@@ -18,8 +18,9 @@ function blockDocumentation() {
     const normalized = input.replace(/\\/g, '/');
     const fileName = normalized.split('/').pop() || '';
     const isInSrc = normalized.includes('/src/') || normalized.startsWith('src/');
+    const isComponentDocMirror = /(^|\/)src\/components\//i.test(normalized) && /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|rhf_zod_report|UnidadesDeMedida)[^/]*\.jsx$/i.test(fileName);
 
-    return isInSrc && (
+    return isComponentDocMirror || (isInSrc && (
       isBlockedDocumentationArtifact(normalized) ||
       isDocumentationArtifactPath(normalized) ||
       textDocumentationPattern.test(fileName) ||

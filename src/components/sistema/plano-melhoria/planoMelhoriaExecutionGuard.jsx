@@ -16,9 +16,11 @@ export const DOCUMENTATION_BLOCK_POLICY = Object.freeze({
   blockDocumentationJsxMirrorsDuringExecution: true,
   purgeBuildCacheBeforeExecution: true,
   protectedDirectories: ['components', 'src/components'],
-  ignoredExtensions: ['.md', '.txt', '.rst', '.adoc', '.json', '.config', '.md.jsx', '.txt.jsx', '.rst.jsx', '.adoc.jsx', '.json.jsx', '.config.jsx', '.md.js', '.json.js', '.config.js'],
-  blockedPrefixes: ['README', 'CERTIFICADO', 'CERTIFICACAO', 'CERTIFIC', 'MANIFESTO', 'VALIDACAO', 'CHECKLIST', 'PROVA', 'MIGRACAO', 'BLOQUEIO', 'DEBUG', 'DIAGNOSTICO', 'INTEGRACAO', 'RESUMO', 'CHANGELOG', 'ROADMAP', 'GUIA', 'STATUS', 'ETAPA', 'FASE', 'SISTEMA', 'BOTOES', 'CORRECAO'],
-  blockedAction: 'ignore_purge_and_never_generate',
+  ignoredExtensions: ['.md', '.txt', '.rst', '.adoc', '.json', '.config', '.jsx', '.md.jsx', '.txt.jsx', '.rst.jsx', '.adoc.jsx', '.json.jsx', '.config.jsx', '.md.js', '.json.js', '.config.js'],
+  blockedPrefixes: ['README', 'CERTIFICADO', 'CERTIFICACAO', 'CERTIFIC', 'MANIFESTO', 'VALIDACAO', 'CHECKLIST', 'PROVA', 'MIGRACAO', 'BLOQUEIO', 'DEBUG', 'DIAGNOSTICO', 'INTEGRACAO', 'RESUMO', 'CHANGELOG', 'ROADMAP', 'GUIA', 'DOC', 'DOCS', 'STATUS', 'ETAPA', 'FASE', 'SISTEMA', 'BOTOES', 'CORRECAO', 'rhf_zod_report', 'UnidadesDeMedida'],
+  blockedAction: 'purge_cache_ignore_and_never_generate',
+  consistencyCheckEntities: ['Cliente', 'Pedido', 'Produto', 'ContaReceber', 'ContaPagar', 'Entrega'],
+  stableEnvironmentPolicy: 'manter_codigo_funcional_e_remover_apenas_artefatos_documentacao',
 });
 
 export const isDocumentationArtifact = (value = '') => {
@@ -63,4 +65,7 @@ export const buildImprovementExecutionPayload = (origem) => ({
   prefixos_bloqueados: DOCUMENTATION_BLOCK_POLICY.blockedPrefixes,
   extensoes_ignoradas: DOCUMENTATION_BLOCK_POLICY.ignoredExtensions,
   permitir_criacao_documentacao_componentes: false,
+  restaurar_ambiente_estavel: true,
+  validar_consistencia_entidades: DOCUMENTATION_BLOCK_POLICY.consistencyCheckEntities,
+  politica_ambiente_estavel: DOCUMENTATION_BLOCK_POLICY.stableEnvironmentPolicy,
 });

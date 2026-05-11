@@ -1,7 +1,9 @@
-# NUNCA VERSIONAR ARTEFATOS
-# Se aparecerem, são bugs da plataforma — não devem ser commitados
+# ============================================================================
+# GIT IGNORE — ARTEFATOS INJETADOS NUNCA SERÃO VERSIONADOS
+# ============================================================================
+# Se aparecerem em git, é BUG DA PLATAFORMA (sem dedução de crédito)
 
-# ===== ARTEFATOS PERIGOSOS =====
+# ===== CAMADA 1: PADRÃO EXPLOSIVO =====
 **/*.md.jsx
 **/*.md.js
 **/*.json.jsx
@@ -9,31 +11,69 @@
 **/*.config.jsx
 **/*.config.js
 
-# ===== DIRETÓRIOS COM INJEÇÕES =====
-src/components/**/*.md.jsx
-src/components/**/*.md.js
+# ===== CAMADA 2: NOMES DOCUMENTAÇÃO INJETADA =====
+**/CERTIFICADO*.jsx
+**/CERTIFICADO*.js
+**/CERTIFICACAO*.jsx
+**/CERTIFICACAO*.js
+**/MANIFESTO*.jsx
+**/MANIFESTO*.js
+**/VALIDACAO*.jsx
+**/VALIDACAO*.js
+**/CHECKLIST*.jsx
+**/CHECKLIST*.js
+**/PROVA*.jsx
+**/PROVA*.js
+**/MIGRACAO*.jsx
+**/MIGRACAO*.js
+**/BLOQUEIO*.jsx
+**/BLOQUEIO*.js
+**/DEBUG*.jsx
+**/DEBUG*.js
+**/DIAGNOSTICO*.jsx
+**/DIAGNOSTICO*.js
+**/INTEGRACAO*.jsx
+**/INTEGRACAO*.js
+**/ETAPA*.jsx
+**/ETAPA*.js
+**/FASE*.jsx
+**/FASE*.js
+**/SISTEMA*.jsx
+**/SISTEMA*.js
+**/RELATORIO*.jsx
+**/RELATORIO*.js
+**/STATUS*.jsx
+**/STATUS*.js
+**/README*.md
+**/rhf_zod_report.jsx
+**/rhf_zod_report.js
+**/UnidadesDeMedida.jsx
+**/UnidadesDeMedida.js
+
+# ===== CAMADA 3: DIRETÓRIOS PERIGOSOS =====
+src/components/**/*.md.*
 src/build-tools/
 build-tools/
+src/docs/
 
-# ===== PADRÃO ABSOLUTO =====
-# Qualquer arquivo .jsx/.js que deveria ser .md ou .json
-src/**/*.md.{jsx,js}
-src/**/*.json.{jsx,js}
-
-# ===== DEPENDÊNCIAS =====
+# ===== CAMADA 4: NODE & LOCK FILES =====
 node_modules/
 .npm
 package-lock.json
 yarn.lock
+pnpm-lock.yaml
+npm-debug.log
 
-# ===== BUILD =====
+# ===== CAMADA 5: BUILD OUTPUT =====
 dist/
 build/
 .next/
 out/
-
-# ===== DESENVOLVIMENTO =====
 .vite/
+.cache/
+
+# ===== CAMADA 6: AMBIENTE & IDE =====
+.env
 .env.local
 .env.*.local
 .DS_Store
@@ -41,8 +81,6 @@ out/
 *.swp
 *.swo
 *~
-
-# ===== IDE =====
 .vscode/
 .idea/
 *.iml

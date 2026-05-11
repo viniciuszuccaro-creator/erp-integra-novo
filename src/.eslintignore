@@ -1,37 +1,82 @@
-# ABSOLUTO: ESLint nunca parseará esses arquivos
-# Estratégia: Ignorar no ESLint ANTES de qualquer outro processamento
+# ============================================================================
+# ESLINT IGNORE — BLINDAGEM CONTRA ARTEFATOS INJETADOS
+# ============================================================================
+# REGRA ABSOLUTA: Qualquer arquivo que pareça .md/.json mas é .jsx/.js
+# deve ser ignorado 100%. Nunca será parseado por ESLint.
 
-# ===== BLOQUEIO TOTAL =====
+# ===== CAMADA 1: PADRÃO GLOBAL AGRESSIVO =====
 **/*.md.jsx
 **/*.md.js
 **/*.json.jsx
 **/*.json.js
 **/*.config.jsx
 **/*.config.js
-**/*.config.ts
-**/*.config.mjs
 
-# ===== DIRETÓRIOS INTEIROS (onde Base44 injeta) =====
-src/components/
+# ===== CAMADA 2: NOMES PERIGOSOS (DOCUMENTAÇÃO INJETADA) =====
+# Qualquer coisa com CERTIFICADO, MANIFESTO, CHECKLIST, etc em .jsx/.js
+**/CERTIFICADO*.jsx
+**/CERTIFICADO*.js
+**/CERTIFICACAO*.jsx
+**/CERTIFICACAO*.js
+**/MANIFESTO*.jsx
+**/MANIFESTO*.js
+**/VALIDACAO*.jsx
+**/VALIDACAO*.js
+**/CHECKLIST*.jsx
+**/CHECKLIST*.js
+**/PROVA*.jsx
+**/PROVA*.js
+**/MIGRACAO*.jsx
+**/MIGRACAO*.js
+**/BLOQUEIO*.jsx
+**/BLOQUEIO*.js
+**/DEBUG*.jsx
+**/DEBUG*.js
+**/DIAGNOSTICO*.jsx
+**/DIAGNOSTICO*.js
+**/INTEGRACAO*.jsx
+**/INTEGRACAO*.js
+**/ETAPA*.jsx
+**/ETAPA*.js
+**/FASE*.jsx
+**/FASE*.js
+**/SISTEMA*.jsx
+**/SISTEMA*.js
+**/RELATORIO*.jsx
+**/RELATORIO*.js
+**/rhf_zod_report.jsx
+**/rhf_zod_report.js
+**/UnidadesDeMedida.jsx
+**/UnidadesDeMedida.js
+
+# ===== CAMADA 3: DIRETÓRIOS INTEIROS (POR SEGURANÇA) =====
+src/components/**/*.md.jsx
+src/components/**/*.md.js
+src/components/**/*.json.jsx
+src/components/**/*.json.js
 src/build-tools/
 build-tools/
+src/docs/
 
-# ===== DEPENDÊNCIAS E BUILD =====
+# ===== CAMADA 4: DEPENDÊNCIAS =====
 node_modules/
+.npm
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ===== CAMADA 5: BUILD OUTPUTS =====
 dist/
-.vite/
 build/
-.cache/
 .next/
+out/
+.vite/
 
-# ===== ARQUIVOS DE TESTE =====
-**/*.test.js
-**/*.test.jsx
-**/*.test.ts
-**/*.test.tsx
-**/*.spec.js
-**/*.spec.jsx
-
-# ===== MARKDOWN PURO (nunca deveria ter .jsx no fim) =====
-**/*.md
-**/*.markdown
+# ===== CAMADA 6: IDE & SISTEMA =====
+.env.local
+.env.*.local
+.DS_Store
+*.log
+.vscode/
+.idea/
+.eslintcache

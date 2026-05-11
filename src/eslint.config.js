@@ -29,6 +29,7 @@ export default [
       "src/api/**/*.{js,jsx,ts,tsx}",
       "src/hooks/**/*.{js,jsx,ts,tsx}",
       "src/utils/**/*.{js,jsx,ts,tsx}",
+      "src/components/**/*.{js,jsx,ts,tsx}",
     ],
     languageOptions: {
       ecmaVersion: "latest",

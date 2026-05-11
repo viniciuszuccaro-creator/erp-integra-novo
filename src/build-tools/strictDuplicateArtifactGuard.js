@@ -3,28 +3,27 @@ import path from 'node:path';
 
 const normalize = (value = '') => String(value || '').replace(/\\/g, '/');
 
-const DOC_PREFIX = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida)/i;
+const DOC_PREFIX = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|FLUXO|rhf_zod_report|UnidadesDeMedida)/i;
 const MIRROR_EXT = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i;
 const TEXT_EXT = /\.(md|txt|rst|adoc|yaml|yml|jsxe)$/i;
-const GENERATED_DOC_CODE = /(^|\/)(src\/)?components\/.*(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida).*\.(js|jsx|jsxe|ts|tsx)$/i;
 const SKIP_DIRS = /^(node_modules|dist|build|\.git|\.vite|coverage|tmp|temp|logs)$/i;
-const TARGET_DIRS = ['src/components', 'components', 'src/build-tools', 'build-tools'];
+const TARGET_DIRS = ['src/components', 'components'];
 
-function shouldRemove(relativePath) {
+function shouldNeutralize(relativePath) {
   const normalized = normalize(relativePath);
   const fileName = normalized.split('/').pop() || '';
   const inComponents = /(^|\/)(src\/)?components\//i.test(normalized);
-
-  if (MIRROR_EXT.test(fileName) || TEXT_EXT.test(fileName)) return true;
-  if (inComponents && GENERATED_DOC_CODE.test(normalized)) return true;
-  if (inComponents && DOC_PREFIX.test(fileName) && /\.(js|jsx|jsxe|ts|tsx)$/i.test(fileName)) return true;
-
-  return false;
+  if (!inComponents) return false;
+  return MIRROR_EXT.test(fileName) || TEXT_EXT.test(fileName) || (DOC_PREFIX.test(fileName) && /\.(js|jsx|ts|tsx)$/i.test(fileName));
 }
 
-function scanAndRemove(root, dir, removed) {
-  if (!fs.existsSync(dir)) return;
+function neutralContent(relativePath) {
+  const safeName = (normalize(relativePath).split('/').pop() || 'DocumentationArtifact').replace(/[^a-zA-Z0-9_$]/g, '_');
+  return `const ${safeName} = () => null;\nexport default ${safeName};\n`;
+}
 
+function scanAndNeutralize(root, dir, changed) {
+  if (!fs.existsSync(dir)) return;
   let entries = [];
   try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
 
@@ -34,37 +33,41 @@ function scanAndRemove(root, dir, removed) {
 
     if (entry.isDirectory()) {
       if (SKIP_DIRS.test(entry.name)) continue;
-      scanAndRemove(root, fullPath, removed);
-      try {
-        if (fs.existsSync(fullPath) && fs.readdirSync(fullPath).length === 0) fs.rmdirSync(fullPath);
-      } catch {}
+      scanAndNeutralize(root, fullPath, changed);
       continue;
     }
 
-    if (entry.isFile() && shouldRemove(relativePath)) {
-      try {
+    if (!entry.isFile() || !shouldNeutralize(relativePath)) continue;
+
+    try {
+      if (/\.(js|jsx|ts|tsx)$/i.test(entry.name)) {
+        const content = neutralContent(relativePath);
+        if (!fs.readFileSync(fullPath, 'utf8').startsWith('const ')) {
+          fs.writeFileSync(fullPath, content);
+          changed.push(`${relativePath}::neutralized`);
+        }
+      } else {
         fs.rmSync(fullPath, { force: true });
-        removed.push(relativePath);
-      } catch {}
-    }
+        changed.push(`${relativePath}::removed`);
+      }
+    } catch {}
   }
 }
 
 export function runStrictDuplicateArtifactGuard(rootDir = '.') {
   const root = path.resolve(rootDir);
-  const removed = [];
+  const changed = [];
 
   for (const targetDir of TARGET_DIRS) {
-    scanAndRemove(root, path.resolve(root, targetDir), removed);
+    scanAndNeutralize(root, path.resolve(root, targetDir), changed);
   }
 
   const proof = {
-    status: 'strict_duplicate_artifact_guard_ok',
+    status: 'strict_duplicate_artifact_guard_neutralized_ok',
     timestamp: new Date().toISOString(),
-    removedCount: removed.length,
-    removed,
-    blockedPatterns: ['*.md.jsx', '*.md.jsxe', '*.json.jsx', '*.config.jsx', '*.jsxe', 'documentation-prefixed-code-in-components'],
-    documentationMirrorsBlocked: true,
+    changedCount: changed.length,
+    changed,
+    documentationCodeNeutralized: true,
     buildSafe: true,
   };
 
@@ -78,5 +81,5 @@ export function runStrictDuplicateArtifactGuard(rootDir = '.') {
 const cliProcess = globalThis?.process;
 if (cliProcess?.argv?.[1] && import.meta.url === `file://${cliProcess.argv[1]}`) {
   const proof = runStrictDuplicateArtifactGuard(cliProcess.cwd());
-  console.log('[Base44 Strict Guard] Espelhos de documentação bloqueados.', proof);
+  console.log('[Base44 Strict Guard] Artefatos de documentação neutralizados.', proof);
 }

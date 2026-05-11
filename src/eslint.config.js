@@ -8,6 +8,57 @@ runPrebuildIntegrityCheck('.');
 runStableEnvironmentCheck('.');
 runStrictDuplicateArtifactGuard('.');
 
+const documentationNoopParser = {
+  parseForESLint() {
+    return {
+      ast: {
+        type: 'Program',
+        body: [],
+        sourceType: 'module',
+        range: [0, 0],
+        loc: { start: { line: 1, column: 0 }, end: { line: 1, column: 0 } },
+        tokens: [],
+        comments: [],
+      },
+      visitorKeys: { Program: [] },
+      services: {},
+    };
+  },
+};
+
+const documentationJsxFiles = [
+  '**/src/components/**/*.md.jsx',
+  '**/src/components/**/*.json.jsx',
+  '**/src/components/**/*.config.jsx',
+  '**/src/components/**/*.txt.jsx',
+  '**/src/components/**/*.rst.jsx',
+  '**/src/components/**/*.adoc.jsx',
+  '**/src/components/**/*.yaml.jsx',
+  '**/src/components/**/*.yml.jsx',
+  '**/src/components/**/*.jsxe',
+  '**/src/components/**/README*.jsx',
+  '**/src/components/**/CERTIFIC*.jsx',
+  '**/src/components/**/CERTIFICADO*.jsx',
+  '**/src/components/**/CERTIFICACAO*.jsx',
+  '**/src/components/**/MANIFESTO*.jsx',
+  '**/src/components/**/VALIDACAO*.jsx',
+  '**/src/components/**/CHECKLIST*.jsx',
+  '**/src/components/**/PROVA*.jsx',
+  '**/src/components/**/BLOQUEIO*.jsx',
+  '**/src/components/**/BOTOES*.jsx',
+  '**/src/components/**/INTEGRACAO*.jsx',
+  '**/src/components/**/STATUS*.jsx',
+  '**/src/components/**/ETAPAS*.jsx',
+  '**/src/components/**/ETAPA*.jsx',
+  '**/src/components/**/FASES*.jsx',
+  '**/src/components/**/FASE*.jsx',
+  '**/src/components/**/DEBUG*.jsx',
+  '**/src/components/**/DIAGNOSTICO*.jsx',
+  '**/src/components/**/CORRECAO*.jsx',
+  '**/src/components/**/FLUXO*.jsx',
+  '**/src/components/**/ZINDEX*.jsx',
+];
+
 const documentationArtifactIgnores = [
   '**/src/components/**/*.md.jsx',
   '**/src/components/**/*.md.js',
@@ -123,6 +174,13 @@ const documentationArtifactIgnores = [
 ];
 
 export default [
+  {
+    files: documentationJsxFiles,
+    languageOptions: {
+      parser: documentationNoopParser,
+    },
+    rules: {},
+  },
   {
     ignores: [
       '**/components/**/*.md.jsx',

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Loader2, PlayCircle, ShieldCheck } from 'lucide-react';
 import { criticalBacklogItems, criticalValidationActions } from './criticalExecutionPlan';
+import { buildImprovementExecutionPayload, filterOperationalPlanItems } from './planoMelhoriaExecutionGuard';
 
 const statusClass = {
   idle: 'bg-slate-50 text-slate-600 border-slate-200',
@@ -16,12 +17,14 @@ const statusClass = {
 
 export default function PlanoMelhoriaCriticalExecutor() {
   const queryClient = useQueryClient();
+  const autoRunRef = useRef(false);
   const [backlogStatus, setBacklogStatus] = useState('idle');
   const [validationStatus, setValidationStatus] = useState({});
+  const operationalBacklogItems = filterOperationalPlanItems(criticalBacklogItems);
 
   const registrarBacklogCritico = async () => {
     setBacklogStatus('running');
-    await Promise.all(criticalBacklogItems.map(async (item) => {
+    await Promise.all(operationalBacklogItems.map(async (item) => {
       const existing = await base44.entities.PlanoMelhoriaItem.filter({ titulo: item.titulo }, '-updated_date', 1);
       if (existing?.[0]?.id) {
         return base44.entities.PlanoMelhoriaItem.update(existing[0].id, item);
@@ -35,13 +38,19 @@ export default function PlanoMelhoriaCriticalExecutor() {
   const executarValidacoes = async () => {
     setValidationStatus(Object.fromEntries(criticalValidationActions.map((action) => [action.id, 'running'])));
     const results = await Promise.allSettled(
-      criticalValidationActions.map((action) => base44.functions.invoke(action.functionName, { origem: 'plano_melhoria_critico' }))
+      criticalValidationActions.map((action) => base44.functions.invoke(action.functionName, buildImprovementExecutionPayload('plano_melhoria_critico')))
     );
     setValidationStatus(Object.fromEntries(criticalValidationActions.map((action, index) => [
       action.id,
       results[index].status === 'fulfilled' ? 'success' : 'error'
     ])));
   };
+
+  useEffect(() => {
+    if (autoRunRef.current) return;
+    autoRunRef.current = true;
+    registrarBacklogCritico().then(() => executarValidacoes());
+  }, []);
 
   return (
     <Card className="w-full border-red-100 bg-white shadow-sm">
@@ -71,7 +80,7 @@ export default function PlanoMelhoriaCriticalExecutor() {
             <Badge variant="outline" className={statusClass[backlogStatus]}>{backlogStatus === 'success' ? 'Registrado' : backlogStatus === 'running' ? 'Executando' : 'Pronto'}</Badge>
           </div>
           <div className="mt-3 grid gap-2">
-            {criticalBacklogItems.map((item) => (
+            {operationalBacklogItems.map((item) => (
               <div key={item.titulo} className="rounded-xl bg-white px-3 py-2 text-sm text-slate-700">
                 <span className="font-medium text-slate-900">{item.modulo}</span> • {item.titulo}
               </div>

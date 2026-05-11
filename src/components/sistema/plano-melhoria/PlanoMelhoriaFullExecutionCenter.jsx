@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle2, Loader2, PlayCircle, Rocket, ShieldCheck } from 'lucide-react';
 import { fullPlanBacklogItems, fullPlanValidationStack } from './planoMelhoriaFullExecutionData';
+import { buildImprovementExecutionPayload, filterOperationalPlanItems } from './planoMelhoriaExecutionGuard';
 
 const stateClass = {
   idle: 'bg-slate-50 text-slate-600 border-slate-200',
@@ -17,16 +18,18 @@ const stateClass = {
 
 export default function PlanoMelhoriaFullExecutionCenter() {
   const queryClient = useQueryClient();
+  const autoRunRef = useRef(false);
   const [executionState, setExecutionState] = useState('idle');
   const [validationState, setValidationState] = useState({});
+  const operationalBacklogItems = useMemo(() => filterOperationalPlanItems(fullPlanBacklogItems), []);
 
   const progress = useMemo(() => Math.round(
-    fullPlanBacklogItems.reduce((sum, item) => sum + (item.percentual || 0), 0) / fullPlanBacklogItems.length
-  ), []);
+    operationalBacklogItems.reduce((sum, item) => sum + (item.percentual || 0), 0) / operationalBacklogItems.length
+  ), [operationalBacklogItems]);
 
   const executarPlanoCompleto = async () => {
     setExecutionState('running');
-    await Promise.all(fullPlanBacklogItems.map(async (item) => {
+    await Promise.all(operationalBacklogItems.map(async (item) => {
       const existing = await base44.entities.PlanoMelhoriaItem.filter({ titulo: item.titulo }, '-updated_date', 1);
       if (existing?.[0]?.id) return base44.entities.PlanoMelhoriaItem.update(existing[0].id, item);
       return base44.entities.PlanoMelhoriaItem.create(item);
@@ -38,13 +41,19 @@ export default function PlanoMelhoriaFullExecutionCenter() {
   const validarPlanoCompleto = async () => {
     setValidationState(Object.fromEntries(fullPlanValidationStack.map((item) => [item.id, 'running'])));
     const results = await Promise.allSettled(fullPlanValidationStack.map((item) => (
-      base44.functions.invoke(item.functionName, { origem: 'plano_melhoria_completo' })
+      base44.functions.invoke(item.functionName, buildImprovementExecutionPayload('plano_melhoria_completo'))
     )));
     setValidationState(Object.fromEntries(fullPlanValidationStack.map((item, index) => [
       item.id,
       results[index].status === 'fulfilled' ? 'success' : 'error'
     ])));
   };
+
+  useEffect(() => {
+    if (autoRunRef.current) return;
+    autoRunRef.current = true;
+    executarPlanoCompleto().then(() => validarPlanoCompleto());
+  }, []);
 
   return (
     <Card className="w-full border-blue-100 bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 text-white shadow-sm">
@@ -81,7 +90,7 @@ export default function PlanoMelhoriaFullExecutionCenter() {
             </Badge>
           </div>
           <Progress value={progress} className="mt-5 h-2 bg-white/20" />
-          <p className="mt-4 text-sm text-slate-300">{fullPlanBacklogItems.length} melhorias preparadas para execução contínua.</p>
+          <p className="mt-4 text-sm text-slate-300">{operationalBacklogItems.length} melhorias operacionais preparadas; documentação é ignorada automaticamente.</p>
         </div>
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {fullPlanValidationStack.map((item) => {

@@ -8,6 +8,7 @@ import { runStableEnvironmentCheck } from './build-tools/stableEnvironmentCheck.
 import { verifyChatbotComponents } from './build-tools/verifyChatbotComponents.js';
 import { forceProjectReindex } from './build-tools/projectReindex.js';
 import { viteDefineConfig } from './build-tools/buildRuntimeConfig.js';
+import { runPrebuildIntegrityCheck } from './build-tools/prebuildIntegrityCheck.js';
 
 const documentationArtifactFilePattern = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|yaml|yml|js|jsx|ts|tsx))?$/i;
 const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|ts|tsx)$/i;
@@ -58,6 +59,7 @@ function blockDocumentation() {
           if (entry.isFile() && isBlockedPath(filePath)) fs.unlinkSync(filePath);
         }
       };
+      runPrebuildIntegrityCheck(__dirname);
       forceProjectReindex(__dirname);
       runStableEnvironmentCheck(__dirname);
       verifyChatbotComponents(__dirname);
@@ -67,6 +69,7 @@ function blockDocumentation() {
     configureServer(server) {
       const purgeBuildCachesLocal = () => purgeBuildCaches(__dirname);
       const purgeDocumentationNow = () => {
+        runPrebuildIntegrityCheck(__dirname);
         forceProjectReindex(__dirname);
         runStableEnvironmentCheck(__dirname);
         verifyChatbotComponents(__dirname);

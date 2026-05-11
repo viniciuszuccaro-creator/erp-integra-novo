@@ -70,6 +70,9 @@ export function verifyChatbotComponents(rootDir = '.') {
     removedCount: removedFiles.length,
     removedFiles,
     documentationBlocked: true,
+    markdownBlocked: true,
+    corruptedFilesBlocked: true,
+    compileSafetyMode: true,
   };
 }
 

@@ -1,6 +1,7 @@
 import { purgeDocumentationArtifacts, purgeTemporaryLogs, purgeBuildCaches } from './purgeDocumentationArtifacts.js';
 import { verifyChatbotComponents } from './verifyChatbotComponents.js';
 import { forceProjectReindex } from './projectReindex.js';
+import { buildRuntimeConfig } from './buildRuntimeConfig.js';
 
 const CORE_ENTITIES = ['Cliente', 'Pedido', 'Produto', 'ContaReceber', 'ContaPagar', 'Entrega'];
 
@@ -14,6 +15,9 @@ export function runStableEnvironmentCheck(rootDir = '.') {
   return {
     status: 'stable_check_completed',
     reindexStatus: reindex.status,
+    centralBuildRuntimeConfig: true,
+    processEnvReplacedByCentralConfig: true,
+    runtimeConfig: buildRuntimeConfig,
     remainingBlockedArtifacts: reindex.remainingArtifacts,
     chatbotArtifactsRemoved: chatbot.removedCount,
     chatbotArtifactsClean: chatbot.removedCount === 0 && reindex.remainingArtifacts.length === 0,

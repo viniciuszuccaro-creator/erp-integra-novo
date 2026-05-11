@@ -1,5 +1,7 @@
 import { runStableEnvironmentCheck } from './build-tools/stableEnvironmentCheck.js';
+import { runPrebuildIntegrityCheck } from './build-tools/prebuildIntegrityCheck.js';
 
+runPrebuildIntegrityCheck('.');
 runStableEnvironmentCheck('.');
 
 const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config)\.(js|jsx|ts|tsx)$/i;

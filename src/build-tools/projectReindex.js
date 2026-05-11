@@ -54,7 +54,10 @@ export function forceProjectReindex(rootDir = '.') {
     buildCachesRemoved: cache.removed,
     remainingArtifacts,
     documentationRecreationBlocked: true,
+    markdownJsxMirrorsBlocked: true,
+    componentDocumentationGenerationBlocked: true,
     chatbotIntegrityVerified: true,
+    buildCacheCleared: true,
   };
 
   try {

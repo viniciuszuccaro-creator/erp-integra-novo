@@ -9,6 +9,14 @@ runStableEnvironmentCheck('.');
 runStrictDuplicateArtifactGuard('.');
 
 const documentationArtifactIgnores = [
+  '**/*.md.jsx',
+  '**/*.json.jsx',
+  '**/*.config.jsx',
+  '**/*.txt.jsx',
+  '**/*.rst.jsx',
+  '**/*.adoc.jsx',
+  '**/*.yaml.jsx',
+  '**/*.yml.jsx',
   'src/components/**/*.md.jsx',
   'src/components/**/*.md.js',
   'src/components/**/*.json.jsx',

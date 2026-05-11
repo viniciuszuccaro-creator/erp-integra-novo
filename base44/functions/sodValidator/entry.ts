@@ -54,6 +54,12 @@ Deno.serve(async (req) => {
     let payload = {};
     try { payload = await req.json(); } catch { payload = {}; }
 
+    const changedFields = Array.isArray(payload?.changed_fields) ? payload.changed_fields : [];
+    const onlyInternalSodPatch = changedFields.length > 0 && changedFields.every((field) => ['conflitos_sod_detectados', 'requer_aprovacao_especial'].includes(field));
+    if (onlyInternalSodPatch) {
+      return Response.json({ ok: true, skipped: true, reason: 'patch interno SoD ignorado para evitar loop' });
+    }
+
     let user = null;
     try { user = await base44.auth.me(); } catch { user = null; }
     if (user && user.role !== 'admin') {
@@ -83,8 +89,8 @@ Deno.serve(async (req) => {
     await base44.asServiceRole.entities.AuditLog.create({
       usuario: user?.full_name || 'Sistema',
       usuario_id: user?.id || null,
-      acao: 'Validação',
-      modulo: 'Sistema',
+      acao: 'Visualização',
+      modulo: 'Controle de Acesso',
       tipo_auditoria: 'seguranca',
       entidade: 'PerfilAcesso',
       descricao: `Validação SoD concluída: ${results.length} perfil(is), ${totalConflitos} conflito(s).`,

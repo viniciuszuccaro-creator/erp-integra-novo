@@ -1,5 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
+let LAST_SECURITY_ALERTS_RUN_AT = 0;
+const SECURITY_ALERTS_COOLDOWN_MS = 15 * 60 * 1000;
+
 // Agregado de alertas de segurança com envio de e-mail para administradores
 // Heurísticas simples: alto volume de Exclusões, alterações em perfis, bloqueios de acesso em curto período
 Deno.serve(async (req) => {
@@ -14,6 +17,10 @@ Deno.serve(async (req) => {
     // Filtros multiempresa opcionais via payload { filtros: { empresa_id?, group_id? } }
     let payload = {};
     try { payload = await req.json(); } catch { payload = {}; }
+    if (!payload?.force && Date.now() - LAST_SECURITY_ALERTS_RUN_AT < SECURITY_ALERTS_COOLDOWN_MS) {
+      return Response.json({ ok: true, skipped: true, reason: 'alertas em cooldown anti-rate-limit' });
+    }
+    LAST_SECURITY_ALERTS_RUN_AT = Date.now();
     const filtros = payload?.filtros || {};
 
     const WINDOW_MIN = 15;
@@ -21,7 +28,7 @@ Deno.serve(async (req) => {
     const windowStart = new Date(now.getTime() - WINDOW_MIN * 60 * 1000);
 
     // Buscar últimos logs recentes (limite razoável)
-    const logs = await base44.asServiceRole.entities.AuditLog.filter({}, '-created_date', 500);
+    const logs = await base44.asServiceRole.entities.AuditLog.filter({}, '-created_date', 120);
 
     // Normalizar data do log
     const getLogDate = (l) => {
@@ -104,7 +111,7 @@ Deno.serve(async (req) => {
     } catch {}
 
     // Obter admins para notificar
-    const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' }, undefined, 100);
+    const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' }, undefined, 20);
     const toList = admins.map((u) => u.email).filter(Boolean);
 
     const highAlerts = suspicious.filter((s) => s.severidade === 'Alta');
@@ -138,10 +145,7 @@ Deno.serve(async (req) => {
           recent.length ? `Eventos analisados: ${recent.length}` : ''
         ].filter(Boolean).join('\n');
 
-        const webhook = Deno.env.get('SLACK_WEBHOOK_URL');
-        if (scfg?.enabled && webhook) {
-          await fetch(webhook, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, username: 'ERP Zuccaro Bot', icon_emoji: ':rotating_light:' }) });
-        } else if (scfg?.enabled && scfg?.channel) {
+        if (scfg?.enabled && scfg?.channel) {
           try {
             const { accessToken } = await base44.asServiceRole.connectors.getConnection('slackbot');
             await fetch('https://slack.com/api/chat.postMessage', {

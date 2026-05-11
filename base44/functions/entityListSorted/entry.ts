@@ -4,8 +4,8 @@ const LIST_CACHE = new Map();
 const LIST_CACHE_TTL_MS = 5 * 60 * 1000;
 let LIST_LAST_CALL_AT = 0;
 let LIST_BACKEND_PAUSED_UNTIL = 0;
-const LIST_MIN_GAP_MS = 3000;
-const LIST_BACKEND_PAUSE_MS = 2 * 60 * 1000;
+const LIST_MIN_GAP_MS = 8000;
+const LIST_BACKEND_PAUSE_MS = 5 * 60 * 1000;
 
 function stableListKey(value) {
   try { return JSON.stringify(value || {}, Object.keys(value || {}).sort()); }
@@ -222,7 +222,7 @@ async function listOne(base44, user, q) {
 
   // Sem escopo → lista tudo (acesso autenticado e auditado; dados protegidos por RBAC no frontend)
 
-  const limit = Math.max(1, Math.min(Number(q?.limit || q?.pageSize) || 100, 500));
+  const limit = Math.max(1, Math.min(Number(q?.limit || q?.pageSize) || 80, 150));
   const skip = Math.max(0, Number(q?.skip ?? q?.offset ?? 0) || 0);
 
   const sortField = normalizeSortField(entityName, q?.sortField || q?.sortBy);

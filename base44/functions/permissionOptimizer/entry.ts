@@ -1,5 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
+let LAST_OPTIMIZER_RUN_AT = 0;
+const OPTIMIZER_COOLDOWN_MS = 60 * 60 * 1000;
+
 Deno.serve(async (req) => {
   const t0 = Date.now();
   try {
@@ -11,25 +14,32 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin required' }, { status: 403 });
     }
 
+    if (Date.now() - LAST_OPTIMIZER_RUN_AT < OPTIMIZER_COOLDOWN_MS) {
+      return Response.json({ success: true, skipped: true, reason: 'otimizador em cooldown anti-rate-limit' });
+    }
+    LAST_OPTIMIZER_RUN_AT = Date.now();
+
     // Heurística: analisar bloqueios por módulo nos últimos eventos
-    const ultimos = await base44.asServiceRole.entities.AuditLog.filter({}, '-data_hora', 800);
+    const ultimos = await base44.asServiceRole.entities.AuditLog.filter({}, '-data_hora', 120);
     const bloqueios = ultimos.filter(l => l.acao === 'Bloqueio');
 
     // Contagem por módulo
     const countBy = (arr, fn) => arr.reduce((acc, v) => { const k = fn(v); acc[k] = (acc[k] || 0) + 1; return acc; }, {});
     const blocksByModule = countBy(bloqueios, (l) => l.modulo || 'Sistema');
 
-    const perfis = await base44.asServiceRole.entities.PerfilAcesso.list();
+    const perfis = await base44.asServiceRole.entities.PerfilAcesso.list('-updated_date', 50);
     const sugestoes = {};
 
+    const topModulesResumo = Object.entries(blocksByModule)
+      .sort((a,b) => b[1]-a[1])
+      .slice(0, 5)
+      .map(([m,c]) => `${m}: ${c}`)
+      .join(', ');
+    const texto = `Sugestão IA: revisar permissões (bloqueios por módulo → ${topModulesResumo || 'sem incidência'}); aplicar SoD onde houver conflitos.`;
+
     for (const p of perfis) {
-      const topModules = Object.entries(blocksByModule)
-        .sort((a,b) => b[1]-a[1])
-        .slice(0, 5)
-        .map(([m,c]) => `${m}: ${c}`)
-        .join(', ');
-      const texto = `Sugestão IA: revisar permissões (bloqueios por módulo → ${topModules || 'sem incidência'}); aplicar SoD onde houver conflitos.`;
-      const novoObs = p.observacoes ? `${p.observacoes}\n${texto}` : texto;
+      const linhas = String(p.observacoes || '').split('\n').filter((linha) => !linha.startsWith('Sugestão IA: revisar permissões'));
+      const novoObs = [...linhas.slice(-8), texto].filter(Boolean).join('\n');
       const conflitos = Array.isArray(p.conflitos_sod_detectados) ? p.conflitos_sod_detectados : [];
       const updated = { observacoes: novoObs };
       if (conflitos.length > 0 || Object.values(blocksByModule).some(v => v >= 10)) {

@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 // auditEntityEvents: registra em AuditLog todos os eventos de entidade (create/update/delete)
 // Payload recebido por automação de entidade:
@@ -15,7 +15,7 @@ function getModuleForEntity(entity) {
     Fornecedor: 'Compras', SolicitacaoCompra: 'Compras', OrdemCompra: 'Compras',
     Produto: 'Estoque', MovimentacaoEstoque: 'Estoque', Inventario: 'Estoque',
     ContaPagar: 'Financeiro', ContaReceber: 'Financeiro', CentroCusto: 'Financeiro',
-    Evento: 'Agenda', User: 'Administração', PerfilAcesso: 'Administração'
+    Evento: 'Agenda', User: 'Controle de Acesso', PerfilAcesso: 'Controle de Acesso'
   };
   return map[entity] || 'Sistema';
 }
@@ -56,13 +56,12 @@ function computeSimpleRisk({ entity, type, record, gaps, diffSensitive }) {
 }
 
 function detectBusinessAction(entity, type, before, after) {
-  // Promove "Edição" para ações de negócio (Aprovação/Emissão/Cancelamento) quando detectar mudança de status
   if (type !== 'update') return null;
   const b = before || {}; const a = after || {};
   // Financeiro
   if (entity === 'ContaPagar' && b.status_pagamento !== a.status_pagamento) {
     if (/aprov/i.test(String(a.status_pagamento))) return 'Aprovação';
-    if (/pago/i.test(String(a.status_pagamento))) return 'Liquidação';
+    if (/pago/i.test(String(a.status_pagamento))) return 'Pagamento';
   }
   if (entity === 'ContaReceber' && b.status !== a.status) {
     if (/recebid/i.test(String(a.status))) return 'Recebimento';
@@ -70,12 +69,12 @@ function detectBusinessAction(entity, type, before, after) {
   // Comercial
   if (entity === 'Pedido' && b.status_aprovacao !== a.status_aprovacao) {
     if (/aprov/i.test(String(a.status_aprovacao))) return 'Aprovação';
-    if (/negad/i.test(String(a.status_aprovacao))) return 'Reprovação';
+    if (/negad/i.test(String(a.status_aprovacao))) return 'Rejeição';
   }
   // Fiscal
   if (entity === 'NotaFiscal' && b.status !== a.status) {
-    if (/autorizad/i.test(String(a.status))) return 'Emissão';
-    if (/cancelad/i.test(String(a.status))) return 'Cancelamento';
+    if (/autorizad/i.test(String(a.status))) return 'Emissão NF-e';
+    if (/cancelad/i.test(String(a.status))) return 'Cancelamento NF-e';
   }
   return null;
 }
@@ -139,8 +138,10 @@ Deno.serve(async (req) => {
     const risk = computeSimpleRisk({ entity: entidade, type: tipoEvento, record: recordData, gaps, diffSensitive });
     const businessAction = detectBusinessAction(entidade, tipoEvento, previousData, recordData);
 
-    // Define ação para AuditLog
-    const acao = tipoEvento === 'create' ? 'Criação' : tipoEvento === 'delete' ? 'Exclusão' : (businessAction || 'Edição');
+    const allowedActions = new Set(['Login','Logout','Criação','Edição','Exclusão','Visualização','Aprovação','Rejeição','Exportação','Importação','Troca de Empresa','Emissão NF-e','Cancelamento NF-e','Carta de Correção','Inutilização','Bloqueio']);
+    const rawAcao = tipoEvento === 'create' ? 'Criação' : tipoEvento === 'delete' ? 'Exclusão' : (businessAction || 'Edição');
+    const acao = allowedActions.has(rawAcao) ? rawAcao : 'Edição';
+    const acaoNegocio = rawAcao !== acao ? rawAcao : null;
 
     // Tipo de auditoria enfatiza segurança quando sensível/alto risco
     const tipo_auditoria = (risk.level === 'Crítico' || risk.level === 'Alto' || diffSensitive.length)
@@ -166,7 +167,7 @@ Deno.serve(async (req) => {
         tipo_auditoria,
         entidade: entidade,
         registro_id: event.entity_id,
-        descricao: `${entidade} • ${acao}${paramKey ? ' • param: ' + paramKey : ''} • risco ${risk.level}${gaps.length ? ' • gaps: ' + gaps.join(',') : ''}${diffSensitive.length ? ' • mudança sensível' : ''}${resumoValor}`,
+        descricao: `${entidade} • ${acao}${acaoNegocio ? ' • ação: ' + acaoNegocio : ''}${paramKey ? ' • param: ' + paramKey : ''} • risco ${risk.level}${gaps.length ? ' • gaps: ' + gaps.join(',') : ''}${diffSensitive.length ? ' • mudança sensível' : ''}${resumoValor}`,
         empresa_id: empresa_id || null,
         group_id: group_id || null,
         dados_anteriores: tipoEvento !== 'create' ? safeTrimPayload(previousData) : null,

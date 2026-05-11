@@ -1,4 +1,7 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+
+let LAST_BACKUP_RUN_AT = 0;
+const BACKUP_COOLDOWN_MS = 60 * 60 * 1000;
 
 // Util: decode secret (base64 ou hex) para Uint8Array
 function decodeKey(str) {
@@ -17,14 +20,27 @@ function decodeKey(str) {
   }
 }
 
+async function getBackupKeyRaw() {
+  const decoded = decodeKey(Deno.env.get('BACKUP_ENCRYPTION_KEY'));
+  if (decoded.length === 32) return decoded;
+  const digest = await crypto.subtle.digest('SHA-256', decoded);
+  return new Uint8Array(digest);
+}
+
 async function encryptJSON(obj) {
-  const keyRaw = decodeKey(Deno.env.get('BACKUP_ENCRYPTION_KEY'));
-  if (keyRaw.length !== 32) throw new Error('Chave deve ter 32 bytes');
+  const keyRaw = await getBackupKeyRaw();
   const key = await crypto.subtle.importKey('raw', keyRaw, 'AES-GCM', false, ['encrypt']);
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const data = new TextEncoder().encode(JSON.stringify(obj));
   const cipher = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, data));
-  const toB64 = (u8) => btoa(String.fromCharCode(...u8));
+  const toB64 = (u8) => {
+    let binary = '';
+    const chunkSize = 0x8000;
+    for (let i = 0; i < u8.length; i += chunkSize) {
+      binary += String.fromCharCode(...u8.subarray(i, i + chunkSize));
+    }
+    return btoa(binary);
+  };
   return { v: 1, algo: 'AES-GCM', iv_b64: toB64(iv), data_b64: toB64(cipher), created_at: new Date().toISOString() };
 }
 
@@ -39,21 +55,25 @@ Deno.serve(async (req) => {
     }
 
     let body = {}; try { body = await req.json(); } catch { body = {}; }
+    if (!body?.force && Date.now() - LAST_BACKUP_RUN_AT < BACKUP_COOLDOWN_MS) {
+      return Response.json({ ok: true, skipped: true, reason: 'backup em cooldown anti-rate-limit' });
+    }
+    LAST_BACKUP_RUN_AT = Date.now();
     const filtros = body?.filtros || {};
 
     // Entidades principais (multiempresa aplicada via filtros opcionais)
     const where = (extra = {}) => ({ ...(filtros?.empresa_id ? { empresa_id: filtros.empresa_id } : {}), ...(filtros?.group_id ? { group_id: filtros.group_id } : {}), ...extra });
 
     const entidades = {
-      Cliente: await base44.asServiceRole.entities.Cliente.filter(where(), '-updated_date', 5000),
-      Fornecedor: await base44.asServiceRole.entities.Fornecedor.filter(where(), '-updated_date', 5000),
-      Produto: await base44.asServiceRole.entities.Produto.filter(where(), '-updated_date', 5000),
-      Pedido: await base44.asServiceRole.entities.Pedido.filter(where(), '-updated_date', 5000),
-      ContaPagar: await base44.asServiceRole.entities.ContaPagar.filter(where(), '-updated_date', 5000),
-      ContaReceber: await base44.asServiceRole.entities.ContaReceber.filter(where(), '-updated_date', 5000),
-      NotaFiscal: await base44.asServiceRole.entities.NotaFiscal.filter(where(), '-updated_date', 5000),
-      Entrega: await base44.asServiceRole.entities.Entrega.filter(where(), '-updated_date', 5000),
-      MovimentacaoEstoque: await base44.asServiceRole.entities.MovimentacaoEstoque.filter(where(), '-updated_date', 5000),
+      Cliente: await base44.asServiceRole.entities.Cliente.filter(where(), '-updated_date', 500),
+      Fornecedor: await base44.asServiceRole.entities.Fornecedor.filter(where(), '-updated_date', 500),
+      Produto: await base44.asServiceRole.entities.Produto.filter(where(), '-updated_date', 500),
+      Pedido: await base44.asServiceRole.entities.Pedido.filter(where(), '-updated_date', 500),
+      ContaPagar: await base44.asServiceRole.entities.ContaPagar.filter(where(), '-updated_date', 500),
+      ContaReceber: await base44.asServiceRole.entities.ContaReceber.filter(where(), '-updated_date', 500),
+      NotaFiscal: await base44.asServiceRole.entities.NotaFiscal.filter(where(), '-updated_date', 500),
+      Entrega: await base44.asServiceRole.entities.Entrega.filter(where(), '-updated_date', 500),
+      MovimentacaoEstoque: await base44.asServiceRole.entities.MovimentacaoEstoque.filter(where(), '-updated_date', 500),
     };
 
     const payload = {

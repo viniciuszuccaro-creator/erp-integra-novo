@@ -98,7 +98,9 @@ async function expandGroupFilter(base44, entityName, f) {
 const COUNT_CACHE = new Map();
 const COUNT_CACHE_TTL_MS = 30 * 60 * 1000;
 let LAST_COUNT_CALL_AT = 0;
-const MIN_COUNT_GAP_MS = 3500;
+let COUNT_BACKEND_PAUSED_UNTIL = 0;
+const MIN_COUNT_GAP_MS = 8000;
+const COUNT_BACKEND_PAUSE_MS = 5 * 60 * 1000;
 
 function stableCacheKey(entityName, finalFilter) {
   try { return `${entityName}:${JSON.stringify(finalFilter || {}, Object.keys(finalFilter || {}).sort())}`; }
@@ -111,6 +113,7 @@ async function fastCount(base44, entityName, finalFilter) {
   const key = stableCacheKey(entityName, finalFilter);
   const cached = COUNT_CACHE.get(key);
   if (cached && Date.now() - cached.ts < COUNT_CACHE_TTL_MS) return cached.count;
+  if (Date.now() < COUNT_BACKEND_PAUSED_UNTIL) return cached?.count || 0;
 
   let total = 0;
 
@@ -126,7 +129,8 @@ async function fastCount(base44, entityName, finalFilter) {
         break;
       } catch (err) {
         const status = err?.status || err?.response?.status;
-        if (status === 429) {
+        if (status === 429 || status === 502 || (typeof status === 'number' && status >= 500)) {
+          COUNT_BACKEND_PAUSED_UNTIL = Date.now() + COUNT_BACKEND_PAUSE_MS;
           const safeCount = cached?.count || 0;
           COUNT_CACHE.set(key, { count: safeCount, ts: Date.now() });
           return safeCount;

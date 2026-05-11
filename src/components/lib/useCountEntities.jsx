@@ -49,7 +49,7 @@ async function flushBatch() {
     withGroupTotal: false,
   }));
 
-  // Retry exponencial para o batch inteiro (3 tentativas)
+  // Retry mínimo para evitar amplificar rate limit
   let attempt = 0;
   while (true) {
     try {
@@ -65,8 +65,8 @@ async function flushBatch() {
     } catch (err) {
       const status = err?.response?.status || err?.status;
       const now = Date.now();
-      if (status === 429 && attempt < 3) {
-        const delay = 2500 * Math.pow(2, attempt) + Math.floor(Math.random() * 800);
+      if (status === 429 && attempt < 1) {
+        const delay = 8000 + Math.floor(Math.random() * 1500);
         items.forEach(it => cooldown.set(it.entityName, now + delay));
         await new Promise(r => setTimeout(r, delay));
         attempt++;
@@ -74,7 +74,7 @@ async function flushBatch() {
       }
       // Fallback: serve cache para cada item
       items.forEach(it => {
-        if (status === 429) cooldown.set(it.entityName, now + 3000);
+        if (status === 429) cooldown.set(it.entityName, now + 60000);
         const cached = cache.get(it.reqKey)
           ?? (() => { try { const v = Number(localStorage.getItem(`count_cache_${it.reqKey}`) || '0'); return isNaN(v) ? 0 : v; } catch { return 0; } })();
         it.resolvers.forEach(r => r(typeof cached === 'number' ? cached : 0));
@@ -105,7 +105,7 @@ function enqueue(reqKey, entityName, filter) {
   inflight.set(reqKey, p);
 
   if (!getTimer()) {
-    const BATCH_WINDOW = 12; // ms
+    const BATCH_WINDOW = 350; // ms — janela maior para reduzir rajadas
     setTimer(setTimeout(async () => {
       setTimer(null);
       await flushBatch();

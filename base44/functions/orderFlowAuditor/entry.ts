@@ -1,4 +1,7 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+
+let LAST_AUDITOR_RUN_AT = 0;
+const AUDITOR_COOLDOWN_MS = 30 * 60 * 1000;
 
 // Auditor de ramificações entre módulos: verifica coerência Pedido ↔ Entrega ↔ NotaFiscal
 // Examina pedidos recentes e registra inconsistências no AuditLog para ação corretiva
@@ -8,8 +11,13 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (user?.role !== 'admin') { return Response.json({ error: 'Forbidden' }, { status: 403 }); }
 
+    if (Date.now() - LAST_AUDITOR_RUN_AT < AUDITOR_COOLDOWN_MS) {
+      return Response.json({ ok: true, skipped: true, reason: 'auditor em cooldown anti-rate-limit' });
+    }
+    LAST_AUDITOR_RUN_AT = Date.now();
+
     // Buscar últimos pedidos atualizados
-    const pedidos = await base44.asServiceRole.entities.Pedido.filter({}, '-updated_date', 200);
+    const pedidos = await base44.asServiceRole.entities.Pedido.filter({}, '-updated_date', 30);
 
     const issues = [];
 

@@ -11,6 +11,7 @@ const __elsLastCallAt = (typeof window !== 'undefined' ? (window.__elsLastCallAt
 const __elsCooldownUntil = (typeof window !== 'undefined' ? (window.__elsCooldownUntil || (window.__elsCooldownUntil = new Map())) : new Map());
 const __elsEntityBusy = (typeof window !== 'undefined' ? (window.__elsEntityBusy || (window.__elsEntityBusy = new Map())) : new Map());
 const __elsStrikeCount = (typeof window !== 'undefined' ? (window.__elsStrikeCount || (window.__elsStrikeCount = new Map())) : new Map());
+const __elsGlobalState = (typeof window !== 'undefined' ? (window.__elsGlobalState || (window.__elsGlobalState = { busy: false, lastCallAt: 0, cooldownUntil: 0 })) : { busy: false, lastCallAt: 0, cooldownUntil: 0 });
 
 // Stable stringify (sorted keys) to avoid cache misses when object key order changes
 function stableStringify(value) {
@@ -109,22 +110,31 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
       }
 
       const exec = async () => {
-        // Serializa por entidade para evitar bursts concorrentes
-        if (__elsEntityBusy.get(entityName) === true) {
+        // Serializa globalmente para evitar bursts concorrentes entre módulos
+        if (__elsGlobalState.busy === true) {
           const startWait = Date.now();
-          while (__elsEntityBusy.get(entityName) === true && Date.now() - startWait < 1500) {
-            await new Promise(r => setTimeout(r, 80));
+          while (__elsGlobalState.busy === true && Date.now() - startWait < 4000) {
+            await new Promise(r => setTimeout(r, 120));
           }
         }
+        if (__elsEntityBusy.get(entityName) === true) {
+          const startWait = Date.now();
+          while (__elsEntityBusy.get(entityName) === true && Date.now() - startWait < 2500) {
+            await new Promise(r => setTimeout(r, 120));
+          }
+        }
+        __elsGlobalState.busy = true;
         __elsEntityBusy.set(entityName, true);
 
         // Throttle por entidade
         const now = Date.now();
         const last = __elsLastCallAt.get(entityName) || 0;
         const since = now - last;
-        const minGap = 5000; // proteção anti-rate-limit global por entidade
+        const globalSince = now - (__elsGlobalState.lastCallAt || 0);
+        const minGap = 9000; // proteção anti-rate-limit por entidade
+        const globalMinGap = 1800; // proteção anti-rate-limit entre entidades
         const cooldown = __elsCooldownUntil.get(entityName) || 0;
-        const waitMs = Math.max(0, cooldown - now, since < minGap ? (minGap - since) : 0);
+        const waitMs = Math.max(0, __elsGlobalState.cooldownUntil - now, cooldown - now, since < minGap ? (minGap - since) : 0, globalSince < globalMinGap ? (globalMinGap - globalSince) : 0);
         if (waitMs > 0) {
           await new Promise(r => setTimeout(r, waitMs));
         }
@@ -145,6 +155,7 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
             __elsCache.set(key, out);
             __elsCache.set(cacheKey, out);
             __elsLastCallAt.set(entityName, Date.now());
+            __elsGlobalState.lastCallAt = Date.now();
             __elsStrikeCount.set(entityName, 0);
             // Fase 3: persiste no IDB (TTL 10 min) para cache entre recarregamentos
             idbSet(idbKey, out, 10 * 60 * 1000).catch(() => {});
@@ -156,13 +167,15 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
               __elsStrikeCount.set(entityName, strikes);
               if (attempt < 1) {
                 const sleep = 2500 + Math.floor(Math.random() * 500);
-                __elsCooldownUntil.set(entityName, Date.now() + 30000);
+                __elsCooldownUntil.set(entityName, Date.now() + 120000);
+                __elsGlobalState.cooldownUntil = Date.now() + 60000;
                 await new Promise(r => setTimeout(r, sleep));
                 attempt++;
                 continue;
               }
               if (__elsCache.has(key)) {
-                __elsCooldownUntil.set(entityName, Date.now() + 5000);
+                __elsCooldownUntil.set(entityName, Date.now() + 120000);
+                __elsGlobalState.cooldownUntil = Date.now() + 60000;
                 return __elsCache.get(key);
               }
               // Fase 3: fallback IDB no 429 sem cache em memória
@@ -186,6 +199,7 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
       const p = exec().finally(() => {
         __elsInflight.delete(key);
         __elsEntityBusy.set(entityName, false);
+        __elsGlobalState.busy = false;
       });
       __elsInflight.set(key, p);
       return p;

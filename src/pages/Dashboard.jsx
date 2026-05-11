@@ -130,7 +130,7 @@ export default function Dashboard() {
     }
   }, [periodo]);
 
-  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [autoRefresh, setAutoRefresh] = useState(false);
   const queryClient = useQueryClient();
   const hasContextoAtivo = Boolean(empresaAtual?.id || estaNoGrupo || grupoAtual?.id);
   const refetchInterval = (empresaAtual?.id || estaNoGrupo) ? ((activeTab === 'resumo' && autoRefresh) ? DASHBOARD_REFETCH_INTERVAL_MS : false) : false; // evita zero-dados sem contexto

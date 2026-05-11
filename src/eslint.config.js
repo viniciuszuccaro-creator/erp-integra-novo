@@ -274,11 +274,13 @@ export default [
     ],
   },
   {
-    files: ['**/components/**/*.{js,jsx,ts,tsx}', ...documentationJsxFiles],
+    files: documentationJsxFiles,
     languageOptions: {
       parser: documentationNoopParser,
     },
-    rules: {},
+    rules: {
+      'no-undef': 'off',
+    },
   },
   {
     files: [
@@ -289,7 +291,6 @@ export default [
       'src/hooks/**/*.{js,jsx}',
       'src/api/**/*.{js,jsx}',
       'src/utils/**/*.{js,jsx}',
-      'src/components/**/*.{js,jsx}',
       '!src/components/**/*.{md,txt,rst,adoc,json,config,yaml,yml}.{js,jsx}',
       '!src/components/**/{README,CERTIFICADO,CERTIFICACAO,CERTIFIC,MANIFESTO,VALIDACAO,CHECKLIST,PROVA,MIGRACAO,BLOQUEIO,DEBUG,DIAGNOSTICO,INTEGRACAO,RESUMO,CHANGELOG,ROADMAP,GUIA,DOC,STATUS,ETAPA,ETAPAS,FASE,FASES,SISTEMA,BOTOES,CORRECAO,RELATORIO,REPORT,MANUAL,VALIDADOR,FLUXO,ZINDEX}*.jsx',
       '!**/components/**/*.md.jsx',

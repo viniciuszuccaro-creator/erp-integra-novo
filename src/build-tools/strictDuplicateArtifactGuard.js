@@ -5,7 +5,7 @@ const normalize = (value = '') => String(value || '').replace(/\\/g, '/');
 
 const DOC_NAME_PATTERN = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPAS|ETAPA|FASES|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|FLUXO|ZINDEX|rhf_zod_report|UnidadesDeMedida)/i;
 const DOC_CODE_MIRROR = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i;
-const DOC_TEXT_FILE = /\.(md|txt|rst|adoc|yaml|yml|jsxe)$/i;
+const DOC_TEXT_FILE = /\.jsxe$/i;
 const SKIP_DIRS = /^(node_modules|dist|build|\.git|\.vite|coverage|tmp|temp|logs)$/i;
 const TARGET_DIRS = ['src/components', 'components'];
 
@@ -17,6 +17,7 @@ function shouldNeutralize(relativePath) {
 
   if (DOC_CODE_MIRROR.test(fileName)) return true;
   if (DOC_TEXT_FILE.test(fileName)) return true;
+  if (!path.extname(fileName) && DOC_NAME_PATTERN.test(fileName)) return true;
   if (DOC_NAME_PATTERN.test(fileName) && /\.(js|jsx|ts|tsx)$/i.test(fileName)) return true;
   if (/(^|\/)commitlint\.config\.jsx$/i.test(normalized)) return true;
 

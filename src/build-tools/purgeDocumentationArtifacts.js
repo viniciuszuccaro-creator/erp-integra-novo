@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 export const DOCUMENTATION_PREFIX_PATTERN = /^(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPAS|ETAPA|FASES|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|FLUXO|ZINDEX|rhf_zod_report|UnidadesDeMedida)/i;
-export const DOCUMENTATION_EXTENSION_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)(\.(js|jsx|jsxe|ts|tsx))?$/i;
+export const DOCUMENTATION_EXTENSION_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i;
 export const DOCUMENTATION_MIRROR_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i;
 export const VALID_COMPONENT_CODE_PATTERN = /\.(js|jsx|ts|tsx|css)$/i;
 export const BUILD_CACHE_DIRS = ['node_modules/.vite', 'node_modules/.cache', 'dist/.vite', 'dist', '.vite', '.eslintcache', 'build/.vite', 'build'];
@@ -22,19 +22,12 @@ export function isBlockedDocumentationArtifact(filePath = '') {
 
   if (!inProtectedDir) return false;
 
-  if (inChatbotDir && !VALID_COMPONENT_CODE_PATTERN.test(fileName)) {
-    return true;
-  }
+  if (DOCUMENTATION_MIRROR_PATTERN.test(fileName)) return true;
+  if (/\.jsxe$/i.test(fileName)) return true;
+  if (!path.extname(fileName) && DOCUMENTATION_PREFIX_PATTERN.test(fileName)) return true;
+  if (VALID_COMPONENT_CODE_PATTERN.test(fileName) && DOCUMENTATION_PREFIX_PATTERN.test(fileName)) return true;
 
-  if (!VALID_COMPONENT_CODE_PATTERN.test(fileName)) {
-    return true;
-  }
-
-  return (
-    DOCUMENTATION_PREFIX_PATTERN.test(fileName) ||
-    DOCUMENTATION_EXTENSION_PATTERN.test(fileName) ||
-    DOCUMENTATION_MIRROR_PATTERN.test(fileName)
-  );
+  return DOCUMENTATION_EXTENSION_PATTERN.test(fileName);
 }
 
 const removePath = (targetPath) => {
@@ -88,8 +81,8 @@ export function purgeTemporaryLogs(rootDir = '.') {
 
       if (entry.isFile() && TEMP_LOG_FILE_PATTERN.test(entry.name)) {
         try {
-          fs.writeFileSync(fullPath, 'export default null;\n');
-          removedFiles.push(`${relativePath}::neutralized`);
+          fs.unlinkSync(fullPath);
+          removedFiles.push(`${relativePath}::removed-temporary-file`);
         } catch {}
       }
     }
@@ -128,8 +121,8 @@ export function purgeDocumentationArtifacts(rootDir = '.') {
 
       if (entry.isFile() && isBlockedDocumentationArtifact(relativePath)) {
         try {
-          fs.writeFileSync(fullPath, 'export default null;\n');
-          removedFiles.push(`${relativePath}::neutralized`);
+          fs.unlinkSync(fullPath);
+          removedFiles.push(`${relativePath}::removed-invalid-documentation-artifact`);
         } catch {}
       }
     }

@@ -11,21 +11,21 @@ const SOURCE_DIRS = ['src/components', 'components'];
 const GLOBAL_DOCUMENTATION_SCAN_DIRS = ['src', 'components'];
 const VALID_CODE_EXTENSIONS = new Set(['.js', '.jsx', '.ts', '.tsx', '.css']);
 const VALID_CODE_SIGNATURE_PATTERN = /(import\s|export\s|from\s+["']|const\s|let\s|var\s|function\s|class\s|React|Deno\.serve|module\.exports)/;
-const BLOCKED_DOC_PATTERN = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|yaml|yml|js|jsx|ts|tsx))?$/i;
+const BLOCKED_DOC_PATTERN = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(js|jsx|ts|tsx))?$/i;
 const BLOCKED_MIRROR_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i;
-const TEXT_OR_DATA_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml|jsxe)$/i;
+const TEXT_OR_DATA_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$|\.jsxe$/i;
 
 function neutralizeIfBlocked(root, filePath, removedFiles) {
   const relativePath = normalize(path.relative(root, filePath));
   const fileName = relativePath.split('/').pop() || '';
   const extension = path.extname(fileName);
-  const blocked = !VALID_CODE_EXTENSIONS.has(extension) || BLOCKED_DOC_PATTERN.test(relativePath) || BLOCKED_MIRROR_PATTERN.test(relativePath) || TEXT_OR_DATA_PATTERN.test(relativePath);
+  const blocked = BLOCKED_DOC_PATTERN.test(relativePath) || BLOCKED_MIRROR_PATTERN.test(relativePath) || TEXT_OR_DATA_PATTERN.test(relativePath);
 
   if (!blocked) return false;
 
   try {
-    fs.writeFileSync(filePath, 'export default null;\n');
-    removedFiles.push(`${relativePath}::neutralized`);
+    fs.unlinkSync(filePath);
+    removedFiles.push(`${relativePath}::removed-invalid-documentation-artifact`);
     return true;
   } catch {
     return false;
@@ -55,12 +55,10 @@ function cleanSourceDirectories(root) {
         const relativePath = normalize(path.relative(root, fullPath));
         const fileName = relativePath.split('/').pop() || '';
         const extension = path.extname(fileName);
+        if (neutralizeIfBlocked(root, fullPath, removedFiles)) continue;
         if (VALID_CODE_EXTENSIONS.has(extension) && !VALID_CODE_SIGNATURE_PATTERN.test(fs.readFileSync(fullPath, 'utf8').slice(0, 2000))) {
-          fs.writeFileSync(fullPath, 'export default null;\n');
-          removedFiles.push(`${relativePath}::neutralized`);
           continue;
         }
-        neutralizeIfBlocked(root, fullPath, removedFiles);
       }
     }
   };
@@ -90,8 +88,8 @@ function purgeGlobalDocumentationMirrors(root) {
       if (!entry.isFile()) continue;
       if (BLOCKED_MIRROR_PATTERN.test(relativePath) || /\.md\.jsx$/i.test(relativePath) || BLOCKED_DOC_PATTERN.test(relativePath)) {
         try {
-          fs.writeFileSync(fullPath, 'export default null;\n');
-          removedFiles.push(`${relativePath}::neutralized`);
+          fs.unlinkSync(fullPath);
+          removedFiles.push(`${relativePath}::removed-invalid-documentation-artifact`);
         } catch {}
       }
     }

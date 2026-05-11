@@ -372,8 +372,8 @@ export default function Dashboard() {
       });
       return res?.data || { previsoes: [] };
     },
-    staleTime: 120000,
-    enabled: Boolean(canSeeEstoque && hasContextoAtivo)
+    staleTime: 600000,
+    enabled: Boolean(canSeeEstoque && hasContextoAtivo && autoRefresh)
   });
 
   const { data: previsoesIA30 = {} } = useQuery({
@@ -387,8 +387,8 @@ export default function Dashboard() {
       });
       return res?.data || { previsoes: [] };
     },
-    staleTime: 120000,
-    enabled: Boolean(canSeeEstoque && hasContextoAtivo)
+    staleTime: 600000,
+    enabled: Boolean(canSeeEstoque && hasContextoAtivo && autoRefresh)
   });
 
   const { data: anomaliasIA = {}, isLoading: loadingAnomIA } = useQuery({
@@ -399,8 +399,8 @@ export default function Dashboard() {
       const res = await base44.functions.invoke('iaFinanceAnomalyScan', { filtros });
       return res?.data || { details: [] };
     },
-    staleTime: 120000,
-    enabled: Boolean(canSeeFinanceiro && hasContextoAtivo)
+    staleTime: 600000,
+    enabled: Boolean(canSeeFinanceiro && hasContextoAtivo && autoRefresh)
   });
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];

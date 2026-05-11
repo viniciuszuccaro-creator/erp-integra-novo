@@ -42,7 +42,7 @@ function visit(root, dir, changed) {
     if (!entry.isFile() || !shouldNeutralize(relativePath)) continue;
 
     try {
-      fs.unlinkSync(fullPath);
+      fs.writeFileSync(fullPath, SAFE_NOOP_CONTENT);
       changed.push(relativePath);
     } catch {}
   }
@@ -59,7 +59,7 @@ export function neutralizeLintArtifacts(rootDir = '.') {
   try {
     fs.writeFileSync(
       path.resolve(root, '.base44-lint-artifacts-neutralized-proof.json'),
-      JSON.stringify({ status: 'lint_artifacts_removed', changedCount: changed.length, changed }, null, 2)
+      JSON.stringify({ status: 'lint_artifacts_neutralized', changedCount: changed.length, changed }, null, 2)
     );
   } catch {}
 

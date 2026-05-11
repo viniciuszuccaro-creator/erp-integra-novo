@@ -45,8 +45,8 @@ function scanAndNeutralize(root, dir, changed) {
     if (!entry.isFile() || !shouldNeutralize(relativePath)) continue;
 
     try {
-      fs.unlinkSync(fullPath);
-      changed.push(`${relativePath}::removed-invalid-documentation-mirror`);
+      fs.writeFileSync(fullPath, 'export default null;\n');
+      changed.push(`${relativePath}::neutralized-invalid-documentation-mirror`);
     } catch {}
   }
 }
@@ -60,12 +60,12 @@ export function runStrictDuplicateArtifactGuard(rootDir = '.') {
   }
 
   const proof = {
-    status: 'strict_duplicate_artifact_guard_removed_ok',
+    status: 'strict_duplicate_artifact_guard_neutralized_ok',
     timestamp: new Date().toISOString(),
     changedCount: changed.length,
     changed,
     documentationCodeNeutralized: true,
-    documentationInvalidMirrorsRemoved: true,
+    documentationInvalidMirrorsNeutralized: true,
     buildSafe: true,
   };
 

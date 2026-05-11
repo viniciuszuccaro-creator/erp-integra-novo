@@ -6,7 +6,8 @@ import { isDocumentationArtifactPath } from './src/components/lib/documentationB
 import { isBlockedDocumentationArtifact, purgeBuildCaches, purgeDocumentationArtifacts } from './build-tools/purgeDocumentationArtifacts.js';
 import { runStableEnvironmentCheck } from './build-tools/stableEnvironmentCheck.js';
 import { verifyChatbotComponents } from './build-tools/verifyChatbotComponents.js';
-import { viteRuntimeDefine } from './build-tools/viteRuntimeConfig.js';
+import { forceProjectReindex } from './build-tools/projectReindex.js';
+import { viteDefineConfig } from './build-tools/buildRuntimeConfig.js';
 
 const documentationArtifactFilePattern = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|yaml|yml|js|jsx|ts|tsx))?$/i;
 const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|ts|tsx)$/i;
@@ -57,6 +58,7 @@ function blockDocumentation() {
           if (entry.isFile() && isBlockedPath(filePath)) fs.unlinkSync(filePath);
         }
       };
+      forceProjectReindex(__dirname);
       runStableEnvironmentCheck(__dirname);
       verifyChatbotComponents(__dirname);
       purgeDocumentationArtifacts(__dirname);
@@ -65,6 +67,7 @@ function blockDocumentation() {
     configureServer(server) {
       const purgeBuildCachesLocal = () => purgeBuildCaches(__dirname);
       const purgeDocumentationNow = () => {
+        forceProjectReindex(__dirname);
         runStableEnvironmentCheck(__dirname);
         verifyChatbotComponents(__dirname);
         purgeDocumentationArtifacts(__dirname);
@@ -116,7 +119,7 @@ function blockDocumentation() {
 }
 
 export default defineConfig({
-  define: viteRuntimeDefine,
+  define: viteDefineConfig,
   plugins: [react(), blockDocumentation()],
   resolve: {
     alias: {

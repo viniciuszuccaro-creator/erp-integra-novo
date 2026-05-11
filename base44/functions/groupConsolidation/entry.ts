@@ -5,6 +5,8 @@ const CACHE = globalThis.__gcCache || (globalThis.__gcCache = new Map());
 const AUDIT_CACHE = globalThis.__gcAuditCache || (globalThis.__gcAuditCache = new Map());
 const CACHE_TTL_MS = 300_000; // 5 minutes
 const AUDIT_TTL_MS = 15 * 60 * 1000;
+let BACKEND_PAUSED_UNTIL = globalThis.__groupConsolidationPausedUntil || 0;
+const BACKEND_PAUSE_MS = 120_000;
 
 Deno.serve(async (req) => {
   const t0 = Date.now();
@@ -31,11 +33,26 @@ Deno.serve(async (req) => {
       return Response.json(entry.resp);
     }
 
-    const [pedidos, receber, pagar] = await Promise.all([
-      base44.asServiceRole.entities.Pedido.filter(filtros, '-updated_date', 500),
-      base44.asServiceRole.entities.ContaReceber.filter(filtros, '-updated_date', 500),
-      base44.asServiceRole.entities.ContaPagar.filter(filtros, '-updated_date', 500)
-    ]);
+    if (Date.now() < BACKEND_PAUSED_UNTIL) {
+      return Response.json(entry?.resp || { ok: true, groups: 0, summary: [], cached: true, paused: true });
+    }
+
+    let pedidos = [];
+    let receber = [];
+    let pagar = [];
+    try {
+      pedidos = await base44.asServiceRole.entities.Pedido.filter(filtros, '-updated_date', 300);
+      receber = await base44.asServiceRole.entities.ContaReceber.filter(filtros, '-updated_date', 300);
+      pagar = await base44.asServiceRole.entities.ContaPagar.filter(filtros, '-updated_date', 300);
+    } catch (e) {
+      const status = e?.status || e?.response?.status;
+      if (status === 429 || status === 502 || (typeof status === 'number' && status >= 500)) {
+        BACKEND_PAUSED_UNTIL = Date.now() + BACKEND_PAUSE_MS;
+        globalThis.__groupConsolidationPausedUntil = BACKEND_PAUSED_UNTIL;
+        return Response.json(entry?.resp || { ok: true, groups: 0, summary: [], cached: true, paused: true });
+      }
+      throw e;
+    }
 
     const gaps = {
       pedido_sem_empresa: pedidos.filter(p => !p?.empresa_id).length,

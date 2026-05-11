@@ -4,7 +4,7 @@
  * ✅ Suporta grupo + empresa com $or automático
  * ✅ Cache de 30s no servidor
  */
-import { createClientFromRequest } from "npm:@base44/sdk@0.8.20";
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.25";
 
 const FIELD_MAP = {
   Cliente: "empresa_id",
@@ -17,8 +17,12 @@ const FIELD_MAP = {
 
 const SHARED_ENTITIES = new Set(["Cliente", "Fornecedor", "Transportadora"]);
 
-const serverCache = new Map();
-const CACHE_TTL = 30_000;
+const serverCache = globalThis.__countEntitiesOptimizedCache || (globalThis.__countEntitiesOptimizedCache = new Map());
+const CACHE_TTL = 300_000;
+let backendPausedUntil = globalThis.__countEntitiesOptimizedPausedUntil || 0;
+let lastBackendCallAt = globalThis.__countEntitiesOptimizedLastCallAt || 0;
+const MIN_CALL_GAP_MS = 2500;
+const BACKEND_PAUSE_MS = 120_000;
 
 Deno.serve(async (req) => {
   try {
@@ -71,17 +75,36 @@ Deno.serve(async (req) => {
         countFilter.$or = orConditions;
       }
 
-      // Contar
+      // Contar em modo protegido: evita rajadas e mantém cache em falhas 429/502
       try {
+        if (Date.now() < backendPausedUntil) {
+          result[entity] = cached?.count || 0;
+          continue;
+        }
+
+        const waitMs = Math.max(0, MIN_CALL_GAP_MS - (Date.now() - lastBackendCallAt));
+        if (waitMs > 0 && cached) {
+          result[entity] = cached.count;
+          continue;
+        }
+        if (waitMs > 0) await new Promise((resolve) => setTimeout(resolve, waitMs));
+
+        lastBackendCallAt = Date.now();
+        globalThis.__countEntitiesOptimizedLastCallAt = lastBackendCallAt;
+
         const api = base44.asServiceRole.entities[entity];
-        const count = await api.filter(countFilter, undefined, 0).then((res) => res?.length || 0);
+        const rows = await api.filter(countFilter, "-id", 1000, 0);
+        const count = Array.isArray(rows) ? rows.length : 0;
 
         result[entity] = count;
-
-        // Cache
-        serverCache.set(cacheKey, { count, ts: now });
-      } catch (_e) {
-        result[entity] = 0;
+        serverCache.set(cacheKey, { count, ts: Date.now() });
+      } catch (e) {
+        const status = e?.status || e?.response?.status;
+        if (status === 429 || status === 502 || (typeof status === "number" && status >= 500)) {
+          backendPausedUntil = Date.now() + BACKEND_PAUSE_MS;
+          globalThis.__countEntitiesOptimizedPausedUntil = backendPausedUntil;
+        }
+        result[entity] = cached?.count || 0;
       }
     }
 

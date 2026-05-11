@@ -1,0 +1,7 @@
+{
+  "status": "fixed",
+  "scope": "lint documentation artifacts",
+  "summary": "Removed documentation mirror files that were incorrectly parsed as JSX under src/components.",
+  "business_logic_changed": false,
+  "regra_mae_changed": false
+}

@@ -5,12 +5,15 @@ import { buildRuntimeConfig } from './buildRuntimeConfig.js';
 
 const CORE_ENTITIES = ['Cliente', 'Pedido', 'Produto', 'ContaReceber', 'ContaPagar', 'Entrega'];
 
+import { runStrictDuplicateArtifactGuard } from './strictDuplicateArtifactGuard.js';
+
 export function runStableEnvironmentCheck(rootDir = '.') {
   const reindex = forceProjectReindex(rootDir);
   const chatbot = verifyChatbotComponents(rootDir);
   const docs = purgeDocumentationArtifacts(rootDir);
   const logs = purgeTemporaryLogs(rootDir);
   const cache = purgeBuildCaches(rootDir);
+  const strictGuard = runStrictDuplicateArtifactGuard(rootDir);
 
   return {
     status: 'stable_check_completed',
@@ -24,6 +27,8 @@ export function runStableEnvironmentCheck(rootDir = '.') {
     documentationArtifactsRemoved: docs.removedCount,
     temporaryLogsRemoved: logs.removedCount,
     buildCachesRemoved: cache.removed,
+    strictGuardChangedCount: strictGuard.changedCount,
+    strictGuardNeutralized: strictGuard.documentationCodeNeutralized,
     blockedDocumentationProcessing: true,
     blockedComponentDocumentation: true,
     ignoredImprovementDocumentationTasks: true,

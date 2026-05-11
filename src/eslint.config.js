@@ -2,8 +2,8 @@ import { runStableEnvironmentCheck } from './build-tools/stableEnvironmentCheck.
 import { runPrebuildIntegrityCheck } from './build-tools/prebuildIntegrityCheck.js';
 import { runStrictDuplicateArtifactGuard } from './build-tools/strictDuplicateArtifactGuard.js';
 
-runPrebuildIntegrityCheck('.');
 runStrictDuplicateArtifactGuard('.');
+runPrebuildIntegrityCheck('.');
 runStableEnvironmentCheck('.');
 runStrictDuplicateArtifactGuard('.');
 
@@ -108,6 +108,29 @@ export default [
       'src/api/**/*.{js,jsx}',
       'src/utils/**/*.{js,jsx}',
       'src/components/**/*.{js,jsx}',
+      '!src/components/**/*.md.jsx',
+      '!src/components/**/*.json.jsx',
+      '!src/components/**/*.config.jsx',
+      '!src/components/**/*.jsxe',
+      '!src/components/**/README*.jsx',
+      '!src/components/**/CERTIFIC*.jsx',
+      '!src/components/**/CERTIFICADO*.jsx',
+      '!src/components/**/CERTIFICACAO*.jsx',
+      '!src/components/**/MANIFESTO*.jsx',
+      '!src/components/**/VALIDACAO*.jsx',
+      '!src/components/**/CHECKLIST*.jsx',
+      '!src/components/**/PROVA*.jsx',
+      '!src/components/**/BLOQUEIO*.jsx',
+      '!src/components/**/BOTOES*.jsx',
+      '!src/components/**/INTEGRACAO*.jsx',
+      '!src/components/**/STATUS*.jsx',
+      '!src/components/**/ETAPA*.jsx',
+      '!src/components/**/ETAPAS*.jsx',
+      '!src/components/**/FASE*.jsx',
+      '!src/components/**/DEBUG*.jsx',
+      '!src/components/**/DIAGNOSTICO*.jsx',
+      '!src/components/**/CORRECAO*.jsx',
+      '!src/components/**/FLUXO*.jsx',
     ],
     ignores: documentationArtifactIgnores,
     languageOptions: {

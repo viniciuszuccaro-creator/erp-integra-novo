@@ -11,7 +11,8 @@ const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config|yaml|yml)\
 const textDocumentationPattern = /\.(md|txt|rst|adoc|yaml|yml)$/i;
 const componentDocumentationMirrorPattern = /\/src\/components\/.*(\.md\.jsx|\.txt\.jsx|\.rst\.jsx|\.adoc\.jsx|\.json\.jsx|\.config\.jsx)$/i;
 const buildCacheDirs = ['node_modules/.vite', 'node_modules/.cache', 'dist/.vite', '.vite', '.eslintcache', 'build/.vite'];
-const blockedComponentDocExtensions = ['.md', '.txt', '.rst', '.adoc', '.jsx', '.md.jsx', '.txt.jsx', '.rst.jsx', '.adoc.jsx', '.json.jsx', '.config.jsx', '.md.js', '.json.js', '.config.js'];
+const validComponentCodePattern = /\.(js|jsx|ts|tsx|css)$/i;
+const blockedComponentDocExtensions = ['.md', '.txt', '.rst', '.adoc', '.json', '.config', '.yaml', '.yml', '.md.jsx', '.txt.jsx', '.rst.jsx', '.adoc.jsx', '.json.jsx', '.config.jsx', '.md.js', '.json.js', '.config.js'];
 const blockedComponentDocPrefixes = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFICADO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida)/i;
 const chatbotDocumentationPattern = /(^|\/)src\/components\/chatbot\/.*(\.(md|txt|rst|adoc|json|config|yaml|yml)(\.(js|jsx|ts|tsx))?|README|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|STATUS|GUIA|DOC)/i;
 
@@ -20,7 +21,10 @@ function blockDocumentation() {
     const normalized = input.replace(/\\/g, '/');
     const fileName = normalized.split('/').pop() || '';
     const isInSrc = normalized.includes('/src/') || normalized.startsWith('src/');
+    const isInComponents = /(^|\/)src\/components\//i.test(normalized) || /(^|\/)components\//i.test(normalized);
     const isComponentDocMirror = /(^|\/)src\/components\//i.test(normalized) && /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|rhf_zod_report|UnidadesDeMedida)[^/]*\.jsx$/i.test(fileName);
+
+    if (isInComponents && !validComponentCodePattern.test(fileName)) return true;
 
     return chatbotDocumentationPattern.test(normalized) || isComponentDocMirror || (isInSrc && (
       isBlockedDocumentationArtifact(normalized) ||
@@ -30,7 +34,7 @@ function blockDocumentation() {
       componentDocumentationMirrorPattern.test(normalized) ||
       documentationArtifactFilePattern.test(fileName) ||
       blockedComponentDocPrefixes.test(fileName)
-    );
+    ));
   };
 
   return {
@@ -127,6 +131,7 @@ export default defineConfig({
       '**/README*',
       '**/CERTIFICADO*',
       '**/CERTIFICACAO*',
+      '**/CERTIFIC*',
       '**/MANIFESTO*',
       '**/VALIDACAO*',
       '**/CHECKLIST*',

@@ -4,6 +4,7 @@ import path from 'node:path';
 export const DOCUMENTATION_PREFIX_PATTERN = /^(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|PROVA|VALIDADOR|rhf_zod_report|UnidadesDeMedida)/i;
 export const DOCUMENTATION_EXTENSION_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)(\.(js|jsx|ts|tsx))?$/i;
 export const DOCUMENTATION_MIRROR_PATTERN = /\.(md|txt|rst|adoc|json|config)\.(js|jsx|ts|tsx)$/i;
+export const VALID_COMPONENT_CODE_PATTERN = /\.(js|jsx|ts|tsx|css)$/i;
 export const BUILD_CACHE_DIRS = ['node_modules/.vite', 'node_modules/.cache', 'dist/.vite', 'dist', '.vite', '.eslintcache', 'build/.vite', 'build'];
 export const TEMP_LOG_DIRS = ['tmp', 'temp', '.tmp', 'logs', 'coverage', 'dist/.cache', 'build/.cache'];
 export const TEMP_LOG_FILE_PATTERN = /\.(log|tmp|temp|cache|bak|old|orig)$/i;
@@ -19,16 +20,17 @@ export function isBlockedDocumentationArtifact(filePath = '') {
   const inProtectedDir = PROTECTED_DOC_DIR_PATTERN.test(normalized);
   const inChatbotDir = CHATBOT_DIR_PATTERN.test(normalized);
 
-  if (inChatbotDir && (
-    DOCUMENTATION_PREFIX_PATTERN.test(fileName) ||
-    DOCUMENTATION_EXTENSION_PATTERN.test(fileName) ||
-    DOCUMENTATION_MIRROR_PATTERN.test(fileName) ||
-    /\.(md|txt|rst|adoc|json|config|yaml|yml)$/i.test(fileName)
-  )) {
+  if (!inProtectedDir) return false;
+
+  if (inChatbotDir && !VALID_COMPONENT_CODE_PATTERN.test(fileName)) {
     return true;
   }
 
-  return inProtectedDir && (
+  if (!VALID_COMPONENT_CODE_PATTERN.test(fileName)) {
+    return true;
+  }
+
+  return (
     DOCUMENTATION_PREFIX_PATTERN.test(fileName) ||
     DOCUMENTATION_EXTENSION_PATTERN.test(fileName) ||
     DOCUMENTATION_MIRROR_PATTERN.test(fileName)

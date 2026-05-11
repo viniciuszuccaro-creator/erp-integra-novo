@@ -200,6 +200,12 @@ const documentationArtifactIgnores = [
 export default [
   {
     ignores: [
+      '**/src/components/**/*.{md,txt,rst,adoc,yaml,yml}',
+      '**/src/components/**/*.{md,txt,rst,adoc,json,config,yaml,yml}.{js,jsx,ts,tsx}',
+      '**/src/components/**/{README,CERTIFICADO,CERTIFICACAO,CERTIFIC,MANIFESTO,VALIDACAO,CHECKLIST,PROVA,MIGRACAO,BLOQUEIO,DEBUG,DIAGNOSTICO,INTEGRACAO,RESUMO,CHANGELOG,ROADMAP,GUIA,DOC,STATUS,ETAPA,ETAPAS,FASE,FASES,SISTEMA,BOTOES,CORRECAO,RELATORIO,REPORT,MANUAL,VALIDADOR,FLUXO,ZINDEX}*',
+      '**/components/**/*.{md,txt,rst,adoc,yaml,yml}',
+      '**/components/**/*.{md,txt,rst,adoc,json,config,yaml,yml}.{js,jsx,ts,tsx}',
+      '**/components/**/{README,CERTIFICADO,CERTIFICACAO,CERTIFIC,MANIFESTO,VALIDACAO,CHECKLIST,PROVA,MIGRACAO,BLOQUEIO,DEBUG,DIAGNOSTICO,INTEGRACAO,RESUMO,CHANGELOG,ROADMAP,GUIA,DOC,STATUS,ETAPA,ETAPAS,FASE,FASES,SISTEMA,BOTOES,CORRECAO,RELATORIO,REPORT,MANUAL,VALIDADOR,FLUXO,ZINDEX}*',
       '**/components/**/*.md.jsx',
       '**/components/**/*.json.jsx',
       '**/components/**/*.config.jsx',
@@ -284,6 +290,8 @@ export default [
       'src/api/**/*.{js,jsx}',
       'src/utils/**/*.{js,jsx}',
       'src/components/**/*.{js,jsx}',
+      '!src/components/**/*.{md,txt,rst,adoc,json,config,yaml,yml}.{js,jsx}',
+      '!src/components/**/{README,CERTIFICADO,CERTIFICACAO,CERTIFIC,MANIFESTO,VALIDACAO,CHECKLIST,PROVA,MIGRACAO,BLOQUEIO,DEBUG,DIAGNOSTICO,INTEGRACAO,RESUMO,CHANGELOG,ROADMAP,GUIA,DOC,STATUS,ETAPA,ETAPAS,FASE,FASES,SISTEMA,BOTOES,CORRECAO,RELATORIO,REPORT,MANUAL,VALIDADOR,FLUXO,ZINDEX}*.jsx',
       '!**/components/**/*.md.jsx',
       '!**/components/**/*.json.jsx',
       '!**/components/**/*.config.jsx',

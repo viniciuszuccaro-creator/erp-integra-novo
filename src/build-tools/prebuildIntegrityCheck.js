@@ -7,6 +7,7 @@ import { forceProjectReindex } from './projectReindex.js';
 
 const normalize = (value = '') => String(value || '').replace(/\\/g, '/');
 const SOURCE_DIRS = ['src/components', 'components'];
+const GLOBAL_DOCUMENTATION_SCAN_DIRS = ['src', 'components'];
 const VALID_CODE_EXTENSIONS = new Set(['.js', '.jsx', '.ts', '.tsx', '.css']);
 const VALID_CODE_SIGNATURE_PATTERN = /(import\s|export\s|from\s+["']|const\s|let\s|var\s|function\s|class\s|React|Deno\.serve|module\.exports)/;
 const BLOCKED_DOC_PATTERN = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|yaml|yml|js|jsx|ts|tsx))?$/i;
@@ -67,28 +68,94 @@ function cleanSourceDirectories(root) {
   return removedFiles;
 }
 
+function purgeGlobalDocumentationMirrors(root) {
+  const removedFiles = [];
+
+  const visit = (dir) => {
+    if (!fs.existsSync(dir)) return;
+    let entries = [];
+    try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      const relativePath = normalize(path.relative(root, fullPath));
+
+      if (entry.isDirectory()) {
+        if (/^(node_modules|dist|build|\.git|\.vite)$/.test(entry.name)) continue;
+        visit(fullPath);
+        continue;
+      }
+
+      if (!entry.isFile()) continue;
+      if (BLOCKED_MIRROR_PATTERN.test(relativePath) || /\.md\.jsx$/i.test(relativePath) || BLOCKED_DOC_PATTERN.test(relativePath)) {
+        try {
+          fs.rmSync(fullPath, { force: true, recursive: true });
+          removedFiles.push(relativePath);
+        } catch {}
+      }
+    }
+  };
+
+  GLOBAL_DOCUMENTATION_SCAN_DIRS.forEach((dir) => visit(path.resolve(root, dir)));
+  return removedFiles;
+}
+
+function collectRemainingDocumentationMirrors(root) {
+  const remaining = [];
+
+  const visit = (dir) => {
+    if (!fs.existsSync(dir)) return;
+    let entries = [];
+    try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      const relativePath = normalize(path.relative(root, fullPath));
+
+      if (entry.isDirectory()) {
+        if (/^(node_modules|dist|build|\.git|\.vite)$/.test(entry.name)) continue;
+        visit(fullPath);
+        continue;
+      }
+
+      if (entry.isFile() && (BLOCKED_MIRROR_PATTERN.test(relativePath) || /\.md\.jsx$/i.test(relativePath) || BLOCKED_DOC_PATTERN.test(relativePath))) {
+        remaining.push(relativePath);
+      }
+    }
+  };
+
+  GLOBAL_DOCUMENTATION_SCAN_DIRS.forEach((dir) => visit(path.resolve(root, dir)));
+  return remaining;
+}
+
 export function runPrebuildIntegrityCheck(rootDir = '.') {
   const root = path.resolve(rootDir);
   const removedInvalidSourceFiles = cleanSourceDirectories(root);
+  const removedGlobalDocumentationMirrors = purgeGlobalDocumentationMirrors(root);
   const chatbot = verifyChatbotComponents(root);
   const docs = purgeDocumentationArtifacts(root);
   const logs = purgeTemporaryLogs(root);
   const cache = purgeBuildCaches(root);
   const reindex = forceProjectReindex(root);
+  const remainingDocumentationMirrors = collectRemainingDocumentationMirrors(root);
+  const remainingArtifacts = [...(reindex.remainingArtifacts || []), ...remainingDocumentationMirrors];
 
   const proof = {
-    status: reindex.remainingArtifacts?.length ? 'blocked_artifacts_remaining' : 'prebuild_integrity_ok',
+    status: remainingArtifacts.length ? 'blocked_artifacts_remaining' : 'prebuild_integrity_ok',
     timestamp: new Date().toISOString(),
     runtimeMode: buildRuntimeConfig.appEnv,
     processEnvReplacedByCentralConfig: true,
     centralizedBuildEnv: safeBuildEnv,
     invalidSourceFilesRemoved: removedInvalidSourceFiles,
+    globalDocumentationMirrorsRemoved: removedGlobalDocumentationMirrors,
     chatbotArtifactsRemoved: chatbot.removedFiles || [],
     documentationArtifactsRemoved: docs.removedFiles || [],
     temporaryLogsRemoved: logs.removedFiles || [],
     buildCachesRemoved: cache.removed,
     reindexStatus: reindex.status,
-    remainingArtifacts: reindex.remainingArtifacts || [],
+    remainingArtifacts,
+    remainingDocumentationMirrors,
+    documentationRecreationProof: remainingDocumentationMirrors.length === 0 ? 'no_md_jsx_or_documentation_mirrors_recreated' : 'documentation_mirrors_still_present',
     documentationGenerationBlocked: buildRuntimeConfig.blockDocumentationMirrors,
     criticalImprovementTasksAutoRun: buildRuntimeConfig.autoRunCriticalImprovementTasks,
   };

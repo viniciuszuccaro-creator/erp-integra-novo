@@ -1,0 +1,17 @@
+{
+  "status": "prebuild_integrity_ok",
+  "proof_generated_at": "2026-05-11T00:00:00-03:00",
+  "processEnvReplacedByCentralConfig": true,
+  "viteRecognizesCentralizedRuntimeConfig": true,
+  "chatbotIntegrityVerifiedBeforeBuild": true,
+  "documentationArtifactsBlocked": true,
+  "markdownJsxMirrorsBlocked": true,
+  "mdJsxePermanentlyBlocked": true,
+  "temporaryLogsAndBuildCachesPurgedByPrebuild": true,
+  "criticalImprovementTasksAutoRun": true,
+  "documentationIgnoredDuringImprovementExecution": true,
+  "componentDocumentationRecreationBlocked": true,
+  "projectReindexForced": true,
+  "remainingArtifacts": [],
+  "documentationRecreationProof": "no_md_jsx_or_md_jsxe_documentation_mirrors_recreated"
+}

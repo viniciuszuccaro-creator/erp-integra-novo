@@ -6,8 +6,8 @@ import { verifyChatbotComponents } from './verifyChatbotComponents.js';
 const normalize = (value = '') => String(value || '').replace(/\\/g, '/');
 const INDEX_MARKER_FILE = '.base44-reindex-proof.json';
 const WATCH_DIRS = ['src/components', 'components'];
-const BLOCKED_PATTERN = /(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|rhf_zod_report|UnidadesDeMedida).*\.(md|txt|rst|adoc|json|config|yaml|yml|jsx|js|ts|tsx)$/i;
-const MIRROR_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|ts|tsx)$/i;
+const BLOCKED_PATTERN = /(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|rhf_zod_report|UnidadesDeMedida).*\.(md|txt|rst|adoc|json|config|yaml|yml|jsx|jsxe|js|ts|tsx)$/i;
+const MIRROR_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i;
 
 function collectBlockedArtifacts(rootDir = '.') {
   const root = path.resolve(rootDir);

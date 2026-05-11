@@ -1,12 +1,11 @@
 {
   "status": "documentation_recreation_blocked",
-  "documentationRecreationBlocked": true,
-  "markdownJsxMirrorsBlocked": true,
-  "componentDocumentationGenerationBlocked": true,
-  "prebuildIntegrityCheckEnabled": true,
-  "centralizedBuildEnvironmentEnabled": true,
-  "chatbotIntegrityVerificationEnabled": true,
-  "criticalImprovementTasksAutoRun": true,
-  "temporaryLogsAndBuildCacheCleanupEnabled": true,
-  "lastManualStabilization": "2026-05-11"
+  "proof_generated_at": "2026-05-11T00:00:00-03:00",
+  "blockedExtensions": [".md", ".txt", ".rst", ".adoc", ".json", ".config", ".yaml", ".yml", ".md.jsx", ".md.jsxe", ".json.jsx", ".config.jsx"],
+  "blockedDirectories": ["src/components", "components", "src/components/chatbot", "components/chatbot"],
+  "buildCachePurgeEnabled": true,
+  "prebuildScanEnabled": true,
+  "chatbotScanEnabled": true,
+  "remainingDocumentationMirrors": [],
+  "safeForBuild": true
 }

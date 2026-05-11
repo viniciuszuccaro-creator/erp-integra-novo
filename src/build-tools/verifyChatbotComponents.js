@@ -5,7 +5,7 @@ import { isBlockedDocumentationArtifact } from './purgeDocumentationArtifacts.js
 const normalize = (value = '') => String(value || '').replace(/\\/g, '/');
 const CHATBOT_DIRS = ['src/components/chatbot', 'components/chatbot'];
 const VALID_CHATBOT_FILE_PATTERN = /\.(js|jsx|ts|tsx|css)$/i;
-const DOCUMENTATION_OR_TEXT_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)(\.(js|jsx|ts|tsx))?$/i;
+const DOCUMENTATION_OR_TEXT_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)(\.(js|jsx|jsxe|ts|tsx))?$/i;
 const DOC_NAME_PATTERN = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BLOQUEIO|CORRECAO)/i;
 
 const shouldRemove = (filePath) => {

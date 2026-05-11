@@ -32,5 +32,6 @@ export const viteDefineConfig = Object.freeze({
   'import.meta.env.APP_ENV': JSON.stringify(buildRuntimeConfig.appEnv),
   'import.meta.env.NODE_ENV': JSON.stringify(buildRuntimeConfig.nodeEnv),
   'process.env': JSON.stringify(safeBuildEnv),
+  process: JSON.stringify({ env: safeBuildEnv }),
   global: 'globalThis',
 });

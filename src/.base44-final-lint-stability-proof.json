@@ -1,0 +1,12 @@
+{
+  "status": "lint_stability_rules_reinforced",
+  "validated_at": "2026-05-11T00:00:00-03:00",
+  "strictEslintIgnoreForDocumentationMirrors": true,
+  "mdJsxeBlocked": true,
+  "chatbotIntegrityGuardEnabled": true,
+  "fullBuildSanitizerCreated": "build-tools/fullBuildSanitizer.js",
+  "temporaryAndCacheCleanupEnabled": true,
+  "projectReindexEnabled": true,
+  "processEnvironmentCentralized": true,
+  "documentationRecreationBlocked": true
+}

@@ -1,0 +1,11 @@
+{
+  "status": "reported_lint_artifacts_removed",
+  "validated_at": "2026-05-11T00:00:00-03:00",
+  "processReferenceFixed": true,
+  "srcBuildToolMirrorRemoved": true,
+  "reportedMdJsxArtifactsRemoved": true,
+  "chatbotDocumentationArtifactsRemoved": true,
+  "systemDocumentationMirrorsRemoved": true,
+  "strictPrebuildProtectionEnabled": true,
+  "fullSanitizerProof": ".base44-full-build-sanitizer-proof.json"
+}

@@ -1,6 +1,6 @@
 export const DOCUMENTATION_ARTIFACT_PATTERNS = [
   /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO)[^/]*(\.(md|txt|rst|adoc|json|config|jsx|js|ts|tsx))?$/i,
-  /\.(md|txt|rst|adoc|json|config)\.(js|jsx|ts|tsx)$/i,
+  /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i,
   /\.(md|txt|rst|adoc)$/i,
   /(^|\/)components\/.*\.(md|txt|rst|adoc|json|config)\.jsx$/i,
   /rhf_zod_report/i,

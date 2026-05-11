@@ -11,8 +11,8 @@ const GLOBAL_DOCUMENTATION_SCAN_DIRS = ['src', 'components'];
 const VALID_CODE_EXTENSIONS = new Set(['.js', '.jsx', '.ts', '.tsx', '.css']);
 const VALID_CODE_SIGNATURE_PATTERN = /(import\s|export\s|from\s+["']|const\s|let\s|var\s|function\s|class\s|React|Deno\.serve|module\.exports)/;
 const BLOCKED_DOC_PATTERN = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|yaml|yml|js|jsx|ts|tsx))?$/i;
-const BLOCKED_MIRROR_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|ts|tsx)$/i;
-const TEXT_OR_DATA_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)$/i;
+const BLOCKED_MIRROR_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i;
+const TEXT_OR_DATA_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml|jsxe)$/i;
 
 function removeIfBlocked(root, filePath, removedFiles) {
   const relativePath = normalize(path.relative(root, filePath));

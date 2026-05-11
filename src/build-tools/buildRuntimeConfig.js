@@ -11,6 +11,10 @@ export const buildRuntimeConfig = Object.freeze({
   blockComponentDocumentationGeneration: true,
   autoRunCriticalImprovementTasks: true,
   strictTextDocumentationIgnore: true,
+  strictMdJsxeBlock: true,
+  blockDocumentationGenerationInComponents: true,
+  forceReindexBeforeBuild: true,
+  textDocumentationExtensions: ['.md', '.txt', '.rst', '.adoc', '.json.jsx', '.md.jsx', '.md.jsxe', '.jsxe'],
   proofFileName: '.base44-prebuild-integrity-proof.json',
 });
 

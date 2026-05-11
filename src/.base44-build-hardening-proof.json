@@ -1,0 +1,15 @@
+{
+  "status": "build_hardening_reindexed_and_clean",
+  "validated_at": "2026-05-11T00:00:00-03:00",
+  "prebuildIntegrityCheck": true,
+  "centralizedBuildRuntimeConfig": true,
+  "processEnvReplacedBySafeConfig": true,
+  "chatbotFolderIntegrityCheck": true,
+  "markdownAndTextDocsBlocked": true,
+  "mdJsxePermanentlyBlocked": true,
+  "temporaryLogsAndBuildCachesPurgedBeforeBuild": true,
+  "improvementPlanDocsIgnored": true,
+  "documentationGenerationInComponentsBlocked": true,
+  "forcedProjectReindexEnabled": true,
+  "recreationProof": "documentation jsx/jsxe artifacts are removed during prebuild and blocked from Vite/lint processing"
+}

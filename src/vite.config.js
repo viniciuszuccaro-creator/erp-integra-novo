@@ -175,6 +175,7 @@ export default defineConfig({
         '**/rhf_zod_report*',
         '**/UnidadesDeMedida*',
         '**/*.md.jsx',
+        '**/*.md.jsxe',
         '**/*.txt.jsx',
         '**/*.rst.jsx',
         '**/*.adoc.jsx',

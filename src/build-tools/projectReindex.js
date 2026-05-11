@@ -8,6 +8,7 @@ const INDEX_MARKER_FILE = '.base44-reindex-proof.json';
 const WATCH_DIRS = ['src/components', 'components'];
 const BLOCKED_PATTERN = /(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|rhf_zod_report|UnidadesDeMedida).*\.(md|txt|rst|adoc|json|config|yaml|yml|jsx|jsxe|js|ts|tsx)$/i;
 const MIRROR_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i;
+const TEXT_DOC_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml|jsxe)$/i;
 
 function collectBlockedArtifacts(rootDir = '.') {
   const root = path.resolve(rootDir);
@@ -29,7 +30,7 @@ function collectBlockedArtifacts(rootDir = '.') {
 
       if (!entry.isFile()) continue;
       const fileName = relativePath.split('/').pop() || '';
-      if (BLOCKED_PATTERN.test(fileName) || MIRROR_PATTERN.test(fileName)) found.push(relativePath);
+      if (BLOCKED_PATTERN.test(fileName) || MIRROR_PATTERN.test(fileName) || TEXT_DOC_PATTERN.test(fileName)) found.push(relativePath);
     }
   };
 

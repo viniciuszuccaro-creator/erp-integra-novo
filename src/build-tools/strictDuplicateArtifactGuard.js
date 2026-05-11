@@ -44,8 +44,8 @@ function scanAndNeutralize(root, dir, changed) {
     if (!entry.isFile() || !shouldNeutralize(relativePath)) continue;
 
     try {
-      fs.rmSync(fullPath, { recursive: true, force: true });
-      changed.push(`${relativePath}::removed`);
+      fs.writeFileSync(fullPath, 'export default null;\n');
+      changed.push(`${relativePath}::neutralized`);
     } catch {}
   }
 }

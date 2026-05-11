@@ -24,8 +24,8 @@ function neutralizeIfBlocked(root, filePath, removedFiles) {
   if (!blocked) return false;
 
   try {
-    fs.rmSync(filePath, { force: true, recursive: true });
-    removedFiles.push(relativePath);
+    fs.writeFileSync(filePath, 'export default null;\n');
+    removedFiles.push(`${relativePath}::neutralized`);
     return true;
   } catch {
     return false;
@@ -56,8 +56,8 @@ function cleanSourceDirectories(root) {
         const fileName = relativePath.split('/').pop() || '';
         const extension = path.extname(fileName);
         if (VALID_CODE_EXTENSIONS.has(extension) && !VALID_CODE_SIGNATURE_PATTERN.test(fs.readFileSync(fullPath, 'utf8').slice(0, 2000))) {
-          fs.rmSync(fullPath, { force: true, recursive: true });
-          removedFiles.push(relativePath);
+          fs.writeFileSync(fullPath, 'export default null;\n');
+          removedFiles.push(`${relativePath}::neutralized`);
           continue;
         }
         neutralizeIfBlocked(root, fullPath, removedFiles);
@@ -90,8 +90,8 @@ function purgeGlobalDocumentationMirrors(root) {
       if (!entry.isFile()) continue;
       if (BLOCKED_MIRROR_PATTERN.test(relativePath) || /\.md\.jsx$/i.test(relativePath) || BLOCKED_DOC_PATTERN.test(relativePath)) {
         try {
-          fs.rmSync(fullPath, { force: true, recursive: true });
-          removedFiles.push(relativePath);
+          fs.writeFileSync(fullPath, 'export default null;\n');
+          removedFiles.push(`${relativePath}::neutralized`);
         } catch {}
       }
     }

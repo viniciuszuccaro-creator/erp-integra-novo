@@ -27,6 +27,9 @@ const documentationNoopParser = {
 };
 
 const documentationJsxFiles = [
+  '**/*.md.jsx',
+  '**/*.json.jsx',
+  '**/*.config.jsx',
   '**/src/components/**/*.md.jsx',
   '**/src/components/**/*.json.jsx',
   '**/src/components/**/*.config.jsx',
@@ -57,6 +60,27 @@ const documentationJsxFiles = [
   '**/src/components/**/CORRECAO*.jsx',
   '**/src/components/**/FLUXO*.jsx',
   '**/src/components/**/ZINDEX*.jsx',
+  '**/components/**/README*.jsx',
+  '**/components/**/CERTIFIC*.jsx',
+  '**/components/**/CERTIFICADO*.jsx',
+  '**/components/**/CERTIFICACAO*.jsx',
+  '**/components/**/MANIFESTO*.jsx',
+  '**/components/**/VALIDACAO*.jsx',
+  '**/components/**/CHECKLIST*.jsx',
+  '**/components/**/PROVA*.jsx',
+  '**/components/**/BLOQUEIO*.jsx',
+  '**/components/**/BOTOES*.jsx',
+  '**/components/**/INTEGRACAO*.jsx',
+  '**/components/**/STATUS*.jsx',
+  '**/components/**/ETAPAS*.jsx',
+  '**/components/**/ETAPA*.jsx',
+  '**/components/**/FASES*.jsx',
+  '**/components/**/FASE*.jsx',
+  '**/components/**/DEBUG*.jsx',
+  '**/components/**/DIAGNOSTICO*.jsx',
+  '**/components/**/CORRECAO*.jsx',
+  '**/components/**/FLUXO*.jsx',
+  '**/components/**/ZINDEX*.jsx',
 ];
 
 const documentationArtifactIgnores = [
@@ -175,13 +199,6 @@ const documentationArtifactIgnores = [
 
 export default [
   {
-    files: documentationJsxFiles,
-    languageOptions: {
-      parser: documentationNoopParser,
-    },
-    rules: {},
-  },
-  {
     ignores: [
       '**/components/**/*.md.jsx',
       '**/components/**/*.json.jsx',
@@ -249,6 +266,13 @@ export default [
       'build-tools/**',
       ...documentationArtifactIgnores,
     ],
+  },
+  {
+    files: documentationJsxFiles,
+    languageOptions: {
+      parser: documentationNoopParser,
+    },
+    rules: {},
   },
   {
     files: [

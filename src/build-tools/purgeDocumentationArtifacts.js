@@ -88,8 +88,8 @@ export function purgeTemporaryLogs(rootDir = '.') {
 
       if (entry.isFile() && TEMP_LOG_FILE_PATTERN.test(entry.name)) {
         try {
-          fs.unlinkSync(fullPath);
-          removedFiles.push(relativePath);
+          fs.writeFileSync(fullPath, 'export default null;\n');
+          removedFiles.push(`${relativePath}::neutralized`);
         } catch {}
       }
     }
@@ -128,8 +128,8 @@ export function purgeDocumentationArtifacts(rootDir = '.') {
 
       if (entry.isFile() && isBlockedDocumentationArtifact(relativePath)) {
         try {
-          fs.unlinkSync(fullPath);
-          removedFiles.push(relativePath);
+          fs.writeFileSync(fullPath, 'export default null;\n');
+          removedFiles.push(`${relativePath}::neutralized`);
         } catch {}
       }
     }

@@ -4,7 +4,7 @@ import path from 'path';
 import fs from 'node:fs';
 import { isDocumentationArtifactPath } from './src/components/lib/documentationBlockPolicy.js';
 
-const documentationArtifactFilePattern = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFICADO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|js|jsx|ts|tsx))?$/i;
+const documentationArtifactFilePattern = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|js|jsx|ts|tsx))?$/i;
 const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config)\.(js|jsx|ts|tsx)$/i;
 const textDocumentationPattern = /\.(md|txt|rst|adoc)$/i;
 const componentDocumentationMirrorPattern = /\/src\/components\/.*(\.md\.jsx|\.txt\.jsx|\.rst\.jsx|\.adoc\.jsx|\.json\.jsx|\.config\.jsx)$/i;
@@ -38,6 +38,9 @@ function blockDocumentation() {
           const filePath = path.join(dir, entry.name);
           if (entry.isDirectory()) {
             cleanup(filePath);
+            try {
+              if (fs.existsSync(filePath) && fs.readdirSync(filePath).length === 0) fs.rmdirSync(filePath);
+            } catch {}
             continue;
           }
           if (entry.isFile() && isBlockedPath(filePath)) fs.unlinkSync(filePath);
@@ -139,6 +142,10 @@ export default defineConfig({
         '**/INTEGRACAO*',
         '**/rhf_zod_report*',
         '**/UnidadesDeMedida*',
+        '**/*.md.jsx',
+        '**/*.txt.jsx',
+        '**/*.rst.jsx',
+        '**/*.adoc.jsx',
       ],
     },
   },

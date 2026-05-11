@@ -1,5 +1,5 @@
 export const DOCUMENTATION_ARTIFACT_PATTERNS = [
-  /(^|\/)(README|CERTIFICADO|CERTIFICACAO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA)[^/]*(\.(md|txt|rst|adoc|json|config|jsx|js|ts|tsx))?$/i,
+  /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO)[^/]*(\.(md|txt|rst|adoc|json|config|jsx|js|ts|tsx))?$/i,
   /\.(md|txt|rst|adoc|json|config)\.(js|jsx|ts|tsx)$/i,
   /\.(md|txt|rst|adoc)$/i,
   /(^|\/)components\/.*\.(md|txt|rst|adoc|json|config)\.jsx$/i,
@@ -15,7 +15,7 @@ export const DOCUMENTATION_BLOCK_POLICY = Object.freeze({
   purgeBuildCacheBeforeExecution: true,
   protectedDirectories: ['components', 'src/components'],
   ignoredExtensions: ['.md', '.txt', '.rst', '.adoc', '.json', '.config', '.md.jsx', '.txt.jsx', '.rst.jsx', '.adoc.jsx', '.json.jsx', '.config.jsx', '.md.js', '.json.js', '.config.js'],
-  blockedPrefixes: ['README', 'CERTIFICADO', 'CERTIFICACAO', 'MANIFESTO', 'VALIDACAO', 'CHECKLIST', 'PROVA', 'MIGRACAO', 'BLOQUEIO', 'DEBUG', 'DIAGNOSTICO', 'INTEGRACAO', 'RESUMO', 'CHANGELOG', 'ROADMAP', 'GUIA', 'STATUS', 'ETAPA', 'FASE', 'SISTEMA', 'BOTOES', 'CORRECAO'],
+  blockedPrefixes: ['README', 'CERTIFICADO', 'CERTIFICACAO', 'CERTIFIC', 'MANIFESTO', 'VALIDACAO', 'CHECKLIST', 'PROVA', 'MIGRACAO', 'BLOQUEIO', 'DEBUG', 'DIAGNOSTICO', 'INTEGRACAO', 'RESUMO', 'CHANGELOG', 'ROADMAP', 'GUIA', 'STATUS', 'ETAPA', 'FASE', 'SISTEMA', 'BOTOES', 'CORRECAO'],
   blockedAction: 'ignore_purge_and_never_generate',
 });
 

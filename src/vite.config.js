@@ -9,6 +9,7 @@ import { verifyChatbotComponents } from './build-tools/verifyChatbotComponents.j
 import { forceProjectReindex } from './build-tools/projectReindex.js';
 import { viteDefineConfig } from './build-tools/buildRuntimeConfig.js';
 import { runPrebuildIntegrityCheck } from './build-tools/prebuildIntegrityCheck.js';
+import { guardDocumentationArtifacts } from './build-tools/documentationGuard.js';
 
 const documentationArtifactFilePattern = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPAS|ETAPA|FASES|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|FLUXO|ZINDEX|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|yaml|yml|js|jsx|ts|tsx))?$/i;
 const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i;
@@ -56,28 +57,29 @@ function blockDocumentation() {
     name: 'block-documentation-artifacts',
     enforce: 'pre',
     buildStart() {
-      const cleanup = (dir) => {
-        if (!fs.existsSync(dir)) return;
-        for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-          const filePath = path.join(dir, entry.name);
-          if (entry.isDirectory()) {
-            cleanup(filePath);
-            try {
-              if (fs.existsSync(filePath) && fs.readdirSync(filePath).length === 0) fs.rmdirSync(filePath);
-            } catch {}
-            continue;
-          }
-          if (entry.isFile() && isBlockedPath(filePath)) neutralizeDocumentationFile(filePath);
-        }
-      };
-      runPrebuildIntegrityCheck(__dirname);
-      forceProjectReindex(__dirname);
-      runStableEnvironmentCheck(__dirname);
-      verifyChatbotComponents(__dirname);
-      purgeDocumentationArtifacts(__dirname);
-      cleanup(path.resolve(__dirname, 'src'));
-      cleanup(path.resolve(__dirname, 'components'));
-    },
+       guardDocumentationArtifacts(__dirname);
+       const cleanup = (dir) => {
+         if (!fs.existsSync(dir)) return;
+         for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+           const filePath = path.join(dir, entry.name);
+           if (entry.isDirectory()) {
+             cleanup(filePath);
+             try {
+               if (fs.existsSync(filePath) && fs.readdirSync(filePath).length === 0) fs.rmdirSync(filePath);
+             } catch {}
+             continue;
+           }
+           if (entry.isFile() && isBlockedPath(filePath)) neutralizeDocumentationFile(filePath);
+         }
+       };
+       runPrebuildIntegrityCheck(__dirname);
+       forceProjectReindex(__dirname);
+       runStableEnvironmentCheck(__dirname);
+       verifyChatbotComponents(__dirname);
+       purgeDocumentationArtifacts(__dirname);
+       cleanup(path.resolve(__dirname, 'src'));
+       cleanup(path.resolve(__dirname, 'components'));
+     },
     configureServer(server) {
       const purgeBuildCachesLocal = () => purgeBuildCaches(__dirname);
       const purgeDocumentationNow = () => {

@@ -9,6 +9,20 @@ const appFiles = [
   "src/**/*.{js,jsx,ts,tsx}",
 ];
 
+// Filtro negativo: BLOQUEIA tudo que vier de src/components/
+const blockedPaths = [
+  "src/components/**/*.md.jsx",
+  "src/components/**/*.md.js",
+  "src/components/**/*.json.jsx",
+  "src/components/**/*.json.js",
+  "src/components/**/*CERTIFICADO*.jsx",
+  "src/components/**/*README*.jsx",
+  "src/components/**/*CHECKLIST*.jsx",
+  "src/components/**/*ETAPA*.jsx",
+  "src/components/**/*FASE*.jsx",
+  "src/components/**/*MANIFESTO*.jsx",
+];
+
 const ignorePatterns = [
   "node_modules/**",
   "dist/**",
@@ -43,11 +57,11 @@ const ignorePatterns = [
 
 export default [
   {
-    ignores: ignorePatterns,
+    ignores: [...ignorePatterns, ...blockedPaths],
   },
   {
     files: appFiles,
-    ignores: ignorePatterns,
+    ignores: [...ignorePatterns, ...blockedPaths],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",

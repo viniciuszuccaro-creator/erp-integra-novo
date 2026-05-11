@@ -1,0 +1,30 @@
+# ABSOLUTE BAN — ESLint will not even try to parse these
+
+# All of src/components (Base44 injects artifacts there)
+src/components/
+
+# All build-tools
+src/build-tools/
+build-tools/
+
+# All markdown-jsx files
+**/*.md.jsx
+**/*.md.js
+
+# All json-jsx files  
+**/*.json.jsx
+**/*.json.js
+
+# Config files as JSX
+**/*.config.jsx
+**/*.config.js
+
+# Dependencies
+node_modules/
+dist/
+.vite/
+build/
+
+# IDE
+.next/
+.cache/

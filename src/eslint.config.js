@@ -4,20 +4,13 @@ import reactHooks from "eslint-plugin-react-hooks";
 
 export default [
   {
-    // Ignora ABSOLUTAMENTE TUDO por padrão
+    // BLOCK EVERYTHING first
     ignores: [
-      "**/*",
-      // Whitelist apenas código legítimo de app
-      "!src/pages/**/*.{js,jsx}",
-      "!src/lib/**/*.{js,jsx}",
-      "!src/api/**/*.{js,jsx}",
-      "!src/hooks/**/*.{js,jsx}",
-      "!src/utils/**/*.{js,jsx}",
-      "!App.jsx",
-      "!main.jsx",
+      "**",
     ],
   },
   {
+    // Then WHITELIST only the real app code
     files: [
       "App.jsx",
       "main.jsx",

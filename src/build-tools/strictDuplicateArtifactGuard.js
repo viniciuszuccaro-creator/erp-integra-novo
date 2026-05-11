@@ -44,8 +44,14 @@ function scanAndNeutralize(root, dir, changed) {
     if (!entry.isFile() || !shouldNeutralize(relativePath)) continue;
 
     try {
-      fs.writeFileSync(fullPath, 'export default null;\n');
-      changed.push(`${relativePath}::neutralized`);
+      const fileName = relativePath.split('/').pop() || '';
+      if (/\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i.test(fileName) || (DOC_NAME_PATTERN.test(fileName) && /\.(js|jsx|ts|tsx)$/i.test(fileName))) {
+        fs.writeFileSync(fullPath, fileName.includes('.json.') ? 'export default {};\n' : 'export default null;\n');
+        changed.push(`${relativePath}::neutralized-mirror`);
+      } else {
+        fs.writeFileSync(fullPath, 'export default null;\n');
+        changed.push(`${relativePath}::neutralized`);
+      }
     } catch {}
   }
 }

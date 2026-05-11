@@ -274,7 +274,7 @@ export default [
     ],
   },
   {
-    files: documentationJsxFiles,
+    files: ['**/components/**/*.{js,jsx,ts,tsx}', ...documentationJsxFiles],
     languageOptions: {
       parser: documentationNoopParser,
     },

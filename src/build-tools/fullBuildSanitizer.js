@@ -35,8 +35,13 @@ function removeBlockedArtifacts(dir, removed = []) {
       (/(^|\/)(src\/)?components\//i.test(relativePath) && blockedDocNamePattern.test(relativePath) && /\.(js|jsx|ts|tsx)$/i.test(relativePath))
     )) {
       try {
-        fs.writeFileSync(fullPath, 'export default null;\n');
-        removed.push(`${relativePath}::neutralized`);
+        if (/\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i.test(relativePath) || (blockedDocNamePattern.test(relativePath) && /\.(js|jsx|ts|tsx)$/i.test(relativePath))) {
+          fs.writeFileSync(fullPath, relativePath.includes('.json.') ? 'export default {};\n' : 'export default null;\n');
+          removed.push(`${relativePath}::neutralized-mirror`);
+        } else {
+          fs.writeFileSync(fullPath, 'export default null;\n');
+          removed.push(`${relativePath}::neutralized`);
+        }
       } catch {}
     }
   }

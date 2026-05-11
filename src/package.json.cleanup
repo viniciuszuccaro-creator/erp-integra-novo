@@ -1,9 +1,12 @@
-// Add these scripts to package.json if they don't exist:
 {
   "scripts": {
-    "clean-artifacts": "node -e \"import('./build-tools/finalArtifactBlocker.js').then(m => console.log('✅ Cleanup complete'))\"",
-    "prebuild": "npm run clean-artifacts",
-    "postbuild": "npm run clean-artifacts",
-    "predev": "npm run clean-artifacts"
+    "prebuild": "node build-tools/finalArtifactBlocker.js && npm run clean:artifacts",
+    "build": "vite build",
+    "postbuild": "node build-tools/finalArtifactBlocker.js && npm run clean:artifacts",
+    "predev": "npm run clean:artifacts",
+    "dev": "vite",
+    "clean:artifacts": "node -e \"const fs=require('fs');const path=require('path');const purge=d=>{try{fs.readdirSync(d,{withFileTypes:true}).forEach(e=>{const p=path.join(d,e.name);if(e.isDirectory()&&!['node_modules','.git','dist','.vite'].includes(e.name))purge(p);else if(e.isFile()&&/\\.(md|json)\\.jsx?$/.test(p)){try{fs.unlinkSync(p);console.log('🗑️',p)}catch(_){}}});}catch(_){}};purge('src');console.log('✅ Limpeza completa')\"",
+    "lint": "eslint --cache src/ --ignore-path .eslintignore",
+    "type-check": "tsc --noEmit"
   }
 }

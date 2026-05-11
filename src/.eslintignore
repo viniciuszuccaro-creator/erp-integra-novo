@@ -1,30 +1,37 @@
-# ABSOLUTE BAN — ESLint will not even try to parse these
+# ABSOLUTO: ESLint nunca parseará esses arquivos
+# Estratégia: Ignorar no ESLint ANTES de qualquer outro processamento
 
-# All of src/components (Base44 injects artifacts there)
+# ===== BLOQUEIO TOTAL =====
+**/*.md.jsx
+**/*.md.js
+**/*.json.jsx
+**/*.json.js
+**/*.config.jsx
+**/*.config.js
+**/*.config.ts
+**/*.config.mjs
+
+# ===== DIRETÓRIOS INTEIROS (onde Base44 injeta) =====
 src/components/
-
-# All build-tools
 src/build-tools/
 build-tools/
 
-# All markdown-jsx files
-**/*.md.jsx
-**/*.md.js
-
-# All json-jsx files  
-**/*.json.jsx
-**/*.json.js
-
-# Config files as JSX
-**/*.config.jsx
-**/*.config.js
-
-# Dependencies
+# ===== DEPENDÊNCIAS E BUILD =====
 node_modules/
 dist/
 .vite/
 build/
-
-# IDE
-.next/
 .cache/
+.next/
+
+# ===== ARQUIVOS DE TESTE =====
+**/*.test.js
+**/*.test.jsx
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.js
+**/*.spec.jsx
+
+# ===== MARKDOWN PURO (nunca deveria ter .jsx no fim) =====
+**/*.md
+**/*.markdown

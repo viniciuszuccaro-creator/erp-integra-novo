@@ -12,7 +12,7 @@ const FORBIDDEN_PATTERNS = [
 
 const isForbidden = (filePath) => FORBIDDEN_PATTERNS.some(p => p.test(filePath))
 
-// Limpeza agressiva de artefatos
+// Limpeza agressiva de artefatos (roda a cada mudança)
 const purgeArtifacts = (dir) => {
   try {
     const entries = fs.readdirSync(dir, { withFileTypes: true })
@@ -23,12 +23,15 @@ const purgeArtifacts = (dir) => {
       } else if (entry.isFile() && isForbidden(fullPath)) {
         try {
           fs.unlinkSync(fullPath)
-          console.warn(`⚠️  PURGED: ${path.relative(process.cwd(), fullPath)}`)
+          console.warn(`🧹 ELIMINADO PERMANENTEMENTE: ${path.relative(process.cwd(), fullPath)}`)
         } catch (_) {}
       }
     })
   } catch (e) {}
 }
+
+// Limpa a cada reinicialização
+purgeArtifacts(path.resolve('src'))
 
 export default defineConfig({
   plugins: [
@@ -36,31 +39,42 @@ export default defineConfig({
     {
       name: 'vite-anti-artifact-plugin',
       apply: 'serve',
+      
+      // PRÉ-INICIALIZAÇÃO: Limpar ANTES de qualquer coisa
       config() {
-        // Limpeza em serve (dev mode)
         purgeArtifacts(path.resolve('src'))
+        console.log('✅ Limpeza de artefatos completada no startup')
       },
+      
+      // DURANTE RESOLUÇÃO: Bloquear artefatos
       resolveId(id) {
-        // Bloqueia resolução de artefatos
         if (isForbidden(id)) {
-          throw new Error(`FORBIDDEN FILE (artifact): ${id}`)
+          throw new Error(`[FATAL] BLOQUEADO: ${id}`)
         }
       },
+      
+      // DURANTE TRANSFORMAÇÃO: Rejeitar se escaparem
       transform(code, id) {
-        // Rejeita se conseguir passar (safety net)
         if (isForbidden(id)) {
-          throw new Error(`FORBIDDEN FILE (transform): ${id}`)
+          throw new Error(`[FATAL] BLOCKED-TRANSFORM: ${id}`)
         }
       },
+      
+      // DURANTE HMR: Deletar e recusar
       handleHotUpdate({ file, server }) {
-        // Purga se arquivo questionável foi criado
         if (isForbidden(file)) {
           try {
             fs.unlinkSync(file)
-            console.warn(`🔥 AUTO-DELETED (HMR): ${path.relative(process.cwd(), file)}`)
+            console.warn(`🗑️ DELETADO NO HMR: ${path.relative(process.cwd(), file)}`)
           } catch (_) {}
           return []
         }
+      },
+      
+      // APÓS BUILD: Varredura final
+      writeBundle() {
+        purgeArtifacts(path.resolve('src'))
+        console.log('✅ Limpeza pós-build completada')
       }
     },
   ],

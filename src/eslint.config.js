@@ -3,30 +3,47 @@ import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 
 export default [
+  // CAMADA 1: BLOQUEIO ABSOLUTO — ignora TUDO por padrão
   {
-    // BLOCK EVERYTHING first
     ignores: [
-      "**",
+      "**/*",
+      "build-tools/**",
+      "src/build-tools/**",
+      "**/*.md.jsx",
+      "**/*.md.js",
+      "**/*.json.jsx",
+      "**/*.json.js",
+      "**/*.config.jsx",
+      "src/components/**/*",
     ],
   },
+  
+  // CAMADA 2: WHITELIST EXPLÍCITA — apenas código legítimo da app
   {
-    // Then WHITELIST only the real app code
     files: [
-      "App.jsx",
-      "main.jsx",
-      "src/pages/**/*.{js,jsx}",
-      "src/lib/**/*.{js,jsx}",
-      "src/api/**/*.{js,jsx}",
-      "src/hooks/**/*.{js,jsx}",
-      "src/utils/**/*.{js,jsx}",
+      "src/App.jsx",
+      "src/main.jsx",
+      "src/index.jsx",
+      "src/pages/**/*.{js,jsx,ts,tsx}",
+      "src/lib/**/*.{js,jsx,ts,tsx}",
+      "src/api/**/*.{js,jsx,ts,tsx}",
+      "src/hooks/**/*.{js,jsx,ts,tsx}",
+      "src/utils/**/*.{js,jsx,ts,tsx}",
     ],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
       parserOptions: { ecmaFeatures: { jsx: true } },
-      globals: { ...globals.browser, ...globals.node, React: "readonly" },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        React: "readonly",
+      },
     },
-    plugins: { react, "react-hooks": reactHooks },
+    plugins: {
+      react,
+      "react-hooks": reactHooks,
+    },
     rules: {
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",

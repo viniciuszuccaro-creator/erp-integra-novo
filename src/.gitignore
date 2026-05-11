@@ -1,76 +1,50 @@
-# ANTI-ARTIFACT POLICY
-# ======================
-# BLOQUEIO ABSOLUTO de documentação + config files com extensões JS
-*.md.js
-*.md.jsx
-*.md.ts
-*.md.tsx
-*.json.js
-*.json.jsx
-*.json.ts
-*.json.tsx
-*.config.js
-*.config.jsx
-*.config.ts
-*.config.tsx
-*.yml.js
-*.yaml.js
-*.rst.js
-*.adoc.js
+# NUNCA VERSIONAR ARTEFATOS
+# Se aparecerem, são bugs da plataforma — não devem ser commitados
 
-# Nomes específicos de artefatos problemáticos
-src/components/**/CERTIFICADO*.{js,jsx}
-src/components/**/CERTIFICACAO*.{js,jsx}
-src/components/**/MANIFESTO*.{js,jsx}
-src/components/**/VALIDACAO*.{js,jsx}
-src/components/**/CHECKLIST*.{js,jsx}
-src/components/**/PROVA*.{js,jsx}
-src/components/**/MIGRACAO*.{js,jsx}
-src/components/**/BLOQUEIO*.{js,jsx}
-src/components/**/DEBUG*.{js,jsx}
-src/components/**/DIAGNOSTICO*.{js,jsx}
-src/components/**/INTEGRACAO*.{js,jsx}
-src/components/**/RESUMO*.{js,jsx}
-src/components/**/CHANGELOG*.{js,jsx}
-src/components/**/ROADMAP*.{js,jsx}
-src/components/**/GUIA*.{js,jsx}
-src/components/**/DOCS*.{js,jsx}
-src/components/**/README*.{js,jsx}
-src/components/**/STATUS*.{js,jsx}
-src/components/**/ETAPA*.{js,jsx}
-src/components/**/FASE*.{js,jsx}
-src/components/**/SISTEMA*.{js,jsx}
-src/components/**/BOTOES*.{js,jsx}
-src/components/**/CORRECAO*.{js,jsx}
-src/components/**/RELATORIO*.{js,jsx}
-src/components/**/REPORT*.{js,jsx}
-src/components/**/MANUAL*.{js,jsx}
-src/components/**/VALIDADOR*.{js,jsx}
-src/components/**/FLUXO*.{js,jsx}
-src/components/**/ZINDEX*.{js,jsx}
-src/components/**/rhf_zod_report*.{js,jsx}
-src/components/**/UnidadesDeMedida*.{js,jsx}
+# ===== ARTEFATOS PERIGOSOS =====
+**/*.md.jsx
+**/*.md.js
+**/*.json.jsx
+**/*.json.js
+**/*.config.jsx
+**/*.config.js
 
-# Desenvolvimento
+# ===== DIRETÓRIOS COM INJEÇÕES =====
+src/components/**/*.md.jsx
+src/components/**/*.md.js
+src/build-tools/
+build-tools/
+
+# ===== PADRÃO ABSOLUTO =====
+# Qualquer arquivo .jsx/.js que deveria ser .md ou .json
+src/**/*.md.{jsx,js}
+src/**/*.json.{jsx,js}
+
+# ===== DEPENDÊNCIAS =====
 node_modules/
+.npm
+package-lock.json
+yarn.lock
+
+# ===== BUILD =====
 dist/
+build/
+.next/
+out/
+
+# ===== DESENVOLVIMENTO =====
 .vite/
 .env.local
 .env.*.local
-
-# IDE
-.vscode/
-.idea/
+.DS_Store
+*.log
 *.swp
 *.swo
 *~
-.DS_Store
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Build artifacts
-*.map
-.cache/
+# ===== IDE =====
+.vscode/
+.idea/
+*.iml
+.eslintcache
+.prettierignore

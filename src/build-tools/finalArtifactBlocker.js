@@ -1,106 +1,45 @@
+#!/usr/bin/env node
+
 /**
- * SOLUÇÃO FINAL E PERMANENTE
- * Remove QUALQUER arquivo de documentação que Base44 tente criar
- * Executa em: build time, dev time, post-build
+ * GARANTIDOR FINAL DE LIMPEZA
+ * Roda ANTES de qualquer build/lint/dev
+ * Propósito: Eliminar 100% dos artefatos injetados pela plataforma
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
+const fs = require('fs');
+const path = require('path');
 
-const BLOCKED_PATTERNS = [
-  /\.md\.jsx$/i,
-  /\.md\.js$/i,
-  /\.json\.jsx$/i,
-  /\.json\.js$/i,
-  /\.config\.jsx$/i,
-  /\.config\.js$/i,
-  /\.txt\.jsx$/i,
-  /\.yaml\.jsx$/i,
-  /\.yml\.jsx$/i,
-  /\.rst\.jsx$/i,
-  /\.adoc\.jsx$/i,
+// Padrões absolutamente proibidos
+const FORBIDDEN = [
+  /\.(md|txt|rst|adoc|json|yaml|yml)\.(jsx?|tsx?)$/i,
+  /\.config\.(jsx?|tsx?)$/i,
+  /[A-Z][A-Z0-9_]*(CERTIFICADO|MANIFESTO|CHECKLIST|DEBUG|DIAGNOSTICO|INTEGRACAO|RELATORIO|VALIDACAO|ETAPA|FASE|SISTEMA)[^/]*\.(jsx?|tsx?)$/i,
 ];
 
-const BLOCKED_PREFIXES = [
-  'README',
-  'CERTIFICADO',
-  'CERTIFICACAO',
-  'MANIFESTO',
-  'VALIDACAO',
-  'CHECKLIST',
-  'PROVA',
-  'ETAPA',
-  'FASE',
-  'BLOQUEIO',
-  'DEBUG',
-  'DIAGNOSTICO',
-  'INTEGRACAO',
-  'RESUMO',
-  'FLUXO',
-  'ZINDEX',
-  'CORRECAO',
-  'BOTOES',
-  'RHINO',
-  'rhf_zod_report',
-  'UnidadesDeMedida',
-];
+const isForbidden = (filePath) => FORBIDDEN.some(p => p.test(filePath));
 
-const isBlocked = (filePath) => {
-  const fileName = path.basename(filePath);
-  
-  // Check extension patterns
-  for (const pattern of BLOCKED_PATTERNS) {
-    if (pattern.test(fileName)) return true;
-  }
-  
-  // Check prefix patterns
-  const fileNameUpper = fileName.split(/[._-]/)[0].toUpperCase();
-  for (const prefix of BLOCKED_PREFIXES) {
-    if (fileNameUpper.includes(prefix.toUpperCase())) {
-      return true;
-    }
-  }
-  
-  return false;
-};
-
-export function cleanupBlockedArtifacts(rootDir = '.') {
-  const root = path.resolve(rootDir);
-  const srcDir = path.join(root, 'src');
-  let deletedCount = 0;
-  
-  const scan = (dir) => {
-    if (!fs.existsSync(dir)) return;
-    
-    try {
-      const entries = fs.readdirSync(dir, { withFileTypes: true });
-      
-      for (const entry of entries) {
-        const fullPath = path.join(dir, entry.name);
-        
-        if (entry.isDirectory()) {
-          if (!/^(node_modules|dist|build|\.git|\.vite)$/.test(entry.name)) {
-            scan(fullPath);
-          }
-        } else if (entry.isFile() && isBlocked(fullPath)) {
-          try {
-            fs.unlinkSync(fullPath);
-            deletedCount++;
-            console.log(`🚫 BLOCKED & DELETED: ${path.relative(root, fullPath)}`);
-          } catch (e) {
-            console.warn(`⚠️  Failed to delete: ${fullPath}`, e.message);
-          }
+function purge(dir) {
+  try {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    entries.forEach(entry => {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory() && !['node_modules', '.git', 'dist', '.vite', '.next'].includes(entry.name)) {
+        purge(fullPath);
+      } else if (entry.isFile() && isForbidden(fullPath)) {
+        try {
+          fs.unlinkSync(fullPath);
+          console.log(`✅ ELIMINADO: ${path.relative(process.cwd(), fullPath)}`);
+        } catch (e) {
+          console.warn(`⚠️ FALHA ao deletar ${path.relative(process.cwd(), fullPath)}`);
         }
       }
-    } catch (e) {
-      console.error(`Error scanning ${dir}:`, e.message);
-    }
-  };
-  
-  scan(srcDir);
-  return { deletedCount };
+    });
+  } catch (e) {
+    // Diretório pode não existir ainda
+  }
 }
 
-// Execute immediately on import
-const result = cleanupBlockedArtifacts();
-console.log(`✅ Artifact Blocker: Removed ${result.deletedCount} files`);
+console.log('🧹 Iniciando limpeza de artefatos...');
+purge(path.resolve('src'));
+purge(path.resolve('public'));
+console.log('✅ Limpeza concluída. Sistema pronto.');

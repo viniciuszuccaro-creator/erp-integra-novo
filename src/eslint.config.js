@@ -4,7 +4,7 @@ import reactHooks from "eslint-plugin-react-hooks";
 
 export default [
   {
-    // IGNORAR TUDO exceto os arquivos de rota/app principal
+    // Ignorar TUDO — depois incluímos apenas o que realmente precisa de lint
     ignores: [
       "**/*",
       "!src/pages/**/*.{js,jsx}",
@@ -14,16 +14,12 @@ export default [
       "!src/utils/**/*.{js,jsx}",
       "!App.jsx",
       "!main.jsx",
-      "!src/App.jsx",
-      "!src/main.jsx",
     ],
   },
   {
     files: [
       "App.jsx",
       "main.jsx",
-      "src/App.jsx",
-      "src/main.jsx",
       "src/pages/**/*.{js,jsx}",
       "src/lib/**/*.{js,jsx}",
       "src/api/**/*.{js,jsx}",
@@ -33,20 +29,10 @@ export default [
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
-      parserOptions: {
-        ecmaFeatures: { jsx: true },
-      },
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-        React: "readonly",
-        ReactDOM: "readonly",
-      },
+      parserOptions: { ecmaFeatures: { jsx: true } },
+      globals: { ...globals.browser, ...globals.node, React: "readonly" },
     },
-    plugins: {
-      react,
-      "react-hooks": reactHooks,
-    },
+    plugins: { react, "react-hooks": reactHooks },
     rules: {
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",

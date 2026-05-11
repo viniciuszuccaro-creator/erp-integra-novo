@@ -14,8 +14,9 @@ export const DOCUMENTATION_BLOCK_POLICY = Object.freeze({
   blockDocumentationGenerationInComponents: true,
   purgeBuildCacheBeforeExecution: true,
   protectedDirectories: ['components', 'src/components'],
-  ignoredExtensions: ['.md', '.txt', '.rst', '.adoc', '.json', '.config', '.md.jsx', '.txt.jsx', '.rst.jsx', '.adoc.jsx', '.json.jsx', '.config.jsx'],
-  blockedAction: 'ignore_and_purge',
+  ignoredExtensions: ['.md', '.txt', '.rst', '.adoc', '.json', '.config', '.md.jsx', '.txt.jsx', '.rst.jsx', '.adoc.jsx', '.json.jsx', '.config.jsx', '.md.js', '.json.js', '.config.js'],
+  blockedPrefixes: ['README', 'CERTIFICADO', 'CERTIFICACAO', 'MANIFESTO', 'VALIDACAO', 'CHECKLIST', 'PROVA', 'MIGRACAO', 'BLOQUEIO', 'DEBUG', 'DIAGNOSTICO', 'INTEGRACAO', 'RESUMO', 'CHANGELOG', 'ROADMAP', 'GUIA', 'STATUS', 'ETAPA', 'FASE', 'SISTEMA', 'BOTOES', 'CORRECAO'],
+  blockedAction: 'ignore_purge_and_never_generate',
 });
 
 export const isDocumentationArtifact = (value = '') => {
@@ -24,7 +25,9 @@ export const isDocumentationArtifact = (value = '') => {
 };
 
 export const isExecutableImprovementItem = (item = {}) => (
-  ![item.titulo, item.descricao, item.modulo, item.file_path, item.path, item.functionName]
+  item.tipo_tarefa !== 'documentacao' &&
+  item.tipo !== 'Documentação' &&
+  ![item.titulo, item.descricao, item.modulo, item.file_path, item.path, item.functionName, item.output_path]
     .some((value) => isDocumentationArtifact(value))
 );
 
@@ -47,5 +50,7 @@ export const buildImprovementExecutionPayload = (origem) => ({
   modo_estrito_documentacao: DOCUMENTATION_BLOCK_POLICY.strictMode,
   bloquear_componentes_documentacao: DOCUMENTATION_BLOCK_POLICY.protectedDirectories,
   acao_bloqueio_documentacao: DOCUMENTATION_BLOCK_POLICY.blockedAction,
+  prefixos_bloqueados: DOCUMENTATION_BLOCK_POLICY.blockedPrefixes,
   extensoes_ignoradas: DOCUMENTATION_BLOCK_POLICY.ignoredExtensions,
+  permitir_criacao_documentacao_componentes: false,
 });

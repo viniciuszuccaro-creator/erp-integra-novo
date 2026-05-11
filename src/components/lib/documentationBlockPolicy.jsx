@@ -1,6 +1,8 @@
 export const DOCUMENTATION_FILE_NAME_PATTERN = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|js|jsx|ts|tsx))?$/i;
 export const DOCUMENTATION_MIRROR_PATTERN = /\.(md|txt|rst|adoc|json|config)\.(js|jsx|ts|tsx)$/i;
 export const TEXT_DOCUMENTATION_PATTERN = /\.(md|txt|rst|adoc)$/i;
+export const COMPONENTS_DIRECTORY_PATTERN = /(^|\/)src\/components\/|(^|\/)components\//i;
+export const BUILD_CACHE_DIRS = ['node_modules/.vite', 'node_modules/.cache', 'dist/.vite', '.vite', '.eslintcache', 'build/.vite'];
 
 export function isDocumentationArtifactPath(value = '') {
   const normalized = String(value || '').replace(/\\/g, '/');
@@ -12,10 +14,19 @@ export function isDocumentationArtifactPath(value = '') {
   );
 }
 
+export function shouldBlockComponentDocumentationPath(value = '') {
+  const normalized = String(value || '').replace(/\\/g, '/');
+  return COMPONENTS_DIRECTORY_PATTERN.test(normalized) && isDocumentationArtifactPath(normalized);
+}
+
 export const DOCUMENTATION_BLOCK_POLICY = Object.freeze({
   strictMode: true,
   ignoredDuringImprovementPlan: true,
+  autoRunCriticalTasksOnly: true,
   blockComponentDocumentationGeneration: true,
+  blockDocumentationMirrors: true,
   purgeBuildCache: true,
   protectedDirectories: ['src/components', 'components'],
+  ignoredExtensions: ['.md', '.txt', '.rst', '.adoc', '.json.jsx', '.config.jsx', '.md.jsx', '.txt.jsx', '.rst.jsx', '.adoc.jsx'],
+  buildCacheDirs: BUILD_CACHE_DIRS,
 });

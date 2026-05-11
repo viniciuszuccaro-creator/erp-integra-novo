@@ -4,6 +4,17 @@ build/
 .DS_Store
 
 # Artefatos de documentação espelhados que não devem entrar no build
+.vite/
+.eslintcache
+node_modules/.vite/
+node_modules/.cache/
+src/**/*.md
+src/**/*.txt
+src/**/*.rst
+src/**/*.adoc
+src/**/*.md.*
+src/**/*.json.*
+src/**/*.config.*
 src/**/*.md.jsx
 src/**/*.json.jsx
 src/**/*.config.jsx

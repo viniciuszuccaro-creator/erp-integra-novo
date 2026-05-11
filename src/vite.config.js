@@ -9,7 +9,8 @@ const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config)\.(js|jsx|
 const textDocumentationPattern = /\.(md|txt|rst|adoc)$/i;
 const componentDocumentationMirrorPattern = /\/src\/components\/.*(\.md\.jsx|\.txt\.jsx|\.rst\.jsx|\.adoc\.jsx|\.json\.jsx|\.config\.jsx)$/i;
 const buildCacheDirs = ['node_modules/.vite', 'node_modules/.cache', 'dist/.vite', '.vite', '.eslintcache', 'build/.vite'];
-const blockedComponentDocExtensions = ['.md.jsx', '.txt.jsx', '.rst.jsx', '.adoc.jsx', '.json.jsx', '.config.jsx'];
+const blockedComponentDocExtensions = ['.md', '.txt', '.rst', '.adoc', '.md.jsx', '.txt.jsx', '.rst.jsx', '.adoc.jsx', '.json.jsx', '.config.jsx', '.md.js', '.json.js', '.config.js'];
+const blockedComponentDocPrefixes = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|rhf_zod_report|UnidadesDeMedida)/i;
 
 function blockDocumentation() {
   const isBlockedPath = (input = '') => {
@@ -22,7 +23,8 @@ function blockDocumentation() {
       textDocumentationPattern.test(fileName) ||
       documentationExtensionPattern.test(fileName) ||
       componentDocumentationMirrorPattern.test(normalized) ||
-      documentationArtifactFilePattern.test(fileName)
+      documentationArtifactFilePattern.test(fileName) ||
+      blockedComponentDocPrefixes.test(fileName)
     );
   };
 
@@ -57,7 +59,7 @@ function blockDocumentation() {
       server.watcher.on('add', blockFile);
       server.watcher.on('change', blockFile);
       server.watcher.on('unlink', (filePath) => {
-        if (blockedComponentDocExtensions.some((ext) => String(filePath).endsWith(ext))) {
+        if (blockedComponentDocExtensions.some((ext) => String(filePath).endsWith(ext)) || blockedComponentDocPrefixes.test(String(filePath).split(/[\\/]/).pop() || '')) {
           buildCacheDirs.forEach((dir) => {
             try { fs.rmSync(path.resolve(__dirname, dir), { recursive: true, force: true }); } catch {}
           });

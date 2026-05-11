@@ -1,33 +1,8 @@
-import fs from "node:fs";
-import path from "node:path";
+import { purgeDocumentationArtifacts } from './build-tools/purgeDocumentationArtifacts.js';
 
-const documentationArtifactFilePattern = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|js|jsx|ts|tsx))?$/i;
+purgeDocumentationArtifacts('.');
+
 const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config)\.(js|jsx|ts|tsx)$/i;
-const textDocumentationPattern = /\.(md|txt|rst|adoc)$/i;
-
-const removeDocumentationArtifacts = (dir) => {
-  if (!fs.existsSync(dir)) return;
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const filePath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      removeDocumentationArtifacts(filePath);
-      continue;
-    }
-    const normalized = filePath.replace(/\\/g, '/');
-    const fileName = normalized.split('/').pop() || '';
-    const shouldRemove = normalized.includes('/src/components/') && (
-      textDocumentationPattern.test(fileName) ||
-      documentationExtensionPattern.test(fileName) ||
-      documentationArtifactFilePattern.test(fileName)
-    );
-    if (shouldRemove) fs.rmSync(filePath, { force: true });
-  }
-};
-
-['node_modules/.vite', 'node_modules/.cache', 'dist/.vite', '.vite', '.eslintcache', 'build/.vite'].forEach((dir) => {
-  try { fs.rmSync(path.resolve(process.cwd(), dir), { recursive: true, force: true }); } catch {}
-});
-removeDocumentationArtifacts(path.resolve(process.cwd(), 'src/components'));
 
 const documentationMirrorPatterns = [
   "src/components/**/*.md.jsx",
@@ -183,6 +158,8 @@ export default [
       "**/CORRECAO*",
       "**/rhf_zod_report*",
       "**/UnidadesDeMedida*",
+      "src/build-tools/**",
+      "build-tools/**",
       "dist/**",
       "build/**",
       "node_modules/**",

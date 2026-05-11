@@ -26,7 +26,13 @@ export const isDocumentationArtifact = (value = '') => {
 
 export const isExecutableImprovementItem = (item = {}) => (
   item.tipo_tarefa !== 'documentacao' &&
+  item.tipo_tarefa !== 'documentação' &&
   item.tipo !== 'Documentação' &&
+  item.tipo !== 'documentacao' &&
+  item.tipo !== 'documentação' &&
+  item.categoria !== 'Documentação' &&
+  item.categoria !== 'documentacao' &&
+  item.categoria !== 'documentação' &&
   ![item.titulo, item.descricao, item.modulo, item.file_path, item.path, item.functionName, item.output_path]
     .some((value) => isDocumentationArtifact(value))
 );

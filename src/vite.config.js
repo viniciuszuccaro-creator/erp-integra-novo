@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import fs from 'node:fs';
 import { isDocumentationArtifactPath } from './src/components/lib/documentationBlockPolicy.js';
+import { isBlockedDocumentationArtifact, purgeBuildCaches, purgeDocumentationArtifacts } from './build-tools/purgeDocumentationArtifacts.js';
 
 const documentationArtifactFilePattern = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|js|jsx|ts|tsx))?$/i;
 const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config)\.(js|jsx|ts|tsx)$/i;
@@ -19,6 +20,7 @@ function blockDocumentation() {
     const isInSrc = normalized.includes('/src/') || normalized.startsWith('src/');
 
     return isInSrc && (
+      isBlockedDocumentationArtifact(normalized) ||
       isDocumentationArtifactPath(normalized) ||
       textDocumentationPattern.test(fileName) ||
       documentationExtensionPattern.test(fileName) ||
@@ -46,29 +48,23 @@ function blockDocumentation() {
           if (entry.isFile() && isBlockedPath(filePath)) fs.unlinkSync(filePath);
         }
       };
-      buildCacheDirs.forEach((dir) => {
-        try { fs.rmSync(path.resolve(__dirname, dir), { recursive: true, force: true }); } catch {}
-      });
+      purgeDocumentationArtifacts(__dirname);
       cleanup(path.resolve(__dirname, 'src'));
     },
     configureServer(server) {
-      const purgeBuildCaches = () => buildCacheDirs.forEach((dir) => {
-        try { fs.rmSync(path.resolve(__dirname, dir), { recursive: true, force: true }); } catch {}
-      });
+      const purgeBuildCachesLocal = () => purgeBuildCaches(__dirname);
       const blockFile = async (filePath) => {
         if (!isBlockedPath(filePath)) return;
         console.log('🚫 Documentação bloqueada: arquivo removido antes de virar código');
         try { server.watcher.unwatch(filePath); } catch {}
         try { if (fs.existsSync(filePath)) fs.unlinkSync(filePath); } catch {}
-        purgeBuildCaches();
+        purgeBuildCachesLocal();
       };
       server.watcher.on('add', blockFile);
       server.watcher.on('change', blockFile);
       server.watcher.on('unlink', (filePath) => {
         if (blockedComponentDocExtensions.some((ext) => String(filePath).endsWith(ext)) || blockedComponentDocPrefixes.test(String(filePath).split(/[\\/]/).pop() || '')) {
-          buildCacheDirs.forEach((dir) => {
-            try { fs.rmSync(path.resolve(__dirname, dir), { recursive: true, force: true }); } catch {}
-          });
+          purgeBuildCachesLocal();
         }
       });
     },

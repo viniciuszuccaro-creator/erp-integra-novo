@@ -7,6 +7,7 @@ runStrictDuplicateArtifactGuard('.');
 runPrebuildIntegrityCheck('.');
 runStableEnvironmentCheck('.');
 runStrictDuplicateArtifactGuard('.');
+// Regra-Mãe técnica: documentação espelhada nunca deve ser tratada como código executável.
 
 const documentationNoopParser = {
   parseForESLint() {
@@ -200,6 +201,8 @@ const documentationArtifactIgnores = [
 export default [
   {
     ignores: [
+      'src/components/**',
+      'components/**',
       '**/src/components/**/*.{md,txt,rst,adoc,yaml,yml}',
       '**/src/components/**/*.{md,txt,rst,adoc,json,config,yaml,yml}.{js,jsx,ts,tsx}',
       '**/src/components/**/{README,CERTIFICADO,CERTIFICACAO,CERTIFIC,MANIFESTO,VALIDACAO,CHECKLIST,PROVA,MIGRACAO,BLOQUEIO,DEBUG,DIAGNOSTICO,INTEGRACAO,RESUMO,CHANGELOG,ROADMAP,GUIA,DOC,STATUS,ETAPA,ETAPAS,FASE,FASES,SISTEMA,BOTOES,CORRECAO,RELATORIO,REPORT,MANUAL,VALIDADOR,FLUXO,ZINDEX}*',

@@ -4,7 +4,7 @@ import path from 'node:path';
 const TARGET_DIRS = ['src/components', 'components'];
 const SKIP_DIRS = /^(node_modules|dist|build|\.git|\.vite|coverage|tmp|temp|logs)$/i;
 const ARTIFACT_FILE_PATTERN = /(\.md\.jsx|\.json\.jsx|\.config\.jsx|\.txt\.jsx|\.rst\.jsx|\.adoc\.jsx|\.jsxe)$/i;
-const ARTIFACT_NAME_PATTERN = /(^|\/)(README|CERTIFIC|CERTIFICADO|CERTIFICACAO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|BLOQUEIO|BOTOES|INTEGRACAO|STATUS|ETAPA|ETAPAS|FASE|DEBUG|DIAGNOSTICO|CORRECAO|FLUXO|RESUMO|GUIA|ROADMAP|SISTEMA|UnidadesDeMedida|rhf_zod_report)[^/]*\.jsx$/i;
+const ARTIFACT_NAME_PATTERN = /(^|\/)(README|CERTIFIC|CERTIFICADO|CERTIFICACAO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|BOTOES|INTEGRACAO|STATUS|ETAPAS|ETAPA|FASES|FASE|DEBUG|DIAGNOSTICO|CORRECAO|FLUXO|ZINDEX|RESUMO|GUIA|ROADMAP|SISTEMA|UnidadesDeMedida|rhf_zod_report)[^/]*\.jsx$/i;
 
 function normalize(value = '') {
   return String(value || '').replace(/\\/g, '/');

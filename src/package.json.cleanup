@@ -1,0 +1,9 @@
+// Add these scripts to package.json if they don't exist:
+{
+  "scripts": {
+    "clean-artifacts": "node -e \"import('./build-tools/finalArtifactBlocker.js').then(m => console.log('✅ Cleanup complete'))\"",
+    "prebuild": "npm run clean-artifacts",
+    "postbuild": "npm run clean-artifacts",
+    "predev": "npm run clean-artifacts"
+  }
+}

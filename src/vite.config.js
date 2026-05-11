@@ -138,6 +138,10 @@ function blockDocumentation() {
 export default defineConfig({
   define: viteDefineConfig,
   plugins: [blockDocumentation(), react()],
+  // Force delete build caches every time
+  optimizeDeps: {
+    force: true,
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

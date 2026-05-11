@@ -1,39 +1,69 @@
+# Dependencies
 node_modules/
-dist/
-build/
-.DS_Store
+/.pnp
+.pnp.js
 
-# Artefatos de documentação espelhados que não devem entrar no build
-.vite/
+# Testing
+/coverage
+
+# Production
+/build
+/dist
+
+# Misc
+.DS_Store
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Cache
+.vite
 .eslintcache
-node_modules/.vite/
-node_modules/.cache/
-src/**/*.md
-src/**/*.txt
-src/**/*.rst
-src/**/*.adoc
-src/**/*.md.*
-src/**/*.json.*
-src/**/*.config.*
-src/**/*.md.jsx
-src/**/*.json.jsx
-src/**/*.config.jsx
-src/**/*.md.js
-src/**/*.json.js
-src/**/*.config.js
-src/**/README*.jsx
-src/**/CERTIFICADO*.jsx
-src/**/CERTIFICACAO*.jsx
-src/**/MANIFESTO*.jsx
-src/**/STATUS*.jsx
-src/**/VALIDACAO*.jsx
-src/**/CHECKLIST*.jsx
-src/**/ETAPA*.jsx
-src/**/FASE*.jsx
-src/**/PROVA*.jsx
-src/**/BLOQUEIO*.jsx
-src/**/INTEGRACAO*.jsx
-src/**/DIAGNOSTICO*.jsx
-src/**/CORRECAO*.jsx
-src/**/rhf_zod_report*
-src/**/UnidadesDeMedida*
+.turbo
+.parcel-cache
+.cache
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# BLOQUEADO: Nunca commit documentação autoinserida
+**/*.md.jsx
+**/*.md.js
+**/*.json.jsx
+**/*.json.js
+**/*.config.jsx
+**/*.txt.jsx
+**/*.yaml.jsx
+**/*.yml.jsx
+**/*.rst.jsx
+**/*.adoc.jsx
+**/README*.jsx
+**/CERTIFICADO*.jsx
+**/MANIFESTO*.jsx
+**/VALIDACAO*.jsx
+**/CHECKLIST*.jsx
+**/PROVA*.jsx
+**/ETAPA*.jsx
+**/FASE*.jsx
+**/DEBUG*.jsx
+**/DIAGNOSTICO*.jsx
+**/INTEGRACAO*.jsx
+**/BLOQUEIO*.jsx
+**/FLUXO*.jsx
+**/ZINDEX*.jsx
+**/CORRECAO*.jsx
+**/BOTOES*.jsx
+**/RESUMO*.jsx
+**/RHINO*.jsx
+**/rhf_zod_report*.jsx
+**/UnidadesDeMedida*.jsx

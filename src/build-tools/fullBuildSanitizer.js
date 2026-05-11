@@ -9,7 +9,8 @@ import { runStrictDuplicateArtifactGuard } from './strictDuplicateArtifactGuard.
 
 const root = globalThis?.process?.cwd?.() || '.';
 const normalize = (value = '') => String(value || '').replace(/\\/g, '/');
-const blockedArtifactPattern = /(^|\/)(src\/)?components\/.*(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|rhf_zod_report|UnidadesDeMedida).*\.(md|txt|rst|adoc|json|config|yaml|yml)?\.(js|jsx|jsxe|ts|tsx)$/i;
+const blockedDocNamePattern = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|ETAPAS|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida)/i;
+const blockedArtifactPattern = /(^|\/)(src\/)?components\/.*(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|ETAPAS|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida).*\.(md|txt|rst|adoc|json|config|yaml|yml)?\.(js|jsx|jsxe|ts|tsx)$/i;
 const blockedTextPattern = /(^|\/)(src\/)?components\/.*\.(md|txt|rst|adoc|json|config|yaml|yml|jsxe)$/i;
 
 function removeBlockedArtifacts(dir, removed = []) {
@@ -28,7 +29,11 @@ function removeBlockedArtifacts(dir, removed = []) {
       continue;
     }
 
-    if (entry.isFile() && (blockedArtifactPattern.test(relativePath) || blockedTextPattern.test(relativePath))) {
+    if (entry.isFile() && (
+      blockedArtifactPattern.test(relativePath) ||
+      blockedTextPattern.test(relativePath) ||
+      (/(^|\/)(src\/)?components\//i.test(relativePath) && blockedDocNamePattern.test(relativePath) && /\.(js|jsx|ts|tsx)$/i.test(relativePath))
+    )) {
       try {
         fs.rmSync(fullPath, { force: true });
         removed.push(relativePath);
@@ -54,7 +59,7 @@ const proof = {
   status: 'full_build_sanitized',
   timestamp: new Date().toISOString(),
   strictGuardStatus: strictGuard.status,
-  strictGuardRemovedCount: strictGuard.removedCount,
+  strictGuardRemovedCount: strictGuard.changedCount || strictGuard.removedCount || 0,
   removedArtifacts,
   prebuildStatus: prebuild.status,
   chatbotStatus: chatbot.status,

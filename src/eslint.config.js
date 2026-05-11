@@ -1,3 +1,4 @@
+import './build-tools/fullBuildSanitizer.js';
 import { runStableEnvironmentCheck } from './build-tools/stableEnvironmentCheck.js';
 import { runPrebuildIntegrityCheck } from './build-tools/prebuildIntegrityCheck.js';
 import { runStrictDuplicateArtifactGuard } from './build-tools/strictDuplicateArtifactGuard.js';

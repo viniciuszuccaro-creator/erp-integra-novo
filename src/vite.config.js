@@ -65,6 +65,7 @@ function blockDocumentation() {
       verifyChatbotComponents(__dirname);
       purgeDocumentationArtifacts(__dirname);
       cleanup(path.resolve(__dirname, 'src'));
+      cleanup(path.resolve(__dirname, 'components'));
     },
     configureServer(server) {
       const purgeBuildCachesLocal = () => purgeBuildCaches(__dirname);
@@ -123,7 +124,7 @@ function blockDocumentation() {
 
 export default defineConfig({
   define: viteDefineConfig,
-  plugins: [react(), blockDocumentation()],
+  plugins: [blockDocumentation(), react()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle2, Loader2, PlayCircle, Rocket, ShieldCheck } from 'lucide-react';
 import { fullPlanBacklogItems, fullPlanValidationStack } from './planoMelhoriaFullExecutionData';
-import { DOCUMENTATION_BLOCK_POLICY, buildImprovementExecutionPayload, filterOperationalPlanItems } from './planoMelhoriaExecutionGuard';
+import { DOCUMENTATION_BLOCK_POLICY, assertImprovementTaskAllowed, buildImprovementExecutionPayload, filterOperationalPlanItems } from './planoMelhoriaExecutionGuard';
 
 const stateClass = {
   idle: 'bg-slate-50 text-slate-600 border-slate-200',
@@ -31,6 +31,7 @@ export default function PlanoMelhoriaFullExecutionCenter() {
   const executarPlanoCompleto = async () => {
     setExecutionState('running');
     await Promise.all(operationalBacklogItems.map(async (item) => {
+      if (!assertImprovementTaskAllowed(item).allowed) return null;
       const existing = await base44.entities.PlanoMelhoriaItem.filter({ titulo: item.titulo }, '-updated_date', 1);
       if (existing?.[0]?.id) return base44.entities.PlanoMelhoriaItem.update(existing[0].id, item);
       return base44.entities.PlanoMelhoriaItem.create(item);

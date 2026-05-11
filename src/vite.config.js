@@ -6,13 +6,14 @@ import { isDocumentationArtifactPath } from './src/components/lib/documentationB
 import { isBlockedDocumentationArtifact, purgeBuildCaches, purgeDocumentationArtifacts } from './build-tools/purgeDocumentationArtifacts.js';
 import { runStableEnvironmentCheck } from './build-tools/stableEnvironmentCheck.js';
 
-const documentationArtifactFilePattern = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|js|jsx|ts|tsx))?$/i;
-const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config)\.(js|jsx|ts|tsx)$/i;
-const textDocumentationPattern = /\.(md|txt|rst|adoc)$/i;
+const documentationArtifactFilePattern = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|yaml|yml|js|jsx|ts|tsx))?$/i;
+const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|ts|tsx)$/i;
+const textDocumentationPattern = /\.(md|txt|rst|adoc|yaml|yml)$/i;
 const componentDocumentationMirrorPattern = /\/src\/components\/.*(\.md\.jsx|\.txt\.jsx|\.rst\.jsx|\.adoc\.jsx|\.json\.jsx|\.config\.jsx)$/i;
 const buildCacheDirs = ['node_modules/.vite', 'node_modules/.cache', 'dist/.vite', '.vite', '.eslintcache', 'build/.vite'];
 const blockedComponentDocExtensions = ['.md', '.txt', '.rst', '.adoc', '.jsx', '.md.jsx', '.txt.jsx', '.rst.jsx', '.adoc.jsx', '.json.jsx', '.config.jsx', '.md.js', '.json.js', '.config.js'];
-const blockedComponentDocPrefixes = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|rhf_zod_report|UnidadesDeMedida)/i;
+const blockedComponentDocPrefixes = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFICADO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida)/i;
+const chatbotDocumentationPattern = /(^|\/)src\/components\/chatbot\/.*(\.(md|txt|rst|adoc|json|config|yaml|yml)(\.(js|jsx|ts|tsx))?|README|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|STATUS|GUIA|DOC)/i;
 
 function blockDocumentation() {
   const isBlockedPath = (input = '') => {
@@ -21,7 +22,7 @@ function blockDocumentation() {
     const isInSrc = normalized.includes('/src/') || normalized.startsWith('src/');
     const isComponentDocMirror = /(^|\/)src\/components\//i.test(normalized) && /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|rhf_zod_report|UnidadesDeMedida)[^/]*\.jsx$/i.test(fileName);
 
-    return isComponentDocMirror || (isInSrc && (
+    return chatbotDocumentationPattern.test(normalized) || isComponentDocMirror || (isInSrc && (
       isBlockedDocumentationArtifact(normalized) ||
       isDocumentationArtifactPath(normalized) ||
       textDocumentationPattern.test(fileName) ||
@@ -107,7 +108,9 @@ function blockDocumentation() {
 }
 
 export default defineConfig({
-  define: { 'process.env.VITE_IGNORE_DOCS': 'true' },
+  define: {
+    __BASE44_IGNORE_DOCS__: true,
+  },
   plugins: [react(), blockDocumentation()],
   resolve: {
     alias: {

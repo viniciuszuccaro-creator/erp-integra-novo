@@ -1,6 +1,6 @@
-export const DOCUMENTATION_FILE_NAME_PATTERN = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|js|jsx|ts|tsx))?$/i;
-export const DOCUMENTATION_MIRROR_PATTERN = /\.(md|txt|rst|adoc|json|config)\.(js|jsx|ts|tsx)$/i;
-export const DOCUMENTATION_TEXT_OR_DATA_PATTERN = /\.(md|txt|rst|adoc|json|config)$/i;
+export const DOCUMENTATION_FILE_NAME_PATTERN = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|yaml|yml|js|jsx|ts|tsx))?$/i;
+export const DOCUMENTATION_MIRROR_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|ts|tsx)$/i;
+export const DOCUMENTATION_TEXT_OR_DATA_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)$/i;
 export const TEXT_DOCUMENTATION_PATTERN = /\.(md|txt|rst|adoc)$/i;
 export const COMPONENTS_DIRECTORY_PATTERN = /(^|\/)src\/components\/|(^|\/)components\//i;
 export const BUILD_CACHE_DIRS = ['node_modules/.vite', 'node_modules/.cache', 'dist/.vite', '.vite', '.eslintcache', 'build/.vite'];

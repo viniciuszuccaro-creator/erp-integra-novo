@@ -131,6 +131,10 @@ const documentationMirrorPatterns = [
 export default [
   {
     ignores: [
+      "components/**/*.jsx",
+      "components/**/*.md.jsx",
+      "components/**/*.json.jsx",
+      "components/**/*.config.jsx",
       "src/components/**/*.jsx",
       "src/components/**/*.md.jsx",
       "src/components/**/*.json.jsx",

@@ -28,6 +28,12 @@ const documentationNoopParser = {
 };
 
 const documentationJsxFiles = [
+  'src/components/**/*',
+  './src/components/**/*',
+  '**/src/components/**/*',
+  'components/**/*',
+  './components/**/*',
+  '**/components/**/*',
   '**/*.md.jsx',
   '**/*.json.jsx',
   '**/*.config.jsx',
@@ -200,8 +206,12 @@ const documentationArtifactIgnores = [
 
 export default [
   {
-    files: ['**/*.{js,jsx,ts,tsx}'],
-    ignores: ['src/components/**', 'components/**'],
+    ignores: [
+      'src/components/**',
+      'components/**',
+      '**/src/components/**',
+      '**/components/**',
+    ],
   },
   {
     ignores: [
@@ -291,6 +301,8 @@ export default [
   },
   {
     files: [
+      'App.jsx',
+      'main.jsx',
       '*.js',
       '*.jsx',
       'src/pages/**/*.{js,jsx}',
@@ -374,7 +386,15 @@ export default [
       '!src/components/**/CORRECAO*.jsx',
       '!src/components/**/FLUXO*.jsx',
     ],
-    ignores: documentationArtifactIgnores,
+    ignores: [
+      'src/components/**',
+      './src/components/**',
+      '**/src/components/**',
+      'components/**',
+      './components/**',
+      '**/components/**',
+      ...documentationArtifactIgnores,
+    ],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',

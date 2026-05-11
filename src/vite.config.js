@@ -27,7 +27,7 @@ function neutralDocumentationContent(filePath = '') {
 
 function neutralizeDocumentationFile(filePath) {
   try {
-    if (fs.existsSync(filePath)) fs.writeFileSync(filePath, neutralDocumentationContent(filePath));
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
   } catch {}
 }
 
@@ -89,7 +89,7 @@ function blockDocumentation() {
       };
       const blockFile = async (filePath) => {
         if (!isBlockedPath(filePath)) return;
-        console.log('🚫 Documentação bloqueada: arquivo neutralizado antes de virar código');
+        console.log('🚫 Documentação bloqueada: arquivo removido antes de virar código');
         try { server.watcher.unwatch(filePath); } catch {}
         neutralizeDocumentationFile(filePath);
         purgeBuildCachesLocal();

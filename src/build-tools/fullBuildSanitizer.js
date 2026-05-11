@@ -5,6 +5,7 @@ import { runStableEnvironmentCheck } from './stableEnvironmentCheck.js';
 import { verifyChatbotComponents } from './verifyChatbotComponents.js';
 import { forceProjectReindex } from './projectReindex.js';
 import { purgeBuildCaches, purgeDocumentationArtifacts, purgeTemporaryLogs } from './purgeDocumentationArtifacts.js';
+import { runStrictDuplicateArtifactGuard } from './strictDuplicateArtifactGuard.js';
 
 const root = globalThis?.process?.cwd?.() || '.';
 const normalize = (value = '') => String(value || '').replace(/\\/g, '/');
@@ -38,6 +39,7 @@ function removeBlockedArtifacts(dir, removed = []) {
   return removed;
 }
 
+const strictGuard = runStrictDuplicateArtifactGuard(root);
 const removedArtifacts = removeBlockedArtifacts(path.resolve(root, 'src'))
   .concat(removeBlockedArtifacts(path.resolve(root, 'components')));
 const prebuild = runPrebuildIntegrityCheck(root);
@@ -51,6 +53,8 @@ const stable = runStableEnvironmentCheck(root);
 const proof = {
   status: 'full_build_sanitized',
   timestamp: new Date().toISOString(),
+  strictGuardStatus: strictGuard.status,
+  strictGuardRemovedCount: strictGuard.removedCount,
   removedArtifacts,
   prebuildStatus: prebuild.status,
   chatbotStatus: chatbot.status,

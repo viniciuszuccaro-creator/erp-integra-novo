@@ -1,0 +1,7 @@
+{
+  "status": "lint_listed_artifacts_removed",
+  "date": "2026-05-11",
+  "reason": "Removed documentation mirror files that ESLint parsed as React code.",
+  "strict_guard_active": true,
+  "result": "lint should no longer parse the listed duplicated documentation artifacts"
+}

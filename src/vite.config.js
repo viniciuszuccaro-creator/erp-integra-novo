@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import fs from 'node:fs';
+import { isDocumentationArtifactPath } from './src/components/lib/documentationBlockPolicy.js';
 
 const documentationArtifactFilePattern = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFICADO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|js|jsx|ts|tsx))?$/i;
 const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config)\.(js|jsx|ts|tsx)$/i;
@@ -17,6 +18,7 @@ function blockDocumentation() {
     const isInSrc = normalized.includes('/src/') || normalized.startsWith('src/');
 
     return isInSrc && (
+      isDocumentationArtifactPath(normalized) ||
       textDocumentationPattern.test(fileName) ||
       documentationExtensionPattern.test(fileName) ||
       componentDocumentationMirrorPattern.test(normalized) ||

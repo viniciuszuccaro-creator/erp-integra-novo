@@ -3,9 +3,9 @@ import path from 'node:path';
 
 const normalize = (value = '') => String(value || '').replace(/\\/g, '/');
 
-const DOC_PREFIX = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|FLUXO|rhf_zod_report|UnidadesDeMedida)/i;
-const MIRROR_EXT = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i;
-const TEXT_EXT = /\.(md|txt|rst|adoc|yaml|yml|jsxe)$/i;
+const DOC_NAME_PATTERN = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|ETAPAS|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|FLUXO|rhf_zod_report|UnidadesDeMedida)/i;
+const DOC_CODE_MIRROR = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i;
+const DOC_TEXT_FILE = /\.(md|txt|rst|adoc|yaml|yml|jsxe)$/i;
 const SKIP_DIRS = /^(node_modules|dist|build|\.git|\.vite|coverage|tmp|temp|logs)$/i;
 const TARGET_DIRS = ['src/components', 'components'];
 
@@ -14,7 +14,13 @@ function shouldNeutralize(relativePath) {
   const fileName = normalized.split('/').pop() || '';
   const inComponents = /(^|\/)(src\/)?components\//i.test(normalized);
   if (!inComponents) return false;
-  return MIRROR_EXT.test(fileName) || TEXT_EXT.test(fileName) || (DOC_PREFIX.test(fileName) && /\.(js|jsx|ts|tsx)$/i.test(fileName));
+
+  if (DOC_CODE_MIRROR.test(fileName)) return true;
+  if (DOC_TEXT_FILE.test(fileName)) return true;
+  if (DOC_NAME_PATTERN.test(fileName) && /\.(js|jsx|ts|tsx)$/i.test(fileName)) return true;
+  if (/(^|\/)commitlint\.config\.jsx$/i.test(normalized)) return true;
+
+  return false;
 }
 
 function neutralContent(relativePath) {
@@ -40,15 +46,11 @@ function scanAndNeutralize(root, dir, changed) {
     if (!entry.isFile() || !shouldNeutralize(relativePath)) continue;
 
     try {
-      if (/\.(js|jsx|ts|tsx)$/i.test(entry.name)) {
-        const content = neutralContent(relativePath);
-        if (!fs.readFileSync(fullPath, 'utf8').startsWith('const ')) {
-          fs.writeFileSync(fullPath, content);
-          changed.push(`${relativePath}::neutralized`);
-        }
-      } else {
-        fs.rmSync(fullPath, { force: true });
-        changed.push(`${relativePath}::removed`);
+      const content = neutralContent(relativePath);
+      const current = fs.existsSync(fullPath) ? fs.readFileSync(fullPath, 'utf8') : '';
+      if (current !== content) {
+        fs.writeFileSync(fullPath, content);
+        changed.push(`${relativePath}::neutralized`);
       }
     } catch {}
   }

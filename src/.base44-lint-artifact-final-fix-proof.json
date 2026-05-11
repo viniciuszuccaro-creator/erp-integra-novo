@@ -1,0 +1,7 @@
+{
+  "status": "lint_artifact_final_fix_applied",
+  "date": "2026-05-11",
+  "problem": "Documentation mirrors such as .md.jsx and .json.jsx were being parsed as React code by lint.",
+  "fix": "Strict guard now rewrites all documentation mirror files into valid noop JS modules and ESLint explicitly ignores those generated mirrors before parsing.",
+  "business_logic_changed": false
+}

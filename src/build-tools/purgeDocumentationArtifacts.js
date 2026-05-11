@@ -121,8 +121,8 @@ export function purgeDocumentationArtifacts(rootDir = '.') {
 
       if (entry.isFile() && isBlockedDocumentationArtifact(relativePath)) {
         try {
-          fs.writeFileSync(fullPath, 'export default null;\n');
-          removedFiles.push(`${relativePath}::neutralized-invalid-documentation-artifact`);
+          fs.unlinkSync(fullPath);
+          removedFiles.push(`${relativePath}::DELETED-BLOCKED-ARTIFACT`);
         } catch {}
       }
     }

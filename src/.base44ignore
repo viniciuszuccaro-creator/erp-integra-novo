@@ -1,0 +1,47 @@
+# Base44 Platform Ignore File
+# Previne regeneração automática de arquivos-fantasma
+
+# Documentation artifacts - NUNCA criar como JSX
+**/*.md.jsx
+**/*.md.js
+**/*.json.jsx
+**/*.json.js
+**/*.config.jsx
+**/*.config.js
+**/*.txt.jsx
+**/*.rst.jsx
+**/*.adoc.jsx
+**/*.yaml.jsx
+**/*.yml.jsx
+
+# Specific blocked prefixes - NUNCA gerar como código
+**/README*.jsx
+**/CERTIFICADO*.jsx
+**/CERTIFICACAO*.jsx
+**/MANIFESTO*.jsx
+**/VALIDACAO*.jsx
+**/CHECKLIST*.jsx
+**/PROVA*.jsx
+**/ETAPA*.jsx
+**/FASE*.jsx
+**/BLOQUEIO*.jsx
+**/DEBUG*.jsx
+**/DIAGNOSTICO*.jsx
+**/INTEGRACAO*.jsx
+**/RESUMO*.jsx
+**/FLUXO*.jsx
+**/ZINDEX*.jsx
+**/rhf_zod_report*.jsx
+**/UnidadesDeMedida*.jsx
+**/CORRECAO*.jsx
+**/BOTOES*.jsx
+**/CHECKLIST*.jsx
+**/ETAPAS*.jsx
+
+# Build and cache - limpar automaticamente
+node_modules/.vite
+node_modules/.cache
+.vite
+.eslintcache
+dist
+build

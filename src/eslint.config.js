@@ -8,6 +8,55 @@ runStableEnvironmentCheck('.');
 
 const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i;
 
+const emergencyDocumentationArtifactIgnores = [
+  "src/components/**/*.md.jsx",
+  "src/components/**/*.md.js",
+  "src/components/**/*.json.jsx",
+  "src/components/**/*.config.jsx",
+  "src/components/**/*.txt.jsx",
+  "src/components/**/*.rst.jsx",
+  "src/components/**/*.adoc.jsx",
+  "src/components/**/*README*.jsx",
+  "src/components/**/*CERTIFIC*.jsx",
+  "src/components/**/*CERTIFICADO*.jsx",
+  "src/components/**/*CERTIFICACAO*.jsx",
+  "src/components/**/*MANIFESTO*.jsx",
+  "src/components/**/*VALIDACAO*.jsx",
+  "src/components/**/*CHECKLIST*.jsx",
+  "src/components/**/*PROVA*.jsx",
+  "src/components/**/*BLOQUEIO*.jsx",
+  "src/components/**/*BOTOES*.jsx",
+  "src/components/**/*INTEGRACAO*.jsx",
+  "src/components/**/*STATUS*.jsx",
+  "src/components/**/*ETAPA*.jsx",
+  "src/components/**/*ETAPAS*.jsx",
+  "src/components/**/*FASE*.jsx",
+  "src/components/**/*DEBUG*.jsx",
+  "src/components/**/*DIAGNOSTICO*.jsx",
+  "src/components/**/*CORRECAO*.jsx",
+  "src/components/**/*FLUXO*.jsx",
+  "src/components/**/*UnidadesDeMedida*.jsx",
+  "src/components/**/*rhf_zod_report*.jsx",
+  "components/**/*.md.jsx",
+  "components/**/*.json.jsx",
+  "components/**/*.config.jsx",
+  "components/**/*README*.jsx",
+  "components/**/*CERTIFIC*.jsx",
+  "components/**/*CHECKLIST*.jsx",
+  "components/**/*MANIFESTO*.jsx",
+  "components/**/*VALIDACAO*.jsx",
+  "components/**/*BLOQUEIO*.jsx",
+  "components/**/*BOTOES*.jsx",
+  "components/**/*INTEGRACAO*.jsx",
+  "components/**/*STATUS*.jsx",
+  "components/**/*ETAPA*.jsx",
+  "components/**/*FASE*.jsx",
+  "components/**/*DEBUG*.jsx",
+  "components/**/*DIAGNOSTICO*.jsx",
+  "components/**/*CORRECAO*.jsx",
+  "components/**/*FLUXO*.jsx"
+];
+
 const documentationMirrorPatterns = [
   "src/components/chatbot/**",
   "src/components/docs/**",
@@ -167,6 +216,12 @@ const documentationMirrorPatterns = [
   ];
 
 export default [
+  {
+    ignores: [
+      ...emergencyDocumentationArtifactIgnores,
+      ...documentationMirrorPatterns,
+    ],
+  },
   {
     ignores: [
       "**/src/components/**/*.md.jsx",

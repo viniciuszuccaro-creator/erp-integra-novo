@@ -18,7 +18,7 @@ function shouldNeutralize(relativePath) {
 }
 
 function neutralContent(relativePath) {
-  const safeName = (normalize(relativePath).split('/').pop() || 'DocumentationArtifact').replace(/[^a-zA-Z0-9_$]/g, '_');
+  const safeName = `DocumentationArtifact_${(normalize(relativePath).split('/').pop() || 'Artifact').replace(/[^a-zA-Z0-9_$]/g, '_')}`;
   return `const ${safeName} = () => null;\nexport default ${safeName};\n`;
 }
 

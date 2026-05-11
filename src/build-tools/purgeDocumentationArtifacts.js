@@ -9,7 +9,7 @@ export const BUILD_CACHE_DIRS = ['node_modules/.vite', 'node_modules/.cache', 'd
 export const TEMP_LOG_DIRS = ['tmp', 'temp', '.tmp', 'logs', 'coverage', 'dist/.cache', 'build/.cache'];
 export const TEMP_LOG_FILE_PATTERN = /\.(log|tmp|temp|cache|bak|old|orig)$/i;
 export const PROTECTED_DOC_DIR_PATTERN = /(^|\/)(src\/components|components)(\/|$)/i;
-export const CHATBOT_DIR_PATTERN = /(^|\/)src\/components\/chatbot\//i;
+export const CHATBOT_DIR_PATTERN = /(^|\/)(src\/)?components\/chatbot\//i;
 export const VALID_REACT_CODE_PATTERN = /\.(jsx|js|tsx|ts)$/i;
 
 const normalize = (value = '') => String(value || '').replace(/\\/g, '/');

@@ -14,7 +14,7 @@ const buildCacheDirs = ['node_modules/.vite', 'node_modules/.cache', 'dist/.vite
 const validComponentCodePattern = /\.(js|jsx|ts|tsx|css)$/i;
 const blockedComponentDocExtensions = ['.md', '.txt', '.rst', '.adoc', '.json', '.config', '.yaml', '.yml', '.md.jsx', '.txt.jsx', '.rst.jsx', '.adoc.jsx', '.json.jsx', '.config.jsx', '.md.js', '.json.js', '.config.js'];
 const blockedComponentDocPrefixes = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFICADO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida)/i;
-const chatbotDocumentationPattern = /(^|\/)src\/components\/chatbot\/.*(\.(md|txt|rst|adoc|json|config|yaml|yml)(\.(js|jsx|ts|tsx))?|README|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|STATUS|GUIA|DOC)/i;
+const chatbotDocumentationPattern = /(^|\/)(src\/)?components\/chatbot\/.*(\.(md|txt|rst|adoc|json|config|yaml|yml)(\.(js|jsx|ts|tsx))?|README|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|STATUS|GUIA|DOC)/i;
 
 function blockDocumentation() {
   const isBlockedPath = (input = '') => {
@@ -114,6 +114,9 @@ function blockDocumentation() {
 export default defineConfig({
   define: {
     __BASE44_IGNORE_DOCS__: true,
+    'process.env': {},
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
+    global: 'globalThis',
   },
   plugins: [react(), blockDocumentation()],
   resolve: {

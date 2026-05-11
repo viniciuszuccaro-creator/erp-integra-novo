@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Base44 APP</title>
     <script>
+      window.process = window.process || { env: {} };
+      window.global = window.global || window;
       window.__ERP_BOOT_ERROR__ = function (title, detail) {
         const root = document.getElementById('root');
         if (!root) return;

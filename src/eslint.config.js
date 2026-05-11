@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const documentationArtifactFilePattern = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|js|jsx|ts|tsx))?$/i;
+const documentationArtifactFilePattern = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|js|jsx|ts|tsx))?$/i;
 const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config)\.(js|jsx|ts|tsx)$/i;
 const textDocumentationPattern = /\.(md|txt|rst|adoc)$/i;
 
@@ -162,6 +162,9 @@ export default [
       "**/README*",
       "**/CERTIFICADO*",
       "**/CERTIFICACAO*",
+      "**/CERTIFIC*",
+      "**/CERTIFICADO*.jsx",
+      "**/CERTIFICACAO*.jsx",
       "**/MANIFESTO*",
       "**/VALIDACAO*",
       "**/CHECKLIST*",

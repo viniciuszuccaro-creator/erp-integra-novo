@@ -36,7 +36,10 @@ function blockDocumentation() {
         if (!fs.existsSync(dir)) return;
         for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
           const filePath = path.join(dir, entry.name);
-          if (entry.isDirectory()) cleanup(filePath);
+          if (entry.isDirectory()) {
+            cleanup(filePath);
+            continue;
+          }
           if (entry.isFile() && isBlockedPath(filePath)) fs.unlinkSync(filePath);
         }
       };
@@ -126,6 +129,7 @@ export default defineConfig({
         '**/README*',
         '**/CERTIFICADO*',
         '**/CERTIFICACAO*',
+        '**/CERTIFIC*',
         '**/MANIFESTO*',
         '**/VALIDACAO*',
         '**/CHECKLIST*',

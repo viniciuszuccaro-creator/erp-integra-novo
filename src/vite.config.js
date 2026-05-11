@@ -5,6 +5,8 @@ import fs from 'node:fs';
 import { isDocumentationArtifactPath } from './src/components/lib/documentationBlockPolicy.js';
 import { isBlockedDocumentationArtifact, purgeBuildCaches, purgeDocumentationArtifacts } from './build-tools/purgeDocumentationArtifacts.js';
 import { runStableEnvironmentCheck } from './build-tools/stableEnvironmentCheck.js';
+import { verifyChatbotComponents } from './build-tools/verifyChatbotComponents.js';
+import { viteRuntimeDefine } from './build-tools/viteRuntimeConfig.js';
 
 const documentationArtifactFilePattern = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|yaml|yml|js|jsx|ts|tsx))?$/i;
 const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|ts|tsx)$/i;
@@ -56,6 +58,7 @@ function blockDocumentation() {
         }
       };
       runStableEnvironmentCheck(__dirname);
+      verifyChatbotComponents(__dirname);
       purgeDocumentationArtifacts(__dirname);
       cleanup(path.resolve(__dirname, 'src'));
     },
@@ -63,6 +66,7 @@ function blockDocumentation() {
       const purgeBuildCachesLocal = () => purgeBuildCaches(__dirname);
       const purgeDocumentationNow = () => {
         runStableEnvironmentCheck(__dirname);
+        verifyChatbotComponents(__dirname);
         purgeDocumentationArtifacts(__dirname);
       };
       const blockFile = async (filePath) => {
@@ -112,12 +116,7 @@ function blockDocumentation() {
 }
 
 export default defineConfig({
-  define: {
-    __BASE44_IGNORE_DOCS__: true,
-    'process.env': {},
-    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
-    global: 'globalThis',
-  },
+  define: viteRuntimeDefine,
   plugins: [react(), blockDocumentation()],
   resolve: {
     alias: {

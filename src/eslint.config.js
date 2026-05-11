@@ -181,6 +181,8 @@ export default [
       "components/**/DIAGNOSTICO*.jsx",
       "components/**/CORRECAO*.jsx",
       "src/components/**/*.md.jsx",
+      "**/src/components/**/*.md.jsx",
+      "**/components/**/*.md.jsx",
       "src/components/**/*.json.jsx",
       "src/components/**/*.config.jsx",
       "src/components/**/*README*.jsx",

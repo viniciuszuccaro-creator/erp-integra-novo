@@ -1,69 +1,71 @@
-# Dependencies
+# === DEPENDENCIES ===
 node_modules/
-/.pnp
+.pnp
 .pnp.js
 
-# Testing
-/coverage
+# === BUILD ===
+dist/
+dist-ssr/
+*.local
+.vite/
+.vercel/
 
-# Production
-/build
-/dist
-
-# Misc
-.DS_Store
+# === ENV & SECRETS ===
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*.local
 
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Cache
-.vite
-.eslintcache
-.turbo
-.parcel-cache
-.cache
-
-# IDE
+# === IDE ===
 .vscode/
 .idea/
 *.swp
 *.swo
+*.swn
 *~
+.DS_Store
 
-# BLOQUEADO: Nunca commit documentação autoinserida
-**/*.md.jsx
-**/*.md.js
-**/*.json.jsx
-**/*.json.js
-**/*.config.jsx
-**/*.txt.jsx
-**/*.yaml.jsx
-**/*.yml.jsx
-**/*.rst.jsx
-**/*.adoc.jsx
-**/README*.jsx
-**/CERTIFICADO*.jsx
-**/MANIFESTO*.jsx
-**/VALIDACAO*.jsx
-**/CHECKLIST*.jsx
-**/PROVA*.jsx
-**/ETAPA*.jsx
-**/FASE*.jsx
-**/DEBUG*.jsx
-**/DIAGNOSTICO*.jsx
-**/INTEGRACAO*.jsx
-**/BLOQUEIO*.jsx
-**/FLUXO*.jsx
-**/ZINDEX*.jsx
-**/CORRECAO*.jsx
-**/BOTOES*.jsx
-**/RESUMO*.jsx
-**/RHINO*.jsx
-**/rhf_zod_report*.jsx
-**/UnidadesDeMedida*.jsx
+# === DOCUMENTATION ARTIFACTS (CRITICAL BLOCK) ===
+# NEVER COMMIT THESE — They're auto-generated junk breaking the build
+src/components/**/*.md.jsx
+src/components/**/*.md.jsxe
+src/components/**/*.txt.jsx
+src/components/**/*.rst.jsx
+src/components/**/*.adoc.jsx
+src/components/**/*.md.js
+src/components/**/*.txt.js
+src/components/**/*.rst.js
+src/components/**/*.adoc.js
+src/components/**/*.json.jsx
+src/components/**/*.config.jsx
+src/components/**/*.json.js
+src/components/**/*.config.js
+
+# Specific culprits
+src/components/chatbot/CERTIFICADO_OMNICANAL_V21_5.md.jsx
+src/components/chatbot/README_IMPLEMENTACAO_FINAL_V21_5.md.jsx
+src/components/chatbot/README_OMNICHANNEL_V21_5.md.jsx
+src/components/comercial/README_AUTOMACAO_FLUXO_V21_6.md.jsx
+src/components/docs/README.md.jsx
+src/components/docs/README_OMNICANAL_COMPLETO_V21_5.md.jsx
+src/components/docs/templates/commitlint.config.jsx
+src/components/lib/README_CONTAGEM_OTIMIZADA.md.jsx
+src/components/lib/README_V22_Conversao.md.jsx
+src/components/lib/UnidadesDeMedida.json.jsx
+src/components/logistica/INTEGRACAO_TOTAL_V21_5.md.jsx
+src/components/logistica/README_COMPLETO_V21_5.md.jsx
+src/components/portal/**/*.md.jsx
+src/components/reports/rhf_zod_report.json.jsx
+src/components/sistema/**/*.md.jsx
+src/components/sistema/**/*.jsx
+
+# === CACHES ===
+.eslintcache
+.cache/
+build/.vite/
+coverage/
+
+# === LOGS ===
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

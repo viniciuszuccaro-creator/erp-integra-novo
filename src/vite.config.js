@@ -135,6 +135,36 @@ function blockDocumentation() {
   };
 }
 
+// PRE-BUILD: Limpar artefatos antes de qualquer coisa
+const preClean = () => {
+  const fs = require('fs');
+  const path = require('path');
+  const srcPath = path.resolve(__dirname, 'src');
+  
+  const isBlocked = (file) => {
+    const blocked = /(README|CERTIFICADO|CERTIFICACAO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS|STATUS|ETAPA|FASE|FLUXO|ZINDEX|rhf_zod_report|UnidadesDeMedida)[^/]*\.(md|txt|rst|adoc|json|yaml|yml)\.(js|jsx)$/i;
+    return blocked.test(file) || /\.(md|json|config|yaml|yml)\.(jsx?|ts)$/i.test(file);
+  };
+
+  const clean = (dir) => {
+    try {
+      fs.readdirSync(dir, { withFileTypes: true }).forEach(entry => {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          clean(fullPath);
+          try { if (fs.readdirSync(fullPath).length === 0) fs.rmdirSync(fullPath); } catch {}
+        } else if (isBlocked(fullPath)) {
+          try { fs.unlinkSync(fullPath); console.log(`🚫 PURGED: ${fullPath}`); } catch {}
+        }
+      });
+    } catch {}
+  };
+  
+  clean(srcPath);
+};
+
+preClean();
+
 export default defineConfig({
   define: viteDefineConfig,
   plugins: [blockDocumentation(), react()],
@@ -172,39 +202,12 @@ export default defineConfig({
   server: {
     watch: {
       ignored: [
-        '**/*.md',
-        '**/*.txt',
-        '**/*.rst',
-        '**/*.adoc',
-        '**/*.md.*',
-        '**/*.json.*',
-        '**/*.config.*',
-        '**/README*',
-        '**/CERTIFICADO*',
-        '**/CERTIFICACAO*',
-        '**/CERTIFIC*',
-        '**/MANIFESTO*',
-        '**/VALIDACAO*',
-        '**/CHECKLIST*',
-        '**/PROVA*',
-        '**/BLOQUEIO*',
-        '**/DIAGNOSTICO*',
-        '**/INTEGRACAO*',
-        '**/rhf_zod_report*',
-        '**/UnidadesDeMedida*',
-        '**/*.md.jsx',
-        '**/*.md.jsxe',
-        '**/*.txt.jsx',
-        '**/*.rst.jsx',
-        '**/*.adoc.jsx',
-        '**/*.md.js',
-        '**/*.txt.js',
-        '**/*.rst.js',
-        '**/*.adoc.js',
-        '**/*.json.jsx',
-        '**/*.config.jsx',
-        '**/*.json.js',
-        '**/*.config.js',
+        '**/*.md', '**/*.txt', '**/*.rst', '**/*.adoc', '**/*.md.*', '**/*.json.*', '**/*.config.*',
+        '**/README*', '**/CERTIFICADO*', '**/CERTIFICACAO*', '**/CERTIFIC*', '**/MANIFESTO*', '**/VALIDACAO*',
+        '**/CHECKLIST*', '**/PROVA*', '**/BLOQUEIO*', '**/DIAGNOSTICO*', '**/INTEGRACAO*', '**/rhf_zod_report*',
+        '**/UnidadesDeMedida*', '**/*.md.jsx', '**/*.md.jsxe', '**/*.txt.jsx', '**/*.rst.jsx', '**/*.adoc.jsx',
+        '**/*.md.js', '**/*.txt.js', '**/*.rst.js', '**/*.adoc.js', '**/*.json.jsx', '**/*.config.jsx',
+        '**/*.json.js', '**/*.config.js', 'node_modules', '.git', 'dist',
       ],
     },
   },

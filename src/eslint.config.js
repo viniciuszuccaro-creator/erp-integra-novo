@@ -8,6 +8,8 @@ export default [
     ignores: [
       "**/*",
       "!src/pages/**/*.{js,jsx}",
+      "src/build-tools/**",
+      "build-tools/**",
       "!src/lib/**/*.{js,jsx}",
       "!src/api/**/*.{js,jsx}",
       "!src/hooks/**/*.{js,jsx}",

@@ -1,8 +1,10 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 // Simple in-memory cache per instance
 const CACHE = globalThis.__gcCache || (globalThis.__gcCache = new Map());
+const AUDIT_CACHE = globalThis.__gcAuditCache || (globalThis.__gcAuditCache = new Map());
 const CACHE_TTL_MS = 300_000; // 5 minutes
+const AUDIT_TTL_MS = 15 * 60 * 1000;
 
 Deno.serve(async (req) => {
   const t0 = Date.now();
@@ -71,9 +73,13 @@ Deno.serve(async (req) => {
 
     const summary = Array.from(groups.values());
 
-    // Audit snapshot + performance
+    // Audit snapshot + performance (throttled to avoid rate limits)
+    const auditKey = `snapshot:${key}`;
     try {
-      await base44.asServiceRole.entities.AuditLog.create({
+      const lastAudit = AUDIT_CACHE.get(auditKey) || 0;
+      if (Date.now() - lastAudit > AUDIT_TTL_MS) {
+        AUDIT_CACHE.set(auditKey, Date.now());
+        await base44.asServiceRole.entities.AuditLog.create({
         usuario: 'Sistema',
         acao: 'Criação',
         modulo: 'Sistema',
@@ -81,13 +87,18 @@ Deno.serve(async (req) => {
         descricao: `Snapshot multiempresa (${summary.length} escopos) — gaps: ${JSON.stringify(gaps)}`,
         dados_novos: { gerado_em: new Date().toISOString(), summary, gaps },
         data_hora: new Date().toISOString(),
-      });
+        });
+      }
     } catch (_) {}
 
     const durationMs = Date.now() - t0;
-    if (durationMs > 500) {
+    if (durationMs > 1500) {
+      const perfKey = `perf:${key}`;
       try {
-        await base44.asServiceRole.entities.AuditLog.create({
+        const lastPerfAudit = AUDIT_CACHE.get(perfKey) || 0;
+        if (Date.now() - lastPerfAudit > AUDIT_TTL_MS) {
+          AUDIT_CACHE.set(perfKey, Date.now());
+          await base44.asServiceRole.entities.AuditLog.create({
           usuario: 'Sistema',
           acao: 'Visualização',
           modulo: 'Sistema',
@@ -96,7 +107,8 @@ Deno.serve(async (req) => {
           descricao: `groupConsolidation ${durationMs}ms`,
           dados_novos: { durationMs, filtros },
           data_hora: new Date().toISOString(),
-        });
+          });
+        }
       } catch (_) {}
     }
 

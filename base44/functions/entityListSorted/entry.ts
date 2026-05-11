@@ -1,9 +1,11 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const LIST_CACHE = new Map();
 const LIST_CACHE_TTL_MS = 5 * 60 * 1000;
 let LIST_LAST_CALL_AT = 0;
+let LIST_BACKEND_PAUSED_UNTIL = 0;
 const LIST_MIN_GAP_MS = 3000;
+const LIST_BACKEND_PAUSE_MS = 2 * 60 * 1000;
 
 function stableListKey(value) {
   try { return JSON.stringify(value || {}, Object.keys(value || {}).sort()); }
@@ -265,6 +267,9 @@ async function listOne(base44, user, q) {
   if (cached && Date.now() - cached.ts < LIST_CACHE_TTL_MS) {
     return { entityName, items: cached.items };
   }
+  if (Date.now() < LIST_BACKEND_PAUSED_UNTIL) {
+    return { entityName, items: cached?.items || [] };
+  }
 
   try {
     const now = Date.now();
@@ -279,7 +284,8 @@ async function listOne(base44, user, q) {
     return { entityName, items };
   } catch (err) {
     const status = err?.status || err?.response?.status;
-    if (status === 429) {
+    if (status === 429 || status === 502 || (typeof status === 'number' && status >= 500)) {
+      LIST_BACKEND_PAUSED_UNTIL = Date.now() + LIST_BACKEND_PAUSE_MS;
       return { entityName, items: cached?.items || [] };
     }
     throw err;
@@ -329,7 +335,7 @@ Deno.serve(async (req) => {
           results.push({ entityName: q?.entityName, items: [], error: String(err?.message || err) });
         }
         // Delay entre queries em lote para evitar 429
-        if (i < queries.length - 1) await new Promise(r => setTimeout(r, 1200));
+        if (i < queries.length - 1) await new Promise(r => setTimeout(r, 2500));
       }
       return compressedJson({ results }, req);
     }

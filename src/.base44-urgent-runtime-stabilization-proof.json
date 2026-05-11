@@ -1,0 +1,23 @@
+{
+  "status": "urgent_runtime_stabilization_completed",
+  "date": "2026-05-11",
+  "issues_found": [
+    "Intermittent 502 responses in countEntities",
+    "Rate limit 429 pressure in entityListSorted/listing flows",
+    "Excessive audit writes in groupConsolidation under frequent dashboard refreshes"
+  ],
+  "fixes_applied": [
+    "Updated critical backend functions to Base44 SDK 0.8.25",
+    "Added circuit breaker and safe cached responses to countEntities",
+    "Added circuit breaker and safer batch spacing to entityListSorted",
+    "Throttled groupConsolidation audit writes to prevent backend rate limits"
+  ],
+  "validated_functions": {
+    "countEntities": "HTTP 200",
+    "entityListSorted": "HTTP 200",
+    "groupConsolidation": "HTTP 200"
+  },
+  "latest_runtime_logs": "No active app errors after stabilization; only external Datadog storage warning remains.",
+  "regra_mae_changed": false,
+  "business_logic_changed": false
+}

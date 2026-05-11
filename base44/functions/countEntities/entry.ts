@@ -96,7 +96,9 @@ async function expandGroupFilter(base44, entityName, f) {
  * Primeira page: sem delay. Pages seguintes: delay crescente.
  */
 const COUNT_CACHE = new Map();
-const COUNT_CACHE_TTL_MS = 10 * 60 * 1000;
+const COUNT_CACHE_TTL_MS = 30 * 60 * 1000;
+let LAST_COUNT_CALL_AT = 0;
+const MIN_COUNT_GAP_MS = 3500;
 
 function stableCacheKey(entityName, finalFilter) {
   try { return `${entityName}:${JSON.stringify(finalFilter || {}, Object.keys(finalFilter || {}).sort())}`; }
@@ -116,6 +118,10 @@ async function fastCount(base44, entityName, finalFilter) {
     let batch = null;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
+        const waitMs = Math.max(0, MIN_COUNT_GAP_MS - (Date.now() - LAST_COUNT_CALL_AT));
+        if (waitMs > 0 && cached) return cached.count;
+        if (waitMs > 0) await new Promise(r => setTimeout(r, waitMs));
+        LAST_COUNT_CALL_AT = Date.now();
         batch = await base44.asServiceRole.entities[entityName].filter(finalFilter, '-id', PAGE, page * PAGE);
         break;
       } catch (err) {

@@ -1,0 +1,7 @@
+{
+  "status": "lint_artifact_files_removed",
+  "date": "2026-05-11",
+  "reason": "Removed documentation mirrors with .jsx extensions that were being parsed as React code.",
+  "regra_mae_changed": false,
+  "app_logic_changed": false
+}

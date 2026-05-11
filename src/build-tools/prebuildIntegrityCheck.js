@@ -24,14 +24,8 @@ function neutralizeIfBlocked(root, filePath, removedFiles) {
   if (!blocked) return false;
 
   try {
-    if (/\.(js|jsx|ts|tsx)$/i.test(fileName)) {
-      const safeName = `DocumentationArtifact_${fileName.replace(/[^a-zA-Z0-9_$]/g, '_')}`;
-      fs.writeFileSync(filePath, `const ${safeName} = () => null;\nexport default ${safeName};\n`);
-      removedFiles.push(`${relativePath}::neutralized`);
-    } else {
-      fs.rmSync(filePath, { force: true, recursive: true });
-      removedFiles.push(relativePath);
-    }
+    fs.rmSync(filePath, { force: true, recursive: true });
+    removedFiles.push(relativePath);
     return true;
   } catch {
     return false;
@@ -96,15 +90,8 @@ function purgeGlobalDocumentationMirrors(root) {
       if (!entry.isFile()) continue;
       if (BLOCKED_MIRROR_PATTERN.test(relativePath) || /\.md\.jsx$/i.test(relativePath) || BLOCKED_DOC_PATTERN.test(relativePath)) {
         try {
-          if (/\.(js|jsx|ts|tsx)$/i.test(relativePath)) {
-            const fileName = relativePath.split('/').pop() || 'Artifact.jsx';
-            const safeName = `DocumentationArtifact_${fileName.replace(/[^a-zA-Z0-9_$]/g, '_')}`;
-            fs.writeFileSync(fullPath, `const ${safeName} = () => null;\nexport default ${safeName};\n`);
-            removedFiles.push(`${relativePath}::neutralized`);
-          } else {
-            fs.rmSync(fullPath, { force: true, recursive: true });
-            removedFiles.push(relativePath);
-          }
+          fs.rmSync(fullPath, { force: true, recursive: true });
+          removedFiles.push(relativePath);
         } catch {}
       }
     }

@@ -23,11 +23,6 @@ function shouldNeutralize(relativePath) {
   return false;
 }
 
-function neutralContent(relativePath) {
-  const safeName = `DocumentationArtifact_${(normalize(relativePath).split('/').pop() || 'Artifact').replace(/[^a-zA-Z0-9_$]/g, '_')}`;
-  return `const ${safeName} = () => null;\nexport default ${safeName};\n`;
-}
-
 function scanAndNeutralize(root, dir, changed) {
   if (!fs.existsSync(dir)) return;
   let entries = [];
@@ -40,18 +35,17 @@ function scanAndNeutralize(root, dir, changed) {
     if (entry.isDirectory()) {
       if (SKIP_DIRS.test(entry.name)) continue;
       scanAndNeutralize(root, fullPath, changed);
+      try {
+        if (fs.existsSync(fullPath) && fs.readdirSync(fullPath).length === 0) fs.rmdirSync(fullPath);
+      } catch {}
       continue;
     }
 
     if (!entry.isFile() || !shouldNeutralize(relativePath)) continue;
 
     try {
-      const content = neutralContent(relativePath);
-      const current = fs.existsSync(fullPath) ? fs.readFileSync(fullPath, 'utf8') : '';
-      if (current !== content) {
-        fs.writeFileSync(fullPath, content);
-        changed.push(`${relativePath}::neutralized`);
-      }
+      fs.rmSync(fullPath, { recursive: true, force: true });
+      changed.push(`${relativePath}::removed`);
     } catch {}
   }
 }

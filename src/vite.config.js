@@ -38,7 +38,7 @@ export default defineConfig({
     react(),
     {
       name: 'vite-anti-artifact-plugin',
-      apply: 'serve',
+      // apply: sem restrição = roda em SERVE e BUILD
       
       // PRÉ-INICIALIZAÇÃO: Limpar ANTES de qualquer coisa
       config() {

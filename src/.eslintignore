@@ -1,10 +1,13 @@
 # ============================================================================
-# ESLINT IGNORE — BLINDAGEM CONTRA ARTEFATOS INJETADOS
+# ESLINT IGNORE — ARTEFATOS INJETADOS PELA PLATAFORMA
+# NUNCA PROCESSAR ESSES ARQUIVOS
 # ============================================================================
-# REGRA ABSOLUTA: Qualquer arquivo que pareça .md/.json mas é .jsx/.js
-# deve ser ignorado 100%. Nunca será parseado por ESLint.
 
-# ===== CAMADA 1: PADRÃO GLOBAL AGRESSIVO =====
+# Build tools (Node.js scripts — não são código React)
+build-tools/
+src/build-tools/
+
+# Artefatos injetados — extensões duplas
 **/*.md.jsx
 **/*.md.js
 **/*.json.jsx
@@ -12,8 +15,7 @@
 **/*.config.jsx
 **/*.config.js
 
-# ===== CAMADA 2: NOMES PERIGOSOS (DOCUMENTAÇÃO INJETADA) =====
-# Qualquer coisa com CERTIFICADO, MANIFESTO, CHECKLIST, etc em .jsx/.js
+# Arquivos de documentação injetados com nome CAPSLOCK
 **/CERTIFICADO*.jsx
 **/CERTIFICADO*.js
 **/CERTIFICACAO*.jsx
@@ -26,57 +28,34 @@
 **/CHECKLIST*.js
 **/PROVA*.jsx
 **/PROVA*.js
-**/MIGRACAO*.jsx
-**/MIGRACAO*.js
-**/BLOQUEIO*.jsx
-**/BLOQUEIO*.js
-**/DEBUG*.jsx
-**/DEBUG*.js
 **/DIAGNOSTICO*.jsx
 **/DIAGNOSTICO*.js
-**/INTEGRACAO*.jsx
-**/INTEGRACAO*.js
 **/ETAPA*.jsx
 **/ETAPA*.js
 **/FASE*.jsx
 **/FASE*.js
+**/README*.jsx
+**/README*.js
+**/CORRECAO*.jsx
+**/CORRECAO*.js
+**/DEBUG*.jsx
+**/DEBUG*.js
 **/SISTEMA*.jsx
 **/SISTEMA*.js
-**/RELATORIO*.jsx
-**/RELATORIO*.js
-**/rhf_zod_report.jsx
-**/rhf_zod_report.js
+
+# Arquivos específicos problemáticos
 **/UnidadesDeMedida.jsx
 **/UnidadesDeMedida.js
+**/rhf_zod_report.jsx
+**/rhf_zod_report.js
+**/commitlint.config.jsx
+**/commitlint.config.js
 
-# ===== CAMADA 3: DIRETÓRIOS INTEIROS (POR SEGURANÇA) =====
-src/components/**/*.md.jsx
-src/components/**/*.md.js
-src/components/**/*.json.jsx
-src/components/**/*.json.js
-src/build-tools/
-build-tools/
-src/docs/
-
-# ===== CAMADA 4: DEPENDÊNCIAS =====
+# Builds e dependências
 node_modules/
-.npm
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-
-# ===== CAMADA 5: BUILD OUTPUTS =====
 dist/
 build/
+.vite/
 .next/
 out/
-.vite/
-
-# ===== CAMADA 6: IDE & SISTEMA =====
-.env.local
-.env.*.local
-.DS_Store
-*.log
-.vscode/
-.idea/
-.eslintcache
+public/

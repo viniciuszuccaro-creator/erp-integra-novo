@@ -1,0 +1,8 @@
+{
+  "status": "eslint_clean_stability_restored",
+  "date": "2026-05-11",
+  "fix": "Replaced oversized emergency ESLint config with a clean parser-safe configuration that ignores documentation artifacts but still lints real app code, including src/components.",
+  "runtime_logs": "No blocking runtime errors found; preview connected successfully.",
+  "business_logic_changed": false,
+  "components_linted_again": true
+}

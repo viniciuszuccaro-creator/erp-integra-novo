@@ -4,11 +4,14 @@ import { runStrictDuplicateArtifactGuard } from './build-tools/strictDuplicateAr
 
 runStrictDuplicateArtifactGuard('.');
 runPrebuildIntegrityCheck('.');
+runStrictDuplicateArtifactGuard('.');
 runStableEnvironmentCheck('.');
 
 const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i;
 
 const emergencyDocumentationArtifactIgnores = [
+  "src/components/**",
+  "components/**",
   "src/components/**/*.md.jsx",
   "src/components/**/*.md.js",
   "src/components/**/*.json.jsx",

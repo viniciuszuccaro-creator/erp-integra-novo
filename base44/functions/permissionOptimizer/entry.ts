@@ -45,7 +45,11 @@ Deno.serve(async (req) => {
       if (conflitos.length > 0 || Object.values(blocksByModule).some(v => v >= 10)) {
         updated.requer_aprovacao_especial = true;
       }
-      await base44.asServiceRole.entities.PerfilAcesso.update(p.id, updated);
+      const observacaoIgual = String(p.observacoes || '') === String(updated.observacoes || '');
+      const aprovacaoIgual = updated.requer_aprovacao_especial === undefined || p.requer_aprovacao_especial === updated.requer_aprovacao_especial;
+      if (!observacaoIgual || !aprovacaoIgual) {
+        await base44.asServiceRole.entities.PerfilAcesso.update(p.id, updated);
+      }
       sugestoes[p.id] = { nome: p.nome_perfil, observacao_adicionada: texto, requer_aprovacao_especial: !!updated.requer_aprovacao_especial };
     }
 

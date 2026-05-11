@@ -1,5 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
+let LAST_SOD_RUN_AT = 0;
+const SOD_COOLDOWN_MS = 60 * 60 * 1000;
+
 function flattenActions(permissoes, prefix = []) {
   const rows = [];
   if (!permissoes || typeof permissoes !== 'object') return rows;
@@ -44,7 +47,11 @@ async function validateProfile(base44, perfil) {
     conflitos_sod_detectados: conflitos,
     requer_aprovacao_especial: ['Alta', 'Crítica'].includes(severidadeMax) || perfil?.requer_aprovacao_especial || false,
   };
-  await base44.asServiceRole.entities.PerfilAcesso.update(perfil.id, patch);
+  const sameConflicts = JSON.stringify(perfil?.conflitos_sod_detectados || []) === JSON.stringify(patch.conflitos_sod_detectados || []);
+  const sameApproval = perfil?.requer_aprovacao_especial === patch.requer_aprovacao_especial;
+  if (!sameConflicts || !sameApproval) {
+    await base44.asServiceRole.entities.PerfilAcesso.update(perfil.id, patch);
+  }
   return { perfil_id: perfil.id, nome: perfil.nome_perfil || perfil.nome || perfil.id, conflitos: conflitos.length, severidadeMax };
 }
 
@@ -68,6 +75,11 @@ Deno.serve(async (req) => {
 
     const event = payload?.event || null;
     const incoming = payload?.data || null;
+    const isEntityAutomation = event?.entity_name === 'PerfilAcesso';
+    if (!payload?.force && !isEntityAutomation && Date.now() - LAST_SOD_RUN_AT < SOD_COOLDOWN_MS) {
+      return Response.json({ ok: true, skipped: true, reason: 'SoD em cooldown anti-rate-limit' });
+    }
+    if (!isEntityAutomation) LAST_SOD_RUN_AT = Date.now();
     const results = [];
 
     if (event?.entity_name === 'PerfilAcesso') {
@@ -79,7 +91,7 @@ Deno.serve(async (req) => {
       if (!perfil) return Response.json({ ok: false, error: 'Perfil não encontrado' }, { status: 400 });
       results.push(await validateProfile(base44, perfil));
     } else {
-      const perfis = await base44.asServiceRole.entities.PerfilAcesso.list('-updated_date', 500);
+      const perfis = await base44.asServiceRole.entities.PerfilAcesso.list('-updated_date', 25);
       for (const perfil of perfis) {
         results.push(await validateProfile(base44, perfil));
       }
@@ -100,6 +112,11 @@ Deno.serve(async (req) => {
 
     return Response.json({ ok: true, perfis_validados: results.length, conflitos: totalConflitos, results });
   } catch (error) {
+    const status = error?.status || error?.response?.status;
+    if (status === 429 || status === 502 || (typeof status === 'number' && status >= 500)) {
+      LAST_SOD_RUN_AT = Date.now();
+      return Response.json({ ok: true, skipped: true, reason: 'SoD pausado temporariamente por rate-limit' });
+    }
     return Response.json({ error: String(error?.message || error) }, { status: 500 });
   }
 });

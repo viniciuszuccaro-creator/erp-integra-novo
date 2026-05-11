@@ -65,15 +65,15 @@ Deno.serve(async (req) => {
     const where = (extra = {}) => ({ ...(filtros?.empresa_id ? { empresa_id: filtros.empresa_id } : {}), ...(filtros?.group_id ? { group_id: filtros.group_id } : {}), ...extra });
 
     const entidades = {
-      Cliente: await base44.asServiceRole.entities.Cliente.filter(where(), '-updated_date', 500),
-      Fornecedor: await base44.asServiceRole.entities.Fornecedor.filter(where(), '-updated_date', 500),
-      Produto: await base44.asServiceRole.entities.Produto.filter(where(), '-updated_date', 500),
-      Pedido: await base44.asServiceRole.entities.Pedido.filter(where(), '-updated_date', 500),
-      ContaPagar: await base44.asServiceRole.entities.ContaPagar.filter(where(), '-updated_date', 500),
-      ContaReceber: await base44.asServiceRole.entities.ContaReceber.filter(where(), '-updated_date', 500),
-      NotaFiscal: await base44.asServiceRole.entities.NotaFiscal.filter(where(), '-updated_date', 500),
-      Entrega: await base44.asServiceRole.entities.Entrega.filter(where(), '-updated_date', 500),
-      MovimentacaoEstoque: await base44.asServiceRole.entities.MovimentacaoEstoque.filter(where(), '-updated_date', 500),
+      Cliente: await base44.asServiceRole.entities.Cliente.filter(where(), '-updated_date', 200),
+      Fornecedor: await base44.asServiceRole.entities.Fornecedor.filter(where(), '-updated_date', 200),
+      Produto: await base44.asServiceRole.entities.Produto.filter(where(), '-updated_date', 200),
+      Pedido: await base44.asServiceRole.entities.Pedido.filter(where(), '-updated_date', 200),
+      ContaPagar: await base44.asServiceRole.entities.ContaPagar.filter(where(), '-updated_date', 200),
+      ContaReceber: await base44.asServiceRole.entities.ContaReceber.filter(where(), '-updated_date', 200),
+      NotaFiscal: await base44.asServiceRole.entities.NotaFiscal.filter(where(), '-updated_date', 200),
+      Entrega: await base44.asServiceRole.entities.Entrega.filter(where(), '-updated_date', 200),
+      MovimentacaoEstoque: await base44.asServiceRole.entities.MovimentacaoEstoque.filter(where(), '-updated_date', 200),
     };
 
     const payload = {

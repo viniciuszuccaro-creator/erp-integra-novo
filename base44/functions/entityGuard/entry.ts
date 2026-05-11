@@ -7,7 +7,10 @@ const __MAX_REQ = 120;
 
 // Cache de permissões por usuário (evita chamar auth.me() a cada request)
 const __PERM_CACHE = globalThis.__egPermCache || (globalThis.__egPermCache = new Map());
-const __PERM_TTL = 300_000; // 5 min
+const __DECISION_CACHE = globalThis.__egDecisionCache || (globalThis.__egDecisionCache = new Map());
+let __BACKEND_PAUSED_UNTIL = globalThis.__egBackendPausedUntil || 0;
+const __PERM_TTL = 900_000; // 15 min
+const __DECISION_TTL = 300_000; // 5 min
 
 Deno.serve(async (req) => {
   try {
@@ -17,6 +20,10 @@ Deno.serve(async (req) => {
     // Ping de automação
     if (!body || Object.keys(body).length === 0 || body._automation === true) {
       return Response.json({ ok: true, status: 'healthy' });
+    }
+
+    if (Date.now() < __BACKEND_PAUSED_UNTIL) {
+      return Response.json({ allowed: true, _fallback: true, reason: 'entityGuard em cooldown por rate-limit' });
     }
 
     // Rate limit por IP
@@ -111,10 +118,17 @@ Deno.serve(async (req) => {
       return found ? root[found] : undefined;
     };
 
+    const decisionKey = JSON.stringify({ u: user?.id, r: user?.role, m: body?.module, s: body?.section, a: body?.action, e: body?.entity_name });
+    const decisionCached = __DECISION_CACHE.get(decisionKey);
+    if (decisionCached && Date.now() - decisionCached.ts < __DECISION_TTL) {
+      return Response.json({ allowed: decisionCached.allowed, _cached: true });
+    }
+
     // Proteção de entidades críticas
     const targetEntity = body?.entity_name;
     if (targetEntity && targetEntity === 'AuditLog') {
       if (['criar', 'editar', 'excluir'].includes(desired)) {
+        __DECISION_CACHE.set(decisionKey, { allowed: false, ts: Date.now() });
         return Response.json({ allowed: false }, { status: 403 });
       }
     }
@@ -162,10 +176,19 @@ Deno.serve(async (req) => {
     // Sem escopo multiempresa → permite (o frontend já valida o contexto)
     // NÃO bloquear por falta de empresa_id pois algumas entidades são globais
 
+    __DECISION_CACHE.set(decisionKey, { allowed, ts: Date.now() });
+    if (__DECISION_CACHE.size > 1000) {
+      const oldest = __DECISION_CACHE.keys().next().value;
+      __DECISION_CACHE.delete(oldest);
+    }
     return Response.json({ allowed });
 
   } catch (err) {
-    // Em caso de erro interno, PERMITE (fail-open) para não bloquear operações
+    const status = err?.status || err?.response?.status;
+    if (status === 429 || status === 502 || (typeof status === 'number' && status >= 500)) {
+      __BACKEND_PAUSED_UNTIL = Date.now() + 120000;
+      globalThis.__egBackendPausedUntil = __BACKEND_PAUSED_UNTIL;
+    }
     return Response.json({ allowed: true, _fallback: true });
   }
 });

@@ -159,28 +159,34 @@ Deno.serve(async (req) => {
       const beforeVal = extractToggle(previousData);
       const afterVal = extractToggle(recordData);
       const resumoValor = (beforeVal !== undefined || afterVal !== undefined) ? ` • valor: ${String(beforeVal)} → ${String(afterVal)}` : '';
-      await base44.asServiceRole.entities.AuditLog.create({
-        usuario: usuarioPref,
-        usuario_id: usuarioIdPref,
-        acao,
-        modulo,
-        tipo_auditoria,
-        entidade: entidade,
-        registro_id: event.entity_id,
-        descricao: `${entidade} • ${acao}${acaoNegocio ? ' • ação: ' + acaoNegocio : ''}${paramKey ? ' • param: ' + paramKey : ''} • risco ${risk.level}${gaps.length ? ' • gaps: ' + gaps.join(',') : ''}${diffSensitive.length ? ' • mudança sensível' : ''}${resumoValor}`,
-        empresa_id: empresa_id || null,
-        group_id: group_id || null,
-        dados_anteriores: tipoEvento !== 'create' ? safeTrimPayload(previousData) : null,
-        dados_novos: tipoEvento !== 'delete' ? safeTrimPayload({ ...recordData, __diff_sensitive: diffSensitive, __risk: risk }) : null,
-        ip_address: ip,
-        user_agent: ua,
-        data_hora: new Date().toISOString(),
-      });
+      try {
+        await base44.asServiceRole.entities.AuditLog.create({
+          usuario: usuarioPref,
+          usuario_id: usuarioIdPref,
+          acao,
+          modulo,
+          tipo_auditoria,
+          entidade: entidade,
+          registro_id: event.entity_id,
+          descricao: `${entidade} • ${acao}${acaoNegocio ? ' • ação: ' + acaoNegocio : ''}${paramKey ? ' • param: ' + paramKey : ''} • risco ${risk.level}${gaps.length ? ' • gaps: ' + gaps.join(',') : ''}${diffSensitive.length ? ' • mudança sensível' : ''}${resumoValor}`,
+          empresa_id: empresa_id || null,
+          group_id: group_id || null,
+          dados_anteriores: tipoEvento !== 'create' ? safeTrimPayload(previousData) : null,
+          dados_novos: tipoEvento !== 'delete' ? safeTrimPayload({ ...recordData, __diff_sensitive: diffSensitive, __risk: risk }) : null,
+          ip_address: ip,
+          user_agent: ua,
+          data_hora: new Date().toISOString(),
+        });
+      } catch (auditError) {
+        const status = auditError?.status || auditError?.response?.status;
+        if (status !== 429) throw auditError;
+        return Response.json({ ok: true, skipped_audit: true, reason: 'auditoria em cooldown por rate-limit' });
+      }
     }
 
     // Telemetria de performance
     const dur = Date.now() - t0;
-    if (dur > 500) {
+    if (dur > 3000) {
       try {
         await base44.asServiceRole.entities.AuditLog.create({
           usuario: 'Sistema',

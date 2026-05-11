@@ -14,7 +14,7 @@ const BLOCKED_DOC_PATTERN = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MAN
 const BLOCKED_MIRROR_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i;
 const TEXT_OR_DATA_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml|jsxe)$/i;
 
-function removeIfBlocked(root, filePath, removedFiles) {
+function neutralizeIfBlocked(root, filePath, removedFiles) {
   const relativePath = normalize(path.relative(root, filePath));
   const fileName = relativePath.split('/').pop() || '';
   const extension = path.extname(fileName);
@@ -23,8 +23,14 @@ function removeIfBlocked(root, filePath, removedFiles) {
   if (!blocked) return false;
 
   try {
-    fs.rmSync(filePath, { force: true, recursive: true });
-    removedFiles.push(relativePath);
+    if (/\.(js|jsx|ts|tsx)$/i.test(fileName)) {
+      const safeName = `DocumentationArtifact_${fileName.replace(/[^a-zA-Z0-9_$]/g, '_')}`;
+      fs.writeFileSync(filePath, `const ${safeName} = () => null;\nexport default ${safeName};\n`);
+      removedFiles.push(`${relativePath}::neutralized`);
+    } else {
+      fs.rmSync(filePath, { force: true, recursive: true });
+      removedFiles.push(relativePath);
+    }
     return true;
   } catch {
     return false;
@@ -59,7 +65,7 @@ function cleanSourceDirectories(root) {
           removedFiles.push(relativePath);
           continue;
         }
-        removeIfBlocked(root, fullPath, removedFiles);
+        neutralizeIfBlocked(root, fullPath, removedFiles);
       }
     }
   };
@@ -89,8 +95,15 @@ function purgeGlobalDocumentationMirrors(root) {
       if (!entry.isFile()) continue;
       if (BLOCKED_MIRROR_PATTERN.test(relativePath) || /\.md\.jsx$/i.test(relativePath) || BLOCKED_DOC_PATTERN.test(relativePath)) {
         try {
-          fs.rmSync(fullPath, { force: true, recursive: true });
-          removedFiles.push(relativePath);
+          if (/\.(js|jsx|ts|tsx)$/i.test(relativePath)) {
+            const fileName = relativePath.split('/').pop() || 'Artifact.jsx';
+            const safeName = `DocumentationArtifact_${fileName.replace(/[^a-zA-Z0-9_$]/g, '_')}`;
+            fs.writeFileSync(fullPath, `const ${safeName} = () => null;\nexport default ${safeName};\n`);
+            removedFiles.push(`${relativePath}::neutralized`);
+          } else {
+            fs.rmSync(fullPath, { force: true, recursive: true });
+            removedFiles.push(relativePath);
+          }
         } catch {}
       }
     }

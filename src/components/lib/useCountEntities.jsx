@@ -170,8 +170,8 @@ export function useCountEntities(entityName, filter = {}, options = {}) {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    retry: 2,
-    retryDelay: (i) => Math.min(1000 * 2 ** i, 5000),
+    retry: 0,
+    retryDelay: 0,
     enabled: options.enabled ?? true,
     placeholderData: (prev) => {
       if (prev !== undefined) return prev;

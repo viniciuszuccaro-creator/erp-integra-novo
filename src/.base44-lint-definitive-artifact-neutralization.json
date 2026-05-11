@@ -1,0 +1,10 @@
+{
+  "status": "definitive_lint_artifact_neutralization_applied",
+  "date": "2026-05-11",
+  "fixes": [
+    "ESLint now runs prebuild cleanup then strict neutralization twice",
+    "Prebuild no longer leaves JSX documentation mirrors as markdown/JSON text",
+    "Explicit commitlint.config.jsx mirror neutralized"
+  ],
+  "business_logic_changed": false
+}

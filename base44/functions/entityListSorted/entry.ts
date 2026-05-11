@@ -1,5 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
+const LIST_CACHE = new Map();
+const LIST_CACHE_TTL_MS = 2 * 60 * 1000;
+let LIST_LAST_CALL_AT = 0;
+const LIST_MIN_GAP_MS = 1200;
+
+function stableListKey(value) {
+  try { return JSON.stringify(value || {}, Object.keys(value || {}).sort()); }
+  catch (_) { return JSON.stringify({}); }
+}
+
 const DEFAULT_SORTS = {
   Produto: { field: 'descricao', direction: 'asc' }, Cliente: { field: 'nome', direction: 'asc' },
   Fornecedor: { field: 'nome', direction: 'asc' }, Transportadora: { field: 'razao_social', direction: 'asc' },
@@ -250,8 +260,30 @@ async function listOne(base44, user, q) {
     finalFilter = hasScope ? { $and: [finalFilter, { $or: embeddedSearch }] } : { $or: embeddedSearch };
   }
 
-  const items = await base44.asServiceRole.entities[entityName].filter(finalFilter, orderHint, limit, skip) || [];
-  return { entityName, items };
+  const cacheKey = `${entityName}:${stableListKey(finalFilter)}:${orderHint}:${limit}:${skip}`;
+  const cached = LIST_CACHE.get(cacheKey);
+  if (cached && Date.now() - cached.ts < LIST_CACHE_TTL_MS) {
+    return { entityName, items: cached.items };
+  }
+
+  try {
+    const now = Date.now();
+    const waitMs = Math.max(0, LIST_MIN_GAP_MS - (now - LIST_LAST_CALL_AT));
+    if (waitMs > 0) {
+      if (cached) return { entityName, items: cached.items };
+      await new Promise(r => setTimeout(r, waitMs));
+    }
+    LIST_LAST_CALL_AT = Date.now();
+    const items = await base44.asServiceRole.entities[entityName].filter(finalFilter, orderHint, limit, skip) || [];
+    LIST_CACHE.set(cacheKey, { items, ts: Date.now() });
+    return { entityName, items };
+  } catch (err) {
+    const status = err?.status || err?.response?.status;
+    if (status === 429 && cached) {
+      return { entityName, items: cached.items };
+    }
+    throw err;
+  }
 }
 
 // Compressão gzip quando suportado

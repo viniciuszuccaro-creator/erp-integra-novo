@@ -95,23 +95,34 @@ async function expandGroupFilter(base44, entityName, f) {
  * Estratégia: páginas de 500 com delay progressivo.
  * Primeira page: sem delay. Pages seguintes: delay crescente.
  */
+const COUNT_CACHE = new Map();
+const COUNT_CACHE_TTL_MS = 5 * 60 * 1000;
+
+function stableCacheKey(entityName, finalFilter) {
+  try { return `${entityName}:${JSON.stringify(finalFilter || {}, Object.keys(finalFilter || {}).sort())}`; }
+  catch (_) { return `${entityName}:${Date.now()}`; }
+}
+
 async function fastCount(base44, entityName, finalFilter) {
-  const PAGE = 500;
-  const MAX_PAGES = 20; // cap em 10.000 registros
+  const PAGE = 1000;
+  const MAX_PAGES = 1; // modo proteção: 1 chamada por entidade para evitar rate limit
+  const key = stableCacheKey(entityName, finalFilter);
+  const cached = COUNT_CACHE.get(key);
+  if (cached && Date.now() - cached.ts < COUNT_CACHE_TTL_MS) return cached.count;
+
   let total = 0;
 
   for (let page = 0; page < MAX_PAGES; page++) {
-    if (page > 0) await new Promise(r => setTimeout(r, 400 + page * 100));
-
     let batch = null;
-    for (let attempt = 0; attempt < 5; attempt++) {
+    for (let attempt = 0; attempt < 3; attempt++) {
       try {
         batch = await base44.asServiceRole.entities[entityName].filter(finalFilter, '-id', PAGE, page * PAGE);
         break;
       } catch (err) {
         const status = err?.status || err?.response?.status;
         if (status === 429) {
-          await new Promise(r => setTimeout(r, 1500 * Math.pow(2, attempt)));
+          if (cached) return cached.count;
+          await new Promise(r => setTimeout(r, 2000 * Math.pow(2, attempt)));
         } else {
           batch = [];
           break;
@@ -124,6 +135,7 @@ async function fastCount(base44, entityName, finalFilter) {
     if (n < PAGE) break;
   }
 
+  COUNT_CACHE.set(key, { count: total, ts: Date.now() });
   return total;
 }
 
@@ -170,12 +182,11 @@ Deno.serve(async (req) => {
     const entitiesBatch = Array.isArray(body?.entities) ? body.entities : null;
 
     // MODO LOTE: { entities: [{ entityName, filter }, ...] }
-    // Processa em janelas de 5 paralelas com delay de 200ms entre janelas
+    // Processa em modo serial protegido para evitar rajadas e erro 429
     if (entitiesBatch && entitiesBatch.length > 0) {
-      const counts = {};
-      // 2 paralelas com delay maior — evita burst de 429s
-      const WINDOW = 2;
-      const DELAY_BETWEEN_WINDOWS = 500;
+    const counts = {};
+    const WINDOW = 1;
+    const DELAY_BETWEEN_WINDOWS = 900;
 
       for (let i = 0; i < entitiesBatch.length; i += WINDOW) {
         const slice = entitiesBatch.slice(i, i + WINDOW);

@@ -122,7 +122,7 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
         const now = Date.now();
         const last = __elsLastCallAt.get(entityName) || 0;
         const since = now - last;
-        const minGap = 600; // ms
+        const minGap = 2500; // proteção anti-rate-limit global por entidade
         const cooldown = __elsCooldownUntil.get(entityName) || 0;
         const waitMs = Math.max(0, cooldown - now, since < minGap ? (minGap - since) : 0);
         if (waitMs > 0) {
@@ -143,6 +143,7 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
             });
             const out = Array.isArray(res?.data) ? res.data : [];
             __elsCache.set(key, out);
+            __elsCache.set(cacheKey, out);
             __elsLastCallAt.set(entityName, Date.now());
             __elsStrikeCount.set(entityName, 0);
             // Fase 3: persiste no IDB (TTL 10 min) para cache entre recarregamentos
@@ -157,7 +158,7 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
                 const base = 800;
                 const jitter = Math.floor(Math.random() * 400);
                 const sleep = base * Math.pow(2, attempt) + jitter;
-                __elsCooldownUntil.set(entityName, Date.now() + Math.max(1200, sleep));
+                __elsCooldownUntil.set(entityName, Date.now() + Math.max(15000, sleep));
                 await new Promise(r => setTimeout(r, sleep));
                 attempt++;
                 continue;
@@ -191,8 +192,8 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
       __elsInflight.set(key, p);
       return p;
     },
-    staleTime: 90_000,
-    gcTime: 300_000,
+    staleTime: 300_000,
+    gcTime: 900_000,
     placeholderData: (prev) => {
       if (prev !== undefined) return prev;
       if (__elsCache.has(cacheKey)) return __elsCache.get(cacheKey);
@@ -203,8 +204,8 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    retry: 3,
-    retryDelay: (attempt) => Math.min(800 * Math.pow(2, attempt), 6000),
+    retry: 0,
+    retryDelay: 0,
     enabled: enabledFlag,
   });
 }

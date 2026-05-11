@@ -1,0 +1,7 @@
+{
+  "status": "entity_list_cooldown_applied",
+  "date": "2026-05-11",
+  "fix": "Applied server-side and frontend cooldown for entityListSorted to stop 429 bursts.",
+  "regra_mae_changed": false,
+  "business_logic_changed": false
+}

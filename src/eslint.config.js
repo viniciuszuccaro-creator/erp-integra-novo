@@ -2,9 +2,10 @@ import { runStableEnvironmentCheck } from './build-tools/stableEnvironmentCheck.
 import { runPrebuildIntegrityCheck } from './build-tools/prebuildIntegrityCheck.js';
 import { runStrictDuplicateArtifactGuard } from './build-tools/strictDuplicateArtifactGuard.js';
 
-runStrictDuplicateArtifactGuard('.');
 runPrebuildIntegrityCheck('.');
+runStrictDuplicateArtifactGuard('.');
 runStableEnvironmentCheck('.');
+runStrictDuplicateArtifactGuard('.');
 
 const documentationArtifactIgnores = [
   'src/components/**/*.md.jsx',

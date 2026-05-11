@@ -5,6 +5,8 @@ export const DOCUMENTATION_PREFIX_PATTERN = /^(README|CERTIFICADO|CERTIFICACAO|C
 export const DOCUMENTATION_EXTENSION_PATTERN = /\.(md|txt|rst|adoc|json|config)(\.(js|jsx|ts|tsx))?$/i;
 export const DOCUMENTATION_MIRROR_PATTERN = /\.(md|txt|rst|adoc|json|config)\.(js|jsx|ts|tsx)$/i;
 export const BUILD_CACHE_DIRS = ['node_modules/.vite', 'node_modules/.cache', 'dist/.vite', '.vite', '.eslintcache', 'build/.vite'];
+export const TEMP_LOG_DIRS = ['tmp', 'temp', '.tmp', 'logs', 'coverage', 'dist/.cache', 'build/.cache'];
+export const TEMP_LOG_FILE_PATTERN = /\.(log|tmp|temp|cache|bak|old|orig)$/i;
 export const PROTECTED_DOC_DIR_PATTERN = /(^|\/)(src\/components|components)(\/|$)/i;
 
 const normalize = (value = '') => String(value || '').replace(/\\/g, '/');
@@ -39,7 +41,48 @@ export function purgeBuildCaches(rootDir = '.') {
     if (removePath(path.resolve(root, cacheDir))) removed += 1;
   }
 
+  for (const tempDir of TEMP_LOG_DIRS) {
+    if (removePath(path.resolve(root, tempDir))) removed += 1;
+  }
+
   return { removed };
+}
+
+export function purgeTemporaryLogs(rootDir = '.') {
+  const root = path.resolve(rootDir);
+  const removedFiles = [];
+
+  const visit = (dir) => {
+    if (!fs.existsSync(dir)) return;
+    let entries = [];
+
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      const relativePath = normalize(path.relative(root, fullPath));
+
+      if (entry.isDirectory()) {
+        if (/^(node_modules|dist|build|\.git|\.vite)$/.test(entry.name)) continue;
+        visit(fullPath);
+        continue;
+      }
+
+      if (entry.isFile() && TEMP_LOG_FILE_PATTERN.test(entry.name)) {
+        try {
+          fs.unlinkSync(fullPath);
+          removedFiles.push(relativePath);
+        } catch {}
+      }
+    }
+  };
+
+  visit(root);
+  return { removedCount: removedFiles.length, removedFiles };
 }
 
 export function purgeDocumentationArtifacts(rootDir = '.') {
@@ -80,10 +123,13 @@ export function purgeDocumentationArtifacts(rootDir = '.') {
 
   visit(root);
   const cache = purgeBuildCaches(root);
+  const temp = purgeTemporaryLogs(root);
 
   return {
     removedCount: removedFiles.length,
     removedFiles,
     cacheRemovedCount: cache.removed,
+    tempLogRemovedCount: temp.removedCount,
+    tempLogRemovedFiles: temp.removedFiles,
   };
 }

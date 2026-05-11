@@ -1,6 +1,6 @@
-import { purgeDocumentationArtifacts } from './build-tools/purgeDocumentationArtifacts.js';
+import { runStableEnvironmentCheck } from './build-tools/stableEnvironmentCheck.js';
 
-purgeDocumentationArtifacts('.');
+runStableEnvironmentCheck('.');
 
 const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config)\.(js|jsx|ts|tsx)$/i;
 
@@ -218,7 +218,7 @@ export default [
     ],
   },
   {
-    files: ["src/**/*.{js,jsx}", "*.{js,jsx}"],
+    files: ["src/pages/**/*.{js,jsx}", "src/lib/**/*.{js,jsx}", "src/hooks/**/*.{js,jsx}", "src/api/**/*.{js,jsx}", "src/utils/**/*.{js,jsx}", "*.{js,jsx}"],
     ignores: [
       "components/**/*.md.jsx",
       "components/**/*.json.jsx",

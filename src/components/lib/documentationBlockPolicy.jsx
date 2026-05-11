@@ -28,6 +28,8 @@ export const DOCUMENTATION_BLOCK_POLICY = Object.freeze({
   blockComponentDocumentationGeneration: true,
   blockDocumentationMirrors: true,
   purgeBuildCache: true,
+  purgeTemporaryLogs: true,
+  runStableEnvironmentCheck: true,
   protectedDirectories: ['src/components', 'components'],
   ignoredExtensions: ['.md', '.txt', '.rst', '.adoc', '.json', '.config', '.jsx', '.md.jsx', '.txt.jsx', '.rst.jsx', '.adoc.jsx', '.json.jsx', '.config.jsx', '.md.js', '.json.js', '.config.js'],
   buildCacheDirs: BUILD_CACHE_DIRS,

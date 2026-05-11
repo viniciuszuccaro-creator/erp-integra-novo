@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Loader2, PlayCircle, ShieldCheck } from 'lucide-react';
 import { criticalBacklogItems, criticalValidationActions } from './criticalExecutionPlan';
-import { buildImprovementExecutionPayload, filterOperationalPlanItems } from './planoMelhoriaExecutionGuard';
+import { DOCUMENTATION_BLOCK_POLICY, buildImprovementExecutionPayload, filterOperationalPlanItems } from './planoMelhoriaExecutionGuard';
 
 const statusClass = {
   idle: 'bg-slate-50 text-slate-600 border-slate-200',
@@ -21,6 +21,7 @@ export default function PlanoMelhoriaCriticalExecutor() {
   const [backlogStatus, setBacklogStatus] = useState('idle');
   const [validationStatus, setValidationStatus] = useState({});
   const operationalBacklogItems = filterOperationalPlanItems(criticalBacklogItems);
+  const documentationPolicy = DOCUMENTATION_BLOCK_POLICY;
 
   const registrarBacklogCritico = async () => {
     setBacklogStatus('running');
@@ -60,7 +61,8 @@ export default function PlanoMelhoriaCriticalExecutor() {
             <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
               <ShieldCheck className="h-5 w-5 text-red-600" /> Executor crítico do plano
             </CardTitle>
-            <p className="mt-1 text-sm text-slate-500">Registra melhorias críticas e aciona validações de governança sem alterar os demais módulos.</p>
+            <p className="mt-1 text-sm text-slate-500">Registra melhorias críticas automaticamente com documentação bloqueada no processo.</p>
+            <p className="mt-1 text-xs text-emerald-700">Política ativa: {documentationPolicy.ignoredExtensions.length} extensões ignoradas e cache de build limpo.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={registrarBacklogCritico} disabled={backlogStatus === 'running'}>

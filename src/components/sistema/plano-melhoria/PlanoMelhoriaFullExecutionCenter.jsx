@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle2, Loader2, PlayCircle, Rocket, ShieldCheck } from 'lucide-react';
 import { fullPlanBacklogItems, fullPlanValidationStack } from './planoMelhoriaFullExecutionData';
-import { buildImprovementExecutionPayload, filterOperationalPlanItems } from './planoMelhoriaExecutionGuard';
+import { DOCUMENTATION_BLOCK_POLICY, buildImprovementExecutionPayload, filterOperationalPlanItems } from './planoMelhoriaExecutionGuard';
 
 const stateClass = {
   idle: 'bg-slate-50 text-slate-600 border-slate-200',
@@ -22,6 +22,7 @@ export default function PlanoMelhoriaFullExecutionCenter() {
   const [executionState, setExecutionState] = useState('idle');
   const [validationState, setValidationState] = useState({});
   const operationalBacklogItems = useMemo(() => filterOperationalPlanItems(fullPlanBacklogItems), []);
+  const documentationPolicy = DOCUMENTATION_BLOCK_POLICY;
 
   const progress = useMemo(() => Math.round(
     operationalBacklogItems.reduce((sum, item) => sum + (item.percentual || 0), 0) / operationalBacklogItems.length
@@ -64,7 +65,7 @@ export default function PlanoMelhoriaFullExecutionCenter() {
               <Rocket className="h-6 w-6 text-cyan-300" /> Execução completa do Plano de Melhoria
             </CardTitle>
             <p className="mt-2 max-w-3xl text-sm text-slate-300">
-              Converte todas as fases e sprints em backlog vivo, preservando módulos existentes e mantendo multiempresa, acesso, IA e auditoria como padrão.
+              Converte todas as fases e sprints em backlog vivo, com execução automática e bloqueio estrito de documentação como código.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -90,7 +91,7 @@ export default function PlanoMelhoriaFullExecutionCenter() {
             </Badge>
           </div>
           <Progress value={progress} className="mt-5 h-2 bg-white/20" />
-          <p className="mt-4 text-sm text-slate-300">{operationalBacklogItems.length} melhorias operacionais preparadas; documentação é ignorada automaticamente.</p>
+          <p className="mt-4 text-sm text-slate-300">{operationalBacklogItems.length} melhorias operacionais preparadas; {documentationPolicy.ignoredExtensions.length} extensões de documentação são ignoradas automaticamente.</p>
         </div>
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {fullPlanValidationStack.map((item) => {

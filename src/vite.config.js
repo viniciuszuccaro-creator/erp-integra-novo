@@ -1,214 +1,92 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import path from 'path';
-import fs from 'node:fs';
-import { isDocumentationArtifactPath } from './src/components/lib/documentationBlockPolicy.js';
-import { isBlockedDocumentationArtifact, purgeBuildCaches, purgeDocumentationArtifacts } from './build-tools/purgeDocumentationArtifacts.js';
-import { runStableEnvironmentCheck } from './build-tools/stableEnvironmentCheck.js';
-import { verifyChatbotComponents } from './build-tools/verifyChatbotComponents.js';
-import { forceProjectReindex } from './build-tools/projectReindex.js';
-import { viteDefineConfig } from './build-tools/buildRuntimeConfig.js';
-import { runPrebuildIntegrityCheck } from './build-tools/prebuildIntegrityCheck.js';
-import { guardDocumentationArtifacts } from './build-tools/documentationGuard.js';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import path from 'path'
+import fs from 'fs'
 
-const documentationArtifactFilePattern = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPAS|ETAPA|FASES|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|FLUXO|ZINDEX|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(md|txt|rst|adoc|json|config|yaml|yml|js|jsx|ts|tsx))?$/i;
-const documentationExtensionPattern = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i;
-const textDocumentationPattern = /\.(md|txt|rst|adoc|yaml|yml|jsxe)$/i;
-const componentDocumentationMirrorPattern = /\/src\/components\/.*(\.md\.jsx|\.md\.jsxe|\.txt\.jsx|\.rst\.jsx|\.adoc\.jsx|\.json\.jsx|\.config\.jsx)$/i;
-const buildCacheDirs = ['node_modules/.vite', 'node_modules/.cache', 'dist/.vite', '.vite', '.eslintcache', 'build/.vite'];
-const validComponentCodePattern = /\.(js|jsx|ts|tsx|css)$/i;
-const blockedComponentDocExtensions = ['.md', '.txt', '.rst', '.adoc', '.json', '.config', '.yaml', '.yml', '.jsxe', '.md.jsx', '.md.jsxe', '.txt.jsx', '.rst.jsx', '.adoc.jsx', '.json.jsx', '.config.jsx', '.md.js', '.json.js', '.config.js'];
-const blockedComponentDocPrefixes = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFICADO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPAS|ETAPA|FASES|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|FLUXO|ZINDEX|rhf_zod_report|UnidadesDeMedida)/i;
-const chatbotDocumentationPattern = /(^|\/)(src\/)?components\/chatbot\/.*(\.(md|txt|rst|adoc|json|config|yaml|yml)(\.(js|jsx|jsxe|ts|tsx))?|README|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|STATUS|GUIA|DOC)/i;
+// Padrões BLOQUEADOS absolutamente
+const FORBIDDEN_PATTERNS = [
+  /\.(md|txt|rst|adoc|json|yaml|yml)\.(jsx?|tsx?)$/i,
+  /\.config\.(jsx?|tsx?)$/i,
+  /[A-Z][A-Z0-9_]*(CERTIFICADO|CERTIFICACAO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|FLUXO|ZINDEX|rhf_zod_report|UnidadesDeMedida)[^/]*\.(jsx?|tsx?)$/i,
+]
 
-function neutralDocumentationContent(filePath = '') {
-  const safeName = `BlockedDoc_${String(filePath).replace(/[^a-zA-Z0-9_$]/g, '_')}`;
-  return `const ${safeName} = () => null;\nexport default ${safeName};\n`;
-}
+const isForbidden = (filePath) => FORBIDDEN_PATTERNS.some(p => p.test(filePath))
 
-function neutralizeDocumentationFile(filePath) {
+// Limpeza agressiva de artefatos
+const purgeArtifacts = (dir) => {
   try {
-    if (fs.existsSync(filePath)) fs.writeFileSync(filePath, neutralDocumentationContent(filePath));
-  } catch {}
+    const entries = fs.readdirSync(dir, { withFileTypes: true })
+    entries.forEach(entry => {
+      const fullPath = path.join(dir, entry.name)
+      if (entry.isDirectory() && !['node_modules', '.git', 'dist', '.vite'].includes(entry.name)) {
+        purgeArtifacts(fullPath)
+      } else if (entry.isFile() && isForbidden(fullPath)) {
+        try {
+          fs.unlinkSync(fullPath)
+          console.warn(`⚠️  PURGED: ${path.relative(process.cwd(), fullPath)}`)
+        } catch (_) {}
+      }
+    })
+  } catch (e) {}
 }
-
-function blockDocumentation() {
-  const isBlockedPath = (input = '') => {
-    const normalized = input.replace(/\\/g, '/');
-    const fileName = normalized.split('/').pop() || '';
-    const isInSrc = normalized.includes('/src/') || normalized.startsWith('src/');
-    const isInComponents = /(^|\/)src\/components\//i.test(normalized) || /(^|\/)components\//i.test(normalized);
-    const isComponentDocMirror = /(^|\/)src\/components\//i.test(normalized) && /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPAS|ETAPA|FASES|FASE|SISTEMA|BOTOES|CORRECAO|FLUXO|ZINDEX|rhf_zod_report|UnidadesDeMedida)[^/]*\.jsx$/i.test(fileName);
-
-    if (isInComponents && !validComponentCodePattern.test(fileName)) return true;
-
-    return chatbotDocumentationPattern.test(normalized) || isComponentDocMirror || (isInSrc && (
-      isBlockedDocumentationArtifact(normalized) ||
-      isDocumentationArtifactPath(normalized) ||
-      textDocumentationPattern.test(fileName) ||
-      documentationExtensionPattern.test(fileName) ||
-      componentDocumentationMirrorPattern.test(normalized) ||
-      documentationArtifactFilePattern.test(fileName) ||
-      blockedComponentDocPrefixes.test(fileName)
-    ));
-  };
-
-  return {
-    name: 'block-documentation-artifacts',
-    enforce: 'pre',
-    buildStart() {
-       guardDocumentationArtifacts(__dirname);
-       const cleanup = (dir) => {
-         if (!fs.existsSync(dir)) return;
-         for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-           const filePath = path.join(dir, entry.name);
-           if (entry.isDirectory()) {
-             cleanup(filePath);
-             try {
-               if (fs.existsSync(filePath) && fs.readdirSync(filePath).length === 0) fs.rmdirSync(filePath);
-             } catch {}
-             continue;
-           }
-           if (entry.isFile() && isBlockedPath(filePath)) neutralizeDocumentationFile(filePath);
-         }
-       };
-       runPrebuildIntegrityCheck(__dirname);
-       forceProjectReindex(__dirname);
-       runStableEnvironmentCheck(__dirname);
-       verifyChatbotComponents(__dirname);
-       purgeDocumentationArtifacts(__dirname);
-       cleanup(path.resolve(__dirname, 'src'));
-       cleanup(path.resolve(__dirname, 'components'));
-     },
-    configureServer(server) {
-      const purgeBuildCachesLocal = () => purgeBuildCaches(__dirname);
-      const purgeDocumentationNow = () => {
-        runPrebuildIntegrityCheck(__dirname);
-        forceProjectReindex(__dirname);
-        runStableEnvironmentCheck(__dirname);
-        verifyChatbotComponents(__dirname);
-        purgeDocumentationArtifacts(__dirname);
-      };
-      const blockFile = async (filePath) => {
-        if (!isBlockedPath(filePath)) return;
-        console.log('🚫 Documentação bloqueada: arquivo neutralizado antes de virar código');
-        try { server.watcher.unwatch(filePath); } catch {}
-        neutralizeDocumentationFile(filePath);
-        purgeBuildCachesLocal();
-      };
-
-      purgeDocumentationNow();
-      server.watcher.on('ready', purgeDocumentationNow);
-      server.watcher.on('add', blockFile);
-      server.watcher.on('change', blockFile);
-      server.watcher.on('unlink', (filePath) => {
-        if (blockedComponentDocExtensions.some((ext) => String(filePath).endsWith(ext)) || blockedComponentDocPrefixes.test(String(filePath).split(/[\\/]/).pop() || '')) {
-          purgeBuildCachesLocal();
-        }
-      });
-    },
-    handleHotUpdate(ctx) {
-      if (!isBlockedPath(ctx.file)) return undefined;
-      neutralizeDocumentationFile(ctx.file);
-      purgeBuildCaches(__dirname);
-      return [];
-    },
-    resolveId(source) {
-      if (isBlockedPath(source)) return '\0blocked-doc-file';
-      return null;
-    },
-    load(id) {
-      if (id === '\0blocked-doc-file' || isBlockedPath(id)) return 'export default undefined;';
-      return null;
-    },
-    transform(code, id) {
-      if (isBlockedPath(id)) return { code: 'export default undefined;', map: null };
-      return null;
-    },
-    generateBundle(_, bundle) {
-      Object.keys(bundle).forEach((fileName) => {
-        if (isBlockedPath(fileName) || documentationExtensionPattern.test(fileName) || componentDocumentationMirrorPattern.test(fileName)) {
-          delete bundle[fileName];
-        }
-      });
-    }
-  };
-}
-
-// PRE-BUILD: Limpar artefatos antes de qualquer coisa
-const preClean = () => {
-  const fs = require('fs');
-  const path = require('path');
-  const srcPath = path.resolve(__dirname, 'src');
-  
-  const isBlocked = (file) => {
-    const blocked = /(README|CERTIFICADO|CERTIFICACAO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS|STATUS|ETAPA|FASE|FLUXO|ZINDEX|rhf_zod_report|UnidadesDeMedida)[^/]*\.(md|txt|rst|adoc|json|yaml|yml)\.(js|jsx)$/i;
-    return blocked.test(file) || /\.(md|json|config|yaml|yml)\.(jsx?|ts)$/i.test(file);
-  };
-
-  const clean = (dir) => {
-    try {
-      fs.readdirSync(dir, { withFileTypes: true }).forEach(entry => {
-        const fullPath = path.join(dir, entry.name);
-        if (entry.isDirectory()) {
-          clean(fullPath);
-          try { if (fs.readdirSync(fullPath).length === 0) fs.rmdirSync(fullPath); } catch {}
-        } else if (isBlocked(fullPath)) {
-          try { fs.unlinkSync(fullPath); console.log(`🚫 PURGED: ${fullPath}`); } catch {}
-        }
-      });
-    } catch {}
-  };
-  
-  clean(srcPath);
-};
-
-preClean();
 
 export default defineConfig({
-  define: viteDefineConfig,
-  plugins: [blockDocumentation(), react()],
-  // Force delete build caches every time
-  optimizeDeps: {
-    force: true,
-  },
+  plugins: [
+    react(),
+    {
+      name: 'vite-anti-artifact-plugin',
+      apply: 'serve',
+      config() {
+        // Limpeza em serve (dev mode)
+        purgeArtifacts(path.resolve('src'))
+      },
+      resolveId(id) {
+        // Bloqueia resolução de artefatos
+        if (isForbidden(id)) {
+          throw new Error(`FORBIDDEN FILE (artifact): ${id}`)
+        }
+      },
+      transform(code, id) {
+        // Rejeita se conseguir passar (safety net)
+        if (isForbidden(id)) {
+          throw new Error(`FORBIDDEN FILE (transform): ${id}`)
+        }
+      },
+      handleHotUpdate({ file, server }) {
+        // Purga se arquivo questionável foi criado
+        if (isForbidden(file)) {
+          try {
+            fs.unlinkSync(file)
+            console.warn(`🔥 AUTO-DELETED (HMR): ${path.relative(process.cwd(), file)}`)
+          } catch (_) {}
+          return []
+        }
+      }
+    },
+  ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
+      '@': path.resolve(__dirname, './src'),
     },
-    extensions: ['.ts', '.tsx', '.js', '.jsx'],
   },
-  assetsInclude: ['**/*.svg', '**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.webp'],
-  optimizeDeps: {
-    exclude: [
-      '**/*.md.jsx',
-      '**/*.json.jsx',
-      '**/*.config.jsx',
-      '**/README*',
-      '**/CERTIFICADO*',
-      '**/CERTIFICACAO*',
-      '**/CERTIFIC*',
-      '**/MANIFESTO*',
-      '**/VALIDACAO*',
-      '**/CHECKLIST*',
-      '**/PROVA*',
-      '**/BLOQUEIO*',
-      '**/DIAGNOSTICO*',
-      '**/INTEGRACAO*',
-      '**/rhf_zod_report*',
-      '**/UnidadesDeMedida*',
-    ],
+  build: {
+    outDir: 'dist',
+    rollupOptions: {
+      input: path.resolve(__dirname, 'index.html'),
+    },
   },
   server: {
-    watch: {
-      ignored: [
-        '**/*.md', '**/*.txt', '**/*.rst', '**/*.adoc', '**/*.md.*', '**/*.json.*', '**/*.config.*',
-        '**/README*', '**/CERTIFICADO*', '**/CERTIFICACAO*', '**/CERTIFIC*', '**/MANIFESTO*', '**/VALIDACAO*',
-        '**/CHECKLIST*', '**/PROVA*', '**/BLOQUEIO*', '**/DIAGNOSTICO*', '**/INTEGRACAO*', '**/rhf_zod_report*',
-        '**/UnidadesDeMedida*', '**/*.md.jsx', '**/*.md.jsxe', '**/*.txt.jsx', '**/*.rst.jsx', '**/*.adoc.jsx',
-        '**/*.md.js', '**/*.txt.js', '**/*.rst.js', '**/*.adoc.js', '**/*.json.jsx', '**/*.config.jsx',
-        '**/*.json.js', '**/*.config.js', 'node_modules', '.git', 'dist',
-      ],
-    },
-  },
-});
+    middlewares: [
+      (req, res, next) => {
+        // Extra safety: bloqueia requisições para artefatos
+        const filePath = path.join('src', req.url)
+        if (isForbidden(filePath)) {
+          res.statusCode = 403
+          res.end('FORBIDDEN')
+          return
+        }
+        next()
+      }
+    ]
+  }
+})

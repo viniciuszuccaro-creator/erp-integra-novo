@@ -4,12 +4,11 @@ import reactHooks from "eslint-plugin-react-hooks";
 
 export default [
   {
-    // Ignorar TUDO — depois incluímos apenas o que realmente precisa de lint
+    // Ignora ABSOLUTAMENTE TUDO por padrão
     ignores: [
       "**/*",
+      // Whitelist apenas código legítimo de app
       "!src/pages/**/*.{js,jsx}",
-      "src/build-tools/**",
-      "build-tools/**",
       "!src/lib/**/*.{js,jsx}",
       "!src/api/**/*.{js,jsx}",
       "!src/hooks/**/*.{js,jsx}",

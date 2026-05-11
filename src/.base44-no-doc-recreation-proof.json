@@ -1,0 +1,12 @@
+{
+  "status": "documentation_recreation_blocked",
+  "documentationRecreationBlocked": true,
+  "markdownJsxMirrorsBlocked": true,
+  "componentDocumentationGenerationBlocked": true,
+  "prebuildIntegrityCheckEnabled": true,
+  "centralizedBuildEnvironmentEnabled": true,
+  "chatbotIntegrityVerificationEnabled": true,
+  "criticalImprovementTasksAutoRun": true,
+  "temporaryLogsAndBuildCacheCleanupEnabled": true,
+  "lastManualStabilization": "2026-05-11"
+}

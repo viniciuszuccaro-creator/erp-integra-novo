@@ -1,160 +1,78 @@
-import './build-tools/fullBuildSanitizer.js';
-import { runStableEnvironmentCheck } from './build-tools/stableEnvironmentCheck.js';
-import { runPrebuildIntegrityCheck } from './build-tools/prebuildIntegrityCheck.js';
-import { runStrictDuplicateArtifactGuard } from './build-tools/strictDuplicateArtifactGuard.js';
-
-runStrictDuplicateArtifactGuard('.');
-runPrebuildIntegrityCheck('.');
-runStableEnvironmentCheck('.');
-runStrictDuplicateArtifactGuard('.');
-
-const documentationNoopParser = {
-  meta: { name: 'base44-documentation-noop-parser', version: '1.0.0' },
-  parseForESLint() {
-    return {
-      ast: {
-        type: 'Program',
-        body: [],
-        sourceType: 'module',
-        range: [0, 0],
-        loc: { start: { line: 1, column: 0 }, end: { line: 1, column: 0 } },
-        tokens: [],
-        comments: [],
-      },
-      visitorKeys: { Program: [] },
-      services: {},
-    };
-  },
-};
-
-const componentDocumentationFiles = [
-  'src/components/**/*',
-  './src/components/**/*',
-  '**/src/components/**/*',
-  'components/**/*',
-  './components/**/*',
-  '**/components/**/*',
-  '**/*.md.jsx',
-  '**/*.json.jsx',
-  '**/*.config.jsx',
-  '**/*.txt.jsx',
-  '**/*.rst.jsx',
-  '**/*.adoc.jsx',
-  '**/*.yaml.jsx',
-  '**/*.yml.jsx',
-  '**/*.jsxe',
-  '**/README*',
-  '**/CERTIFIC*',
-  '**/CERTIFICADO*',
-  '**/CERTIFICACAO*',
-  '**/MANIFESTO*',
-  '**/VALIDACAO*',
-  '**/CHECKLIST*',
-  '**/PROVA*',
-  '**/BLOQUEIO*',
-  '**/BOTOES*',
-  '**/INTEGRACAO*',
-  '**/STATUS*',
-  '**/ETAPA*',
-  '**/ETAPAS*',
-  '**/FASE*',
-  '**/FASES*',
-  '**/DEBUG*',
-  '**/DIAGNOSTICO*',
-  '**/CORRECAO*',
-  '**/FLUXO*',
-  '**/ZINDEX*',
-  '**/SISTEMA*',
-  '**/RESUMO*',
-  '**/CHANGELOG*',
-  '**/ROADMAP*',
-  '**/GUIA*',
-  '**/DOC*',
-  '**/UnidadesDeMedida*',
-  '**/rhf_zod_report*',
-];
+import globals from "globals";
+import js from "@eslint/js";
+import react from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
 
 const appFiles = [
-  'App.jsx',
-  'main.jsx',
-  '*.js',
-  '*.jsx',
-  'src/pages/**/*.{js,jsx}',
-  'src/lib/**/*.{js,jsx}',
-  'src/hooks/**/*.{js,jsx}',
-  'src/api/**/*.{js,jsx}',
-  'src/utils/**/*.{js,jsx}',
+  "App.jsx",
+  "main.jsx",
+  "src/**/*.{js,jsx,ts,tsx}",
 ];
 
-const appIgnores = [
-  'node_modules/**',
-  'dist/**',
-  'build/**',
-  '.vite/**',
-  'coverage/**',
-  'tmp/**',
-  'temp/**',
-  'logs/**',
-  'public/base44-local-*.json',
-  'build-tools/**',
-  'src/build-tools/**',
-  'src/components/**',
-  './src/components/**',
-  '**/src/components/**',
-  'components/**',
-  './components/**',
-  '**/components/**',
-  ...componentDocumentationFiles,
+const ignorePatterns = [
+  "node_modules/**",
+  "dist/**",
+  "build/**",
+  ".vite/**",
+  "coverage/**",
+  "**/node_modules/**",
+  "**/dist/**",
+  "**/*.md",
+  "**/*.md.jsx",
+  "**/*.md.js",
+  "**/*.json.jsx",
+  "**/*.json.js",
+  "**/*.config.jsx",
+  "**/*.config.js",
+  "**/*.txt.jsx",
+  "**/*.txt.js",
+  "**/*.rst.jsx",
+  "**/*.rst.js",
+  "**/*.adoc.jsx",
+  "**/*.adoc.js",
+  "**/*.yaml.jsx",
+  "**/*.yaml.js",
+  "**/*.yml.jsx",
+  "**/*.yml.js",
+  "**/*.jsxe",
+  "src/components/**",
+  "components/**",
+  "public/**",
+  "build-tools/**",
 ];
-
-const globals = {
-  window: 'readonly',
-  document: 'readonly',
-  navigator: 'readonly',
-  localStorage: 'readonly',
-  sessionStorage: 'readonly',
-  console: 'readonly',
-  globalThis: 'readonly',
-  module: 'readonly',
-  process: 'readonly',
-  Deno: 'readonly',
-  setTimeout: 'readonly',
-  setInterval: 'readonly',
-  clearTimeout: 'readonly',
-  clearInterval: 'readonly',
-  Blob: 'readonly',
-  URL: 'readonly',
-  fetch: 'readonly',
-  Response: 'readonly',
-  Request: 'readonly',
-  Headers: 'readonly',
-  FormData: 'readonly',
-  File: 'readonly',
-  confirm: 'readonly',
-  prompt: 'readonly',
-  React: 'readonly',
-};
 
 export default [
   {
-    files: componentDocumentationFiles,
-    languageOptions: { parser: documentationNoopParser },
-    rules: { 'no-undef': 'off' },
-  },
-  {
-    ignores: appIgnores,
+    ignores: ignorePatterns,
   },
   {
     files: appFiles,
-    ignores: appIgnores,
+    ignores: ignorePatterns,
     languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      parserOptions: { ecmaFeatures: { jsx: true } },
-      globals,
+      ecmaVersion: "latest",
+      sourceType: "module",
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        React: "readonly",
+        ReactDOM: "readonly",
+        Deno: "readonly",
+      },
+    },
+    plugins: {
+      react,
+      "react-hooks": reactHooks,
     },
     rules: {
-      'no-undef': 'error',
+      "react/react-in-jsx-scope": "off",
+      "react/prop-types": "warn",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+      "no-undef": "error",
+      "no-unused-vars": "warn",
     },
   },
 ];

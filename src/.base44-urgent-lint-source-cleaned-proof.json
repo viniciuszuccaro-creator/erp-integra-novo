@@ -1,0 +1,6 @@
+{
+  "status": "urgent_lint_source_cleaned",
+  "date": "2026-05-11",
+  "action": "Deleted all reported documentation mirror files from src/components so ESLint no longer parses markdown/json/config as JSX.",
+  "guard": "strictDuplicateArtifactGuard remains configured to neutralize future recreated code-extension artifacts."
+}

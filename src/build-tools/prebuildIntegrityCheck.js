@@ -87,3 +87,15 @@ export function runPrebuildIntegrityCheck(rootDir = '.') {
 
   return proof;
 }
+
+const cliProcess = globalThis?.process;
+
+if (cliProcess?.argv?.[1] && import.meta.url === `file://${cliProcess.argv[1]}`) {
+  const proof = runPrebuildIntegrityCheck(cliProcess.cwd());
+  if (proof.remainingArtifacts?.length) {
+    console.error('[Base44 Prebuild] Artefatos bloqueados ainda encontrados:', proof.remainingArtifacts);
+    cliProcess.exitCode = 1;
+  } else {
+    console.log('[Base44 Prebuild] Integridade validada sem alertas de sintaxe.');
+  }
+}

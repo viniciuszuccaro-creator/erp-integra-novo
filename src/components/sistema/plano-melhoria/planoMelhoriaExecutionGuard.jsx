@@ -16,6 +16,8 @@ export const DOCUMENTATION_BLOCK_POLICY = Object.freeze({
   blockDocumentationJsxMirrorsDuringExecution: true,
   blockChatbotDocumentationArtifacts: true,
   purgeBuildCacheBeforeExecution: true,
+  forcePrebuildIntegrityCheck: true,
+  preventDocumentationRecreation: true,
   protectedDirectories: ['components', 'src/components'],
   ignoredExtensions: ['.md', '.txt', '.rst', '.adoc', '.json', '.config', '.jsx', '.md.jsx', '.txt.jsx', '.rst.jsx', '.adoc.jsx', '.json.jsx', '.config.jsx', '.md.js', '.json.js', '.config.js'],
   blockedPrefixes: ['README', 'CERTIFICADO', 'CERTIFICACAO', 'CERTIFIC', 'MANIFESTO', 'VALIDACAO', 'CHECKLIST', 'PROVA', 'MIGRACAO', 'BLOQUEIO', 'DEBUG', 'DIAGNOSTICO', 'INTEGRACAO', 'RESUMO', 'CHANGELOG', 'ROADMAP', 'GUIA', 'DOC', 'DOCS', 'STATUS', 'ETAPA', 'FASE', 'SISTEMA', 'BOTOES', 'CORRECAO', 'rhf_zod_report', 'UnidadesDeMedida'],

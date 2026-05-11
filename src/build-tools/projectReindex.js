@@ -62,6 +62,13 @@ export function forceProjectReindex(rootDir = '.') {
 
   try {
     fs.writeFileSync(path.resolve(root, INDEX_MARKER_FILE), JSON.stringify(proof, null, 2));
+    fs.writeFileSync(path.resolve(root, '.base44-no-doc-recreation-proof.json'), JSON.stringify({
+      timestamp: proof.timestamp,
+      status: proof.status,
+      remainingArtifacts: proof.remainingArtifacts,
+      documentationRecreationBlocked: true,
+      markdownJsxMirrorsBlocked: true,
+    }, null, 2));
   } catch {}
 
   return proof;

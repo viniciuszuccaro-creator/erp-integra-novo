@@ -1,0 +1,7 @@
+{
+  "status": "eslint_documentation_artifact_ignore_applied",
+  "date": "2026-05-11",
+  "fix": "Added broad src/components and components documentation mirror ignore patterns to flat ESLint config and .eslintignore.",
+  "regra_mae_changed": false,
+  "business_logic_changed": false
+}

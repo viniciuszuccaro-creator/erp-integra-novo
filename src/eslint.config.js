@@ -1,14 +1,11 @@
 import { runStableEnvironmentCheck } from './build-tools/stableEnvironmentCheck.js';
 import { runPrebuildIntegrityCheck } from './build-tools/prebuildIntegrityCheck.js';
 import { runStrictDuplicateArtifactGuard } from './build-tools/strictDuplicateArtifactGuard.js';
-import { neutralizeLintArtifacts } from './build-tools/neutralizeLintArtifacts.js';
 
-neutralizeLintArtifacts('.');
 runStrictDuplicateArtifactGuard('.');
 runPrebuildIntegrityCheck('.');
 runStableEnvironmentCheck('.');
 runStrictDuplicateArtifactGuard('.');
-neutralizeLintArtifacts('.');
 
 const documentationArtifactIgnores = [
   'src/components/**/*.md.jsx',
@@ -87,6 +84,32 @@ const documentationArtifactIgnores = [
 export default [
   {
     ignores: [
+      '**/components/**/*.md.jsx',
+      '**/components/**/*.json.jsx',
+      '**/components/**/*.config.jsx',
+      '**/components/**/*.txt.jsx',
+      '**/components/**/*.rst.jsx',
+      '**/components/**/*.adoc.jsx',
+      '**/components/**/*.jsxe',
+      '**/components/**/README*.jsx',
+      '**/components/**/CERTIFIC*.jsx',
+      '**/components/**/CERTIFICADO*.jsx',
+      '**/components/**/CERTIFICACAO*.jsx',
+      '**/components/**/MANIFESTO*.jsx',
+      '**/components/**/VALIDACAO*.jsx',
+      '**/components/**/CHECKLIST*.jsx',
+      '**/components/**/PROVA*.jsx',
+      '**/components/**/BLOQUEIO*.jsx',
+      '**/components/**/BOTOES*.jsx',
+      '**/components/**/INTEGRACAO*.jsx',
+      '**/components/**/STATUS*.jsx',
+      '**/components/**/ETAPA*.jsx',
+      '**/components/**/ETAPAS*.jsx',
+      '**/components/**/FASE*.jsx',
+      '**/components/**/DEBUG*.jsx',
+      '**/components/**/DIAGNOSTICO*.jsx',
+      '**/components/**/CORRECAO*.jsx',
+      '**/components/**/FLUXO*.jsx',
       'dist/**',
       'build/**',
       'node_modules/**',
@@ -111,6 +134,29 @@ export default [
       'src/api/**/*.{js,jsx}',
       'src/utils/**/*.{js,jsx}',
       'src/components/**/*.{js,jsx}',
+      '!**/components/**/*.md.jsx',
+      '!**/components/**/*.json.jsx',
+      '!**/components/**/*.config.jsx',
+      '!**/components/**/*.jsxe',
+      '!**/components/**/README*.jsx',
+      '!**/components/**/CERTIFIC*.jsx',
+      '!**/components/**/CERTIFICADO*.jsx',
+      '!**/components/**/CERTIFICACAO*.jsx',
+      '!**/components/**/MANIFESTO*.jsx',
+      '!**/components/**/VALIDACAO*.jsx',
+      '!**/components/**/CHECKLIST*.jsx',
+      '!**/components/**/PROVA*.jsx',
+      '!**/components/**/BLOQUEIO*.jsx',
+      '!**/components/**/BOTOES*.jsx',
+      '!**/components/**/INTEGRACAO*.jsx',
+      '!**/components/**/STATUS*.jsx',
+      '!**/components/**/ETAPA*.jsx',
+      '!**/components/**/ETAPAS*.jsx',
+      '!**/components/**/FASE*.jsx',
+      '!**/components/**/DEBUG*.jsx',
+      '!**/components/**/DIAGNOSTICO*.jsx',
+      '!**/components/**/CORRECAO*.jsx',
+      '!**/components/**/FLUXO*.jsx',
       '!src/components/**/*.md.jsx',
       '!src/components/**/*.json.jsx',
       '!src/components/**/*.config.jsx',

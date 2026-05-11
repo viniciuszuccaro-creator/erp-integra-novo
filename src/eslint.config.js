@@ -200,6 +200,10 @@ const documentationArtifactIgnores = [
 
 export default [
   {
+    files: ['**/*.{js,jsx,ts,tsx}'],
+    ignores: ['src/components/**', 'components/**'],
+  },
+  {
     ignores: [
       'src/components/**',
       'components/**',

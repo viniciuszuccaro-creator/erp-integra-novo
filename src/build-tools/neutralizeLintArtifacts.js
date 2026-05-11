@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const TARGET_DIRS = ['src/components', 'components'];
+const SAFE_NOOP_CONTENT = 'export default null;\n';
 const SKIP_DIRS = /^(node_modules|dist|build|\.git|\.vite|coverage|tmp|temp|logs)$/i;
 const ARTIFACT_FILE_PATTERN = /(\.md\.jsx|\.json\.jsx|\.config\.jsx|\.txt\.jsx|\.rst\.jsx|\.adoc\.jsx|\.jsxe)$/i;
 const ARTIFACT_NAME_PATTERN = /(^|\/)(README|CERTIFIC|CERTIFICADO|CERTIFICACAO|CERTIFICAÇÃO|MANIFESTO|MANIFEST|VALIDACAO|VALIDAÇÃO|CHECKLIST|PROVA|MIGRACAO|MIGRAÇÃO|BLOQUEIO|BOTOES|BOTÕES|INTEGRACAO|INTEGRAÇÃO|STATUS|ETAPAS|ETAPA|FASES|FASE|DEBUG|DIAGNOSTICO|DIAGNÓSTICO|CORRECAO|CORREÇÃO|FLUXO|ZINDEX|RESUMO|GUIA|ROADMAP|SISTEMA|RELATORIO|RELATÓRIO|REPORT|MANUAL|VALIDADOR|UnidadesDeMedida|rhf_zod_report)[^/]*\.jsx$/i;
@@ -14,9 +15,8 @@ function safeComponentName(relativePath) {
   return `LintArtifact_${normalize(relativePath).replace(/[^a-zA-Z0-9_$]/g, '_')}`;
 }
 
-function neutralContent(relativePath) {
-  const name = safeComponentName(relativePath);
-  return `const ${name} = () => null;\nexport default ${name};\n`;
+function neutralContent() {
+  return SAFE_NOOP_CONTENT;
 }
 
 function shouldNeutralize(relativePath) {

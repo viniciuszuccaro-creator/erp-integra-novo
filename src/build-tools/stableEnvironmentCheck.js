@@ -15,6 +15,12 @@ export function runStableEnvironmentCheck(rootDir = '.') {
     blockedDocumentationProcessing: true,
     blockedComponentDocumentation: true,
     ignoredImprovementDocumentationTasks: true,
+    permanentComponentDocumentationGuard: true,
+    preventsJsxDocumentationMirrors: true,
+    clearsBuildCacheOnDocumentationEvents: true,
+    permanentComponentDocumentationGuard: true,
+    preventsJsxDocumentationMirrors: true,
+    clearsBuildCacheOnDocumentationEvents: true,
     coreEntitiesChecked: CORE_ENTITIES,
   };
 }

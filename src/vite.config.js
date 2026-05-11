@@ -56,6 +56,10 @@ function blockDocumentation() {
     },
     configureServer(server) {
       const purgeBuildCachesLocal = () => purgeBuildCaches(__dirname);
+      const purgeDocumentationNow = () => {
+        runStableEnvironmentCheck(__dirname);
+        purgeDocumentationArtifacts(__dirname);
+      };
       const blockFile = async (filePath) => {
         if (!isBlockedPath(filePath)) return;
         console.log('🚫 Documentação bloqueada: arquivo removido antes de virar código');
@@ -63,6 +67,9 @@ function blockDocumentation() {
         try { if (fs.existsSync(filePath)) fs.unlinkSync(filePath); } catch {}
         purgeBuildCachesLocal();
       };
+
+      purgeDocumentationNow();
+      server.watcher.on('ready', purgeDocumentationNow);
       server.watcher.on('add', blockFile);
       server.watcher.on('change', blockFile);
       server.watcher.on('unlink', (filePath) => {
@@ -71,12 +78,22 @@ function blockDocumentation() {
         }
       });
     },
+    handleHotUpdate(ctx) {
+      if (!isBlockedPath(ctx.file)) return undefined;
+      try { if (fs.existsSync(ctx.file)) fs.unlinkSync(ctx.file); } catch {}
+      purgeBuildCaches(__dirname);
+      return [];
+    },
     resolveId(source) {
       if (isBlockedPath(source)) return '\0blocked-doc-file';
       return null;
     },
     load(id) {
       if (id === '\0blocked-doc-file' || isBlockedPath(id)) return 'export default undefined;';
+      return null;
+    },
+    transform(code, id) {
+      if (isBlockedPath(id)) return { code: 'export default undefined;', map: null };
       return null;
     },
     generateBundle(_, bundle) {
@@ -145,6 +162,14 @@ export default defineConfig({
         '**/*.txt.jsx',
         '**/*.rst.jsx',
         '**/*.adoc.jsx',
+        '**/*.md.js',
+        '**/*.txt.js',
+        '**/*.rst.js',
+        '**/*.adoc.js',
+        '**/*.json.jsx',
+        '**/*.config.jsx',
+        '**/*.json.js',
+        '**/*.config.js',
       ],
     },
   },

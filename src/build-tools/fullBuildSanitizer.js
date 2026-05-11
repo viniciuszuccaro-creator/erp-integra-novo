@@ -13,6 +13,11 @@ const blockedDocNamePattern = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|M
 const blockedArtifactPattern = /(^|\/)(src\/)?components\/.*(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPAS|ETAPA|FASES|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|FLUXO|ZINDEX|rhf_zod_report|UnidadesDeMedida).*\.(md|txt|rst|adoc|json|config|yaml|yml)?\.(js|jsx|jsxe|ts|tsx)$/i;
 const blockedTextPattern = /(^|\/)(src\/)?components\/.*\.(md|txt|rst|adoc|json|config|yaml|yml|jsxe)$/i;
 
+function neutralContent(relativePath) {
+  const safeName = `SanitizedDoc_${normalize(relativePath).replace(/[^a-zA-Z0-9_$]/g, '_')}`;
+  return `const ${safeName} = () => null;\nexport default ${safeName};\n`;
+}
+
 function removeBlockedArtifacts(dir, removed = []) {
   if (!fs.existsSync(dir)) return removed;
   let entries = [];
@@ -35,8 +40,8 @@ function removeBlockedArtifacts(dir, removed = []) {
       (/(^|\/)(src\/)?components\//i.test(relativePath) && blockedDocNamePattern.test(relativePath) && /\.(js|jsx|ts|tsx)$/i.test(relativePath))
     )) {
       try {
-        fs.unlinkSync(fullPath);
-        removed.push(`${relativePath}::removed-invalid-documentation-mirror`);
+        fs.writeFileSync(fullPath, neutralContent(relativePath));
+        removed.push(`${relativePath}::neutralized-invalid-documentation-mirror`);
       } catch {}
     }
   }
@@ -63,7 +68,7 @@ const proof = {
   removedArtifacts,
   prebuildStatus: prebuild.status,
   chatbotStatus: chatbot.status,
-  documentationArtifactsRemoved: docs.removedCount,
+  documentationArtifactsNeutralized: docs.removedCount,
   temporaryLogsRemoved: logs.removedCount,
   buildCachesRemoved: cache.removed,
   reindexStatus: reindex.status,

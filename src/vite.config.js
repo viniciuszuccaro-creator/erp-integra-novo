@@ -20,6 +20,17 @@ const blockedComponentDocExtensions = ['.md', '.txt', '.rst', '.adoc', '.json', 
 const blockedComponentDocPrefixes = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFICADO|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida)/i;
 const chatbotDocumentationPattern = /(^|\/)(src\/)?components\/chatbot\/.*(\.(md|txt|rst|adoc|json|config|yaml|yml)(\.(js|jsx|jsxe|ts|tsx))?|README|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|STATUS|GUIA|DOC)/i;
 
+function neutralDocumentationContent(filePath = '') {
+  const safeName = `BlockedDoc_${String(filePath).replace(/[^a-zA-Z0-9_$]/g, '_')}`;
+  return `const ${safeName} = () => null;\nexport default ${safeName};\n`;
+}
+
+function neutralizeDocumentationFile(filePath) {
+  try {
+    if (fs.existsSync(filePath)) fs.writeFileSync(filePath, neutralDocumentationContent(filePath));
+  } catch {}
+}
+
 function blockDocumentation() {
   const isBlockedPath = (input = '') => {
     const normalized = input.replace(/\\/g, '/');
@@ -56,7 +67,7 @@ function blockDocumentation() {
             } catch {}
             continue;
           }
-          if (entry.isFile() && isBlockedPath(filePath)) fs.unlinkSync(filePath);
+          if (entry.isFile() && isBlockedPath(filePath)) neutralizeDocumentationFile(filePath);
         }
       };
       runPrebuildIntegrityCheck(__dirname);
@@ -78,9 +89,9 @@ function blockDocumentation() {
       };
       const blockFile = async (filePath) => {
         if (!isBlockedPath(filePath)) return;
-        console.log('🚫 Documentação bloqueada: arquivo removido antes de virar código');
+        console.log('🚫 Documentação bloqueada: arquivo neutralizado antes de virar código');
         try { server.watcher.unwatch(filePath); } catch {}
-        try { if (fs.existsSync(filePath)) fs.unlinkSync(filePath); } catch {}
+        neutralizeDocumentationFile(filePath);
         purgeBuildCachesLocal();
       };
 
@@ -96,7 +107,7 @@ function blockDocumentation() {
     },
     handleHotUpdate(ctx) {
       if (!isBlockedPath(ctx.file)) return undefined;
-      try { if (fs.existsSync(ctx.file)) fs.unlinkSync(ctx.file); } catch {}
+      neutralizeDocumentationFile(ctx.file);
       purgeBuildCaches(__dirname);
       return [];
     },

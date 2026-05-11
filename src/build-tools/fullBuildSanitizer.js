@@ -40,8 +40,8 @@ function removeBlockedArtifacts(dir, removed = []) {
       (/(^|\/)(src\/)?components\//i.test(relativePath) && blockedDocNamePattern.test(relativePath) && /\.(js|jsx|ts|tsx)$/i.test(relativePath))
     )) {
       try {
-        fs.writeFileSync(fullPath, neutralContent(relativePath));
-        removed.push(`${relativePath}::neutralized-invalid-documentation-mirror`);
+        fs.unlinkSync(fullPath);
+        removed.push(`${relativePath}::removed-invalid-documentation-mirror`);
       } catch {}
     }
   }

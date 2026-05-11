@@ -24,8 +24,8 @@ function neutralizeIfBlocked(root, filePath, removedFiles) {
   if (!blocked) return false;
 
   try {
-    fs.writeFileSync(filePath, 'export default null;\n');
-    removedFiles.push(`${relativePath}::neutralized-invalid-documentation-artifact`);
+    fs.unlinkSync(filePath);
+    removedFiles.push(`${relativePath}::removed-invalid-documentation-artifact`);
     return true;
   } catch {
     return false;
@@ -88,8 +88,8 @@ function purgeGlobalDocumentationMirrors(root) {
       if (!entry.isFile()) continue;
       if (BLOCKED_MIRROR_PATTERN.test(relativePath) || /\.md\.jsx$/i.test(relativePath) || BLOCKED_DOC_PATTERN.test(relativePath)) {
         try {
-          fs.writeFileSync(fullPath, 'export default null;\n');
-          removedFiles.push(`${relativePath}::neutralized-invalid-documentation-artifact`);
+          fs.unlinkSync(fullPath);
+          removedFiles.push(`${relativePath}::removed-invalid-documentation-artifact`);
         } catch {}
       }
     }

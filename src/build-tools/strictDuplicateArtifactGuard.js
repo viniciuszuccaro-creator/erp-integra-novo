@@ -3,7 +3,7 @@ import path from 'node:path';
 
 const normalize = (value = '') => String(value || '').replace(/\\/g, '/');
 
-const DOC_NAME_PATTERN = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPAS|ETAPA|FASES|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|FLUXO|ZINDEX|rhf_zod_report|UnidadesDeMedida)/i;
+const DOC_NAME_PATTERN = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPAS|ETAPA|FASES|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|FLUXO|ZINDEX|rhf_zod_report|UnidadesDeMedida)/;
 const DOC_CODE_MIRROR = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i;
 const DOC_TEXT_FILE = /\.jsxe$/i;
 const SKIP_DIRS = /^(node_modules|dist|build|\.git|\.vite|coverage|tmp|temp|logs)$/i;
@@ -45,8 +45,8 @@ function scanAndNeutralize(root, dir, changed) {
     if (!entry.isFile() || !shouldNeutralize(relativePath)) continue;
 
     try {
-      fs.unlinkSync(fullPath);
-      changed.push(`${relativePath}::removed-invalid-documentation-mirror`);
+      fs.writeFileSync(fullPath, 'export default null;\n');
+      changed.push(`${relativePath}::neutralized-invalid-documentation-mirror`);
     } catch {}
   }
 }
@@ -65,6 +65,7 @@ export function runStrictDuplicateArtifactGuard(rootDir = '.') {
     changedCount: changed.length,
     changed,
     documentationCodeNeutralized: true,
+    documentationFilesPreservedAsSafeStubs: true,
     buildSafe: true,
   };
 

@@ -11,7 +11,7 @@ const SOURCE_DIRS = ['src/components', 'components'];
 const GLOBAL_DOCUMENTATION_SCAN_DIRS = ['src', 'components'];
 const VALID_CODE_EXTENSIONS = new Set(['.js', '.jsx', '.ts', '.tsx', '.css']);
 const VALID_CODE_SIGNATURE_PATTERN = /(import\s|export\s|from\s+["']|const\s|let\s|var\s|function\s|class\s|React|Deno\.serve|module\.exports)/;
-const BLOCKED_DOC_PATTERN = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|FASE|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(js|jsx|ts|tsx))?$/i;
+const BLOCKED_DOC_PATTERN = /(^|\/)(README|CERTIFICADO|CERTIFICACAO|CERTIFIC|MANIFESTO|VALIDACAO|CHECKLIST|PROVA|MIGRACAO|BLOQUEIO|DEBUG|DIAGNOSTICO|INTEGRACAO|RESUMO|CHANGELOG|ROADMAP|GUIA|DOCS?|STATUS|ETAPA|ETAPAS|FASE|FASES|SISTEMA|BOTOES|CORRECAO|RELATORIO|REPORT|MANUAL|VALIDADOR|rhf_zod_report|UnidadesDeMedida)[^/]*(\.(js|jsx|ts|tsx))?$/;
 const BLOCKED_MIRROR_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$/i;
 const TEXT_OR_DATA_PATTERN = /\.(md|txt|rst|adoc|json|config|yaml|yml)\.(js|jsx|jsxe|ts|tsx)$|\.jsxe$/i;
 
@@ -24,8 +24,8 @@ function neutralizeIfBlocked(root, filePath, removedFiles) {
   if (!blocked) return false;
 
   try {
-    fs.unlinkSync(filePath);
-    removedFiles.push(`${relativePath}::removed-invalid-documentation-artifact`);
+    fs.writeFileSync(filePath, 'export default null;\n');
+    removedFiles.push(`${relativePath}::neutralized-invalid-documentation-artifact`);
     return true;
   } catch {
     return false;
@@ -88,8 +88,8 @@ function purgeGlobalDocumentationMirrors(root) {
       if (!entry.isFile()) continue;
       if (BLOCKED_MIRROR_PATTERN.test(relativePath) || /\.md\.jsx$/i.test(relativePath) || BLOCKED_DOC_PATTERN.test(relativePath)) {
         try {
-          fs.unlinkSync(fullPath);
-          removedFiles.push(`${relativePath}::removed-invalid-documentation-artifact`);
+          fs.writeFileSync(fullPath, 'export default null;\n');
+          removedFiles.push(`${relativePath}::neutralized-invalid-documentation-artifact`);
         } catch {}
       }
     }

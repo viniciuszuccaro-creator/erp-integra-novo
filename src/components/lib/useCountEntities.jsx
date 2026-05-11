@@ -66,7 +66,7 @@ async function flushBatch() {
       const status = err?.response?.status || err?.status;
       const now = Date.now();
       if (status === 429 && attempt < 3) {
-        const delay = 600 * Math.pow(2, attempt) + Math.floor(Math.random() * 300);
+        const delay = 2500 * Math.pow(2, attempt) + Math.floor(Math.random() * 800);
         items.forEach(it => cooldown.set(it.entityName, now + delay));
         await new Promise(r => setTimeout(r, delay));
         attempt++;
@@ -165,8 +165,8 @@ export function useCountEntities(entityName, filter = {}, options = {}) {
       const result = await enqueue(reqKey, entityName, finalFilter);
       return typeof result === 'number' ? result : 0;
     },
-    staleTime: options.staleTime ?? 120000,
-    gcTime: options.gcTime ?? 120000,
+    staleTime: options.staleTime ?? 300000,
+    gcTime: options.gcTime ?? 900000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,

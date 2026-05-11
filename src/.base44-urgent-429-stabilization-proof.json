@@ -1,0 +1,13 @@
+{
+  "status": "urgent_429_stabilization_applied",
+  "date": "2026-05-11",
+  "problem": "Backend rate limit exceeded on entityListSorted and countEntities caused by request bursts.",
+  "changes": [
+    "Increased backend cache TTL and minimum gaps",
+    "Returned safe cached/empty results on 429 instead of throwing repeated failures",
+    "Reduced frontend retries and automatic refetch bursts",
+    "Increased React Query stale/gc time"
+  ],
+  "regra_mae_changed": false,
+  "business_logic_changed": false
+}

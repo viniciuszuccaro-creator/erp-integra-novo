@@ -122,7 +122,7 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
         const now = Date.now();
         const last = __elsLastCallAt.get(entityName) || 0;
         const since = now - last;
-        const minGap = 2500; // proteção anti-rate-limit global por entidade
+        const minGap = 5000; // proteção anti-rate-limit global por entidade
         const cooldown = __elsCooldownUntil.get(entityName) || 0;
         const waitMs = Math.max(0, cooldown - now, since < minGap ? (minGap - since) : 0);
         if (waitMs > 0) {
@@ -154,11 +154,9 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
             if (status === 429) {
               const strikes = (__elsStrikeCount.get(entityName) || 0) + 1;
               __elsStrikeCount.set(entityName, strikes);
-              if (attempt < 5) {
-                const base = 800;
-                const jitter = Math.floor(Math.random() * 400);
-                const sleep = base * Math.pow(2, attempt) + jitter;
-                __elsCooldownUntil.set(entityName, Date.now() + Math.max(15000, sleep));
+              if (attempt < 1) {
+                const sleep = 2500 + Math.floor(Math.random() * 500);
+                __elsCooldownUntil.set(entityName, Date.now() + 30000);
                 await new Promise(r => setTimeout(r, sleep));
                 attempt++;
                 continue;
@@ -180,7 +178,7 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
               const idbFallback = await idbGet(idbKey);
               if (Array.isArray(idbFallback)) return idbFallback;
             } catch (_) {}
-            throw err;
+            return [];
           }
         }
       };

@@ -6,6 +6,7 @@ import { buildRuntimeConfig } from './buildRuntimeConfig.js';
 const CORE_ENTITIES = ['Cliente', 'Pedido', 'Produto', 'ContaReceber', 'ContaPagar', 'Entrega'];
 
 import { runStrictDuplicateArtifactGuard } from './strictDuplicateArtifactGuard.js';
+import { neutralizeLintArtifacts } from './neutralizeLintArtifacts.js';
 
 export function runStableEnvironmentCheck(rootDir = '.') {
   const reindex = forceProjectReindex(rootDir);
@@ -14,6 +15,7 @@ export function runStableEnvironmentCheck(rootDir = '.') {
   const logs = purgeTemporaryLogs(rootDir);
   const cache = purgeBuildCaches(rootDir);
   const strictGuard = runStrictDuplicateArtifactGuard(rootDir);
+  const lintNeutralized = neutralizeLintArtifacts(rootDir);
 
   return {
     status: 'stable_check_completed',
@@ -29,6 +31,7 @@ export function runStableEnvironmentCheck(rootDir = '.') {
     buildCachesRemoved: cache.removed,
     strictGuardChangedCount: strictGuard.changedCount,
     strictGuardNeutralized: strictGuard.documentationCodeNeutralized,
+    lintArtifactsNeutralizedCount: lintNeutralized.changedCount,
     blockedDocumentationProcessing: true,
     blockedComponentDocumentation: true,
     ignoredImprovementDocumentationTasks: true,

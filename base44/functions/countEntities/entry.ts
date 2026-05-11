@@ -96,7 +96,7 @@ async function expandGroupFilter(base44, entityName, f) {
  * Primeira page: sem delay. Pages seguintes: delay crescente.
  */
 const COUNT_CACHE = new Map();
-const COUNT_CACHE_TTL_MS = 5 * 60 * 1000;
+const COUNT_CACHE_TTL_MS = 10 * 60 * 1000;
 
 function stableCacheKey(entityName, finalFilter) {
   try { return `${entityName}:${JSON.stringify(finalFilter || {}, Object.keys(finalFilter || {}).sort())}`; }
@@ -121,8 +121,9 @@ async function fastCount(base44, entityName, finalFilter) {
       } catch (err) {
         const status = err?.status || err?.response?.status;
         if (status === 429) {
-          if (cached) return cached.count;
-          await new Promise(r => setTimeout(r, 2000 * Math.pow(2, attempt)));
+          const safeCount = cached?.count || 0;
+          COUNT_CACHE.set(key, { count: safeCount, ts: Date.now() });
+          return safeCount;
         } else {
           batch = [];
           break;
@@ -186,7 +187,7 @@ Deno.serve(async (req) => {
     if (entitiesBatch && entitiesBatch.length > 0) {
     const counts = {};
     const WINDOW = 1;
-    const DELAY_BETWEEN_WINDOWS = 900;
+    const DELAY_BETWEEN_WINDOWS = 2500;
 
       for (let i = 0; i < entitiesBatch.length; i += WINDOW) {
         const slice = entitiesBatch.slice(i, i + WINDOW);

@@ -4,6 +4,7 @@ import { buildRuntimeConfig, safeBuildEnv } from './buildRuntimeConfig.js';
 import { purgeDocumentationArtifacts, purgeTemporaryLogs, purgeBuildCaches } from './purgeDocumentationArtifacts.js';
 import { verifyChatbotComponents } from './verifyChatbotComponents.js';
 import { forceProjectReindex } from './projectReindex.js';
+import { neutralizeLintArtifacts } from './neutralizeLintArtifacts.js';
 
 const normalize = (value = '') => String(value || '').replace(/\\/g, '/');
 const SOURCE_DIRS = ['src/components', 'components'];
@@ -145,6 +146,7 @@ export function runPrebuildIntegrityCheck(rootDir = '.') {
   const root = path.resolve(rootDir);
   const removedInvalidSourceFiles = cleanSourceDirectories(root);
   const removedGlobalDocumentationMirrors = purgeGlobalDocumentationMirrors(root);
+  const lintNeutralized = neutralizeLintArtifacts(root);
   const chatbot = verifyChatbotComponents(root);
   const docs = purgeDocumentationArtifacts(root);
   const logs = purgeTemporaryLogs(root);
@@ -159,6 +161,7 @@ export function runPrebuildIntegrityCheck(rootDir = '.') {
     runtimeMode: buildRuntimeConfig.appEnv,
     processEnvReplacedByCentralConfig: true,
     centralizedBuildEnv: safeBuildEnv,
+    lintArtifactsNeutralized: lintNeutralized.changed || [],
     invalidSourceFilesRemoved: removedInvalidSourceFiles,
     globalDocumentationMirrorsRemoved: removedGlobalDocumentationMirrors,
     chatbotArtifactsRemoved: chatbot.removedFiles || [],

@@ -1,9 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const LIST_CACHE = new Map();
-const LIST_CACHE_TTL_MS = 2 * 60 * 1000;
+const LIST_CACHE_TTL_MS = 5 * 60 * 1000;
 let LIST_LAST_CALL_AT = 0;
-const LIST_MIN_GAP_MS = 1200;
+const LIST_MIN_GAP_MS = 3000;
 
 function stableListKey(value) {
   try { return JSON.stringify(value || {}, Object.keys(value || {}).sort()); }
@@ -279,8 +279,8 @@ async function listOne(base44, user, q) {
     return { entityName, items };
   } catch (err) {
     const status = err?.status || err?.response?.status;
-    if (status === 429 && cached) {
-      return { entityName, items: cached.items };
+    if (status === 429) {
+      return { entityName, items: cached?.items || [] };
     }
     throw err;
   }
@@ -329,7 +329,7 @@ Deno.serve(async (req) => {
           results.push({ entityName: q?.entityName, items: [], error: String(err?.message || err) });
         }
         // Delay entre queries em lote para evitar 429
-        if (i < queries.length - 1) await new Promise(r => setTimeout(r, 150));
+        if (i < queries.length - 1) await new Promise(r => setTimeout(r, 1200));
       }
       return compressedJson({ results }, req);
     }

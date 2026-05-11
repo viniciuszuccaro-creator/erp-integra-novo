@@ -2,6 +2,22 @@ import { useState, useEffect } from "react";
 import { base44, isApiKeyMode, isLocalOnlyMode, localApiUser } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+const CONTEXTO_CACHE_KEY = 'contexto_grupo_empresa_cache_v1';
+const CONTEXTO_CACHE_TTL_MS = 5 * 60 * 1000;
+let contextoLoadPromise = null;
+
+function readContextoCache() {
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(CONTEXTO_CACHE_KEY) || 'null');
+    if (cached?.ts && Date.now() - cached.ts < CONTEXTO_CACHE_TTL_MS) return cached;
+  } catch {}
+  return null;
+}
+
+function writeContextoCache(data) {
+  try { sessionStorage.setItem(CONTEXTO_CACHE_KEY, JSON.stringify({ ...data, ts: Date.now() })); } catch {}
+}
+
 export function useContextoGrupoEmpresa() {
   const isRemoteApiKeyMode = isApiKeyMode && !isLocalOnlyMode;
   const [user, setUser] = useState(null);
@@ -47,34 +63,63 @@ export function useContextoGrupoEmpresa() {
 
   const carregarContextoInicial = async () => {
     setIsLoadingContexto(true);
-    try {
-      const currentUser = isRemoteApiKeyMode ? localApiUser : await base44.auth.me();
-      setUser(currentUser);
+    const cached = readContextoCache();
+    if (cached?.user) {
+      setUser(cached.user);
+      setContexto(cached.contexto || 'empresa');
+      setGrupoAtual(cached.grupoAtual || null);
+      setEmpresaAtual(cached.empresaAtual || null);
+      setIsLoadingContexto(false);
+      return;
+    }
+
+    if (contextoLoadPromise) {
+      const data = await contextoLoadPromise;
+      setUser(data.user || null);
+      setContexto(data.contexto || 'empresa');
+      setGrupoAtual(data.grupoAtual || null);
+      setEmpresaAtual(data.empresaAtual || null);
+      setIsLoadingContexto(false);
+      return;
+    }
+
+    contextoLoadPromise = (async () => {
+      let loadedUser = null;
+      let loadedGrupo = null;
+      let loadedEmpresa = null;
+      let loadedContexto = 'empresa';
+      try {
+        const currentUser = isRemoteApiKeyMode ? localApiUser : await base44.auth.me();
+        loadedUser = currentUser;
+        setUser(currentUser);
 
       // Detecta contexto: prioridade user.contexto_atual, senão localStorage
       const ctxPersistido = (() => {
         try { return localStorage.getItem('contexto_atual'); } catch { return null; }
       })();
       const ctx = currentUser.contexto_atual || ctxPersistido || 'empresa';
+      loadedContexto = ctx;
       setContexto(ctx);
       try { localStorage.setItem('contexto_atual', ctx); } catch {}
 
       if (ctx === 'grupo') {
         // Tenta user > localStorage
-        await carregarGrupoPorIdOuPadrao(currentUser);
+        loadedGrupo = await carregarGrupoPorIdOuPadrao(currentUser);
       } else {
         // Mesmo no contexto Empresa, manter o Grupo ativo para herança de configurações.
-        await carregarGrupoPorIdOuPadrao(currentUser);
+        loadedGrupo = await carregarGrupoPorIdOuPadrao(currentUser);
 
         const empresaId = currentUser.empresa_atual_id || currentUser.empresa_padrao_id || localStorage.getItem('empresa_atual_id');
         if (empresaId) {
           const empresas = await base44.entities.Empresa.filter({ id: empresaId });
           if (empresas[0]) {
+            loadedEmpresa = empresas[0];
             setEmpresaAtual(empresas[0]);
           } else if (isRemoteApiKeyMode || currentUser?.role === 'admin') {
             const todasEmpresas = await base44.entities.Empresa.list();
             const ativa = todasEmpresas.find(e => e.status === 'Ativa') || todasEmpresas[0];
             if (ativa) {
+              loadedEmpresa = ativa;
               setEmpresaAtual(ativa);
               try { localStorage.setItem('empresa_atual_id', ativa.id); } catch {}
             }
@@ -83,18 +128,40 @@ export function useContextoGrupoEmpresa() {
           const empresas = await base44.entities.Empresa.list();
           const ativa = empresas.find(e => e.status === 'Ativa') || empresas[0];
           if (ativa) {
+            loadedEmpresa = ativa;
             setEmpresaAtual(ativa);
             try { localStorage.setItem('empresa_atual_id', ativa.id); } catch {}
           }
         }
       }
+      const data = { user: loadedUser, contexto: loadedContexto, grupoAtual: loadedGrupo, empresaAtual: loadedEmpresa };
+      writeContextoCache(data);
+      return data;
     } catch (error) {
-      console.error("Erro ao carregar contexto:", error);
+      if (String(error?.message || '').includes('Rate limit') || error?.status === 429 || error?.response?.status === 429) {
+        const stale = readContextoCache();
+        if (stale) return stale;
+      } else {
+        console.error("Erro ao carregar contexto:", error);
+      }
       if (isRemoteApiKeyMode) {
+        const fallback = { user: localApiUser, contexto: 'empresa', grupoAtual: null, empresaAtual: null };
         setUser(localApiUser);
         setContexto('empresa');
+        return fallback;
       }
+      return { user: null, contexto: 'empresa', grupoAtual: null, empresaAtual: null };
+    }
+    })();
+
+    try {
+      const data = await contextoLoadPromise;
+      setUser(data.user || null);
+      setContexto(data.contexto || 'empresa');
+      setGrupoAtual(data.grupoAtual || null);
+      setEmpresaAtual(data.empresaAtual || null);
     } finally {
+      contextoLoadPromise = null;
       setIsLoadingContexto(false);
     }
   };
@@ -206,12 +273,26 @@ export function useContextoGrupoEmpresa() {
     queryKey: ['empresas-grupo', grupoAtual?.id],
     queryFn: async () => {
       if (!grupoAtual?.id) return [];
-      return await base44.entities.Empresa.filter({
-        grupo_id: grupoAtual.id,
-        status: 'Ativa'
-      });
+      try {
+        const empresas = await base44.entities.Empresa.filter({
+          grupo_id: grupoAtual.id,
+          status: 'Ativa'
+        });
+        try { sessionStorage.setItem(`empresas_grupo_${grupoAtual.id}`, JSON.stringify(empresas || [])); } catch {}
+        return empresas || [];
+      } catch (error) {
+        if (error?.status === 429 || error?.response?.status === 429 || String(error?.message || '').includes('Rate limit')) {
+          try { return JSON.parse(sessionStorage.getItem(`empresas_grupo_${grupoAtual.id}`) || '[]'); } catch { return []; }
+        }
+        throw error;
+      }
     },
     enabled: !!grupoAtual && contexto === 'grupo',
+    staleTime: 300000,
+    gcTime: 900000,
+    retry: 0,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   const obterPoliticaPadrao = async (tipoDocumento) => {

@@ -104,13 +104,14 @@ const navigationItems = [
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 120000,
-      gcTime: 300000,
-      retry: 1,
+      staleTime: 300000,
+      gcTime: 900000,
+      retry: 0,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
+      refetchOnMount: false,
     },
-    mutations: { retry: 1 }
+    mutations: { retry: 0 }
   }
 });
 
@@ -179,7 +180,7 @@ function LayoutContent({ children, currentPageName }) {
                 gcTime: 300000,
                 refetchOnWindowFocus: false,
                 refetchOnReconnect: false,
-                retry: 1,
+                retry: 0,
                 onError: (error) => {
                                                                                     const m = String(error?.message || '');
                                                                                     const code = error?.code;
@@ -208,7 +209,7 @@ function LayoutContent({ children, currentPageName }) {
                                                             }
               },
               mutations: {
-                retry: 1,
+                retry: 0,
                 onError: (error) => {
                                                                                     const m = String(error?.message || '');
                                                                                     const code = error?.code;

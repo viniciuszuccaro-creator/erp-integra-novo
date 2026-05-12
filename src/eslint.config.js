@@ -2,19 +2,17 @@ import globals from "globals";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 
-// ============================================================================
-// NUCLEAR IGNORE — bloqueia TODOS os artefatos injetados pela plataforma.
-// Esta config usa duas estratégias:
-// 1. Ignores globais por padrão de nome/extensão (cobertura ampla)
-// 2. Whitelist explícita — só processa arquivos de código React legítimos
-// ============================================================================
+// =============================================================================
+// ESTRATÉGIA DEFINITIVA: Ignorar tudo em src/ que NÃO seja código React legítimo
+// A plataforma injeta artefatos *.md.jsx, *.json.jsx e arquivos ALL_CAPS_*.jsx
+// A solução: NÃO usar "files" amplo — usar ignores globais cobrindo todos os padrões
+// =============================================================================
 
 export default [
-  // CAMADA 1: Ignores globais — qualquer arquivo que bater nesses padrões
-  // é completamente ignorado pelo ESLint, independente do diretório.
+  // IGNORES GLOBAIS — aplicados antes de qualquer regra
   {
     ignores: [
-      // Infraestrutura / build
+      // Infraestrutura
       "node_modules/**",
       "dist/**",
       "build/**",
@@ -23,27 +21,51 @@ export default [
       "build-tools/**",
       "src/build-tools/**",
 
-      // Extensões duplas injetadas pela plataforma
+      // Extensões duplas (artefatos da plataforma)
       "**/*.md.jsx",
       "**/*.md.js",
       "**/*.json.jsx",
       "**/*.json.js",
       "**/*.config.jsx",
-      "**/*.config.js",
 
-      // Arquivos ALL_CAPS com underscores (artefatos de documentação injetados)
-      // Cobre tanto *.jsx quanto *.md.jsx — padrão: PALAVRA_PALAVRA*.jsx
-      "src/**/[A-Z]*_[A-Z]*.jsx",
-      "src/**/[A-Z]*_[A-Z]*.js",
+      // Prefixos ALL_CAPS conhecidos (artefatos de documentação injetados)
+      "src/**/BLOQUEIO*.jsx",
+      "src/**/BOTOES*.jsx",
+      "src/**/CERTIFICACAO*.jsx",
+      "src/**/CERTIFICADO*.jsx",
+      "src/**/CHECKLIST*.jsx",
+      "src/**/CORRECAO*.jsx",
+      "src/**/DEBUG*.jsx",
+      "src/**/DIAGNOSTICO*.jsx",
+      "src/**/ETAPA*.jsx",
+      "src/**/ETAPAS*.jsx",
+      "src/**/FASE*.jsx",
+      "src/**/FLUXO*.jsx",
+      "src/**/INTEGRACAO*.jsx",
+      "src/**/MANIFESTO*.jsx",
+      "src/**/MANIFEST_*.jsx",
+      "src/**/MIGRACAO*.jsx",
+      "src/**/PROVA*.jsx",
+      "src/**/README*.jsx",
+      "src/**/RELATORIO*.jsx",
+      "src/**/RESUMO*.jsx",
+      "src/**/SISTEMA*.jsx",
+      "src/**/STATUS*.jsx",
+      "src/**/VALIDACAO*.jsx",
+      "src/**/ZINDEX*.jsx",
 
-      // Nomes específicos problemáticos não cobertos pelo padrão acima
+      // vite.config dentro de src/ (não é código React)
+      "src/vite.config.*",
+      "vite.config.*",
+
+      // Arquivos específicos
       "src/**/commitlint.config.*",
       "src/**/UnidadesDeMedida.*",
       "src/**/rhf_zod_report.*",
     ],
   },
 
-  // CAMADA 2: Whitelist explícita — apenas código React legítimo
+  // REGRAS — aplicadas APENAS a código React legítimo
   {
     files: ["src/**/*.{js,jsx,ts,tsx}"],
     languageOptions: {

@@ -69,7 +69,7 @@ export default function RH() {
           entityName: 'Colaborador',
           filter: getFiltroContexto('empresa_alocada_id', true)
         });
-        return response.data?.count || colaboradores.length;
+        return response.data?.count ?? colaboradores.length;
       } catch {
         return colaboradores.length;
       }
@@ -85,10 +85,10 @@ export default function RH() {
     queryFn: async () => {
       try {
         const filtroBase = getFiltroContexto('empresa_alocada_id', true);
-        const filtro = { ...(filtroBase || {}), status: 'Ativo' };
+        const filtroAtivos = { ...(filtroBase || {}), status: 'Ativo' };
         const response = await base44.functions.invoke('countEntities', {
           entityName: 'Colaborador',
-          filter
+          filter: filtroAtivos
         });
         return response.data?.count ?? null;
       } catch {

@@ -25,6 +25,9 @@ import PlanoMelhoriaCriticalCompletionSuite from '@/components/sistema/plano-mel
 import PlanoMelhoriaResumoFinal from '@/components/sistema/plano-melhoria/PlanoMelhoriaResumoFinal';
 import PlanoMelhoriaStatusConsolidado from '@/components/sistema/plano-melhoria/PlanoMelhoriaStatusConsolidado';
 import PlanoMelhoriaMetricasDetalhadas from '@/components/sistema/plano-melhoria/PlanoMelhoriaMetricasDetalhadas';
+import PlanoMelhoriaDashboardFinal from '@/components/sistema/plano-melhoria/PlanoMelhoriaDashboardFinal';
+import PlanoMelhoriaProximasAcoes from '@/components/sistema/plano-melhoria/PlanoMelhoriaProximasAcoes';
+import PlanoMelhoriaSinteseFinal from '@/components/sistema/plano-melhoria/PlanoMelhoriaSinteseFinal';
 import { melhoriaPlanPhases } from '@/components/sistema/plano-melhoria/melhoriaPlanData';
 
 export default function PlanoMelhoria() {
@@ -38,10 +41,16 @@ export default function PlanoMelhoria() {
       {/* 1. Header com KPIs do plano */}
       <PlanoMelhoriaHeader totalProgress={totalProgress} />
 
-      {/* 2. Status Consolidado — conquistas e visão geral do plano */}
+      {/* 2. Síntese Final — visão executiva 360 consolidada */}
+      <PlanoMelhoriaSinteseFinal />
+
+      {/* 3. Dashboard Final — visão 360 completa do plano */}
+      <PlanoMelhoriaDashboardFinal />
+
+      {/* 4. Status Consolidado — conquistas e visão geral do plano */}
       <PlanoMelhoriaStatusConsolidado />
 
-      {/* 3. KPIs Big + Pilares + Módulos completos */}
+      {/* 5. KPIs Big + Pilares + Módulos completos */}
       <PlanoMelhoriaKPIsBig />
 
       {/* 3. Cockpit IA: diagnóstico executivo inteligente */}
@@ -114,7 +123,10 @@ export default function PlanoMelhoria() {
       {/* 25. Próximos ciclos de melhoria */}
       <PlanoMelhoriaProximosCiclos />
 
-      {/* 26. Próxima execução — ações imediatas */}
+      {/* 26. Próximas ações — Ciclo 10 & Roadmap */}
+      <PlanoMelhoriaProximasAcoes />
+
+      {/* 27. Próxima execução — ações imediatas */}
       <PlanoMelhoriaNextSteps />
 
     </div>

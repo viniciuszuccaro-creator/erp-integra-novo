@@ -3,11 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 
 const steps = [
-  'Finalizar limpeza técnica e validação de lint/build.',
-  'Revisar módulo por módulo aplicando multiempresa e permissões.',
-  'Modularizar telas grandes em componentes menores.',
-  'Conectar IA às ações reais de cada área operacional.',
-  'Medir performance, auditar e repetir o ciclo de melhoria.'
+  'Elevar módulos Financeiro e RH para 96%+ com painel de IA integrado.',
+  'Completar validação ponta a ponta do fluxo Pedido → Estoque → NF-e → Entrega.',
+  'Revisar perfis de acesso e revalidar SoD em todos os módulos críticos.',
+  'Conectar IA de previsão de demanda ao módulo de Compras.',
+  'Auditar cobertura de multiempresa nos relatórios e dashboards.',
+  'Ativar notificações automáticas para eventos críticos por WhatsApp.',
+  'Revisar e elevar score de UX responsiva em RH, Contratos e Hub de Atendimento.',
+  'Executar ciclo de performance: medir latências, otimizar e republicar.'
 ];
 
 export default function PlanoMelhoriaNextSteps() {

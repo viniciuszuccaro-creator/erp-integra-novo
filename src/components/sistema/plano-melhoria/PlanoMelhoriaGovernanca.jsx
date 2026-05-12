@@ -4,11 +4,17 @@ import { Badge } from '@/components/ui/badge';
 
 const rules = [
   'Nunca apagar: melhorar, integrar e preservar funcionalidades existentes.',
-  'Multiempresa por padrão: group_id e empresa_id em dados e funções.',
-  'Controle de acesso em módulos, abas, ações e campos sensíveis.',
-  'Componentes pequenos, reutilizáveis e fáceis de manter.',
-  'Layout w-full/h-full, responsivo e preparado para multitarefa.',
-  'IA conectada ao operacional, não apenas demonstrativa.'
+  'Multiempresa por padrão: group_id e empresa_id em todas as entidades e funções.',
+  'Controle de acesso granular em módulos, abas, ações e campos sensíveis.',
+  'Componentes pequenos (≤ 150 linhas), reutilizáveis e fáceis de manter.',
+  'Layout w-full/h-full, responsivo, mobile-first e preparado para multitarefa.',
+  'IA conectada ao operacional: anomalias, preço, churn, rotas e diagnóstico.',
+  'Auditoria de todas as ações sensíveis no AuditLog central.',
+  'LGPD: PII encriptado, consentimento registrado e direito de exclusão.',
+  'Performance: paginação, cache seletivo, prefetch e contagens otimizadas.',
+  'Ciclos contínuos: medir → identificar gap → executar → validar → repetir.',
+  'Inovação: IA futurista, dashboards preditivos e automações inteligentes.',
+  'Governança de configurações: herança grupo → empresa → usuário.'
 ];
 
 export default function PlanoMelhoriaGovernanca() {

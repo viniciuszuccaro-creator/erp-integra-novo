@@ -27,6 +27,9 @@ import PlanoMelhoriaStatusConsolidado from '@/components/sistema/plano-melhoria/
 import PlanoMelhoriaMetricasDetalhadas from '@/components/sistema/plano-melhoria/PlanoMelhoriaMetricasDetalhadas';
 import PlanoMelhoriaDashboardFinal from '@/components/sistema/plano-melhoria/PlanoMelhoriaDashboardFinal';
 import PlanoMelhoriaProximasAcoes from '@/components/sistema/plano-melhoria/PlanoMelhoriaProximasAcoes';
+import PlanoMelhoriaFinalSummary from '@/components/sistema/plano-melhoria/PlanoMelhoriaFinalSummary';
+import PlanoMelhoriaCiclo10Showcase from '@/components/sistema/plano-melhoria/PlanoMelhoriaCiclo10Showcase';
+import PlanoMelhoriaRuleMaster from '@/components/sistema/plano-melhoria/PlanoMelhoriaRuleMaster';
 import { Link } from 'react-router-dom';
 import { melhoriaPlanPhases } from '@/components/sistema/plano-melhoria/melhoriaPlanData';
 
@@ -126,12 +129,14 @@ export default function PlanoMelhoria() {
       {/* 27. Próxima execução — ações imediatas */}
       <PlanoMelhoriaNextSteps />
 
-      {/* 28. Ciclo 10 Live em Produção */}
-      <Link to="/CicloX">
-        <div className="p-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl text-white text-center font-semibold hover:shadow-xl transition cursor-pointer">
-          🚀 Ver Ciclo 10 em Produção — IA Generativa, BI Preditivo, E-commerce & Bot WhatsApp
-        </div>
-      </Link>
+      {/* 28. Ciclo 10 Showcase */}
+      <PlanoMelhoriaCiclo10Showcase />
+
+      {/* 29. Regra-Mãe do Sistema */}
+      <PlanoMelhoriaRuleMaster />
+
+      {/* 30. Resumo Final Executivo */}
+      <PlanoMelhoriaFinalSummary />
 
     </div>
   );

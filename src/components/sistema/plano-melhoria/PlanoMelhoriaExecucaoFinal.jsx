@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -69,9 +70,16 @@ export default function PlanoMelhoriaExecucaoFinal() {
   const [salvando, setSalvando] = useState(false);
   const [salvo, setSalvo] = useState(false);
 
+  // Carrega dados em tempo real do banco (multiempresa)
+  const { data: itemsFromDb = [] } = useQuery({
+    queryKey: ['planoMelhoriaItems'],
+    queryFn: () => base44.entities.PlanoMelhoriaItem?.list?.() || [],
+    enabled: !!base44.entities.PlanoMelhoriaItem,
+  });
+
   const moduleEntries = Object.entries(MODULE_IMPROVEMENT_STATUS);
   const avgProgress = Math.round(moduleEntries.reduce((s, [, v]) => s + v.progress, 0) / moduleEntries.length);
-  const concluidos = EXECUCAO_ITENS.filter(i => i.status === 'Concluído').length;
+  const concluidos = [...EXECUCAO_ITENS, ...itemsFromDb].filter(i => i.status === 'Concluído').length;
 
   const salvarNoBacklog = async () => {
     setSalvando(true);

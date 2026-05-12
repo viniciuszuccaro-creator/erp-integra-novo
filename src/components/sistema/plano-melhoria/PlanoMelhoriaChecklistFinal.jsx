@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Circle, ChevronDown, ChevronRight, ClipboardCheck } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CheckCircle2, Circle, ChevronDown, ChevronRight, ClipboardCheck, Download, Share2 } from 'lucide-react';
 
 const CHECKLIST = [
   {
@@ -120,10 +122,44 @@ const CHECKLIST = [
 
 export default function PlanoMelhoriaChecklistFinal() {
   const [expandido, setExpandido] = useState(null);
+  const [exportando, setExportando] = useState(false);
 
   const totalItens = CHECKLIST.reduce((s, c) => s + c.total, 0);
   const totalFeitos = CHECKLIST.reduce((s, c) => s + c.feitos, 0);
   const percentual = Math.round((totalFeitos / totalItens) * 100);
+
+  const handleExportChecklist = () => {
+    setExportando(true);
+    const data = {
+      titulo: 'Checklist Plano de Melhoria - 100% Executado',
+      data_exportacao: new Date().toISOString(),
+      total_itens: totalItens,
+      total_feitos: totalFeitos,
+      percentual_completo: percentual,
+      categorias: CHECKLIST,
+    };
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `plano-melhoria-checklist-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setTimeout(() => setExportando(false), 500);
+  };
+
+  const handleShareResults = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Plano de Melhoria - 100% Executado',
+          text: `Plano de Melhoria Base44 ERP: ${percentual}% completo (${totalFeitos}/${totalItens} itens)`,
+          url: window.location.href,
+        });
+      } catch (_) {}
+    }
+  };
 
   return (
     <Card className="w-full border-emerald-100">
@@ -138,9 +174,28 @@ export default function PlanoMelhoriaChecklistFinal() {
               <p className="text-xs text-slate-500">Verificação completa de todos os itens do plano de melhoria</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Badge className="bg-emerald-100 text-emerald-700">{totalFeitos}/{totalItens} itens</Badge>
             <Badge className="bg-emerald-600 text-white">{percentual}%</Badge>
+            <div className="flex gap-2 ml-auto">
+              <Button
+                onClick={handleExportChecklist}
+                disabled={exportando}
+                size="sm"
+                variant="outline"
+              >
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                Exportar
+              </Button>
+              <Button
+                onClick={handleShareResults}
+                size="sm"
+                variant="outline"
+              >
+                <Share2 className="h-3.5 w-3.5 mr-1.5" />
+                Compartilhar
+              </Button>
+            </div>
           </div>
         </div>
       </CardHeader>

@@ -16,6 +16,7 @@ import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
 import { Button } from "@/components/ui/button";
+import ExpedicaoIAPanel from "@/components/expedicao/ExpedicaoIAPanel";
 import HeaderExpedicaoCompacto from "@/components/expedicao/expedicao-launchpad/HeaderExpedicaoCompacto";
 import KPIsExpedicao from "@/components/expedicao/expedicao-launchpad/KPIsExpedicao";
 import ModulosGridExpedicao from "@/components/expedicao/expedicao-launchpad/ModulosGridExpedicao";
@@ -348,6 +349,7 @@ export default function Expedicao() {
     <ErrorBoundary>
       <ModuleLayout title="Expedição e Logística" subtitle="Entregas, romaneios e rotas" actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'expedicao_primary_action' })}>Nova Entrega</Button></div>}>
         <ModuleKPIs>
+          <ExpedicaoIAPanel entregas={entregasFiltradas} />
           <KPIsExpedicao statusCounts={statusCounts} />
           {estaNoGrupo && (
             <Badge className="bg-blue-100 text-blue-700 px-3 py-1.5">

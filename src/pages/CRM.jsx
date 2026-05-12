@@ -17,6 +17,9 @@ import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
 import { Button } from "@/components/ui/button";
 import useCRMDerivedData from "@/components/crm/hooks/useCRMDerivedData";
+import CRMIAPanel from "@/components/crm/CRMIAPanel";
+const OportunidadesListagem = React.lazy(() => import("../components/crm/OportunidadesListagem"));
+const InteracoesListagem = React.lazy(() => import("../components/crm/InteracoesListagem"));
 import { useUser } from "@/components/lib/UserContext";
 import { CRM_CAMPAIGN_LIMIT, CRM_LIST_LIMIT, crmQueryDefaults } from "@/components/crm/config/crmQueryConfig";
 
@@ -146,7 +149,7 @@ export default function CRMPage() {
       description: 'Gestão completa',
       icon: Target,
       color: 'indigo',
-      component: () => <div className="p-4">Listagem Oportunidades (em desenvolvimento)</div>,
+      component: OportunidadesListagem,
       windowTitle: '📊 Oportunidades',
       width: 1500,
       height: 850,
@@ -156,7 +159,7 @@ export default function CRMPage() {
       description: 'Histórico contatos',
       icon: MessageSquare,
       color: 'green',
-      component: () => <div className="p-4">Histórico Interações (em desenvolvimento)</div>,
+      component: InteracoesListagem,
       windowTitle: '💬 Interações',
       width: 1400,
       height: 800,
@@ -231,6 +234,7 @@ export default function CRMPage() {
     <ErrorBoundary>
       <ModuleLayout title="CRM - Relacionamento" subtitle="Relacionamento, funil e campanhas" actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'crm_primary_action' })}>Novo</Button></div>}>
         <ModuleKPIs>
+          <CRMIAPanel oportunidades={oportunidadesFiltradas} clientes={clientes} interacoes={interacoesFiltradas} />
           <KPIsCRM
             oportunidadesAbertas={oportunidadesAbertas}
             totalOportunidades={totalOportunidades}

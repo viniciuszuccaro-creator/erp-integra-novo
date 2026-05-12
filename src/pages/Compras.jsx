@@ -18,6 +18,7 @@ import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
 import { Button } from "@/components/ui/button";
 import ComprasIAInsights from "@/components/compras/ComprasIAInsights";
+import ComprasPerformancePanel from "@/components/compras/ComprasPerformancePanel";
 
 const FornecedoresTab = React.lazy(() => import("../components/compras/FornecedoresTab"));
 const OrdensCompraTab = React.lazy(() => import("../components/compras/OrdensCompraTab"));
@@ -226,6 +227,7 @@ export default function Compras() {
     <ErrorBoundary>
       <ModuleLayout title="Compras e Suprimentos" subtitle="Fornecedores, OCs e recebimento" actions={<div className="flex items-center gap-2"><Button size="sm" disabled={!contextoValido || !podeCriarOC} onClick={() => openWindow(OrdemCompraForm, { windowMode: true, onSubmit: (data) => createInContext('OrdemCompra', data) }, { title: 'Nova Ordem de Compra', width: 1200, height: 780 })}>Nova OC</Button></div>}>
         <ModuleKPIs>
+          <ComprasPerformancePanel ordensCompra={ordensCompraFiltradas} fornecedores={fornecedoresFiltrados} solicitacoes={solicitacoesFiltradas} />
           <ComprasIAInsights
             fornecedores={fornecedoresFiltrados}
             ordensCompra={ordensCompraFiltradas}

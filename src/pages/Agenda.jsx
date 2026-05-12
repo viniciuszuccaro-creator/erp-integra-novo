@@ -826,9 +826,6 @@ function Agenda() {
         <p className="text-slate-600">Gerencie compromissos, reuniões e lembretes com notificações automáticas</p>
       </div>
 
-      {/* IA Panel */}
-      <AgendaIAPanel eventos={eventos} />
-
       {/* Alert Sincronização */}
       {googleSyncAtivo ? (
         <Card className="border-green-200 bg-green-50">
@@ -880,6 +877,9 @@ function Agenda() {
           </CardContent>
         </Card>
       )}
+
+      {/* IA Panel */}
+      <AgendaIAPanel eventos={eventos} />
 
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

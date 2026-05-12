@@ -98,7 +98,7 @@ export default function Producao() {
       description: 'Listagem OPs',
       icon: Factory,
       color: 'orange',
-      component: () => <div className="p-4">Listagem de OPs (em desenvolvimento)</div>,
+      component: React.lazy(() => import("@/components/producao/OrdensProducaoListagem")),
       windowTitle: '🏭 Ordens de Produção',
       width: 1500,
       height: 850,

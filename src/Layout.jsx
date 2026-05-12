@@ -70,6 +70,7 @@ import { useNavHistory } from "@/components/lib/useNavHistory";
 import { usePredictivePrefetch } from "@/components/lib/usePredictivePrefetch";
 import { idbClearExpired } from "@/components/lib/useIndexedDBCache";
 import ModuleImprovementBar from "@/components/layout/ModuleImprovementBar";
+import EmpresaOnboardingGuard from "@/components/sistema/EmpresaOnboardingGuard";
 
 
 const navigationItems = [
@@ -1525,7 +1526,8 @@ function LayoutContent({ children, currentPageName }) {
             <ErrorBoundary>
               <Suspense fallback={<div className="p-6 text-slate-500">Carregando…</div>}>
                 <BootstrapGuard>
-                  <ProtectedSection module={moduleName || 'Sistema'} action="ver" fallback={<div className="p-10 text-center text-slate-600">Acesso negado a este módulo.</div>}>
+                  <EmpresaOnboardingGuard>
+                   <ProtectedSection module={moduleName || 'Sistema'} action="ver" fallback={<div className="p-10 text-center text-slate-600">Acesso negado a este módulo.</div>}>
                     <GuardRails currentPageName={currentPageName}>
                       <div className="w-full h-full">
                         <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-4 space-y-4">
@@ -1535,6 +1537,7 @@ function LayoutContent({ children, currentPageName }) {
                       </div>
                     </GuardRails>
                   </ProtectedSection>
+                  </EmpresaOnboardingGuard>
                 </BootstrapGuard>
               </Suspense>
             </ErrorBoundary>

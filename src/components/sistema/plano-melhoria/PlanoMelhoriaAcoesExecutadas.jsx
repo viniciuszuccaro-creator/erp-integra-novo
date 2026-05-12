@@ -131,6 +131,20 @@ const ACOES = [
       { acao: 'whatsappSend + templates — notificações automáticas multicanal', feito: true },
     ]
   },
+  {
+    categoria: 'Documentação do Plano',
+    cor: 'violet',
+    itens: [
+      { acao: 'PlanoMelhoriaIACockpit — análise executiva com IA', feito: true },
+      { acao: 'PlanoMelhoriaConexoesModulos — fluxos reais entre módulos', feito: true },
+      { acao: 'PlanoMelhoriaTimelineExecutiva — histórico completo de fases', feito: true },
+      { acao: 'PlanoMelhoriaModulosPorPilar — score módulo × pilar expandível', feito: true },
+      { acao: 'PlanoMelhoriaFuncoesBackend — 25 funções mapeadas com filtro', feito: true },
+      { acao: 'PlanoMelhoriaEntidadesStatus — cobertura multiempresa por entidade', feito: true },
+      { acao: 'PlanoMelhoriaInovacaoQ3 — roadmap de inovações Q3/Q4 2026', feito: true },
+      { acao: 'PlanoMelhoriaKPIsGlobais — 8 KPIs de pilares atualizados', feito: true },
+    ]
+  },
 ];
 
 const corMap = {

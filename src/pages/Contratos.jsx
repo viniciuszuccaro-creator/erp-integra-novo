@@ -37,6 +37,8 @@ import {
   Zap
 } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import ContratosKPIs from "@/components/contratos/ContratosKPIs";
+import ContratosIAPanel from "@/components/contratos/ContratosIAPanel";
 
 export default function ContratosPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -1068,66 +1070,10 @@ export default function ContratosPage() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm text-slate-600">Contratos Vigentes</p>
-                <p className="text-3xl font-bold text-green-600 mt-1">{contratosPorStatus.vigentes.length}</p>
-              </div>
-              <div className="p-3 bg-green-100 rounded-lg">
-                <CheckCircle className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <ContratosKPIs contratos={contratosContexto} />
 
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm text-slate-600">Receita Mensal Recorrente</p>
-                <p className="text-2xl font-bold text-emerald-600 mt-1">
-                  R$ {valorTotalContratos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </p>
-              </div>
-              <div className="p-3 bg-emerald-100 rounded-lg">
-                <DollarSign className="w-6 h-6 text-emerald-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm text-slate-600">Próximos a Vencer</p>
-                <p className="text-3xl font-bold text-orange-600 mt-1">{contratosPorStatus.proximosVencer.length}</p>
-                <p className="text-xs text-slate-500 mt-1">60 dias</p>
-              </div>
-              <div className="p-3 bg-orange-100 rounded-lg">
-                <Clock className="w-6 h-6 text-orange-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm text-slate-600">Aguardando Assinatura</p>
-                <p className="text-3xl font-bold text-yellow-600 mt-1">{contratosPorStatus.aguardando.length}</p>
-              </div>
-              <div className="p-3 bg-yellow-100 rounded-lg">
-                <AlertCircle className="w-6 h-6 text-yellow-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Painel IA */}
+      <ContratosIAPanel contratos={contratosContexto} />
 
       {/* Abas de Navegação */}
       <Tabs value={activeTab} onValueChange={handleTabChange}>

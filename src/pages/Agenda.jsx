@@ -32,6 +32,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/components/ui/use-toast";
 import { Switch } from "@/components/ui/switch";
 import EventoForm from "@/components/agenda/EventoForm";
+import AgendaPainelLateral from "@/components/agenda/AgendaPainelLateral";
 import { useWindow } from "@/components/lib/useWindow";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
@@ -923,8 +924,19 @@ function Agenda() {
         </Card>
       </div>
 
-      {/* Calendário */}
+      {/* Layout com painel lateral */}
       <ErrorBoundary>
+      <div className="flex gap-4 w-full">
+        {/* Painel lateral */}
+        <div className="hidden xl:flex flex-col w-72 shrink-0">
+          <AgendaPainelLateral
+            eventos={eventos}
+            dataAtual={dataAtual}
+            onEventoClick={(e) => setVisualizandoEvento(e)}
+          />
+        </div>
+        {/* Calendário principal */}
+        <div className="flex-1 min-w-0">
       <Card className="border-0 shadow-md">
         <CardHeader className="border-b bg-slate-50">
           <div className="flex flex-col sm:flex-row justify-between gap-4">
@@ -1320,6 +1332,8 @@ function Agenda() {
           {visualizacao === 'dia' && renderVisaoDiaria()}
         </CardContent>
       </Card>
+      </div>{/* fim flex-1 */}
+      </div>{/* fim flex gap-4 */}
       </ErrorBoundary>
 
       {/* Dialog de Visualização do Evento */}

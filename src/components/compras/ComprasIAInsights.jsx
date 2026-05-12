@@ -1,37 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, RefreshCw, TrendingDown, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Sparkles, RefreshCw, AlertTriangle, Package, TrendingDown, Clock } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function ComprasIAInsights({ fornecedores = [], ordensCompra = [], solicitacoes = [] }) {
   const [loading, setLoading] = useState(false);
   const [insights, setInsights] = useState(null);
 
-  // Análise local
-  const pendentes = solicitacoes.filter(s => s.status === 'Pendente').length;
-  const atrasadas = ordensCompra.filter(o => {
-    if (!o.data_entrega_prevista || o.status === 'Recebida' || o.status === 'Cancelada') return false;
-    return new Date(o.data_entrega_prevista) < new Date();
-  }).length;
-  const fornAtivos = fornecedores.filter(f => f.status === 'Ativo').length;
-  const totalValorAberto = ordensCompra
-    .filter(o => !['Recebida', 'Cancelada'].includes(o.status))
-    .reduce((s, o) => s + (o.valor_total || 0), 0);
+  const stats = useMemo(() => {
+    const ativos = fornecedores.filter(f => f.status === 'Ativo').length;
+    const bloqueados = fornecedores.filter(f => f.status_fornecedor === 'Bloqueado').length;
+    const ocPendentes = ordensCompra.filter(o => ['Solicitada','Aprovada'].includes(o.status)).length;
+    const solPendentes = solicitacoes.filter(s => s.status === 'Pendente').length;
+    const valorTotal = ordensCompra.filter(o => o.status !== 'Cancelada').reduce((s, o) => s + (o.valor_total || 0), 0);
+    const atrasadas = ordensCompra.filter(o => {
+      if (!o.data_entrega_prevista || o.status === 'Recebida' || o.status === 'Cancelada') return false;
+      return new Date(o.data_entrega_prevista) < new Date();
+    }).length;
+    return { ativos, bloqueados, ocPendentes, solPendentes, valorTotal, atrasadas };
+  }, [fornecedores, ordensCompra, solicitacoes]);
 
-  const analisarComIA = async () => {
+  const analisar = async () => {
     setLoading(true);
     try {
-      const resumo = {
-        pendentes,
-        atrasadas,
-        fornecedores_ativos: fornAtivos,
-        valor_em_aberto: totalValorAberto,
-        top_fornecedores: fornecedores.slice(0, 5).map(f => ({ nome: f.nome, nota: f.nota_media }))
-      };
       const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Analise estes dados de compras/suprimentos e forneça 3 insights práticos em português: ${JSON.stringify(resumo)}`,
+        prompt: `Analise estes dados de compras e suprimentos e forneça 3 insights acionáveis para otimizar a cadeia de fornecimento em português: ${JSON.stringify(stats)}`,
         response_json_schema: {
           type: "object",
           properties: {
@@ -42,8 +36,7 @@ export default function ComprasIAInsights({ fornecedores = [], ordensCompra = []
                 properties: {
                   titulo: { type: "string" },
                   descricao: { type: "string" },
-                  acao: { type: "string" },
-                  prioridade: { type: "string", enum: ["alta", "media", "baixa"] }
+                  impacto: { type: "string", enum: ["alto", "medio", "baixo"] }
                 }
               }
             }
@@ -52,55 +45,63 @@ export default function ComprasIAInsights({ fornecedores = [], ordensCompra = []
       });
       setInsights(res?.insights || []);
     } catch {
-      setInsights([{ titulo: "Indisponível", descricao: "Tente novamente.", acao: "", prioridade: "baixa" }]);
+      setInsights([{ titulo: "Indisponível", descricao: "Tente novamente.", impacto: "baixo" }]);
     }
     setLoading(false);
   };
 
-  const prColor = { alta: "text-red-600 bg-red-50 border-red-200", media: "text-amber-700 bg-amber-50 border-amber-200", baixa: "text-slate-600 bg-slate-50 border-slate-200" };
+  const cor = { alto: "bg-red-50 border-red-200 text-red-800", medio: "bg-amber-50 border-amber-200 text-amber-800", baixo: "bg-blue-50 border-blue-200 text-blue-800" };
 
   return (
     <Card className="border shadow-sm">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-purple-600" /> IA Suprimentos
+            <Sparkles className="w-4 h-4 text-purple-600" /> IA Compras
           </CardTitle>
-          <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={analisarComIA} disabled={loading}>
+          <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={analisar} disabled={loading}>
             {loading ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-            {loading ? "Analisando..." : "Gerar Insights"}
+            {loading ? "Analisando..." : "Otimizar Suprimentos"}
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-2">
-        {/* Alertas locais */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+          <div className="text-center p-2 rounded-lg bg-cyan-50 border border-cyan-200">
+            <p className="text-sm font-bold text-cyan-700">{stats.ativos}</p>
+            <p className="text-xs text-cyan-600">Fornecedores ativos</p>
+          </div>
+          <div className="text-center p-2 rounded-lg bg-amber-50 border border-amber-200">
+            <p className="text-sm font-bold text-amber-700">{stats.ocPendentes}</p>
+            <p className="text-xs text-amber-600">OCs pendentes</p>
+          </div>
           <div className="text-center p-2 rounded-lg bg-orange-50 border border-orange-200">
-            <p className="text-xs text-orange-600 font-semibold">{pendentes}</p>
-            <p className="text-xs text-orange-700">Solicitações pendentes</p>
+            <p className="text-sm font-bold text-orange-700">{stats.solPendentes}</p>
+            <p className="text-xs text-orange-600">Sol. pendentes</p>
           </div>
           <div className="text-center p-2 rounded-lg bg-red-50 border border-red-200">
-            <p className="text-xs text-red-600 font-semibold">{atrasadas}</p>
-            <p className="text-xs text-red-700">OCs atrasadas</p>
-          </div>
-          <div className="text-center p-2 rounded-lg bg-blue-50 border border-blue-200">
-            <p className="text-xs text-blue-600 font-semibold">R$ {(totalValorAberto / 1000).toFixed(0)}k</p>
-            <p className="text-xs text-blue-700">Em aberto</p>
+            <p className="text-sm font-bold text-red-700">{stats.atrasadas}</p>
+            <p className="text-xs text-red-600">OCs atrasadas</p>
           </div>
         </div>
-
-        {/* IA Insights */}
+        {(stats.atrasadas > 0 || stats.bloqueados > 0) && (
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-red-50 border border-red-200">
+            <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+            <p className="text-xs text-red-800">
+              {stats.atrasadas > 0 && `${stats.atrasadas} OC(s) atrasadas. `}
+              {stats.bloqueados > 0 && `${stats.bloqueados} fornecedor(es) bloqueado(s).`}
+            </p>
+          </div>
+        )}
         {insights && insights.map((i, idx) => (
-          <div key={idx} className={`p-2 rounded-lg border ${prColor[i.prioridade] || prColor.baixa}`}>
-            <div className="flex items-center gap-2 mb-1">
-              <Badge className={`text-xs ${i.prioridade === 'alta' ? 'bg-red-100 text-red-700' : i.prioridade === 'media' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}`}>{i.prioridade}</Badge>
-              <span className="text-xs font-semibold">{i.titulo}</span>
-            </div>
+          <div key={idx} className={`p-2 rounded-lg border ${cor[i.impacto] || cor.baixo}`}>
+            <p className="text-xs font-semibold mb-0.5">{i.titulo}</p>
             <p className="text-xs">{i.descricao}</p>
-            {i.acao && <p className="text-xs font-medium mt-1 opacity-80">→ {i.acao}</p>}
           </div>
         ))}
-        {!insights && <p className="text-xs text-slate-400 text-center py-2">Clique em "Gerar Insights" para análise com IA</p>}
+        {!insights && stats.atrasadas === 0 && (
+          <p className="text-xs text-slate-400 text-center py-2">Clique em "Otimizar Suprimentos" para análise IA</p>
+        )}
       </CardContent>
     </Card>
   );

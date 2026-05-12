@@ -1,57 +1,58 @@
 import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, AlertTriangle, TrendingUp, Clock, RefreshCw } from "lucide-react";
+import { Sparkles, RefreshCw, AlertTriangle, FileText, TrendingUp, Clock } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function ContratosIAPanel({ contratos = [] }) {
   const [loading, setLoading] = useState(false);
   const [insights, setInsights] = useState(null);
 
-  const hoje = new Date();
-
-  // Análise local sem IA
-  const analise = React.useMemo(() => {
-    const vigentes = contratos.filter(c => c.status === 'Vigente');
-    const vencendo30 = vigentes.filter(c => {
-      if (!c.data_fim) return false;
+  const stats = useMemo(() => {
+    const hoje = new Date();
+    const vigentes = contratos.filter(c => c.status === 'Vigente').length;
+    const vencidos = contratos.filter(c => c.status === 'Vencido').length;
+    const proxVencer = contratos.filter(c => {
+      if (c.status !== 'Vigente' || !c.data_fim) return false;
       const dias = Math.floor((new Date(c.data_fim) - hoje) / 86400000);
-      return dias > 0 && dias <= 30;
-    });
-    const semRenovacao = vigentes.filter(c => !c.renovacao_automatica);
-    const semCobranca = vigentes.filter(c => !c.gerar_cobranca_automatica);
-    const valorRisco = vencendo30.reduce((s, c) => s + (c.valor_mensal || 0), 0);
-    return { vencendo30, semRenovacao, semCobranca, valorRisco };
+      return dias <= 60 && dias > 0;
+    }).length;
+    const valorMensal = contratos.filter(c => c.status === 'Vigente').reduce((s, c) => s + (c.valor_mensal || 0), 0);
+    const semRenovacao = contratos.filter(c => c.status === 'Vigente' && !c.renovacao_automatica).length;
+    return { vigentes, vencidos, proxVencer, valorMensal, semRenovacao, total: contratos.length };
   }, [contratos]);
 
-  const analisarComIA = async () => {
+  const analisar = async () => {
     setLoading(true);
     try {
-      const resumo = contratos.slice(0, 20).map(c => ({
-        numero: c.numero_contrato,
-        status: c.status,
-        valor: c.valor_mensal,
-        vencimento: c.data_fim,
-        renovacao_auto: c.renovacao_automatica,
-      }));
       const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Analise estes contratos e dê 3 insights executivos em português (max 2 linhas cada): ${JSON.stringify(resumo)}`,
+        prompt: `Analise esta carteira de contratos e forneça 3 insights estratégicos com ações recomendadas em português: ${JSON.stringify(stats)}`,
         response_json_schema: {
           type: "object",
           properties: {
-            insights: { type: "array", items: { type: "object", properties: { titulo: { type: "string" }, descricao: { type: "string" }, prioridade: { type: "string", enum: ["alta", "media", "baixa"] } } } }
+            insights: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  titulo: { type: "string" },
+                  descricao: { type: "string" },
+                  acao: { type: "string" },
+                  risco: { type: "string", enum: ["alto", "medio", "baixo"] }
+                }
+              }
+            }
           }
         }
       });
       setInsights(res?.insights || []);
     } catch {
-      setInsights([{ titulo: "Análise indisponível", descricao: "Tente novamente mais tarde.", prioridade: "baixa" }]);
+      setInsights([{ titulo: "Indisponível", descricao: "Tente novamente.", acao: "", risco: "baixo" }]);
     }
     setLoading(false);
   };
 
-  const prioridadeColor = { alta: "bg-red-100 text-red-700", media: "bg-amber-100 text-amber-700", baixa: "bg-slate-100 text-slate-600" };
+  const cor = { alto: "bg-red-50 border-red-200 text-red-800", medio: "bg-amber-50 border-amber-200 text-amber-800", baixo: "bg-blue-50 border-blue-200 text-blue-800" };
 
   return (
     <Card className="border shadow-sm">
@@ -60,49 +61,49 @@ export default function ContratosIAPanel({ contratos = [] }) {
           <CardTitle className="text-sm flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-purple-600" /> IA Contratos
           </CardTitle>
-          <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={analisarComIA} disabled={loading}>
+          <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={analisar} disabled={loading}>
             {loading ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-            {loading ? "Analisando..." : "Analisar com IA"}
+            {loading ? "Analisando..." : "Analisar Carteira"}
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {/* Alertas locais */}
-        {analise.vencendo30.length > 0 && (
-          <div className="flex items-start gap-2 p-2 rounded-lg bg-orange-50 border border-orange-200">
-            <Clock className="w-4 h-4 text-orange-600 mt-0.5 shrink-0" />
-            <div>
-              <p className="text-xs font-semibold text-orange-800">{analise.vencendo30.length} contrato(s) vencem em 30 dias</p>
-              <p className="text-xs text-orange-700">Risco: R$ {analise.valorRisco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/mês</p>
-            </div>
+      <CardContent className="space-y-2">
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+          <div className="text-center p-2 rounded-lg bg-green-50 border border-green-200">
+            <p className="text-sm font-bold text-green-700">{stats.vigentes}</p>
+            <p className="text-xs text-green-600">Vigentes</p>
+          </div>
+          <div className="text-center p-2 rounded-lg bg-emerald-50 border border-emerald-200">
+            <p className="text-xs font-bold text-emerald-700">R$ {(stats.valorMensal / 1000).toFixed(0)}k</p>
+            <p className="text-xs text-emerald-600">Receita/mês</p>
+          </div>
+          <div className="text-center p-2 rounded-lg bg-orange-50 border border-orange-200">
+            <p className="text-sm font-bold text-orange-700">{stats.proxVencer}</p>
+            <p className="text-xs text-orange-600">Venc. em 60d</p>
+          </div>
+          <div className="text-center p-2 rounded-lg bg-red-50 border border-red-200">
+            <p className="text-sm font-bold text-red-700">{stats.vencidos}</p>
+            <p className="text-xs text-red-600">Vencidos</p>
+          </div>
+        </div>
+        {(stats.proxVencer > 0 || stats.semRenovacao > 0) && (
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-50 border border-amber-200">
+            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+            <p className="text-xs text-amber-800">
+              {stats.proxVencer > 0 && `${stats.proxVencer} contrato(s) vencem em 60 dias. `}
+              {stats.semRenovacao > 0 && `${stats.semRenovacao} sem renovação automática.`}
+            </p>
           </div>
         )}
-        {analise.semRenovacao.length > 0 && (
-          <div className="flex items-start gap-2 p-2 rounded-lg bg-yellow-50 border border-yellow-200">
-            <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 shrink-0" />
-            <p className="text-xs text-yellow-800">{analise.semRenovacao.length} vigente(s) sem renovação automática configurada</p>
-          </div>
-        )}
-        {analise.semCobranca.length > 0 && (
-          <div className="flex items-start gap-2 p-2 rounded-lg bg-blue-50 border border-blue-200">
-            <TrendingUp className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
-            <p className="text-xs text-blue-800">{analise.semCobranca.length} contrato(s) sem cobrança automática</p>
-          </div>
-        )}
-
-        {/* Insights IA */}
         {insights && insights.map((i, idx) => (
-          <div key={idx} className="p-2 rounded-lg bg-purple-50 border border-purple-200">
-            <div className="flex items-center gap-2 mb-1">
-              <Badge className={`text-xs ${prioridadeColor[i.prioridade] || prioridadeColor.baixa}`}>{i.prioridade}</Badge>
-              <span className="text-xs font-semibold text-purple-900">{i.titulo}</span>
-            </div>
-            <p className="text-xs text-purple-800">{i.descricao}</p>
+          <div key={idx} className={`p-2 rounded-lg border ${cor[i.risco] || cor.baixo}`}>
+            <p className="text-xs font-semibold mb-0.5">{i.titulo}</p>
+            <p className="text-xs">{i.descricao}</p>
+            {i.acao && <p className="text-xs font-medium mt-1 opacity-80">→ {i.acao}</p>}
           </div>
         ))}
-
-        {!insights && analise.vencendo30.length === 0 && analise.semRenovacao.length === 0 && (
-          <p className="text-xs text-slate-500 text-center py-2">Clique em "Analisar com IA" para gerar insights</p>
+        {!insights && stats.proxVencer === 0 && (
+          <p className="text-xs text-slate-400 text-center py-2">Clique em "Analisar Carteira" para insights estratégicos</p>
         )}
       </CardContent>
     </Card>

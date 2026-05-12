@@ -39,6 +39,7 @@ import {
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import ContratosKPIs from "@/components/contratos/ContratosKPIs";
 import ContratosIAPanel from "@/components/contratos/ContratosIAPanel";
+// ContratosIAPanel already imported - multiempresa context via filtrarPorContexto
 
 export default function ContratosPage() {
   const [searchTerm, setSearchTerm] = useState("");

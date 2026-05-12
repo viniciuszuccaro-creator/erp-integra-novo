@@ -33,6 +33,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Switch } from "@/components/ui/switch";
 import EventoForm from "@/components/agenda/EventoForm";
 import AgendaPainelLateral from "@/components/agenda/AgendaPainelLateral";
+import AgendaIAPanel from "@/components/agenda/AgendaIAPanel";
 import { useWindow } from "@/components/lib/useWindow";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
@@ -824,6 +825,9 @@ function Agenda() {
         <h1 className="text-3xl font-bold text-slate-900 mb-2">Agenda e Calendário</h1>
         <p className="text-slate-600">Gerencie compromissos, reuniões e lembretes com notificações automáticas</p>
       </div>
+
+      {/* IA Panel */}
+      <AgendaIAPanel eventos={eventos} />
 
       {/* Alert Sincronização */}
       {googleSyncAtivo ? (

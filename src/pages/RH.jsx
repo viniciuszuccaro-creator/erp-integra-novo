@@ -19,6 +19,7 @@ import ModuleLayout from "@/components/layout/ModuleLayout";
 import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
+import RHIAPanel from "@/components/rh/RHIAPanel";
 
 const PontoTab = React.lazy(() => import("../components/rh/PontoTab"));
 const GameficacaoProducao = React.lazy(() => import("@/components/rh/GameficacaoProducao"));
@@ -261,6 +262,7 @@ export default function RH() {
     <ErrorBoundary>
       <ModuleLayout title="Recursos Humanos" subtitle="Colaboradores, ponto e indicadores" actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'rh_primary_action' })}>Novo Colaborador</Button></div>}>
         <ModuleKPIs>
+          <RHIAPanel colaboradores={colaboradoresFiltrados} pontos={pontos} ferias={ferias} />
           <KPIsRH
             colaboradoresAtivos={colaboradoresAtivos}
             totalColaboradores={totalColaboradores}

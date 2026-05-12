@@ -16,6 +16,7 @@ import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
 import { Button } from "@/components/ui/button";
+import ProducaoIAPanel from "@/components/producao/ProducaoIAPanel";
 
 const KanbanProducaoInteligente = React.lazy(() => import("@/components/producao/KanbanProducaoInteligente"));
 const ApontamentoProducao = React.lazy(() => import("@/components/producao/ApontamentoProducao"));
@@ -229,6 +230,7 @@ export default function Producao() {
         actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'producao_primary_action' })}>Nova OP</Button></div>}
       >
         <ModuleKPIs>
+          <ProducaoIAPanel ordensProducao={ordensProducao} />
           <KPIsProducao
             totalOPs={totalOPs}
             opsLiberadas={opsLiberadas}

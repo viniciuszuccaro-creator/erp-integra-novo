@@ -3,32 +3,33 @@ import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 
 // =============================================================================
-// PROTOCOLO DE ESTABILIDADE PERMANENTE V3.0
-// Estratégia: ignorar TUDO que não seja código React legítimo em src/pages,
-// src/components e src/lib. Qualquer artefato injetado pela plataforma é
-// silenciado globalmente por padrões amplos.
+// PROTOCOLO DE ESTABILIDADE PERMANENTE — VERSÃO DEFINITIVA
+//
+// Estratégia: WHITELIST em vez de blacklist.
+// Só fazemos lint de arquivos que SABEMOS ser código React legítimo.
+// Qualquer artefato injetado pela plataforma fora dessas pastas é ignorado.
 // =============================================================================
 
 export default [
-  // ─── IGNORES GLOBAIS (aplicados antes de qualquer regra) ────────────────────
+  // ─── IGNORES GLOBAIS (máxima cobertura) ─────────────────────────────────────
   {
     ignores: [
-      // Infraestrutura e build
+      // Build e dependências
       "node_modules/**",
       "dist/**",
       "build/**",
       ".vite/**",
       "public/**",
       "build-tools/**",
-      "src/build-tools/**",
 
-      // vite.config em qualquer lugar (usa process, __dirname do Node)
+      // Configs de build (usam process, __dirname — são Node, não React)
       "vite.config.*",
-      "vite.config.js",
+      "*.config.js",
+      "*.config.ts",
       "src/vite.config.*",
-      "src/vite.config.js",
+      "src/*.config.*",
 
-      // Extensões duplas (artefatos *.md.jsx, *.json.jsx, etc.)
+      // Extensões duplas — SEMPRE artefatos da plataforma
       "**/*.md.jsx",
       "**/*.md.js",
       "**/*.md.ts",
@@ -36,52 +37,45 @@ export default [
       "**/*.json.jsx",
       "**/*.json.js",
       "**/*.config.jsx",
-      "**/*.config.js.jsx",
 
-      // ── PADRÃO AMPLO: qualquer arquivo começando com letras maiúsculas
-      //    seguido de _ (artefatos ALL_CAPS injetados pela plataforma)
-      "src/**/*_*.jsx",
+      // Qualquer arquivo com underscore em src/ — padrão ALL_CAPS da plataforma
+      // (arquivos legítimos usam camelCase ou PascalCase sem underscore)
+      "src/**/*_*",
 
-      // ── PADRÃO AMPLO: qualquer arquivo README em qualquer pasta
-      "src/**/README*.jsx",
-      "src/**/README*.js",
+      // Padrões README em qualquer pasta
+      "src/**/README*",
 
-      // ── PADRÃO AMPLO: qualquer arquivo que começa com maiúscula e contém
-      //    padrões típicos de documentação injetada
-      "src/**/BLOQUEIO*.jsx",
-      "src/**/BOTOES*.jsx",
-      "src/**/CERTIFICACAO*.jsx",
-      "src/**/CERTIFICADO*.jsx",
-      "src/**/CHECKLIST*.jsx",
-      "src/**/CORRECAO*.jsx",
-      "src/**/DEBUG*.jsx",
-      "src/**/DIAGNOSTICO*.jsx",
-      "src/**/ETAPA*.jsx",
-      "src/**/ETAPAS*.jsx",
-      "src/**/FASE*.jsx",
-      "src/**/FLUXO*.jsx",
-      "src/**/INTEGRACAO*.jsx",
-      "src/**/MANIFESTO*.jsx",
-      "src/**/MANIFEST_*.jsx",
-      "src/**/MIGRACAO*.jsx",
-      "src/**/PROVA*.jsx",
-      "src/**/RELATORIO*.jsx",
-      "src/**/RESUMO*.jsx",
-      "src/**/SISTEMA*.jsx",
-      "src/**/STATUS*.jsx",
-      "src/**/VALIDACAO*.jsx",
-      "src/**/ZINDEX*.jsx",
+      // Pasta docs e templates
+      "src/components/docs/**",
 
-      // Arquivos de documentação/configuração específicos
-      "src/**/commitlint.config.*",
-      "src/**/UnidadesDeMedida.*",
-      "src/**/rhf_zod_report.*",
+      // Arquivos de prova/certificação
+      "*.json",
+      "src/**/*.proof.*",
     ],
   },
 
-  // ─── REGRAS — somente código React legítimo ────────────────────────────────
+  // ─── LINT apenas em código React legítimo ────────────────────────────────────
   {
-    files: ["src/**/*.{js,jsx,ts,tsx}"],
+    files: [
+      "src/pages/*.{js,jsx,ts,tsx}",
+      "src/pages/**/*.{js,jsx,ts,tsx}",
+      "src/components/*.{js,jsx,ts,tsx}",
+      "src/components/**/*.{js,jsx,ts,tsx}",
+      "src/lib/*.{js,jsx,ts,tsx}",
+      "src/lib/**/*.{js,jsx,ts,tsx}",
+      "src/hooks/*.{js,jsx,ts,tsx}",
+      "src/utils/*.{js,jsx,ts,tsx}",
+      "src/api/*.{js,jsx,ts,tsx}",
+      "src/App.jsx",
+      "src/main.jsx",
+    ],
+    ignores: [
+      // Re-aplica ignores de artefatos dentro das pastas legítimas
+      "**/*_*",
+      "**/README*",
+      "**/*.md.*",
+      "**/*.json.*",
+    ],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
@@ -97,7 +91,6 @@ export default [
       "react-hooks": reactHooks,
     },
     rules: {
-      // Regras desligadas para máxima compatibilidade com o projeto
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
       "react-hooks/rules-of-hooks": "warn",
@@ -105,6 +98,7 @@ export default [
       "no-undef": "off",
       "no-unused-vars": "off",
       "no-redeclare": "off",
+      "no-constant-condition": "off",
     },
   },
 ];

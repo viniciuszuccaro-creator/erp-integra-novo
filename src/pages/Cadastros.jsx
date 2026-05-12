@@ -24,7 +24,7 @@ import ExternalAppsHub from "@/components/administracao-sistema/ExternalAppsHub"
 
 export default function Cadastros() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [acordeonAberto, setAcordeonAberto] = useState(["bloco1"]);
+  const [acordeonAberto, setAcordeonAberto] = useState(["bloco1", "bloco2", "bloco3", "bloco4", "bloco5", "bloco6"]);
   const [abaGerenciamento, setAbaGerenciamento] = useState("cadastros");
   const { counts: allCounts, totals, isLoading: countsLoading } = useCadastrosAllCounts();
   const { isAdmin, hasPermission } = usePermissions();
@@ -85,7 +85,7 @@ export default function Cadastros() {
         </TabsContent>
 
         {/* ABA: CADASTROS */}
-        <TabsContent value="cadastros" className="space-y-6 mt-6">
+         <TabsContent value="cadastros" className="space-y-6 mt-6 w-full">
           {!contextoAtivo && (
             <Card className="rounded-sm border border-amber-200 bg-amber-50">
               <CardContent className="p-3 text-sm text-amber-900">

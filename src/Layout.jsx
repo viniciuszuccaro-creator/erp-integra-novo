@@ -930,7 +930,8 @@ function LayoutContent({ children, currentPageName }) {
       if (orig.filter) {
         api.filter = async (criteria = {}, order, limit, skip) => {
           const ctx = contextRef.current;
-          if (ctx.contexto !== 'grupo' && !ctx.empresaAtual?.id) { return []; }
+          // Lógica ajustada: se está em modo empresa SEM empresa selecionada, apenas registros de grupo passam
+          // Se está em modo grupo, retorna tudo (sem filtro empresa_id)
           const scope = getScope();
           // Se o filtro já contém $or/$and ou campos de escopo, não injetar AND adicional
           const hasScope = !!criteria?.empresa_id || !!criteria?.group_id || !!criteria?.$or || !!criteria?.$and;
@@ -942,7 +943,6 @@ function LayoutContent({ children, currentPageName }) {
       if (orig.list) {
         api.list = async (order, limit, skip) => {
           const ctx = contextRef.current;
-          if (ctx.contexto !== 'grupo' && !ctx.empresaAtual?.id) { return []; }
           if (orig.filter) {
             return await orig.filter(getScope(), order, limit, skip);
           }

@@ -9,6 +9,8 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import PlanoMelhoria from './pages/PlanoMelhoria';
 import CicloX from './pages/CicloX';
+import EmpresaOnboarding from './pages/EmpresaOnboarding';
+import EmpresaSelectorGuard from '@/components/sistema/EmpresaSelectorGuard';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ErrorBoundary from '@/components/lib/ErrorBoundary';
@@ -47,31 +49,40 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
+      <Route path="/EmpresaOnboarding" element={<EmpresaOnboarding />} />
       <Route path="/" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
-        </LayoutWrapper>
+        <EmpresaSelectorGuard>
+          <LayoutWrapper currentPageName={mainPageKey}>
+            <MainPage />
+          </LayoutWrapper>
+        </EmpresaSelectorGuard>
       } />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
           key={path}
           path={`/${path}`}
           element={
-            <LayoutWrapper currentPageName={path}>
-              <Page />
-            </LayoutWrapper>
+            <EmpresaSelectorGuard>
+              <LayoutWrapper currentPageName={path}>
+                <Page />
+              </LayoutWrapper>
+            </EmpresaSelectorGuard>
           }
         />
       ))}
       <Route path="/PlanoMelhoria" element={
-        <LayoutWrapper currentPageName="PlanoMelhoria">
-          <PlanoMelhoria />
-        </LayoutWrapper>
+        <EmpresaSelectorGuard>
+          <LayoutWrapper currentPageName="PlanoMelhoria">
+            <PlanoMelhoria />
+          </LayoutWrapper>
+        </EmpresaSelectorGuard>
       } />
       <Route path="/CicloX" element={
-        <LayoutWrapper currentPageName="CicloX">
-          <CicloX />
-        </LayoutWrapper>
+        <EmpresaSelectorGuard>
+          <LayoutWrapper currentPageName="CicloX">
+            <CicloX />
+          </LayoutWrapper>
+        </EmpresaSelectorGuard>
       } />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

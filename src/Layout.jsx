@@ -24,7 +24,8 @@ import {
         CheckCircle2,
         Trophy,
         Zap,
-        Rocket
+        Rocket,
+        Building2
       } from "lucide-react";
 import {
   Sidebar,
@@ -90,9 +91,10 @@ const navigationItems = [
   { title: "Recursos Humanos", url: createPageUrl("RH"), icon: UserCircle, group: "administrativo" },
   { title: "Fiscal e Tributário", url: createPageUrl("Fiscal"), icon: FileText, group: "administrativo" },
   { title: "Gestão de Contratos", url: createPageUrl("Contratos"), icon: FileText, group: "administrativo" },
+  { title: "Empresas & Grupos", url: createPageUrl("Empresas"), icon: Building2, group: "sistema" },
   { title: "Administração do Sistema", url: createPageUrl("AdministracaoSistema?tab=integracoes"), icon: Settings, group: "sistema" },
   { title: "📚 Documentação", url: createPageUrl("Documentacao"), icon: BookOpen, group: "sistema" },
-  { title: "Plano de Melhoria", url: createPageUrl("PlanoMelhoria"), icon: Rocket, group: "sistema" },
+  { title: "🚀 Plano de Melhoria", url: createPageUrl("PlanoMelhoria"), icon: Rocket, group: "sistema" },
   
   
   

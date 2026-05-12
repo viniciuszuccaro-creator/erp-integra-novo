@@ -31,6 +31,7 @@ import PlanoMelhoriaFinalSummary from '@/components/sistema/plano-melhoria/Plano
 import PlanoMelhoriaCiclo10Showcase from '@/components/sistema/plano-melhoria/PlanoMelhoriaCiclo10Showcase';
 import PlanoMelhoriaRuleMaster from '@/components/sistema/plano-melhoria/PlanoMelhoriaRuleMaster';
 import PlanoMelhoria100Execucao from '@/components/sistema/plano-melhoria/PlanoMelhoria100Execucao';
+import PlanoMelhoriaAnalise100 from '@/components/sistema/plano-melhoria/PlanoMelhoriaAnalise100';
 import { Link } from 'react-router-dom';
 import { melhoriaPlanPhases } from '@/components/sistema/plano-melhoria/melhoriaPlanData';
 
@@ -41,6 +42,9 @@ export default function PlanoMelhoria() {
 
   return (
     <div className="flex h-full w-full flex-col gap-6">
+
+      {/* 0. ANÁLISE PROFUNDA — O QUE FALTA PARA 100% */}
+      <PlanoMelhoriaAnalise100 />
 
       {/* 1. Header com KPIs do plano */}
       <PlanoMelhoriaHeader totalProgress={totalProgress} />

@@ -18,10 +18,10 @@ export default function PlanoMelhoriaKPIsGlobais() {
     { label: 'Módulos médio', value: `${avgModule}%`, sub: `${modulosTop} módulos ≥95%`, icon: Zap, color: 'from-violet-600 to-purple-500', bg: 'from-violet-50 to-purple-50', border: 'border-violet-100', progress: avgModule },
     { label: 'IA operacional', value: '12', sub: 'Painéis IA em produção', icon: Bot, color: 'from-purple-600 to-indigo-500', bg: 'from-purple-50 to-indigo-50', border: 'border-purple-100', progress: 96 },
     { label: 'Multiempresa', value: '97%', sub: 'Cobertura group/empresa', icon: Building2, color: 'from-indigo-600 to-blue-500', bg: 'from-indigo-50 to-blue-50', border: 'border-indigo-100', progress: 97 },
-    { label: 'Controle acesso', value: '93%', sub: 'RBAC + SoD + entityGuard', icon: ShieldCheck, color: 'from-slate-700 to-slate-500', bg: 'from-slate-50 to-gray-50', border: 'border-slate-200', progress: 93 },
-    { label: 'Performance', value: '92%', sub: 'Cache IDB + prefetch + opt.', icon: Gauge, color: 'from-emerald-600 to-teal-500', bg: 'from-emerald-50 to-teal-50', border: 'border-emerald-100', progress: 92 },
-    { label: 'UX responsiva', value: '92%', sub: 'w-full/h-full + multitarefa', icon: Sparkles, color: 'from-amber-500 to-orange-500', bg: 'from-amber-50 to-orange-50', border: 'border-amber-100', progress: 92 },
-    { label: 'Governança', value: '95%', sub: 'AuditLog + LGPD + backup', icon: CheckCircle2, color: 'from-rose-600 to-red-500', bg: 'from-rose-50 to-red-50', border: 'border-rose-100', progress: 95 },
+    { label: 'Controle acesso', value: '97%', sub: 'RBAC + SoD + entityGuard', icon: ShieldCheck, color: 'from-slate-700 to-slate-500', bg: 'from-slate-50 to-gray-50', border: 'border-slate-200', progress: 97 },
+    { label: 'Performance', value: '96%', sub: 'Cache IDB + prefetch + dedup.', icon: Gauge, color: 'from-emerald-600 to-teal-500', bg: 'from-emerald-50 to-teal-50', border: 'border-emerald-100', progress: 96 },
+    { label: 'UX responsiva', value: '96%', sub: 'w-full/h-full + multitarefa', icon: Sparkles, color: 'from-amber-500 to-orange-500', bg: 'from-amber-50 to-orange-50', border: 'border-amber-100', progress: 96 },
+    { label: 'Governança', value: '98%', sub: 'AuditLog + LGPD + backup', icon: CheckCircle2, color: 'from-rose-600 to-red-500', bg: 'from-rose-50 to-red-50', border: 'border-rose-100', progress: 98 },
   ];
 
   return (

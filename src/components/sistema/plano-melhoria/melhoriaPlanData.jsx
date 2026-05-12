@@ -26,7 +26,7 @@ export const melhoriaPlanPhases = [
     id: 'multiempresa',
     title: 'Multiempresa total',
     status: 'concluido',
-    progress: 98,
+    progress: 97,
     icon: Building2,
     color: 'from-indigo-600 to-blue-500',
     goal: 'Garantir group_id e empresa_id em cadastros, consultas, dashboards, relatórios e funções.',
@@ -35,8 +35,8 @@ export const melhoriaPlanPhases = [
   {
     id: 'acesso',
     title: 'Controle de acesso',
-    status: 'em_execucao',
-    progress: 95,
+    status: 'concluido',
+    progress: 97,
     icon: Lock,
     color: 'from-slate-700 to-slate-500',
     goal: 'Reforçar permissões por módulo, aba, ação e campo com auditoria dos bloqueios.',
@@ -45,8 +45,8 @@ export const melhoriaPlanPhases = [
   {
     id: 'modularizacao',
     title: 'Modularização contínua',
-    status: 'em_execucao',
-    progress: 97,
+    status: 'concluido',
+    progress: 98,
     icon: Workflow,
     color: 'from-violet-600 to-fuchsia-500',
     goal: 'Quebrar páginas grandes em pequenos componentes reutilizáveis e conectados.',
@@ -55,8 +55,8 @@ export const melhoriaPlanPhases = [
   {
     id: 'performance',
     title: 'Performance e cache',
-    status: 'em_execucao',
-    progress: 92,
+    status: 'concluido',
+    progress: 96,
     icon: Gauge,
     color: 'from-emerald-600 to-teal-500',
     goal: 'Otimizar carregamento, contagens, dashboards e chamadas repetidas.',
@@ -65,8 +65,8 @@ export const melhoriaPlanPhases = [
   {
     id: 'ux',
     title: 'UX responsiva',
-    status: 'em_execucao',
-    progress: 92,
+    status: 'concluido',
+    progress: 96,
     icon: Sparkles,
     color: 'from-amber-500 to-orange-500',
     goal: 'Garantir telas w-full/h-full, responsivas, limpas e redimensionáveis.',
@@ -75,8 +75,8 @@ export const melhoriaPlanPhases = [
   {
     id: 'ia',
     title: 'IA operacional',
-    status: 'em_execucao',
-    progress: 97,
+    status: 'concluido',
+    progress: 98,
     icon: Bot,
     color: 'from-purple-600 to-indigo-500',
     goal: 'Conectar IA aos fluxos reais de vendas, estoque, financeiro, logística, fiscal e RH.',
@@ -85,8 +85,8 @@ export const melhoriaPlanPhases = [
   {
     id: 'integracoes',
     title: 'Integrações e automações',
-    status: 'em_execucao',
-    progress: 90,
+    status: 'concluido',
+    progress: 95,
     icon: Network,
     color: 'from-cyan-600 to-sky-500',
     goal: 'Consolidar WhatsApp, NF-e, boletos, mapas, marketplaces e notificações.',
@@ -95,8 +95,8 @@ export const melhoriaPlanPhases = [
   {
     id: 'governanca',
     title: 'Governança e auditoria',
-    status: 'em_execucao',
-    progress: 96,
+    status: 'concluido',
+    progress: 98,
     icon: ClipboardCheck,
     color: 'from-rose-600 to-red-500',
     goal: 'Melhorar rastreabilidade, LGPD, logs, revisão de riscos e compliance.',
@@ -106,11 +106,11 @@ export const melhoriaPlanPhases = [
     id: 'continua',
     title: 'Melhoria contínua',
     status: 'permanente',
-    progress: 90,
+    progress: 98,
     icon: Rocket,
     color: 'from-blue-700 to-violet-600',
     goal: 'Executar ciclos constantes: corrigir, modularizar, conectar, otimizar e validar.',
-    items: ['Backlog por módulo', 'Checklists vivos', 'Validação por fase', 'Evolução sem apagar']
+    items: ['Backlog por módulo', 'Checklists vivos', 'Timeline executiva', 'Inovação Q3/Q4 2026']
   }
 ];
 

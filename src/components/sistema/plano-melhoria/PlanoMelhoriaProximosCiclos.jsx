@@ -6,36 +6,36 @@ import { ArrowRight, Rocket, Target, Zap } from 'lucide-react';
 
 const PROXIMOS_CICLOS = [
   {
-    ciclo: 'Ciclo 1 — Fechar 95% de cobertura',
-    prazo: 'Imediato',
-    cor: 'red',
-    acoes: [
-      { modulo: 'Financeiro', acao: 'Elevar conciliação bancária a 100% funcional com IA', prioridade: 'Crítica', progresso: 88 },
-      { modulo: 'Fiscal', acao: 'Completar SPED Fiscal com validação automática pré-envio', prioridade: 'Alta', progresso: 85 },
-      { modulo: 'Compras', acao: 'Avaliação de fornecedor pós-OC com score automático', prioridade: 'Alta', progresso: 82 },
-      { modulo: 'RH', acao: 'Ponto biométrico com integração folha de pagamento', prioridade: 'Média', progresso: 78 },
-    ]
-  },
-  {
-    ciclo: 'Ciclo 2 — Inovação e expansão',
-    prazo: 'Próximo sprint',
+    ciclo: 'Ciclo 8 — Cockpit + Documentação do Plano',
+    prazo: 'Em curso (Mai 2026)',
     cor: 'blue',
     acoes: [
-      { modulo: 'CRM', acao: 'Score de cliente IA com previsão de churn por ML', prioridade: 'Alta', progresso: 70 },
-      { modulo: 'Expedição', acao: 'Rastreamento GPS em tempo real com WebSocket', prioridade: 'Alta', progresso: 72 },
-      { modulo: 'Comercial', acao: 'Portal do cliente com aprovação de orçamento digital', prioridade: 'Alta', progresso: 75 },
-      { modulo: 'Sistema', acao: 'Dashboard de saúde do sistema com alertas automáticos', prioridade: 'Alta', progresso: 80 },
+      { modulo: 'Sistema', acao: 'Timeline executiva com histórico completo de fases', prioridade: 'Alta', progresso: 95 },
+      { modulo: 'Sistema', acao: 'Score módulo × pilar com drill-down expandível', prioridade: 'Alta', progresso: 95 },
+      { modulo: 'Sistema', acao: 'Funções backend mapeadas e documentadas (25+)', prioridade: 'Alta', progresso: 95 },
+      { modulo: 'Sistema', acao: 'Entidades com cobertura multiempresa mapeada', prioridade: 'Alta', progresso: 95 },
     ]
   },
   {
-    ciclo: 'Ciclo 3 — Automação total',
-    prazo: 'Médio prazo',
+    ciclo: 'Ciclo 9 — Finalização 100% dos módulos',
+    prazo: 'Jun 2026',
+    cor: 'red',
+    acoes: [
+      { modulo: 'Hub Atendimento', acao: 'IAPanel + SLA + score de atendimento em tempo real', prioridade: 'Alta', progresso: 85 },
+      { modulo: 'RH', acao: 'Ponto biométrico com integração folha de pagamento', prioridade: 'Média', progresso: 80 },
+      { modulo: 'Financeiro', acao: 'Conciliação bancária 100% com IA + detecção de divergência', prioridade: 'Crítica', progresso: 90 },
+      { modulo: 'Fiscal', acao: 'SPED Fiscal automatizado com validação pré-envio', prioridade: 'Alta', progresso: 85 },
+    ]
+  },
+  {
+    ciclo: 'Ciclo 10 — Inovação Q3 2026',
+    prazo: 'Jul–Set 2026',
     cor: 'violet',
     acoes: [
-      { modulo: 'Financeiro', acao: 'Régua de cobrança automática por perfil de inadimplência', prioridade: 'Alta', progresso: 60 },
-      { modulo: 'Estoque', acao: 'Reposição automática via OC gerada por IA por estoque mínimo', prioridade: 'Alta', progresso: 65 },
-      { modulo: 'Produção', acao: 'Digital Twin 3D para simulação de processo produtivo', prioridade: 'Média', progresso: 55 },
-      { modulo: 'BI', acao: 'Business Intelligence com drill-down multiempresa e exportação', prioridade: 'Alta', progresso: 60 },
+      { modulo: 'IA', acao: 'IA Generativa contextual por módulo (LLM + RAG)', prioridade: 'Alta', progresso: 30 },
+      { modulo: 'BI', acao: 'Business Intelligence preditivo com ML e forecast 90 dias', prioridade: 'Alta', progresso: 25 },
+      { modulo: 'E-commerce', acao: 'Sync bidirecional Mercado Livre, Amazon, Shopee', prioridade: 'Alta', progresso: 20 },
+      { modulo: 'Omnichannel', acao: 'Bot WhatsApp NLP com pedidos e suporte autônomo', prioridade: 'Crítica', progresso: 40 },
     ]
   }
 ];

@@ -27,6 +27,7 @@ const RentabilidadeProduto = React.lazy(() => import("@/components/relatorios/Re
 const DashboardInadimplencia = React.lazy(() => import("@/components/relatorios/DashboardInadimplencia"));
 const RelatorioVendasPorRegiao = React.lazy(() => import("@/components/relatorios/RelatorioVendasPorRegiao"));
 const DashboardRepresentantes = React.lazy(() => import("@/components/relatorios/DashboardRepresentantes"));
+const RelatorioPersonalizado = React.lazy(() => import("@/components/relatorios/RelatorioPersonalizado"));
 import useContextoVisual from "@/components/lib/useContextoVisual";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
@@ -368,11 +369,16 @@ export default function Relatorios() {
           <TabsTrigger value="dre" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
             <BarChart3 className="w-4 h-4 mr-2" />DRE
           </TabsTrigger>
+          <TabsTrigger value="representantes" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">
+            <Users className="w-4 h-4 mr-2" />Representantes
+          </TabsTrigger>
+          <TabsTrigger value="personalizado" className="data-[state=active]:bg-slate-700 data-[state=active]:text-white">
+            <Filter className="w-4 h-4 mr-2" />Personalizado
+          </TabsTrigger>
           <TabsTrigger value="exportacao">
             <Download className="w-4 h-4 mr-2" />
             Exportações
           </TabsTrigger>
-          
 
 
               
@@ -486,7 +492,19 @@ export default function Relatorios() {
           <Suspense fallback={<div>Carregando...</div>}><MatrizAdequacaoFase3 /></Suspense>
         </TabsContent>
 
-        {/* NEW: Tab Exportação */}
+        <TabsContent value="representantes">
+          <Suspense fallback={<div className="p-8 text-center text-slate-500">Carregando...</div>}>
+            <DashboardRepresentantes empresaId={empresaAtual?.id} filtros={filtros} />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="personalizado">
+          <Suspense fallback={<div className="p-8 text-center text-slate-500">Carregando...</div>}>
+            <RelatorioPersonalizado empresaId={empresaAtual?.id} />
+          </Suspense>
+        </TabsContent>
+
+        {/* Tab Exportação */}
         <TabsContent value="exportacao">
           <Suspense fallback={<div>Carregando...</div>}><GeradorRelatorios empresaId={empresaAtual?.id} /></Suspense>
         </TabsContent>

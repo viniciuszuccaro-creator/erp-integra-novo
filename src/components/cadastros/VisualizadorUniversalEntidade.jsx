@@ -137,23 +137,27 @@ export default function VisualizadorUniversalEntidade({
     ],
     queryFn: async () => {
       if (!ENTITY) return [];
-      // Se o contexto ainda está carregando, tenta listar sem filtro (limit pequeno)
-      if (!hasContext) {
-        try {
-          const res = await base44.entities?.[ENTITY]?.list("-updated_date", pageSize);
-          return Array.isArray(res) ? res : [];
-        } catch { return []; }
-      }
       try {
-        const skip = (currentPage - 1) * pageSize;
-        // filterInContext já suporta skip implícito via limit; passamos limit maior para simular
-        return await filterInContext(ENTITY, searchFilter, sortField, pageSize);
-      } catch { return []; }
+        const api = base44.entities?.[ENTITY];
+        if (!api) return [];
+        
+        // Tenta com contexto se houver, senão lista tudo
+        if (hasContext && debouncedSearch.trim()) {
+          return await filterInContext(ENTITY, searchFilter, sortField, pageSize);
+        }
+        
+        // Sem busca ou sem contexto: lista simples
+        const res = await api.list(sortField, pageSize);
+        return Array.isArray(res) ? res : [];
+      } catch (err) {
+        console.error(`Erro ao listar ${ENTITY}:`, err);
+        return [];
+      }
     },
     staleTime:            30_000,
     gcTime:               120_000,
     refetchOnWindowFocus: false,
-    placeholderData:      (prev) => prev,   // ← elimina pulo da tela
+    placeholderData:      (prev) => prev,
     enabled:              !!ENTITY && canViewCadastro,
   });
 

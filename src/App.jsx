@@ -7,9 +7,6 @@ import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
-import PlanoMelhoria from './pages/PlanoMelhoria';
-import CicloX from './pages/CicloX';
-import Empresas from './pages/Empresas';
 import EmpresaOnboarding from './pages/EmpresaOnboarding';
 import EmpresaSelectorGuard from '@/components/sistema/EmpresaSelectorGuard';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
@@ -71,27 +68,7 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
-      <Route path="/PlanoMelhoria" element={
-        <EmpresaSelectorGuard>
-          <LayoutWrapper currentPageName="PlanoMelhoria">
-            <PlanoMelhoria />
-          </LayoutWrapper>
-        </EmpresaSelectorGuard>
-      } />
-      <Route path="/CicloX" element={
-        <EmpresaSelectorGuard>
-          <LayoutWrapper currentPageName="CicloX">
-            <CicloX />
-          </LayoutWrapper>
-        </EmpresaSelectorGuard>
-      } />
-      <Route path="/Empresas" element={
-        <EmpresaSelectorGuard>
-          <LayoutWrapper currentPageName="Empresas">
-            <Empresas />
-          </LayoutWrapper>
-        </EmpresaSelectorGuard>
-      } />
+
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

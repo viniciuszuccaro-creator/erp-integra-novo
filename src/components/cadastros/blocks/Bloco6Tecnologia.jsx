@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useWindow } from "@/components/lib/useWindow";
 import usePermissions from "@/components/lib/usePermissions";
-import VisualizadorUniversalEntidadeV24 from "@/components/cadastros/VisualizadorUniversalEntidadeV24";
+import VisualizadorUniversalEntidade from "@/components/cadastros/VisualizadorUniversalEntidade";
 import { Zap, Code, Settings, Package, Link2, Cloud, MessageCircle, Bell } from "lucide-react";
 import CountBadgeSimplificado from "@/components/cadastros/CountBadgeSimplificado";
 
@@ -28,7 +28,7 @@ export default function Bloco6Tecnologia({ allCounts, isLoading, searchTerm = ""
 
   const openList = (entidade, titulo, Icon, campos, FormComp) => () => {
     openWindow(
-      VisualizadorUniversalEntidadeV24,
+      VisualizadorUniversalEntidade,
       { nomeEntidade: entidade, tituloDisplay: titulo, icone: Icon, camposPrincipais: campos, componenteEdicao: FormComp, windowMode: true },
       { title: titulo, width: 1400, height: 800 }
     );

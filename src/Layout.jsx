@@ -23,9 +23,7 @@ import {
         MessageCircle,
         CheckCircle2,
         Trophy,
-        Zap,
-        Rocket,
-        Building2
+        Zap
       } from "lucide-react";
 import {
   Sidebar,
@@ -69,7 +67,7 @@ import { useInvalidationBus } from "@/components/lib/useInvalidationBus";
 import { useNavHistory } from "@/components/lib/useNavHistory";
 import { usePredictivePrefetch } from "@/components/lib/usePredictivePrefetch";
 import { idbClearExpired } from "@/components/lib/useIndexedDBCache";
-import ModuleImprovementBar from "@/components/layout/ModuleImprovementBar";
+
 import EmpresaOnboardingGuard from "@/components/sistema/EmpresaOnboardingGuard";
 
 
@@ -92,10 +90,8 @@ const navigationItems = [
   { title: "Recursos Humanos", url: createPageUrl("RH"), icon: UserCircle, group: "administrativo" },
   { title: "Fiscal e Tributário", url: createPageUrl("Fiscal"), icon: FileText, group: "administrativo" },
   { title: "Gestão de Contratos", url: createPageUrl("Contratos"), icon: FileText, group: "administrativo" },
-  { title: "Empresas & Grupos", url: createPageUrl("Empresas"), icon: Building2, group: "sistema" },
   { title: "Administração do Sistema", url: createPageUrl("AdministracaoSistema?tab=integracoes"), icon: Settings, group: "sistema" },
   { title: "📚 Documentação", url: createPageUrl("Documentacao"), icon: BookOpen, group: "sistema" },
-  { title: "🚀 Plano de Melhoria", url: createPageUrl("PlanoMelhoria"), icon: Rocket, group: "sistema" },
   
   
   
@@ -1531,7 +1527,6 @@ function LayoutContent({ children, currentPageName }) {
                     <GuardRails currentPageName={currentPageName}>
                       <div className="w-full h-full">
                         <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-4 space-y-4">
-                          <ModuleImprovementBar moduleName={moduleName || 'Sistema'} />
                           {children}
                         </div>
                       </div>

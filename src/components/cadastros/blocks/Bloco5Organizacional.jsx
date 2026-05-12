@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useWindow } from "@/components/lib/useWindow";
 import usePermissions from "@/components/lib/usePermissions";
-import VisualizadorUniversalEntidadeV24 from "@/components/cadastros/VisualizadorUniversalEntidadeV24";
+import VisualizadorUniversalEntidade from "@/components/cadastros/VisualizadorUniversalEntidade";
 import { Building2, Spline, Users, Briefcase, Clock, Shield } from "lucide-react";
 import CountBadgeSimplificado from "@/components/cadastros/CountBadgeSimplificado";
 
@@ -24,7 +24,7 @@ export default function Bloco5Organizacional({ allCounts, isLoading, searchTerm 
   const { openWindow } = useWindow();
   const { hasPermission } = usePermissions();
   const openList = (entidade, titulo, Icon, campos, FormComp) => () =>
-    openWindow(VisualizadorUniversalEntidadeV24, { nomeEntidade: entidade, tituloDisplay: titulo, icone: Icon, camposPrincipais: campos, componenteEdicao: FormComp, windowMode: true }, { title: titulo, width: 1400, height: 800 });
+    openWindow(VisualizadorUniversalEntidade, { nomeEntidade: entidade, tituloDisplay: titulo, icone: Icon, camposPrincipais: campos, componenteEdicao: FormComp, windowMode: true }, { title: titulo, width: 1400, height: 800 });
 
   // Campos reais de cada entidade (sem alias — getDisplayValue faz fallback)
   const tiles = [

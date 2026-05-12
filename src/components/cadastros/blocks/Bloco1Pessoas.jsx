@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useWindow } from "@/components/lib/useWindow";
 import usePermissions from "@/components/lib/usePermissions";
-import VisualizadorUniversalEntidadeV24 from "@/components/cadastros/VisualizadorUniversalEntidadeV24";
+import VisualizadorUniversalEntidade from "@/components/cadastros/VisualizadorUniversalEntidade";
 import { Users, Building2, Truck, User, Award, MessageCircle, TrendingUp, MapPin } from "lucide-react";
 import CountBadgeSimplificado from "@/components/cadastros/CountBadgeSimplificado";
 
@@ -32,7 +32,7 @@ export default function Bloco1Pessoas({ allCounts, isLoading, searchTerm = "" })
 
   const openList = (entidade, titulo, Icon, campos, FormComp) => () => {
     openWindow(
-      VisualizadorUniversalEntidadeV24,
+      VisualizadorUniversalEntidade,
       {
         nomeEntidade: entidade,
         tituloDisplay: titulo,

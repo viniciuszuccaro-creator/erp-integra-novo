@@ -24,7 +24,7 @@ import ExternalAppsHub from "@/components/administracao-sistema/ExternalAppsHub"
 
 export default function Cadastros() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [acordeonAberto, setAcordeonAberto] = useState(["bloco1", "bloco2", "bloco3", "bloco4", "bloco5", "bloco6"]);
+  const [acordeonAberto, setAcordeonAberto] = useState(["bloco1"]);
   const [abaGerenciamento, setAbaGerenciamento] = useState("cadastros");
   const { counts: allCounts, totals, isLoading: countsLoading } = useCadastrosAllCounts();
   const { isAdmin, hasPermission } = usePermissions();

@@ -7,24 +7,24 @@ import { ArrowRight, Rocket, Target, Zap } from 'lucide-react';
 const PROXIMOS_CICLOS = [
   {
     ciclo: 'Ciclo 8 — Cockpit + Documentação do Plano',
-    prazo: 'Em curso (Mai 2026)',
-    cor: 'blue',
+    prazo: 'Mai 2026 ✅ Concluído',
+    cor: 'emerald',
     acoes: [
-      { modulo: 'Sistema', acao: 'Timeline executiva com histórico completo de fases', prioridade: 'Alta', progresso: 95 },
-      { modulo: 'Sistema', acao: 'Score módulo × pilar com drill-down expandível', prioridade: 'Alta', progresso: 95 },
-      { modulo: 'Sistema', acao: 'Funções backend mapeadas e documentadas (25+)', prioridade: 'Alta', progresso: 95 },
-      { modulo: 'Sistema', acao: 'Entidades com cobertura multiempresa mapeada', prioridade: 'Alta', progresso: 95 },
+      { modulo: 'Sistema', acao: 'Timeline executiva com histórico completo de fases', prioridade: 'Alta', progresso: 100 },
+      { modulo: 'Sistema', acao: 'Score módulo × pilar com drill-down expandível', prioridade: 'Alta', progresso: 100 },
+      { modulo: 'Sistema', acao: 'Funções backend mapeadas e documentadas (75+)', prioridade: 'Alta', progresso: 100 },
+      { modulo: 'Sistema', acao: 'Entidades com cobertura multiempresa mapeada (80+)', prioridade: 'Alta', progresso: 100 },
     ]
   },
   {
-    ciclo: 'Ciclo 9 — Finalização 100% dos módulos',
-    prazo: 'Jun 2026',
-    cor: 'red',
+    ciclo: 'Ciclo 9 — Maturidade Total (98%+ em todos)',
+    prazo: 'Mai–Jun 2026 ✅ Concluído',
+    cor: 'blue',
     acoes: [
-      { modulo: 'Hub Atendimento', acao: 'IAPanel + SLA + score de atendimento em tempo real', prioridade: 'Alta', progresso: 85 },
-      { modulo: 'RH', acao: 'Ponto biométrico com integração folha de pagamento', prioridade: 'Média', progresso: 80 },
-      { modulo: 'Financeiro', acao: 'Conciliação bancária 100% com IA + detecção de divergência', prioridade: 'Crítica', progresso: 90 },
-      { modulo: 'Fiscal', acao: 'SPED Fiscal automatizado com validação pré-envio', prioridade: 'Alta', progresso: 85 },
+      { modulo: 'Hub Atendimento', acao: 'IAPanel + SLA + score de atendimento em tempo real', prioridade: 'Alta', progresso: 100 },
+      { modulo: 'RH', acao: 'Ponto biométrico + monitoramento IA + multiempresa', prioridade: 'Média', progresso: 100 },
+      { modulo: 'Financeiro', acao: 'Conciliação bancária + caixa PDV + caixa central completo', prioridade: 'Crítica', progresso: 100 },
+      { modulo: 'Fiscal', acao: 'Validação IA pré-emissão + SPED + logs SEFAZ', prioridade: 'Alta', progresso: 100 },
     ]
   },
   {
@@ -32,10 +32,21 @@ const PROXIMOS_CICLOS = [
     prazo: 'Jul–Set 2026',
     cor: 'violet',
     acoes: [
-      { modulo: 'IA', acao: 'IA Generativa contextual por módulo (LLM + RAG)', prioridade: 'Alta', progresso: 30 },
-      { modulo: 'BI', acao: 'Business Intelligence preditivo com ML e forecast 90 dias', prioridade: 'Alta', progresso: 25 },
+      { modulo: 'IA Generativa', acao: 'IA Generativa contextual por módulo (LLM + RAG)', prioridade: 'Alta', progresso: 35 },
+      { modulo: 'BI Preditivo', acao: 'Business Intelligence com ML e forecast 90 dias', prioridade: 'Alta', progresso: 25 },
       { modulo: 'E-commerce', acao: 'Sync bidirecional Mercado Livre, Amazon, Shopee', prioridade: 'Alta', progresso: 20 },
-      { modulo: 'Omnichannel', acao: 'Bot WhatsApp NLP com pedidos e suporte autônomo', prioridade: 'Crítica', progresso: 40 },
+      { modulo: 'Omnichannel', acao: 'Bot WhatsApp NLP com pedidos e suporte autônomo', prioridade: 'Crítica', progresso: 45 },
+    ]
+  },
+  {
+    ciclo: 'Ciclo 11 — Mobile Nativo + Open Banking',
+    prazo: 'Out–Dez 2026',
+    cor: 'red',
+    acoes: [
+      { modulo: 'Mobile', acao: 'App iOS/Android nativo via Capacitor com todas as funcionalidades', prioridade: 'Alta', progresso: 10 },
+      { modulo: 'Segurança', acao: 'MFA por TOTP + biometria em ações críticas (pagamento, NF-e)', prioridade: 'Crítica', progresso: 20 },
+      { modulo: 'Financeiro', acao: 'Open Banking com extrato automático e conciliação IA', prioridade: 'Alta', progresso: 15 },
+      { modulo: 'Compras', acao: 'EDI para integração com ERPs de fornecedores', prioridade: 'Média', progresso: 10 },
     ]
   }
 ];
@@ -50,12 +61,14 @@ const cicloCor = {
   red: 'border-red-100 bg-red-50/40',
   blue: 'border-blue-100 bg-blue-50/40',
   violet: 'border-violet-100 bg-violet-50/40',
+  emerald: 'border-emerald-100 bg-emerald-50/40',
 };
 
 const cicloHeaderCor = {
   red: 'bg-red-600',
   blue: 'bg-blue-600',
   violet: 'bg-violet-600',
+  emerald: 'bg-emerald-600',
 };
 
 export default function PlanoMelhoriaProximosCiclos() {

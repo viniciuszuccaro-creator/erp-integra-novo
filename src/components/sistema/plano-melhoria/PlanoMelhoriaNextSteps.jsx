@@ -3,18 +3,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, CheckCircle2, Clock } from 'lucide-react';
 
 const steps = [
-  { texto: 'Ativar IA de previsão de demanda por SKU com horizon 30/60/90 dias no módulo Compras.', done: false },
-  { texto: 'Implementar score preditivo de saúde financeira do cliente (risco de inadimplência).', done: false },
-  { texto: 'Integrar nativa com Mercado Livre / Shopee via API para sincronização de pedidos.', done: false },
-  { texto: 'Adicionar biometria nativa para login e aprovações via app mobile (Capacitor).', done: false },
-  { texto: 'Executar ciclo de performance: medir LCP/FID por módulo e otimizar gargalos.', done: false },
-  { texto: 'Elevar Portal do cliente para 98%+ com BI embarcado e rastreamento avançado.', done: false },
-  { texto: 'Implementar MFA por TOTP em ações críticas: pagamentos, NF-e e aprovações.', done: false },
-  { texto: 'Criar agente autônomo para fechamento automático de pedidos via IA generativa.', done: false },
-  { texto: 'Fluxo Pedido → NF-e → Cobrança → Liquidação → DRE validado 100%.', done: true },
-  { texto: 'Todos os módulos com IA operacional conectada ao operacional real.', done: true },
-  { texto: 'RBAC + SoD + auditoria completa em todos os módulos críticos.', done: true },
-  { texto: 'Multiempresa group_id/empresa_id em todas as entidades e funções.', done: true },
+  // Ciclo 10 — Inovação Q3 2026 (próximas ações)
+  { texto: 'IA Generativa contextual por módulo: LLM + RAG com contexto de empresa e histórico.', done: false },
+  { texto: 'Business Intelligence preditivo com ML: forecast de vendas, margem e caixa 90 dias.', done: false },
+  { texto: 'Integração nativa bidirecional: Mercado Livre, Amazon e Shopee (sync pedidos/estoque).', done: false },
+  { texto: 'Bot WhatsApp com NLP: pedidos, consultas e suporte autônomo por empresa.', done: false },
+  // Ciclo 11 — Mobile + Segurança (futuro)
+  { texto: 'App iOS/Android nativo via Capacitor com todas as funcionalidades do ERP.', done: false },
+  { texto: 'MFA por TOTP + biometria em ações críticas: pagamento, NF-e e aprovações.', done: false },
+  { texto: 'Open Banking: extrato automático + conciliação bancária com IA.', done: false },
+  { texto: 'BI Executivo com drill-down por empresa, grupo, produto e cenário.', done: false },
+  // Ciclos 8 e 9 — Concluídos
+  { texto: 'Ciclo 8: Timeline executiva, funções mapeadas (75+), score módulo × pilar. ✅', done: true },
+  { texto: 'Ciclo 9: Hub Atendimento, RH, Financeiro, Produção e Contratos ≥97%.', done: true },
+  { texto: 'Fluxo Pedido → NF-e → Cobrança → Liquidação → DRE 100% validado.', done: true },
+  { texto: 'RBAC + SoD + piiEncryptor + auditoria completa em todos os módulos.', done: true },
+  { texto: 'Multiempresa 99%: group_id/empresa_id em 18 módulos e 75+ funções backend.', done: true },
+  { texto: 'IA operacional em 17 módulos: churn, anomalias, rotas, preço, diagnóstico.', done: true },
 ];
 
 export default function PlanoMelhoriaNextSteps() {

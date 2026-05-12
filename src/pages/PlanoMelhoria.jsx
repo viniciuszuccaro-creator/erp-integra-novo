@@ -23,6 +23,8 @@ import PlanoMelhoriaCriticalCommandCenter from '@/components/sistema/plano-melho
 import PlanoMelhoriaCriticalExecutor from '@/components/sistema/plano-melhoria/PlanoMelhoriaCriticalExecutor';
 import PlanoMelhoriaCriticalCompletionSuite from '@/components/sistema/plano-melhoria/PlanoMelhoriaCriticalCompletionSuite';
 import PlanoMelhoriaResumoFinal from '@/components/sistema/plano-melhoria/PlanoMelhoriaResumoFinal';
+import PlanoMelhoriaStatusConsolidado from '@/components/sistema/plano-melhoria/PlanoMelhoriaStatusConsolidado';
+import PlanoMelhoriaMetricasDetalhadas from '@/components/sistema/plano-melhoria/PlanoMelhoriaMetricasDetalhadas';
 import { melhoriaPlanPhases } from '@/components/sistema/plano-melhoria/melhoriaPlanData';
 
 export default function PlanoMelhoria() {
@@ -36,7 +38,10 @@ export default function PlanoMelhoria() {
       {/* 1. Header com KPIs do plano */}
       <PlanoMelhoriaHeader totalProgress={totalProgress} />
 
-      {/* 2. KPIs Big + Pilares + Módulos completos */}
+      {/* 2. Status Consolidado — conquistas e visão geral do plano */}
+      <PlanoMelhoriaStatusConsolidado />
+
+      {/* 3. KPIs Big + Pilares + Módulos completos */}
       <PlanoMelhoriaKPIsBig />
 
       {/* 3. Cockpit IA: diagnóstico executivo inteligente */}
@@ -81,7 +86,10 @@ export default function PlanoMelhoria() {
       {/* 16. Painel de automações backend */}
       <PlanoMelhoriaAutomationPanel />
 
-      {/* 17. Matriz módulo × pilar */}
+      {/* 17. Métricas detalhadas por pilar (drill-down) */}
+      <PlanoMelhoriaMetricasDetalhadas />
+
+      {/* 18. Matriz módulo × pilar */}
       <PlanoMelhoriaModuleMatrix />
 
       {/* 18. Controle de riscos */}
@@ -100,13 +108,13 @@ export default function PlanoMelhoria() {
         ))}
       </div>
 
-      {/* 22. Roadmap de inovação futura 2026-2027 */}
+      {/* 24. Roadmap de inovação futura 2026-2027 */}
       <PlanoMelhoriaRoadmapFuturo />
 
-      {/* 23. Próximos ciclos de melhoria */}
+      {/* 25. Próximos ciclos de melhoria */}
       <PlanoMelhoriaProximosCiclos />
 
-      {/* 24. Próxima execução — ações imediatas */}
+      {/* 26. Próxima execução — ações imediatas */}
       <PlanoMelhoriaNextSteps />
 
     </div>

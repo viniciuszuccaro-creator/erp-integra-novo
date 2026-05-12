@@ -5,8 +5,8 @@ export const planoExecutionPillars = [
     id: 'multiempresa',
     title: 'Multiempresa em tudo',
     icon: Building2,
-    progress: 96,
-    status: 'Validando',
+    progress: 99,
+    status: 'Concluído',
     description: 'Carimbo automático, filtro contextual e leitura por grupo/empresa em todos os módulos operacionais. EmpresaSwitcher global com propagação descendente.',
     checkpoints: ['group_id/empresa_id', 'EmpresaSwitcher', 'filterInContext', 'auditoria por escopo', 'propagateGroupConfigs', 'Isolamento por empresa']
   },
@@ -14,8 +14,8 @@ export const planoExecutionPillars = [
     id: 'acesso',
     title: 'Controle de acesso granular',
     icon: LockKeyhole,
-    progress: 92,
-    status: 'Em execução',
+    progress: 99,
+    status: 'Concluído',
     description: 'Proteção visual, guard backend, ações sensíveis auditadas, permissões por módulo, aba, ação e campo com SoD.',
     checkpoints: ['ProtectedSection', 'entityGuard', 'RBAC local', 'bloqueios auditados', 'SoDValidator', 'perfis por empresa']
   },
@@ -23,8 +23,8 @@ export const planoExecutionPillars = [
     id: 'performance',
     title: 'Performance e cache',
     icon: Gauge,
-    progress: 91,
-    status: 'Validando',
+    progress: 98,
+    status: 'Concluído',
     description: 'Contagens otimizadas, cache seletivo IDB, prefetch preditivo e redução de chamadas repetidas com deduplicação de inflight.',
     checkpoints: ['entityListSorted', 'countEntitiesOptimized', 'prefetch preditivo', 'cache IDB offline', 'deduplicação inflight', 'limites de paginação']
   },
@@ -32,8 +32,8 @@ export const planoExecutionPillars = [
     id: 'ux',
     title: 'UX responsiva e multitarefa',
     icon: Sparkles,
-    progress: 91,
-    status: 'Em execução',
+    progress: 98,
+    status: 'Concluído',
     description: 'Layouts w-full/h-full em todos os módulos, cards fluidos, integração com WindowManager multitarefa e modo escuro.',
     checkpoints: ['w-full/h-full', 'mobile-first', 'WindowManager', 'cards adaptáveis', 'modo escuro', 'ModuleImprovementBar']
   },
@@ -41,8 +41,8 @@ export const planoExecutionPillars = [
     id: 'ia',
     title: 'IA operacional conectada',
     icon: Bot,
-    progress: 95,
-    status: 'Validando',
+    progress: 99,
+    status: 'Concluído',
     description: 'IA integrada em cada módulo: financeiro, preço, rotas, churn, agenda, compras, produção, RH, fiscal e CRM.',
     checkpoints: ['iaFinanceAnomalyScan', 'productPriceOptimizer', 'optimizeDeliveryRoute', 'iaChurnAnalyzer', 'AgendaIAPanel', 'ComprasIAInsights']
   },
@@ -50,8 +50,8 @@ export const planoExecutionPillars = [
     id: 'governanca',
     title: 'Governança e auditoria',
     icon: ClipboardCheck,
-    progress: 94,
-    status: 'Validando',
+    progress: 99,
+    status: 'Concluído',
     description: 'AuditLog central, rastreabilidade de função, LGPD, PII encriptado, validações de risco e SoD em todas as entidades.',
     checkpoints: ['AuditLog', 'deployAudit', 'piiEncryptor', 'sodValidator', 'securityAlerts', 'permissionOptimizer']
   }
@@ -63,16 +63,17 @@ export const planoModuleSprints = [
   { module: 'Comercial', focus: 'Pedido completo, reserva de estoque, aprovação de desconto, fechamento e NF-e', owner: 'Vendas', priority: 'Crítica', status: 'Concluído' },
   { module: 'Estoque', focus: 'Saldo confiável em KG, movimentações auditadas, inventário seguro e IA de reposição', owner: 'Operação', priority: 'Crítica', status: 'Concluído' },
   { module: 'Compras', focus: 'Fornecedores compartilhados, OC com governança, IA insights e performance panel', owner: 'Suprimentos', priority: 'Alta', status: 'Concluído' },
-  { module: 'Financeiro', focus: 'Liquidação segura, boletos/PIX, conciliação, anomalias IA e caixa central', owner: 'Financeiro', priority: 'Crítica', status: 'Validando' },
+  { module: 'Financeiro', focus: 'Liquidação segura, boletos/PIX, conciliação, anomalias IA e caixa central', owner: 'Financeiro', priority: 'Crítica', status: 'Concluído' },
   { module: 'Expedição', focus: 'Roteirização IA, romaneio, entrega digital, rastreio GPS e logística reversa', owner: 'Logística', priority: 'Alta', status: 'Concluído' },
   { module: 'Fiscal', focus: 'NF-e multiempresa, validação IA, SPED, CFOP automático e logs SEFAZ', owner: 'Fiscal', priority: 'Alta', status: 'Concluído' },
-  { module: 'RH', focus: 'Colaboradores, ponto biométrico, férias, monitoramento IA e apontamentos', owner: 'RH', priority: 'Média', status: 'Validando' },
-  { module: 'Produção', focus: 'OPs reais, apontamentos, IA diagnóstico, kanban inteligente e multiempresa', owner: 'Fábrica', priority: 'Alta', status: 'Validando' },
+  { module: 'RH', focus: 'Colaboradores, ponto biométrico, férias, monitoramento IA e apontamentos', owner: 'RH', priority: 'Média', status: 'Concluído' },
+  { module: 'Produção', focus: 'OPs reais, apontamentos, IA diagnóstico, kanban inteligente e multiempresa', owner: 'Fábrica', priority: 'Alta', status: 'Concluído' },
   { module: 'Agenda', focus: 'Calendário multiempresa, IA de eventos, painel lateral e lembretes automáticos', owner: 'Sistema', priority: 'Alta', status: 'Concluído' },
-  { module: 'Contratos', focus: 'KPIs de contratos, IA de risco, renovação automática e cobrança integrada', owner: 'Jurídico', priority: 'Média', status: 'Validando' },
+  { module: 'Contratos', focus: 'KPIs de contratos, IA de risco, renovação automática e cobrança integrada', owner: 'Jurídico', priority: 'Média', status: 'Concluído' },
   { module: 'Cadastros', focus: 'Base mestre padronizada, IA de sugestão, contagens otimizadas e validação KYC', owner: 'Admin', priority: 'Alta', status: 'Concluído' },
   { module: 'Sistema', focus: 'Acessos granulares, auditoria total, SoD, backup, governança e plano de melhoria vivo', owner: 'Admin', priority: 'Crítica', status: 'Concluído' },
-  { module: 'Hub Atendimento', focus: 'Omnichannel, chatbot IA, SLA e atendimento multicanal unificado', owner: 'Atendimento', priority: 'Alta', status: 'Validando' },
+  { module: 'Hub Atendimento', focus: 'Omnichannel, chatbot IA, SLA e atendimento multicanal unificado', owner: 'Atendimento', priority: 'Alta', status: 'Concluído' },
+  { module: 'Portal', focus: 'Portal cliente: pedidos, boletos, entregas, rastreio e BI embarcado', owner: 'Sistema', priority: 'Alta', status: 'Concluído' },
   { module: 'Empresas', focus: 'Gestão de grupo empresarial, filiais, EmpresaSwitcher e configurações por empresa', owner: 'Admin', priority: 'Alta', status: 'Concluído' }
 ];
 

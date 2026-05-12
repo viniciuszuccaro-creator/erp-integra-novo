@@ -8,6 +8,7 @@ import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import PlanoMelhoria from './pages/PlanoMelhoria';
+import CicloX from './pages/CicloX';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ErrorBoundary from '@/components/lib/ErrorBoundary';
@@ -65,6 +66,11 @@ const AuthenticatedApp = () => {
       <Route path="/PlanoMelhoria" element={
         <LayoutWrapper currentPageName="PlanoMelhoria">
           <PlanoMelhoria />
+        </LayoutWrapper>
+      } />
+      <Route path="/CicloX" element={
+        <LayoutWrapper currentPageName="CicloX">
+          <CicloX />
         </LayoutWrapper>
       } />
       <Route path="*" element={<PageNotFound />} />

@@ -30,6 +30,7 @@ import PlanoMelhoriaProximasAcoes from '@/components/sistema/plano-melhoria/Plan
 import PlanoMelhoriaFinalSummary from '@/components/sistema/plano-melhoria/PlanoMelhoriaFinalSummary';
 import PlanoMelhoriaCiclo10Showcase from '@/components/sistema/plano-melhoria/PlanoMelhoriaCiclo10Showcase';
 import PlanoMelhoriaRuleMaster from '@/components/sistema/plano-melhoria/PlanoMelhoriaRuleMaster';
+import PlanoMelhoria100Execucao from '@/components/sistema/plano-melhoria/PlanoMelhoria100Execucao';
 import { Link } from 'react-router-dom';
 import { melhoriaPlanPhases } from '@/components/sistema/plano-melhoria/melhoriaPlanData';
 
@@ -137,6 +138,9 @@ export default function PlanoMelhoria() {
 
       {/* 30. Resumo Final Executivo */}
       <PlanoMelhoriaFinalSummary />
+
+      {/* 31. EXECUÇÃO 100% COMPLETA — Registro permanente */}
+      <PlanoMelhoria100Execucao />
 
     </div>
   );

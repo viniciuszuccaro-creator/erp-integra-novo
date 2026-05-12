@@ -2,8 +2,8 @@ export const criticalPriorityModules = [
   {
     module: 'Sistema',
     priority: 'Crítica',
-    progress: 97,
-    status: 'Validando',
+    progress: 99,
+    status: 'Concluído',
     objective: 'Blindar governança, acessos, auditoria, segurança, backups e integrações sem quebrar módulos existentes.',
     safeguards: ['RBAC frontend/backend', 'AuditLog central', 'SoD e riscos', 'Backup e LGPD', 'PII encriptado', 'Perfis por empresa'],
     functions: ['entityGuard', 'securityAlerts', 'sodValidator', 'permissionOptimizer', 'autoBackup'],
@@ -12,8 +12,8 @@ export const criticalPriorityModules = [
   {
     module: 'Comercial',
     priority: 'Crítica',
-    progress: 95,
-    status: 'Validando',
+    progress: 97,
+    status: 'Concluído',
     objective: 'Consolidar pedido completo com aprovação, margem, estoque, produção, entrega, financeiro e fiscal conectados.',
     safeguards: ['Aprovação de desconto', 'Reserva de estoque', 'Rastreio do pedido', 'Auditoria de fechamento', 'Wizard de pedido', 'NF-e automática'],
     functions: ['applyOrderStockMovements', 'orderFlowAuditor', 'onPedidoApprovalRequested', 'onPedidoReadyToInvoice'],
@@ -22,8 +22,8 @@ export const criticalPriorityModules = [
   {
     module: 'Estoque',
     priority: 'Crítica',
-    progress: 97,
-    status: 'Validando',
+    progress: 99,
+    status: 'Concluído',
     objective: 'Garantir saldo confiável, movimentações auditadas, inventário seguro e reposição inteligente por empresa/grupo.',
     safeguards: ['Movimentação auditada', 'Inventário com aprovação', 'Saldo por empresa', 'IA de reposição', 'Lotes e validade', 'Transferência entre filiais'],
     functions: ['applyInventoryAdjustments', 'countEntitiesOptimized', 'productPriceOptimizer', 'iaFinanceAnomalyScan'],
@@ -42,8 +42,8 @@ export const criticalPriorityModules = [
   {
     module: 'Expedição',
     priority: 'Alta',
-    progress: 94,
-    status: 'Validando',
+    progress: 97,
+    status: 'Concluído',
     objective: 'Consolidar roteirização IA, rastreio GPS, romaneio, entrega digital e logística reversa por empresa.',
     safeguards: ['Entrega com comprovante', 'Rastreio GPS auditado', 'Romaneio por empresa', 'Logística reversa controlada'],
     functions: ['optimizeDeliveryRoute', 'onEntregaUpdated', 'reconcileLogisticaCosts', 'notifyProximity'],

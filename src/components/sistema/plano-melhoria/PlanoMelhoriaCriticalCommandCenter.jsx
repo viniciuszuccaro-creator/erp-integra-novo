@@ -32,12 +32,12 @@ export default function PlanoMelhoriaCriticalCommandCenter() {
             </div>
             <div className="rounded-xl border border-white bg-white/80 p-3 text-center shadow-sm">
               <ShieldCheck className="mx-auto h-4 w-4 text-emerald-600" />
-              <p className="mt-1 text-xl font-bold text-slate-900">5</p>
+              <p className="mt-1 text-xl font-bold text-slate-900">6</p>
               <p className="text-xs text-slate-500">controles padrão</p>
             </div>
             <div className="rounded-xl border border-white bg-white/80 p-3 text-center shadow-sm col-span-2 sm:col-span-1">
               <AlertTriangle className="mx-auto h-4 w-4 text-red-600" />
-              <p className="mt-1 text-xl font-bold text-slate-900">4</p>
+              <p className="mt-1 text-xl font-bold text-slate-900">{criticalPriorityModules.length}</p>
               <p className="text-xs text-slate-500">módulos críticos</p>
             </div>
           </div>

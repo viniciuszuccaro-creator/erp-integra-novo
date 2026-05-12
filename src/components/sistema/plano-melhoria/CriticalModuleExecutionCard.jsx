@@ -13,7 +13,12 @@ export default function CriticalModuleExecutionCard({ item }) {
             <CardTitle className="text-lg text-slate-900">{item.module}</CardTitle>
             <p className="mt-1 text-sm text-slate-600">{item.objective}</p>
           </div>
-          <Badge className="border-red-200 bg-red-50 text-red-700 hover:bg-red-50">{item.priority}</Badge>
+          <div className="flex gap-2 flex-wrap">
+            <Badge className="border-red-200 bg-red-50 text-red-700 hover:bg-red-50">{item.priority}</Badge>
+            <Badge className={item.status === 'Concluído' ? 'bg-emerald-600 text-white' : item.status === 'Validando' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}>
+              {item.status === 'Concluído' ? '✓ ' : ''}{item.status}
+            </Badge>
+          </div>
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs text-slate-500">

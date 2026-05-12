@@ -1,21 +1,25 @@
 import React from 'react';
 import PlanoMelhoriaHeader from '@/components/sistema/plano-melhoria/PlanoMelhoriaHeader';
-import PlanoMelhoriaPhaseCard from '@/components/sistema/plano-melhoria/PlanoMelhoriaPhaseCard';
+import PlanoMelhoriaKPIsGlobais from '@/components/sistema/plano-melhoria/PlanoMelhoriaKPIsGlobais';
+import PlanoMelhoriaResumoFinal from '@/components/sistema/plano-melhoria/PlanoMelhoriaResumoFinal';
+import PlanoMelhoriaModulosDashboard from '@/components/sistema/plano-melhoria/PlanoMelhoriaModulosDashboard';
+import PlanoMelhoriaIAEngine from '@/components/sistema/plano-melhoria/PlanoMelhoriaIAEngine';
+import PlanoMelhoriaAutomacoes from '@/components/sistema/plano-melhoria/PlanoMelhoriaAutomacoes';
+import PlanoMelhoriaFullExecutionCenter from '@/components/sistema/plano-melhoria/PlanoMelhoriaFullExecutionCenter';
 import PlanoMelhoriaGovernanca from '@/components/sistema/plano-melhoria/PlanoMelhoriaGovernanca';
-import PlanoMelhoriaNextSteps from '@/components/sistema/plano-melhoria/PlanoMelhoriaNextSteps';
-import PlanoMelhoriaLiveBacklog from '@/components/sistema/plano-melhoria/PlanoMelhoriaLiveBacklog';
-import PlanoMelhoriaModuleMatrix from '@/components/sistema/plano-melhoria/PlanoMelhoriaModuleMatrix';
-import PlanoMelhoriaAutomationPanel from '@/components/sistema/plano-melhoria/PlanoMelhoriaAutomationPanel';
 import PlanoMelhoriaExecutionBoard from '@/components/sistema/plano-melhoria/PlanoMelhoriaExecutionBoard';
 import PlanoMelhoriaSprintPanel from '@/components/sistema/plano-melhoria/PlanoMelhoriaSprintPanel';
 import PlanoMelhoriaRiskPanel from '@/components/sistema/plano-melhoria/PlanoMelhoriaRiskPanel';
+import PlanoMelhoriaModuleMatrix from '@/components/sistema/plano-melhoria/PlanoMelhoriaModuleMatrix';
+import PlanoMelhoriaAutomationPanel from '@/components/sistema/plano-melhoria/PlanoMelhoriaAutomationPanel';
+import PlanoMelhoriaLiveBacklog from '@/components/sistema/plano-melhoria/PlanoMelhoriaLiveBacklog';
+import PlanoMelhoriaAcoesExecutadas from '@/components/sistema/plano-melhoria/PlanoMelhoriaAcoesExecutadas';
+import PlanoMelhoriaRegisterAcoes from '@/components/sistema/plano-melhoria/PlanoMelhoriaRegisterAcoes';
+import PlanoMelhoriaProximosPassos from '@/components/sistema/plano-melhoria/PlanoMelhoriaProximosPassos';
 import PlanoMelhoriaCriticalCommandCenter from '@/components/sistema/plano-melhoria/PlanoMelhoriaCriticalCommandCenter';
 import PlanoMelhoriaCriticalExecutor from '@/components/sistema/plano-melhoria/PlanoMelhoriaCriticalExecutor';
 import PlanoMelhoriaCriticalCompletionSuite from '@/components/sistema/plano-melhoria/PlanoMelhoriaCriticalCompletionSuite';
-import PlanoMelhoriaFullExecutionCenter from '@/components/sistema/plano-melhoria/PlanoMelhoriaFullExecutionCenter';
-import PlanoMelhoriaResumoFinal from '@/components/sistema/plano-melhoria/PlanoMelhoriaResumoFinal';
-import PlanoMelhoriaAcoesExecutadas from '@/components/sistema/plano-melhoria/PlanoMelhoriaAcoesExecutadas';
-import PlanoMelhoriaProximosCiclos from '@/components/sistema/plano-melhoria/PlanoMelhoriaProximosCiclos';
+import PlanoMelhoriaPhaseCard from '@/components/sistema/plano-melhoria/PlanoMelhoriaPhaseCard';
 import { melhoriaPlanPhases } from '@/components/sistema/plano-melhoria/melhoriaPlanData';
 
 export default function PlanoMelhoria() {
@@ -24,61 +28,75 @@ export default function PlanoMelhoria() {
   );
 
   return (
-    <div className="flex h-full w-full flex-col gap-6">
-      {/* 1. Header com KPIs do plano */}
+    <div className="flex h-full w-full flex-col gap-6 pb-10">
+
+      {/* 1. Header executivo com KPIs reais */}
       <PlanoMelhoriaHeader totalProgress={totalProgress} />
 
-      {/* 2. Resumo final: fases + módulos com progresso visual */}
-      <PlanoMelhoriaResumoFinal />
+      {/* 2. KPIs globais — 8 pilares em linha */}
+      <PlanoMelhoriaKPIsGlobais />
 
       {/* 3. Execução completa automática (upsert no banco) */}
       <PlanoMelhoriaFullExecutionCenter />
 
-      {/* 4. Centro de execução crítica (Comercial, Estoque, Financeiro, Sistema) */}
+      {/* 4. Motor de IA — execução modular */}
+      <PlanoMelhoriaIAEngine />
+
+      {/* 5. Automações e funções ativas */}
+      <PlanoMelhoriaAutomacoes />
+
+      {/* 6. Dashboard de módulos com drill-down por pilar */}
+      <PlanoMelhoriaModulosDashboard />
+
+      {/* 7. Resumo de fases + maturidade de módulos */}
+      <PlanoMelhoriaResumoFinal />
+
+      {/* 8. Centro de execução crítica (Comercial, Estoque, Financeiro, Sistema) */}
       <PlanoMelhoriaCriticalCommandCenter />
 
-      {/* 5. Executor crítico detalhado */}
+      {/* 9. Executor crítico detalhado */}
       <PlanoMelhoriaCriticalExecutor />
 
-      {/* 6. Suite de conclusão crítica */}
+      {/* 10. Suite de conclusão crítica */}
       <PlanoMelhoriaCriticalCompletionSuite />
 
-      {/* 7. Governança da Regra-Mãe */}
+      {/* 11. Governança da Regra-Mãe — 14 regras */}
       <PlanoMelhoriaGovernanca />
 
-      {/* 8. Board de execução real (pilares) */}
+      {/* 12. Board de execução real (pilares) */}
       <PlanoMelhoriaExecutionBoard />
 
-      {/* 9. Sprints por módulo */}
+      {/* 13. Sprints por módulo com prioridade e progresso */}
       <PlanoMelhoriaSprintPanel />
 
-      {/* 10. Painel de automações */}
+      {/* 14. Painel de automações conectadas (legado + novo) */}
       <PlanoMelhoriaAutomationPanel />
 
-      {/* 11. Matriz módulo × pilar */}
+      {/* 15. Matriz módulo × pilar */}
       <PlanoMelhoriaModuleMatrix />
 
-      {/* 12. Controle de riscos */}
+      {/* 16. Controle de riscos + trilhas de validação */}
       <PlanoMelhoriaRiskPanel />
 
-      {/* 13. Backlog vivo do banco */}
+      {/* 17. Backlog vivo do banco (PlanoMelhoriaItem) */}
       <PlanoMelhoriaLiveBacklog />
 
-      {/* 14. Ações executadas completas (checklist expandível) */}
+      {/* 18. Ações executadas principais (8 categorias) */}
       <PlanoMelhoriaAcoesExecutadas />
 
-      {/* 15. Cards de fases do plano */}
+      {/* 19. Módulos complementares: Portal, Hub, SPED, PWA, Relatórios */}
+      <PlanoMelhoriaRegisterAcoes />
+
+      {/* 20. Cards de fases do plano */}
       <div className="grid w-full gap-4 md:grid-cols-2 xl:grid-cols-3">
         {melhoriaPlanPhases.map((phase) => (
           <PlanoMelhoriaPhaseCard key={phase.id} phase={phase} />
         ))}
       </div>
 
-      {/* 16. Próximos ciclos de melhoria */}
-      <PlanoMelhoriaProximosCiclos />
+      {/* 21. Próximos ciclos de inovação — Roadmap 2026 */}
+      <PlanoMelhoriaProximosPassos />
 
-      {/* 17. Próximos passos e ciclos concluídos */}
-      <PlanoMelhoriaNextSteps />
     </div>
   );
 }

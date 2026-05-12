@@ -113,6 +113,22 @@ const ACOES = [
       { acao: 'Sidebar responsiva com collapse automático', feito: true },
       { acao: 'Modo escuro global (Ctrl+M)', feito: true },
       { acao: 'Atalhos de teclado documentados (Ctrl+K, Ctrl+Shift+D/C)', feito: true },
+      { acao: 'ModuleImprovementBar em todos os módulos com score', feito: true },
+    ]
+  },
+  {
+    categoria: 'Automações e backend',
+    cor: 'cyan',
+    itens: [
+      { acao: 'orderFlowAuditor — auditoria de fluxo de pedido ponta a ponta', feito: true },
+      { acao: 'autoBackup — backup automático com criptografia', feito: true },
+      { acao: 'groupConsolidation — consolidação de KPIs por grupo empresarial', feito: true },
+      { acao: 'optimizerOrchestrator — orquestrador de otimizações IA', feito: true },
+      { acao: 'syncGroupCompany — sincronização descendente grupo → empresa', feito: true },
+      { acao: 'propagateGroupConfigs — propagação de configurações para filiais', feito: true },
+      { acao: 'onPedidoCreated, onPedidoApprovalRequested, onPedidoReadyToInvoice — fluxo automático', feito: true },
+      { acao: 'deployAudit — auditoria de versões e deploy do sistema', feito: true },
+      { acao: 'whatsappSend + templates — notificações automáticas multicanal', feito: true },
     ]
   },
 ];

@@ -58,20 +58,22 @@ export const planoExecutionPillars = [
 ];
 
 export const planoModuleSprints = [
-  { module: 'Dashboard', focus: 'KPIs executivos em tempo real, IA preditiva, multiempresa e consolidação por grupo', owner: 'Sistema', priority: 'Alta', status: 'Validando' },
-  { module: 'CRM', focus: 'Oportunidades reais, interações, churn IA, pipeline e escopo multiempresa validado', owner: 'Comercial', priority: 'Alta', status: 'Validando' },
-  { module: 'Comercial', focus: 'Pedido completo, reserva de estoque, aprovação de desconto, fechamento e NF-e', owner: 'Vendas', priority: 'Crítica', status: 'Validando' },
-  { module: 'Estoque', focus: 'Saldo confiável em KG, movimentações auditadas, inventário seguro e IA de reposição', owner: 'Operação', priority: 'Crítica', status: 'Validando' },
-  { module: 'Compras', focus: 'Fornecedores compartilhados, OC com governança, IA insights e performance panel', owner: 'Suprimentos', priority: 'Alta', status: 'Em execução' },
-  { module: 'Financeiro', focus: 'Liquidação segura, boletos/PIX, conciliação, anomalias IA e caixa central', owner: 'Financeiro', priority: 'Crítica', status: 'Em execução' },
-  { module: 'Expedição', focus: 'Roteirização IA, romaneio, entrega digital, rastreio GPS e logística reversa', owner: 'Logística', priority: 'Alta', status: 'Validando' },
-  { module: 'Fiscal', focus: 'NF-e multiempresa, validação IA, SPED, CFOP automático e logs SEFAZ', owner: 'Fiscal', priority: 'Alta', status: 'Validando' },
-  { module: 'RH', focus: 'Colaboradores, ponto biométrico, férias, monitoramento IA e apontamentos', owner: 'RH', priority: 'Média', status: 'Em execução' },
-  { module: 'Produção', focus: 'OPs reais, apontamentos, IA diagnóstico, kanban inteligente e multiempresa', owner: 'Fábrica', priority: 'Alta', status: 'Em execução' },
-  { module: 'Agenda', focus: 'Calendário multiempresa, IA de eventos, painel lateral e lembretes automáticos', owner: 'Sistema', priority: 'Alta', status: 'Em execução' },
-  { module: 'Contratos', focus: 'KPIs de contratos, IA de risco, renovação automática e cobrança integrada', owner: 'Jurídico', priority: 'Média', status: 'Em execução' },
-  { module: 'Cadastros', focus: 'Base mestre padronizada, IA de sugestão, contagens otimizadas e validação KYC', owner: 'Admin', priority: 'Alta', status: 'Validando' },
-  { module: 'Sistema', focus: 'Acessos granulares, auditoria total, SoD, backup, governança e plano de melhoria vivo', owner: 'Admin', priority: 'Crítica', status: 'Validando' }
+  { module: 'Dashboard', focus: 'KPIs executivos em tempo real, IA preditiva, multiempresa e consolidação por grupo', owner: 'Sistema', priority: 'Alta', status: 'Concluído' },
+  { module: 'CRM', focus: 'Oportunidades reais, interações, churn IA, pipeline e escopo multiempresa validado', owner: 'Comercial', priority: 'Alta', status: 'Concluído' },
+  { module: 'Comercial', focus: 'Pedido completo, reserva de estoque, aprovação de desconto, fechamento e NF-e', owner: 'Vendas', priority: 'Crítica', status: 'Concluído' },
+  { module: 'Estoque', focus: 'Saldo confiável em KG, movimentações auditadas, inventário seguro e IA de reposição', owner: 'Operação', priority: 'Crítica', status: 'Concluído' },
+  { module: 'Compras', focus: 'Fornecedores compartilhados, OC com governança, IA insights e performance panel', owner: 'Suprimentos', priority: 'Alta', status: 'Concluído' },
+  { module: 'Financeiro', focus: 'Liquidação segura, boletos/PIX, conciliação, anomalias IA e caixa central', owner: 'Financeiro', priority: 'Crítica', status: 'Validando' },
+  { module: 'Expedição', focus: 'Roteirização IA, romaneio, entrega digital, rastreio GPS e logística reversa', owner: 'Logística', priority: 'Alta', status: 'Concluído' },
+  { module: 'Fiscal', focus: 'NF-e multiempresa, validação IA, SPED, CFOP automático e logs SEFAZ', owner: 'Fiscal', priority: 'Alta', status: 'Concluído' },
+  { module: 'RH', focus: 'Colaboradores, ponto biométrico, férias, monitoramento IA e apontamentos', owner: 'RH', priority: 'Média', status: 'Validando' },
+  { module: 'Produção', focus: 'OPs reais, apontamentos, IA diagnóstico, kanban inteligente e multiempresa', owner: 'Fábrica', priority: 'Alta', status: 'Validando' },
+  { module: 'Agenda', focus: 'Calendário multiempresa, IA de eventos, painel lateral e lembretes automáticos', owner: 'Sistema', priority: 'Alta', status: 'Concluído' },
+  { module: 'Contratos', focus: 'KPIs de contratos, IA de risco, renovação automática e cobrança integrada', owner: 'Jurídico', priority: 'Média', status: 'Validando' },
+  { module: 'Cadastros', focus: 'Base mestre padronizada, IA de sugestão, contagens otimizadas e validação KYC', owner: 'Admin', priority: 'Alta', status: 'Concluído' },
+  { module: 'Sistema', focus: 'Acessos granulares, auditoria total, SoD, backup, governança e plano de melhoria vivo', owner: 'Admin', priority: 'Crítica', status: 'Concluído' },
+  { module: 'Hub Atendimento', focus: 'Omnichannel, chatbot IA, SLA e atendimento multicanal unificado', owner: 'Atendimento', priority: 'Alta', status: 'Validando' },
+  { module: 'Empresas', focus: 'Gestão de grupo empresarial, filiais, EmpresaSwitcher e configurações por empresa', owner: 'Admin', priority: 'Alta', status: 'Concluído' }
 ];
 
 export const planoRiskControls = [

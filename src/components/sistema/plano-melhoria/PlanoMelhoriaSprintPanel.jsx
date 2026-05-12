@@ -12,6 +12,7 @@ const priorityClass = {
 };
 
 const statusClass = {
+  'Concluído': 'bg-emerald-600 text-white',
   'Validando': 'bg-emerald-100 text-emerald-700',
   'Em execução': 'bg-blue-100 text-blue-700',
   'Planejado': 'bg-slate-100 text-slate-700',

@@ -136,26 +136,33 @@ export default function Dashboard() {
   const refetchInterval = (empresaAtual?.id || estaNoGrupo) ? ((activeTab === 'resumo' && autoRefresh) ? DASHBOARD_REFETCH_INTERVAL_MS : false) : false; // evita zero-dados sem contexto
 
   const { data: pedidos = [] } = useQuery({
-      enabled: Boolean(canSeeComercial && hasContextoAtivo),
-      queryKey: ['pedidos', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-      queryFn: async () => {
-        if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
-        return await filterInContext('Pedido', {}, '-created_date', DASHBOARD_LIST_LIMIT);
-      },
-    ...dashboardQueryDefaults,
-    refetchInterval
-  });
+       enabled: Boolean(canSeeComercial && hasContextoAtivo),
+       queryKey: ['pedidos', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
+       queryFn: async () => {
+         if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
+         // Se em modo grupo sem empresa, agregar dados do grupo inteiro
+         if (estaNoGrupo && grupoAtual?.id && !empresaAtual?.id) {
+           return await base44.entities.Pedido.filter({ group_id: grupoAtual.id }, '-created_date', DASHBOARD_LIST_LIMIT);
+         }
+         return await filterInContext('Pedido', {}, '-created_date', DASHBOARD_LIST_LIMIT);
+       },
+     ...dashboardQueryDefaults,
+     refetchInterval
+   });
 
   const { data: contasReceber = [] } = useQuery({
-      enabled: Boolean(canSeeFinanceiro && hasContextoAtivo),
-      queryKey: ['contasReceber', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-      queryFn: async () => {
-        if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
-        return await filterInContext('ContaReceber', {}, '-data_vencimento', DASHBOARD_LIST_LIMIT);
-      },
-    ...dashboardQueryDefaults,
-    refetchInterval
-  });
+       enabled: Boolean(canSeeFinanceiro && hasContextoAtivo),
+       queryKey: ['contasReceber', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
+       queryFn: async () => {
+         if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
+         if (estaNoGrupo && grupoAtual?.id && !empresaAtual?.id) {
+           return await base44.entities.ContaReceber.filter({ group_id: grupoAtual.id }, '-data_vencimento', DASHBOARD_LIST_LIMIT);
+         }
+         return await filterInContext('ContaReceber', {}, '-data_vencimento', DASHBOARD_LIST_LIMIT);
+       },
+     ...dashboardQueryDefaults,
+     refetchInterval
+   });
 
   const { data: contasPagar = [] } = useQuery({
       enabled: Boolean(canSeeFinanceiro && hasContextoAtivo),
@@ -191,15 +198,18 @@ export default function Dashboard() {
   });
 
   const { data: produtos = [] } = useQuery({
-      enabled: Boolean(canSeeEstoque && hasContextoAtivo),
-      queryKey: ['produtos', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-      queryFn: async () => {
-        if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
-        return await filterInContext('Produto', {}, '-created_date', DASHBOARD_LIST_LIMIT);
-      },
-    ...dashboardQueryDefaults,
-    refetchInterval
-  });
+       enabled: Boolean(canSeeEstoque && hasContextoAtivo),
+       queryKey: ['produtos', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
+       queryFn: async () => {
+         if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
+         if (estaNoGrupo && grupoAtual?.id && !empresaAtual?.id) {
+           return await base44.entities.Produto.filter({ group_id: grupoAtual.id }, '-created_date', DASHBOARD_LIST_LIMIT);
+         }
+         return await filterInContext('Produto', {}, '-created_date', DASHBOARD_LIST_LIMIT);
+       },
+     ...dashboardQueryDefaults,
+     refetchInterval
+   });
 
   const { data: totalProdutos = 0 } = useQuery({
     enabled: Boolean(hasContextoAtivo && canSeeEstoque),
@@ -221,15 +231,18 @@ export default function Dashboard() {
   });
 
   const { data: clientes = [] } = useQuery({
-      enabled: Boolean(canSeeCRM && hasContextoAtivo),
-      queryKey: ['clientes', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-      queryFn: async () => {
-        if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
-        return await filterInContext('Cliente', {}, '-created_date', DASHBOARD_LIST_LIMIT);
-      },
-    ...dashboardQueryDefaults,
-    refetchInterval
-  });
+       enabled: Boolean(canSeeCRM && hasContextoAtivo),
+       queryKey: ['clientes', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
+       queryFn: async () => {
+         if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
+         if (estaNoGrupo && grupoAtual?.id && !empresaAtual?.id) {
+           return await base44.entities.Cliente.filter({ group_id: grupoAtual.id }, '-created_date', DASHBOARD_LIST_LIMIT);
+         }
+         return await filterInContext('Cliente', {}, '-created_date', DASHBOARD_LIST_LIMIT);
+       },
+     ...dashboardQueryDefaults,
+     refetchInterval
+   });
 
   const { data: totalClientes = 0 } = useQuery({
     enabled: Boolean(hasContextoAtivo && canSeeCRM),

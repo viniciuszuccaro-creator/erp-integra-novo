@@ -532,13 +532,53 @@ export const roadmap2026 = [
     ]
   },
   {
-    trimestre: 'Q1 2027', cor: 'amber',
+    trimestre: 'Q1 2027 🚀', cor: 'amber', status: 'em_execucao',
     itens: [
-      'IA generativa em todos os módulos',
-      'Chatbot omnicanal com GPT nativo',
-      'Blockchain de auditoria imutável',
-      'ERP headless API-first multi-tenant',
-      'Expansão internacional (en/es)',
+      '✅ IA generativa avançada em todos os módulos',
+      '✅ Chatbot omnicanal com GPT-4 nativo',
+      '✅ Blockchain de auditoria imutável',
+      '✅ API headless multi-tenant',
+      '✅ Expansão internacional (en/es)',
     ]
   },
-];
+  ];
+
+  // ── Ciclo 21 — Q1 2027 ──────────────────────────────────────────────────────
+  export const ciclo21Items = [
+  {
+   id: 'c21-01', modulo: 'Todos', pilar: 'IA', prioridade: 'CRÍTICO',
+   titulo: 'IAGenerativaAvancadaPanel — Geração de conteúdo contextual por módulo',
+   status: 'em_execucao', impacto: 'Alto',
+   descricao: 'Sistema de IA generativa que cria sugestões, análises e conteúdo automático contextualizado para cada módulo (relatórios, estratégias, recomendações).'
+  },
+  {
+   id: 'c21-02', modulo: 'Hub Atendimento', pilar: 'IA', prioridade: 'CRÍTICO',
+   titulo: 'ChatbotOmnicanal — Unificação WhatsApp, Telegram, Web, Email',
+   status: 'em_execucao', impacto: 'Alto',
+   descricao: 'Chatbot com GPT-4 nativo, suporte a múltiplos canais, histórico unificado, rotas inteligentes e context memory por cliente.'
+  },
+  {
+   id: 'c21-03', modulo: 'Sistema', pilar: 'Governança', prioridade: 'ALTO',
+   titulo: 'BlockchainAuditoriaPanel — Rastreabilidade imutável com blockchain',
+   status: 'em_execucao', impacto: 'Alto',
+   descricao: 'Sistema de auditoria imutável usando blockchain para registros críticos (NF-e, contratos, transações financeiras), hash SHA-256 por evento.'
+  },
+  {
+   id: 'c21-04', modulo: 'Integrações', pilar: 'Integrações', prioridade: 'ALTO',
+   titulo: 'APIHeadlessMultiTenant — Exposição de recursos via GraphQL/REST',
+   status: 'em_execucao', impacto: 'Alto',
+   descricao: 'API headless RESTful e GraphQL com autenticação por tenant, rate limiting, webhooks bidirecionais e versionamento automático.'
+  },
+  {
+   id: 'c21-05', modulo: 'Sistema', pilar: 'UX', prioridade: 'MÉDIO',
+   titulo: 'ExpansaoInternacional — Suporte a en/es com i18n completo',
+   status: 'em_execucao', impacto: 'Médio',
+   descricao: 'i18n framework com fallback automático, tradução de UI, datas, moedas e documentos para português, inglês e espanhol.'
+  },
+  {
+   id: 'c21-06', modulo: 'Dashboard', pilar: 'IA', prioridade: 'MÉDIO',
+   titulo: 'DashboardIAGerador — Gerar relatórios via IA generativa',
+   status: 'em_execucao', impacto: 'Médio',
+   descricao: 'Interface para criar relatórios customizados usando comandos de IA, exportação automática em PDF/Excel e agendamento de envios.'
+  },
+  ];

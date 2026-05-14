@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Sparkles, TrendingUp, Target, Zap, Brain } from 'lucide-react';
+import { Sparkles, TrendingUp, Target, Zap, Brain, Mail } from 'lucide-react';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import { useUser } from '@/components/lib/UserContext';
 import { toast } from 'sonner';
@@ -214,13 +214,27 @@ export default function IAVendasPreditivas({ empresaId }) {
 
                       <Button
                         size="sm"
-                        className="w-full mt-3"
-                        variant="outline"
-                        disabled
-                        title="Acao ainda nao conectada ao fluxo de campanhas"
-                        data-action="IA.VendasPreditivas.campanha.placeholder"
+                        className="w-full mt-3 bg-purple-600 hover:bg-purple-700 text-white"
+                        onClick={async () => {
+                          try {
+                            await base44.entities.Campanha.create({
+                              nome: `Recompra — ${prev.cliente_nome}`,
+                              tipo: 'Recompra',
+                              status: 'Ativa',
+                              descricao: `IA detectou probabilidade ${prev.probabilidade}% de recompra. Ciclo médio ${prev.ciclo_medio_dias}d.`,
+                              empresa_id: eId || null,
+                              group_id: gId || null,
+                              clientes_alvo_ids: [prev.cliente_id],
+                              criada_por_ia: true,
+                            });
+                            toast.success(`Campanha criada para ${prev.cliente_nome}!`);
+                          } catch {
+                            toast.error('Erro ao criar campanha.');
+                          }
+                        }}
+                        data-action="IA.VendasPreditivas.campanha.criar"
                       >
-                        <Zap className="w-4 h-4 mr-1" />
+                        <Mail className="w-4 h-4 mr-1" />
                         Criar Campanha Direcionada
                       </Button>
                     </CardContent>

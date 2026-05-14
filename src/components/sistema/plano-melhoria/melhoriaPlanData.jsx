@@ -379,6 +379,46 @@ export const ciclo16Items = [
   },
 ];
 
+// ── Ciclo 17 — Novembro 2026 ────────────────────────────────────────────────
+export const ciclo17Items = [
+  {
+    id: 'c17-01', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'DashboardKPIsComparativosWidget integrado no Dashboard principal',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Widget de KPIs comparativos (Vendas, Pedidos, Receitas, Ticket Médio vs mês anterior) exibido acima do grid IA no Dashboard.',
+  },
+  {
+    id: 'c17-02', modulo: 'CRM', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'CRMScoreClienteWidget integrado na seção KPIs do CRM',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Widget de score de saúde dos clientes (modo compacto) adicionado ao bloco de KPIs do módulo CRM.',
+  },
+  {
+    id: 'c17-03', modulo: 'CRM', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'IAVendasPreditivas — módulo adicionado ao grid do CRM',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Módulo "IA Vendas Preditivas" adicionado ao ModulosGridCRM com abertura em janela multitarefa.',
+  },
+  {
+    id: 'c17-04', modulo: 'CRM', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'IAVendasPreditivas — botão "Criar Campanha" funcional (grava Campanha no banco)',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Botão antes desabilitado agora cria registro em Campanha com cliente, probabilidade, ciclo e context multiempresa.',
+  },
+  {
+    id: 'c17-05', modulo: 'Roadmap', pilar: 'Governança', prioridade: 'MÉDIO',
+    titulo: 'Roadmap Q3 parcialmente concluído; Q4 detalhado com 8 itens',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'roadmap2026 atualizado: Q3 marca KPIs Comparativos como entregues, Q4 detalha BI 3D, GPS, marketplace, ISO, contratos.',
+  },
+  {
+    id: 'c17-06', modulo: 'Sistema', pilar: 'Governança', prioridade: 'BAIXO',
+    titulo: 'ciclo17Items registrado e Sprint Board/CicloAtual atualizados',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'PlanoMelhoria, SprintBoard e CicloAtual refletem Ciclo 17 — Novembro 2026.',
+  },
+];
+
 // ── Roadmap 2026–2027 ────────────────────────────────────────────────────────
 export const roadmap2026 = [
   {
@@ -402,19 +442,25 @@ export const roadmap2026 = [
       '✅ DashboardVendasPrevisaoWidget — gráfico de área 30d',
       '✅ PortalSelfServiceB2B — self-service completo',
       '✅ IAInsights: score de confiança + prioridade visual',
+      '✅ DashboardKPIsComparativosWidget — mês atual vs anterior',
+      '✅ CRMScoreClienteWidget — saúde e churn no CRM',
+      '✅ IAVendasPreditivas — campanha funcional + CRM grid',
       '🔄 Marketplace sync automático (ML, Shopee)',
       '📅 App mobile produção com apontamentos',
       '📅 Open Finance / conciliação bancária',
     ]
   },
   {
-    trimestre: 'Q4 2026', cor: 'emerald',
+    trimestre: 'Q4 2026 📅', cor: 'emerald', status: 'planejado',
     itens: [
-      'BI avançado com gráficos 3D e forecasts',
-      'Automação de fluxos com triggers visuais',
-      'Integração GPS real para rastreamento',
-      'Certificação compliance ISO 27001',
-      'Módulo de contratos eletrônicos avançado',
+      '📅 BI avançado com gráficos 3D e drilldown por produto',
+      '📅 Automação visual de fluxos (triggers por evento)',
+      '📅 Integração GPS real para rastreamento de entregas',
+      '📅 Certificação compliance ISO 27001 checklist',
+      '📅 Módulo de contratos eletrônicos com assinatura digital',
+      '📅 Marketplace sync automático (ML, Shopee, Amazon)',
+      '📅 App mobile de produção com apontamentos offline',
+      '📅 Open Finance — conciliação bancária automática',
     ]
   },
   {

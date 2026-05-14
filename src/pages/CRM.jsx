@@ -18,6 +18,7 @@ import ModuleTabs from "@/components/layout/ModuleTabs";
 import { Button } from "@/components/ui/button";
 import useCRMDerivedData from "@/components/crm/hooks/useCRMDerivedData";
 import CRMIAPanel from "@/components/crm/CRMIAPanel";
+import CRMScoreClienteWidget from "@/components/crm/CRMScoreClienteWidget";
 const OportunidadesListagem = React.lazy(() => import("../components/crm/OportunidadesListagem"));
 const InteracoesListagem = React.lazy(() => import("../components/crm/InteracoesListagem"));
 import { useUser } from "@/components/lib/UserContext";
@@ -235,6 +236,7 @@ export default function CRMPage() {
       <ModuleLayout title="CRM - Relacionamento" subtitle="Relacionamento, funil e campanhas" actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'crm_primary_action' })}>Novo</Button></div>}>
         <ModuleKPIs>
           <CRMIAPanel oportunidades={oportunidadesFiltradas} clientes={clientes} interacoes={interacoesFiltradas} />
+          <CRMScoreClienteWidget compact />
           <KPIsCRM
             oportunidadesAbertas={oportunidadesAbertas}
             totalOportunidades={totalOportunidades}

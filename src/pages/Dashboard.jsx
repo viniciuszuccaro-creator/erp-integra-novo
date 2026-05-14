@@ -77,6 +77,10 @@ import DashboardForecastWidget from "@/components/dashboard/DashboardForecastWid
 import DashboardIAInsightsPanel from "@/components/dashboard/DashboardIAInsightsPanel";
 import DashboardSaudeWidget from "@/components/dashboard/DashboardSaudeWidget";
 import DashboardVendasPrevisaoWidget from "@/components/dashboard/DashboardVendasPrevisaoWidget";
+import DashboardKPIsComparativosWidget from "@/components/dashboard/DashboardKPIsComparativosWidget";
+import DashboardMarketplaceWidget from "@/components/dashboard/DashboardMarketplaceWidget";
+import ConciliacaoIAWidget from "@/components/financeiro/ConciliacaoIAWidget";
+import CRMScoreDashboard from "@/components/crm/CRMScoreDashboard";
 import PedidosResumoPanel from "@/components/dashboard/PedidosResumoPanel";
 import ResizableRow from "@/components/dashboard/ResizableRow";
 import { ResizablePanelGroup as PanelGroup, ResizablePanel as Panel, ResizableHandle as PanelResizeHandle } from "@/components/ui/resizable";
@@ -804,6 +808,14 @@ export default function Dashboard() {
               <TopProdutosStatusPeriodoSection topProdutos={topProdutos} dadosVendasStatus={dadosVendasStatus} COLORS={COLORS} />
             </Panel>
           </PanelGroup>
+
+          {/* Ciclo 17 — BI Comparativo: KPIs mês + Marketplace + CRM Score + Conciliação */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <DashboardKPIsComparativosWidget />
+            <DashboardMarketplaceWidget />
+            {canSeeCRM && <CRMScoreDashboard />}
+            {canSeeFinanceiro && <ConciliacaoIAWidget />}
+          </div>
 
           {/* IA: Saúde + Forecast + Vendas Previsão + Insights */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -18,6 +18,7 @@ import PlanoMelhoriaModulosDashboard from '@/components/sistema/plano-melhoria/P
 import PlanoMelhoriaTimelineExecutiva from '@/components/sistema/plano-melhoria/PlanoMelhoriaTimelineExecutiva';
 import PlanoMelhoriaProximasAcoes from '@/components/sistema/plano-melhoria/PlanoMelhoriaProximasAcoes';
 import PlanoMelhoriaRiskPanel from '@/components/sistema/plano-melhoria/PlanoMelhoriaRiskPanel';
+import PlanoMelhoriaDashboardFinal from '@/components/sistema/plano-melhoria/PlanoMelhoriaDashboardFinal';
 import CicloExecucaoPanel from '@/components/sistema/plano-melhoria/CicloExecucaoPanel';
 
 import {
@@ -25,7 +26,7 @@ import {
 } from 'lucide-react';
 
 export default function PlanoMelhoria() {
-  const [tab, setTab] = useState('execucao-ciclo-21');
+  const [tab, setTab] = useState('dashboard-final');
 
   const totalProgress = Math.round(
     melhoriaPlanPhases.reduce((sum, phase) => sum + phase.progress, 0) / melhoriaPlanPhases.length
@@ -56,6 +57,9 @@ export default function PlanoMelhoria() {
       <Tabs value={tab} onValueChange={setTab} className="w-full flex-1">
         <div className="overflow-x-auto pb-1">
           <TabsList className="inline-flex h-auto min-w-max gap-1 bg-slate-100 p-1 rounded-xl">
+            <TabsTrigger value="dashboard-final" className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg data-[state=active]:bg-slate-900 data-[state=active]:text-white">
+              <LayoutDashboard className="w-3.5 h-3.5" /> Dashboard
+            </TabsTrigger>
             <TabsTrigger value="comando-critico" className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg data-[state=active]:bg-red-600 data-[state=active]:text-white">
               <AlertTriangle className="w-3.5 h-3.5" /> Comando
             </TabsTrigger>
@@ -89,6 +93,10 @@ export default function PlanoMelhoria() {
             </TabsTrigger>
           </TabsList>
         </div>
+
+        <TabsContent value="dashboard-final" className="mt-4 w-full">
+          <PlanoMelhoriaDashboardFinal />
+        </TabsContent>
 
         <TabsContent value="comando-critico" className="mt-4 w-full space-y-4">
           <PlanoMelhoriaCriticalCommandCenter />

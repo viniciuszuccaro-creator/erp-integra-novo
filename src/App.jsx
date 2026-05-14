@@ -12,6 +12,8 @@ import EmpresaSelectorGuard from '@/components/sistema/EmpresaSelectorGuard';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ErrorBoundary from '@/components/lib/ErrorBoundary';
+import RBACRoute from '@/components/lib/RBACRoute';
+import { RBAC_MODULES } from '@/lib/rbacModuleMap';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -44,6 +46,27 @@ const AuthenticatedApp = () => {
     }
   }
 
+  // Mapa de páginas para módulos RBAC
+  const pageModuleMap = {
+    Dashboard: 'Dashboard',
+    Relatorios: 'Relatorios',
+    Agenda: 'Agenda',
+    CRM: 'CRM',
+    Cadastros: 'Cadastros',
+    Comercial: 'Comercial',
+    Estoque: 'Estoque',
+    Compras: 'Compras',
+    Expedicao: 'Expedicao',
+    Producao: 'Producao',
+    Financeiro: 'Financeiro',
+    RH: 'RH',
+    Fiscal: 'Fiscal',
+    Contratos: 'Contratos',
+    AdministracaoSistema: 'Sistema',
+    HubAtendimento: 'HubAtendimento',
+    DashboardCorporativo: 'Dashboard',
+  };
+
   // Render the main app
   return (
     <Routes>
@@ -55,19 +78,34 @@ const AuthenticatedApp = () => {
           </LayoutWrapper>
         </EmpresaSelectorGuard>
       } />
-      {Object.entries(Pages).map(([path, Page]) => (
-        <Route
-          key={path}
-          path={`/${path}`}
-          element={
-            <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName={path}>
-                <Page />
-              </LayoutWrapper>
-            </EmpresaSelectorGuard>
-          }
-        />
-      ))}
+      {Object.entries(Pages).map(([path, Page]) => {
+        const moduleName = pageModuleMap[path];
+        const requiredAction = moduleName ? 'ver' : undefined;
+
+        return (
+          <Route
+            key={path}
+            path={`/${path}`}
+            element={
+              moduleName ? (
+                <RBACRoute module={moduleName} action={requiredAction}>
+                  <EmpresaSelectorGuard>
+                    <LayoutWrapper currentPageName={path}>
+                      <Page />
+                    </LayoutWrapper>
+                  </EmpresaSelectorGuard>
+                </RBACRoute>
+              ) : (
+                <EmpresaSelectorGuard>
+                  <LayoutWrapper currentPageName={path}>
+                    <Page />
+                  </LayoutWrapper>
+                </EmpresaSelectorGuard>
+              )
+            }
+          />
+        );
+      })}
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>

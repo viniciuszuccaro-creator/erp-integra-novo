@@ -7,6 +7,7 @@ import { melhoriaPlanPhases, ciclo11Items } from '@/components/sistema/plano-mel
 // Componentes focados
 import PlanoMelhoriaVisaoGeral from '@/components/sistema/plano-melhoria/PlanoMelhoriaVisaoGeral';
 import PlanoMelhoriaCicloAtual from '@/components/sistema/plano-melhoria/PlanoMelhoriaCicloAtual';
+import PlanoMelhoriaSprintBoard from '@/components/sistema/plano-melhoria/PlanoMelhoriaSprintBoard';
 import PlanoMelhoriaRoadmapView from '@/components/sistema/plano-melhoria/PlanoMelhoriaRoadmapView';
 import PlanoMelhoriaGapsAnalise from '@/components/sistema/plano-melhoria/PlanoMelhoriaGapsAnalise';
 import PlanoMelhoriaLiveBacklog from '@/components/sistema/plano-melhoria/PlanoMelhoriaLiveBacklog';
@@ -72,7 +73,8 @@ export default function PlanoMelhoria() {
           <PlanoMelhoriaVisaoGeral />
         </TabsContent>
 
-        <TabsContent value="ciclo-atual" className="mt-4 w-full">
+        <TabsContent value="ciclo-atual" className="mt-4 w-full space-y-4">
+          <PlanoMelhoriaSprintBoard />
           <PlanoMelhoriaCicloAtual />
         </TabsContent>
 

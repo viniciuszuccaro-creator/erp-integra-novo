@@ -58,18 +58,8 @@ export default function SoDChecker() {
         requested_by: user?.id,
       });
 
-      // Transforma resultados SoD: results = [{perfil_id, nome, conflitos: count, severidadeMax}]
-      const conflicts = Array.isArray(data?.results)
-        ? data.results.map((r) => ({
-            perfil_id: r.perfil_id,
-            perfil_nome: r.nome,
-            tipo_conflito: "SoD Violation",
-            severidade: r.severidadeMax || "Média",
-            descricao: `Detectados ${r.conflitos} conflito(s) no perfil`
-          }))
-        : [];
-      
-      setResultado({ conflicts });
+      // Passa resultados SoD diretos (formato esperado por SoDResults)
+      setResultado(data?.results || []);
       await audit({
         acao: "Visualizacao",
         entidade: "SoD",
@@ -87,7 +77,7 @@ export default function SoDChecker() {
   };
 
   const persistirConflitos = async () => {
-    if (!resultado) return;
+    if (!resultado || !Array.isArray(resultado)) return;
     setPersistindo(true);
     setErro(null);
     try {
@@ -95,17 +85,11 @@ export default function SoDChecker() {
         throw new Error("Selecione um grupo e uma empresa antes de persistir conflitos.");
       }
 
-      const conflicts = Array.isArray(resultado?.conflicts) ? resultado.conflicts : [];
-      const porPerfil = conflicts.reduce((acc, c) => {
-        const id = c?.perfil_id;
-        if (!id) return acc;
-        acc[id] = acc[id] || [];
-        acc[id].push({
-          tipo_conflito: c?.tipo_conflito,
-          descricao: c?.descricao,
-          severidade: c?.severidade || "Media",
-          data_deteccao: new Date().toISOString(),
-        });
+      // Agrupa conflitos por perfil
+      const porPerfil = resultado.reduce((acc, r) => {
+        const perfilId = r?.perfil_id;
+        if (!perfilId) return acc;
+        acc[perfilId] = r.conflitos || [];
         return acc;
       }, {});
 
@@ -113,8 +97,7 @@ export default function SoDChecker() {
       for (const perfilId of ids) {
         await base44.entities.PerfilAcesso.update(perfilId, {
           conflitos_sod_detectados: porPerfil[perfilId],
-          ...(groupId ? { group_id: groupId } : {}),
-          ...(empresaId ? { empresa_id: empresaId } : {}),
+          requer_aprovacao_especial: porPerfil[perfilId].length > 0,
         });
       }
 
@@ -170,8 +153,8 @@ export default function SoDChecker() {
         <div className="text-sm text-red-600">{erro}</div>
       )}
 
-      {resultado && (
-        <SoDResults resultado={resultado} />
+      {resultado && Array.isArray(resultado) && resultado.length > 0 && (
+        <SoDResults resultados={resultado} />
       )}
     </div>
   );

@@ -1,8 +1,21 @@
-import React, { useState } from 'react';
-import { Play, CheckCircle2, AlertCircle, Zap, Code2, Globe2, MessageSquare, Lock } from 'lucide-react';
+import React, { useState, Suspense, lazy } from 'react';
+import { Play, CheckCircle2, AlertCircle, Zap, Code2, Globe2, MessageSquare, Lock, Loader } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { base44 } from '@/api/base44Client';
+import { useUser } from '@/components/lib/UserContext';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
+
+// Carregamento dinâmico (lazy) dos componentes
+const componentMap = {
+  IAGenerativaAvancadaPanel: lazy(() => import('@/components/ia/IAGenerativaAvancadaPanel')),
+  ChatbotOmnicanal: lazy(() => import('@/components/chatbot/ChatbotOmnicanal')),
+  BlockchainAuditoriaPanel: lazy(() => import('@/components/blockchain/BlockchainAuditoriaPanel')),
+  APIHeadlessGuide: lazy(() => import('@/components/integracao/APIHeadlessGuide')),
+  LanguageSwitcher: lazy(() => import('@/components/layout/LanguageSwitcher')),
+  DashboardIAGerador: lazy(() => import('@/components/dashboard/DashboardIAGerador')),
+};
 
 const ciclo21Items = [
   {
@@ -58,6 +71,9 @@ const ciclo21Items = [
 export default function CicloExecucaoPanel() {
   const [executando, setExecutando] = useState(null);
   const [completos, setCompletos] = useState([]);
+  const [mostrando, setMostrando] = useState(null);
+  const { user } = useUser();
+  const { empresaAtual, grupoAtual, contexto } = useContextoVisual();
 
   const statusColor = (status) => {
     switch (status) {
@@ -79,9 +95,25 @@ export default function CicloExecucaoPanel() {
 
   const executar = async (item) => {
     setExecutando(item.id);
-    // Simula execução (2-3s)
-    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
-    setCompletos([...completos, item.id]);
+    try {
+      // Auditoria backend + execução
+      await base44.functions.invoke('deployAudit', {
+        event: 'ciclo21_component_exec',
+        module: 'PlanoMelhoria',
+        page: 'CicloExecucaoPanel',
+        component: item.nome,
+        empresa_id: empresaAtual?.id || null,
+        group_id: grupoAtual?.id || null,
+      });
+      
+      // Simula execução real do componente (2-3s)
+      await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
+      
+      setCompletos([...completos, item.id]);
+      setMostrando(item.id); // Mostra componente após conclusão
+    } catch (err) {
+      console.error(`Erro ao executar ${item.nome}:`, err);
+    }
     setExecutando(null);
   };
 
@@ -136,20 +168,32 @@ export default function CicloExecucaoPanel() {
                   {item.impacto}
                 </Badge>
               </div>
-              <Button 
-                onClick={() => executar(item)} 
-                disabled={executando === item.id || completos.includes(item.id)}
-                size="sm"
-                className="w-full"
-              >
-                {completos.includes(item.id) ? (
-                  <>✓ Concluído</>
-                ) : executando === item.id ? (
-                  <>Executando...</>
-                ) : (
-                  <><Play className="w-3 h-3 mr-1" /> Executar</>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => executar(item)} 
+                  disabled={executando === item.id || completos.includes(item.id)}
+                  size="sm"
+                  className="flex-1"
+                  variant={completos.includes(item.id) ? "outline" : "default"}
+                >
+                  {completos.includes(item.id) ? (
+                    <>✓ Concluído</>
+                  ) : executando === item.id ? (
+                    <><Loader className="w-3 h-3 mr-1 animate-spin" /> Exec...</>
+                  ) : (
+                    <><Play className="w-3 h-3 mr-1" /> Executar</>
+                  )}
+                </Button>
+                {completos.includes(item.id) && (
+                  <Button 
+                    onClick={() => setMostrando(mostrando === item.id ? null : item.id)}
+                    size="sm"
+                    variant="outline"
+                  >
+                    {mostrando === item.id ? 'Ocultar' : 'Ver'}
+                  </Button>
                 )}
-              </Button>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -162,6 +206,25 @@ export default function CicloExecucaoPanel() {
             <p className="font-semibold text-green-900">Ciclo 21 Completo! 🎉</p>
             <p className="text-sm text-green-800 mt-1">Todas as melhorias foram integradas e ativadas. Próximo: Ciclo 22 (Q3 2026).</p>
           </div>
+        </div>
+      )}
+
+      {mostrando && (
+        <div className="border rounded-lg p-4 bg-white">
+          <div className="flex justify-between items-center mb-3">
+            <p className="font-semibold text-slate-900">
+              {ciclo21Items.find(i => i.id === mostrando)?.nome}
+            </p>
+            <button onClick={() => setMostrando(null)} className="text-slate-500 hover:text-slate-700">✕</button>
+          </div>
+          <Suspense fallback={<div className="flex items-center gap-2 text-slate-500"><Loader className="w-4 h-4 animate-spin" /> Carregando...</div>}>
+            {(() => {
+              const item = ciclo21Items.find(i => i.id === mostrando);
+              if (!item) return null;
+              const Component = componentMap[item.componente];
+              return Component ? <Component /> : <p className="text-slate-500">Componente não encontrado</p>;
+            })()}
+          </Suspense>
         </div>
       )}
     </div>

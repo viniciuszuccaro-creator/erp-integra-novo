@@ -240,8 +240,9 @@ export default function Dashboard() {
         return produtos.length;
       }
     },
-    staleTime: 300000,
-    retry: false,
+    staleTime: 600000,
+    retry: 1,
+    retryDelay: 1000,
   });
 
   const { data: clientes = [] } = useQuery({
@@ -256,7 +257,7 @@ export default function Dashboard() {
        },
      ...dashboardQueryDefaults,
      refetchInterval
-   });
+    });
 
   const { data: totalClientes = 0 } = useQuery({
     enabled: Boolean(hasContextoAtivo && canSeeCRM),
@@ -273,8 +274,9 @@ export default function Dashboard() {
         return clientes.length;
       }
     },
-    staleTime: 300000,
-    retry: false,
+    staleTime: 600000,
+    retry: 1,
+    retryDelay: 1000,
   });
 
   const { data: totalColaboradoresDash = 0 } = useQuery({
@@ -292,8 +294,9 @@ export default function Dashboard() {
         return colaboradores.length;
       }
     },
-    staleTime: 300000,
-    retry: false,
+    staleTime: 600000,
+    retry: 1,
+    retryDelay: 1000,
   });
 
   const { data: ordensProducao = [] } = useQuery({

@@ -19,12 +19,12 @@ import {
 } from 'lucide-react';
 
 export default function PlanoMelhoria() {
-  const [tab, setTab] = useState('visao-geral');
+  const [tab, setTab] = useState('execucao-ciclo-21');
 
   const totalProgress = Math.round(
     melhoriaPlanPhases.reduce((sum, phase) => sum + phase.progress, 0) / melhoriaPlanPhases.length
   );
-  // Ciclo atual = Ciclo 20
+  // Ciclo atual = Ciclo 21 (nova aba de execução)
   const cicloAtualItems = ciclo20Items;
   const concluidos = cicloAtualItems.filter(i => i.status === 'concluido').length;
   const total = cicloAtualItems.length;
@@ -50,6 +50,9 @@ export default function PlanoMelhoria() {
       <Tabs value={tab} onValueChange={setTab} className="w-full flex-1">
         <div className="overflow-x-auto pb-1">
           <TabsList className="inline-flex h-auto min-w-max gap-1 bg-slate-100 p-1 rounded-xl">
+            <TabsTrigger value="execucao-ciclo-21" className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg data-[state=active]:bg-green-600 data-[state=active]:text-white">
+              <Zap className="w-3.5 h-3.5" /> Ciclo 21 — Execução
+            </TabsTrigger>
             <TabsTrigger value="visao-geral" className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <LayoutDashboard className="w-3.5 h-3.5" /> Visão Geral
             </TabsTrigger>
@@ -71,6 +74,10 @@ export default function PlanoMelhoria() {
             </TabsTrigger>
           </TabsList>
         </div>
+
+        <TabsContent value="execucao-ciclo-21" className="mt-4 w-full">
+          <CicloExecucaoPanel />
+        </TabsContent>
 
         <TabsContent value="visao-geral" className="mt-4 w-full">
           <PlanoMelhoriaVisaoGeral />

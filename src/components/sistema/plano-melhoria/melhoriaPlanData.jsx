@@ -213,21 +213,21 @@ export const ciclo12Items = [
   },
   {
     id: 'c12-09', modulo: 'Fiscal', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'ValidacaoCertificadoNFe + IAContextualModulo no Header Fiscal',
+    titulo: 'ValidacaoCertificadoNFe na aba NF-e do módulo Fiscal',
     status: 'concluido', impacto: 'Alto',
-    descricao: 'ValidacaoCertificadoNFe + IAContextualModulo + SemEmpresaBanner integrados ao HeaderFiscalCompacto.',
+    descricao: 'ValidacaoCertificadoNFe exibida no HeaderFiscalCompacto + SemEmpresaBanner + IAContextualModulo.',
   },
   {
     id: 'c12-10', modulo: 'Relatórios', pilar: 'UX', prioridade: 'MÉDIO',
     titulo: 'SemEmpresaBanner nos Relatórios + IAContextualModulo de análise',
     status: 'concluido', impacto: 'Médio',
-    descricao: 'Banner orientativo de empresa + IA de insights executivos integrados à página de Relatórios.',
+    descricao: 'SemEmpresaBanner integrado à página de Relatórios e Análises.',
   },
   {
     id: 'c12-11', modulo: 'Contratos', pilar: 'IA', prioridade: 'BAIXO',
-    titulo: 'IAContextualModulo + SemEmpresaBanner no módulo Contratos',
+    titulo: 'IAContextualModulo no módulo Contratos',
     status: 'concluido', impacto: 'Médio',
-    descricao: 'Sugestões IA de renovação, risco e vencimento + banner orientativo integrados à página Contratos.',
+    descricao: 'SemEmpresaBanner + IAContextualModulo integrados ao cabeçalho da página Contratos.',
   },
   {
     id: 'c12-12', modulo: 'Todos', pilar: 'Performance', prioridade: 'MÉDIO',

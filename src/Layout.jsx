@@ -55,6 +55,7 @@ import WindowRenderer from "@/components/lib/WindowRenderer";
 import MinimizedWindowsBar from "@/components/lib/MinimizedWindowsBar";
 import AtalhosTecladoInfo from "@/components/sistema/AtalhosTecladoInfo";
 import ZIndexGuard from "@/components/lib/ZIndexFix";
+import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import "@/components/lib/networkGuard";
 import BootstrapGuard from "@/components/lib/BootstrapGuard";
@@ -1476,6 +1477,8 @@ function LayoutContent({ children, currentPageName }) {
                 </button>
 
                 <AtalhosTecladoInfo />
+
+                <LanguageSwitcher />
 
                 <AcoesRapidasGlobal />
 

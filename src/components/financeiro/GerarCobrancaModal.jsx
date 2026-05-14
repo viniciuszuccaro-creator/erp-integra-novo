@@ -10,6 +10,7 @@ import { CreditCard, QrCode, Link2, CheckCircle2, Copy, X } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import GeradorLinkPagamento from "./GeradorLinkPagamento";
+import WizardGatewayPagamento from "./WizardGatewayPagamento";
 import useContextoVisual from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
 
@@ -218,6 +219,8 @@ export default function GerarCobrancaModal({ isOpen, onClose, contaReceber }) {
               </div>
             </CardContent>
           </Card>
+
+          <WizardGatewayPagamento tipo={tipoCobranca === 'boleto' ? 'Boleto' : 'PIX'} />
 
           {!cobrancaGerada ? (
             <>

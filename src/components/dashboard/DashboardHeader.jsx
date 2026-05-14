@@ -3,9 +3,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "lucide-react";
+import SemEmpresaBanner from "@/components/common/SemEmpresaBanner";
+import IAContextualModulo from "@/components/ia/IAContextualModulo";
 
 export default function DashboardHeader({ empresaAtual, estaNoGrupo, grupoAtual, autoRefresh, setAutoRefresh, periodo, setPeriodo }) {
   return (
+    <div className="space-y-3">
+    <SemEmpresaBanner modulo="Dashboard" />
     <div className="flex justify-between items-center">
       <div>
         <h1 className="text-3xl font-bold text-slate-900 mb-2">Dashboard Executivo</h1>
@@ -39,6 +43,8 @@ export default function DashboardHeader({ empresaAtual, estaNoGrupo, grupoAtual,
           </SelectContent>
         </Select>
       </div>
+    </div>
+    <IAContextualModulo modulo="Dashboard" compact />
     </div>
   );
 }

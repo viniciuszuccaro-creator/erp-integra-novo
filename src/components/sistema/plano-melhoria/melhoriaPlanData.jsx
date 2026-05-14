@@ -126,38 +126,38 @@ export const ciclo11Items = [
   {
     id: 'c11-07', modulo: 'Dashboard', pilar: 'Performance', prioridade: 'MÉDIO',
     titulo: 'KPIs do Dashboard mostram 0 sem empresa — consolidar do grupo',
-    status: 'planejado', impacto: 'Alto',
-    descricao: 'Quando contexto = "grupo", buscar dados consolidados via groupConsolidation automaticamente.'
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Quando contexto = "grupo", buscar dados consolidados via groupConsolidation automaticamente. SemEmpresaBanner integrado no DashboardHeader.'
   },
   {
     id: 'c11-08', modulo: 'Cadastros Gerais', pilar: 'UX', prioridade: 'MÉDIO',
     titulo: 'Mensagem orientativa quando empresa não selecionada (sem tela em branco)',
-    status: 'planejado', impacto: 'Médio',
-    descricao: 'Banner com botão de seleção de empresa + fallback de dados do grupo quando contexto = "grupo".'
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'Componente SemEmpresaBanner criado em components/common/SemEmpresaBanner, com botão de seleção de empresa e fallback de dados do grupo.'
   },
   {
     id: 'c11-09', modulo: 'Sidebar / Layout', pilar: 'UX', prioridade: 'MÉDIO',
     titulo: 'Adicionar links "Empresas" e "Portal do Cliente" na sidebar',
-    status: 'planejado', impacto: 'Médio',
-    descricao: 'Rotas existem (/Empresas, /PortalCliente) mas não estão no menu lateral de navegação.'
+    status: 'concluido', impacto: 'Médio',
+    descricao: '"Empresas e Grupos" e "Portal do Cliente" adicionados ao grupo "sistema" da navigationItems no layout.jsx.'
   },
   {
     id: 'c11-10', modulo: 'Fiscal / NF-e', pilar: 'Integrações', prioridade: 'ALTO',
     titulo: 'Validação de certificado A1 e API fiscal antes de emitir NF-e',
-    status: 'planejado', impacto: 'Alto',
-    descricao: 'Verificar se ConfigFiscalEmpresa está preenchida antes de habilitar botão Emitir NF-e — exibir wizard se não.'
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Componente ValidacaoCertificadoNFe criado em components/fiscal — verifica CNPJ, série e API key; exibe banner bloqueante com link para configurar.'
   },
   {
     id: 'c11-11', modulo: 'Financeiro', pilar: 'Integrações', prioridade: 'MÉDIO',
     titulo: 'Wizard de configuração de gateway quando gerar boleto/PIX sem config',
-    status: 'planejado', impacto: 'Médio',
-    descricao: 'Se gateway não configurado, exibir wizard de configuração em vez de erro genérico.'
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'Componente WizardGatewayPagamento criado em components/financeiro — detecta ausência de gateway e exibe opções de configuração em vez de erro genérico.'
   },
   {
     id: 'c11-12', modulo: 'Todos', pilar: 'IA', prioridade: 'BAIXO',
     titulo: 'IA generativa contextual — sugestões proativas por módulo',
-    status: 'planejado', impacto: 'Alto',
-    descricao: 'Usar iaGenerativeContextual para sugerir próximas ações em cada módulo com base no contexto atual.'
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Componente IAContextualModulo criado em components/ia — chama iaGenerativeContextual com contexto multiempresa, exibe sugestões numeradas com refresh.'
   },
 ];
 

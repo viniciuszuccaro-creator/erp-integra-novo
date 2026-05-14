@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Receipt, FileText, Layers, CheckCircle, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import ValidacaoCertificadoNFe from '@/components/fiscal/ValidacaoCertificadoNFe';
 
 /**
  * V21.1.2 - Modal/Window de Emissão de NF-e com Escolha de Escopo
@@ -58,6 +59,8 @@ export default function GerarNFeModal({ open, onClose, pedidoData, onEmitir, win
           <h2 className="text-xl font-bold">Emitir NF-e - Escolha o Escopo</h2>
         </div>
       )}
+
+      <ValidacaoCertificadoNFe />
 
       <div className="space-y-4">
           <RadioGroup value={escopo} onValueChange={setEscopo}>

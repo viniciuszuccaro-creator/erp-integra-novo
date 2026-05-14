@@ -379,6 +379,28 @@ export const ciclo16Items = [
   },
 ];
 
+// ── Ciclo 19 — Janeiro 2027 ────────────────────────────────────────────────
+export const ciclo19Items = [
+  {
+    id: 'c19-01', modulo: 'Logística', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'RastreamentoGPSWidget — GPS em tempo real para entregas',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Widget com rastreamento de entregas em tempo real via GPS/SMS, distância, ETA, e status de entrega com mapa integrado.',
+  },
+  {
+    id: 'c19-02', modulo: 'Produção', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'ApontamentoProdutoMobileWidget — App mobile para apontamentos',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'App mobile iOS/Android com QR scan, apontamento de produção por operário, sincronização offline e banco de dados local.',
+  },
+  {
+    id: 'c19-03', modulo: 'Sistema', pilar: 'Governança', prioridade: 'MÉDIO',
+    titulo: 'Ciclo 19 registrado — Q1 2027 iniciado',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'ciclo19Items exportado, Rastreamento GPS + Mobile Apontamentos no Dashboard, Q1 2027 em execução.',
+  },
+];
+
 // ── Ciclo 18 — Dezembro 2026 ────────────────────────────────────────────────
 export const ciclo18Items = [
   {
@@ -470,7 +492,8 @@ export const roadmap2026 = [
       '✅ CRM Score integrado ao Dashboard e módulo CRM',
       '✅ BI avançado com gráficos 3D — DashboardBI3DWidget',
       '✅ Automação de fluxos com triggers visuais — DashboardAutomacaoFluxosWidget',
-      '📅 App mobile produção com apontamentos',
+      '✅ Integração GPS real para rastreamento — RastreamentoGPSWidget',
+      '✅ App mobile produção com apontamentos — ApontamentoProdutoMobileWidget',
     ]
   },
   {
@@ -478,8 +501,8 @@ export const roadmap2026 = [
     itens: [
       '✅ BI avançado com gráficos 3D e forecasts — Ciclo 18',
       '✅ Automação de fluxos com triggers visuais — Ciclo 18',
-      '📅 Integração GPS real para rastreamento — Ciclo 19',
-      '📅 App mobile produção com apontamentos — Ciclo 19',
+      '✅ Integração GPS real para rastreamento — Ciclo 19',
+      '✅ App mobile produção com apontamentos — Ciclo 19',
       '📅 Certificação compliance ISO 27001 — Ciclo 20',
       '📅 Módulo de contratos eletrônicos avançado — Ciclo 20',
     ]

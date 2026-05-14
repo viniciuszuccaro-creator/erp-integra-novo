@@ -83,6 +83,8 @@ import ConciliacaoIAWidget from "@/components/financeiro/ConciliacaoIAWidget";
 import CRMScoreDashboard from "@/components/crm/CRMScoreDashboard";
 import DashboardBI3DWidget from "@/components/dashboard/DashboardBI3DWidget";
 import DashboardAutomacaoFluxosWidget from "@/components/dashboard/DashboardAutomacaoFluxosWidget";
+import RastreamentoGPSWidget from "@/components/logistica/RastreamentoGPSWidget";
+import ApontamentoProdutoMobileWidget from "@/components/producao/ApontamentoProdutoMobileWidget";
 import PedidosResumoPanel from "@/components/dashboard/PedidosResumoPanel";
 import ResizableRow from "@/components/dashboard/ResizableRow";
 import { ResizablePanelGroup as PanelGroup, ResizablePanel as Panel, ResizableHandle as PanelResizeHandle } from "@/components/ui/resizable";
@@ -819,10 +821,14 @@ export default function Dashboard() {
             {canSeeFinanceiro && <ConciliacaoIAWidget />}
           </div>
 
-          {/* Ciclo 18 — Q4 2026: BI 3D + Automações */}
+          {/* Ciclo 18-19 — Q4 2026 / Q1 2027: BI 3D + Automações + GPS + Mobile */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <DashboardBI3DWidget />
             <DashboardAutomacaoFluxosWidget />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <RastreamentoGPSWidget />
+            <ApontamentoProdutoMobileWidget />
           </div>
 
           {/* IA: Saúde + Forecast + Vendas Previsão + Insights */}

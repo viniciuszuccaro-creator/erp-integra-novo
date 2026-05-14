@@ -51,13 +51,25 @@ export default function SoDChecker() {
       }
 
       const { data } = await base44.functions.invoke("sodValidator", {
+        force: true,
         scope: estaNoGrupo ? "grupo" : "empresa",
         group_id: groupId || undefined,
         empresa_id: empresaId || undefined,
         requested_by: user?.id,
       });
 
-      setResultado(data);
+      // Transforma resultados SoD: results = [{perfil_id, nome, conflitos: count, severidadeMax}]
+      const conflicts = Array.isArray(data?.results)
+        ? data.results.map((r) => ({
+            perfil_id: r.perfil_id,
+            perfil_nome: r.nome,
+            tipo_conflito: "SoD Violation",
+            severidade: r.severidadeMax || "Média",
+            descricao: `Detectados ${r.conflitos} conflito(s) no perfil`
+          }))
+        : [];
+      
+      setResultado({ conflicts });
       await audit({
         acao: "Visualizacao",
         entidade: "SoD",

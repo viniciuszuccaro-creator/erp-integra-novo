@@ -5,13 +5,14 @@ import { Shield, Users, TrendingUp, AlertTriangle, CheckCircle2 } from "lucide-r
 
 export default function RBACStatsBar({ perfis = [], usuarios = [] }) {
   const perfisAtivos = perfis.filter((p) => p.ativo !== false).length;
+  const usuariosValidos = usuarios.filter((u) => u.role !== "admin").length || 1; // Evita divisão por zero
   const usuariosSemPerfil = usuarios.filter(
     (u) => !u.perfil_acesso_id && u.role !== "admin"
   ).length;
   const cobertura =
-    usuarios.length > 0
+    usuariosValidos > 0
       ? Math.round(
-          ((usuarios.length - usuariosSemPerfil) / usuarios.length) * 100
+          ((usuariosValidos - usuariosSemPerfil) / usuariosValidos) * 100
         )
       : 100;
 

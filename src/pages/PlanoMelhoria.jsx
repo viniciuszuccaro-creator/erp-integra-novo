@@ -1,151 +1,97 @@
-import React from 'react';
-import PlanoMelhoriaHeader from '@/components/sistema/plano-melhoria/PlanoMelhoriaHeader';
-import PlanoMelhoriaKPIsBig from '@/components/sistema/plano-melhoria/PlanoMelhoriaKPIsBig';
-import PlanoMelhoriaIACockpit from '@/components/sistema/plano-melhoria/PlanoMelhoriaIACockpit';
-import PlanoMelhoriaExecucaoFinal from '@/components/sistema/plano-melhoria/PlanoMelhoriaExecucaoFinal';
-import PlanoMelhoriaChecklistFinal from '@/components/sistema/plano-melhoria/PlanoMelhoriaChecklistFinal';
-import PlanoMelhoriaConexoesAvancadas from '@/components/sistema/plano-melhoria/PlanoMelhoriaConexoesAvancadas';
-import PlanoMelhoriaConexoesModulos from '@/components/sistema/plano-melhoria/PlanoMelhoriaConexoesModulos';
-import PlanoMelhoriaGovernanca from '@/components/sistema/plano-melhoria/PlanoMelhoriaGovernanca';
-import PlanoMelhoriaExecutionBoard from '@/components/sistema/plano-melhoria/PlanoMelhoriaExecutionBoard';
-import PlanoMelhoriaSprintPanel from '@/components/sistema/plano-melhoria/PlanoMelhoriaSprintPanel';
-import PlanoMelhoriaAutomationPanel from '@/components/sistema/plano-melhoria/PlanoMelhoriaAutomationPanel';
-import PlanoMelhoriaModuleMatrix from '@/components/sistema/plano-melhoria/PlanoMelhoriaModuleMatrix';
-import PlanoMelhoriaRiskPanel from '@/components/sistema/plano-melhoria/PlanoMelhoriaRiskPanel';
+import React, { useState } from 'react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { melhoriaPlanPhases, ciclo11Items } from '@/components/sistema/plano-melhoria/melhoriaPlanData';
+
+// Componentes focados
+import PlanoMelhoriaVisaoGeral from '@/components/sistema/plano-melhoria/PlanoMelhoriaVisaoGeral';
+import PlanoMelhoriaCicloAtual from '@/components/sistema/plano-melhoria/PlanoMelhoriaCicloAtual';
+import PlanoMelhoriaRoadmapView from '@/components/sistema/plano-melhoria/PlanoMelhoriaRoadmapView';
+import PlanoMelhoriaGapsAnalise from '@/components/sistema/plano-melhoria/PlanoMelhoriaGapsAnalise';
 import PlanoMelhoriaLiveBacklog from '@/components/sistema/plano-melhoria/PlanoMelhoriaLiveBacklog';
-import PlanoMelhoriaAcoesExecutadas from '@/components/sistema/plano-melhoria/PlanoMelhoriaAcoesExecutadas';
-import PlanoMelhoriaPhaseCard from '@/components/sistema/plano-melhoria/PlanoMelhoriaPhaseCard';
-import PlanoMelhoriaProximosCiclos from '@/components/sistema/plano-melhoria/PlanoMelhoriaProximosCiclos';
-import PlanoMelhoriaRoadmapFuturo from '@/components/sistema/plano-melhoria/PlanoMelhoriaRoadmapFuturo';
-import PlanoMelhoriaNextSteps from '@/components/sistema/plano-melhoria/PlanoMelhoriaNextSteps';
-import PlanoMelhoriaFullExecutionCenter from '@/components/sistema/plano-melhoria/PlanoMelhoriaFullExecutionCenter';
-import PlanoMelhoriaCriticalCommandCenter from '@/components/sistema/plano-melhoria/PlanoMelhoriaCriticalCommandCenter';
-import PlanoMelhoriaCriticalExecutor from '@/components/sistema/plano-melhoria/PlanoMelhoriaCriticalExecutor';
-import PlanoMelhoriaCriticalCompletionSuite from '@/components/sistema/plano-melhoria/PlanoMelhoriaCriticalCompletionSuite';
-import PlanoMelhoriaResumoFinal from '@/components/sistema/plano-melhoria/PlanoMelhoriaResumoFinal';
-import PlanoMelhoriaStatusConsolidado from '@/components/sistema/plano-melhoria/PlanoMelhoriaStatusConsolidado';
-import PlanoMelhoriaMetricasDetalhadas from '@/components/sistema/plano-melhoria/PlanoMelhoriaMetricasDetalhadas';
-import PlanoMelhoriaDashboardFinal from '@/components/sistema/plano-melhoria/PlanoMelhoriaDashboardFinal';
-import PlanoMelhoriaProximasAcoes from '@/components/sistema/plano-melhoria/PlanoMelhoriaProximasAcoes';
-import PlanoMelhoriaFinalSummary from '@/components/sistema/plano-melhoria/PlanoMelhoriaFinalSummary';
-import PlanoMelhoriaCiclo10Showcase from '@/components/sistema/plano-melhoria/PlanoMelhoriaCiclo10Showcase';
-import PlanoMelhoriaRuleMaster from '@/components/sistema/plano-melhoria/PlanoMelhoriaRuleMaster';
-import PlanoMelhoria100Execucao from '@/components/sistema/plano-melhoria/PlanoMelhoria100Execucao';
-import PlanoMelhoriaAnalise100 from '@/components/sistema/plano-melhoria/PlanoMelhoriaAnalise100';
-import { Link } from 'react-router-dom';
-import { melhoriaPlanPhases } from '@/components/sistema/plano-melhoria/melhoriaPlanData';
+import PlanoMelhoriaGovernanca from '@/components/sistema/plano-melhoria/PlanoMelhoriaGovernanca';
+
+import {
+  LayoutDashboard, Rocket, MapPin, AlertTriangle, Database, Shield, TrendingUp
+} from 'lucide-react';
 
 export default function PlanoMelhoria() {
+  const [tab, setTab] = useState('visao-geral');
+
   const totalProgress = Math.round(
     melhoriaPlanPhases.reduce((sum, phase) => sum + phase.progress, 0) / melhoriaPlanPhases.length
   );
+  const concluidos = ciclo11Items.filter(i => i.status === 'concluido').length;
+  const total = ciclo11Items.length;
 
   return (
-    <div className="flex h-full w-full flex-col gap-6">
-
-      {/* 0. ANÁLISE PROFUNDA — O QUE FALTA PARA 100% */}
-      <PlanoMelhoriaAnalise100 />
-
-      {/* 1. Header com KPIs do plano */}
-      <PlanoMelhoriaHeader totalProgress={totalProgress} />
-
-      {/* 2. Dashboard Final — visão 360 completa do plano */}
-      <PlanoMelhoriaDashboardFinal />
-
-      {/* 3. Status Consolidado — conquistas e visão geral do plano */}
-      <PlanoMelhoriaStatusConsolidado />
-
-      {/* 4. KPIs Big + Pilares + Módulos completos */}
-      <PlanoMelhoriaKPIsBig />
-
-      {/* 3. Cockpit IA: diagnóstico executivo inteligente */}
-      <PlanoMelhoriaIACockpit />
-
-      {/* 4. Execução Final — todos os itens deste ciclo */}
-      <PlanoMelhoriaExecucaoFinal />
-
-      {/* 5. Checklist final expandível por categoria */}
-      <PlanoMelhoriaChecklistFinal />
-
-      {/* 6. Resumo visual de fases + módulos */}
-      <PlanoMelhoriaResumoFinal />
-
-      {/* 7. Centro de execução total (upsert automático no banco) */}
-      <PlanoMelhoriaFullExecutionCenter />
-
-      {/* 8. Centro de execução crítica */}
-      <PlanoMelhoriaCriticalCommandCenter />
-
-      {/* 9. Executor crítico detalhado */}
-      <PlanoMelhoriaCriticalExecutor />
-
-      {/* 10. Suite de conclusão crítica */}
-      <PlanoMelhoriaCriticalCompletionSuite />
-
-      {/* 11. Governança da Regra-Mãe */}
-      <PlanoMelhoriaGovernanca />
-
-      {/* 12. Fluxos ponta a ponta avançados */}
-      <PlanoMelhoriaConexoesAvancadas />
-
-      {/* 13. Conexões entre módulos (funções backend) */}
-      <PlanoMelhoriaConexoesModulos />
-
-      {/* 14. Board de execução por pilar */}
-      <PlanoMelhoriaExecutionBoard />
-
-      {/* 15. Sprints por módulo */}
-      <PlanoMelhoriaSprintPanel />
-
-      {/* 16. Painel de automações backend */}
-      <PlanoMelhoriaAutomationPanel />
-
-      {/* 17. Métricas detalhadas por pilar (drill-down) */}
-      <PlanoMelhoriaMetricasDetalhadas />
-
-      {/* 18. Matriz módulo × pilar */}
-      <PlanoMelhoriaModuleMatrix />
-
-      {/* 18. Controle de riscos */}
-      <PlanoMelhoriaRiskPanel />
-
-      {/* 19. Backlog vivo do banco */}
-      <PlanoMelhoriaLiveBacklog />
-
-      {/* 20. Ações executadas completas (checklist expandível) */}
-      <PlanoMelhoriaAcoesExecutadas />
-
-      {/* 21. Cards de fases do plano */}
-      <div className="grid w-full gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {melhoriaPlanPhases.map((phase) => (
-          <PlanoMelhoriaPhaseCard key={phase.id} phase={phase} />
-        ))}
+    <div className="flex h-full w-full flex-col gap-4">
+      {/* Header compacto */}
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-gradient-to-r from-blue-900 via-indigo-900 to-violet-900 p-5 text-white">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
+          <TrendingUp className="h-7 w-7" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl font-black">Plano de Melhorias</h1>
+          <p className="text-blue-200 text-sm">ERP Zuccaro V21.5 — Melhoria contínua · Ciclo 11 · Maio 2026</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Badge className="bg-emerald-500 text-white text-sm px-3 py-1">{totalProgress}% plano geral</Badge>
+          <Badge className="bg-blue-500 text-white text-sm px-3 py-1">{concluidos}/{total} ciclo atual</Badge>
+        </div>
       </div>
 
-      {/* 24. Roadmap de inovação futura 2026-2027 */}
-      <PlanoMelhoriaRoadmapFuturo />
+      {/* Abas */}
+      <Tabs value={tab} onValueChange={setTab} className="w-full flex-1">
+        <div className="overflow-x-auto pb-1">
+          <TabsList className="inline-flex h-auto min-w-max gap-1 bg-slate-100 p-1 rounded-xl">
+            <TabsTrigger value="visao-geral" className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <LayoutDashboard className="w-3.5 h-3.5" /> Visão Geral
+            </TabsTrigger>
+            <TabsTrigger value="ciclo-atual" className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Rocket className="w-3.5 h-3.5" /> Ciclo Atual
+              <Badge className="ml-1 text-[9px] bg-blue-100 text-blue-700 px-1">{concluidos}/{total}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="backlog" className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Database className="w-3.5 h-3.5" /> Backlog Vivo
+            </TabsTrigger>
+            <TabsTrigger value="analise" className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <AlertTriangle className="w-3.5 h-3.5" /> Análise de Gaps
+            </TabsTrigger>
+            <TabsTrigger value="roadmap" className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <MapPin className="w-3.5 h-3.5" /> Roadmap
+            </TabsTrigger>
+            <TabsTrigger value="governanca" className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Shield className="w-3.5 h-3.5" /> Governança
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-      {/* 25. Próximos ciclos de melhoria */}
-      <PlanoMelhoriaProximosCiclos />
+        <TabsContent value="visao-geral" className="mt-4 w-full">
+          <PlanoMelhoriaVisaoGeral />
+        </TabsContent>
 
-      {/* 26. Próximas ações — Ciclo 10 & Roadmap */}
-      <PlanoMelhoriaProximasAcoes />
+        <TabsContent value="ciclo-atual" className="mt-4 w-full">
+          <PlanoMelhoriaCicloAtual />
+        </TabsContent>
 
-      {/* 27. Próxima execução — ações imediatas */}
-      <PlanoMelhoriaNextSteps />
+        <TabsContent value="backlog" className="mt-4 w-full">
+          <PlanoMelhoriaLiveBacklog />
+        </TabsContent>
 
-      {/* 28. Ciclo 10 Showcase */}
-      <PlanoMelhoriaCiclo10Showcase />
+        <TabsContent value="analise" className="mt-4 w-full">
+          <PlanoMelhoriaGapsAnalise />
+        </TabsContent>
 
-      {/* 29. Regra-Mãe do Sistema */}
-      <PlanoMelhoriaRuleMaster />
+        <TabsContent value="roadmap" className="mt-4 w-full">
+          <PlanoMelhoriaRoadmapView />
+        </TabsContent>
 
-      {/* 30. Resumo Final Executivo */}
-      <PlanoMelhoriaFinalSummary />
-
-      {/* 31. EXECUÇÃO 100% COMPLETA — Registro permanente */}
-      <PlanoMelhoria100Execucao />
-
+        <TabsContent value="governanca" className="mt-4 w-full">
+          <PlanoMelhoriaGovernanca />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

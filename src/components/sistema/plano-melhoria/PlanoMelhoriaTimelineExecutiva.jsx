@@ -1,49 +1,56 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Flag, Zap } from "lucide-react";
+import { Calendar, Flag, CheckCircle2 } from "lucide-react";
 
 export default function PlanoMelhoriaTimelineExecutiva() {
   const timeline = [
     {
-      data: "30 Mai 2026",
-      evento: "Sincronização Grupo ↔ Empresa",
-      tipo: "milestone",
-      prioridade: "Crítica",
+      data: "28 Mai",
+      evento: "Sincronização Grupo — Resolução",
+      tipo: "Bloqueador",
+      status: "critical",
     },
     {
-      data: "15 Jun 2026",
-      evento: "Finalizar Ciclo 20 — Todos os Módulos",
-      tipo: "release",
-      prioridade: "Alta",
+      data: "31 Mai",
+      evento: "Performance Logística — Deploy",
+      tipo: "Milestone",
+      status: "progress",
     },
     {
-      data: "20 Jun 2026",
-      evento: "Iniciar Ciclo 21 — IA Avançada",
-      tipo: "milestone",
-      prioridade: "Alta",
+      data: "02 Jun",
+      evento: "Ciclo 21 — Release Candidato",
+      tipo: "Release",
+      status: "progress",
     },
     {
-      data: "01 Jul 2026",
-      evento: "Certificação ISO 27001",
-      tipo: "compliance",
-      prioridade: "Alta",
+      data: "05 Jun",
+      evento: "UAT — Validação Completa",
+      tipo: "Validação",
+      status: "pending",
     },
     {
-      data: "15 Jul 2026",
-      evento: "Lançamento Mobile App",
-      tipo: "release",
-      prioridade: "Média",
+      data: "09 Jun",
+      evento: "Produção — Go-Live V21.5",
+      tipo: "Deploy",
+      status: "pending",
     },
   ];
 
-  const getIconByType = (type) => {
+  const getColor = (status) => {
     const map = {
-      milestone: <Flag className="w-3.5 h-3.5 text-purple-600" />,
-      release: <Zap className="w-3.5 h-3.5 text-green-600" />,
-      compliance: <Calendar className="w-3.5 h-3.5 text-blue-600" />,
+      critical: "bg-red-100 text-red-700",
+      progress: "bg-blue-100 text-blue-700",
+      pending: "bg-slate-100 text-slate-700",
+      done: "bg-green-100 text-green-700",
     };
-    return map[type];
+    return map[status] || "";
+  };
+
+  const getIcon = (status) => {
+    if (status === "done") return <CheckCircle2 className="w-5 h-5 text-green-600" />;
+    if (status === "critical") return <Flag className="w-5 h-5 text-red-600" />;
+    return <Calendar className="w-5 h-5 text-slate-600" />;
   };
 
   return (
@@ -51,47 +58,33 @@ export default function PlanoMelhoriaTimelineExecutiva() {
       <CardHeader className="border-b pb-3">
         <CardTitle className="text-sm font-bold flex items-center gap-2">
           <Calendar className="w-4 h-4 text-slate-600" />
-          Timeline Executiva
+          Timeline Executiva — Próximas 3 Semanas
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4">
-        <div className="space-y-3 relative">
-          {/* Linha vertical */}
-          <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-slate-200" />
-
-          {timeline.map((item, idx) => (
-            <div key={idx} className="relative pl-10">
-              {/* Ponto na timeline */}
-              <div className="absolute left-0 top-1 w-7 h-7 bg-white border-2 border-slate-200 rounded-full flex items-center justify-center">
-                {getIconByType(item.tipo)}
+        <div className="relative space-y-4">
+          {timeline.map((item, i) => (
+            <div key={i} className="flex gap-4">
+              <div className="flex flex-col items-center">
+                {getIcon(item.status)}
+                {i < timeline.length - 1 && <div className="w-0.5 h-12 bg-slate-300 my-2" />}
               </div>
-
-              {/* Conteúdo */}
-              <div className="bg-slate-50 rounded-lg p-3 border border-slate-200 hover:border-slate-300 transition">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-900">{item.data}</p>
-                    <p className="text-sm font-medium text-slate-800 mt-0.5">{item.evento}</p>
-                  </div>
-                  <Badge
-                    className={`text-[10px] flex-shrink-0 ${
-                      item.prioridade === "Crítica"
-                        ? "bg-red-100 text-red-700"
-                        : item.prioridade === "Alta"
-                        ? "bg-amber-100 text-amber-700"
-                        : "bg-green-100 text-green-700"
-                    }`}
-                  >
-                    {item.prioridade}
-                  </Badge>
+              <div className="flex-1 pb-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="font-bold text-sm text-slate-900">{item.data}</p>
+                  <Badge className={`text-[10px] ${getColor(item.status)}`}>{item.tipo}</Badge>
                 </div>
+                <p className="text-sm text-slate-700">{item.evento}</p>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-4 pt-3 border-t text-xs text-slate-600 bg-blue-50 p-2 rounded">
-          📅 <strong>Próximo:</strong> Revisar status em 25/Mai — ajustes finais antes do milestone crítico
+        <div className="mt-4 pt-3 border-t bg-blue-50 p-3 rounded">
+          <p className="text-xs text-blue-900">
+            <strong>Nota Executiva:</strong> Release V21.5 agendada para 09 Jun com validação UAT em produção homolog em 05 Jun.
+            Sincronização Grupo é o gargalo crítico.
+          </p>
         </div>
       </CardContent>
     </Card>

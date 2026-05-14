@@ -1,107 +1,68 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Zap, Clock } from "lucide-react";
+import { AlertTriangle, Zap, TrendingDown } from "lucide-react";
 
 export default function PlanoMelhoriaCriticalCommandCenter() {
-  const criticalItems = [
-    {
-      id: 1,
-      titulo: "RBAC Multinível Completo",
-      pilar: "Acesso",
-      bloqueador: false,
-      eia: 85,
-      risco: "Baixo",
-    },
-    {
-      id: 2,
-      titulo: "Sincronização Grupo ↔ Empresa",
-      pilar: "Multiempresa",
-      bloqueador: true,
-      eia: 60,
-      risco: "Alto",
-    },
-    {
-      id: 3,
-      titulo: "Motor Financeiro V22",
-      pilar: "Financeiro",
-      bloqueador: false,
-      eia: 70,
-      risco: "Médio",
-    },
-    {
-      id: 4,
-      titulo: "Integração Logística Completa",
-      pilar: "Logística",
-      bloqueador: true,
-      eia: 55,
-      risco: "Alto",
-    },
+  const blockers = [
+    { id: 1, titulo: "Sincronização Grupo — Bug Crítico", status: "Bloqueador", area: "Backend", assignee: "Dev Lead", prazo: "28 Mai" },
+    { id: 2, titulo: "Performance Logística > 2s", status: "Alto", area: "Logística", assignee: "Arch", prazo: "31 Mai" },
+  ];
+
+  const risks = [
+    { id: 1, risco: "Débito Técnico Acumulado", score: "8.5/10", acao: "Refatoração Sprint Limpeza" },
+    { id: 2, risco: "Recursos Q3 Limitados", score: "7/10", acao: "Priorização Dinâmica" },
   ];
 
   return (
-    <Card className="w-full">
-      <CardHeader className="border-b pb-3 bg-gradient-to-r from-red-50 to-amber-50">
-        <CardTitle className="text-sm font-bold flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-red-600" />
-          Centro de Comando — Prioridades Críticas
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-4">
-        <div className="space-y-2">
-          {criticalItems.map((item) => (
-            <div key={item.id} className="border border-slate-200 rounded-lg p-3 hover:bg-slate-50 transition">
-              <div className="flex items-start justify-between gap-3 mb-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold text-sm">{item.titulo}</p>
-                    {item.bloqueador && (
-                      <Badge className="bg-red-600 text-white text-[10px]">BLOQUEADOR</Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1">Pilar: {item.pilar}</p>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+      <Card className="border-red-200 bg-red-50/30">
+        <CardHeader className="pb-3 border-b border-red-200">
+          <CardTitle className="text-sm font-bold flex items-center gap-2">
+            <Zap className="w-4 h-4 text-red-600" />
+            Bloqueadores Críticos
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">
+          <div className="space-y-2">
+            {blockers.map((b) => (
+              <div key={b.id} className="border border-red-200 rounded p-2 bg-white hover:bg-red-50">
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <p className="text-sm font-semibold text-slate-900">{b.titulo}</p>
+                  <Badge className="bg-red-600 text-white text-[10px]">{b.status}</Badge>
+                </div>
+                <div className="grid grid-cols-3 gap-1 text-xs text-slate-600">
+                  <span>{b.area}</span>
+                  <span>@{b.assignee}</span>
+                  <span className="text-right">{b.prazo}</span>
                 </div>
               </div>
-
-              <div className="grid grid-cols-3 gap-2 text-xs">
-                <div className="bg-slate-50 p-2 rounded">
-                  <p className="text-slate-500 mb-1">IA Score</p>
-                  <p className="font-bold text-blue-600">{item.eia}%</p>
-                </div>
-                <div className="bg-slate-50 p-2 rounded">
-                  <p className="text-slate-500 mb-1">Risco</p>
-                  <Badge
-                    className={`text-[10px] ${
-                      item.risco === "Alto"
-                        ? "bg-red-100 text-red-700"
-                        : item.risco === "Médio"
-                        ? "bg-amber-100 text-amber-700"
-                        : "bg-green-100 text-green-700"
-                    }`}
-                  >
-                    {item.risco}
-                  </Badge>
-                </div>
-                <div className="bg-slate-50 p-2 rounded">
-                  <p className="text-slate-500 mb-1">Status</p>
-                  <div className="flex items-center gap-1">
-                    <Zap className="w-3 h-3 text-amber-500" />
-                    <span className="font-medium">Crítico</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-slate-700 flex items-start gap-2">
-          <Clock className="w-3.5 h-3.5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="font-semibold">Próximo milestones crítico:</p>
-            <p>30 de Maio — Finalizar Sincronização Grupo ↔ Empresa</p>
+            ))}
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <Card className="border-orange-200 bg-orange-50/30">
+        <CardHeader className="pb-3 border-b border-orange-200">
+          <CardTitle className="text-sm font-bold flex items-center gap-2">
+            <TrendingDown className="w-4 h-4 text-orange-600" />
+            Riscos Prioritários
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">
+          <div className="space-y-2">
+            {risks.map((r) => (
+              <div key={r.id} className="border border-orange-200 rounded p-2 bg-white hover:bg-orange-50">
+                <p className="text-sm font-semibold text-slate-900 mb-1">{r.risco}</p>
+                <div className="flex items-center justify-between">
+                  <Badge className="bg-orange-100 text-orange-700 text-[10px]">Score: {r.score}</Badge>
+                  <span className="text-xs text-slate-600">{r.acao}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

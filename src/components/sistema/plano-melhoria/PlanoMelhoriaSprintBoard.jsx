@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { ciclo18Items, ciclo19Items } from './melhoriaPlanData';
+import { ciclo19Items, ciclo20Items } from './melhoriaPlanData';
 import { Zap } from 'lucide-react';
 
 const COLS = [
@@ -17,9 +17,9 @@ const PRIOR_CLS = {
 };
 
 export default function PlanoMelhoriaSprintBoard() {
-  const [cicloView, setCicloView] = useState('c19');
-  const activeItems = cicloView === 'c19' ? ciclo19Items : ciclo18Items;
-  const cicloLabel = cicloView === 'c19' ? 'Ciclo 19 — Janeiro 2027' : 'Ciclo 18 — Dezembro 2026';
+  const [cicloView, setCicloView] = useState('c20');
+  const activeItems = cicloView === 'c20' ? ciclo20Items : ciclo19Items;
+  const cicloLabel = cicloView === 'c20' ? 'Ciclo 20 — Fevereiro 2027' : 'Ciclo 19 — Janeiro 2027';
 
   const byStatus = COLS.reduce((acc, col) => {
     acc[col.key] = activeItems.filter(i => i.status === col.key);
@@ -34,16 +34,16 @@ export default function PlanoMelhoriaSprintBoard() {
         <Badge className="bg-blue-600 text-white">{activeItems.length} itens</Badge>
         <div className="ml-auto flex gap-2">
           <button
-            onClick={() => setCicloView('c18')}
-            className={`text-xs px-3 py-1 rounded-full border transition-colors ${cicloView === 'c18' ? 'bg-blue-600 text-white border-blue-600' : 'border-slate-300 text-slate-600 hover:bg-slate-50'}`}
+            onClick={() => setCicloView('c19')}
+            className={`text-xs px-3 py-1 rounded-full border transition-colors ${cicloView === 'c19' ? 'bg-blue-600 text-white border-blue-600' : 'border-slate-300 text-slate-600 hover:bg-slate-50'}`}
           >
-            Ciclo 18
+            Ciclo 19
           </button>
           <button
-            onClick={() => setCicloView('c19')}
-            className={`text-xs px-3 py-1 rounded-full border transition-colors ${cicloView === 'c19' ? 'bg-purple-600 text-white border-purple-600' : 'border-slate-300 text-slate-600 hover:bg-slate-50'}`}
+            onClick={() => setCicloView('c20')}
+            className={`text-xs px-3 py-1 rounded-full border transition-colors ${cicloView === 'c20' ? 'bg-purple-600 text-white border-purple-600' : 'border-slate-300 text-slate-600 hover:bg-slate-50'}`}
           >
-            Ciclo 19 ▶
+            Ciclo 20 ▶
           </button>
         </div>
       </div>

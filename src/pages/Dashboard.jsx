@@ -85,6 +85,8 @@ import DashboardBI3DWidget from "@/components/dashboard/DashboardBI3DWidget";
 import DashboardAutomacaoFluxosWidget from "@/components/dashboard/DashboardAutomacaoFluxosWidget";
 import RastreamentoGPSWidget from "@/components/logistica/RastreamentoGPSWidget";
 import ApontamentoProdutoMobileWidget from "@/components/producao/ApontamentoProdutoMobileWidget";
+import ComplianceISO27001Widget from "@/components/administracao-sistema/ComplianceISO27001Widget";
+import ContratosEletronicosWidget from "@/components/contratos/ContratosEletronicosWidget";
 import PedidosResumoPanel from "@/components/dashboard/PedidosResumoPanel";
 import ResizableRow from "@/components/dashboard/ResizableRow";
 import { ResizablePanelGroup as PanelGroup, ResizablePanel as Panel, ResizableHandle as PanelResizeHandle } from "@/components/ui/resizable";
@@ -821,7 +823,7 @@ export default function Dashboard() {
             {canSeeFinanceiro && <ConciliacaoIAWidget />}
           </div>
 
-          {/* Ciclo 18-19 — Q4 2026 / Q1 2027: BI 3D + Automações + GPS + Mobile */}
+          {/* Ciclo 18-20 — Q4 2026 / Q1 2027: BI 3D + Automações + GPS + Mobile + Compliance + Contratos */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <DashboardBI3DWidget />
             <DashboardAutomacaoFluxosWidget />
@@ -829,6 +831,10 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <RastreamentoGPSWidget />
             <ApontamentoProdutoMobileWidget />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <ComplianceISO27001Widget />
+            <ContratosEletronicosWidget />
           </div>
 
           {/* IA: Saúde + Forecast + Vendas Previsão + Insights */}

@@ -379,6 +379,28 @@ export const ciclo16Items = [
   },
 ];
 
+// ── Ciclo 20 — Fevereiro 2027 ────────────────────────────────────────────────
+export const ciclo20Items = [
+  {
+    id: 'c20-01', modulo: 'Sistema', pilar: 'Governança', prioridade: 'ALTO',
+    titulo: 'ComplianceISO27001Widget — Certificação de Segurança da Informação',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Widget com dashboard de compliance ISO 27001 mostrando controles de segurança, auditorias e conformidade legal com 6 áreas principais.',
+  },
+  {
+    id: 'c20-02', modulo: 'Contratos', pilar: 'Governança', prioridade: 'ALTO',
+    titulo: 'ContratosEletronicosWidget — Gestão de contratos com assinatura digital',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Widget para gestão de contratos eletrônicos com assinatura digital, verificação blockchain e rastreamento de status (assinado/pendente/em revisão).',
+  },
+  {
+    id: 'c20-03', modulo: 'Sistema', pilar: 'Governança', prioridade: 'MÉDIO',
+    titulo: 'Ciclo 20 registrado — Q1 2027 concluído',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'ciclo20Items exportado, ISO 27001 + Contratos Eletrônicos no Dashboard, roadmap Q1 2027 finalizado com 100% de implementação.',
+  },
+];
+
 // ── Ciclo 19 — Janeiro 2027 ────────────────────────────────────────────────
 export const ciclo19Items = [
   {
@@ -494,6 +516,8 @@ export const roadmap2026 = [
       '✅ Automação de fluxos com triggers visuais — DashboardAutomacaoFluxosWidget',
       '✅ Integração GPS real para rastreamento — RastreamentoGPSWidget',
       '✅ App mobile produção com apontamentos — ApontamentoProdutoMobileWidget',
+      '✅ Certificação compliance ISO 27001 — ComplianceISO27001Widget',
+      '✅ Módulo de contratos eletrônicos avançado — ContratosEletronicosWidget',
     ]
   },
   {
@@ -503,8 +527,8 @@ export const roadmap2026 = [
       '✅ Automação de fluxos com triggers visuais — Ciclo 18',
       '✅ Integração GPS real para rastreamento — Ciclo 19',
       '✅ App mobile produção com apontamentos — Ciclo 19',
-      '📅 Certificação compliance ISO 27001 — Ciclo 20',
-      '📅 Módulo de contratos eletrônicos avançado — Ciclo 20',
+      '✅ Certificação compliance ISO 27001 — Ciclo 20',
+      '✅ Módulo de contratos eletrônicos avançado — Ciclo 20',
     ]
   },
   {

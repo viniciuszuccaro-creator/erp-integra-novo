@@ -145,6 +145,9 @@ export default function PortalCliente() {
     <div className="w-full min-h-full p-3 sm:p-4 space-y-3">
       <HeaderPortalCompacto clienteNome={cliente?.nome_fantasia || cliente?.nome} />
       <PortalHeader cliente={cliente} spotlight={spotlight} />
+      <div className="flex justify-end">
+        <IAContextualModulo modulo="Portal" compact />
+      </div>
 
       <Tabs value={tab} onValueChange={setTab} className="w-full min-w-0">
         {/* Scrollable tabs para mobile */}

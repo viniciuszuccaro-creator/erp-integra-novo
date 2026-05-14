@@ -259,9 +259,9 @@ export const ciclo13Items = [
   },
   {
     id: 'c13-04', modulo: 'Portal', pilar: 'UX', prioridade: 'MÉDIO',
-    titulo: 'SemEmpresaBanner no Portal do Cliente',
-    status: 'planejado', impacto: 'Médio',
-    descricao: 'Banner orientativo na página de Portal do Cliente para guiar acesso sem empresa configurada.',
+    titulo: 'IAContextualModulo no Portal do Cliente',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'IAContextualModulo integrado à página PortalCliente — sugestões contextuais para o cliente via IA.',
   },
   {
     id: 'c13-05', modulo: 'Todos', pilar: 'Governança', prioridade: 'ALTO',

@@ -23,8 +23,8 @@ export default function PlanoMelhoria() {
   const totalProgress = Math.round(
     melhoriaPlanPhases.reduce((sum, phase) => sum + phase.progress, 0) / melhoriaPlanPhases.length
   );
-  // Ciclo atual = Ciclo 13
-  const cicloAtualItems = ciclo13Items;
+  // Ciclo atual = Ciclo 14
+  const cicloAtualItems = ciclo14Items;
   const concluidos = cicloAtualItems.filter(i => i.status === 'concluido').length;
   const total = cicloAtualItems.length;
 

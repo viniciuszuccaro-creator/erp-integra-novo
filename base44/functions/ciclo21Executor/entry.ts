@@ -9,7 +9,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const payload = await req.json();
+    let payload = {};
+    try {
+      payload = await req.json();
+    } catch {
+      payload = {};
+    }
     const { component_id, empresa_id, group_id, action } = payload;
 
     if (action === 'start') {
@@ -59,8 +64,9 @@ Deno.serve(async (req) => {
 
     if (action === 'execute_component') {
       // Executa componente individual
-      if (!component_id || component_id < 1 || component_id > 6) {
-        return Response.json({ error: 'ID de componente inválido' }, { status: 400 });
+      const compId = parseInt(component_id, 10);
+      if (!compId || isNaN(compId) || compId < 1 || compId > 6) {
+        return Response.json({ error: 'ID de componente inválido', received: component_id }, { status: 400 });
       }
 
       const componentes = {
@@ -82,15 +88,15 @@ Deno.serve(async (req) => {
         modulo: 'PlanoMelhoria',
         tipo_auditoria: 'sistema',
         entidade: 'Ciclo 21',
-        descricao: `Componente ${component_id} executado: ${componentes[component_id]}`,
-        dados_novos: { componente_id, nome: componentes[component_id], status: 'concluído' }
+        descricao: `Componente ${compId} executado: ${componentes[compId]}`,
+        dados_novos: { componente_id: compId, nome: componentes[compId], status: 'concluído' }
       });
 
       return Response.json({
         success: true,
-        message: `${componentes[component_id]} executado com sucesso`,
-        componente_id,
-        componente_nome: componentes[component_id],
+        message: `${componentes[compId]} executado com sucesso`,
+        componente_id: compId,
+        componente_nome: componentes[compId],
         status: 'concluído',
         timestamp: new Date().toISOString()
       });

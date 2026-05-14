@@ -75,6 +75,8 @@ import DashboardStabilityNotice from "@/components/dashboard/DashboardStabilityN
 import DashboardStickyKpis from "@/components/dashboard/DashboardStickyKpis";
 import DashboardForecastWidget from "@/components/dashboard/DashboardForecastWidget";
 import DashboardIAInsightsPanel from "@/components/dashboard/DashboardIAInsightsPanel";
+import DashboardSaudeWidget from "@/components/dashboard/DashboardSaudeWidget";
+import DashboardVendasPrevisaoWidget from "@/components/dashboard/DashboardVendasPrevisaoWidget";
 import PedidosResumoPanel from "@/components/dashboard/PedidosResumoPanel";
 import ResizableRow from "@/components/dashboard/ResizableRow";
 import { ResizablePanelGroup as PanelGroup, ResizablePanel as Panel, ResizableHandle as PanelResizeHandle } from "@/components/ui/resizable";
@@ -803,9 +805,11 @@ export default function Dashboard() {
             </Panel>
           </PanelGroup>
 
-          {/* IA: Forecast + Insights em grid lado a lado */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* IA: Saúde + Forecast + Vendas Previsão + Insights */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <DashboardSaudeWidget />
             <DashboardForecastWidget />
+            <DashboardVendasPrevisaoWidget />
             <DashboardIAInsightsPanel />
           </div>
 

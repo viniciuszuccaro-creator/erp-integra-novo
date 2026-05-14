@@ -339,6 +339,40 @@ export const ciclo15Items = [
   },
 ];
 
+// ── Ciclo 16 — Outubro 2026 ─────────────────────────────────────────────────
+export const ciclo16Items = [
+  {
+    id: 'c16-01', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'DashboardKPIsComparativosWidget — KPIs Mês Atual vs Anterior',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Widget comparativo que exibe Vendas, Pedidos, Receitas e Ticket Médio com variação percentual automática versus o mês anterior.',
+  },
+  {
+    id: 'c16-02', modulo: 'CRM', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'CRMScoreClienteWidget — Score de Saúde do Cliente com IA',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Widget no CRM com score de saúde por cliente, indicadores de risco de churn, dias sem comprar e classificação ABC.',
+  },
+  {
+    id: 'c16-03', modulo: 'Dashboard', pilar: 'UX', prioridade: 'MÉDIO',
+    titulo: 'KPIsComparativosWidget integrado ao painel principal do Dashboard',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'DashboardKPIsComparativosWidget injetado antes da seção de Forecast + Insights no Dashboard Executivo.',
+  },
+  {
+    id: 'c16-04', modulo: 'Roadmap', pilar: 'Governança', prioridade: 'MÉDIO',
+    titulo: 'Roadmap: Q3 2026 com novos itens marcados como concluídos',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'roadmap2026 atualizado com KPIs Comparativos e Score Cliente marcados em Q3.',
+  },
+  {
+    id: 'c16-05', modulo: 'Sistema', pilar: 'Governança', prioridade: 'BAIXO',
+    titulo: 'PlanoMelhoria: Ciclo 16 registrado — Outubro 2026',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'ciclo16Items exportado, Sprint Board e PlanoMelhoriaCicloAtual atualizados para Ciclo 16.',
+  },
+];
+
 // ── Roadmap 2026–2027 ────────────────────────────────────────────────────────
 export const roadmap2026 = [
   {
@@ -358,6 +392,8 @@ export const roadmap2026 = [
     itens: [
       '✅ DashboardAnomaliaWidget (iaFinanceAnomalyScan)',
       '✅ IAChurnWidget avançado (iaChurnAnalyzer)',
+      '✅ DashboardKPIsComparativosWidget (Ciclo 16)',
+      '✅ CRMScoreClienteWidget — saúde e churn (Ciclo 16)',
       '🔄 Portal B2B self-service completo',
       '🔄 Marketplace sync automático (ML, Shopee)',
       '📅 App mobile produção com apontamentos',

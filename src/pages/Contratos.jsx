@@ -39,7 +39,8 @@ import {
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import ContratosKPIs from "@/components/contratos/ContratosKPIs";
 import ContratosIAPanel from "@/components/contratos/ContratosIAPanel";
-// ContratosIAPanel already imported - multiempresa context via filtrarPorContexto
+import SemEmpresaBanner from "@/components/common/SemEmpresaBanner";
+import IAContextualModulo from "@/components/ia/IAContextualModulo";
 
 export default function ContratosPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -726,15 +727,19 @@ export default function ContratosPage() {
 
   return (
     <div className="h-full w-full p-6 lg:p-8 space-y-6 overflow-auto">
+      <SemEmpresaBanner modulo="Gestão de Contratos" />
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg">
-              <FileText className="w-8 h-8 text-white" />
-            </div>
-            Gestão de Contratos
-          </h1>
-          <p className="text-slate-600 mt-1">Contratos inteligentes com alertas, assinatura eletrônica e cobrança automática</p>
+        <div className="flex items-start gap-3 flex-1">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg">
+                <FileText className="w-8 h-8 text-white" />
+              </div>
+              Gestão de Contratos
+            </h1>
+            <p className="text-slate-600 mt-1">Contratos inteligentes com alertas, assinatura eletrônica e cobrança automática</p>
+          </div>
+          <div className="mt-2"><IAContextualModulo modulo="Contratos" compact /></div>
         </div>
 
         <Button 

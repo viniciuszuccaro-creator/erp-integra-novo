@@ -32,6 +32,7 @@ import useContextoVisual from "@/components/lib/useContextoVisual";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import RelatoriosIAInsights from "@/components/relatorios/RelatoriosIAInsights";
+import SemEmpresaBanner from "@/components/common/SemEmpresaBanner";
 import { z } from "zod";
 import FormWrapper from "@/components/common/FormWrapper";
 
@@ -331,6 +332,7 @@ export default function Relatorios() {
   return (
     <ProtectedSection module="Relatórios" action="visualizar">
     <div className="h-full min-h-screen w-full p-6 lg:p-8 space-y-6 overflow-auto">
+      <SemEmpresaBanner modulo="Relatórios e Análises" />
       <div>
         <h1 className="text-3xl font-bold text-slate-900 mb-2">Relatórios e Análises</h1>
         <p className="text-slate-600">Relatórios estratégicos, análises gerenciais e exportação de dados</p>

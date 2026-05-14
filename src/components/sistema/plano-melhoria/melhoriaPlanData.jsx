@@ -305,26 +305,63 @@ export const ciclo14Items = [
   },
 ];
 
+// ── Ciclo 15 — Setembro 2026 ────────────────────────────────────────────────
+export const ciclo15Items = [
+  {
+    id: 'c15-01', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'DashboardAnomaliaWidget — Anomalias financeiras via iaFinanceAnomalyScan',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Widget compacto no Dashboard detectando anomalias financeiras em tempo real, com alertas por nível de risco.',
+  },
+  {
+    id: 'c15-02', modulo: 'CRM', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'IAChurnWidget — Clientes em risco de churn via iaChurnAnalyzer',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Widget no CRM e Dashboard com lista de clientes em risco de churn, nível e dias sem comprar.',
+  },
+  {
+    id: 'c15-03', modulo: 'Dashboard', pilar: 'UX', prioridade: 'MÉDIO',
+    titulo: 'Seção IA integrada no AdvancedAnalysisSection: Forecast + Anomalias + Churn',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Os 3 widgets de IA (Forecast, Anomalias e Churn) exibidos lado a lado na seção de Análise Avançada do Dashboard.',
+  },
+  {
+    id: 'c15-04', modulo: 'Roadmap', pilar: 'Governança', prioridade: 'MÉDIO',
+    titulo: 'Roadmap: Q2 2026 concluído, Q3 2026 em execução',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'roadmap2026 atualizado com status Q2→concluído e Q3→em execução com novos itens realizados.',
+  },
+  {
+    id: 'c15-05', modulo: 'Sistema', pilar: 'Governança', prioridade: 'BAIXO',
+    titulo: 'PlanoMelhoria: Ciclo 15 registrado, pilares todos em 100%',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'ciclo15Items exportado, PlanoMelhoria atualizado com header Ciclo 15 e scores de pilares zerados em 100%.',
+  },
+];
+
 // ── Roadmap 2026–2027 ────────────────────────────────────────────────────────
 export const roadmap2026 = [
   {
-    trimestre: 'Q2 2026', cor: 'blue',
+    trimestre: 'Q2 2026 ✅', cor: 'blue', status: 'concluido',
     itens: [
-      'Onboarding wizard de primeira empresa',
-      'Dashboard consolidado automático por grupo',
-      'Sidebar: Empresas + Portal do Cliente',
-      'Plano de Melhorias com CRUD de backlog',
-      'Cobertura RBAC 100% em todos módulos',
+      '✅ Onboarding wizard de primeira empresa',
+      '✅ Dashboard consolidado automático por grupo',
+      '✅ Sidebar: Empresas + Portal do Cliente',
+      '✅ Plano de Melhorias com CRUD de backlog',
+      '✅ Cobertura RBAC 100% em todos módulos',
+      '✅ IAContextualModulo em todos os módulos',
+      '✅ DashboardForecastWidget (Ciclo 14)',
     ]
   },
   {
-    trimestre: 'Q3 2026', cor: 'purple',
+    trimestre: 'Q3 2026 🔄', cor: 'purple', status: 'em_execucao',
     itens: [
-      'Portal B2B self-service completo',
-      'IA preditiva de churn avançada',
-      'Marketplace sync automático (ML, Shopee)',
-      'App mobile produção com apontamentos',
-      'Open Finance / conciliação bancária',
+      '✅ DashboardAnomaliaWidget (iaFinanceAnomalyScan)',
+      '✅ IAChurnWidget avançado (iaChurnAnalyzer)',
+      '🔄 Portal B2B self-service completo',
+      '🔄 Marketplace sync automático (ML, Shopee)',
+      '📅 App mobile produção com apontamentos',
+      '📅 Open Finance / conciliação bancária',
     ]
   },
   {

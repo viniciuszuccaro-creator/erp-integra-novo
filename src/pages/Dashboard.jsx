@@ -73,6 +73,8 @@ import FinancialSummary from "@/components/dashboard/FinancialSummary";
 import WidgetEstoqueCritico from "@/components/estoque/WidgetEstoqueCritico";
 import DashboardStabilityNotice from "@/components/dashboard/DashboardStabilityNotice";
 import DashboardStickyKpis from "@/components/dashboard/DashboardStickyKpis";
+import DashboardForecastWidget from "@/components/dashboard/DashboardForecastWidget";
+import DashboardIAInsightsPanel from "@/components/dashboard/DashboardIAInsightsPanel";
 import PedidosResumoPanel from "@/components/dashboard/PedidosResumoPanel";
 import ResizableRow from "@/components/dashboard/ResizableRow";
 import { ResizablePanelGroup as PanelGroup, ResizablePanel as Panel, ResizableHandle as PanelResizeHandle } from "@/components/ui/resizable";
@@ -800,6 +802,12 @@ export default function Dashboard() {
               <TopProdutosStatusPeriodoSection topProdutos={topProdutos} dadosVendasStatus={dadosVendasStatus} COLORS={COLORS} />
             </Panel>
           </PanelGroup>
+
+          {/* IA: Forecast + Insights em grid lado a lado */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <DashboardForecastWidget />
+            <DashboardIAInsightsPanel />
+          </div>
 
           {/* GRÁFICOS AVANÇADOS */}
           <AdvancedAnalysisSection

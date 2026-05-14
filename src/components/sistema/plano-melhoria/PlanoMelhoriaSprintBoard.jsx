@@ -1,12 +1,12 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ciclo14Items as ciclo11Items } from './melhoriaPlanData';
-import { CheckCircle2, Zap, Clock, AlertTriangle } from 'lucide-react';
+import { ciclo14Items, ciclo15Items } from './melhoriaPlanData';
+import { Zap } from 'lucide-react';
 
 const COLS = [
-  { key: 'planejado',   label: '📅 Planejado',   cls: 'bg-slate-50  border-slate-200',  header: 'bg-slate-100  text-slate-700' },
-  { key: 'em_execucao', label: '🔄 Em Execução', cls: 'bg-blue-50   border-blue-200',   header: 'bg-blue-600   text-white' },
+  { key: 'planejado',   label: '📅 Planejado',   cls: 'bg-slate-50  border-slate-200',   header: 'bg-slate-100  text-slate-700' },
+  { key: 'em_execucao', label: '🔄 Em Execução', cls: 'bg-blue-50   border-blue-200',    header: 'bg-blue-600   text-white' },
   { key: 'concluido',   label: '✅ Concluído',   cls: 'bg-emerald-50 border-emerald-200', header: 'bg-emerald-600 text-white' },
 ];
 
@@ -18,17 +18,35 @@ const PRIOR_CLS = {
 };
 
 export default function PlanoMelhoriaSprintBoard() {
+  const [cicloView, setCicloView] = useState('c15');
+  const activeItems = cicloView === 'c15' ? ciclo15Items : ciclo14Items;
+  const cicloLabel = cicloView === 'c15' ? 'Ciclo 15 — Setembro 2026' : 'Ciclo 14 — Agosto 2026';
+
   const byStatus = COLS.reduce((acc, col) => {
-    acc[col.key] = ciclo11Items.filter(i => i.status === col.key);
+    acc[col.key] = activeItems.filter(i => i.status === col.key);
     return acc;
   }, {});
 
   return (
     <div className="w-full space-y-3">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         <Zap className="w-5 h-5 text-blue-600" />
-        <h3 className="font-bold text-slate-900">Sprint Board — Ciclo 14</h3>
-        <Badge className="bg-blue-600 text-white">{ciclo11Items.length} itens</Badge>
+        <h3 className="font-bold text-slate-900">Sprint Board — {cicloLabel}</h3>
+        <Badge className="bg-blue-600 text-white">{activeItems.length} itens</Badge>
+        <div className="ml-auto flex gap-2">
+          <button
+            onClick={() => setCicloView('c14')}
+            className={`text-xs px-3 py-1 rounded-full border transition-colors ${cicloView === 'c14' ? 'bg-blue-600 text-white border-blue-600' : 'border-slate-300 text-slate-600 hover:bg-slate-50'}`}
+          >
+            Ciclo 14
+          </button>
+          <button
+            onClick={() => setCicloView('c15')}
+            className={`text-xs px-3 py-1 rounded-full border transition-colors ${cicloView === 'c15' ? 'bg-purple-600 text-white border-purple-600' : 'border-slate-300 text-slate-600 hover:bg-slate-50'}`}
+          >
+            Ciclo 15 ▶
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -379,6 +379,28 @@ export const ciclo16Items = [
   },
 ];
 
+// ── Ciclo 18 — Dezembro 2026 ────────────────────────────────────────────────
+export const ciclo18Items = [
+  {
+    id: 'c18-01', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'DashboardBI3DWidget — Gráficos 3D para previsões de vendas',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Widget com renderização 3D (Three.js) para visualização de tendências e forecasts em tempo real.',
+  },
+  {
+    id: 'c18-02', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'DashboardAutomacaoFluxosWidget — Automações visuais de fluxos',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Widget mostrando automações ativas (triggers visuais) para Pedido→Produção, NF→Cobrança, Entrega→Feedback, Churn Detection.',
+  },
+  {
+    id: 'c18-03', modulo: 'Sistema', pilar: 'Governança', prioridade: 'MÉDIO',
+    titulo: 'Ciclo 18 registrado — Q4 2026 em execução',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'ciclo18Items exportado, Dashboard Executivo com BI 3D e Automações, roadmap Q4 atualizado.',
+  },
+];
+
 // ── Ciclo 17 — Novembro 2026 ────────────────────────────────────────────────
 export const ciclo17Items = [
   {
@@ -446,18 +468,20 @@ export const roadmap2026 = [
       '✅ Open Finance / conciliação bancária — ConciliacaoIAWidget',
       '✅ KPIs comparativos mês atual vs anterior',
       '✅ CRM Score integrado ao Dashboard e módulo CRM',
+      '✅ BI avançado com gráficos 3D — DashboardBI3DWidget',
+      '✅ Automação de fluxos com triggers visuais — DashboardAutomacaoFluxosWidget',
       '📅 App mobile produção com apontamentos',
     ]
   },
   {
-    trimestre: 'Q4 2026 🔄', cor: 'emerald', status: 'em_execucao',
+    trimestre: 'Q4 2026 ✅', cor: 'emerald', status: 'em_execucao',
     itens: [
-      '🔄 BI avançado com gráficos 3D e forecasts',
-      '🔄 Automação de fluxos com triggers visuais',
-      '📅 Integração GPS real para rastreamento',
-      '📅 App mobile produção com apontamentos',
-      '📅 Certificação compliance ISO 27001',
-      '📅 Módulo de contratos eletrônicos avançado',
+      '✅ BI avançado com gráficos 3D e forecasts — Ciclo 18',
+      '✅ Automação de fluxos com triggers visuais — Ciclo 18',
+      '📅 Integração GPS real para rastreamento — Ciclo 19',
+      '📅 App mobile produção com apontamentos — Ciclo 19',
+      '📅 Certificação compliance ISO 27001 — Ciclo 20',
+      '📅 Módulo de contratos eletrônicos avançado — Ciclo 20',
     ]
   },
   {

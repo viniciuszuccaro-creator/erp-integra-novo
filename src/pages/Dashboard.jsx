@@ -81,6 +81,8 @@ import DashboardKPIsComparativosWidget from "@/components/dashboard/DashboardKPI
 import DashboardMarketplaceWidget from "@/components/dashboard/DashboardMarketplaceWidget";
 import ConciliacaoIAWidget from "@/components/financeiro/ConciliacaoIAWidget";
 import CRMScoreDashboard from "@/components/crm/CRMScoreDashboard";
+import DashboardBI3DWidget from "@/components/dashboard/DashboardBI3DWidget";
+import DashboardAutomacaoFluxosWidget from "@/components/dashboard/DashboardAutomacaoFluxosWidget";
 import PedidosResumoPanel from "@/components/dashboard/PedidosResumoPanel";
 import ResizableRow from "@/components/dashboard/ResizableRow";
 import { ResizablePanelGroup as PanelGroup, ResizablePanel as Panel, ResizableHandle as PanelResizeHandle } from "@/components/ui/resizable";
@@ -815,6 +817,12 @@ export default function Dashboard() {
             <DashboardMarketplaceWidget />
             {canSeeCRM && <CRMScoreDashboard />}
             {canSeeFinanceiro && <ConciliacaoIAWidget />}
+          </div>
+
+          {/* Ciclo 18 — Q4 2026: BI 3D + Automações */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <DashboardBI3DWidget />
+            <DashboardAutomacaoFluxosWidget />
           </div>
 
           {/* IA: Saúde + Forecast + Vendas Previsão + Insights */}

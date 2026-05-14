@@ -12,9 +12,10 @@ import PlanoMelhoriaRoadmapView from '@/components/sistema/plano-melhoria/PlanoM
 import PlanoMelhoriaGapsAnalise from '@/components/sistema/plano-melhoria/PlanoMelhoriaGapsAnalise';
 import PlanoMelhoriaLiveBacklog from '@/components/sistema/plano-melhoria/PlanoMelhoriaLiveBacklog';
 import PlanoMelhoriaGovernanca from '@/components/sistema/plano-melhoria/PlanoMelhoriaGovernanca';
+import CicloExecucaoPanel from '@/components/sistema/plano-melhoria/CicloExecucaoPanel';
 
 import {
-  LayoutDashboard, Rocket, MapPin, AlertTriangle, Database, Shield, TrendingUp
+  LayoutDashboard, Rocket, MapPin, AlertTriangle, Database, Shield, TrendingUp, Zap
 } from 'lucide-react';
 
 export default function PlanoMelhoria() {

@@ -13,19 +13,23 @@ export default function AccessCoverageMap({ perfis = [] }) {
   const moduleCoverage = expectedModules.map((moduleName) => {
     const profilesWithModule = safeArray(perfis).filter((perfil) => {
       const perms = safeObject(perfil?.permissoes);
-      return Object.keys(perms).some(key => key.toLowerCase().includes(moduleName.toLowerCase()) || key === moduleName);
+      // Busca exata ou case-insensitive no objeto de permissões
+      return Object.keys(perms).some(
+        key => key === moduleName || key.toLowerCase() === moduleName.toLowerCase()
+      );
     });
+    
     const actions = new Set();
-
     profilesWithModule.forEach((perfil) => {
       const perms = safeObject(perfil?.permissoes);
-      Object.entries(perms).forEach(([key, value]) => {
-        if (key.toLowerCase().includes(moduleName.toLowerCase()) || key === moduleName) {
-          Object.values(safeObject(value)).forEach((sectionActions) => {
-            safeArray(sectionActions).forEach((action) => actions.add(action === "ver" ? "visualizar" : action));
-          });
-        }
-      });
+      const modulePerms = perms[moduleName] || perms[Object.keys(perms).find(k => k.toLowerCase() === moduleName.toLowerCase())];
+      
+      if (Array.isArray(modulePerms)) {
+        modulePerms.forEach((action) => {
+          const normalized = action === "ver" ? "visualizar" : action;
+          actions.add(normalized);
+        });
+      }
     });
 
     const actionCount = expectedActions.filter((action) => actions.has(action)).length;

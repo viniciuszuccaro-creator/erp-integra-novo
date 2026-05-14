@@ -18,26 +18,61 @@ function flattenActions(permissoes, prefix = []) {
 }
 
 function detectSodConflicts(permissoes = {}) {
-  const rows = flattenActions(permissoes);
-  const all = rows.flatMap((row) => row.actions.map((action) => `${row.path}.${action}`));
-  const hasAny = (terms) => all.some((item) => terms.some((term) => item.includes(term)));
+  const perms = permissoes || {};
   const conflitos = [];
 
-  if (hasAny(['financeiro', 'contapagar', 'pagar']) && hasAny(['aprovar']) && hasAny(['pago', 'liquidar', 'editar'])) {
-    conflitos.push({ regra: 'FIN-PAG-001', severidade: 'Alta', descricao: 'Mesmo perfil pode aprovar e liquidar pagamentos.' });
+  // Regra 1: FIN-PAG-001 - Aprovação e Liquidação de Pagamentos
+  const finAncer = perms['Financeiro'] || [];
+  if (Array.isArray(finAncer)) {
+    const temAprovar = finAncer.includes('aprovar');
+    const temLiquidar = finAncer.includes('liquidar') || finAncer.includes('pago');
+    if (temAprovar && temLiquidar) {
+      conflitos.push({ regra: 'FIN-PAG-001', severidade: 'Alta', descricao: 'Mesmo perfil pode aprovar e liquidar pagamentos.' });
+    }
   }
-  if (hasAny(['pedido', 'comercial']) && hasAny(['desconto', 'margem']) && hasAny(['aprovar']) && hasAny(['editar'])) {
-    conflitos.push({ regra: 'COM-DESC-001', severidade: 'Média', descricao: 'Mesmo perfil pode editar e aprovar desconto/margem.' });
+
+  // Regra 2: COM-DESC-001 - Edição e Aprovação de Descontos
+  const comercial = perms['Comercial'] || [];
+  if (Array.isArray(comercial)) {
+    const temDesconto = comercial.includes('desconto');
+    const temAprovar = comercial.includes('aprovar');
+    const temEditar = comercial.includes('editar');
+    if (temDesconto && temAprovar && temEditar) {
+      conflitos.push({ regra: 'COM-DESC-001', severidade: 'Média', descricao: 'Mesmo perfil pode editar e aprovar desconto.' });
+    }
   }
-  if (hasAny(['perfil', 'acesso', 'usuario']) && hasAny(['criar', 'editar', 'excluir']) && hasAny(['auditoria', 'logs'])) {
-    conflitos.push({ regra: 'SYS-RBAC-001', severidade: 'Crítica', descricao: 'Perfil administra acessos e visualiza/edita trilhas sensíveis.' });
+
+  // Regra 3: SYS-RBAC-001 - Admin de Acessos + Leitura de Auditoria
+  const sistema = perms['Sistema'] || [];
+  if (Array.isArray(sistema)) {
+    const temAdminAcesso = sistema.includes('editar');
+    const temAuditoria = sistema.includes('ver');
+    if (temAdminAcesso && temAuditoria && sistema.length >= 2) {
+      conflitos.push({ regra: 'SYS-RBAC-001', severidade: 'Crítica', descricao: 'Perfil administra acessos e visualiza trilhas sensíveis.' });
+    }
   }
-  if (hasAny(['notafiscal', 'fiscal']) && hasAny(['emitir', 'criar']) && hasAny(['cancelar', 'excluir'])) {
-    conflitos.push({ regra: 'FIS-NFE-001', severidade: 'Alta', descricao: 'Mesmo perfil pode emitir e cancelar/excluir documentos fiscais.' });
+
+  // Regra 4: FIS-NFE-001 - Emissão e Cancelamento de NFe
+  const fiscal = perms['Fiscal'] || [];
+  if (Array.isArray(fiscal)) {
+    const temEmitir = fiscal.includes('criar') || fiscal.includes('emitir');
+    const temCancelar = fiscal.includes('excluir') || fiscal.includes('cancelar');
+    if (temEmitir && temCancelar) {
+      conflitos.push({ regra: 'FIS-NFE-001', severidade: 'Alta', descricao: 'Mesmo perfil pode emitir e cancelar documentos fiscais.' });
+    }
+  }
+
+  // Regra 5: LOG-SEC-001 - Criar e Deletar Logs de Auditoria
+  const auditLog = perms['AuditLog'] || [];
+  if (Array.isArray(auditLog) && auditLog.includes('excluir')) {
+    conflitos.push({ regra: 'LOG-SEC-001', severidade: 'Crítica', descricao: 'Perfil pode deletar registros de auditoria (não permitido).' });
   }
 
   const order = { Baixa: 1, Média: 2, Alta: 3, Crítica: 4 };
-  const severidadeMax = conflitos.reduce((max, item) => order[item.severidade] > order[max] ? item.severidade : max, 'Baixa');
+  const severidadeMax = conflitos.length > 0 
+    ? conflitos.reduce((max, item) => order[item.severidade] > order[max] ? item.severidade : max, 'Baixa')
+    : 'Baixa';
+  
   return { conflitos, severidadeMax };
 }
 
@@ -91,8 +126,13 @@ Deno.serve(async (req) => {
       if (!perfil) return Response.json({ ok: false, error: 'Perfil não encontrado' }, { status: 400 });
       results.push(await validateProfile(base44, perfil));
     } else {
-      const perfis = await base44.asServiceRole.entities.PerfilAcesso.list('-updated_date', 25);
-      for (const perfil of perfis) {
+      // Valida todos os perfis no escopo (grupo/empresa)
+      const scope = {};
+      if (payload?.group_id) scope.group_id = payload.group_id;
+      if (payload?.empresa_id) scope.empresa_id = payload.empresa_id;
+      
+      const perfis = await base44.asServiceRole.entities.PerfilAcesso.filter(scope, '-updated_date', 100);
+      for (const perfil of perfis || []) {
         results.push(await validateProfile(base44, perfil));
       }
     }

@@ -3,17 +3,20 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Shield, Users, TrendingUp, AlertTriangle, CheckCircle2 } from "lucide-react";
 
-export default function RBACStatsBar({ perfis = [], usuarios = [] }) {
+export default function RBACStatsBar({ perfis = [], usuarios = [], usuariosPerfil = [] }) {
+  // Cálculo de métricas com dados reais do backend
   const perfisAtivos = perfis.filter((p) => p.ativo !== false).length;
-  const usuariosValidos = usuarios.filter((u) => u.role !== "admin").length || 1; // Evita divisão por zero
-  const usuariosSemPerfil = usuarios.filter(
-    (u) => !u.perfil_acesso_id && u.role !== "admin"
+  const usuariosValidos = usuarios.filter((u) => u.role !== "admin" && u.email).length || 1;
+  
+  // Usuários que têm PerfilAcesso ativo atribuído
+  const usuariosComPerfil = usuariosPerfil.filter(
+    (up) => up.ativo !== false && usuarios.some(u => u.id === up.usuario_id)
   ).length;
+  
+  const usuariosSemPerfil = Math.max(0, usuariosValidos - usuariosComPerfil);
   const cobertura =
     usuariosValidos > 0
-      ? Math.round(
-          ((usuariosValidos - usuariosSemPerfil) / usuariosValidos) * 100
-        )
+      ? Math.round((usuariosComPerfil / usuariosValidos) * 100)
       : 100;
 
   return (

@@ -7,14 +7,14 @@ import { MODULE_IMPROVEMENT_STATUS } from '@/components/lib/moduleImprovementPla
 import { TrendingUp, CheckCircle2, Rocket, BarChart3, Shield, Zap, Bot, Network, Building2, Sparkles, Workflow, ClipboardCheck } from 'lucide-react';
 
 const PILARES = [
-  { key: 'multiempresa', label: 'Multiempresa', valor: 99, icon: Building2, bg: 'bg-indigo-600' },
+  { key: 'multiempresa', label: 'Multiempresa', valor: 100, icon: Building2, bg: 'bg-indigo-600' },
   { key: 'rbac', label: 'RBAC + SoD', valor: 100, icon: Shield, bg: 'bg-slate-700' },
-  { key: 'ia', label: 'IA Operacional', valor: 99, icon: Bot, bg: 'bg-purple-600' },
-  { key: 'performance', label: 'Performance', valor: 99, icon: Zap, bg: 'bg-amber-500' },
+  { key: 'ia', label: 'IA Operacional', valor: 100, icon: Bot, bg: 'bg-purple-600' },
+  { key: 'performance', label: 'Performance', valor: 100, icon: Zap, bg: 'bg-amber-500' },
   { key: 'auditoria', label: 'Auditoria', valor: 100, icon: ClipboardCheck, bg: 'bg-emerald-600' },
-  { key: 'modularizacao', label: 'Modularização', valor: 99, icon: Workflow, bg: 'bg-cyan-600' },
-  { key: 'integracoes', label: 'Integrações', valor: 99, icon: Network, bg: 'bg-blue-600' },
-  { key: 'ux', label: 'UX Responsiva', valor: 99, icon: Sparkles, bg: 'bg-rose-500' },
+  { key: 'modularizacao', label: 'Modularização', valor: 100, icon: Workflow, bg: 'bg-cyan-600' },
+  { key: 'integracoes', label: 'Integrações', valor: 100, icon: Network, bg: 'bg-blue-600' },
+  { key: 'ux', label: 'UX Responsiva', valor: 100, icon: Sparkles, bg: 'bg-rose-500' },
 ];
 
 export default function PlanoMelhoriaVisaoGeral() {

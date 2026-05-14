@@ -2,10 +2,19 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, BarChart, Bar, PieChart as RechartsPie, Pie, Cell, Legend } from "recharts";
 import { BarChart3, Users, ShoppingCart, DollarSign } from "lucide-react";
+import DashboardForecastWidget from "./DashboardForecastWidget";
+import DashboardAnomaliaWidget from "./DashboardAnomaliaWidget";
+import IAChurnWidget from "@/components/crm/IAChurnWidget";
+
 export default function AdvancedAnalysisSection({ vendasPorMes, top5Clientes, statusPedidos, fluxoCaixaMensal, COLORS }) {
   return (
     <div>
       <h2 className="text-xl font-bold text-slate-900 mb-4">Análise Detalhada</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+        <DashboardForecastWidget />
+        <DashboardAnomaliaWidget />
+        <IAChurnWidget compact />
+      </div>
       <div className="grid lg:grid-cols-2 gap-6">
         <Card className="border-0 shadow-md">
           <CardHeader className="bg-slate-50 border-b">

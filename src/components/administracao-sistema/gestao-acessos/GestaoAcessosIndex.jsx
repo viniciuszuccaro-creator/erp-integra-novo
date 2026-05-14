@@ -18,10 +18,12 @@ import AccessActionPlan from "@/components/administracao-sistema/gestao-acessos/
 import AccessCoverageMap from "@/components/administracao-sistema/gestao-acessos/AccessCoverageMap";
 import AccessAutomationPanel from "@/components/administracao-sistema/gestao-acessos/AccessAutomationPanel";
 import AccessMaturityRoadmap from "@/components/administracao-sistema/gestao-acessos/AccessMaturityRoadmap";
-import { Shield, Users, BarChart3, AlertTriangle, CheckCircle2, TrendingUp, Activity } from "lucide-react";
+import { Shield, Users, BarChart3, AlertTriangle, CheckCircle2, Activity } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { getAccessScope, isUserInAccessScope } from "@/components/administracao-sistema/gestao-acessos/accessScope";
+import RBACStatsBar from "@/components/administracao-sistema/gestao-acessos/RBACStatsBar";
+import IAAccessAnalyzer from "@/components/administracao-sistema/gestao-acessos/IAAccessAnalyzer";
+import CoberturaMultiempresa from "@/components/administracao-sistema/gestao-acessos/CoberturaMultiempresa";
 
 export default function GestaoAcessosIndex() {
   const { hasPermission, isAdmin } = usePermissions();
@@ -105,54 +107,8 @@ export default function GestaoAcessosIndex() {
 
   return (
     <div className="w-full flex flex-col gap-3 min-h-0">
-      {/* Banner RBAC com estatísticas — 4 cards */}
-      <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="p-3 flex items-center gap-3">
-            <Shield className="w-8 h-8 text-blue-600 flex-shrink-0" />
-            <div>
-              <p className="text-xs text-blue-600 font-medium">Perfis RBAC</p>
-              <p className="text-lg font-bold text-blue-900">{perfisAtivos}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className={usuariosSemPerfil > 0 ? 'border-amber-200 bg-amber-50' : 'border-green-200 bg-green-50'}>
-          <CardContent className="p-3 flex items-center gap-3">
-            {usuariosSemPerfil > 0
-              ? <AlertTriangle className="w-8 h-8 text-amber-600 flex-shrink-0" />
-              : <CheckCircle2 className="w-8 h-8 text-green-600 flex-shrink-0" />}
-            <div>
-              <p className={`text-xs font-medium ${usuariosSemPerfil > 0 ? 'text-amber-600' : 'text-green-600'}`}>
-                {usuariosSemPerfil > 0 ? 'Sem perfil' : 'Cobertura total'}
-              </p>
-              <p className={`text-lg font-bold ${usuariosSemPerfil > 0 ? 'text-amber-900' : 'text-green-900'}`}>
-                {usuariosSemPerfil > 0 ? `${usuariosSemPerfil} pendente(s)` : `${usuariosNoEscopo.length} ok`}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-200 bg-slate-50">
-          <CardContent className="p-3 flex items-center gap-3">
-            <Users className="w-8 h-8 text-slate-600 flex-shrink-0" />
-            <div>
-              <p className="text-xs text-slate-600 font-medium">Total Usuários</p>
-              <p className="text-lg font-bold text-slate-900">{usuariosNoEscopo.length}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className={cobertura >= 80 ? 'border-emerald-200 bg-emerald-50' : 'border-orange-200 bg-orange-50'}>
-          <CardContent className="p-3 flex items-center gap-3">
-            <TrendingUp className={`w-8 h-8 flex-shrink-0 ${cobertura >= 80 ? 'text-emerald-600' : 'text-orange-600'}`} />
-            <div>
-              <p className={`text-xs font-medium ${cobertura >= 80 ? 'text-emerald-600' : 'text-orange-600'}`}>Cobertura RBAC</p>
-              <p className={`text-lg font-bold ${cobertura >= 80 ? 'text-emerald-900' : 'text-orange-900'}`}>{cobertura}%</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Banner RBAC com estatísticas — componente modular */}
+      <RBACStatsBar perfis={perfis} usuarios={usuariosNoEscopo} />
 
       {/* Aviso se há usuários sem perfil */}
       {usuariosSemPerfil > 0 && (
@@ -208,6 +164,9 @@ export default function GestaoAcessosIndex() {
               Auditoria
               <Badge className="ml-1.5 text-[9px] bg-slate-200 text-slate-700 px-1">{auditoriasAcesso.length}</Badge>
             </TabsTrigger>
+            <TabsTrigger value="ia-acesso" data-action="RBAC.tab.ia" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+              ✦ IA
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -232,6 +191,11 @@ export default function GestaoAcessosIndex() {
               <AccessActionPlan perfis={perfis} usuarios={usuariosNoEscopo} />
               <AccessImprovementChecklist perfis={perfis} usuarios={usuariosNoEscopo} />
             </div>
+            <CoberturaMultiempresa
+              usuarios={usuariosNoEscopo}
+              perfis={perfis}
+              empresas={empresas}
+            />
           </div>
         </TabsContent>
 
@@ -262,6 +226,12 @@ export default function GestaoAcessosIndex() {
         <TabsContent value="auditoria" className="mt-3 w-full">
           <div className="w-full space-y-3">
             <AccessAuditTimeline auditorias={auditoriasAcesso} />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="ia-acesso" className="mt-3 w-full">
+          <div className="w-full space-y-3">
+            <IAAccessAnalyzer perfis={perfis} usuarios={usuariosNoEscopo} empresas={empresas} />
           </div>
         </TabsContent>
       </Tabs>

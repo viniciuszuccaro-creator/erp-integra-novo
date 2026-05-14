@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ciclo13Items as ciclo11Items } from './melhoriaPlanData';
+import { ciclo13Items, ciclo14Items } from './melhoriaPlanData';
 import { CheckCircle2, Zap, Clock, AlertTriangle } from 'lucide-react';
 
 const COLS = [
@@ -18,17 +18,35 @@ const PRIOR_CLS = {
 };
 
 export default function PlanoMelhoriaSprintBoard() {
+  const [cicloView, setCicloView] = React.useState('c13');
+  const activeItems = cicloView === 'c13' ? ciclo13Items : ciclo14Items;
+  const cicloLabel = cicloView === 'c13' ? 'Ciclo 13 — Julho 2026' : 'Ciclo 14 — Agosto 2026 (Preview)';
+
   const byStatus = COLS.reduce((acc, col) => {
-    acc[col.key] = ciclo11Items.filter(i => i.status === col.key);
+    acc[col.key] = activeItems.filter(i => i.status === col.key);
     return acc;
   }, {});
 
   return (
     <div className="w-full space-y-3">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         <Zap className="w-5 h-5 text-blue-600" />
-        <h3 className="font-bold text-slate-900">Sprint Board — Ciclo 13</h3>
-        <Badge className="bg-blue-600 text-white">{ciclo11Items.length} itens</Badge>
+        <h3 className="font-bold text-slate-900">Sprint Board — {cicloLabel}</h3>
+        <Badge className="bg-blue-600 text-white">{activeItems.length} itens</Badge>
+        <div className="ml-auto flex gap-2">
+          <button
+            onClick={() => setCicloView('c13')}
+            className={`text-xs px-3 py-1 rounded-full border transition-colors ${cicloView === 'c13' ? 'bg-blue-600 text-white border-blue-600' : 'border-slate-300 text-slate-600 hover:bg-slate-50'}`}
+          >
+            Ciclo 13
+          </button>
+          <button
+            onClick={() => setCicloView('c14')}
+            className={`text-xs px-3 py-1 rounded-full border transition-colors ${cicloView === 'c14' ? 'bg-purple-600 text-white border-purple-600' : 'border-slate-300 text-slate-600 hover:bg-slate-50'}`}
+          >
+            Ciclo 14 ▶
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

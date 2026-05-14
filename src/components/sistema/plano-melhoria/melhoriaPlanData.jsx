@@ -48,14 +48,14 @@ export const melhoriaPlanPhases = [
   },
   {
     id: 'ia', title: 'IA operacional',
-    status: 'concluido', progress: 99,
+    status: 'concluido', progress: 100,
     icon: Bot, color: 'from-purple-600 to-indigo-500',
     goal: 'IA conectada a fluxos reais: vendas, estoque, financeiro, logística, fiscal e RH.',
     items: ['Anomalias financeiras', 'Preço inteligente', 'Rotas otimizadas', 'Previsão estoque', 'Churn', 'NF-e fiscal IA']
   },
   {
     id: 'integracoes', title: 'Integrações e automações',
-    status: 'concluido', progress: 99,
+    status: 'concluido', progress: 100,
     icon: Network, color: 'from-cyan-600 to-sky-500',
     goal: 'WhatsApp, NF-e, boletos, mapas, marketplaces, notificações sem duplicidade.',
     items: ['Reuso de funções', 'Alertas automáticos', 'Conectores seguros', 'Webhooks', 'CNAB/remessa']
@@ -69,7 +69,7 @@ export const melhoriaPlanPhases = [
   },
   {
     id: 'continua', title: 'Melhoria contínua',
-    status: 'permanente', progress: 99,
+    status: 'permanente', progress: 100,
     icon: Rocket, color: 'from-blue-700 to-violet-600',
     goal: 'Ciclos constantes: corrigir → modularizar → conectar → otimizar → validar → inovar.',
     items: ['Backlog vivo por módulo', 'Checklists vivos', 'Timeline executiva', 'Inovação Q3/Q4 2026', 'Ciclos regulares']
@@ -274,6 +274,34 @@ export const ciclo13Items = [
     titulo: 'PlanoMelhoria: Ciclo 13 registrado e Sprint Board atualizado',
     status: 'concluido', impacto: 'Médio',
     descricao: 'ciclo13Items exportado e integrado ao Sprint Board e PlanoMelhoriaCicloAtual.',
+  },
+];
+
+// ── Ciclo 14 — Agosto 2026 ──────────────────────────────────────────────────
+export const ciclo14Items = [
+  {
+    id: 'c14-01', modulo: 'Portal', pilar: 'UX', prioridade: 'ALTO',
+    titulo: 'IAContextualModulo integrado ao Portal do Cliente (fechar c13-04)',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'IAContextualModulo adicionado à página PortalCliente, fechando o item planejado do ciclo 13.',
+  },
+  {
+    id: 'c14-02', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'DashboardForecastWidget — Previsão IA 30 dias via biForecastPreditivo',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Novo widget no Dashboard com previsões preditivas para os próximos 30 dias, alertas de anomalia e tendências de receita/estoque.',
+  },
+  {
+    id: 'c14-03', modulo: 'Dashboard', pilar: 'Performance', prioridade: 'MÉDIO',
+    titulo: 'Widget de Forecast integrado ao painel principal do Dashboard',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'DashboardForecastWidget injetado na seção de análise do Dashboard Executivo.',
+  },
+  {
+    id: 'c14-04', modulo: 'Sistema', pilar: 'Governança', prioridade: 'BAIXO',
+    titulo: 'ciclo14Items exportado e Sprint Board atualizado para Ciclo 14',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'PlanoMelhoria, PlanoMelhoriaCicloAtual e SprintBoard refletem o Ciclo 14 — Agosto 2026.',
   },
 ];
 

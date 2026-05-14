@@ -4,7 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ciclo13Items as ciclo11Items } from './melhoriaPlanData';
+import { ciclo13Items, ciclo14Items } from './melhoriaPlanData';
+const ciclo11Items = ciclo13Items;
 import { CheckCircle2, Clock, Rocket, AlertTriangle, Search, Filter, Zap } from 'lucide-react';
 
 const STATUS_CONFIG = {
@@ -47,7 +48,7 @@ export default function PlanoMelhoriaCicloAtual() {
         <CardHeader className="pb-2">
           <div className="flex items-center gap-3">
             <Rocket className="w-6 h-6 text-blue-600" />
-            <CardTitle className="text-lg text-blue-900">Ciclo 13 — Julho 2026</CardTitle>
+            <CardTitle className="text-lg text-blue-900">Ciclo 13 — Julho 2026 ✅ | Próximo: Ciclo 14</CardTitle>
             <Badge className="bg-blue-600 text-white">{pct}% concluído</Badge>
           </div>
         </CardHeader>

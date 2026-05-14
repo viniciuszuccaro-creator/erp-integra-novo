@@ -27,7 +27,7 @@ export const MODULE_IMPROVEMENT_STATUS = {
   Produção:          { progress: 100, focus: "OPs listagem real, apontamentos, IA diagnóstico, kanban + SemEmpresaBanner + IAContextual" },
   'Hub Atendimento': { progress: 100, focus: "Omnichannel, chatbot IA, SLA, IAPanel + SemEmpresaBanner + IAContextualModulo integrado" },
   Empresas:          { progress: 100, focus: "Gestão de grupo empresarial, filiais, EmpresaSwitcher e configuração por empresa" },
-  Portal:            { progress: 99, focus: "Portal cliente: pedidos, boletos, entregas, rastreio e BI embarcado" },
+  Portal:            { progress: 100, focus: "Portal cliente: pedidos, boletos, entregas, rastreio, HeaderPortalCompacto + IAContextualModulo" },
   'Gestão Acessos':  { progress: 100, focus: "RBAC granular, SoD, cobertura de perfis, auditoria de acessos e timeline" },
 };
 

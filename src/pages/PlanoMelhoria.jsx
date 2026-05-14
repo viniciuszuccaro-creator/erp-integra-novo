@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { melhoriaPlanPhases, ciclo11Items, ciclo12Items, ciclo13Items } from '@/components/sistema/plano-melhoria/melhoriaPlanData';
+import { melhoriaPlanPhases, ciclo11Items, ciclo12Items, ciclo13Items, ciclo14Items } from '@/components/sistema/plano-melhoria/melhoriaPlanData';
 
 // Componentes focados
 import PlanoMelhoriaVisaoGeral from '@/components/sistema/plano-melhoria/PlanoMelhoriaVisaoGeral';

@@ -7,6 +7,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Package, Truck, Receipt, MessageSquare, FileText, LayoutDashboard, Download } from 'lucide-react';
 
 import PortalHeader from '../components/portal/PortalHeader';
+import HeaderPortalCompacto from '../components/portal/portal-launchpad/HeaderPortalCompacto';
+import IAContextualModulo from '../components/ia/IAContextualModulo';
 import DashboardCliente from '../components/portal/DashboardCliente';
 import PedidosList from '../components/portal/PedidosList';
 import EntregasList from '../components/portal/EntregasList';
@@ -141,6 +143,7 @@ export default function PortalCliente() {
 
   return (
     <div className="w-full min-h-full p-3 sm:p-4 space-y-3">
+      <HeaderPortalCompacto clienteNome={cliente?.nome_fantasia || cliente?.nome} />
       <PortalHeader cliente={cliente} spotlight={spotlight} />
 
       <Tabs value={tab} onValueChange={setTab} className="w-full min-w-0">

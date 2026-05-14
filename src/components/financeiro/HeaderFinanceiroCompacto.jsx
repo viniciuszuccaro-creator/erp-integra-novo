@@ -1,6 +1,8 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Building2, BarChart3 } from 'lucide-react';
+import SemEmpresaBanner from '@/components/common/SemEmpresaBanner';
+import IAContextualModulo from '@/components/ia/IAContextualModulo';
 
 /**
  * HEADER FINANCEIRO COMPACTO V22.0 ETAPA 2
@@ -11,6 +13,8 @@ export default function HeaderFinanceiroCompacto({
   empresaAtual 
 }) {
   return (
+    <div className="space-y-2">
+    <SemEmpresaBanner modulo="Financeiro" />
     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
       <div>
         <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
@@ -30,6 +34,8 @@ export default function HeaderFinanceiroCompacto({
           Visão Consolidada
         </Badge>
       )}
+      <IAContextualModulo modulo="Financeiro" compact />
+    </div>
     </div>
   );
 }

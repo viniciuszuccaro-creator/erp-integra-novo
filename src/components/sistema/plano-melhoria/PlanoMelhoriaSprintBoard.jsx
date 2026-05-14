@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ciclo11Items } from './melhoriaPlanData';
+import { ciclo12Items as ciclo11Items } from './melhoriaPlanData';
 import { CheckCircle2, Zap, Clock, AlertTriangle } from 'lucide-react';
 
 const COLS = [
@@ -27,7 +27,7 @@ export default function PlanoMelhoriaSprintBoard() {
     <div className="w-full space-y-3">
       <div className="flex items-center gap-2">
         <Zap className="w-5 h-5 text-blue-600" />
-        <h3 className="font-bold text-slate-900">Sprint Board — Ciclo 11</h3>
+        <h3 className="font-bold text-slate-900">Sprint Board — Ciclo 12</h3>
         <Badge className="bg-blue-600 text-white">{ciclo11Items.length} itens</Badge>
       </div>
 

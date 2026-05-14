@@ -161,6 +161,82 @@ export const ciclo11Items = [
   },
 ];
 
+// ── Ciclo 12 — Junho 2026 ───────────────────────────────────────────────────
+export const ciclo12Items = [
+  {
+    id: 'c12-01', modulo: 'Comercial', pilar: 'UX', prioridade: 'ALTO',
+    titulo: 'SemEmpresaBanner + IAContextualModulo no Header Comercial',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Banner orientativo e sugestões IA integrados ao HeaderComercialCompacto — guia usuário sem empresa e oferece ações inteligentes.',
+  },
+  {
+    id: 'c12-02', modulo: 'CRM', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'SemEmpresaBanner + IAContextualModulo no Header CRM',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Banner orientativo e IA contextual de relacionamento, oportunidades e churn integrados ao HeaderCRMCompacto.',
+  },
+  {
+    id: 'c12-03', modulo: 'Estoque', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'SemEmpresaBanner + IAContextualModulo no Header Estoque',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Banner de empresa + IA de reposição e movimentações integrados ao HeaderEstoqueCompacto.',
+  },
+  {
+    id: 'c12-04', modulo: 'Financeiro', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'SemEmpresaBanner + IAContextualModulo no Header Financeiro',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Banner orientativo e IA de saúde financeira integrados ao HeaderFinanceiroCompacto — contextualizado por empresa/grupo.',
+  },
+  {
+    id: 'c12-05', modulo: 'RH', pilar: 'IA', prioridade: 'MÉDIO',
+    titulo: 'SemEmpresaBanner + IAContextualModulo no Header RH',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'Banner de empresa + sugestões IA de gestão de pessoas integrados ao HeaderRHCompacto.',
+  },
+  {
+    id: 'c12-06', modulo: 'Compras', pilar: 'IA', prioridade: 'MÉDIO',
+    titulo: 'SemEmpresaBanner + IAContextualModulo no Header Compras',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'Banner + IA de fornecedores e suprimentos integrados ao HeaderComprasCompacto.',
+  },
+  {
+    id: 'c12-07', modulo: 'Expedição', pilar: 'IA', prioridade: 'MÉDIO',
+    titulo: 'SemEmpresaBanner + IAContextualModulo no Header Expedição',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'Banner + IA de rotas e entregas integrados ao HeaderExpedicaoCompacto.',
+  },
+  {
+    id: 'c12-08', modulo: 'Produção', pilar: 'IA', prioridade: 'MÉDIO',
+    titulo: 'IAContextualModulo no Header Produção',
+    status: 'planejado', impacto: 'Médio',
+    descricao: 'Integrar IAContextualModulo e SemEmpresaBanner no HeaderProducaoCompacto.',
+  },
+  {
+    id: 'c12-09', modulo: 'Fiscal', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'ValidacaoCertificadoNFe na aba NF-e do módulo Fiscal',
+    status: 'planejado', impacto: 'Alto',
+    descricao: 'Exibir ValidacaoCertificadoNFe no topo da aba de emissão de NF-e no módulo Fiscal.',
+  },
+  {
+    id: 'c12-10', modulo: 'Relatórios', pilar: 'UX', prioridade: 'MÉDIO',
+    titulo: 'SemEmpresaBanner nos Relatórios + IAContextualModulo de análise',
+    status: 'planejado', impacto: 'Médio',
+    descricao: 'Banner orientativo de empresa + IA de insights executivos integrados à página de Relatórios.',
+  },
+  {
+    id: 'c12-11', modulo: 'Contratos', pilar: 'IA', prioridade: 'BAIXO',
+    titulo: 'IAContextualModulo no módulo Contratos',
+    status: 'planejado', impacto: 'Médio',
+    descricao: 'Sugestões IA de renovação, risco e vencimento integradas ao cabeçalho do módulo Contratos.',
+  },
+  {
+    id: 'c12-12', modulo: 'Todos', pilar: 'Performance', prioridade: 'MÉDIO',
+    titulo: 'Scores módulos 99→100: IA e Integrações concluídas em todos os launchpads',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'moduleImprovementPlan atualizado: IA operacional e Integrações chegam a 100% nos módulos com novos headers.',
+  },
+];
+
 // ── Roadmap 2026–2027 ────────────────────────────────────────────────────────
 export const roadmap2026 = [
   {

@@ -339,37 +339,43 @@ export const ciclo15Items = [
   },
 ];
 
-// ── Ciclo 16 — Outubro 2026 ─────────────────────────────────────────────────
+// ── Ciclo 16 — Outubro 2026 ────────────────────────────────────────────────
 export const ciclo16Items = [
   {
     id: 'c16-01', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'DashboardKPIsComparativosWidget — KPIs Mês Atual vs Anterior',
+    titulo: 'DashboardSaudeWidget — Score de saúde por módulo em tempo real',
     status: 'concluido', impacto: 'Alto',
-    descricao: 'Widget comparativo que exibe Vendas, Pedidos, Receitas e Ticket Médio com variação percentual automática versus o mês anterior.',
+    descricao: 'Widget com barra de progresso por módulo (Financeiro, Estoque, Expedição, Comercial) + score global + alerta de anomalias.',
   },
   {
-    id: 'c16-02', modulo: 'CRM', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'CRMScoreClienteWidget — Score de Saúde do Cliente com IA',
+    id: 'c16-02', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'DashboardVendasPrevisaoWidget — Gráfico de área com previsão 30 dias',
     status: 'concluido', impacto: 'Alto',
-    descricao: 'Widget no CRM com score de saúde por cliente, indicadores de risco de churn, dias sem comprar e classificação ABC.',
+    descricao: 'Widget com gráfico AreaChart de previsão de vendas via biForecastPreditivo + badge de crescimento estimado + total previsto.',
   },
   {
-    id: 'c16-03', modulo: 'Dashboard', pilar: 'UX', prioridade: 'MÉDIO',
-    titulo: 'KPIsComparativosWidget integrado ao painel principal do Dashboard',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'DashboardKPIsComparativosWidget injetado antes da seção de Forecast + Insights no Dashboard Executivo.',
+    id: 'c16-03', modulo: 'Dashboard', pilar: 'UX', prioridade: 'ALTO',
+    titulo: 'Grid IA 4 colunas: Saúde + Forecast + Vendas + Insights',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Dashboard reorganizado com grid responsivo de 4 widgets IA lado a lado substituindo o layout anterior de 2 colunas.',
   },
   {
-    id: 'c16-04', modulo: 'Roadmap', pilar: 'Governança', prioridade: 'MÉDIO',
-    titulo: 'Roadmap: Q3 2026 com novos itens marcados como concluídos',
+    id: 'c16-04', modulo: 'Dashboard', pilar: 'UX', prioridade: 'MÉDIO',
+    titulo: 'DashboardIAInsightsPanel: score de confiança, prioridade e categorias visuais',
     status: 'concluido', impacto: 'Médio',
-    descricao: 'roadmap2026 atualizado com KPIs Comparativos e Score Cliente marcados em Q3.',
+    descricao: 'Painel de insights com barra de progresso de confiança, ícone por tipo (alerta/tendência/insight/ação) e badge de prioridade.',
   },
   {
-    id: 'c16-05', modulo: 'Sistema', pilar: 'Governança', prioridade: 'BAIXO',
-    titulo: 'PlanoMelhoria: Ciclo 16 registrado — Outubro 2026',
+    id: 'c16-05', modulo: 'Portal', pilar: 'UX', prioridade: 'ALTO',
+    titulo: 'PortalSelfServiceB2B — Portal B2B completo com atalhos e pedidos',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Componente self-service com KPIs rápidos (em andamento/trânsito/entregues), 6 atalhos de ação rápida e listagem de pedidos com busca.',
+  },
+  {
+    id: 'c16-06', modulo: 'Sistema', pilar: 'Governança', prioridade: 'BAIXO',
+    titulo: 'Ciclo 16 registrado no PlanoMelhoria e Roadmap Q3 atualizado',
     status: 'concluido', impacto: 'Médio',
-    descricao: 'ciclo16Items exportado, Sprint Board e PlanoMelhoriaCicloAtual atualizados para Ciclo 16.',
+    descricao: 'ciclo16Items exportado, melhoriaPlanData atualizado com roadmap Q3 refletindo entregas de Outubro 2026.',
   },
 ];
 
@@ -392,9 +398,10 @@ export const roadmap2026 = [
     itens: [
       '✅ DashboardAnomaliaWidget (iaFinanceAnomalyScan)',
       '✅ IAChurnWidget avançado (iaChurnAnalyzer)',
-      '✅ DashboardKPIsComparativosWidget (Ciclo 16)',
-      '✅ CRMScoreClienteWidget — saúde e churn (Ciclo 16)',
-      '🔄 Portal B2B self-service completo',
+      '✅ DashboardSaudeWidget — score global por módulo',
+      '✅ DashboardVendasPrevisaoWidget — gráfico de área 30d',
+      '✅ PortalSelfServiceB2B — self-service completo',
+      '✅ IAInsights: score de confiança + prioridade visual',
       '🔄 Marketplace sync automático (ML, Shopee)',
       '📅 App mobile produção com apontamentos',
       '📅 Open Finance / conciliação bancária',

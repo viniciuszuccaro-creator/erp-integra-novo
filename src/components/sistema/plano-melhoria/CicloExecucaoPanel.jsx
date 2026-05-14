@@ -72,8 +72,24 @@ export default function CicloExecucaoPanel() {
   const [executando, setExecutando] = useState(null);
   const [completos, setCompletos] = useState([]);
   const [mostrando, setMostrando] = useState(null);
+  const [inicializado, setInicializado] = useState(false);
   const { user } = useUser();
   const { empresaAtual, grupoAtual, contexto } = useContextoVisual();
+
+  const iniciarCiclo21 = async () => {
+    try {
+      const res = await base44.functions.invoke('ciclo21Executor', {
+        action: 'start',
+        empresa_id: empresaAtual?.id || null,
+        group_id: grupoAtual?.id || null,
+      });
+      if (res?.data?.success) {
+        setInicializado(true);
+      }
+    } catch (err) {
+      console.error('Erro ao iniciar Ciclo 21:', err);
+    }
+  };
 
   const statusColor = (status) => {
     switch (status) {
@@ -96,21 +112,28 @@ export default function CicloExecucaoPanel() {
   const executar = async (item) => {
     setExecutando(item.id);
     try {
-      // Auditoria backend + execução
-      await base44.functions.invoke('deployAudit', {
-        event: 'ciclo21_component_exec',
-        module: 'PlanoMelhoria',
-        page: 'CicloExecucaoPanel',
-        component: item.nome,
+      // Executa componente via backend
+      const res = await base44.functions.invoke('ciclo21Executor', {
+        action: 'execute_component',
+        component_id: item.id,
         empresa_id: empresaAtual?.id || null,
         group_id: grupoAtual?.id || null,
       });
-      
-      // Simula execução real do componente (2-3s)
-      await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
-      
-      setCompletos([...completos, item.id]);
-      setMostrando(item.id); // Mostra componente após conclusão
+
+      if (res?.data?.success) {
+        setCompletos([...completos, item.id]);
+        setMostrando(item.id); // Mostra componente após conclusão
+
+        // Se todos estão completos, finaliza ciclo
+        const novoCompletos = [...completos, item.id];
+        if (novoCompletos.length === ciclo21Items.length) {
+          await base44.functions.invoke('ciclo21Executor', {
+            action: 'complete_cycle',
+            empresa_id: empresaAtual?.id || null,
+            group_id: grupoAtual?.id || null,
+          });
+        }
+      }
     } catch (err) {
       console.error(`Erro ao executar ${item.nome}:`, err);
     }
@@ -127,9 +150,16 @@ export default function CicloExecucaoPanel() {
           <Zap className="w-6 h-6 text-amber-600" />
           <h3 className="text-xl font-bold">Ciclo 21 — Execução de Melhorias</h3>
         </div>
-        <Badge variant="outline" className="text-base px-3 py-1">
-          {percentualCiclo}% Concluído
-        </Badge>
+        <div className="flex items-center gap-2">
+          {!inicializado && (
+            <Button onClick={iniciarCiclo21} className="bg-green-600 hover:bg-green-700 text-white">
+              <Zap className="w-4 h-4 mr-2" /> Iniciar Ciclo 21
+            </Button>
+          )}
+          <Badge variant="outline" className="text-base px-3 py-1">
+            {percentualCiclo}% Concluído
+          </Badge>
+        </div>
       </div>
 
       <div className="bg-white border rounded-lg p-4 space-y-2">
@@ -145,8 +175,16 @@ export default function CicloExecucaoPanel() {
         </div>
       </div>
 
+      {!inicializado && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <p className="text-sm text-amber-800">
+            💡 Clique em "Iniciar Ciclo 21" acima para começar a execução dos 6 componentes estratégicos.
+          </p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {ciclo21Items.map((item) => (
+        {inicializado && ciclo21Items.map((item) => (
           <Card key={item.id} className="overflow-hidden hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-2">
@@ -198,6 +236,12 @@ export default function CicloExecucaoPanel() {
           </Card>
         ))}
       </div>
+
+      {inicializado && completos.length === 0 && (
+        <div className="text-center py-4 text-slate-600 text-sm">
+          Clique em "Executar" em qualquer componente para ativar a funcionalidade.
+        </div>
+      )}
 
       {percentualCiclo === 100 && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">

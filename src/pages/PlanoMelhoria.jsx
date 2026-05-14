@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { melhoriaPlanPhases, ciclo11Items, ciclo12Items } from '@/components/sistema/plano-melhoria/melhoriaPlanData';
+import { melhoriaPlanPhases, ciclo11Items, ciclo12Items, ciclo13Items } from '@/components/sistema/plano-melhoria/melhoriaPlanData';
 
 // Componentes focados
 import PlanoMelhoriaVisaoGeral from '@/components/sistema/plano-melhoria/PlanoMelhoriaVisaoGeral';
@@ -23,8 +23,8 @@ export default function PlanoMelhoria() {
   const totalProgress = Math.round(
     melhoriaPlanPhases.reduce((sum, phase) => sum + phase.progress, 0) / melhoriaPlanPhases.length
   );
-  // Ciclo atual = Ciclo 12
-  const cicloAtualItems = ciclo12Items;
+  // Ciclo atual = Ciclo 13
+  const cicloAtualItems = ciclo13Items;
   const concluidos = cicloAtualItems.filter(i => i.status === 'concluido').length;
   const total = cicloAtualItems.length;
 

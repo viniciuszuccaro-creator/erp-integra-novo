@@ -21,6 +21,8 @@ import Bloco6Tecnologia from "@/components/cadastros/blocks/Bloco6Tecnologia";
 import GroupCountBadge from "@/components/cadastros/GroupCountBadge";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import ExternalAppsHub from "@/components/administracao-sistema/ExternalAppsHub";
+import SemEmpresaBanner from "@/components/common/SemEmpresaBanner";
+import IAContextualModulo from "@/components/ia/IAContextualModulo";
 
 export default function Cadastros() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -69,14 +71,18 @@ export default function Cadastros() {
 
   return (
     <div className="h-full w-full min-h-0 overflow-auto p-6 lg:p-8 space-y-6">
+      <SemEmpresaBanner modulo="Cadastros Gerais" />
       <GerenciadorJanelas />
 
       <Tabs value={abaGerenciamento} onValueChange={handleAbaChange}>
         <div className="overflow-x-auto pb-1">
-          <TabsList className="inline-flex flex-nowrap min-w-max gap-2 mb-2">
-            <TabsTrigger value="cadastros" data-permission="Cadastros.visualizar">📋 Cadastros Gerais</TabsTrigger>
-            <TabsTrigger value="apps-externos" data-permission="Sistema.Integracoes.visualizar">📱 Apps, Portais & Ambientes Externos</TabsTrigger>
-          </TabsList>
+          <div className="flex items-center gap-3 mb-2 flex-wrap">
+            <TabsList className="inline-flex flex-nowrap min-w-max gap-2">
+              <TabsTrigger value="cadastros" data-permission="Cadastros.visualizar">📋 Cadastros Gerais</TabsTrigger>
+              <TabsTrigger value="apps-externos" data-permission="Sistema.Integracoes.visualizar">📱 Apps, Portais & Ambientes Externos</TabsTrigger>
+            </TabsList>
+            <IAContextualModulo modulo="Cadastros" compact />
+          </div>
         </div>
 
         {/* ABA: APPS EXTERNOS — Fonte única para Portal do Cliente, App Motorista, Chatbot, etc. */}

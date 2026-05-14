@@ -237,6 +237,46 @@ export const ciclo12Items = [
   },
 ];
 
+// ── Ciclo 13 — Julho 2026 ───────────────────────────────────────────────────
+export const ciclo13Items = [
+  {
+    id: 'c13-01', modulo: 'Agenda', pilar: 'IA', prioridade: 'ALTO',
+    titulo: 'SemEmpresaBanner + IAContextualModulo na Agenda',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'Banner orientativo e IA contextual de eventos integrados ao cabeçalho da página Agenda.',
+  },
+  {
+    id: 'c13-02', modulo: 'Cadastros', pilar: 'IA', prioridade: 'MÉDIO',
+    titulo: 'SemEmpresaBanner + IAContextualModulo nos Cadastros',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'Banner multiempresa + IA de cadastros integrados à página de Cadastros Gerais.',
+  },
+  {
+    id: 'c13-03', modulo: 'Hub Atendimento', pilar: 'IA', prioridade: 'MÉDIO',
+    titulo: 'SemEmpresaBanner + IAContextualModulo no Hub Atendimento',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'Banner multiempresa + IA de atendimento integrados ao cabeçalho do Hub de Atendimento Omnicanal.',
+  },
+  {
+    id: 'c13-04', modulo: 'Portal', pilar: 'UX', prioridade: 'MÉDIO',
+    titulo: 'SemEmpresaBanner no Portal do Cliente',
+    status: 'planejado', impacto: 'Médio',
+    descricao: 'Banner orientativo na página de Portal do Cliente para guiar acesso sem empresa configurada.',
+  },
+  {
+    id: 'c13-05', modulo: 'Todos', pilar: 'Governança', prioridade: 'ALTO',
+    titulo: 'Scores atualizados: Agenda, Cadastros, Hub Atendimento → 100%',
+    status: 'concluido', impacto: 'Alto',
+    descricao: 'moduleImprovementPlan atualizado com scores finais para fechar o ciclo de headers padronizados.',
+  },
+  {
+    id: 'c13-06', modulo: 'Sistema', pilar: 'Governança', prioridade: 'BAIXO',
+    titulo: 'PlanoMelhoria: Ciclo 13 registrado e Sprint Board atualizado',
+    status: 'concluido', impacto: 'Médio',
+    descricao: 'ciclo13Items exportado e integrado ao Sprint Board e PlanoMelhoriaCicloAtual.',
+  },
+];
+
 // ── Roadmap 2026–2027 ────────────────────────────────────────────────────────
 export const roadmap2026 = [
   {

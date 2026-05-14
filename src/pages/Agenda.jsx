@@ -38,6 +38,8 @@ import { useWindow } from "@/components/lib/useWindow";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import SemEmpresaBanner from "@/components/common/SemEmpresaBanner";
+import IAContextualModulo from "@/components/ia/IAContextualModulo";
 
 
 function Agenda() {
@@ -821,9 +823,13 @@ function Agenda() {
     <ProtectedSection module="Agenda" action="visualizar">
     <div className="w-full h-full flex flex-col overflow-hidden">
       <div className="flex-1 p-6 lg:p-8 space-y-6 overflow-auto">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Agenda e Calendário</h1>
-        <p className="text-slate-600">Gerencie compromissos, reuniões e lembretes com notificações automáticas</p>
+      <SemEmpresaBanner modulo="Agenda e Calendário" />
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 mb-1">Agenda e Calendário</h1>
+          <p className="text-slate-600">Gerencie compromissos, reuniões e lembretes com notificações automáticas</p>
+        </div>
+        <IAContextualModulo modulo="Agenda" compact />
       </div>
 
       {/* Alert Sincronização */}

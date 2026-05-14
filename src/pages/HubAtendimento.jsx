@@ -51,6 +51,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
+import SemEmpresaBanner from "@/components/common/SemEmpresaBanner";
+import IAContextualModulo from "@/components/ia/IAContextualModulo";
 
 const ChatbotDashboard = React.lazy(() => import("@/components/chatbot/ChatbotDashboard"));
 const ConfiguracaoCanais = React.lazy(() => import("@/components/chatbot/ConfiguracaoCanais"));
@@ -330,18 +332,22 @@ export default function HubAtendimento() {
 
   return (
     <div className="w-full h-full min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 lg:p-6 overflow-auto">
+      <SemEmpresaBanner modulo="Hub de Atendimento" />
       <div className={`${layoutExpandido ? 'max-w-full' : 'max-w-7xl'} mx-auto space-y-4`}>
         <ErrorBoundary>
         {/* Header Responsivo */}
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 flex items-center gap-3">
-              <MessageCircle className="w-7 h-7 lg:w-8 lg:h-8 text-blue-600" />
-              Hub de Atendimento Omnicanal
-            </h1>
-            <p className="text-slate-600 text-sm lg:text-base mt-1">
-              Central unificada • Multi-empresa • IA Avançada • V21.6
-            </p>
+          <div className="flex items-start gap-3">
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 flex items-center gap-3">
+                <MessageCircle className="w-7 h-7 lg:w-8 lg:h-8 text-blue-600" />
+                Hub de Atendimento Omnicanal
+              </h1>
+              <p className="text-slate-600 text-sm lg:text-base mt-1">
+                Central unificada • Multi-empresa • IA Avançada • V21.6
+              </p>
+            </div>
+            <div className="mt-1"><IAContextualModulo modulo="Hub Atendimento" compact /></div>
           </div>
           
           {/* Navegação entre abas - Responsiva */}

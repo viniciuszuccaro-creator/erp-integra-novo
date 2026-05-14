@@ -1,56 +1,107 @@
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { AlertTriangle, Rocket, ShieldCheck } from 'lucide-react';
-import CriticalModuleExecutionCard from './CriticalModuleExecutionCard';
-import CriticalValidationRail from './CriticalValidationRail';
-import { criticalPriorityModules } from './criticalPriorityData';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { AlertCircle, Zap, Clock } from "lucide-react";
 
 export default function PlanoMelhoriaCriticalCommandCenter() {
-  const average = Math.round(criticalPriorityModules.reduce((sum, item) => sum + item.progress, 0) / criticalPriorityModules.length);
+  const criticalItems = [
+    {
+      id: 1,
+      titulo: "RBAC Multinível Completo",
+      pilar: "Acesso",
+      bloqueador: false,
+      eia: 85,
+      risco: "Baixo",
+    },
+    {
+      id: 2,
+      titulo: "Sincronização Grupo ↔ Empresa",
+      pilar: "Multiempresa",
+      bloqueador: true,
+      eia: 60,
+      risco: "Alto",
+    },
+    {
+      id: 3,
+      titulo: "Motor Financeiro V22",
+      pilar: "Financeiro",
+      bloqueador: false,
+      eia: 70,
+      risco: "Médio",
+    },
+    {
+      id: 4,
+      titulo: "Integração Logística Completa",
+      pilar: "Logística",
+      bloqueador: true,
+      eia: 55,
+      risco: "Alto",
+    },
+  ];
 
   return (
-    <section className="flex h-full w-full flex-col gap-4">
-      <Card className="w-full overflow-hidden border-red-100 bg-gradient-to-r from-red-50 via-white to-blue-50 shadow-sm">
-        <CardContent className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-start gap-3">
-            <div className="rounded-2xl bg-red-100 p-3 text-red-700">
-              <AlertTriangle className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-red-600">Prioridade crítica • melhoria completa</p>
-              <h2 className="mt-1 text-2xl font-bold text-slate-900">Centro de execução crítica</h2>
-              <p className="mt-1 max-w-3xl text-sm text-slate-600">
-                Consolidação dos módulos que sustentam operação, caixa, estoque, pedido e segurança, sempre com multiempresa, acesso, auditoria, IA e performance.
-              </p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-white bg-white/80 p-3 text-center shadow-sm">
-              <Rocket className="mx-auto h-4 w-4 text-blue-600" />
-              <p className="mt-1 text-xl font-bold text-slate-900">{average}%</p>
-              <p className="text-xs text-slate-500">maturidade crítica</p>
-            </div>
-            <div className="rounded-xl border border-white bg-white/80 p-3 text-center shadow-sm">
-              <ShieldCheck className="mx-auto h-4 w-4 text-emerald-600" />
-              <p className="mt-1 text-xl font-bold text-slate-900">6</p>
-              <p className="text-xs text-slate-500">controles padrão</p>
-            </div>
-            <div className="rounded-xl border border-white bg-white/80 p-3 text-center shadow-sm col-span-2 sm:col-span-1">
-              <AlertTriangle className="mx-auto h-4 w-4 text-red-600" />
-              <p className="mt-1 text-xl font-bold text-slate-900">{criticalPriorityModules.length}</p>
-              <p className="text-xs text-slate-500">módulos críticos</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+    <Card className="w-full">
+      <CardHeader className="border-b pb-3 bg-gradient-to-r from-red-50 to-amber-50">
+        <CardTitle className="text-sm font-bold flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-red-600" />
+          Centro de Comando — Prioridades Críticas
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-4">
+        <div className="space-y-2">
+          {criticalItems.map((item) => (
+            <div key={item.id} className="border border-slate-200 rounded-lg p-3 hover:bg-slate-50 transition">
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-semibold text-sm">{item.titulo}</p>
+                    {item.bloqueador && (
+                      <Badge className="bg-red-600 text-white text-[10px]">BLOQUEADOR</Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">Pilar: {item.pilar}</p>
+                </div>
+              </div>
 
-      <CriticalValidationRail />
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div className="bg-slate-50 p-2 rounded">
+                  <p className="text-slate-500 mb-1">IA Score</p>
+                  <p className="font-bold text-blue-600">{item.eia}%</p>
+                </div>
+                <div className="bg-slate-50 p-2 rounded">
+                  <p className="text-slate-500 mb-1">Risco</p>
+                  <Badge
+                    className={`text-[10px] ${
+                      item.risco === "Alto"
+                        ? "bg-red-100 text-red-700"
+                        : item.risco === "Médio"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-green-100 text-green-700"
+                    }`}
+                  >
+                    {item.risco}
+                  </Badge>
+                </div>
+                <div className="bg-slate-50 p-2 rounded">
+                  <p className="text-slate-500 mb-1">Status</p>
+                  <div className="flex items-center gap-1">
+                    <Zap className="w-3 h-3 text-amber-500" />
+                    <span className="font-medium">Crítico</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
 
-      <div className="grid w-full gap-4 xl:grid-cols-2">
-        {criticalPriorityModules.map((item) => (
-          <CriticalModuleExecutionCard key={item.module} item={item} />
-        ))}
-      </div>
-    </section>
+        <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-slate-700 flex items-start gap-2">
+          <Clock className="w-3.5 h-3.5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold">Próximo milestones crítico:</p>
+            <p>30 de Maio — Finalizar Sincronização Grupo ↔ Empresa</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

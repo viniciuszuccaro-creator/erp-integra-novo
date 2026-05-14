@@ -1,124 +1,97 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Clock, Rocket, Sparkles } from 'lucide-react';
-
-const TIMELINE = [
-  {
-    periodo: 'Fase 1 — Estabilização',
-    data: 'Concluída',
-    status: 'done',
-    cor: 'emerald',
-    itens: ['Lint e build limpos', 'Imports corrigidos', 'Base segura para evoluir', 'Erros auditados no AuditLog'],
-  },
-  {
-    periodo: 'Fase 2 — Multiempresa + Acesso',
-    data: 'Concluída',
-    status: 'done',
-    cor: 'emerald',
-    itens: ['group_id + empresa_id em todas as entidades', 'Wrapping automático no Layout', 'RBAC + entityGuard', 'SoD Checker ativo'],
-  },
-  {
-    periodo: 'Fase 3 — Modularização + Performance',
-    data: 'Concluída',
-    status: 'done',
-    cor: 'emerald',
-    itens: ['Launchpads por módulo', 'Hooks dedicados por módulo', 'Cache IDB offline', 'Prefetch preditivo'],
-  },
-  {
-    periodo: 'Fase 4 — IA Operacional',
-    data: 'Concluída',
-    status: 'done',
-    cor: 'emerald',
-    itens: ['12 painéis IA em produção', 'iaFinanceAnomalyScan', 'productPriceOptimizer', 'iaChurnAnalyzer', 'Cockpit IA no Plano de Melhoria'],
-  },
-  {
-    periodo: 'Fase 5 — Integrações + Automações',
-    data: 'Concluída',
-    status: 'done',
-    cor: 'emerald',
-    itens: ['NF-e multiempresa via eNotas', 'Boleto/PIX por gateway', 'WhatsApp com templates', 'onPedidoCreated/Approval/ReadyToInvoice'],
-  },
-  {
-    periodo: 'Fase 6 — Governança + Auditoria',
-    data: 'Concluída',
-    status: 'done',
-    cor: 'emerald',
-    itens: ['AuditLog central universal', 'LGPD piiEncryptor', 'Backup automático criptografado', 'deployAudit + orderFlowAuditor'],
-  },
-  {
-    periodo: 'Fase 7 — UX Responsiva + Multitarefa',
-    data: 'Concluída',
-    status: 'done',
-    cor: 'emerald',
-    itens: ['WindowManager multitarefa', 'Mobile-first em todos módulos', 'Sidebar adaptativa', 'Atalhos de teclado (Ctrl+K)'],
-  },
-  {
-    periodo: 'Fase 8 — Cockpit + Conexões + Documentação',
-    data: 'Em curso',
-    status: 'active',
-    cor: 'blue',
-    itens: ['PlanoMelhoriaIACockpit', 'PlanoMelhoriaConexoesModulos', 'PlanoMelhoriaFuncoesBackend', 'PlanoMelhoriaEntidadesStatus'],
-  },
-  {
-    periodo: 'Fase 9 — Inovação Q3/Q4 2026',
-    data: 'Planejada',
-    status: 'planned',
-    cor: 'violet',
-    itens: ['IA generativa contextual', 'BI preditivo com ML', 'Omnichannel total', 'Digital Twin 3D', 'RPA + Zero Trust'],
-  },
-];
-
-const corMap = {
-  emerald: { dot: 'bg-emerald-500', card: 'border-emerald-100 bg-emerald-50/40', badge: 'bg-emerald-100 text-emerald-700', line: 'bg-emerald-200' },
-  blue: { dot: 'bg-blue-500 ring-4 ring-blue-100', card: 'border-blue-100 bg-blue-50/40', badge: 'bg-blue-100 text-blue-700', line: 'bg-blue-200' },
-  violet: { dot: 'bg-violet-400', card: 'border-violet-100 bg-violet-50/40', badge: 'bg-violet-100 text-violet-700', line: 'bg-violet-200' },
-};
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Flag, Zap } from "lucide-react";
 
 export default function PlanoMelhoriaTimelineExecutiva() {
+  const timeline = [
+    {
+      data: "30 Mai 2026",
+      evento: "Sincronização Grupo ↔ Empresa",
+      tipo: "milestone",
+      prioridade: "Crítica",
+    },
+    {
+      data: "15 Jun 2026",
+      evento: "Finalizar Ciclo 20 — Todos os Módulos",
+      tipo: "release",
+      prioridade: "Alta",
+    },
+    {
+      data: "20 Jun 2026",
+      evento: "Iniciar Ciclo 21 — IA Avançada",
+      tipo: "milestone",
+      prioridade: "Alta",
+    },
+    {
+      data: "01 Jul 2026",
+      evento: "Certificação ISO 27001",
+      tipo: "compliance",
+      prioridade: "Alta",
+    },
+    {
+      data: "15 Jul 2026",
+      evento: "Lançamento Mobile App",
+      tipo: "release",
+      prioridade: "Média",
+    },
+  ];
+
+  const getIconByType = (type) => {
+    const map = {
+      milestone: <Flag className="w-3.5 h-3.5 text-purple-600" />,
+      release: <Zap className="w-3.5 h-3.5 text-green-600" />,
+      compliance: <Calendar className="w-3.5 h-3.5 text-blue-600" />,
+    };
+    return map[type];
+  };
+
   return (
     <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl text-slate-900">
-          <Rocket className="h-5 w-5 text-blue-600" />
-          Timeline executiva do plano
+      <CardHeader className="border-b pb-3">
+        <CardTitle className="text-sm font-bold flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-slate-600" />
+          Timeline Executiva
         </CardTitle>
-        <p className="text-sm text-slate-500">Histórico completo das fases executadas e próximos ciclos planejados.</p>
       </CardHeader>
-      <CardContent>
-        <div className="relative flex flex-col gap-0">
-          {TIMELINE.map((fase, idx) => {
-            const cores = corMap[fase.cor];
-            const Icon = fase.status === 'done' ? CheckCircle2 : fase.status === 'active' ? Clock : Sparkles;
-            return (
-              <div key={fase.periodo} className="flex gap-4">
-                {/* Linha vertical + dot */}
-                <div className="flex flex-col items-center">
-                  <div className={`mt-4 h-4 w-4 rounded-full shrink-0 ${cores.dot}`} />
-                  {idx < TIMELINE.length - 1 && (
-                    <div className={`w-0.5 flex-1 min-h-4 ${cores.line}`} />
-                  )}
-                </div>
-                {/* Conteúdo */}
-                <div className={`mb-3 flex-1 rounded-xl border p-4 ${cores.card}`}>
-                  <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
-                    <div>
-                      <p className="font-bold text-slate-900">{fase.periodo}</p>
-                    </div>
-                    <Badge className={cores.badge}>{fase.data}</Badge>
+      <CardContent className="p-4">
+        <div className="space-y-3 relative">
+          {/* Linha vertical */}
+          <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-slate-200" />
+
+          {timeline.map((item, idx) => (
+            <div key={idx} className="relative pl-10">
+              {/* Ponto na timeline */}
+              <div className="absolute left-0 top-1 w-7 h-7 bg-white border-2 border-slate-200 rounded-full flex items-center justify-center">
+                {getIconByType(item.tipo)}
+              </div>
+
+              {/* Conteúdo */}
+              <div className="bg-slate-50 rounded-lg p-3 border border-slate-200 hover:border-slate-300 transition">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-slate-900">{item.data}</p>
+                    <p className="text-sm font-medium text-slate-800 mt-0.5">{item.evento}</p>
                   </div>
-                  <div className="grid gap-1 sm:grid-cols-2">
-                    {fase.itens.map((item) => (
-                      <div key={item} className="flex items-center gap-1.5 text-xs text-slate-600">
-                        <Icon className={`h-3 w-3 shrink-0 ${fase.status === 'done' ? 'text-emerald-500' : fase.status === 'active' ? 'text-blue-500' : 'text-violet-400'}`} />
-                        {item}
-                      </div>
-                    ))}
-                  </div>
+                  <Badge
+                    className={`text-[10px] flex-shrink-0 ${
+                      item.prioridade === "Crítica"
+                        ? "bg-red-100 text-red-700"
+                        : item.prioridade === "Alta"
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-green-100 text-green-700"
+                    }`}
+                  >
+                    {item.prioridade}
+                  </Badge>
                 </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 pt-3 border-t text-xs text-slate-600 bg-blue-50 p-2 rounded">
+          📅 <strong>Próximo:</strong> Revisar status em 25/Mai — ajustes finais antes do milestone crítico
         </div>
       </CardContent>
     </Card>

@@ -15,8 +15,8 @@ Deno.serve(async (req) => {
       return new Response('Method Not Allowed', { status: 405 });
     }
 
-    // Versão com timestamp para forçar atualização do SW sempre que o backend for redeploy
-    const SW_VERSION = 'v' + Date.now();
+    // Versão estática incrementada — muda o hash e força o browser a descartar o SW antigo
+    const SW_VERSION = 'v' + Math.floor(Date.now() / 60000); // muda a cada minuto de deploy
     const swCode = `
       // SW Version: ${SW_VERSION}
       const CACHE_NAME = 'zuccaro-app-cache-${SW_VERSION}';

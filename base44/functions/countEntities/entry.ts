@@ -73,19 +73,21 @@ async function expandGroupFilter(base44, entityName, f) {
       const empresasIds = (empresas || []).map(e => e.id).filter(Boolean);
       const rest = { ...f };
       delete rest.group_id;
+
       if (EXPAND_SET.has(entityName)) {
+        // Conta APENAS pelo campo principal da empresa dona (sem empresas_compartilhadas_ids)
+        // para evitar duplicação de registros compartilhados entre empresas do grupo
         const orConds = [
           { [ctxCampo]: { $in: empresasIds } },
-          ...(ctxCampo !== 'empresa_id' ? [{ empresa_id: { $in: empresasIds } }] : []),
-          { empresas_compartilhadas_ids: { $in: empresasIds } },
           { group_id: groupId },
         ];
-        if (entityName !== 'Produto') orConds.push({ empresa_id: null }); // legados
+        if (ctxCampo !== 'empresa_id') orConds.push({ empresa_id: { $in: empresasIds } });
         if (entityName === 'Produto') orConds.push({ compartilhado_grupo: true });
         return { ...rest, $or: orConds };
       }
-      return { ...rest, $or: [{ [ctxCampo]: { $in: empresasIds } }, { group_id: groupId }, { empresa_id: null }] };
-    } catch (_) { /* fallback */ }
+      // Demais entidades: filtra pelo campo correto da empresa dona
+      return { ...rest, $or: [{ [ctxCampo]: { $in: empresasIds } }, { group_id: groupId }] };
+    } catch (_) { /* fallback: retorna filtro com group_id direto */ }
   }
   return f;
 }

@@ -15,53 +15,50 @@ Deno.serve(async (req) => {
       return new Response('Method Not Allowed', { status: 405 });
     }
 
+    // Versão com timestamp para forçar atualização do SW sempre que o backend for redeploy
+    const SW_VERSION = 'v' + Date.now();
     const swCode = `
-      const CACHE_NAME = 'zuccaro-app-cache-v1';
-      const APP_SHELL = ['/', '/index.html', '/favicon.ico'];
+      // SW Version: ${SW_VERSION}
+      const CACHE_NAME = 'zuccaro-app-cache-${SW_VERSION}';
 
       self.addEventListener('install', (event) => {
-        event.waitUntil(
-          caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting())
-        );
+        // Ativa imediatamente sem esperar tab fechar
+        event.waitUntil(self.skipWaiting());
       });
 
       self.addEventListener('activate', (event) => {
+        // Remove TODOS os caches antigos para garantir que código novo seja servido
         event.waitUntil(
-          caches.keys().then((keys) => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))).then(() => self.clients.claim())
+          caches.keys()
+            .then((keys) => Promise.all(keys.map(k => caches.delete(k))))
+            .then(() => self.clients.claim())
         );
       });
 
-      // Network-first for navigation; cache-first for same-origin static assets
+      // NETWORK-FIRST para tudo — garante que atualizações do GitHub sejam refletidas imediatamente
+      // Fallback para cache apenas quando offline
       self.addEventListener('fetch', (event) => {
         const req = event.request;
         const url = new URL(req.url);
-        const isSameOrigin = url.origin === self.location.origin;
-        const isNavigation = req.mode === 'navigate';
 
-        if (isNavigation) {
-          event.respondWith(
-            fetch(req).then((res) => {
-              const copy = res.clone();
-              caches.open(CACHE_NAME).then((cache) => cache.put('/', copy)).catch(()=>{});
-              return res;
-            }).catch(() => caches.match('/') || caches.match('/index.html'))
-          );
-          return;
-        }
+        // Não intercepta requests de API/functions
+        if (url.pathname.startsWith('/functions/') || url.pathname.startsWith('/api/')) return;
 
-        if (isSameOrigin && (url.pathname.endsWith('.js') || url.pathname.endsWith('.css') || url.pathname.endsWith('.png') || url.pathname.endsWith('.svg') || url.pathname.endsWith('.jpg') || url.pathname.endsWith('.jpeg') || url.pathname.endsWith('.woff2'))) {
-          event.respondWith(
-            caches.match(req).then((hit) => hit || fetch(req).then((res) => {
-              const copy = res.clone();
-              caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)).catch(()=>{});
+        // Network-first: tenta rede, cai para cache offline
+        event.respondWith(
+          fetch(req)
+            .then((res) => {
+              if (res && res.status === 200) {
+                const copy = res.clone();
+                caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)).catch(() => {});
+              }
               return res;
-            }))
-          );
-          return;
-        }
+            })
+            .catch(() => caches.match(req))
+        );
       });
 
-      // Support immediate activation
+      // Ativação imediata ao receber mensagem
       self.addEventListener('message', (event) => {
         if (event.data && event.data.type === 'SKIP_WAITING') {
           self.skipWaiting();

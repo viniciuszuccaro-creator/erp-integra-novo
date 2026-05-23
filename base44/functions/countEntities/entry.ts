@@ -91,16 +91,11 @@ async function expandGroupFilter(base44, entityName, f) {
 }
 
 /**
- * fastCount V2 — contagem eficiente com retry automático em 429
- * Estratégia: páginas de 500 com delay progressivo.
- * Primeira page: sem delay. Pages seguintes: delay crescente.
+ * fastCount V3 — contagem eficiente sem throttle artificial
+ * Busca até 2000 registros em uma única chamada (suficiente para badges de cadastro)
  */
 const COUNT_CACHE = new Map();
-const COUNT_CACHE_TTL_MS = 30 * 60 * 1000;
-let LAST_COUNT_CALL_AT = 0;
-let COUNT_BACKEND_PAUSED_UNTIL = 0;
-const MIN_COUNT_GAP_MS = 8000;
-const COUNT_BACKEND_PAUSE_MS = 5 * 60 * 1000;
+const COUNT_CACHE_TTL_MS = 60 * 1000; // 60s cache
 
 function stableCacheKey(entityName, finalFilter) {
   try { return `${entityName}:${JSON.stringify(finalFilter || {}, Object.keys(finalFilter || {}).sort())}`; }
@@ -108,42 +103,20 @@ function stableCacheKey(entityName, finalFilter) {
 }
 
 async function fastCount(base44, entityName, finalFilter) {
-  const PAGE = 1000;
-  const MAX_PAGES = 1; // modo proteção: 1 chamada por entidade para evitar rate limit
   const key = stableCacheKey(entityName, finalFilter);
   const cached = COUNT_CACHE.get(key);
   if (cached && Date.now() - cached.ts < COUNT_CACHE_TTL_MS) return cached.count;
-  if (Date.now() < COUNT_BACKEND_PAUSED_UNTIL) return cached?.count || 0;
 
   let total = 0;
-
-  for (let page = 0; page < MAX_PAGES; page++) {
-    let batch = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        const waitMs = Math.max(0, MIN_COUNT_GAP_MS - (Date.now() - LAST_COUNT_CALL_AT));
-        if (waitMs > 0 && cached) return cached.count;
-        if (waitMs > 0) await new Promise(r => setTimeout(r, waitMs));
-        LAST_COUNT_CALL_AT = Date.now();
-        batch = await base44.asServiceRole.entities[entityName].filter(finalFilter, '-id', PAGE, page * PAGE);
-        break;
-      } catch (err) {
-        const status = err?.status || err?.response?.status;
-        if (status === 429 || status === 502 || (typeof status === 'number' && status >= 500)) {
-          COUNT_BACKEND_PAUSED_UNTIL = Date.now() + COUNT_BACKEND_PAUSE_MS;
-          const safeCount = cached?.count || 0;
-          COUNT_CACHE.set(key, { count: safeCount, ts: Date.now() });
-          return safeCount;
-        } else {
-          batch = [];
-          break;
-        }
-      }
+  try {
+    const batch = await base44.asServiceRole.entities[entityName].filter(finalFilter, '-id', 2000, 0);
+    total = Array.isArray(batch) ? batch.length : 0;
+  } catch (err) {
+    const status = err?.status || err?.response?.status;
+    if (status === 429 || (typeof status === 'number' && status >= 500)) {
+      return cached?.count || 0;
     }
-
-    const n = Array.isArray(batch) ? batch.length : 0;
-    total += n;
-    if (n < PAGE) break;
+    total = 0;
   }
 
   COUNT_CACHE.set(key, { count: total, ts: Date.now() });
@@ -195,9 +168,10 @@ Deno.serve(async (req) => {
     // MODO LOTE: { entities: [{ entityName, filter }, ...] }
     // Processa em modo serial protegido para evitar rajadas e erro 429
     if (entitiesBatch && entitiesBatch.length > 0) {
-    const counts = {};
-    const WINDOW = 1;
-    const DELAY_BETWEEN_WINDOWS = 2500;
+      const counts = {};
+      // Processa em janelas de 5 entidades em paralelo com delay mínimo de 300ms entre janelas
+      const WINDOW = 5;
+      const DELAY_BETWEEN_WINDOWS = 300;
 
       for (let i = 0; i < entitiesBatch.length; i += WINDOW) {
         const slice = entitiesBatch.slice(i, i + WINDOW);

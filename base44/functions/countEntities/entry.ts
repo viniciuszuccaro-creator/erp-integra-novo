@@ -93,7 +93,7 @@ async function expandGroupFilter(base44, entityName, f) {
 }
 
 /**
- * fastCount V3 — contagem eficiente sem throttle artificial
+ * fastCount V4 — contagem eficiente sem throttle artificial
  * Busca até 2000 registros em uma única chamada (suficiente para badges de cadastro)
  */
 const COUNT_CACHE = new Map();

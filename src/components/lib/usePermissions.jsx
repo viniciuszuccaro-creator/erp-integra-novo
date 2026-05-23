@@ -1,9 +1,15 @@
-import { useUser } from "./UserContext";
+import { useContext } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
+import { UserContext } from "./UserContext";
 
 export default function usePermissions() {
-  const { user, isLoading: loadingUser } = useUser();
+  // Tenta usar UserContext (layout completo); cai para AuthContext quando fora do UserProvider
+  const userCtx = useContext(UserContext);
+  const { user: authUser, isLoadingAuth } = useAuth();
+  const user = userCtx?.user ?? authUser;
+  const loadingUser = userCtx ? (userCtx.isLoading ?? false) : isLoadingAuth;
 
   // Buscar perfil de acesso completo
   const { data: perfilAcesso, isLoading: loadingPerfil } = useQuery({

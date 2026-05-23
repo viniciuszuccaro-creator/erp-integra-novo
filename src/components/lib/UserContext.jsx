@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { base44, isApiKeyMode, isLocalOnlyMode, localApiUser } from "@/api/base44Client";
 
-const UserContext = createContext(null);
+export const UserContext = createContext(null);
 
 export function UserProvider({ children }) {
   const [user, setUser] = useState(null);

@@ -136,12 +136,12 @@ export function useEntityCounts(entities = []) {
       }
       return result;
     },
-    staleTime: 300_000,     // proteção anti-rate-limit: contagens em cache por 5 minutos
-    gcTime: 600_000,
+    staleTime: 30_000,      // 30s — contagens ficam atualizadas
+    gcTime: 300_000,
     placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    retry: 0,
+    refetchOnMount: 'always',
+    retry: 1,
     enabled: canFetch,
   });
 
@@ -152,7 +152,7 @@ export function useEntityCounts(entities = []) {
       const api = base44.entities?.[entity];
       if (!api?.subscribe) return null;
       return api.subscribe(() => {
-        queryClient.invalidateQueries({ queryKey: ['entityCounts_v5'], refetchType: 'none' });
+        queryClient.invalidateQueries({ queryKey: ['entityCounts_v5'] });
       });
     }).filter(Boolean);
     return () => { unsubs.forEach(u => { if (typeof u === 'function') u(); }); };

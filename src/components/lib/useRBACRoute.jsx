@@ -1,12 +1,12 @@
 // Hook para verificação RBAC em rotas
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '@/components/lib/UserContext';
+import { useAuth } from '@/lib/AuthContext';
 import usePermissions from '@/components/lib/usePermissions';
 
 export function useRBACRoute(moduleName, requiredAction = 'ver') {
   const navigate = useNavigate();
-  const { user, isLoadingAuth } = useUser();
+  const { user, isLoadingAuth } = useAuth();
   const { hasPermission } = usePermissions();
 
   useEffect(() => {

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { 
@@ -71,6 +72,8 @@ import { usePredictivePrefetch } from "@/components/lib/usePredictivePrefetch";
 import { idbClearExpired } from "@/components/lib/useIndexedDBCache";
 
 import EmpresaOnboardingGuard from "@/components/sistema/EmpresaOnboardingGuard";
+import LayoutEffects from "@/components/layout/LayoutEffects";
+import LayoutRBACWrapper from "@/components/layout/LayoutRBACWrapper";
 
 
 const navigationItems = [
@@ -145,17 +148,16 @@ function LayoutContent({ children, currentPageName }) {
         const { user } = useUser();
         const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
         const { hasPermission } = usePermissions();
-        const contextRef = React.useRef({ user, empresaAtual, grupoAtual, contexto, moduleName });
         contextRef.current = { user, empresaAtual, grupoAtual, contexto, moduleName };
 
 
         const [pesquisaOpen, setPesquisaOpen] = useState(false);
         const [modoEscuro, setModoEscuro] = useState(false);
         const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
-        const auditThrottleRef = React.useRef({ click: 0, change: 0 });
+        const [integracoesOk, setIntegracoesOk] = useState(true);
         const { prefetch: prefetchModule } = usePrefetchModuleData();
-        const AUDIT_BUSINESS_ONLY = true;
         const queryClient = useQueryClient();
+        const contextRef = useRef({ user, empresaAtual, grupoAtual, contexto, moduleName });
 
         // Fase 2: Barramento de invalidação seletiva — substitui broadcast global por keys específicas
         useInvalidationBus([
@@ -333,32 +335,7 @@ function LayoutContent({ children, currentPageName }) {
     };
   }, []);
 
-  // Verificação de integrações fiscais por empresa (alerta leve para admins)
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        if (!empresaAtual?.id) { if (!cancelled) setIntegracoesOk(true); return; }
-        // Apenas perfis com permissão de Sistema visualizam alerta
-        const allowed = hasPermission('Sistema', null, 'ver');
-        if (!allowed) { if (!cancelled) setIntegracoesOk(true); return; }
-        const chave = `integracoes_${empresaAtual.id}`;
-        const isAuth = await base44.auth.isAuthenticated();
-        if (!isAuth) { if (!cancelled) setIntegracoesOk(true); return; }
-        const res = await base44.functions.invoke('getEntityRecord', {
-          entityName: 'ConfiguracaoSistema',
-          filter: { chave },
-          limit: 1,
-        });
-        const cfg = Array.isArray(res?.data) ? (res.data[0] || null) : null;
-        const ok = !!(cfg?.integracao_nfe?.api_key && cfg?.integracao_boletos?.api_key);
-        if (!cancelled) setIntegracoesOk(!!ok);
-      } catch {
-        if (!cancelled) setIntegracoesOk(true);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [empresaAtual?.id]);
+  // Verificação de integrações delegada ao LayoutEffects (via setIntegracoesOk prop)
 
   // PWA-lite: injeta manifest em runtime e tenta registrar service worker (se disponível)
   useEffect(() => {
@@ -487,55 +464,30 @@ function LayoutContent({ children, currentPageName }) {
     }
     }, []);
 
+  // Cache persistência RQ — mantido aqui (acesso ao queryClient local)
   useEffect(() => {
     const cache = queryClient.getQueryCache();
     const indexKey = 'rq_index_keys';
     const addToIndex = (k) => {
       try {
         const curr = JSON.parse(localStorage.getItem(indexKey) || '[]');
-        if (!curr.includes(k)) {
-          curr.push(k);
-          localStorage.setItem(indexKey, JSON.stringify(curr));
-        }
-      } catch (_) {}
+        if (!curr.includes(k)) { curr.push(k); localStorage.setItem(indexKey, JSON.stringify(curr)); }
+      } catch {}
     };
     const sub = cache.subscribe((event) => {
       try {
         if (event?.type !== 'updated') return;
-        const q = event.query;
-        const state = q.getState?.();
+        const q = event.query; const state = q.getState?.();
         if (state?.data === undefined) return;
-        const scopeEmpresa = empresaAtual?.id || '';
-        const scopeGrupo = grupoAtual?.id || '';
-        const storageKey = `rq_${JSON.stringify(q.queryKey)}_${scopeEmpresa}_${scopeGrupo}`;
-        localStorage.setItem(storageKey, JSON.stringify(state.data));
-        addToIndex(storageKey);
-      } catch (_) {}
+        const sk = `rq_${JSON.stringify(q.queryKey)}_${empresaAtual?.id||''}_${grupoAtual?.id||''}`;
+        localStorage.setItem(sk, JSON.stringify(state.data)); addToIndex(sk);
+      } catch {}
     });
-    // Hydrate when offline (cold start)
-    if (isOffline) {
-      try {
-        const keys = JSON.parse(localStorage.getItem(indexKey) || '[]');
-        keys.forEach((k) => {
-          try {
-            const val = JSON.parse(localStorage.getItem(k) || 'null');
-            if (val != null) {
-              const match = k.match(/^rq_(.*)_/);
-              if (match) {
-                const keyJson = match[1];
-                const qk = JSON.parse(keyJson);
-                queryClient.setQueryData(qk, val);
-              }
-            }
-          } catch (_) {}
-        });
-      } catch (_) {}
-    }
     return () => { if (typeof sub === 'function') sub(); };
-  }, [queryClient, isOffline, empresaAtual?.id, grupoAtual?.id]);
+  }, [queryClient, empresaAtual?.id, grupoAtual?.id]);
 
-  // Registro global de erros de UI (não altera layout visual)
-  useEffect(() => {
+  // Erros de UI — delegado ao LayoutEffects
+  /* useEffect(() => {
     const onError = (e) => {
                                     try {
                                       const msg = e?.message || e?.error?.message || 'Erro de UI';
@@ -593,7 +545,7 @@ function LayoutContent({ children, currentPageName }) {
       window.removeEventListener('error', onError);
       window.removeEventListener('unhandledrejection', onUnhandled);
     };
-  }, []);
+  }, []); */
 
   const darkModeStyles = modoEscuro ? `
     <style>
@@ -643,7 +595,8 @@ function LayoutContent({ children, currentPageName }) {
     </style>
   ` : '';
 
-  useEffect(() => {
+  // Entity subscriptions — delegado ao LayoutEffects
+  /* useEffect(() => {
     if (!user) return;
     const entityToModule = {
       Cliente: 'CRM',
@@ -752,10 +705,10 @@ function LayoutContent({ children, currentPageName }) {
     }).filter(Boolean);
 
     return () => { unsubs.forEach(u => { if (typeof u === 'function') u(); }); };
-  }, [user?.id, empresaAtual?.id, queryClient]);
+  }, [user?.id, empresaAtual?.id, queryClient]); */
 
-  // Global Phase 4 patch: multiempresa stamping + audit on entity writes
-  useEffect(() => {
+  // RBAC entity wrap — delegado ao LayoutRBACWrapper
+  /* useEffect(() => {
     if (!base44?.entities) return;
 
     const stamp = (dados) => {
@@ -1086,43 +1039,16 @@ function LayoutContent({ children, currentPageName }) {
         };
 
         base44.functions.__wrappedPhase4 = true;
-        // Nota: performance logs visíveis em Auditoria > Logs; usar este sinal para detectar gargalos.
       }
     } catch (_) {}
-    }, [user?.id, empresaAtual?.id, grupoAtual?.id, contexto]);
+    }, [user?.id, empresaAtual?.id, grupoAtual?.id, contexto]); */
 
-
-  // Auditoria global de interações (cliques/seletores/tabs)
-
-  // Auditoria de navegação entre páginas
-  useEffect(() => {
+  // Auditoria de navegação + bloqueio delegada ao LayoutEffects
+  // Auditoria de cliques (AUDIT_BUSINESS_ONLY=true → desabilitado)
+  /* useEffect(() => {
     if (!user) return;
-    try {
-      (async () => {
-        try {
-          if (await base44.auth.isAuthenticated()) {
-            await base44.entities.AuditLog.create({
-              usuario: user?.full_name || user?.email || 'Usuário',
-              usuario_id: user?.id,
-              empresa_id: empresaAtual?.id || null,
-              empresa_nome: empresaAtual?.nome_fantasia || empresaAtual?.razao_social || null,
-              acao: 'Visualização',
-              modulo: moduleName || 'Sistema',
-              tipo_auditoria: 'ui',
-              entidade: 'Navegação',
-              descricao: `Rota: ${location.pathname}`,
-              data_hora: new Date().toISOString(),
-            });
-          }
-        } catch (_) {}
-      })();
-    } catch (_) {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname, user?.id, empresaAtual?.id, moduleName]);
-  useEffect(() => {
-            if (!user) return;
-            if (AUDIT_BUSINESS_ONLY) return;
-            const handlerClick = (e) => {
+    if (true) return; // AUDIT_BUSINESS_ONLY
+    const handlerClick = (e) => {
       try {
         const now = Date.now();
         if (now - auditThrottleRef.current.click < 1500) return; // throttle 1.5s
@@ -1176,7 +1102,7 @@ function LayoutContent({ children, currentPageName }) {
       document.removeEventListener('click', handlerClick, true);
       document.removeEventListener('change', handlerChange, true);
     };
-  }, [user?.id, empresaAtual?.id, moduleName]);
+  }, [user?.id, empresaAtual?.id, moduleName]); */
 
   const handleIAEstoque = async () => {
           try {
@@ -1227,62 +1153,7 @@ function LayoutContent({ children, currentPageName }) {
     }
   }, [empresaAtual?.id, grupoAtual?.id, contexto]);
 
-  // Fase 3: Limpeza do IDB expirado no idle (uma vez por sessão)
-  useEffect(() => {
-    const cleanup = () => { try { idbClearExpired(); } catch (_) {} };
-    if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(cleanup, { timeout: 10000 });
-    } else {
-      setTimeout(cleanup, 8000);
-    }
-  }, []);
-
-  // Performance metrics observer (audit slow LCP/long tasks)
-  useEffect(() => {
-    try {
-      // Auditoria de deploy/app load (não bloqueante)
-      setTimeout(() => { (async () => { try { if (await base44.auth.isAuthenticated()) { await base44.functions.invoke('deployAudit', { event: 'app_loaded', module: moduleName || 'Sistema', page: currentPageName }); } } catch {} })(); }, 0);
-      const audits = [];
-      if (typeof PerformanceObserver !== 'undefined') {
-        // LCP
-        const lcpObs = new PerformanceObserver((list) => {
-          const entries = list.getEntries();
-          const entry = entries && entries.length ? entries[entries.length - 1] : null;
-          if (entry && entry.startTime > 2500) {
-            audits.push({ type: 'LCP', value: entry.startTime });
-          }
-        });
-        try { lcpObs.observe({ type: 'largest-contentful-paint', buffered: true }); } catch {}
-        // Long tasks
-        const ltObs = new PerformanceObserver((list) => {
-          const longs = list.getEntries().filter((e) => e.duration > 200);
-          if (longs.length) {
-            const max = Math.max.apply(null, longs.map((e) => e.duration));
-            audits.push({ type: 'longtask', count: longs.length, max });
-          }
-        });
-        try { ltObs.observe({ type: 'longtask', buffered: true }); } catch {}
-        // Flush once after 5s
-        setTimeout(() => {
-          if (audits.length) {
-            try { (async () => { try { if (await base44.auth.isAuthenticated()) { await base44.entities.AuditLog.create({
-              usuario: user?.full_name || 'Usuário',
-              usuario_id: user?.id,
-              empresa_id: empresaAtual?.id || null,
-              group_id: grupoAtual?.id || null,
-              acao: 'Visualização',
-              modulo: moduleName || 'Sistema',
-              tipo_auditoria: 'sistema',
-              entidade: 'Performance',
-              descricao: 'Métricas de desempenho',
-              dados_novos: { audits },
-              data_hora: new Date().toISOString(),
-            }); } } catch {} })(); } catch {}
-          }
-        }, 5000);
-      }
-    } catch (_) {}
-  }, [user?.id, empresaAtual?.id, grupoAtual?.id, moduleName]);
+  // IDB cleanup + performance metrics delegados ao LayoutEffects
 
   const titleToModule = {
     "CRM - Relacionamento": "CRM",
@@ -1301,27 +1172,7 @@ function LayoutContent({ children, currentPageName }) {
     return hasPermission(mod, null, 'ver');
   });
 
-  useEffect(() => {
-    if (!moduleName) return;
-    const key = `audit_block_${moduleName}`;
-    try {
-      const allowed = hasPermission(moduleName, null, 'ver');
-      if (!allowed && !sessionStorage.getItem(key)) {
-        sessionStorage.setItem(key, '1');
-        base44.entities.AuditLog.create({
-                        usuario: user?.full_name || user?.email || 'Usuário',
-                        usuario_id: user?.id,
-                        empresa_id: empresaAtual?.id || null,
-                        empresa_nome: empresaAtual?.nome_fantasia || empresaAtual?.razao_social || null,
-                        acao: 'Bloqueio',
-                        modulo: moduleName,
-                        tipo_auditoria: 'seguranca',
-                        entidade: 'Página',
-                        descricao: `Acesso negado ao módulo ${moduleName} (${currentPageName})`,
-                      });
-      }
-    } catch (e) {}
-  }, [moduleName, currentPageName, user?.id, empresaAtual?.id]);
+  // Auditoria de bloqueio de módulo delegada ao LayoutEffects
 
 
 
@@ -1345,6 +1196,17 @@ function LayoutContent({ children, currentPageName }) {
 
   return (
     <SidebarProvider>
+      {/* Efeitos extraídos — sem renderização visual */}
+      <LayoutEffects
+        user={user} empresaAtual={empresaAtual} grupoAtual={grupoAtual}
+        contexto={contexto} moduleName={moduleName} currentPageName={currentPageName}
+        isOffline={isOffline} setIsOffline={setIsOffline}
+        setIntegracoesOk={setIntegracoesOk} contextRef={contextRef}
+      />
+      <LayoutRBACWrapper
+        user={user} empresaAtual={empresaAtual} grupoAtual={grupoAtual}
+        contexto={contexto} contextRef={contextRef}
+      />
       {modoEscuro && <div dangerouslySetInnerHTML={{ __html: darkModeStyles }} />}
       
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-blue-50">

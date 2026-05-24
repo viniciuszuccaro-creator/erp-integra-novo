@@ -13,6 +13,7 @@ import { useUser } from "@/components/lib/UserContext";
 // Sub-modules
 import AdminStatusBar from "@/components/administracao-sistema/AdminStatusBar";
 import SistemaHealthPanel from "@/components/administracao-sistema/SistemaHealthPanel";
+import SistemaStatusBar from "@/components/sistema/SistemaStatusBar";
 
 import ConfiguracoesGeraisIndex from "@/components/administracao-sistema/configuracoes-gerais/ConfiguracoesGeraisIndex";
 import IntegracoesIndex from "@/components/administracao-sistema/IntegracoesIndex";
@@ -84,7 +85,8 @@ export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtua
       </TabsList>
 
       {/* ── STATUS BAR GLOBAL ── */}
-      <div className="mt-3 space-y-3">
+      <div className="mt-3 space-y-2">
+        <SistemaStatusBar />
         <AdminStatusBar />
         <SistemaHealthPanel />
       </div>

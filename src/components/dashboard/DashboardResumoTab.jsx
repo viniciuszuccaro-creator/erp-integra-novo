@@ -4,7 +4,8 @@
  */
 import React, { Suspense } from "react";
 import { createPageUrl } from "@/utils";
-import { AlertCircle, Trophy, Shield, Activity, BarChart3, MessageCircle } from "lucide-react";
+import { Trophy, AlertCircle } from "lucide-react";
+import DashboardCommandCenter from "@/components/dashboard/DashboardCommandCenter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TabsContent } from "@/components/ui/tabs";
@@ -204,32 +205,9 @@ export default function DashboardResumoTab({
         COLORS={COLORS}
       />
 
-      {/* Command Center */}
+      {/* Command Center — compacto */}
       <ProtectedSection module="Sistema" action="ver" hideInstead>
-        <Card className="bg-white/80 backdrop-blur-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Command Center (24h)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-              {[
-                { label: "Erros", value: ccMetrics?.errors ?? 0, Icon: AlertCircle, color: "text-rose-600" },
-                { label: "Jobs", value: ccMetrics?.funcs ?? 0, Icon: Activity, color: "text-blue-600" },
-                { label: "Integrações", value: "OK", Icon: BarChart3, color: "text-emerald-600" },
-                { label: "Segurança", value: ccMetrics?.secAlerts ?? 0, Icon: Shield, color: "text-amber-600" },
-                { label: "Chatbot SLA", value: `${botMetrics?.chats ?? 0}/${botMetrics?.sla_total ?? 0}`, Icon: MessageCircle, color: "text-blue-600" },
-              ].map(({ label, value, Icon, color }) => (
-                <div key={label} className="p-3 rounded-lg border border-slate-200 bg-white flex items-center justify-between gap-2">
-                  <div>
-                    <p className="text-xs text-slate-500">{label}</p>
-                    <p className="text-lg font-bold text-slate-800">{value}</p>
-                  </div>
-                  <Icon className={`w-5 h-5 shrink-0 ${color}`} />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <DashboardCommandCenter ccMetrics={ccMetrics} botMetrics={botMetrics} />
       </ProtectedSection>
 
       <ProtectedSection module="Sistema" action="ver" hideInstead>

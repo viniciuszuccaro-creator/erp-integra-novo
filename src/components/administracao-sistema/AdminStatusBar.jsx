@@ -1,23 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
-import { CheckCircle2, AlertCircle, XCircle, Wifi } from "lucide-react";
+import { CheckCircle2, AlertCircle, XCircle, Wifi, ArrowDownUp, RefreshCw } from "lucide-react";
 import PropagacaoStatusWidget from "@/components/administracao-sistema/PropagacaoStatusWidget";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 /**
- * AdminStatusBar — barra de saúde em tempo real do sistema.
- * Mostra status de integrações, segurança e IA em um único painel compacto.
+ * AdminStatusBar — barra de saúde compacta com propagação integrada.
  */
 export default function AdminStatusBar() {
   const { empresaAtual, grupoAtual } = useContextoVisual();
   const eId = empresaAtual?.id;
-  const gId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || (() => {
+  const gId = grupoAtual?.id || (() => {
     try { return localStorage.getItem('group_atual_id'); } catch { return null; }
   })();
+  const [propagando, setPropagando] = useState(false);
 
-  const { data: configs = [], isFetching } = useQuery({
+  const { data: configs = [], isFetching, refetch } = useQuery({
     queryKey: ["admin-status-bar", eId ?? "sem", gId ?? "sem"],
     queryFn: async () => {
       try {
@@ -32,14 +34,12 @@ export default function AdminStatusBar() {
           sort: "-updated_date",
         });
         return Array.isArray(res?.data) ? res.data : [];
-      } catch (_) {
-        return [];
-      }
+      } catch (_) { return []; }
     },
     enabled: true,
     staleTime: 0,
     refetchOnMount: "always",
-    refetchInterval: 60000, // Atualiza a cada 1 min
+    refetchInterval: 60000,
   });
 
   const getToggle = (chave) => {
@@ -60,7 +60,7 @@ export default function AdminStatusBar() {
     { label: "NF-e", ok: getIntegracao("integracao_nfe", "integracao_nfe") || getToggle("integracao_nfe") },
     { label: "Boleto/PIX", ok: getIntegracao("integracao_boletos", "integracao_boletos") || getToggle("integracao_boletos") },
     { label: "WhatsApp", ok: getToggle("integracao_whatsapp") },
-    { label: "Notif. Pedido", ok: getToggle("notif_pedido_aprovado") },
+    { label: "Notif.", ok: getToggle("notif_pedido_aprovado") },
     { label: "IA Vendas", ok: getToggle("ia_preditiva_vendas") },
     { label: "IA Finanças", ok: getToggle("ia_anomalia_financeira") },
   ];
@@ -68,58 +68,88 @@ export default function AdminStatusBar() {
   const okCount = indicators.filter((i) => i.ok).length;
   const totalCount = indicators.length;
   const healthPct = Math.round((okCount / totalCount) * 100);
-  const healthColor =
-    healthPct >= 80 ? "text-green-600" : healthPct >= 50 ? "text-amber-600" : "text-red-600";
-  const healthBg =
-    healthPct >= 80 ? "bg-green-50 border-green-200" : healthPct >= 50 ? "bg-amber-50 border-amber-200" : "bg-red-50 border-red-200";
+  const healthColor = healthPct >= 80 ? "text-green-600" : healthPct >= 50 ? "text-amber-600" : "text-red-600";
+  const healthBg = healthPct >= 80 ? "bg-green-50 border-green-200" : healthPct >= 50 ? "bg-amber-50 border-amber-200" : "bg-red-50 border-red-200";
+
+  const handlePropagacaoRapida = async () => {
+    if (!gId && !eId) { toast.error("Selecione grupo ou empresa."); return; }
+    setPropagando(true);
+    try {
+      const res = await base44.functions.invoke("propagateGroupConfigs", {
+        group_id: gId || null, empresa_id: eId || null, direction: "grupo_to_empresas", strategy: "merge"
+      });
+      const total = (res?.data?.results || []).reduce((s, r) => s + (r.created || 0) + (r.updated || 0), 0);
+      toast.success(`✅ Propagação rápida: ${total} registros sincronizados.`);
+    } catch (err) {
+      toast.error("Erro na propagação: " + String(err?.message || err));
+    } finally {
+      setPropagando(false);
+    }
+  };
 
   return (
-    <div className={`w-full border rounded-xl px-4 py-3 mb-4 flex flex-wrap items-center gap-3 ${healthBg}`}>
-      {/* Score geral */}
-      <div className="flex items-center gap-2 min-w-[120px]">
-        {isFetching ? (
-          <Wifi className="w-4 h-4 text-blue-400 animate-pulse" />
-        ) : healthPct >= 80 ? (
-          <CheckCircle2 className="w-4 h-4 text-green-600" />
-        ) : (
-          <AlertCircle className="w-4 h-4 text-amber-600" />
+    <div className={`w-full border rounded-xl px-4 py-3 mb-2 ${healthBg}`}>
+      <div className="flex flex-wrap items-center gap-3">
+        {/* Score */}
+        <div className="flex items-center gap-2 min-w-[110px]">
+          {isFetching
+            ? <Wifi className="w-4 h-4 text-blue-400 animate-pulse" />
+            : healthPct >= 80
+              ? <CheckCircle2 className="w-4 h-4 text-green-600" />
+              : <AlertCircle className="w-4 h-4 text-amber-600" />
+          }
+          <span className={`font-bold text-sm ${healthColor}`}>Saúde: {healthPct}%</span>
+          <span className="text-xs text-slate-500">({okCount}/{totalCount})</span>
+        </div>
+
+        <div className="h-4 w-px bg-slate-300 hidden sm:block" />
+
+        {/* Indicadores */}
+        <div className="flex flex-wrap gap-1">
+          {indicators.map(({ label, ok }) => (
+            <Badge
+              key={label}
+              className={`text-[10px] px-1.5 py-0.5 flex items-center gap-0.5 ${
+                ok ? "bg-green-100 text-green-700 border border-green-200" : "bg-slate-100 text-slate-500 border border-slate-200"
+              }`}
+            >
+              {ok ? <CheckCircle2 className="w-2.5 h-2.5" /> : <XCircle className="w-2.5 h-2.5" />}
+              {label}
+            </Badge>
+          ))}
+        </div>
+
+        <div className="ml-auto flex items-center gap-2">
+          {/* Propagação rápida */}
+          {(eId || gId) && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs gap-1.5 border-blue-200 text-blue-700 hover:bg-blue-50"
+              onClick={handlePropagacaoRapida}
+              disabled={propagando}
+              title="Propagar configurações do Grupo para todas as Empresas agora"
+            >
+              {propagando
+                ? <RefreshCw className="w-3 h-3 animate-spin" />
+                : <ArrowDownUp className="w-3 h-3" />
+              }
+              {propagando ? "Propagando…" : "Propagação Rápida"}
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => refetch()}>
+            <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? "animate-spin" : ""}`} />
+          </Button>
+        </div>
+
+        {!eId && !gId && (
+          <span className="text-xs text-amber-700 w-full mt-1">
+            ⚠️ Selecione empresa/grupo para ver status real das integrações
+          </span>
         )}
-        <span className={`font-bold text-sm ${healthColor}`}>
-          Saúde: {healthPct}%
-        </span>
-        <span className="text-xs text-slate-500">({okCount}/{totalCount} ativos)</span>
       </div>
 
-      <div className="h-4 w-px bg-slate-300 hidden sm:block" />
-
-      {/* Indicadores individuais */}
-      <div className="flex flex-wrap gap-1.5">
-        {indicators.map(({ label, ok }) => (
-          <Badge
-            key={label}
-            className={`text-[10px] px-2 py-0.5 flex items-center gap-1 ${
-              ok
-                ? "bg-green-100 text-green-700 border border-green-200"
-                : "bg-slate-100 text-slate-500 border border-slate-200"
-            }`}
-          >
-            {ok ? (
-              <CheckCircle2 className="w-2.5 h-2.5" />
-            ) : (
-              <XCircle className="w-2.5 h-2.5 text-slate-400" />
-            )}
-            {label}
-          </Badge>
-        ))}
-      </div>
-
-      {!eId && !gId && (
-        <span className="text-xs text-amber-700 ml-auto">
-          ⚠️ Selecione empresa/grupo para ver status real
-        </span>
-      )}
-
-      {/* Propagação status inline */}
+      {/* Propagação inline */}
       {(eId || gId) && (
         <div className="w-full mt-2 border-t border-slate-200 pt-2">
           <PropagacaoStatusWidget />

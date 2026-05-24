@@ -32,17 +32,19 @@ Deno.serve(async (req) => {
     const DEFAULT_ENTIDADES = [
       // Financeiro & Fiscal
       'PlanoDeContas', 'CentroCusto', 'CentroResultado', 'TipoDespesa', 'MoedaIndice',
-      'FormaPagamento', 'CondicaoComercial', 'TabelaFiscal', 'Banco',
+      'FormaPagamento', 'CondicaoComercial', 'TabelaFiscal', 'Banco', 'ContaBancariaEmpresa',
       // Produtos & Serviços
       'GrupoProduto', 'Marca', 'SetorAtividade', 'UnidadeMedida', 'Servico',
       // Logística
-      'TipoFrete', 'LocalEstoque', 'RotaPadrao', 'Transportadora',
+      'TipoFrete', 'LocalEstoque', 'RotaPadrao', 'Transportadora', 'TipoFrete', 'Veiculo',
       // Estrutura Organizacional
-      'Cargo', 'Departamento', 'Turno',
+      'Cargo', 'Departamento', 'Turno', 'PerfilAcesso',
       // Comercial & CRM
-      'SegmentoCliente', 'RegiaoAtendimento', 'TabelaPreco',
-      // Documentos
-      'ModeloDocumento', 'PerfilAcesso',
+      'SegmentoCliente', 'RegiaoAtendimento', 'TabelaPreco', 'KitProduto',
+      // Cadastros Gerais
+      'ModeloDocumento', 'ContatoB2B', 'Representante', 'RegiaoAtendimento',
+      // Parâmetros
+      'ParametroOrigemPedido', 'ParametroPortalCliente', 'ParametroRoteirizacao',
     ];
     entidades = Array.isArray(entidades) && entidades.length ? entidades : DEFAULT_ENTIDADES;
     strategy = strategy || 'merge'; // 'skip' | 'merge' | 'override'

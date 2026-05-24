@@ -70,7 +70,11 @@ Deno.serve(async (req) => {
     }
 
     // Entidades que NÃO devem ser espelhadas automaticamente (operacionais/transacionais que têm lógica própria)
-    const SKIP_ENTITIES = new Set(['AuditLog', 'SyncMap', 'SessaoUsuario', 'TokenRefresh', 'Ponto', 'ApontamentoProducao']);
+    const SKIP_ENTITIES = new Set([
+      'AuditLog', 'SyncMap', 'SessaoUsuario', 'TokenRefresh', 'Ponto', 'ApontamentoProducao',
+      'BackupAutomatico', 'LogPerformance', 'AlertaPerformance', 'LogFiscal', 'LogCobranca',
+      'ChatbotInteracao', 'MensagemOmnicanal', 'ConversaOmnicanal', 'ArquivoRemessaRetorno',
+    ]);
     if (SKIP_ENTITIES.has(entityName)) {
       return Response.json({ ok: true, skipped: 'skip-list' });
     }

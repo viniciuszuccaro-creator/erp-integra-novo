@@ -63,6 +63,7 @@ import usePermissions from "@/components/lib/usePermissions";
 const WidgetCanaisOrigem = React.lazy(() => import("@/components/dashboard/WidgetCanaisOrigem")); // kept for backward-compat (not used directly here)
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardContextoBanner from "@/components/dashboard/DashboardContextoBanner";
+import DashboardMultiempresaBar from "@/components/dashboard/DashboardMultiempresaBar";
 import DashboardEssentialKPIs from "@/components/dashboard/DashboardEssentialKPIs";
 import DashboardEstoquePrevisoesWidget from "@/components/dashboard/DashboardEstoquePrevisoesWidget";
 import StatsSection from "@/components/dashboard/StatsSection";
@@ -725,6 +726,7 @@ export default function Dashboard() {
       />
 
       <DashboardContextoBanner />
+      <DashboardMultiempresaBar />
       <DashboardEssentialKPIs
         totalVendas={totalVendas}
         taxaInadimplencia={taxaInadimplencia}

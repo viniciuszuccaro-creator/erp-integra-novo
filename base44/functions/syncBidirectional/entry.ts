@@ -125,6 +125,26 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ===== DELETE DOWN: Grupo deleta → remove réplicas nas empresas =====
+    if (eventType === 'delete' && (isDown || direction === 'down') && entityId) {
+      try {
+        const replicas = await base44.asServiceRole.entities[entityName]
+          .filter({ documento_grupo_id: entityId }, null, 100)
+          .catch(() => []);
+
+        for (const replica of replicas) {
+          try {
+            await base44.asServiceRole.entities[entityName].delete(replica.id);
+            results.push({ replica_id: replica.id, empresa_id: replica.empresa_id, status: 'deleted' });
+          } catch (e) {
+            results.push({ replica_id: replica.id, status: 'delete_error', msg: e.message });
+          }
+        }
+      } catch (e) {
+        results.push({ status: 'delete_replicas_error', msg: e.message });
+      }
+    }
+
     return Response.json({
       ok: true,
       entity: entityName,

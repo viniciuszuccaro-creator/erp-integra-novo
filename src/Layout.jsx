@@ -699,7 +699,7 @@ function LayoutContent({ children, currentPageName }) {
             });
           } catch (_) {}
 
-        } catch (e) { /* auditoria nunca deve quebrar a UI */ }
+        } catch (e) { }
       });
     }).filter(Boolean);
 

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { SelectWithAudit } from "@/components/ui/SelectWithAudit";
 import { DollarSign, Calendar, FileText, Building2, Package, Loader2, TrendingDown } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -154,25 +155,20 @@ export default function ContaPagarForm({ conta, onSubmit, isSubmitting, windowMo
             </AlertDescription>
           </Alert>
 
-          <div>
-            <Label>Status do Pagamento</Label>
-            <Select
-              value={formData.status_pagamento}
-              onValueChange={(v) => setFormData({...formData, status_pagamento: v})}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Pendente">Pendente</SelectItem>
-                <SelectItem value="Aguardando Aprovação">Aguardando Aprovação</SelectItem>
-                <SelectItem value="Aprovado">Aprovado</SelectItem>
-                <SelectItem value="Pago">Pago</SelectItem>
-                <SelectItem value="Rejeitado">Rejeitado</SelectItem>
-                <SelectItem value="Cancelado">Cancelado</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <SelectWithAudit
+            label="Status do Pagamento"
+            value={formData.status_pagamento}
+            onValueChange={(v) => setFormData({...formData, status_pagamento: v})}
+            data-action="conta_pagar.status_pagamento"
+            items={[
+              { value: 'Pendente', label: 'Pendente' },
+              { value: 'Aguardando Aprovação', label: 'Aguardando Aprovação' },
+              { value: 'Aprovado', label: 'Aprovado' },
+              { value: 'Pago', label: 'Pago' },
+              { value: 'Rejeitado', label: 'Rejeitado' },
+              { value: 'Cancelado', label: 'Cancelado' },
+            ]}
+          />
 
           <div>
             <Label>Observações</Label>

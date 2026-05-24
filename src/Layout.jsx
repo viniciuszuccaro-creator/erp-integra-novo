@@ -1,4 +1,3 @@
-import React, { useEffect, useState, Suspense } from "react";
 import React, { useState, useEffect, Suspense, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -170,8 +169,6 @@ function LayoutContent({ children, currentPageName }) {
         // Fase 3: Rastreamento de histórico + prefetch preditivo
         useNavHistory();
         usePredictivePrefetch();
-
-        const [integracoesOk, setIntegracoesOk] = useState(true);
 
   // pageToModule/moduleName movidos para antes dos efeitos para evitar TDZ
 

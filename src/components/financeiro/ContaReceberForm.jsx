@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { SelectWithAudit } from "@/components/ui/SelectWithAudit";
 
 import { DollarSign, Calendar, FileText, Building2, Users, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -147,24 +148,19 @@ export default function ContaReceberForm({ conta, onSubmit, isSubmitting, window
 
         {/* ABA 4: CONFIGURAÇÕES */}
         <TabsContent value="config" className="space-y-4">
-          <div>
-            <Label>Origem do Título</Label>
-            <Select
-              value={formData.origem_tipo}
-              onValueChange={(v) => setFormData({...formData, origem_tipo: v})}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pedido">Pedido</SelectItem>
-                <SelectItem value="financeiro">Financeiro Direto</SelectItem>
-                <SelectItem value="contrato">Contrato</SelectItem>
-                <SelectItem value="manual">Manual</SelectItem>
-                <SelectItem value="outro">Outro</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <SelectWithAudit
+            label="Origem do Título"
+            value={formData.origem_tipo}
+            onValueChange={(v) => setFormData({...formData, origem_tipo: v})}
+            data-action="conta_receber.origem_tipo"
+            items={[
+              { value: 'pedido', label: 'Pedido' },
+              { value: 'financeiro', label: 'Financeiro Direto' },
+              { value: 'contrato', label: 'Contrato' },
+              { value: 'manual', label: 'Manual' },
+              { value: 'outro', label: 'Outro' },
+            ]}
+          />
 
           <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border">
             <div>

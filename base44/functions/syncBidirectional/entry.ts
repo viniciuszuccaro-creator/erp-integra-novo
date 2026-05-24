@@ -1,23 +1,51 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
+/**
+ * syncBidirectional v2.0
+ * Propagação bidirecional Grupo ↔ Empresas
+ * Suporta: create (DOWN), update (DOWN + UP), delete (DOWN)
+ * 
+ * Anti-loop: verifica e_replicado=true para evitar loops infinitos
+ * Chamado via automação entity OU diretamente do frontend
+ */
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
-    const { entity_name, entity_id, group_id, empresa_id, direction, data } = body;
 
-    // Determina se DOWN (grupo→empresas) ou UP (empresa→grupo)
-    const isDown = !!group_id && !empresa_id;
-    const isUp = !!empresa_id && !!group_id;
+    // Suporte tanto ao payload manual quanto ao payload de automação entity
+    const eventData = body?.data || body;
+    const eventType = body?.event?.type || 'create';
+    const entityName = body?.event?.entity_name || body?.entity_name;
+    const entityId = body?.event?.entity_id || body?.entity_id;
 
-    if (!isDown && !isUp) {
-      return Response.json({ ok: false, reason: 'Contexto inválido' }, { status: 400 });
+    const {
+      group_id = eventData?.group_id,
+      empresa_id = eventData?.empresa_id,
+      direction,
+    } = body;
+
+    // Anti-loop: se o registro já é replicado, não propagar novamente
+    if (eventData?.e_replicado === true) {
+      return Response.json({ ok: true, skipped: 'anti-loop', e_replicado: true });
+    }
+
+    // Sem entidade → não propagar
+    if (!entityName) {
+      return Response.json({ ok: false, reason: 'entity_name obrigatório' }, { status: 400 });
+    }
+
+    // Sem contexto → não propagar
+    if (!group_id && !empresa_id) {
+      return Response.json({ ok: true, skipped: 'no context' });
     }
 
     const results = [];
+    const isDown = !!group_id && !empresa_id; // Grupo → Empresas
+    const isUp   = !!empresa_id && !!group_id;  // Empresa → Grupo
 
-    if (isDown) {
-      // Grupo → Empresas
+    // ===== DOWN: Grupo → Empresas =====
+    if ((isDown || direction === 'down') && eventData) {
       const empresas = await base44.asServiceRole.entities.Empresa.filter(
         { group_id },
         null,
@@ -26,27 +54,85 @@ Deno.serve(async (req) => {
 
       for (const emp of empresas) {
         try {
-          const newData = { ...data, empresa_id: emp.id, documento_grupo_id: entity_id };
-          await base44.asServiceRole.entities[entity_name].create(newData);
-          results.push({ empresa_id: emp.id, status: 'ok' });
+          const newData = {
+            ...eventData,
+            empresa_id: emp.id,
+            documento_grupo_id: entityId || eventData?.id,
+            e_replicado: true,
+            // Remover campos que pertencem apenas ao grupo
+            group_id: group_id,
+          };
+          delete newData.id;
+          delete newData.created_date;
+          delete newData.updated_date;
+
+          // Verificar se já existe réplica para evitar duplicação
+          const existing = await base44.asServiceRole.entities[entityName]
+            .filter({ documento_grupo_id: entityId || eventData?.id, empresa_id: emp.id }, null, 1)
+            .catch(() => []);
+
+          if (existing?.length > 0 && eventType === 'update') {
+            // Atualizar réplica existente
+            await base44.asServiceRole.entities[entityName].update(existing[0].id, {
+              ...newData,
+              id: undefined
+            });
+            results.push({ empresa_id: emp.id, status: 'updated' });
+          } else if (existing?.length === 0) {
+            // Criar nova réplica
+            await base44.asServiceRole.entities[entityName].create(newData);
+            results.push({ empresa_id: emp.id, status: 'created' });
+          } else {
+            results.push({ empresa_id: emp.id, status: 'skipped_exists' });
+          }
         } catch (e) {
           results.push({ empresa_id: emp.id, status: 'error', msg: e.message });
         }
       }
     }
 
-    if (isUp) {
-      // Empresa → Grupo
+    // ===== UP: Empresa → Grupo =====
+    if ((isUp || direction === 'up') && eventData) {
       try {
-        const groupData = { ...data, empresa_id: null, empresa_dona_id: empresa_id };
-        await base44.asServiceRole.entities[entity_name].create(groupData);
-        results.push({ group_id, status: 'ok' });
+        // Verificar se já existe no grupo (evita duplicação)
+        const existing = await base44.asServiceRole.entities[entityName]
+          .filter({ empresa_dona_id: empresa_id, grupo_origem: true, group_id }, null, 1)
+          .catch(() => []);
+
+        const groupData = {
+          ...eventData,
+          group_id,
+          empresa_id: null,
+          empresa_dona_id: empresa_id,
+          grupo_origem: true,
+          e_replicado: true,
+        };
+        delete groupData.id;
+        delete groupData.created_date;
+        delete groupData.updated_date;
+
+        if (existing?.length > 0 && eventType === 'update') {
+          await base44.asServiceRole.entities[entityName].update(existing[0].id, { ...groupData, id: undefined });
+          results.push({ group_id, status: 'updated_group' });
+        } else if (existing?.length === 0) {
+          await base44.asServiceRole.entities[entityName].create(groupData);
+          results.push({ group_id, status: 'created_group' });
+        } else {
+          results.push({ group_id, status: 'skipped_exists_group' });
+        }
       } catch (e) {
         results.push({ group_id, status: 'error', msg: e.message });
       }
     }
 
-    return Response.json({ ok: true, direction: isDown ? 'down' : 'up', results });
+    return Response.json({
+      ok: true,
+      entity: entityName,
+      event: eventType,
+      direction: isDown ? 'down' : isUp ? 'up' : direction || 'auto',
+      results,
+      total: results.length,
+    });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

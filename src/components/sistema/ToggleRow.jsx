@@ -14,11 +14,16 @@ export default function ToggleRow({
   chave,
   categoria,
   label,
+  // suporta tanto 'descricao' (novo) quanto 'desc' (legado)
   descricao,
+  desc,
   configs = [],
   saving = {},
+  isFetching,
   getToggleValue,
+  // suporta tanto 'handleToggle' (novo) quanto 'onToggle' (legado)
   handleToggle,
+  onToggle,
   badge,
   badgeColor = "bg-blue-100 text-blue-700",
   disabled = false,
@@ -27,7 +32,10 @@ export default function ToggleRow({
   const canEdit = canEditConfigByPermission(hasPermission, chave, categoria);
   const value = getToggleValue(configs, chave);
   const isSaving = !!saving[chave];
-  const isDisabled = disabled || !canEdit || isSaving;
+  const isDisabled = disabled || !canEdit || isSaving || !!isFetching;
+  const descText = descricao || desc;
+  // aceita tanto handleToggle quanto onToggle
+  const doToggle = handleToggle || onToggle;
 
   return (
     <div className={`flex items-center justify-between gap-3 py-3 px-1 border-b border-slate-100 last:border-0 transition-colors ${!canEdit ? "opacity-60" : ""}`}>
@@ -46,13 +54,13 @@ export default function ToggleRow({
             </Tooltip>
           )}
         </div>
-        {descricao && <p className="text-xs text-slate-500 mt-0.5 leading-tight">{descricao}</p>}
+        {descText && <p className="text-xs text-slate-500 mt-0.5 leading-tight">{descText}</p>}
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        {isSaving && <Loader2 className="w-3.5 h-3.5 text-blue-500 animate-spin" />}
+        {(isSaving || isFetching) && <Loader2 className="w-3.5 h-3.5 text-blue-500 animate-spin" />}
         <Switch
           checked={!!value}
-          onCheckedChange={(newVal) => !isDisabled && handleToggle(chave, categoria, newVal)}
+          onCheckedChange={(newVal) => !isDisabled && doToggle && doToggle(chave, categoria, newVal)}
           disabled={isDisabled}
           className={`transition-all ${value ? "data-[state=checked]:bg-blue-600" : ""}`}
           aria-label={label}

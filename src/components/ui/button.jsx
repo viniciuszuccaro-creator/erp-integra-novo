@@ -7,6 +7,7 @@ import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import usePermissions from "@/components/lib/usePermissions";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { uiAuditWrap } from "@/components/lib/uiAudit";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -84,8 +85,6 @@ const Button = React.forwardRef(({ className, variant, size, asChild = false, ..
   );
 })
 Button.displayName = "Button"
-
-import { uiAuditWrap } from "@/components/lib/uiAudit";
 
 // HOC to wrap onClick with audit (non-invasive)
 function withUIAudit(props) {

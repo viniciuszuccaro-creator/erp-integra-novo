@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 // AdminTabs v2 — inclui aba de Propagação Grupo↔Empresas (7 abas)
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Settings, Users, Shield, FileText, Sparkles, Brain, Plug, ArrowDownUp, Zap } from "lucide-react";
+import { Settings, Users, Shield, FileText, Brain, Plug, ArrowDownUp } from "lucide-react";
 import usePermissions from "@/components/lib/usePermissions";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import { Button } from "@/components/ui/button";
@@ -22,8 +22,7 @@ import SegurancaGovernancaIndex from "@/components/administracao-sistema/seguran
 import IAOtimizacaoIndex from "@/components/administracao-sistema/IAOtimizacaoIndex";
 import GestaoAcessosIndex from "@/components/administracao-sistema/gestao-acessos/GestaoAcessosIndex";
 import PropagacaoIndex from "@/components/administracao-sistema/propagacao/PropagacaoIndex";
-import CheckupSistemaPanel from "@/components/administracao-sistema/CheckupSistemaPanel";
-import PropagacaoHealthPanel from "@/components/administracao-sistema/PropagacaoHealthPanel";
+
 
 const TAB_DEFS = [
   { value: "gerais",      label: "Parâmetros Gerais",     icon: Settings,    perm: "Configurações",    color: "blue" },
@@ -33,7 +32,7 @@ const TAB_DEFS = [
   { value: "seguranca",   label: "Segurança & Gov.",      icon: Shield,      perm: "Segurança",        color: "blue" },
   { value: "ia",          label: "IA & Otimização",        icon: Brain,       perm: "IA",               color: "purple" },
   { value: "auditoria",   label: "Auditoria e Logs",      icon: FileText,    perm: "Auditoria",        color: "blue" },
-  { value: "checkup",    label: "Checkup Sistema",       icon: Zap,         perm: "Configurações",    color: "amber" },
+
 ];
 
 export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtual }) {
@@ -163,22 +162,7 @@ export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtua
           fallback={<p className="p-4 text-sm text-slate-500">Acesso restrito à Propagação.</p>}
         >
           <div className="w-full h-full overflow-auto space-y-4">
-            <CheckupSistemaPanel />
-            <PropagacaoHealthPanel />
             <PropagacaoIndex />
-          </div>
-        </ProtectedSection>
-      </TabsContent>
-
-      {/* ── CHECKUP SISTEMA ── */}
-      <TabsContent value="checkup" className="mt-4">
-        <ProtectedSection
-          module="Sistema" section={["Configurações"]} action="visualizar"
-          fallback={<p className="p-4 text-sm text-slate-500">Acesso restrito ao Checkup.</p>}
-        >
-          <div className="w-full h-full overflow-auto space-y-4">
-            <CheckupSistemaPanel />
-            <PropagacaoHealthPanel />
           </div>
         </ProtectedSection>
       </TabsContent>

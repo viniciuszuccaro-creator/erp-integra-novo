@@ -55,10 +55,9 @@ async function expandGroupFilter(base44, entityName, f) {
     return { ...rest, $or: orConds };
   }
 
-  // Caso 2: demais entidades com empresa_id — inclui legados
+  // Caso 2: demais entidades com empresa_id — sem incluir legados sem empresa (inflaria contagem)
   if (!EXPAND_SET.has(entityName) && f?.empresa_id && !f?.$or && !f?.group_id) {
-    const { empresa_id, ...rest } = f;
-    return { ...rest, $or: [{ empresa_id }, { empresa_id: null }] };
+    return f; // passa empresa_id direto, sem expandir com empresa_id: null
   }
 
   if (f?.$or && f?.group_id) {
@@ -97,7 +96,7 @@ async function expandGroupFilter(base44, entityName, f) {
  * Busca até 2000 registros em uma única chamada (suficiente para badges de cadastro)
  */
 const COUNT_CACHE = new Map();
-const COUNT_CACHE_TTL_MS = 60 * 1000; // 60s cache
+const COUNT_CACHE_TTL_MS = 30 * 1000; // 30s cache (reduzido para refletir mudanças rápidas)
 
 function stableCacheKey(entityName, finalFilter) {
   try { return `${entityName}:${JSON.stringify(finalFilter || {}, Object.keys(finalFilter || {}).sort())}`; }
@@ -133,8 +132,25 @@ async function countOne(base44, user, payload) {
   const hasOr = Array.isArray(filter?.$or) && filter.$or.length > 0;
   const scopeProvided = filter?.empresa_id || filter?.group_id || filter?.empresa_dona_id || filter?.empresa_alocada_id || hasOr;
 
-  // Entidades simples (catálogos) não precisam de escopo — retorna contagem total
+  // Entidades simples (catálogos): se há escopo disponível, filtra por ele para evitar contagem global inflada
   if (isSimple) {
+    // Entidades que têm campo group_id ou empresa_id devem respeitar o contexto
+    const CATALOG_WITH_SCOPE = new Set([
+      'Empresa', 'GrupoEmpresarial', 'Departamento', 'Cargo', 'Turno', 'PerfilAcesso',
+      'CentroCusto', 'PlanoDeContas', 'PlanoContas', 'CentroResultado',
+      'ContatoB2B', 'Representante', 'SegmentoCliente', 'RegiaoAtendimento',
+      'TabelaPreco', 'CondicaoComercial', 'GatewayPagamento', 'ApiExterna',
+      'Webhook', 'ChatbotIntent', 'ChatbotCanal', 'JobAgendado', 'EventoNotificacao',
+      'ConfiguracaoNFe', 'ConfiguracaoDespesaRecorrente', 'OperadorCaixa',
+      'Veiculo', 'Motorista', 'LocalEstoque', 'RotaPadrao', 'ModeloDocumento',
+      'KitProduto', 'CatalogoWeb', 'SetorAtividade', 'GrupoProduto', 'Marca',
+    ]);
+    if (CATALOG_WITH_SCOPE.has(entityName) && (filter?.empresa_id || filter?.group_id)) {
+      // Usa o filtro fornecido pelo frontend (empresa_id ou group_id)
+      const scopedCount = await fastCount(base44, entityName, filter);
+      return { entityName, count: scopedCount };
+    }
+    // Catálogos puros sem escopo (UnidadeMedida, Banco, FormaPagamento, etc.) — conta global
     const simpleCount = await fastCount(base44, entityName, {});
     return { entityName, count: simpleCount };
   }

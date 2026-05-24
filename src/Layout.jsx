@@ -1,4 +1,3 @@
-import React, { useEffect, useState, Suspense } from "react";
 import React, { useState, useEffect, Suspense, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -148,8 +147,8 @@ function LayoutContent({ children, currentPageName }) {
         const { user } = useUser();
         const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
         const { hasPermission } = usePermissions();
+        const contextRef = useRef({ user, empresaAtual, grupoAtual, contexto, moduleName });
         contextRef.current = { user, empresaAtual, grupoAtual, contexto, moduleName };
-
 
         const [pesquisaOpen, setPesquisaOpen] = useState(false);
         const [modoEscuro, setModoEscuro] = useState(false);
@@ -157,9 +156,8 @@ function LayoutContent({ children, currentPageName }) {
         const [integracoesOk, setIntegracoesOk] = useState(true);
         const { prefetch: prefetchModule } = usePrefetchModuleData();
         const queryClient = useQueryClient();
-        const contextRef = useRef({ user, empresaAtual, grupoAtual, contexto, moduleName });
 
-        // Fase 2: Barramento de invalidação seletiva — substitui broadcast global por keys específicas
+        // Fase 2: Barramento de invalidação seletiva
         useInvalidationBus([
           'Cliente', 'Fornecedor', 'Transportadora', 'Colaborador', 'Produto',
           'Pedido', 'ContaReceber', 'ContaPagar', 'Entrega', 'NotaFiscal',
@@ -170,10 +168,6 @@ function LayoutContent({ children, currentPageName }) {
         // Fase 3: Rastreamento de histórico + prefetch preditivo
         useNavHistory();
         usePredictivePrefetch();
-
-        const [integracoesOk, setIntegracoesOk] = useState(true);
-
-  // pageToModule/moduleName movidos para antes dos efeitos para evitar TDZ
 
         // Auditoria global de erros do React Query (queries e mutations)
         React.useEffect(() => {

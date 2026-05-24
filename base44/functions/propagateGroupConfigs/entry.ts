@@ -33,18 +33,22 @@ Deno.serve(async (req) => {
       // Financeiro & Fiscal
       'PlanoDeContas', 'CentroCusto', 'CentroResultado', 'TipoDespesa', 'MoedaIndice',
       'FormaPagamento', 'CondicaoComercial', 'TabelaFiscal', 'Banco', 'ContaBancariaEmpresa',
+      'GatewayPagamento', 'ConfiguracaoGatewayPagamento',
       // Produtos & Serviços
       'GrupoProduto', 'Marca', 'SetorAtividade', 'UnidadeMedida', 'Servico',
       // Logística
-      'TipoFrete', 'LocalEstoque', 'RotaPadrao', 'Transportadora', 'TipoFrete', 'Veiculo',
+      'TipoFrete', 'LocalEstoque', 'RotaPadrao', 'Transportadora', 'Veiculo', 'Motorista',
       // Estrutura Organizacional
       'Cargo', 'Departamento', 'Turno', 'PerfilAcesso',
       // Comercial & CRM
       'SegmentoCliente', 'RegiaoAtendimento', 'TabelaPreco', 'KitProduto',
       // Cadastros Gerais
-      'ModeloDocumento', 'ContatoB2B', 'Representante', 'RegiaoAtendimento',
+      'ModeloDocumento', 'ContatoB2B', 'Representante',
       // Parâmetros
       'ParametroOrigemPedido', 'ParametroPortalCliente', 'ParametroRoteirizacao',
+      'ParametroConciliacaoBancaria', 'ParametroCaixaDiario',
+      // Chatbot & Templates
+      'TemplateWhatsApp', 'ChatbotIntent',
     ];
     entidades = Array.isArray(entidades) && entidades.length ? entidades : DEFAULT_ENTIDADES;
     strategy = strategy || 'merge'; // 'skip' | 'merge' | 'override'

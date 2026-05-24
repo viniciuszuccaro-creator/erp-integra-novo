@@ -93,6 +93,7 @@ import ComplianceISO27001Widget from "@/components/administracao-sistema/Complia
 import ContratosEletronicosWidget from "@/components/contratos/ContratosEletronicosWidget";
 import PedidosResumoPanel from "@/components/dashboard/PedidosResumoPanel";
 import ResizableRow from "@/components/dashboard/ResizableRow";
+import DashboardResumoTab from "@/components/dashboard/DashboardResumoTab";
 import { ResizablePanelGroup as PanelGroup, ResizablePanel as Panel, ResizableHandle as PanelResizeHandle } from "@/components/ui/resizable";
 import useDashboardDerivedData from "@/components/dashboard/hooks/useDashboardDerivedData";
 import { DASHBOARD_LIST_LIMIT, DASHBOARD_REFETCH_INTERVAL_MS, dashboardQueryDefaults } from "@/components/dashboard/config/dashboardQueryConfig";
@@ -746,223 +747,41 @@ export default function Dashboard() {
 
 
 
-        <TabsContent value="resumo" className="w-full h-full overflow-y-auto space-y-6 mt-6">
-          {/* Sticky KPIs principais */}
-          <DashboardStickyKpis
-            pedidos={pedidos}
-            pedidosPendentes={pedidosPendentes}
-            pedidosAguardandoAprovacao={pedidosAguardandoAprovacao}
-            produtosBaixoEstoque={produtosBaixoEstoque}
-          />
-          <PanelGroup direction="vertical" className="gap-2 flex-1 w-full h-full">
-            <Panel defaultSize={50} minSize={30} className="overflow-auto">
-              {/* KPIs Principais + Widget Canais */}
-              <StatsSection statsCards={statsCards} empresaId={empresaAtual?.id} />
-            </Panel>
-            <PanelResizeHandle className="h-1 bg-slate-200 rounded" />
-            <Panel defaultSize={50} minSize={20} className="overflow-auto">
-              {/* NOVOS KPIs OPERACIONAIS */}
-              <KPIsOperacionaisSection kpis={kpisOperacionais} />
-            </Panel>
-          </PanelGroup>
-
-          {/* KPIs Secundários */}
-          <SecondaryKPIsSection kpis={kpiCards} />
-
-          {/* Tempo Real - Mapa em card dentro do Dashboard unificado */}
-          <div className="mt-4">
-            <ProtectedSection module="Expedição" action="ver" hideInstead>
-              <Card className="bg-white/80 backdrop-blur-sm rounded-md shadow-sm">
-                <CardContent>
-                  <Suspense fallback={<div className="h-40 rounded-md bg-slate-100 animate-pulse" />}>
-                    <MapaTempoReal />
-                  </Suspense>
-                </CardContent>
-              </Card>
-            </ProtectedSection>
-          </div>
-
-          {canSeeComercial && (
-            <PedidosResumoPanel
-              pedidosRecentes={pedidosRecentes}
-              pedidosPendentes={pedidosPendentes}
-              pedidosAguardandoAprovacao={pedidosAguardandoAprovacao}
-              onVerTodos={() => handleDrillDown(createPageUrl('Comercial'))}
-            />
-          )}
-
-
-          {/* Anomalias Financeiras (IA) – hiperpersonalização por role */}
-          {canSeeFinanceiro && (
-            <Card className="bg-white/80 backdrop-blur-sm mt-4">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 text-rose-600" />
-                  Anomalias Financeiras Detectadas
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {loadingAnomIA ? (
-                  <div className="h-10 rounded-md bg-slate-100 animate-pulse" />
-                ) : (
-                  (() => {
-                    const list = anomaliasIA?.details || [];
-                    if (!list.length) return <p className="text-sm text-slate-600">Nenhuma anomalia relevante.</p>;
-                    const resumo = list.reduce((acc, i) => { acc[i.severity || 'baixo'] = (acc[i.severity || 'baixo'] || 0) + 1; return acc; }, {});
-                    return (
-                      <div className="flex flex-wrap gap-2 text-sm">
-                        <Badge className="bg-red-100 text-red-700">Alta: {resumo.alto || 0}</Badge>
-                        <Badge className="bg-amber-100 text-amber-700">Média: {resumo.medio || 0}</Badge>
-                        <Badge variant="outline">Baixa: {resumo.baixo || 0}</Badge>
-                      </div>
-                    );
-                  })()
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Estoque Crítico */}
-          <WidgetEstoqueCritico 
-            preds14Count={(previsoesIA?.previsoes || []).filter(p => p.risco_ruptura && p.risco_ruptura !== 'baixo').length}
-            preds30Count={(previsoesIA30?.previsoes || []).filter(p => p.risco_ruptura && p.risco_ruptura !== 'baixo').length}
-            count={produtosBaixoEstoque}
-            onNavigate={() => handleDrillDown(createPageUrl("Estoque"))}
-          />
-
-          {/* Gráficos + Top Produtos (redimensionável) */}
-          <PanelGroup direction="vertical" className="gap-2 min-h-[420px]">
-            <Panel defaultSize={55} minSize={30} className="overflow-auto">
-              <ChartsSection vendasUltimos30Dias={vendasUltimos30Dias} fluxo7Dias={fluxo7Dias} />
-            </Panel>
-            <PanelResizeHandle className="w-1 bg-slate-200 rounded" />
-            <Panel defaultSize={45} minSize={20} className="overflow-auto">
-              <TopProdutosStatusPeriodoSection topProdutos={topProdutos} dadosVendasStatus={dadosVendasStatus} COLORS={COLORS} />
-            </Panel>
-          </PanelGroup>
-
-          {/* Ciclo 17 — BI Comparativo: KPIs mês + Marketplace + CRM Score + Conciliação */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <DashboardKPIsComparativosWidget />
-            <DashboardMarketplaceWidget />
-            {canSeeCRM && <CRMScoreDashboard />}
-            {canSeeFinanceiro && <ConciliacaoIAWidget />}
-          </div>
-
-          {/* Ciclo 18-20 — Q4 2026 / Q1 2027: BI 3D + Automações + GPS + Mobile + Compliance + Contratos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <DashboardBI3DWidget />
-            <DashboardAutomacaoFluxosWidget />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <RastreamentoGPSWidget />
-            <ApontamentoProdutoMobileWidget />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <ComplianceISO27001Widget />
-            <ContratosEletronicosWidget />
-          </div>
-
-          {/* IA: Saúde + Forecast + Vendas Previsão + Insights */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <DashboardSaudeWidget />
-            <DashboardForecastWidget />
-            <DashboardVendasPrevisaoWidget />
-            <DashboardIAInsightsPanel />
-          </div>
-
-          {/* GRÁFICOS AVANÇADOS */}
-          <AdvancedAnalysisSection
-            vendasPorMes={vendasPorMesData}
-            top5Clientes={top5ClientesData}
-            statusPedidos={statusPedidosDataAll}
-            fluxoCaixaMensal={fluxoCaixaMensalData}
-            COLORS={COLORS}
-          />
-
-          {/* Command Center (Executivo) - sem criar módulo novo, visível a quem tem Sistema */}
-          <ProtectedSection module="Sistema" action="ver" hideInstead>
-            <Card className="bg-white/80 backdrop-blur-sm mt-4">
-              <CardHeader>
-                <CardTitle>Command Center</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                  <div className="p-4 rounded-md border border-slate-200 bg-white/70 backdrop-blur shadow-md flex items-center justify-between">
-                    <div>
-                      <div className="text-sm font-semibold text-slate-700">Erros (24h)</div>
-                      <div className="text-2xl font-bold">{ccMetrics?.errors ?? 0}</div>
-                    </div>
-                    <AlertCircle className="w-6 h-6 text-rose-600" />
-                  </div>
-                  <div className="p-4 rounded-md border border-slate-200 bg-white/70 backdrop-blur shadow-md flex items-center justify-between">
-                    <div>
-                      <div className="text-sm font-semibold text-slate-700">Jobs/Automations</div>
-                      <div className="text-2xl font-bold">{ccMetrics?.funcs ?? 0}</div>
-                    </div>
-                    <Activity className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div className="p-4 rounded-md border border-slate-200 bg-white/70 backdrop-blur shadow-md flex items-center justify-between">
-                    <div>
-                      <div className="text-sm font-semibold text-slate-700">Integrações</div>
-                      <div className="text-2xl font-bold">OK</div>
-                    </div>
-                    <BarChart3 className="w-6 h-6 text-emerald-600" />
-                  </div>
-                  <div className="p-4 rounded-md border border-slate-200 bg-white/70 backdrop-blur shadow-md flex items-center justify-between">
-                    <div>
-                      <div className="text-sm font-semibold text-slate-700">Segurança</div>
-                      <div className="text-2xl font-bold">{ccMetrics?.secAlerts ?? 0}</div>
-                    </div>
-                    <Shield className="w-6 h-6 text-amber-600" />
-                  </div>
-                  <div className="p-4 rounded-md border border-slate-200 bg-white/70 backdrop-blur shadow-md flex items-center justify-between">
-                    <div>
-                      <div className="text-sm font-semibold text-slate-700">Chatbot (24h)</div>
-                      <div className="text-xs text-slate-500">SLA 1ª resp.</div>
-                      <div className="text-2xl font-bold">{botMetrics?.chats ?? 0} / {botMetrics?.sla_total ?? 0} • {botMetrics?.sla_total ? Math.round(100*(botMetrics.sla_ok/(botMetrics.sla_total||1))) : 0}%</div>
-                    </div>
-                    <MessageCircle className="w-6 h-6 text-blue-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </ProtectedSection>
-
-          <ProtectedSection module="Sistema" action="ver" hideInstead>
-            <Suspense fallback={<div className="h-40 rounded-md bg-slate-100 animate-pulse" />}> 
-              <DashboardPerformance />
-            </Suspense>
-          </ProtectedSection>
-
-          {/* Previsões de Estoque (IA) — componente dedicado */}
-          {canSeeEstoque && (
-            <DashboardEstoquePrevisoesWidget previsoesIA={previsoesIA} loadingPrevIA={loadingPrevIA} />
-          )}
-
-          {/* Módulos de Acesso Rápido */}
-          <QuickAccessModulesGrid modules={quickAccess} onClick={handleDrillDown} />
-
-          {/* Resumo Financeiro */}
-          <FinancialSummary receitasPendentes={receitasPendentes} despesasPendentes={despesasPendentes} fluxoCaixa={fluxoCaixa} />
-
-          {/* NOVO: Gamificação */}
-          <div>
-            <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <Trophy className="w-6 h-6 text-yellow-600" />
-              Rankings de Performance
-            </h2>
-            <Suspense fallback={<div className="h-40 rounded-md bg-slate-100 animate-pulse" />}>
-              <GamificacaoOperacoes />
-            </Suspense>
-          </div>
-
-          {/* Placeholder or replacement if PainelOperacoes3D was still intended for "resumo" tab */}
-          {/* If PainelOperacoes3D should be nested within the "Resumo Geral" tab and not a separate view,
-              it would go here, possibly conditionally or within a different section.
-              Based on the outline, it's removed from the main switch. */}
-          {/* Example: <PainelOperacoes3D empresaId={null} grupoId={null} /> */}
-        </TabsContent>
+        <DashboardResumoTab
+          statsCards={statsCards}
+          kpisOperacionais={kpisOperacionais}
+          kpiCards={kpiCards}
+          quickAccess={quickAccess}
+          pedidosRecentes={pedidosRecentes}
+          pedidosPendentes={pedidosPendentes}
+          pedidosAguardandoAprovacao={pedidosAguardandoAprovacao}
+          produtosBaixoEstoque={produtosBaixoEstoque}
+          receitasPendentes={receitasPendentes}
+          despesasPendentes={despesasPendentes}
+          fluxoCaixa={fluxoCaixa}
+          vendasUltimos30Dias={vendasUltimos30Dias}
+          fluxo7Dias={fluxo7Dias}
+          topProdutos={topProdutos}
+          dadosVendasStatus={dadosVendasStatus}
+          vendasPorMesData={vendasPorMesData}
+          top5ClientesData={top5ClientesData}
+          statusPedidosDataAll={statusPedidosDataAll}
+          fluxoCaixaMensalData={fluxoCaixaMensalData}
+          COLORS={COLORS}
+          anomaliasIA={anomaliasIA}
+          loadingAnomIA={loadingAnomIA}
+          previsoesIA={previsoesIA}
+          previsoesIA30={previsoesIA30}
+          loadingPrevIA={loadingPrevIA}
+          ccMetrics={ccMetrics}
+          botMetrics={botMetrics}
+          canSeeFinanceiro={canSeeFinanceiro}
+          canSeeCRM={canSeeCRM}
+          canSeeEstoque={canSeeEstoque}
+          onDrillDown={handleDrillDown}
+          empresaId={empresaAtual?.id}
+        />
+        {/* conteúdo movido para DashboardResumoTab */}
       </Tabs>
       </ErrorBoundary>
       </div>

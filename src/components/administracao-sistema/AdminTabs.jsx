@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-// AdminTabs v2 — inclui aba de Propagação Grupo↔Empresas
+// AdminTabs v2 — inclui aba de Propagação Grupo↔Empresas (7 abas)
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Settings, Users, Shield, FileText, Sparkles, Brain, Plug, ArrowDownUp } from "lucide-react";
 import usePermissions from "@/components/lib/usePermissions";

@@ -2,7 +2,8 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
-import { CheckCircle2, AlertCircle, XCircle, Wifi, WifiOff } from "lucide-react";
+import { CheckCircle2, AlertCircle, XCircle, Wifi } from "lucide-react";
+import PropagacaoStatusWidget from "@/components/administracao-sistema/PropagacaoStatusWidget";
 import { Badge } from "@/components/ui/badge";
 
 /**
@@ -116,6 +117,13 @@ export default function AdminStatusBar() {
         <span className="text-xs text-amber-700 ml-auto">
           ⚠️ Selecione empresa/grupo para ver status real
         </span>
+      )}
+
+      {/* Propagação status inline */}
+      {(eId || gId) && (
+        <div className="w-full mt-2 border-t border-slate-200 pt-2">
+          <PropagacaoStatusWidget />
+        </div>
       )}
     </div>
   );

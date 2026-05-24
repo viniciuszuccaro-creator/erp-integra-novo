@@ -34,14 +34,18 @@ Deno.serve(async (req) => {
       'PlanoDeContas', 'CentroCusto', 'CentroResultado', 'TipoDespesa', 'MoedaIndice',
       'FormaPagamento', 'CondicaoComercial', 'TabelaFiscal', 'Banco', 'ContaBancariaEmpresa',
       'GatewayPagamento', 'ConfiguracaoGatewayPagamento',
-      // Produtos & Serviços
+      // Produtos & Serviços ← inclui Produto e Fornecedor agora
       'GrupoProduto', 'Marca', 'SetorAtividade', 'UnidadeMedida', 'Servico',
-      // Logística
+      'Produto', 'Fornecedor',
+      // Logística ← inclui Entrega
       'TipoFrete', 'LocalEstoque', 'RotaPadrao', 'Transportadora', 'Veiculo', 'Motorista',
       // Estrutura Organizacional
       'Cargo', 'Departamento', 'Turno', 'PerfilAcesso',
-      // Comercial & CRM
+      // Comercial & CRM ← inclui Cliente e NotaFiscal
       'SegmentoCliente', 'RegiaoAtendimento', 'TabelaPreco', 'KitProduto',
+      'Cliente',
+      // Fiscal ← NF-e agora propagável DOWN
+      'ConfiguracaoNFe', 'TabelaNCM',
       // Cadastros Gerais
       'ModeloDocumento', 'ContatoB2B', 'Representante',
       // Parâmetros

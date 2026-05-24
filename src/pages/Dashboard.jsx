@@ -230,7 +230,10 @@ export default function Dashboard() {
     queryKey: ['produtos-count-dash', empresaAtual?.id, grupoAtual?.id],
     queryFn: async () => {
       try {
-        const filtro = getFiltroContexto('empresa_id');
+        // Filtro simples: o backend expande corretamente sem duplicação
+        const filtro = grupoAtual?.id && !empresaAtual?.id
+          ? { group_id: grupoAtual.id }
+          : empresaAtual?.id ? { empresa_id: empresaAtual.id } : {};
         const response = await base44.functions.invoke('countEntities', {
           entityName: 'Produto',
           filter: filtro
@@ -240,7 +243,7 @@ export default function Dashboard() {
         return produtos.length;
       }
     },
-    staleTime: 600000,
+    staleTime: 60000,
     retry: 1,
     retryDelay: 1000,
   });
@@ -264,7 +267,10 @@ export default function Dashboard() {
     queryKey: ['clientes-count', empresaAtual?.id, grupoAtual?.id],
     queryFn: async () => {
       try {
-        const filtro = getFiltroContexto('empresa_id', true);
+        // Filtro simples: o backend expande corretamente sem duplicação
+        const filtro = grupoAtual?.id && !empresaAtual?.id
+          ? { group_id: grupoAtual.id }
+          : empresaAtual?.id ? { empresa_id: empresaAtual.id } : {};
         const response = await base44.functions.invoke('countEntities', {
           entityName: 'Cliente',
           filter: filtro
@@ -274,7 +280,7 @@ export default function Dashboard() {
         return clientes.length;
       }
     },
-    staleTime: 600000,
+    staleTime: 60000,
     retry: 1,
     retryDelay: 1000,
   });
@@ -284,7 +290,10 @@ export default function Dashboard() {
     queryKey: ['colaboradores-count-dash', empresaAtual?.id, grupoAtual?.id],
     queryFn: async () => {
       try {
-        const filtro = getFiltroContexto('empresa_alocada_id', true);
+        // Filtro simples: o backend mapeia empresa_id → empresa_alocada_id para Colaborador
+        const filtro = grupoAtual?.id && !empresaAtual?.id
+          ? { group_id: grupoAtual.id }
+          : empresaAtual?.id ? { empresa_id: empresaAtual.id } : {};
         const response = await base44.functions.invoke('countEntities', {
           entityName: 'Colaborador',
           filter: filtro
@@ -294,7 +303,7 @@ export default function Dashboard() {
         return colaboradores.length;
       }
     },
-    staleTime: 600000,
+    staleTime: 60000,
     retry: 1,
     retryDelay: 1000,
   });

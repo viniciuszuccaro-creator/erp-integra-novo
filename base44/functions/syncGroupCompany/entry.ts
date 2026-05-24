@@ -1,33 +1,35 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import { z } from 'npm:zod@3.24.2';
 
+// syncGroupCompany — sincronização bidirecional em tempo real via entity automation
+// Disparada quando um registro é criado/atualizado/deletado em qualquer entidade rastreada.
+// Anti-loop: janela de 2.5s por registro no SyncMap.
+
 function pickAllowed(entityName, data) {
-  // Remove read-only fields and IDs
   const clone = { ...data };
   delete clone.id; delete clone.created_date; delete clone.updated_date; delete clone.created_by;
-  // NotaFiscal nunca é espelhada entre escopos
+  // NF-e nunca é espelhada entre escopos (política separada em nfeActions)
   if (entityName === 'NotaFiscal') return null;
   return clone;
 }
 
 async function listEmpresasByGroup(base44, groupId) {
   try {
-    const empresas = await base44.asServiceRole.entities.Empresa.filter({ group_id: groupId });
+    const empresas = await base44.asServiceRole.entities.Empresa.filter({ group_id: groupId }, undefined, 500);
     if (Array.isArray(empresas) && empresas.length) return empresas;
   } catch (_) {}
-  // Fallback: todas empresas ativas
-  try {
-    return await base44.asServiceRole.entities.Empresa.filter({ status: 'Ativa' });
-  } catch (_) { return []; }
+  return [];
 }
 
 function nowIso() { return new Date().toISOString(); }
 
-// Retry helper (idempotent best-effort)
 async function doWithRetry(fn, tries = 3, delayMs = 300) {
   let lastErr;
   for (let i = 0; i < tries; i++) {
-    try { return await fn(); } catch (e) { lastErr = e; if (i < tries - 1) { await new Promise(r => setTimeout(r, delayMs * (i + 1))); } }
+    try { return await fn(); } catch (e) {
+      lastErr = e;
+      if (i < tries - 1) await new Promise(r => setTimeout(r, delayMs * (i + 1)));
+    }
   }
   throw lastErr;
 }
@@ -36,18 +38,18 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Automations call with payload: { event, data, old_data, payload_too_large }
     const raw = await req.json().catch(() => ({}));
     const EventSchema = z.object({
       event: z.object({
         entity_name: z.string(),
-        type: z.enum(['create','update','delete']),
+        type: z.enum(['create', 'update', 'delete']),
         entity_id: z.string()
       }),
       data: z.record(z.any()).optional(),
       old_data: z.record(z.any()).optional(),
       payload_too_large: z.boolean().optional()
     }).passthrough();
+
     const parsed = EventSchema.safeParse(raw);
     if (!parsed.success) {
       return Response.json({ error: 'Evento inválido', issues: parsed.error.issues }, { status: 400 });
@@ -55,43 +57,50 @@ Deno.serve(async (req) => {
     const body = parsed.data;
     const event = body?.event || {};
     const entityName = event?.entity_name;
-    const eventType = event?.type; // create | update | delete
+    const eventType = event?.type;
     const entityId = event?.entity_id;
 
     if (!entityName || !eventType || !entityId) {
       return Response.json({ error: 'Invalid payload' }, { status: 400 });
     }
 
-    // Carrega o registro atual (delete pode não ter data)
-    let record = body?.data;
-    if (!record && eventType !== 'delete') {
-      try { record = await base44.asServiceRole.entities[entityName].get(entityId); } catch (_) {}
-    }
-
-    // Regras NF-e: nunca sincronizar (apenas política separada em nfeActions)
+    // NF-e: nunca sincronizar automaticamente
     if (entityName === 'NotaFiscal') {
       return Response.json({ ok: true, skipped: 'NotaFiscal' });
+    }
+
+    // Entidades que NÃO devem ser espelhadas automaticamente (operacionais/transacionais que têm lógica própria)
+    const SKIP_ENTITIES = new Set(['AuditLog', 'SyncMap', 'SessaoUsuario', 'TokenRefresh', 'Ponto', 'ApontamentoProducao']);
+    if (SKIP_ENTITIES.has(entityName)) {
+      return Response.json({ ok: true, skipped: 'skip-list' });
+    }
+
+    let record = body?.data;
+    if (!record && eventType !== 'delete') {
+      try {
+        record = await base44.asServiceRole.entities[entityName]?.get?.(entityId);
+      } catch (_) {}
     }
 
     const groupId = record?.group_id || body?.data?.group_id || body?.old_data?.group_id || null;
     const empresaId = record?.empresa_id || body?.data?.empresa_id || null;
 
-    // Proteção anti-loop: se acabou de sincronizar, ignorar
-    const existingMaps = await base44.asServiceRole.entities.SyncMap.filter({ entity_name: entityName });
+    // Anti-loop: verifica SyncMap para evitar propagação circular
+    const existingMaps = await base44.asServiceRole.entities.SyncMap.filter({ entity_name: entityName }).catch(() => []);
     const mapsById = (existingMaps || []).filter(m => m.source_id === entityId || m.target_id === entityId);
-    const recent = mapsById.find(m => {
+    const recentSync = mapsById.find(m => {
       const t = new Date(m.last_sync_at || 0).getTime();
       return Date.now() - t < 2500; // 2.5s janela anti-loop
     });
-    if (recent) {
+    if (recentSync) {
       return Response.json({ ok: true, ignored: 'recent-sync' });
     }
 
-    // DELETE: apagar espelhos
+    // DELETE: remover espelhos
     if (eventType === 'delete') {
       for (const m of mapsById) {
         const counterpartId = (m.source_id === entityId) ? m.target_id : m.source_id;
-        try { await base44.asServiceRole.entities[entityName].delete(counterpartId); } catch (_) {}
+        try { await base44.asServiceRole.entities[entityName]?.delete?.(counterpartId); } catch (_) {}
         try { await base44.asServiceRole.entities.SyncMap.delete(m.id); } catch (_) {}
       }
       return Response.json({ ok: true, deleted: mapsById.length });
@@ -99,44 +108,38 @@ Deno.serve(async (req) => {
 
     // CREATE/UPDATE: bidirecional
     if (empresaId) {
-      // empresa -> grupo (UP)
-      // Se já existe mapeamento up, atualiza; senão cria no grupo (sem empresa_id)
+      // empresa → grupo (UP)
       const upMap = mapsById.find(m => m.direction === 'up');
       const payload = pickAllowed(entityName, record);
-      const groupFilter = { ...(groupId ? { group_id: groupId } : {}) };
       if (!payload) return Response.json({ ok: true, skipped: 'not-allowed' });
       delete payload.empresa_id;
-      let targetId = upMap?.target_id;
-      if (targetId) {
-         const current = await base44.asServiceRole.entities[entityName].get(targetId).catch(() => ({}));
-         const mergeRes = await base44.asServiceRole.functions.invoke('conflictPolicy', {
-           entity_name: entityName,
-           group_id: groupId || null,
-           empresa_id: empresaId,
-           source: 'up',
-           current,
-           incoming: payload
-         });
-         const merged = (mergeRes?.data && (mergeRes.data.merged || mergeRes.data)) || payload;
-         await doWithRetry(() => base44.asServiceRole.entities[entityName].update(targetId, merged));
-         await doWithRetry(() => base44.asServiceRole.entities.SyncMap.update(upMap.id, { last_sync_at: nowIso() }));
-       } else {
-         const mergeRes = await base44.asServiceRole.functions.invoke('conflictPolicy', {
-           entity_name: entityName,
-           group_id: groupId || null,
-           empresa_id: empresaId,
-           source: 'up',
-           current: {},
-           incoming: { ...payload, ...groupFilter }
-         });
-         const merged = (mergeRes?.data && (mergeRes.data.merged || mergeRes.data)) || { ...payload, ...groupFilter };
-         const created = await doWithRetry(() => base44.asServiceRole.entities[entityName].create(merged));
-         await doWithRetry(() => base44.asServiceRole.entities.SyncMap.create({ entity_name: entityName, group_id: groupId || null, empresa_id: empresaId, source_id: entityId, target_id: created.id, direction: 'up', last_sync_at: nowIso() }));
-       }
+      const groupFilter = groupId ? { group_id: groupId } : {};
+
+      if (upMap?.target_id) {
+        const current = await base44.asServiceRole.entities[entityName]?.get?.(upMap.target_id).catch(() => ({})) || {};
+        const mergeRes = await base44.asServiceRole.functions.invoke('conflictPolicy', {
+          entity_name: entityName, group_id: groupId || null, empresa_id: empresaId,
+          source: 'up', current, incoming: payload
+        }).catch(() => null);
+        const merged = (mergeRes?.data && (mergeRes.data.merged || mergeRes.data)) || payload;
+        await doWithRetry(() => base44.asServiceRole.entities[entityName].update(upMap.target_id, merged));
+        await doWithRetry(() => base44.asServiceRole.entities.SyncMap.update(upMap.id, { last_sync_at: nowIso() }));
+      } else {
+        const mergeRes = await base44.asServiceRole.functions.invoke('conflictPolicy', {
+          entity_name: entityName, group_id: groupId || null, empresa_id: empresaId,
+          source: 'up', current: {}, incoming: { ...payload, ...groupFilter }
+        }).catch(() => null);
+        const merged = (mergeRes?.data && (mergeRes.data.merged || mergeRes.data)) || { ...payload, ...groupFilter };
+        const created = await doWithRetry(() => base44.asServiceRole.entities[entityName].create(merged));
+        await doWithRetry(() => base44.asServiceRole.entities.SyncMap.create({
+          entity_name: entityName, group_id: groupId || null, empresa_id: empresaId,
+          source_id: entityId, target_id: created.id, direction: 'up', last_sync_at: nowIso()
+        }));
+      }
       return Response.json({ ok: true, direction: 'up' });
     }
 
-    // grupo -> empresas (DOWN)
+    // grupo → empresas (DOWN)
     if (groupId) {
       const empresas = await listEmpresasByGroup(base44, groupId);
       const payload = pickAllowed(entityName, record);
@@ -144,39 +147,37 @@ Deno.serve(async (req) => {
       const results = [];
       for (const emp of empresas) {
         const empId = emp.id;
-        const map = (existingMaps || []).find(m => (m.source_id === entityId && m.empresa_id === empId && m.direction === 'down') || (m.target_id === entityId && m.empresa_id === empId && m.direction === 'up'))
-          || mapsById.find(m => m.empresa_id === empId && (m.source_id === entityId || m.target_id === entityId));
-        const isMirror = map && map.target_id && map.source_id === entityId && map.direction === 'down';
+        const map = (existingMaps || []).find(m =>
+          (m.source_id === entityId && m.empresa_id === empId && m.direction === 'down') ||
+          (m.target_id === entityId && m.empresa_id === empId && m.direction === 'up')
+        ) || mapsById.find(m => m.empresa_id === empId);
+        const isMirror = map?.target_id && map.source_id === entityId && map.direction === 'down';
         const targetId = isMirror ? map.target_id : null;
-        const dataDown = { ...payload, empresa_id: empId };
+        const dataDown = { ...payload, empresa_id: empId, group_id: groupId };
+
         if (targetId) {
-           const current = await base44.asServiceRole.entities[entityName].get(targetId).catch(() => ({}));
-           const mergeRes = await base44.asServiceRole.functions.invoke('conflictPolicy', {
-             entity_name: entityName,
-             group_id: groupId,
-             empresa_id: empId,
-             source: 'down',
-             current,
-             incoming: dataDown
-           });
-           const merged = (mergeRes?.data && (mergeRes.data.merged || mergeRes.data)) || dataDown;
-           await doWithRetry(() => base44.asServiceRole.entities[entityName].update(targetId, merged));
-           await doWithRetry(() => base44.asServiceRole.entities.SyncMap.update(map.id, { last_sync_at: nowIso() }));
-           results.push({ empresa_id: empId, action: 'updated' });
-         } else {
-           const mergeRes = await base44.asServiceRole.functions.invoke('conflictPolicy', {
-             entity_name: entityName,
-             group_id: groupId,
-             empresa_id: empId,
-             source: 'down',
-             current: {},
-             incoming: { ...dataDown, group_id: groupId }
-           });
-           const merged = (mergeRes?.data && (mergeRes.data.merged || mergeRes.data)) || { ...dataDown, group_id: groupId };
-           const created = await doWithRetry(() => base44.asServiceRole.entities[entityName].create(merged));
-           await doWithRetry(() => base44.asServiceRole.entities.SyncMap.create({ entity_name: entityName, group_id: groupId, empresa_id: empId, source_id: entityId, target_id: created.id, direction: 'down', last_sync_at: nowIso() }));
-           results.push({ empresa_id: empId, action: 'created' });
-         }
+          const current = await base44.asServiceRole.entities[entityName]?.get?.(targetId).catch(() => ({})) || {};
+          const mergeRes = await base44.asServiceRole.functions.invoke('conflictPolicy', {
+            entity_name: entityName, group_id: groupId, empresa_id: empId,
+            source: 'down', current, incoming: dataDown
+          }).catch(() => null);
+          const merged = (mergeRes?.data && (mergeRes.data.merged || mergeRes.data)) || dataDown;
+          await doWithRetry(() => base44.asServiceRole.entities[entityName].update(targetId, merged));
+          await doWithRetry(() => base44.asServiceRole.entities.SyncMap.update(map.id, { last_sync_at: nowIso() }));
+          results.push({ empresa_id: empId, action: 'updated' });
+        } else {
+          const mergeRes = await base44.asServiceRole.functions.invoke('conflictPolicy', {
+            entity_name: entityName, group_id: groupId, empresa_id: empId,
+            source: 'down', current: {}, incoming: dataDown
+          }).catch(() => null);
+          const merged = (mergeRes?.data && (mergeRes.data.merged || mergeRes.data)) || dataDown;
+          const created = await doWithRetry(() => base44.asServiceRole.entities[entityName].create(merged));
+          await doWithRetry(() => base44.asServiceRole.entities.SyncMap.create({
+            entity_name: entityName, group_id: groupId, empresa_id: empId,
+            source_id: entityId, target_id: created.id, direction: 'down', last_sync_at: nowIso()
+          }));
+          results.push({ empresa_id: empId, action: 'created' });
+        }
       }
       return Response.json({ ok: true, direction: 'down', results });
     }

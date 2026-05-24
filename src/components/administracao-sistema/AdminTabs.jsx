@@ -9,8 +9,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useUser } from "@/components/lib/UserContext";
 
-// Lazy sub-modules para não carregar tudo ao mesmo tempo
+// Sub-modules
 import AdminStatusBar from "@/components/administracao-sistema/AdminStatusBar";
+import SistemaHealthPanel from "@/components/administracao-sistema/SistemaHealthPanel";
 
 import ConfiguracoesGeraisIndex from "@/components/administracao-sistema/configuracoes-gerais/ConfiguracoesGeraisIndex";
 import IntegracoesIndex from "@/components/administracao-sistema/IntegracoesIndex";
@@ -82,6 +83,7 @@ export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtua
       {/* ── STATUS BAR GLOBAL ── */}
       <div className="mt-3 space-y-3">
         <AdminStatusBar />
+        <SistemaHealthPanel />
       </div>
 
       {/* ── PARÂMETROS GERAIS ── */}

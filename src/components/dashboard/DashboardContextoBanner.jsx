@@ -1,0 +1,55 @@
+/**
+ * DashboardContextoBanner — Banner limpo mostrando o contexto ativo (Grupo vs. Empresa)
+ * com botão de alternância rápida.
+ */
+import React from "react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Building2, Layers, ArrowLeftRight } from "lucide-react";
+
+export default function DashboardContextoBanner() {
+  const { empresaAtual, grupoAtual, estaNoGrupo, alternarContexto } = useContextoVisual();
+
+  const isGrupo = estaNoGrupo || (!empresaAtual?.id && !!grupoAtual?.id);
+  const nomeContexto = isGrupo
+    ? (grupoAtual?.nome_do_grupo || "Grupo")
+    : (empresaAtual?.nome_fantasia || empresaAtual?.razao_social || "Empresa");
+
+  return (
+    <div className={`flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl border text-sm ${
+      isGrupo
+        ? "bg-purple-50 border-purple-200 text-purple-800"
+        : "bg-blue-50 border-blue-200 text-blue-800"
+    }`}>
+      <div className="flex items-center gap-2">
+        {isGrupo
+          ? <Layers className="w-4 h-4 text-purple-600 shrink-0" />
+          : <Building2 className="w-4 h-4 text-blue-600 shrink-0" />
+        }
+        <span className="font-medium">
+          {isGrupo ? "Visão Grupo:" : "Empresa:"}
+        </span>
+        <Badge variant="outline" className={`text-xs font-semibold ${
+          isGrupo ? "border-purple-300 text-purple-700" : "border-blue-300 text-blue-700"
+        }`}>
+          {nomeContexto}
+        </Badge>
+        {isGrupo && (
+          <span className="text-xs opacity-70">— Dados consolidados de todas as empresas</span>
+        )}
+      </div>
+      {typeof alternarContexto === "function" && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 text-xs gap-1.5 opacity-70 hover:opacity-100"
+          onClick={alternarContexto}
+        >
+          <ArrowLeftRight className="w-3.5 h-3.5" />
+          Alternar
+        </Button>
+      )}
+    </div>
+  );
+}

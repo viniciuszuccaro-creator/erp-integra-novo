@@ -62,6 +62,8 @@ import ProtectedSection from "@/components/security/ProtectedSection";
 import usePermissions from "@/components/lib/usePermissions";
 const WidgetCanaisOrigem = React.lazy(() => import("@/components/dashboard/WidgetCanaisOrigem")); // kept for backward-compat (not used directly here)
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import DashboardContextoBanner from "@/components/dashboard/DashboardContextoBanner";
+import DashboardEssentialKPIs from "@/components/dashboard/DashboardEssentialKPIs";
 import StatsSection from "@/components/dashboard/StatsSection";
 import KPIsOperacionaisSection from "@/components/dashboard/KPIsOperacionaisSection";
 import SecondaryKPIsSection from "@/components/dashboard/SecondaryKPIsSection";
@@ -721,6 +723,15 @@ export default function Dashboard() {
         setPeriodo={setPeriodo}
       />
 
+      <DashboardContextoBanner />
+      <DashboardEssentialKPIs
+        totalVendas={totalVendas}
+        taxaInadimplencia={taxaInadimplencia}
+        valorVencido={valorVencido}
+        entregasPendentes={entregasPendentes}
+        produtosBaixoEstoque={produtosBaixoEstoque}
+        otd={otd}
+      />
       <DashboardStabilityNotice hasContextoAtivo={hasContextoAtivo} activeTab={activeTab} />
 
       <ErrorBoundary>
@@ -960,50 +971,6 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           )}
-
-          {/* Módulos de Acesso Rápido */}
-          {/* Previsões de Estoque (IA) - visível apenas para quem vê Estoque */}
-          <ProtectedSection module="Estoque" action="ver" hideInstead>
-          {canSeeEstoque && (
-            <Card className="bg-white/80 backdrop-blur-sm rounded-md shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-indigo-600" />
-                  Previsões de Estoque (30 dias)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {loadingPrevIA ? (
-                  <div className="h-10 rounded-md bg-slate-100 animate-pulse" />
-                ) : (
-                  (() => {
-                    const preds = (previsoesIA30?.previsoes || [])
-                      .filter(p => p.risco_ruptura && p.risco_ruptura !== 'baixo')
-                      .sort((a, b) => (a.dias_cobertura ?? 999) - (b.dias_cobertura ?? 999))
-                      .slice(0, 8);
-                    if (!preds.length) return <p className="text-sm text-slate-600">Sem riscos relevantes no horizonte.</p>;
-                    return (
-                      <div className="grid md:grid-cols-2 gap-3">
-                        {preds.map((p, idx) => (
-                          <div key={idx} className="flex items-center justify-between p-3 rounded-lg border border-slate-200 bg-white">
-                            <div>
-                              <div className="font-medium text-slate-900 truncate max-w-[340px]">{p.descricao}</div>
-                              <div className="text-xs text-slate-500">Cobertura: {p.dias_cobertura ?? '-'} dias • Demanda/dia: {p.demanda_dia_estimada ?? '-'} {p.preco_previsto != null && (<span className="ml-2">• Preço previsto: R$ {p.preco_previsto}</span>)}</div>
-                            </div>
-                            <Badge className={p.risco_ruptura === 'alto' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}>
-                              {String(p.risco_ruptura || '').toUpperCase()}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })()
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          </ProtectedSection>
 
           {/* Módulos de Acesso Rápido */}
           <QuickAccessModulesGrid modules={quickAccess} onClick={handleDrillDown} />

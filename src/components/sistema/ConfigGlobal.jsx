@@ -14,6 +14,7 @@ import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import { canEditConfigByPermission, getConfigPermissionKey, loadScopedConfiguracaoSistema, useToggleConfig } from '@/components/lib/useToggleConfig';
 import ToggleRow from '@/components/sistema/ToggleRow';
 import usePermissions from '@/components/lib/usePermissions';
+import PropagacaoBidirecionalPanel from '@/components/administracao-sistema/PropagacaoBidirecionalPanel';
 
 /**
  * ConfigGlobal — Painel de configuração global.
@@ -106,6 +107,9 @@ export default function ConfigGlobal({ empresaId, grupoId }) {
 
   return (
     <div className="space-y-4 w-full">
+      {/* Propagação Bidirecional sempre visível no topo */}
+      <PropagacaoBidirecionalPanel />
+
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Parâmetros Globais</h2>

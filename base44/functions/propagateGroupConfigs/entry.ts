@@ -1,19 +1,13 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-// Admin-only function to propagate configurations/data between group and companies
-// Body formats supported:
-// 1) Direct call: { group_id, empresa_id?, direction?: 'grupo_to_empresas'|'empresa_to_grupo', entidades?: string[], strategy?: 'skip'|'merge'|'override' }
-// 2) Entity automation payload: { event, data, old_data, args? }
-// Defaults: direction=grupo_to_empresas, entidades=['PlanoDeContas','CentroCusto'], strategy='merge'
+// propagateGroupConfigs — propagação bidirecional Grupo ↔ Empresas
+// Suporta: chamada direta (admin), automação agendada (service role)
+// Body: { group_id?, empresa_id?, direction?, entidades?, strategy?, empresas_ids? }
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    // Suporta dois modos:
-    // 1) Chamada por usuário autenticado (admin) — requer role=admin
-    // 2) Chamada por automação agendada (sem auth) — permitida via service role
     let user = null;
     try { user = await base44.auth.me(); } catch (_) {}
-    const isScheduledAutomation = !user; // sem auth → automação agendada
     if (user && user.role !== 'admin') {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
@@ -31,37 +25,62 @@ Deno.serve(async (req) => {
       empresas_ids: raw?.empresas_ids
     } : raw;
 
-    // Resolve contexto
     let { group_id: groupId, empresa_id: empresaId, direction, entidades, strategy, empresas_ids } = input || {};
     direction = direction || (empresaId && !groupId ? 'empresa_to_grupo' : 'grupo_to_empresas');
-    entidades = Array.isArray(entidades) && entidades.length ? entidades : [
+
+    // Lista completa de entidades propagáveis (inclui transacionais e cadastros)
+    const DEFAULT_ENTIDADES = [
       // Financeiro & Fiscal
       'PlanoDeContas', 'CentroCusto', 'CentroResultado', 'TipoDespesa', 'MoedaIndice',
       'FormaPagamento', 'CondicaoComercial', 'TabelaFiscal', 'Banco',
       // Produtos & Serviços
-      'GrupoProduto', 'Marca', 'SetorAtividade', 'UnidadeMedida',
+      'GrupoProduto', 'Marca', 'SetorAtividade', 'UnidadeMedida', 'Servico',
       // Logística
-      'TipoFrete', 'LocalEstoque', 'RotaPadrao',
+      'TipoFrete', 'LocalEstoque', 'RotaPadrao', 'Transportadora',
       // Estrutura Organizacional
       'Cargo', 'Departamento', 'Turno',
+      // Comercial & CRM
+      'SegmentoCliente', 'RegiaoAtendimento', 'TabelaPreco',
+      // Documentos
+      'ModeloDocumento', 'PerfilAcesso',
     ];
+    entidades = Array.isArray(entidades) && entidades.length ? entidades : DEFAULT_ENTIDADES;
     strategy = strategy || 'merge'; // 'skip' | 'merge' | 'override'
 
     if (!groupId && empresaId) {
       const emp = await base44.asServiceRole.entities.Empresa.filter({ id: empresaId }, undefined, 1).then(r => r?.[0]).catch(() => null);
       groupId = emp?.group_id || null;
     }
-    if (!groupId) return Response.json({ error: 'group_id obrigatório (ou empresa_id que pertença a um grupo)' }, { status: 400 });
+    if (!groupId) return Response.json({ error: 'group_id obrigatório' }, { status: 400 });
 
-    const empresas = await base44.asServiceRole.entities.Empresa.filter({ group_id: groupId }, undefined, 500);
-    const targetEmpresas = Array.isArray(empresas_ids) && empresas_ids.length ? empresas.filter(e => empresas_ids.includes(e.id)) : empresas;
+    const empresas = await base44.asServiceRole.entities.Empresa.filter({ group_id: groupId }, undefined, 500).catch(() => []);
+    const targetEmpresas = Array.isArray(empresas_ids) && empresas_ids.length
+      ? empresas.filter(e => empresas_ids.includes(e.id))
+      : empresas;
 
-    // Helpers
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
     const keyFieldsByEntity = (en) => {
-      if (en === 'Cliente') return ['cnpj', 'cpf', 'nome', 'razao_social'];
-      if (en === 'Fornecedor') return ['cnpj', 'cpf', 'nome', 'razao_social'];
-      if (en === 'TabelaPreco' || en === 'PlanoDeContas' || en === 'CentroCusto') return ['codigo', 'descricao', 'nome', 'titulo'];
-      return ['codigo', 'descricao', 'nome', 'titulo'];
+      const map = {
+        Cliente: ['cnpj', 'cpf', 'nome', 'razao_social'],
+        Fornecedor: ['cnpj', 'cpf', 'nome', 'razao_social'],
+        Transportadora: ['cnpj', 'razao_social'],
+        PlanoDeContas: ['codigo', 'descricao'],
+        CentroCusto: ['codigo', 'descricao'],
+        TabelaPreco: ['nome', 'codigo'],
+        PerfilAcesso: ['nome_perfil'],
+        Marca: ['nome_marca'],
+        GrupoProduto: ['nome_grupo', 'codigo'],
+        FormaPagamento: ['descricao', 'nome'],
+        Banco: ['codigo', 'nome'],
+        Cargo: ['nome_cargo'],
+        Departamento: ['nome_departamento'],
+        Turno: ['nome_turno'],
+        SegmentoCliente: ['nome_segmento'],
+        RegiaoAtendimento: ['nome_regiao', 'codigo_regiao'],
+        ModeloDocumento: ['nome', 'tipo'],
+      };
+      return map[en] || ['codigo', 'descricao', 'nome', 'titulo'];
     };
 
     const sanitize = (obj) => {
@@ -74,50 +93,45 @@ Deno.serve(async (req) => {
       return out;
     };
 
-    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-    const processChunks = async (arr, size, handler) => {
-      for (let i = 0; i < arr.length; i += size) {
-        const slice = arr.slice(i, i + size);
-        await handler(slice, i / size);
-        if (i + size < arr.length) await sleep(250); // backoff anti rate-limit
-      }
-    };
-
     const copyGroupToEmpresas = async (entityName) => {
-      const baseRegs = await base44.asServiceRole.entities[entityName].filter({ group_id: groupId }, undefined, 5000);
+      if (!base44.asServiceRole.entities?.[entityName]) return { entity: entityName, skipped: 'not-found' };
+      const baseRegs = await base44.asServiceRole.entities[entityName].filter({ group_id: groupId }, undefined, 5000).catch(() => []);
+      if (!baseRegs.length) return { entity: entityName, created: 0, updated: 0, skipped: 0, total_source: 0, direction: 'grupo_to_empresas' };
       const keys = keyFieldsByEntity(entityName);
       let created = 0, updated = 0, skipped = 0;
-      await processChunks(targetEmpresas, 1, async (empSlice) => {
-        for (const emp of empSlice) {
-          await processChunks(baseRegs, 100, async (chunk) => {
-            for (const r of chunk) {
-              const payload = sanitize({ ...r, group_id: undefined, empresa_id: emp.id });
-              const keyField = keys.find(k => r?.[k]);
-              const filtro = { empresa_id: emp.id };
-              if (keyField) filtro[keyField] = r[keyField];
-              const existing = await base44.asServiceRole.entities[entityName].filter(filtro, undefined, 1).then(x=>x?.[0]).catch(()=>null);
-              if (existing) {
-                if (strategy === 'override') {
-                  await base44.asServiceRole.entities[entityName].update(existing.id, payload);
-                  updated++;
-                } else if (strategy === 'merge') {
-                  const patch = {};
-                  for (const [k, v] of Object.entries(payload)) if (existing[k] == null) patch[k] = v;
-                  if (Object.keys(patch).length) { await base44.asServiceRole.entities[entityName].update(existing.id, patch); updated++; } else { skipped++; }
-                } else { skipped++; }
-              } else {
-                await base44.asServiceRole.entities[entityName].create(payload);
-                created++;
-              }
+      for (const emp of targetEmpresas) {
+        for (let i = 0; i < baseRegs.length; i += 50) {
+          const chunk = baseRegs.slice(i, i + 50);
+          for (const r of chunk) {
+            const payload = sanitize({ ...r, group_id: undefined, empresa_id: emp.id });
+            const keyField = keys.find(k => r?.[k]);
+            const filtro = { empresa_id: emp.id };
+            if (keyField) filtro[keyField] = r[keyField];
+            const existing = await base44.asServiceRole.entities[entityName].filter(filtro, undefined, 1).then(x => x?.[0]).catch(() => null);
+            if (existing) {
+              if (strategy === 'override') {
+                await base44.asServiceRole.entities[entityName].update(existing.id, payload).catch(() => {});
+                updated++;
+              } else if (strategy === 'merge') {
+                const patch = {};
+                for (const [k, v] of Object.entries(payload)) if (existing[k] == null) patch[k] = v;
+                if (Object.keys(patch).length) { await base44.asServiceRole.entities[entityName].update(existing.id, patch).catch(() => {}); updated++; } else { skipped++; }
+              } else { skipped++; }
+            } else {
+              await base44.asServiceRole.entities[entityName].create(payload).catch(() => {});
+              created++;
             }
-          });
+          }
+          if (i + 50 < baseRegs.length) await sleep(150);
         }
-      });
+      }
       return { entity: entityName, created, updated, skipped, total_source: baseRegs.length, direction: 'grupo_to_empresas' };
     };
 
     const copyEmpresaToGroup = async (entityName, empresaOrigemId) => {
-      const baseRegs = await base44.asServiceRole.entities[entityName].filter({ empresa_id: empresaOrigemId }, undefined, 5000);
+      if (!base44.asServiceRole.entities?.[entityName]) return { entity: entityName, skipped: 'not-found' };
+      const baseRegs = await base44.asServiceRole.entities[entityName].filter({ empresa_id: empresaOrigemId }, undefined, 5000).catch(() => []);
+      if (!baseRegs.length) return { entity: entityName, created: 0, updated: 0, skipped: 0, total_source: 0, direction: 'empresa_to_grupo' };
       const keys = keyFieldsByEntity(entityName);
       let created = 0, updated = 0, skipped = 0;
       for (const r of baseRegs) {
@@ -125,17 +139,17 @@ Deno.serve(async (req) => {
         const keyField = keys.find(k => r?.[k]);
         const filtro = { group_id: groupId };
         if (keyField) filtro[keyField] = r[keyField];
-        const existing = await base44.asServiceRole.entities[entityName].filter(filtro, undefined, 1).then(x=>x?.[0]).catch(()=>null);
+        const existing = await base44.asServiceRole.entities[entityName].filter(filtro, undefined, 1).then(x => x?.[0]).catch(() => null);
         if (existing) {
           if (strategy === 'override') {
-            await base44.asServiceRole.entities[entityName].update(existing.id, payload); updated++;
+            await base44.asServiceRole.entities[entityName].update(existing.id, payload).catch(() => {}); updated++;
           } else if (strategy === 'merge') {
             const patch = {};
             for (const [k, v] of Object.entries(payload)) if (existing[k] == null) patch[k] = v;
-            if (Object.keys(patch).length) { await base44.asServiceRole.entities[entityName].update(existing.id, patch); updated++; } else { skipped++; }
+            if (Object.keys(patch).length) { await base44.asServiceRole.entities[entityName].update(existing.id, patch).catch(() => {}); updated++; } else { skipped++; }
           } else { skipped++; }
         } else {
-          await base44.asServiceRole.entities[entityName].create(payload); created++;
+          await base44.asServiceRole.entities[entityName].create(payload).catch(() => {}); created++;
         }
       }
       return { entity: entityName, created, updated, skipped, total_source: baseRegs.length, direction: 'empresa_to_grupo' };
@@ -143,23 +157,23 @@ Deno.serve(async (req) => {
 
     const results = [];
     if (direction === 'grupo_to_empresas') {
-      for (const en of entidades) if (base44.asServiceRole.entities?.[en]) results.push(await copyGroupToEmpresas(en));
+      for (const en of entidades) results.push(await copyGroupToEmpresas(en));
     } else if (direction === 'empresa_to_grupo') {
       const ids = Array.isArray(empresas_ids) && empresas_ids.length ? empresas_ids : (empresaId ? [empresaId] : []);
       if (!ids.length) return Response.json({ error: 'empresa_id ou empresas_ids obrigatório para empresa_to_grupo' }, { status: 400 });
-      for (const eid of ids) {
-        for (const en of entidades) if (base44.asServiceRole.entities?.[en]) results.push(await copyEmpresaToGroup(en, eid));
-      }
+      for (const eid of ids) for (const en of entidades) results.push(await copyEmpresaToGroup(en, eid));
     }
 
-    // Audit
-    try { await base44.asServiceRole.entities.AuditLog.create({
-      usuario: user ? (user.full_name || user.email || 'Admin') : 'Sistema Agendado',
-      usuario_id: user?.id || null,
-      acao: 'Execução', modulo: 'Sistema', tipo_auditoria: 'sistema', entidade: 'PropagacaoGrupo',
-      descricao: `Propagação ${direction} (${entidades.join(', ')})`, dados_novos: { group_id: groupId, empresa_id: empresaId || null, direction, strategy, results },
-      data_hora: new Date().toISOString()
-    }); } catch {}
+    try {
+      await base44.asServiceRole.entities.AuditLog.create({
+        usuario: user ? (user.full_name || user.email || 'Admin') : 'Sistema Agendado',
+        usuario_id: user?.id || null,
+        acao: 'Execução', modulo: 'Sistema', tipo_auditoria: 'sistema', entidade: 'PropagacaoGrupo',
+        descricao: `Propagação ${direction} — ${entidades.length} entidades`,
+        dados_novos: { group_id: groupId, empresa_id: empresaId || null, direction, strategy, total_entidades: entidades.length, results },
+        data_hora: new Date().toISOString()
+      });
+    } catch {}
 
     return Response.json({ ok: true, group_id: groupId, empresa_id: empresaId || null, direction, strategy, results });
   } catch (error) {

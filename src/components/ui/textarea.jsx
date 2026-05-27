@@ -1,32 +1,12 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { uiAuditWrap, logUIIssue } from "@/components/lib/uiAudit"
-import usePermissions from "@/components/lib/usePermissions";
 
-const Textarea = React.forwardRef(({ className, onChange, onBlur, ...props }, ref) => {
-  const { hasPermissionKey } = usePermissions();
-  React.useEffect(() => {
-    if (!onChange) {
-      logUIIssue({ component: 'Textarea', issue: 'Sem onChange associado', severity: 'warn', meta: { name: props?.name } });
-    }
-  }, []);
-
-  const auditedOnChange = typeof onChange === 'function' ? uiAuditWrap('Textarea.onChange', onChange, { kind: 'textarea' }) : undefined;
-  const auditedOnBlur = typeof onBlur === 'function' ? uiAuditWrap('Textarea.onBlur', onBlur, { kind: 'textarea' }) : undefined;
-
-  // CORREÇÃO CRÍTICA: Remover __wrapped_audit antes de passar para elemento nativo
-  const { __wrapped_audit, ...cleanProps } = props;
-
-  const perm = cleanProps?.['data-permission'];
+const Textarea = React.forwardRef(({ className, ...props }, ref) => {
+  const cleanProps = { ...props };
   if ('data-permission' in cleanProps) delete cleanProps['data-permission'];
-  if (perm) {
-    const allowed = hasPermissionKey(perm);
-    if (!allowed) {
-      return (
-        <span className="inline-flex min-h-[60px] w-full items-center rounded-md border border-dashed px-3 py-2 text-xs text-slate-400 select-none">Acesso negado</span>
-      );
-    }
-  }
+  if ('data-toast-success' in cleanProps) delete cleanProps['data-toast-success'];
+  if ('data-action' in cleanProps) delete cleanProps['data-action'];
+  if ('__wrapped_audit' in cleanProps) delete cleanProps['__wrapped_audit'];
 
   return (
     <textarea
@@ -35,11 +15,9 @@ const Textarea = React.forwardRef(({ className, onChange, onBlur, ...props }, re
         className
       )}
       ref={ref}
-      onChange={auditedOnChange}
-      onBlur={auditedOnBlur}
       {...cleanProps}
     />
-  )
+  );
 })
 Textarea.displayName = "Textarea"
 

@@ -2,7 +2,6 @@ import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
 import { Check, ChevronDown, ChevronUp } from "lucide-react"
 import { cn } from "@/lib/utils"
-import usePermissions from "@/components/lib/usePermissions";
 
 const Select = SelectPrimitive.Root
 
@@ -135,44 +134,25 @@ const SelectSeparator = React.forwardRef(({ className, ...props }, ref) => (
 ))
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName
 
-import { uiAuditWrap } from "@/components/lib/uiAudit";
-
-// Patch SelectTrigger to audit onValueChange when passed via Root
-const _Select = Select;
-const _Root = _Select;
-
-function withAuditRoot(props) {
+// Normaliza null/empty values para o Root
+const SelectWithNormalize = (props) => {
   const p = { ...props };
   if (p.value === null) p.value = undefined;
-  if (typeof p.onValueChange === 'function' && !p.__wrapped_audit) {
-    const originalOnValueChange = p.onValueChange;
-    p.onValueChange = (value) => {
-      if (value === NULL_SELECT_VALUE) return originalOnValueChange(null);
-      if (value === EMPTY_SELECT_VALUE) return originalOnValueChange("");
-      return originalOnValueChange(value);
-    };
-    const toastSuccess = p['data-toast-success'] === true || p['data-toast-success'] === 'true';
-    p.onValueChange = uiAuditWrap(p['data-action'] || 'Select.onValueChange', p.onValueChange, { kind: 'select', toastSuccess });
-    p.__wrapped_audit = true;
-  }
-  // CORREÇÃO CRÍTICA: Remove __wrapped_audit before passing to Radix UI
-  const { __wrapped_audit, ...cleanProps } = p;
-  if ('data-toast-success' in cleanProps) delete cleanProps['data-toast-success'];
-  return cleanProps;
-}
-
-const AuditedSelect = (props) => {
-  const { hasPermissionKey } = usePermissions();
-  const perm = props?.['data-permission'];
-  const p = { ...props };
   if ('data-permission' in p) delete p['data-permission'];
-  const allowed = perm ? hasPermissionKey(perm) : true;
-        if (perm && !allowed) return <span className="inline-flex h-10 items-center rounded-md border border-dashed px-3 text-xs text-slate-400 select-none">Acesso negado</span>;
-        return <_Root {...withAuditRoot(p)} />
+  if ('data-toast-success' in p) delete p['data-toast-success'];
+  if (typeof p.onValueChange === 'function') {
+    const orig = p.onValueChange;
+    p.onValueChange = (value) => {
+      if (value === NULL_SELECT_VALUE) return orig(null);
+      if (value === EMPTY_SELECT_VALUE) return orig("");
+      return orig(value);
+    };
+  }
+  return <Select {...p} />;
 };
 
 export {
-  AuditedSelect as Select,
+  SelectWithNormalize as Select,
   SelectGroup,
   SelectValue,
   SelectTrigger,

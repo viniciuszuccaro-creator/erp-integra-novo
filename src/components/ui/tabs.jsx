@@ -2,7 +2,6 @@ import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
 
 import { cn } from "@/lib/utils"
-import usePermissions from "@/components/lib/usePermissions";
 
 const Tabs = TabsPrimitive.Root
 
@@ -18,16 +17,8 @@ const TabsList = React.forwardRef(({ className, ...props }, ref) => (
 TabsList.displayName = TabsPrimitive.List.displayName
 
 const TabsTrigger = React.forwardRef(({ className, ...props }, ref) => {
-  const { hasPermissionKey } = usePermissions();
   const p = { ...props };
-  const perm = p?.['data-permission'];
   if ('data-permission' in p) delete p['data-permission'];
-  const allowed = perm ? hasPermissionKey(perm) : true;
-  if (perm && !allowed) {
-    return (
-      <span className="inline-flex items-center rounded-md border border-dashed px-3 py-1 text-xs text-slate-400 select-none">Acesso negado</span>
-    );
-  }
   return (
     <TabsPrimitive.Trigger
       ref={ref}

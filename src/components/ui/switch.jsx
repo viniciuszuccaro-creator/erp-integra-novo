@@ -1,9 +1,13 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { uiAuditWrap } from "@/components/lib/uiAudit";
-import usePermissions from "@/components/lib/usePermissions";
 
 const Switch = React.forwardRef(({ className, checked, onCheckedChange, disabled, ...props }, ref) => {
+  const cleanProps = { ...props };
+  if ('data-permission' in cleanProps) delete cleanProps['data-permission'];
+  if ('data-toast-success' in cleanProps) delete cleanProps['data-toast-success'];
+  if ('data-action' in cleanProps) delete cleanProps['data-action'];
+  if ('__wrapped_audit' in cleanProps) delete cleanProps['__wrapped_audit'];
+
   const handleClick = () => {
     if (!disabled && onCheckedChange) {
       onCheckedChange(!checked);
@@ -23,7 +27,7 @@ const Switch = React.forwardRef(({ className, checked, onCheckedChange, disabled
         checked ? "bg-blue-600" : "bg-slate-200",
         className
       )}
-      {...props}
+      {...cleanProps}
     >
       <span
         className={cn(
@@ -37,35 +41,4 @@ const Switch = React.forwardRef(({ className, checked, onCheckedChange, disabled
 
 Switch.displayName = "Switch"
 
-const AuditedSwitch = React.forwardRef(({ onCheckedChange, ...props }, ref) => {
-  const { hasPermissionKey } = usePermissions();
-  const actionName = props?.['data-action'] || 'Switch.onCheckedChange';
-  const toastSuccess = props?.['data-toast-success'] === true || props?.['data-toast-success'] === 'true';
-  const audited = typeof onCheckedChange === 'function'
-    ? uiAuditWrap(actionName, onCheckedChange, { kind: 'switch', toastSuccess })
-    : undefined;
-  const { __wrapped_audit, ...cleanProps } = props;
-  const perm = cleanProps?.['data-permission'];
-
-  if ('data-permission' in cleanProps) delete cleanProps['data-permission'];
-  if ('data-toast-success' in cleanProps) delete cleanProps['data-toast-success'];
-
-  if (perm) {
-    const allowed = hasPermissionKey(perm);
-    if (!allowed) {
-      return (
-        <span
-          className="inline-flex h-6 min-w-11 items-center justify-center rounded-full border border-dashed px-2 text-[10px] text-slate-400 select-none"
-          aria-disabled="true"
-        >
-          Bloq.
-        </span>
-      );
-    }
-  }
-
-  return <Switch ref={ref} onCheckedChange={audited} {...cleanProps} />;
-});
-AuditedSwitch.displayName = "AuditedSwitch";
-
-export { AuditedSwitch as Switch }
+export { Switch }

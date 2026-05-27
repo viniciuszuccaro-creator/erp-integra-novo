@@ -57,9 +57,10 @@ export default class ErrorBoundary extends React.Component {
                 Recarregar
               </button>
             </div>
-            {import.meta.env?.DEV && this.state.error && (
-              <pre className="text-left text-xs text-slate-500 mt-4 overflow-auto max-h-40">
+            {this.state.error && (
+              <pre className="text-left text-xs text-slate-500 mt-4 overflow-auto max-h-40 bg-slate-50 p-2 rounded">
                 {String(this.state.error?.message || this.state.error)}
+                {this.state.error?.stack ? '\n' + this.state.error.stack.split('\n').slice(0,5).join('\n') : ''}
               </pre>
             )}
           </div>

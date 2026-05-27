@@ -12,8 +12,6 @@ import { TabsContent } from "@/components/ui/tabs";
 import { ResizablePanelGroup as PanelGroup, ResizablePanel as Panel, ResizableHandle as PanelResizeHandle } from "@/components/ui/resizable";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
-import MapaTempoReal from "@/components/expedicao/MapaTempoReal";
-
 import DashboardStickyKpis from "@/components/dashboard/DashboardStickyKpis";
 import StatsSection from "@/components/dashboard/StatsSection";
 import KPIsOperacionaisSection from "@/components/dashboard/KPIsOperacionaisSection";
@@ -43,6 +41,7 @@ import DashboardEstoquePrevisoesWidget from "@/components/dashboard/DashboardEst
 
 const DashboardPerformance = React.lazy(() => import("@/components/sistema/DashboardPerformance"));
 const GamificacaoOperacoes = React.lazy(() => import("../dashboard/GamificacaoOperacoes"));
+const MapaTempoRealLazy = React.lazy(() => import("@/components/expedicao/MapaTempoReal"));
 
 export default function DashboardResumoTab({
   statsCards,
@@ -106,7 +105,7 @@ export default function DashboardResumoTab({
         <Card className="bg-white/80 backdrop-blur-sm rounded-md shadow-sm">
           <CardContent className="p-0 overflow-hidden rounded-md">
             <Suspense fallback={<div className="h-40 bg-slate-100 animate-pulse" />}>
-              <MapaTempoReal />
+              <MapaTempoRealLazy />
             </Suspense>
           </CardContent>
         </Card>
@@ -168,33 +167,43 @@ export default function DashboardResumoTab({
       </PanelGroup>
 
       {/* Widgets de BI */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <DashboardKPIsComparativosWidget />
-        <DashboardMarketplaceWidget />
-        {canSeeCRM && <CRMScoreDashboard />}
-        {canSeeFinanceiro && <ConciliacaoIAWidget />}
-      </div>
+      <ErrorBoundary>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <DashboardKPIsComparativosWidget />
+          <DashboardMarketplaceWidget />
+          {canSeeCRM && <CRMScoreDashboard />}
+          {canSeeFinanceiro && <ConciliacaoIAWidget />}
+        </div>
+      </ErrorBoundary>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <DashboardBI3DWidget />
-        <DashboardAutomacaoFluxosWidget />
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <RastreamentoGPSWidget />
-        <ApontamentoProdutoMobileWidget />
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <ComplianceISO27001Widget />
-        <ContratosEletronicosWidget />
-      </div>
+      <ErrorBoundary>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <DashboardBI3DWidget />
+          <DashboardAutomacaoFluxosWidget />
+        </div>
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <RastreamentoGPSWidget />
+          <ApontamentoProdutoMobileWidget />
+        </div>
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <ComplianceISO27001Widget />
+          <ContratosEletronicosWidget />
+        </div>
+      </ErrorBoundary>
 
       {/* IA */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <DashboardSaudeWidget />
-        <DashboardForecastWidget />
-        <DashboardVendasPrevisaoWidget />
-        <DashboardIAInsightsPanel />
-      </div>
+      <ErrorBoundary>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <DashboardSaudeWidget />
+          <DashboardForecastWidget />
+          <DashboardVendasPrevisaoWidget />
+          <DashboardIAInsightsPanel />
+        </div>
+      </ErrorBoundary>
 
       {/* Gráficos Avançados */}
       <AdvancedAnalysisSection

@@ -8,7 +8,7 @@ import {
 import {
   Users, Building2, Truck, DollarSign, Package, Cpu
 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SearchInput from "@/components/ui/SearchInput";
 import usePermissions from "../components/lib/usePermissions";
 import GerenciadorJanelas from "../components/sistema/GerenciadorJanelas";
@@ -85,13 +85,18 @@ export default function Cadastros() {
           </div>
         </div>
 
-        {/* ABA: APPS EXTERNOS — Fonte única para Portal do Cliente, App Motorista, Chatbot, etc. */}
-        <TabsContent value="apps-externos" className="mt-4">
-          <ExternalAppsHub />
-        </TabsContent>
+      </Tabs>
 
-        {/* ABA: CADASTROS */}
-         <TabsContent value="cadastros" className="space-y-6 mt-6 w-full">
+      {/* ABA: APPS EXTERNOS */}
+      {abaGerenciamento === "apps-externos" && (
+        <div className="mt-4">
+          <ExternalAppsHub />
+        </div>
+      )}
+
+      {/* ABA: CADASTROS */}
+      {abaGerenciamento === "cadastros" && (
+        <div className="space-y-6 mt-6 w-full">
           {!contextoAtivo && (
             <Card className="rounded-sm border border-amber-200 bg-amber-50">
               <CardContent className="p-3 text-sm text-amber-900">
@@ -270,8 +275,8 @@ export default function Cadastros() {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </div>
   );
 }

@@ -741,13 +741,8 @@ export default function Dashboard() {
       <DashboardStabilityNotice hasContextoAtivo={hasContextoAtivo} activeTab={activeTab} />
 
       <ErrorBoundary>
-        <Tabs value={activeTab} onValueChange={handleTabChange}>
-        {/* Unificado em Resumo Geral */}
-        <div className="hidden" />
-
-
-
-
+         <Tabs value={activeTab} onValueChange={handleTabChange}>
+         {/* Unificado em Resumo Geral */}
 
         <DashboardResumoTab
           statsCards={statsCards}

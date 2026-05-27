@@ -78,7 +78,7 @@ export default function DashboardResumoTab({
   empresaId,
 }) {
   return (
-    <TabsContent value="resumo" className="w-full h-full overflow-y-auto space-y-6 mt-4">
+    <div className="w-full h-full overflow-y-auto space-y-6 mt-4">
       {/* Sticky KPIs */}
       <DashboardStickyKpis
         pedidos={[]}
@@ -239,6 +239,6 @@ export default function DashboardResumoTab({
           <GamificacaoOperacoes />
         </Suspense>
       </div>
-    </TabsContent>
+    </div>
   );
 }

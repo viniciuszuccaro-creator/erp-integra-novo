@@ -6,10 +6,16 @@ import { useUser } from "@/components/lib/UserContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-// Cache / dedupe global para entityGuard (TTL 120s)
-const __guardCache = (typeof window !== 'undefined' ? (window.__entityGuardCache || (window.__entityGuardCache = new Map())) : new Map());
-const __guardInflight = (typeof window !== 'undefined' ? (window.__entityGuardInflight || (window.__entityGuardInflight = new Map())) : new Map());
 const GUARD_TTL_MS = 120_000;
+
+function getGuardCache() {
+  if (typeof window === 'undefined') return new Map();
+  return window.__entityGuardCache || (window.__entityGuardCache = new Map());
+}
+function getGuardInflight() {
+  if (typeof window === 'undefined') return new Map();
+  return window.__entityGuardInflight || (window.__entityGuardInflight = new Map());
+}
 const getGuardKey = (module, section, action, empresaId, groupId) => `${module || '-'}|${section || '-'}|${action || '-'}|${empresaId || '-'}|${groupId || '-'}`;
 
 export default function ProtectedSection({
@@ -37,6 +43,8 @@ export default function ProtectedSection({
     if (isLoading) return;
     if (!modulo) { setAllowedFinal(allowed); return; }
 
+    const __guardCache = getGuardCache();
+    const __guardInflight = getGuardInflight();
     const key = getGuardKey(modulo, section, action, empresaAtual?.id, grupoAtual?.id);
     const now = Date.now();
     const cached = __guardCache.get(key);
@@ -72,7 +80,7 @@ export default function ProtectedSection({
       const backendAllowed = data?.allowed === true;
       __guardCache.set(key, { allowed: backendAllowed, ts: Date.now() });
       setAllowedFinal(backendAllowed && allowed);
-    }).catch((err) => {
+    }).catch(() => {
       // fallback em 429/erro
       setAllowedFinal(allowed);
     }).finally(() => {

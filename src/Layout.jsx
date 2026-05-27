@@ -73,6 +73,7 @@ import { idbClearExpired } from "@/components/lib/useIndexedDBCache";
 import EmpresaOnboardingGuard from "@/components/sistema/EmpresaOnboardingGuard";
 import LayoutEffects from "@/components/layout/LayoutEffects";
 import LayoutRBACWrapper from "@/components/layout/LayoutRBACWrapper";
+// v21.9 — layout refatorado (ciclos UI resolvidos)
 
 
 const navigationItems = [

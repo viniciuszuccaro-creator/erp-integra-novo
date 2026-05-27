@@ -164,44 +164,56 @@ export default function DashboardResumoTab({
         </div>
       </div>
 
-      {/* Widgets de BI */}
-      <ErrorBoundary>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <DashboardKPIsComparativosWidget />
-          <DashboardMarketplaceWidget />
-          {canSeeCRM && <CRMScoreDashboard />}
-          {canSeeFinanceiro && <ConciliacaoIAWidget />}
-        </div>
-      </ErrorBoundary>
+      {/* Widgets de BI — encapsulados com chave para evitar conflito de Portal */}
+      <div key="bi-widgets-1">
+        <ErrorBoundary>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <DashboardKPIsComparativosWidget />
+            <DashboardMarketplaceWidget />
+            {canSeeCRM && <CRMScoreDashboard />}
+            {canSeeFinanceiro && <ConciliacaoIAWidget />}
+          </div>
+        </ErrorBoundary>
+      </div>
 
-      <ErrorBoundary>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <DashboardBI3DWidget />
-          <DashboardAutomacaoFluxosWidget />
-        </div>
-      </ErrorBoundary>
-      <ErrorBoundary>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <RastreamentoGPSWidget />
-          <ApontamentoProdutoMobileWidget />
-        </div>
-      </ErrorBoundary>
-      <ErrorBoundary>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <ComplianceISO27001Widget />
-          <ContratosEletronicosWidget />
-        </div>
-      </ErrorBoundary>
+      <div key="bi-widgets-2">
+        <ErrorBoundary>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <DashboardBI3DWidget />
+            <DashboardAutomacaoFluxosWidget />
+          </div>
+        </ErrorBoundary>
+      </div>
+
+      <div key="bi-widgets-3">
+        <ErrorBoundary>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <RastreamentoGPSWidget />
+            <ApontamentoProdutoMobileWidget />
+          </div>
+        </ErrorBoundary>
+      </div>
+
+      <div key="bi-widgets-4">
+        <ErrorBoundary>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <ComplianceISO27001Widget />
+            <ContratosEletronicosWidget />
+          </div>
+        </ErrorBoundary>
+      </div>
 
       {/* IA */}
-      <ErrorBoundary>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <DashboardSaudeWidget />
-          <DashboardForecastWidget />
-          <DashboardVendasPrevisaoWidget />
-          <DashboardIAInsightsPanel />
-        </div>
-      </ErrorBoundary>
+      <div key="ia-widgets">
+        <ErrorBoundary>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <DashboardSaudeWidget />
+            <DashboardForecastWidget />
+            <DashboardVendasPrevisaoWidget />
+            <DashboardIAInsightsPanel />
+          </div>
+        </ErrorBoundary>
+      </div>
 
       {/* Gráficos Avançados */}
       <AdvancedAnalysisSection

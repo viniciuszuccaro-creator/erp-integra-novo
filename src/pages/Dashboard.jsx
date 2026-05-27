@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -56,33 +57,33 @@ const DashboardOperacionalBI = React.lazy(() => import("@/components/dashboard/D
 const MapaTempoReal = React.lazy(() => import("@/components/expedicao/MapaTempoReal"));
 const DashboardPerformance = React.lazy(() => import("@/components/sistema/DashboardPerformance"));
 import { Tabs, TabsContent } from '@/components/ui/tabs';
-import DashboardTabsNav from "@/components/dashboard/DashboardTabsNav";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import usePermissions from "@/components/lib/usePermissions";
+const DashboardTabsNav = React.lazy(() => import("@/components/dashboard/DashboardTabsNav"));
 const WidgetCanaisOrigem = React.lazy(() => import("@/components/dashboard/WidgetCanaisOrigem")); // kept for backward-compat (not used directly here)
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import DashboardContextoBanner from "@/components/dashboard/DashboardContextoBanner";
-import DashboardMultiempresaBar from "@/components/dashboard/DashboardMultiempresaBar";
-import DashboardEssentialKPIs from "@/components/dashboard/DashboardEssentialKPIs";
-import DashboardEstoquePrevisoesWidget from "@/components/dashboard/DashboardEstoquePrevisoesWidget";
-import StatsSection from "@/components/dashboard/StatsSection";
-import KPIsOperacionaisSection from "@/components/dashboard/KPIsOperacionaisSection";
-import SecondaryKPIsSection from "@/components/dashboard/SecondaryKPIsSection";
-import ChartsSection from "@/components/dashboard/ChartsSection";
-import TopProdutosStatusPeriodoSection from "@/components/dashboard/TopProdutosStatusPeriodoSection";
-import AdvancedAnalysisSection from "@/components/dashboard/AdvancedAnalysisSection";
-import QuickAccessModulesGrid from "@/components/dashboard/QuickAccessModulesGrid";
-import FinancialSummary from "@/components/dashboard/FinancialSummary";
-import WidgetEstoqueCritico from "@/components/estoque/WidgetEstoqueCritico";
-import DashboardStabilityNotice from "@/components/dashboard/DashboardStabilityNotice";
-import DashboardStickyKpis from "@/components/dashboard/DashboardStickyKpis";
-import DashboardForecastWidget from "@/components/dashboard/DashboardForecastWidget";
-import DashboardIAInsightsPanel from "@/components/dashboard/DashboardIAInsightsPanel";
-import DashboardSaudeWidget from "@/components/dashboard/DashboardSaudeWidget";
-import DashboardVendasPrevisaoWidget from "@/components/dashboard/DashboardVendasPrevisaoWidget";
-import DashboardKPIsComparativosWidget from "@/components/dashboard/DashboardKPIsComparativosWidget";
-import DashboardMarketplaceWidget from "@/components/dashboard/DashboardMarketplaceWidget";
+const DashboardHeader = React.lazy(() => import("@/components/dashboard/DashboardHeader"));
+const DashboardContextoBanner = React.lazy(() => import("@/components/dashboard/DashboardContextoBanner"));
+const DashboardMultiempresaBar = React.lazy(() => import("@/components/dashboard/DashboardMultiempresaBar"));
+const DashboardEssentialKPIs = React.lazy(() => import("@/components/dashboard/DashboardEssentialKPIs"));
+const DashboardEstoquePrevisoesWidget = React.lazy(() => import("@/components/dashboard/DashboardEstoquePrevisoesWidget"));
+const StatsSection = React.lazy(() => import("@/components/dashboard/StatsSection"));
+const KPIsOperacionaisSection = React.lazy(() => import("@/components/dashboard/KPIsOperacionaisSection"));
+const SecondaryKPIsSection = React.lazy(() => import("@/components/dashboard/SecondaryKPIsSection"));
+const ChartsSection = React.lazy(() => import("@/components/dashboard/ChartsSection"));
+const TopProdutosStatusPeriodoSection = React.lazy(() => import("@/components/dashboard/TopProdutosStatusPeriodoSection"));
+const AdvancedAnalysisSection = React.lazy(() => import("@/components/dashboard/AdvancedAnalysisSection"));
+const QuickAccessModulesGrid = React.lazy(() => import("@/components/dashboard/QuickAccessModulesGrid"));
+const FinancialSummary = React.lazy(() => import("@/components/dashboard/FinancialSummary"));
+const WidgetEstoqueCritico = React.lazy(() => import("@/components/estoque/WidgetEstoqueCritico"));
+const DashboardStabilityNotice = React.lazy(() => import("@/components/dashboard/DashboardStabilityNotice"));
+const DashboardStickyKpis = React.lazy(() => import("@/components/dashboard/DashboardStickyKpis"));
+const DashboardForecastWidget = React.lazy(() => import("@/components/dashboard/DashboardForecastWidget"));
+const DashboardIAInsightsPanel = React.lazy(() => import("@/components/dashboard/DashboardIAInsightsPanel"));
+const DashboardSaudeWidget = React.lazy(() => import("@/components/dashboard/DashboardSaudeWidget"));
+const DashboardVendasPrevisaoWidget = React.lazy(() => import("@/components/dashboard/DashboardVendasPrevisaoWidget"));
+const DashboardKPIsComparativosWidget = React.lazy(() => import("@/components/dashboard/DashboardKPIsComparativosWidget"));
+const DashboardMarketplaceWidget = React.lazy(() => import("@/components/dashboard/DashboardMarketplaceWidget"));
 const ConciliacaoIAWidget = React.lazy(() => import("@/components/financeiro/ConciliacaoIAWidget"));
 const CRMScoreDashboard = React.lazy(() => import("@/components/crm/CRMScoreDashboard"));
 const DashboardBI3DWidget = React.lazy(() => import("@/components/dashboard/DashboardBI3DWidget"));
@@ -91,10 +92,9 @@ const RastreamentoGPSWidget = React.lazy(() => import("@/components/logistica/Ra
 const ApontamentoProdutoMobileWidget = React.lazy(() => import("@/components/producao/ApontamentoProdutoMobileWidget"));
 const ComplianceISO27001Widget = React.lazy(() => import("@/components/administracao-sistema/ComplianceISO27001Widget"));
 const ContratosEletronicosWidget = React.lazy(() => import("@/components/contratos/ContratosEletronicosWidget"));
-import PedidosResumoPanel from "@/components/dashboard/PedidosResumoPanel";
-import ResizableRow from "@/components/dashboard/ResizableRow";
-import DashboardResumoTab from "@/components/dashboard/DashboardResumoTab";
-import { ResizablePanelGroup as PanelGroup, ResizablePanel as Panel, ResizableHandle as PanelResizeHandle } from "@/components/ui/resizable";
+const PedidosResumoPanel = React.lazy(() => import("@/components/dashboard/PedidosResumoPanel"));
+const ResizableRow = React.lazy(() => import("@/components/dashboard/ResizableRow"));
+const DashboardResumoTab = React.lazy(() => import("@/components/dashboard/DashboardResumoTab"));
 import useDashboardDerivedData from "@/components/dashboard/hooks/useDashboardDerivedData";
 import { DASHBOARD_LIST_LIMIT, DASHBOARD_REFETCH_INTERVAL_MS, dashboardQueryDefaults } from "@/components/dashboard/config/dashboardQueryConfig";
 
@@ -716,6 +716,7 @@ export default function Dashboard() {
     <ProtectedSection module="Dashboard" action="ver">
     <div className="w-full h-full min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="flex-1 overflow-hidden p-6 space-y-6">
+      <Suspense fallback={<div className="h-12 w-full" />}>
       <DashboardHeader
         empresaAtual={empresaAtual}
         estaNoGrupo={estaNoGrupo}
@@ -784,6 +785,7 @@ export default function Dashboard() {
         {/* conteúdo movido para DashboardResumoTab */}
       </Tabs>
       </ErrorBoundary>
+      </Suspense>
       </div>
     </div>
   </ProtectedSection>

@@ -9,7 +9,7 @@ import DashboardCommandCenter from "@/components/dashboard/DashboardCommandCente
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TabsContent } from "@/components/ui/tabs";
-import { ResizablePanelGroup as PanelGroup, ResizablePanel as Panel, ResizableHandle as PanelResizeHandle } from "@/components/ui/resizable";
+
 import ProtectedSection from "@/components/security/ProtectedSection";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import DashboardStickyKpis from "@/components/dashboard/DashboardStickyKpis";
@@ -88,15 +88,14 @@ export default function DashboardResumoTab({
       />
 
       {/* KPIs Principais */}
-      <PanelGroup direction="vertical" className="gap-2 w-full">
-        <Panel defaultSize={50} minSize={30} className="overflow-auto">
+      <div className="flex flex-col gap-4 w-full">
+        <div className="overflow-auto">
           <StatsSection statsCards={statsCards} empresaId={empresaId} />
-        </Panel>
-        <PanelResizeHandle className="h-1 bg-slate-200 rounded" />
-        <Panel defaultSize={50} minSize={20} className="overflow-auto">
+        </div>
+        <div className="overflow-auto">
           <KPIsOperacionaisSection kpis={kpisOperacionais} />
-        </Panel>
-      </PanelGroup>
+        </div>
+      </div>
 
       <SecondaryKPIsSection kpis={kpiCards} />
 
@@ -156,15 +155,14 @@ export default function DashboardResumoTab({
       />
 
       {/* Gráficos + Top Produtos */}
-      <PanelGroup direction="vertical" className="gap-2 min-h-[400px]">
-        <Panel defaultSize={55} minSize={30} className="overflow-auto">
+      <div className="flex flex-col gap-4">
+        <div className="overflow-auto">
           <ChartsSection vendasUltimos30Dias={vendasUltimos30Dias} fluxo7Dias={fluxo7Dias} />
-        </Panel>
-        <PanelResizeHandle className="w-1 bg-slate-200 rounded" />
-        <Panel defaultSize={45} minSize={20} className="overflow-auto">
+        </div>
+        <div className="overflow-auto">
           <TopProdutosStatusPeriodoSection topProdutos={topProdutos} dadosVendasStatus={dadosVendasStatus} COLORS={COLORS} />
-        </Panel>
-      </PanelGroup>
+        </div>
+      </div>
 
       {/* Widgets de BI */}
       <ErrorBoundary>

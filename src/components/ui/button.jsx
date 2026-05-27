@@ -1,13 +1,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva } from "class-variance-authority";
-
 import { cn } from "@/lib/utils"
-import { base44 } from "@/api/base44Client";
-import { toast } from "sonner";
-import usePermissions from "@/components/lib/usePermissions";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { uiAuditWrap } from "@/components/lib/uiAudit";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -41,103 +35,14 @@ const buttonVariants = cva(
 
 const Button = React.forwardRef(({ className, variant, size, asChild = false, ...props }, ref) => {
   const Comp = asChild ? Slot : "button";
-  const { hasPermissionKey } = usePermissions();
-  const perm = props?.['data-permission'];
-  let isAllowed = true;
-  if (perm) {
-    try { isAllowed = hasPermissionKey(perm); } catch { isAllowed = true; }
-  }
-  const passProps = {
-    ...props,
-    __perm: perm,
-    __sensitive: props?.['data-sensitive'],
-    __toastSuccess: props?.['data-toast-success'],
-    __successMessage: props?.['data-success-message'],
-  };
-  if ('data-permission' in passProps) delete passProps['data-permission'];
-  if ('data-sensitive' in passProps) delete passProps['data-sensitive'];
-  if ('data-toast-success' in passProps) delete passProps['data-toast-success'];
-  if ('data-success-message' in passProps) delete passProps['data-success-message'];
-
-  if (perm && !isAllowed) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            className={cn(buttonVariants({ variant: "outline", size }), "pointer-events-none opacity-50 cursor-not-allowed")}
-            aria-disabled="true"
-            type="button"
-          >
-            Acesso negado
-          </button>
-        </TooltipTrigger>
-        <TooltipContent>Acesso negado • ação auditada</TooltipContent>
-      </Tooltip>
-    );
-  }
-
   return (
     <Comp
       className={cn(buttonVariants({ variant, size, className }))}
       ref={ref}
-      {...withUIAudit(passProps)}
+      {...props}
     />
   );
 })
 Button.displayName = "Button"
-
-// HOC to wrap onClick with audit (non-invasive)
-function withUIAudit(props) {
-  // Política híbrida: só bloquear ações sensíveis (data-sensitive ou perm); demais apenas auditar
-  const isSensitive = !!(props?.__sensitive || props?.__perm);
-
-  // Reuso de cache/dedupe global do entityGuard (se existir)
-  const __guardCache = (typeof window !== 'undefined' ? (window.__entityGuardCache || (window.__entityGuardCache = new Map())) : new Map());
-  const __guardInflight = (typeof window !== 'undefined' ? (window.__entityGuardInflight || (window.__entityGuardInflight = new Map())) : new Map());
-  const GUARD_TTL_MS = 120_000;
-  const getGuardKey = (module, section, action) => `${module || '-'}|${section || '-'}|${action || '-'}`;
-
-  const wrapIfDenied = (onClick) => async (e) => {
-    try {
-      if (false && isSensitive) {
-        const path = typeof window !== 'undefined' ? window.location.pathname : '';
-        const page = (path.split('/').pop() || '').replace(/^\//,'');
-        const pageToModule = { CRM: 'CRM', Comercial: 'Comercial', Estoque: 'Estoque', Compras: 'Compras', Financeiro: 'Financeiro', Fiscal: 'Fiscal', RH: 'RH', Expedicao: 'Expedição', Producao: 'Produção' };
-        const moduleName = pageToModule[page] || 'Sistema';
-        const key = getGuardKey(moduleName, null, 'executar');
-        const now = Date.now();
-        const cached = __guardCache.get(key);
-        if (cached && (now - cached.ts < GUARD_TTL_MS)) {
-          if (cached.allowed === false) { e?.preventDefault?.(); e?.stopPropagation?.(); try { toast.error('Permissão negada'); } catch {} ; return; }
-        } else if (!__guardInflight.has(key)) {
-          const p = base44.functions.invoke('entityGuard', { module: moduleName, action: 'executar' })
-            .then(({ data }) => { __guardCache.set(key, { allowed: data?.allowed === true, ts: Date.now() }); })
-            .catch(() => { /* fallback otimista em 429/erro */ });
-          __guardInflight.set(key, p);
-          p.finally(() => __guardInflight.delete(key));
-        }
-        // Fallback otimista: não bloquear clique enquanto valida
-      }
-    } catch (_) {}
-    return onClick?.(e);
-  };
-
-  const p = { ...props };
-  if (typeof p.onClick === 'function' && !p.__wrapped_audit) {
-    p.onClick = wrapIfDenied(p.onClick);
-
-    const toastSuccess = p.__toastSuccess === true || p.__toastSuccess === 'true';
-    const meta = { kind: 'button', toastSuccess, successMessage: p.__successMessage };
-    p.onClick = uiAuditWrap(p['data-action'] || 'Button.onClick', p.onClick, meta);
-    p.__wrapped_audit = true;
-  }
-  // Remover flags internas/atributos não-dom
-  delete p.__wrapped_audit;
-  if ('__perm' in p) delete p.__perm;
-  if ('__sensitive' in p) delete p.__sensitive;
-  if ('__toastSuccess' in p) delete p.__toastSuccess;
-  if ('__successMessage' in p) delete p.__successMessage;
-  return p;
-}
 
 export { Button, buttonVariants }

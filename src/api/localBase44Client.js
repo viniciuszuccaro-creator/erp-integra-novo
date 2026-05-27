@@ -568,17 +568,19 @@ const shouldStampEmpresa = (entityName) => ![
   'EventoNotificacao',
 ].includes(entityName);
 
+const _sanitizeStr = (s) => String(s)
+  .replace(/<\s*script[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi, '')
+  .replace(/on[a-z]+\s*=\s*"[^"]*"/gi, '')
+  .replace(/on[a-z]+\s*=\s*'[^']*'/gi, '')
+  .replace(/javascript:\s*/gi, '');
+
 const sanitizeRecord = (value) => {
-  try {
-    return sanitizeOnWrite(value);
-  } catch {}
+  if (typeof value === 'string') return _sanitizeStr(value);
   if (Array.isArray(value)) return value.map(sanitizeRecord);
-  if (!value || typeof value !== 'object') {
-    return typeof value === 'string'
-      ? value.replace(/<\s*script[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi, '').replace(/javascript:\s*/gi, '')
-      : value;
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, sanitizeRecord(v)]));
   }
-  return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, sanitizeRecord(item)]));
+  return value;
 };
 
 const stampRecordContext = (entityName, data = {}) => {

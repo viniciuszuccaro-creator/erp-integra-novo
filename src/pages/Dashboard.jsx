@@ -1,5 +1,4 @@
 import React, { useState, useEffect, Suspense } from "react";
-import React, { useState, useEffect, Suspense } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -28,7 +27,7 @@ import {
   Shield,
   FileText,
   MessageCircle
-  } from "lucide-react";
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -38,7 +37,7 @@ import {
   Line,
   BarChart,
   Bar,
-  PieChart as RechartsPie, // Recharts PieChart component, aliased to avoid conflict with Lucide icon
+  PieChart as RechartsPie,
   Pie,
   Cell,
   XAxis,
@@ -50,18 +49,22 @@ import {
   Area,
   AreaChart
 } from "recharts";
+import { Tabs, TabsContent } from '@/components/ui/tabs';
+import ErrorBoundary from "@/components/lib/ErrorBoundary";
+import ProtectedSection from "@/components/security/ProtectedSection";
+import usePermissions from "@/components/lib/usePermissions";
+import useDashboardDerivedData from "@/components/dashboard/hooks/useDashboardDerivedData";
+import { DASHBOARD_LIST_LIMIT, DASHBOARD_REFETCH_INTERVAL_MS, dashboardQueryDefaults } from "@/components/dashboard/config/dashboardQueryConfig";
+
+// Lazy-loaded components (must be after all static imports)
 const PainelOperacoes3D = React.lazy(() => import("../components/dashboard/PainelOperacoes3D"));
 const GamificacaoOperacoes = React.lazy(() => import("../components/dashboard/GamificacaoOperacoes"));
 const DashboardTempoReal = React.lazy(() => import('../components/dashboard/DashboardTempoReal'));
 const DashboardOperacionalBI = React.lazy(() => import("@/components/dashboard/DashboardOperacionalBI"));
 const MapaTempoReal = React.lazy(() => import("@/components/expedicao/MapaTempoReal"));
 const DashboardPerformance = React.lazy(() => import("@/components/sistema/DashboardPerformance"));
-import { Tabs, TabsContent } from '@/components/ui/tabs';
-import ErrorBoundary from "@/components/lib/ErrorBoundary";
-import ProtectedSection from "@/components/security/ProtectedSection";
-import usePermissions from "@/components/lib/usePermissions";
 const DashboardTabsNav = React.lazy(() => import("@/components/dashboard/DashboardTabsNav"));
-const WidgetCanaisOrigem = React.lazy(() => import("@/components/dashboard/WidgetCanaisOrigem")); // kept for backward-compat (not used directly here)
+const WidgetCanaisOrigem = React.lazy(() => import("@/components/dashboard/WidgetCanaisOrigem"));
 const DashboardHeader = React.lazy(() => import("@/components/dashboard/DashboardHeader"));
 const DashboardContextoBanner = React.lazy(() => import("@/components/dashboard/DashboardContextoBanner"));
 const DashboardMultiempresaBar = React.lazy(() => import("@/components/dashboard/DashboardMultiempresaBar"));
@@ -95,8 +98,6 @@ const ContratosEletronicosWidget = React.lazy(() => import("@/components/contrat
 const PedidosResumoPanel = React.lazy(() => import("@/components/dashboard/PedidosResumoPanel"));
 const ResizableRow = React.lazy(() => import("@/components/dashboard/ResizableRow"));
 const DashboardResumoTab = React.lazy(() => import("@/components/dashboard/DashboardResumoTab"));
-import useDashboardDerivedData from "@/components/dashboard/hooks/useDashboardDerivedData";
-import { DASHBOARD_LIST_LIMIT, DASHBOARD_REFETCH_INTERVAL_MS, dashboardQueryDefaults } from "@/components/dashboard/config/dashboardQueryConfig";
 
 
 export default function Dashboard() {

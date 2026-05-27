@@ -8,7 +8,7 @@ import { Trophy, AlertCircle } from "lucide-react";
 import DashboardCommandCenter from "@/components/dashboard/DashboardCommandCenter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TabsContent } from "@/components/ui/tabs";
+
 
 import ProtectedSection from "@/components/security/ProtectedSection";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";

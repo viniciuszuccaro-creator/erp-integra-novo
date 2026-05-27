@@ -49,7 +49,7 @@ import {
   Area,
   AreaChart
 } from "recharts";
-import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { Tabs } from '@/components/ui/tabs';
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import usePermissions from "@/components/lib/usePermissions";
@@ -778,8 +778,7 @@ export default function Dashboard() {
           onDrillDown={handleDrillDown}
           empresaId={empresaAtual?.id}
         />
-        {/* conteúdo movido para DashboardResumoTab */}
-      </Tabs>
+        </Tabs>
       </ErrorBoundary>
       </Suspense>
       </div>

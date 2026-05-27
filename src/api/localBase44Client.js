@@ -1,5 +1,3 @@
-import { sanitizeOnWrite } from "@/components/lib/sanitizeOnWrite";
-
 const STORAGE_KEY = 'erp_integra_local_db_v1';
 const USER_KEY = 'erp_integra_local_user_v1';
 const SNAPSHOT_IMPORT_KEY = 'erp_integra_base44_snapshot_imported_v5_core_compact';

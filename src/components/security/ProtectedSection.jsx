@@ -3,7 +3,6 @@ import usePermissions from "@/components/lib/usePermissions";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { useUser } from "@/components/lib/UserContext";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
 const GUARD_TTL_MS = 120_000;
@@ -31,13 +30,13 @@ export default function ProtectedSection({
   const { user } = useUser();
   const { empresaAtual, grupoAtual } = useContextoVisual();
   const loggedRef = useRef(false);
-  const [openDenied, setOpenDenied] = useState(false);
   const [requestingAccess, setRequestingAccess] = useState(false);
   const [requestedAccess, setRequestedAccess] = useState(false);
 
   // Sempre manter a mesma ordem de hooks entre renders
   const allowed = !isLoading && hasPermission(modulo, section, action);
   const [allowedFinal, setAllowedFinal] = useState(null);
+  const [showDenied, setShowDenied] = useState(false);
 
   useEffect(() => {
     if (isLoading) return;
@@ -110,12 +109,12 @@ export default function ProtectedSection({
   }, [isLoading, allowedFinal, action, modulo, section, user?.id, empresaAtual?.id]);
 
   useEffect(() => {
-    if (!isLoading && allowedFinal === false) setOpenDenied(true);
+    if (!isLoading && allowedFinal === false) setShowDenied(true);
   }, [isLoading, allowedFinal]);
 
   if (isLoading || allowedFinal === null) return <div className="contents" data-ps-loading />;
   if (!allowedFinal) {
-    if (hideInstead) return fallback;
+    if (hideInstead) return fallback || null;
     if (disableInstead) {
       return (
         <div className="opacity-50 pointer-events-none w-full h-full">
@@ -123,54 +122,43 @@ export default function ProtectedSection({
         </div>
       );
     }
+    // Inline denied banner — sem Dialog/Portal para evitar conflito de fiber tree em lazy contexts
+    if (!showDenied) return fallback || null;
     return (
-      <>
+      <div className="w-full p-6 flex flex-col items-center justify-center gap-4 text-center">
         {fallback}
-        <Dialog open={openDenied} onOpenChange={setOpenDenied}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Permissão negada</DialogTitle>
-              <DialogDescription>
-                Você não possui permissão para visualizar esta seção.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="text-sm text-slate-600 space-y-1">
-              <p><strong>Módulo:</strong> {modulo || 'Sistema'}</p>
-              {section && <p><strong>Seção:</strong> {section}</p>}
-              <p><strong>Ação:</strong> {action}</p>
-            </div>
-            {requestedAccess && (
-              <div className="text-xs text-emerald-600 mt-2">
-                Pedido de acesso enviado para aprovação.
-              </div>
-            )}
-            <DialogFooter>
-              <Button
-                variant="default"
-                disabled={requestingAccess || requestedAccess}
-                onClick={async () => {
-                  try {
-                    setRequestingAccess(true);
-                    await base44.functions.invoke('solicitacoesAprovacao', {
-                      module: modulo || 'Sistema',
-                      section,
-                      action,
-                      empresa_id: empresaAtual?.id || null,
-                      group_id: grupoAtual?.id || null,
-                    });
-                    setRequestedAccess(true);
-                  } finally {
-                    setRequestingAccess(false);
-                  }
-                }}
-              >
-                {requestedAccess ? 'Solicitado' : (requestingAccess ? 'Solicitando…' : 'Solicitar acesso')}
-              </Button>
-              <Button variant="outline" onClick={() => setOpenDenied(false)}>Fechar</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </>
+        <div className="max-w-sm w-full bg-white border border-red-100 rounded-xl shadow-sm p-5">
+          <p className="font-semibold text-slate-800 mb-1">Permissão negada</p>
+          <p className="text-sm text-slate-500 mb-3">
+            Você não possui permissão para acessar <strong>{section || modulo || 'esta seção'}</strong>.
+          </p>
+          {requestedAccess ? (
+            <p className="text-xs text-emerald-600">Pedido de acesso enviado para aprovação.</p>
+          ) : (
+            <Button
+              size="sm"
+              disabled={requestingAccess}
+              onClick={async () => {
+                try {
+                  setRequestingAccess(true);
+                  await base44.functions.invoke('solicitacoesAprovacao', {
+                    module: modulo || 'Sistema',
+                    section,
+                    action,
+                    empresa_id: empresaAtual?.id || null,
+                    group_id: grupoAtual?.id || null,
+                  });
+                  setRequestedAccess(true);
+                } finally {
+                  setRequestingAccess(false);
+                }
+              }}
+            >
+              {requestingAccess ? 'Solicitando…' : 'Solicitar acesso'}
+            </Button>
+          )}
+        </div>
+      </div>
     );
   }
   return <>{children}</>;

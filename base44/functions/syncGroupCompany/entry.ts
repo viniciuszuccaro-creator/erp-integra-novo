@@ -116,7 +116,9 @@ Deno.serve(async (req) => {
       const upMap = mapsById.find(m => m.direction === 'up');
       const payload = pickAllowed(entityName, record);
       if (!payload) return Response.json({ ok: true, skipped: 'not-allowed' });
-      delete payload.empresa_id;
+
+      // IMPORTANT: preserve empresa_id in payload for entities that require it
+      // Only strip empresa_id when creating a group-level mirror (where we explicitly set group scope)
       const groupFilter = groupId ? { group_id: groupId } : {};
 
       if (upMap?.target_id) {
@@ -129,11 +131,13 @@ Deno.serve(async (req) => {
         await doWithRetry(() => base44.asServiceRole.entities[entityName].update(upMap.target_id, merged));
         await doWithRetry(() => base44.asServiceRole.entities.SyncMap.update(upMap.id, { last_sync_at: nowIso() }));
       } else {
+        // For group-level record, keep empresa_id to satisfy required field constraints
+        const groupPayload = { ...payload, ...groupFilter };
         const mergeRes = await base44.asServiceRole.functions.invoke('conflictPolicy', {
           entity_name: entityName, group_id: groupId || null, empresa_id: empresaId,
-          source: 'up', current: {}, incoming: { ...payload, ...groupFilter }
+          source: 'up', current: {}, incoming: groupPayload
         }).catch(() => null);
-        const merged = (mergeRes?.data && (mergeRes.data.merged || mergeRes.data)) || { ...payload, ...groupFilter };
+        const merged = (mergeRes?.data && (mergeRes.data.merged || mergeRes.data)) || groupPayload;
         const created = await doWithRetry(() => base44.asServiceRole.entities[entityName].create(merged));
         await doWithRetry(() => base44.asServiceRole.entities.SyncMap.create({
           entity_name: entityName, group_id: groupId || null, empresa_id: empresaId,

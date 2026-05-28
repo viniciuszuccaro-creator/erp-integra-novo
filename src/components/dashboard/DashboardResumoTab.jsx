@@ -3,7 +3,7 @@
  * Cada widget pesado é lazy + tem seu próprio ErrorBoundary+Suspense com key estável.
  * Isso evita os erros de Portal DOM (removeChild/insertBefore) do React.
  */
-import React, { Suspense, memo, useCallback } from "react";
+import React, { Suspense } from "react";
 import { createPageUrl } from "@/utils";
 import { Trophy, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

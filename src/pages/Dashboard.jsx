@@ -726,8 +726,8 @@ export default function Dashboard() {
       <DashboardStabilityNotice hasContextoAtivo={hasContextoAtivo} />
       </Suspense>
 
-      <Suspense fallback={<div className="h-96 w-full bg-slate-100 rounded animate-pulse" />}>
       <ErrorBoundary key={`dashboard-main-${hasContextoAtivo}`}>
+      <Suspense fallback={<div className="h-96 w-full bg-slate-100 rounded animate-pulse" />}>
         <DashboardResumoTab
           statsCards={statsCards}
           kpisOperacionais={kpisOperacionais}
@@ -762,8 +762,8 @@ export default function Dashboard() {
           onDrillDown={handleDrillDown}
           empresaId={empresaAtual?.id}
         />
-      </ErrorBoundary>
       </Suspense>
+      </ErrorBoundary>
       </div>
     </div>
   </ProtectedSection>

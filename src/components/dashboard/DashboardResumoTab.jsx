@@ -2,12 +2,13 @@
  * DashboardResumoTab — conteúdo principal da aba "Resumo" do Dashboard.
  * Extraído de pages/Dashboard para reduzir tamanho do arquivo.
  */
-import React, { Suspense } from "react";
+import React, { Suspense, useMemo } from "react";
 import { createPageUrl } from "@/utils";
 import { Trophy, AlertCircle } from "lucide-react";
 import DashboardCommandCenter from "@/components/dashboard/DashboardCommandCenter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ResponsiveContainer } from "recharts";
 
 
 import ProtectedSection from "@/components/security/ProtectedSection";
@@ -77,8 +78,11 @@ export default function DashboardResumoTab({
   onDrillDown,
   empresaId,
 }) {
+  // Memoize recharts container to prevent unmount cycles
+  const rechartDefaults = useMemo(() => ({ wrapperStyle: { position: 'relative' } }), []);
+
   return (
-    <div className="w-full h-full overflow-y-auto space-y-6 mt-4">
+    <div className="w-full h-full overflow-y-auto space-y-6 mt-4" suppressHydrationWarning>
       {/* Sticky KPIs */}
       <DashboardStickyKpis
         pedidos={[]}

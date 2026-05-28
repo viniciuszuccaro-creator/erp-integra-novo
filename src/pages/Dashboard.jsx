@@ -49,7 +49,7 @@ import {
   Area,
   AreaChart
 } from "recharts";
-import { Tabs } from '@/components/ui/tabs';
+
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import usePermissions from "@/components/lib/usePermissions";
@@ -123,23 +123,7 @@ export default function Dashboard() {
     }
   });
 
-  // Removed visualizacao state as it's replaced by Tabs
-  const dashboardTabsPermitidas = ["resumo"];
-  const [activeTab, setActiveTab] = useState("resumo");
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    let initial = params.get('tab');
-    if (!initial) { try { initial = localStorage.getItem('Dashboard_tab'); } catch {} }
-    setActiveTab(dashboardTabsPermitidas.includes(initial) ? initial : "resumo");
-  }, []);
-  const handleTabChange = (value) => {
-    const nextTab = dashboardTabsPermitidas.includes(value) ? value : "resumo";
-    setActiveTab(nextTab);
-    const url = new URL(window.location.href);
-    url.searchParams.set('tab', nextTab);
-    window.history.replaceState({}, '', url.toString());
-    try { localStorage.setItem('Dashboard_tab', nextTab); } catch {}
-  }; // New state for active tab
+
 
   useEffect(() => {
     try {
@@ -717,34 +701,33 @@ export default function Dashboard() {
     <ProtectedSection module="Dashboard" action="ver">
     <div className="w-full h-full min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="flex-1 overflow-hidden p-6 space-y-6">
-      <Suspense fallback={<div className="h-12 w-full" />}>
-      <DashboardHeader
-        empresaAtual={empresaAtual}
-        estaNoGrupo={estaNoGrupo}
-        grupoAtual={grupoAtual}
-        autoRefresh={autoRefresh}
-        setAutoRefresh={setAutoRefresh}
-        periodo={periodo}
-        setPeriodo={setPeriodo}
-      />
-
-      <DashboardContextoBanner />
-      <DashboardMultiempresaBar />
-      <DashboardEssentialKPIs
-        totalVendas={totalVendas}
-        taxaInadimplencia={taxaInadimplencia}
-        valorVencido={valorVencido}
-        entregasPendentes={entregasPendentes}
-        produtosBaixoEstoque={produtosBaixoEstoque}
-        otd={otd}
-      />
+      <Suspense fallback={<div className="h-12 w-full bg-slate-100 rounded animate-pulse" />}>
+      <div key={`dashboard-header-${hasContextoAtivo}`} suppressHydrationWarning>
+        <DashboardHeader
+          empresaAtual={empresaAtual}
+          estaNoGrupo={estaNoGrupo}
+          grupoAtual={grupoAtual}
+          autoRefresh={autoRefresh}
+          setAutoRefresh={setAutoRefresh}
+          periodo={periodo}
+          setPeriodo={setPeriodo}
+        />
+        <DashboardContextoBanner />
+        <DashboardMultiempresaBar />
+        <DashboardEssentialKPIs
+          totalVendas={totalVendas}
+          taxaInadimplencia={taxaInadimplencia}
+          valorVencido={valorVencido}
+          entregasPendentes={entregasPendentes}
+          produtosBaixoEstoque={produtosBaixoEstoque}
+          otd={otd}
+        />
+      </div>
       <DashboardStabilityNotice hasContextoAtivo={hasContextoAtivo} activeTab={activeTab} />
+      </Suspense>
 
-      <ErrorBoundary key={`dashboard-error-${activeTab}`}>
-         <Tabs value={activeTab} onValueChange={handleTabChange} suppressHydrationWarning>
-         {/* Unificado em Resumo Geral */}
-
-        <div key={`resumo-content-${activeTab}`} suppressHydrationWarning>
+      <Suspense fallback={<div className="h-96 w-full bg-slate-100 rounded animate-pulse" />}>
+      <ErrorBoundary key={`dashboard-main-${hasContextoAtivo}`}>
         <DashboardResumoTab
           statsCards={statsCards}
           kpisOperacionais={kpisOperacionais}
@@ -778,10 +761,8 @@ export default function Dashboard() {
           canSeeEstoque={canSeeEstoque}
           onDrillDown={handleDrillDown}
           empresaId={empresaAtual?.id}
-          />
-          </div>
-          </Tabs>
-          </ErrorBoundary>
+        />
+      </ErrorBoundary>
       </Suspense>
       </div>
     </div>

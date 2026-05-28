@@ -740,10 +740,11 @@ export default function Dashboard() {
       />
       <DashboardStabilityNotice hasContextoAtivo={hasContextoAtivo} activeTab={activeTab} />
 
-      <ErrorBoundary>
-         <Tabs value={activeTab} onValueChange={handleTabChange}>
+      <ErrorBoundary key={`dashboard-error-${activeTab}`}>
+         <Tabs value={activeTab} onValueChange={handleTabChange} suppressHydrationWarning>
          {/* Unificado em Resumo Geral */}
 
+        <div key={`resumo-content-${activeTab}`} suppressHydrationWarning>
         <DashboardResumoTab
           statsCards={statsCards}
           kpisOperacionais={kpisOperacionais}
@@ -777,9 +778,10 @@ export default function Dashboard() {
           canSeeEstoque={canSeeEstoque}
           onDrillDown={handleDrillDown}
           empresaId={empresaAtual?.id}
-        />
-        </Tabs>
-      </ErrorBoundary>
+          />
+          </div>
+          </Tabs>
+          </ErrorBoundary>
       </Suspense>
       </div>
     </div>

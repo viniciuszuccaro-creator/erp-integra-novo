@@ -100,157 +100,165 @@ export default function DashboardResumoTab({
       <SecondaryKPIsSection kpis={kpiCards} />
 
       {/* Mapa em tempo real */}
-      <ProtectedSection module="Expedição" action="ver" hideInstead>
+      <ProtectedSection module="Expedição" action="ver" hideInstead key="mapa-tempo-real">
         <Card className="bg-white/80 backdrop-blur-sm rounded-md shadow-sm">
           <CardContent className="p-0 overflow-hidden rounded-md">
             <Suspense fallback={<div className="h-40 bg-slate-100 animate-pulse" />}>
-              <MapaTempoRealLazy />
+              <MapaTempoRealLazy key="mapa-lazy" />
             </Suspense>
           </CardContent>
         </Card>
       </ProtectedSection>
 
       {/* Pedidos resumo */}
-      <PedidosResumoPanel
-        pedidosRecentes={pedidosRecentes}
-        pedidosPendentes={pedidosPendentes}
-        pedidosAguardandoAprovacao={pedidosAguardandoAprovacao}
-        onVerTodos={() => onDrillDown(createPageUrl("Comercial"))}
-      />
+      <ErrorBoundary key="pedidos-resumo">
+        <PedidosResumoPanel
+          pedidosRecentes={pedidosRecentes}
+          pedidosPendentes={pedidosPendentes}
+          pedidosAguardandoAprovacao={pedidosAguardandoAprovacao}
+          onVerTodos={() => onDrillDown(createPageUrl("Comercial"))}
+        />
+      </ErrorBoundary>
 
       {/* Anomalias Financeiras */}
       {canSeeFinanceiro && (
-        <Card className="bg-white/80 backdrop-blur-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-600" />
-              Anomalias Financeiras
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loadingAnomIA ? (
-              <div className="h-8 rounded bg-slate-100 animate-pulse" />
-            ) : (() => {
-              const list = anomaliasIA?.details || [];
-              if (!list.length) return <p className="text-sm text-slate-500">Nenhuma anomalia detectada.</p>;
-              const resumo = list.reduce((acc, i) => { acc[i.severity || "baixo"] = (acc[i.severity || "baixo"] || 0) + 1; return acc; }, {});
-              return (
-                <div className="flex flex-wrap gap-2 text-sm">
-                  <Badge className="bg-red-100 text-red-700">Alta: {resumo.alto || 0}</Badge>
-                  <Badge className="bg-amber-100 text-amber-700">Média: {resumo.medio || 0}</Badge>
-                  <Badge variant="outline">Baixa: {resumo.baixo || 0}</Badge>
-                </div>
-              );
-            })()}
-          </CardContent>
-        </Card>
+        <ErrorBoundary key="anomalias-financeiras">
+          <Card className="bg-white/80 backdrop-blur-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600" />
+                Anomalias Financeiras
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingAnomIA ? (
+                <div className="h-8 rounded bg-slate-100 animate-pulse" />
+              ) : (() => {
+                const list = anomaliasIA?.details || [];
+                if (!list.length) return <p className="text-sm text-slate-500">Nenhuma anomalia detectada.</p>;
+                const resumo = list.reduce((acc, i) => { acc[i.severity || "baixo"] = (acc[i.severity || "baixo"] || 0) + 1; return acc; }, {});
+                return (
+                  <div className="flex flex-wrap gap-2 text-sm">
+                    <Badge className="bg-red-100 text-red-700">Alta: {resumo.alto || 0}</Badge>
+                    <Badge className="bg-amber-100 text-amber-700">Média: {resumo.medio || 0}</Badge>
+                    <Badge variant="outline">Baixa: {resumo.baixo || 0}</Badge>
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        </ErrorBoundary>
       )}
 
       {/* Estoque Crítico */}
-      <WidgetEstoqueCritico
-        preds14Count={(previsoesIA?.previsoes || []).filter(p => p.risco_ruptura && p.risco_ruptura !== "baixo").length}
-        preds30Count={(previsoesIA30?.previsoes || []).filter(p => p.risco_ruptura && p.risco_ruptura !== "baixo").length}
-        count={produtosBaixoEstoque}
-        onNavigate={() => onDrillDown(createPageUrl("Estoque"))}
-      />
+      <ErrorBoundary key="estoque-critico">
+        <WidgetEstoqueCritico
+          preds14Count={(previsoesIA?.previsoes || []).filter(p => p.risco_ruptura && p.risco_ruptura !== "baixo").length}
+          preds30Count={(previsoesIA30?.previsoes || []).filter(p => p.risco_ruptura && p.risco_ruptura !== "baixo").length}
+          count={produtosBaixoEstoque}
+          onNavigate={() => onDrillDown(createPageUrl("Estoque"))}
+        />
+      </ErrorBoundary>
 
       {/* Gráficos + Top Produtos */}
-      <div className="flex flex-col gap-4">
-        <div className="overflow-auto">
-          <ChartsSection vendasUltimos30Dias={vendasUltimos30Dias} fluxo7Dias={fluxo7Dias} />
+      <ErrorBoundary key="charts-top-produtos">
+        <div className="flex flex-col gap-4">
+          <div className="overflow-auto">
+            <ChartsSection vendasUltimos30Dias={vendasUltimos30Dias} fluxo7Dias={fluxo7Dias} />
+          </div>
+          <div className="overflow-auto">
+            <TopProdutosStatusPeriodoSection topProdutos={topProdutos} dadosVendasStatus={dadosVendasStatus} COLORS={COLORS} />
+          </div>
         </div>
-        <div className="overflow-auto">
-          <TopProdutosStatusPeriodoSection topProdutos={topProdutos} dadosVendasStatus={dadosVendasStatus} COLORS={COLORS} />
+      </ErrorBoundary>
+
+      {/* Widgets de BI — cada widget encapsulado para forçar remontagem limpa */}
+      <ErrorBoundary>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <DashboardKPIsComparativosWidget key="kpi-comparativo" />
+          <DashboardMarketplaceWidget key="marketplace" />
+          {canSeeCRM && <CRMScoreDashboard key="crm-score" />}
+          {canSeeFinanceiro && <ConciliacaoIAWidget key="conciliacao" />}
         </div>
-      </div>
+      </ErrorBoundary>
 
-      {/* Widgets de BI — encapsulados com chave para evitar conflito de Portal */}
-      <div key="bi-widgets-1">
-        <ErrorBoundary>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <DashboardKPIsComparativosWidget />
-            <DashboardMarketplaceWidget />
-            {canSeeCRM && <CRMScoreDashboard />}
-            {canSeeFinanceiro && <ConciliacaoIAWidget />}
-          </div>
-        </ErrorBoundary>
-      </div>
+      <ErrorBoundary>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <DashboardBI3DWidget key="bi-3d" />
+          <DashboardAutomacaoFluxosWidget key="automacao" />
+        </div>
+      </ErrorBoundary>
 
-      <div key="bi-widgets-2">
-        <ErrorBoundary>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <DashboardBI3DWidget />
-            <DashboardAutomacaoFluxosWidget />
-          </div>
-        </ErrorBoundary>
-      </div>
+      <ErrorBoundary>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <RastreamentoGPSWidget key="rastreamento" />
+          <ApontamentoProdutoMobileWidget key="apontamento" />
+        </div>
+      </ErrorBoundary>
 
-      <div key="bi-widgets-3">
-        <ErrorBoundary>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <RastreamentoGPSWidget />
-            <ApontamentoProdutoMobileWidget />
-          </div>
-        </ErrorBoundary>
-      </div>
-
-      <div key="bi-widgets-4">
-        <ErrorBoundary>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <ComplianceISO27001Widget />
-            <ContratosEletronicosWidget />
-          </div>
-        </ErrorBoundary>
-      </div>
+      <ErrorBoundary>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <ComplianceISO27001Widget key="compliance" />
+          <ContratosEletronicosWidget key="contratos" />
+        </div>
+      </ErrorBoundary>
 
       {/* IA */}
-      <div key="ia-widgets">
-        <ErrorBoundary>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <DashboardSaudeWidget />
-            <DashboardForecastWidget />
-            <DashboardVendasPrevisaoWidget />
-            <DashboardIAInsightsPanel />
-          </div>
-        </ErrorBoundary>
-      </div>
+      <ErrorBoundary>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <DashboardSaudeWidget key="saude" />
+          <DashboardForecastWidget key="forecast" />
+          <DashboardVendasPrevisaoWidget key="vendas-prev" />
+          <DashboardIAInsightsPanel key="ia-insights" />
+        </div>
+      </ErrorBoundary>
 
       {/* Gráficos Avançados */}
-      <AdvancedAnalysisSection
-        vendasPorMes={vendasPorMesData}
-        top5Clientes={top5ClientesData}
-        statusPedidos={statusPedidosDataAll}
-        fluxoCaixaMensal={fluxoCaixaMensalData}
-        COLORS={COLORS}
-      />
+      <ErrorBoundary key="advanced-analysis">
+        <AdvancedAnalysisSection
+          vendasPorMes={vendasPorMesData}
+          top5Clientes={top5ClientesData}
+          statusPedidos={statusPedidosDataAll}
+          fluxoCaixaMensal={fluxoCaixaMensalData}
+          COLORS={COLORS}
+        />
+      </ErrorBoundary>
 
       {/* Command Center — compacto */}
-      <ProtectedSection module="Sistema" action="ver" hideInstead>
+      <ProtectedSection module="Sistema" action="ver" hideInstead key="command-center">
         <DashboardCommandCenter ccMetrics={ccMetrics} botMetrics={botMetrics} />
       </ProtectedSection>
 
-      <ProtectedSection module="Sistema" action="ver" hideInstead>
+      <ProtectedSection module="Sistema" action="ver" hideInstead key="performance">
         <Suspense fallback={<div className="h-32 rounded bg-slate-100 animate-pulse" />}>
-          <DashboardPerformance />
+          <DashboardPerformance key="performance-lazy" />
         </Suspense>
       </ProtectedSection>
 
       {canSeeEstoque && (
-        <DashboardEstoquePrevisoesWidget previsoesIA={previsoesIA} loadingPrevIA={loadingPrevIA} />
+        <ErrorBoundary key="estoque-previoes">
+          <DashboardEstoquePrevisoesWidget previsoesIA={previsoesIA} loadingPrevIA={loadingPrevIA} />
+        </ErrorBoundary>
       )}
 
-      <QuickAccessModulesGrid modules={quickAccess} onClick={onDrillDown} />
-      <FinancialSummary receitasPendentes={receitasPendentes} despesasPendentes={despesasPendentes} fluxoCaixa={fluxoCaixa} />
+      <ErrorBoundary key="quick-access">
+        <QuickAccessModulesGrid modules={quickAccess} onClick={onDrillDown} />
+      </ErrorBoundary>
+      <ErrorBoundary key="financial-summary">
+        <FinancialSummary receitasPendentes={receitasPendentes} despesasPendentes={despesasPendentes} fluxoCaixa={fluxoCaixa} />
+      </ErrorBoundary>
 
-      <div>
-        <h2 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-yellow-600" />
-          Rankings de Performance
-        </h2>
-        <Suspense fallback={<div className="h-32 rounded bg-slate-100 animate-pulse" />}>
-          <GamificacaoOperacoes />
-        </Suspense>
-      </div>
+      <ErrorBoundary key="gamificacao">
+        <div>
+          <h2 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-yellow-600" />
+            Rankings de Performance
+          </h2>
+          <Suspense fallback={<div className="h-32 rounded bg-slate-100 animate-pulse" />}>
+            <GamificacaoOperacoes key="gamificacao-lazy" />
+          </Suspense>
+        </div>
+      </ErrorBoundary>
     </div>
   );
 }

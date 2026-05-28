@@ -137,7 +137,7 @@ export default function Dashboard() {
   const [autoRefresh, setAutoRefresh] = useState(false);
   const queryClient = useQueryClient();
   const hasContextoAtivo = Boolean(empresaAtual?.id || estaNoGrupo || grupoAtual?.id);
-  const refetchInterval = (empresaAtual?.id || estaNoGrupo) ? ((activeTab === 'resumo' && autoRefresh) ? DASHBOARD_REFETCH_INTERVAL_MS : false) : false; // evita zero-dados sem contexto
+  const refetchInterval = (empresaAtual?.id || estaNoGrupo) ? (autoRefresh ? DASHBOARD_REFETCH_INTERVAL_MS : false) : false; // evita zero-dados sem contexto
 
   const { data: pedidos = [] } = useQuery({
        enabled: Boolean(canSeeComercial && hasContextoAtivo),
@@ -723,7 +723,7 @@ export default function Dashboard() {
           otd={otd}
         />
       </div>
-      <DashboardStabilityNotice hasContextoAtivo={hasContextoAtivo} activeTab={activeTab} />
+      <DashboardStabilityNotice hasContextoAtivo={hasContextoAtivo} />
       </Suspense>
 
       <Suspense fallback={<div className="h-96 w-full bg-slate-100 rounded animate-pulse" />}>

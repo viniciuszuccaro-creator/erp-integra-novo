@@ -1,37 +1,25 @@
 /**
  * DashboardResumoTab — conteúdo principal do Dashboard.
- * Todos os widgets pesados são lazy + isolados em ErrorBoundary
- * para evitar conflitos de Portal (removeChild/insertBefore).
+ * Cada widget pesado é lazy + tem seu próprio ErrorBoundary+Suspense com key estável.
+ * Isso evita os erros de Portal DOM (removeChild/insertBefore) do React.
  */
-import React, { Suspense, memo } from "react";
+import React, { Suspense, memo, useCallback } from "react";
 import { createPageUrl } from "@/utils";
 import { Trophy, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 
-// Componentes leves — importados diretamente
-import DashboardStickyKpis from "@/components/dashboard/DashboardStickyKpis";
-import StatsSection from "@/components/dashboard/StatsSection";
-import KPIsOperacionaisSection from "@/components/dashboard/KPIsOperacionaisSection";
-import SecondaryKPIsSection from "@/components/dashboard/SecondaryKPIsSection";
-import QuickAccessModulesGrid from "@/components/dashboard/QuickAccessModulesGrid";
-import FinancialSummary from "@/components/dashboard/FinancialSummary";
-import PedidosResumoPanel from "@/components/dashboard/PedidosResumoPanel";
-import ProtectedSection from "@/components/security/ProtectedSection";
-
-// Todos os widgets pesados (com Portals) são lazy para isolamento limpo de montagem
-const ChartsSection                = React.lazy(() => import("@/components/dashboard/ChartsSection"));
+// ─── Lazy imports ────────────────────────────────────────────────────────────
+const ChartsSection                   = React.lazy(() => import("@/components/dashboard/ChartsSection"));
 const TopProdutosStatusPeriodoSection = React.lazy(() => import("@/components/dashboard/TopProdutosStatusPeriodoSection"));
-const AdvancedAnalysisSection      = React.lazy(() => import("@/components/dashboard/AdvancedAnalysisSection"));
-const WidgetEstoqueCritico         = React.lazy(() => import("@/components/estoque/WidgetEstoqueCritico"));
-const DashboardCommandCenter       = React.lazy(() => import("@/components/dashboard/DashboardCommandCenter"));
-const DashboardPerformance         = React.lazy(() => import("@/components/sistema/DashboardPerformance"));
-const GamificacaoOperacoes         = React.lazy(() => import("@/components/dashboard/GamificacaoOperacoes"));
-const MapaTempoReal                = React.lazy(() => import("@/components/expedicao/MapaTempoReal"));
+const AdvancedAnalysisSection         = React.lazy(() => import("@/components/dashboard/AdvancedAnalysisSection"));
+const WidgetEstoqueCritico            = React.lazy(() => import("@/components/estoque/WidgetEstoqueCritico"));
+const DashboardCommandCenter          = React.lazy(() => import("@/components/dashboard/DashboardCommandCenter"));
+const DashboardPerformance            = React.lazy(() => import("@/components/sistema/DashboardPerformance"));
+const GamificacaoOperacoes            = React.lazy(() => import("@/components/dashboard/GamificacaoOperacoes"));
+const MapaTempoReal                   = React.lazy(() => import("@/components/expedicao/MapaTempoReal"));
 const DashboardEstoquePrevisoesWidget = React.lazy(() => import("@/components/dashboard/DashboardEstoquePrevisoesWidget"));
-
-// Widgets BI — cada um isolado
 const DashboardKPIsComparativosWidget = React.lazy(() => import("@/components/dashboard/DashboardKPIsComparativosWidget"));
 const DashboardMarketplaceWidget      = React.lazy(() => import("@/components/dashboard/DashboardMarketplaceWidget"));
 const CRMScoreDashboard               = React.lazy(() => import("@/components/crm/CRMScoreDashboard"));
@@ -46,19 +34,32 @@ const DashboardSaudeWidget            = React.lazy(() => import("@/components/da
 const DashboardForecastWidget         = React.lazy(() => import("@/components/dashboard/DashboardForecastWidget"));
 const DashboardVendasPrevisaoWidget   = React.lazy(() => import("@/components/dashboard/DashboardVendasPrevisaoWidget"));
 const DashboardIAInsightsPanel        = React.lazy(() => import("@/components/dashboard/DashboardIAInsightsPanel"));
+const DashboardStickyKpis             = React.lazy(() => import("@/components/dashboard/DashboardStickyKpis"));
+const StatsSection                    = React.lazy(() => import("@/components/dashboard/StatsSection"));
+const KPIsOperacionaisSection         = React.lazy(() => import("@/components/dashboard/KPIsOperacionaisSection"));
+const SecondaryKPIsSection            = React.lazy(() => import("@/components/dashboard/SecondaryKPIsSection"));
+const QuickAccessModulesGrid          = React.lazy(() => import("@/components/dashboard/QuickAccessModulesGrid"));
+const FinancialSummary                = React.lazy(() => import("@/components/dashboard/FinancialSummary"));
+const PedidosResumoPanel              = React.lazy(() => import("@/components/dashboard/PedidosResumoPanel"));
 
-// Skeleton genérico
-const Skel = ({ h = 32 }) => <div className={`h-${h} rounded bg-slate-100 animate-pulse w-full`} />;
+// ─── Skeleton ────────────────────────────────────────────────────────────────
+const Skel = ({ h = 32 }) => (
+  <div style={{ height: `${h * 4}px` }} className="rounded bg-slate-100 animate-pulse w-full" />
+);
 
-// Widget wrapper: lazy + ErrorBoundary + Suspense isolado — evita Portal cross-contamination
-const W = memo(({ children, h = 32 }) => (
-  <ErrorBoundary>
-    <Suspense fallback={<Skel h={h} />}>
-      {children}
-    </Suspense>
-  </ErrorBoundary>
-));
+// ─── Stable widget slot — NEVER pass dynamic children, use render prop via Component ─
+// Each slot is a distinct named component so React sees stable fiber identity.
+function Slot({ Component, fallbackH = 32, componentProps = {} }) {
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<Skel h={fallbackH} />}>
+        <Component {...componentProps} />
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
 
+// ─── Main component ───────────────────────────────────────────────────────────
 export default function DashboardResumoTab({
   statsCards,
   kpisOperacionais,
@@ -90,52 +91,60 @@ export default function DashboardResumoTab({
   canSeeFinanceiro,
   canSeeCRM,
   canSeeEstoque,
+  canSeeExpedicao,
+  canSeeAdmin,
   onDrillDown,
   empresaId,
 }) {
+  const preds14 = (previsoesIA?.previsoes || []).filter(p => p.risco_ruptura && p.risco_ruptura !== "baixo").length;
+  const preds30 = (previsoesIA30?.previsoes || []).filter(p => p.risco_ruptura && p.risco_ruptura !== "baixo").length;
+
+  const anomList  = anomaliasIA?.details || [];
+  const anomResumo = anomList.reduce((acc, i) => {
+    acc[i.severity || "baixo"] = (acc[i.severity || "baixo"] || 0) + 1;
+    return acc;
+  }, {});
+
   return (
-    <div className="w-full h-full overflow-y-auto space-y-6 mt-4">
+    <div className="w-full space-y-6 mt-4">
 
-      {/* Sticky KPIs — leve, sem Portal */}
-      <DashboardStickyKpis
-        pedidos={[]}
-        pedidosPendentes={pedidosPendentes}
-        pedidosAguardandoAprovacao={pedidosAguardandoAprovacao}
-        produtosBaixoEstoque={produtosBaixoEstoque}
-      />
+      {/* Sticky KPIs */}
+      <Slot key="sticky-kpis" Component={DashboardStickyKpis} fallbackH={12} componentProps={{
+        pedidos: [],
+        pedidosPendentes,
+        pedidosAguardandoAprovacao,
+        produtosBaixoEstoque,
+      }} />
 
-      {/* KPIs principais */}
-      <div className="flex flex-col gap-4 w-full">
-        <div className="overflow-auto">
-          <StatsSection statsCards={statsCards} empresaId={empresaId} />
-        </div>
-        <div className="overflow-auto">
-          <KPIsOperacionaisSection kpis={kpisOperacionais} />
-        </div>
-      </div>
+      {/* Stats principais */}
+      <Slot key="stats" Component={StatsSection} fallbackH={24} componentProps={{ statsCards, empresaId }} />
 
-      <SecondaryKPIsSection kpis={kpiCards} />
+      {/* KPIs operacionais */}
+      <Slot key="kpis-ops" Component={KPIsOperacionaisSection} fallbackH={20} componentProps={{ kpis: kpisOperacionais }} />
+
+      {/* KPIs secundários */}
+      <Slot key="kpis-sec" Component={SecondaryKPIsSection} fallbackH={16} componentProps={{ kpis: kpiCards }} />
 
       {/* Mapa tempo real */}
-      <ProtectedSection module="Expedição" action="ver" hideInstead>
-        <Card className="bg-white/80 backdrop-blur-sm rounded-md shadow-sm">
+      {canSeeExpedicao !== false && (
+        <Card key="mapa-card" className="bg-white/80 backdrop-blur-sm rounded-md shadow-sm">
           <CardContent className="p-0 overflow-hidden rounded-md">
-            <W h={40}><MapaTempoReal /></W>
+            <Slot key="mapa" Component={MapaTempoReal} fallbackH={40} />
           </CardContent>
         </Card>
-      </ProtectedSection>
+      )}
 
       {/* Pedidos resumo */}
-      <PedidosResumoPanel
-        pedidosRecentes={pedidosRecentes}
-        pedidosPendentes={pedidosPendentes}
-        pedidosAguardandoAprovacao={pedidosAguardandoAprovacao}
-        onVerTodos={() => onDrillDown(createPageUrl("Comercial"))}
-      />
+      <Slot key="pedidos-resumo" Component={PedidosResumoPanel} fallbackH={24} componentProps={{
+        pedidosRecentes,
+        pedidosPendentes,
+        pedidosAguardandoAprovacao,
+        onVerTodos: () => onDrillDown(createPageUrl("Comercial")),
+      }} />
 
       {/* Anomalias Financeiras */}
       {canSeeFinanceiro && (
-        <Card className="bg-white/80 backdrop-blur-sm">
+        <Card key="anomalias-card" className="bg-white/80 backdrop-blur-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-rose-600" />
@@ -145,108 +154,117 @@ export default function DashboardResumoTab({
           <CardContent>
             {loadingAnomIA ? (
               <div className="h-8 rounded bg-slate-100 animate-pulse" />
-            ) : (() => {
-              const list = anomaliasIA?.details || [];
-              if (!list.length) return <p className="text-sm text-slate-500">Nenhuma anomalia detectada.</p>;
-              const resumo = list.reduce((acc, i) => { acc[i.severity || "baixo"] = (acc[i.severity || "baixo"] || 0) + 1; return acc; }, {});
-              return (
-                <div className="flex flex-wrap gap-2 text-sm">
-                  <Badge className="bg-red-100 text-red-700">Alta: {resumo.alto || 0}</Badge>
-                  <Badge className="bg-amber-100 text-amber-700">Média: {resumo.medio || 0}</Badge>
-                  <Badge variant="outline">Baixa: {resumo.baixo || 0}</Badge>
-                </div>
-              );
-            })()}
+            ) : !anomList.length ? (
+              <p className="text-sm text-slate-500">Nenhuma anomalia detectada.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2 text-sm">
+                <Badge className="bg-red-100 text-red-700">Alta: {anomResumo.alto || 0}</Badge>
+                <Badge className="bg-amber-100 text-amber-700">Média: {anomResumo.medio || 0}</Badge>
+                <Badge variant="outline">Baixa: {anomResumo.baixo || 0}</Badge>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
 
       {/* Estoque Crítico */}
-      <W h={24}>
-        <WidgetEstoqueCritico
-          preds14Count={(previsoesIA?.previsoes || []).filter(p => p.risco_ruptura && p.risco_ruptura !== "baixo").length}
-          preds30Count={(previsoesIA30?.previsoes || []).filter(p => p.risco_ruptura && p.risco_ruptura !== "baixo").length}
-          count={produtosBaixoEstoque}
-          onNavigate={() => onDrillDown(createPageUrl("Estoque"))}
-        />
-      </W>
+      <Slot key="estoque-critico" Component={WidgetEstoqueCritico} fallbackH={20} componentProps={{
+        preds14Count: preds14,
+        preds30Count: preds30,
+        count: produtosBaixoEstoque,
+        onNavigate: () => onDrillDown(createPageUrl("Estoque")),
+      }} />
 
-      {/* Gráficos 30 dias + 7 dias */}
-      <W h={48}>
-        <ChartsSection vendasUltimos30Dias={vendasUltimos30Dias} fluxo7Dias={fluxo7Dias} />
-      </W>
+      {/* Gráficos 30d + 7d */}
+      <Slot key="charts" Component={ChartsSection} fallbackH={48} componentProps={{
+        vendasUltimos30Dias,
+        fluxo7Dias,
+      }} />
 
       {/* Top Produtos + Status */}
-      <W h={48}>
-        <TopProdutosStatusPeriodoSection topProdutos={topProdutos} dadosVendasStatus={dadosVendasStatus} COLORS={COLORS} />
-      </W>
+      <Slot key="top-produtos" Component={TopProdutosStatusPeriodoSection} fallbackH={48} componentProps={{
+        topProdutos,
+        dadosVendasStatus,
+        COLORS,
+      }} />
 
-      {/* Widgets BI — cada um no seu próprio W para Portal isolation */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <W h={40}><DashboardKPIsComparativosWidget /></W>
-        <W h={40}><DashboardMarketplaceWidget /></W>
-        {canSeeCRM && <W h={40}><CRMScoreDashboard /></W>}
-        {canSeeFinanceiro && <W h={40}><ConciliacaoIAWidget /></W>}
+      {/* Widgets BI row 1 */}
+      <div key="bi-row1" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Slot key="kpis-comp" Component={DashboardKPIsComparativosWidget} fallbackH={40} />
+        <Slot key="marketplace" Component={DashboardMarketplaceWidget} fallbackH={40} />
+        {canSeeCRM && <Slot key="crm-score" Component={CRMScoreDashboard} fallbackH={40} />}
+        {canSeeFinanceiro && <Slot key="conciliacao" Component={ConciliacaoIAWidget} fallbackH={40} />}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <W h={40}><DashboardBI3DWidget /></W>
-        <W h={40}><DashboardAutomacaoFluxosWidget /></W>
+      {/* Widgets BI row 2 */}
+      <div key="bi-row2" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Slot key="bi-3d" Component={DashboardBI3DWidget} fallbackH={40} />
+        <Slot key="automacao" Component={DashboardAutomacaoFluxosWidget} fallbackH={40} />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <W h={40}><RastreamentoGPSWidget /></W>
-        <W h={40}><ApontamentoProdutoMobileWidget /></W>
+      {/* Widgets BI row 3 */}
+      <div key="bi-row3" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Slot key="gps" Component={RastreamentoGPSWidget} fallbackH={40} />
+        <Slot key="apontamento" Component={ApontamentoProdutoMobileWidget} fallbackH={40} />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <W h={40}><ComplianceISO27001Widget /></W>
-        <W h={40}><ContratosEletronicosWidget /></W>
+      {/* Widgets BI row 4 */}
+      <div key="bi-row4" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Slot key="compliance" Component={ComplianceISO27001Widget} fallbackH={40} />
+        <Slot key="contratos" Component={ContratosEletronicosWidget} fallbackH={40} />
       </div>
 
       {/* IA Widgets */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <W h={40}><DashboardSaudeWidget /></W>
-        <W h={40}><DashboardForecastWidget /></W>
-        <W h={40}><DashboardVendasPrevisaoWidget /></W>
-        <W h={40}><DashboardIAInsightsPanel /></W>
+      <div key="ia-row" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Slot key="saude" Component={DashboardSaudeWidget} fallbackH={40} />
+        <Slot key="forecast" Component={DashboardForecastWidget} fallbackH={40} />
+        <Slot key="vendas-prev" Component={DashboardVendasPrevisaoWidget} fallbackH={40} />
+        <Slot key="ia-insights" Component={DashboardIAInsightsPanel} fallbackH={40} />
       </div>
 
       {/* Análise Avançada */}
-      <W h={64}>
-        <AdvancedAnalysisSection
-          vendasPorMes={vendasPorMesData}
-          top5Clientes={top5ClientesData}
-          statusPedidos={statusPedidosDataAll}
-          fluxoCaixaMensal={fluxoCaixaMensalData}
-          COLORS={COLORS}
-        />
-      </W>
+      <Slot key="advanced" Component={AdvancedAnalysisSection} fallbackH={64} componentProps={{
+        vendasPorMes: vendasPorMesData,
+        top5Clientes: top5ClientesData,
+        statusPedidos: statusPedidosDataAll,
+        fluxoCaixaMensal: fluxoCaixaMensalData,
+        COLORS,
+      }} />
 
       {/* Command Center */}
-      <ProtectedSection module="Sistema" action="ver" hideInstead>
-        <W h={32}><DashboardCommandCenter ccMetrics={ccMetrics} botMetrics={botMetrics} /></W>
-      </ProtectedSection>
+      <Slot key="command-center" Component={DashboardCommandCenter} fallbackH={32} componentProps={{ ccMetrics, botMetrics }} />
 
-      <ProtectedSection module="Sistema" action="ver" hideInstead>
-        <W h={32}><DashboardPerformance /></W>
-      </ProtectedSection>
+      {/* Performance */}
+      <Slot key="performance" Component={DashboardPerformance} fallbackH={32} />
 
+      {/* Previsões Estoque */}
       {canSeeEstoque && (
-        <W h={32}>
-          <DashboardEstoquePrevisoesWidget previsoesIA={previsoesIA} loadingPrevIA={loadingPrevIA} />
-        </W>
+        <Slot key="prev-estoque" Component={DashboardEstoquePrevisoesWidget} fallbackH={32} componentProps={{
+          previsoesIA,
+          loadingPrevIA,
+        }} />
       )}
 
-      <QuickAccessModulesGrid modules={quickAccess} onClick={onDrillDown} />
-      <FinancialSummary receitasPendentes={receitasPendentes} despesasPendentes={despesasPendentes} fluxoCaixa={fluxoCaixa} />
+      {/* Quick Access */}
+      <Slot key="quick-access" Component={QuickAccessModulesGrid} fallbackH={24} componentProps={{
+        modules: quickAccess,
+        onClick: onDrillDown,
+      }} />
 
-      <div>
+      {/* Financial Summary */}
+      <Slot key="financial-summary" Component={FinancialSummary} fallbackH={20} componentProps={{
+        receitasPendentes,
+        despesasPendentes,
+        fluxoCaixa,
+      }} />
+
+      {/* Rankings */}
+      <div key="rankings">
         <h2 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-600" />
           Rankings de Performance
         </h2>
-        <W h={32}><GamificacaoOperacoes /></W>
+        <Slot key="gamificacao" Component={GamificacaoOperacoes} fallbackH={32} />
       </div>
 
     </div>

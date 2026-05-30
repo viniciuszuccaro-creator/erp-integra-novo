@@ -152,17 +152,13 @@ export default function DashboardResumoTab({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {loadingAnomIA ? (
-              <div className="h-8 rounded bg-slate-100 animate-pulse" />
-            ) : !anomList.length ? (
-              <p className="text-sm text-slate-500">Nenhuma anomalia detectada.</p>
-            ) : (
-              <div className="flex flex-wrap gap-2 text-sm">
-                <Badge className="bg-red-100 text-red-700">Alta: {anomResumo.alto || 0}</Badge>
-                <Badge className="bg-amber-100 text-amber-700">Média: {anomResumo.medio || 0}</Badge>
-                <Badge variant="outline">Baixa: {anomResumo.baixo || 0}</Badge>
-              </div>
-            )}
+            <div style={{ display: loadingAnomIA ? undefined : 'none' }} className="h-8 rounded bg-slate-100 animate-pulse" />
+            <p style={{ display: (!loadingAnomIA && !anomList.length) ? undefined : 'none' }} className="text-sm text-slate-500">Nenhuma anomalia detectada.</p>
+            <div style={{ display: (!loadingAnomIA && anomList.length > 0) ? undefined : 'none' }} className="flex flex-wrap gap-2 text-sm">
+              <Badge className="bg-red-100 text-red-700">Alta: {anomResumo.alto || 0}</Badge>
+              <Badge className="bg-amber-100 text-amber-700">Média: {anomResumo.medio || 0}</Badge>
+              <Badge variant="outline">Baixa: {anomResumo.baixo || 0}</Badge>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -188,16 +184,12 @@ export default function DashboardResumoTab({
         COLORS,
       }} />
 
-      {/* Widgets BI row 1 — all slots always mounted */}
-      <div key="bi-row1" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Slot key="kpis-comp" Component={DashboardKPIsComparativosWidget} fallbackH={40} />
-        <Slot key="marketplace" Component={DashboardMarketplaceWidget} fallbackH={40} />
-        <div style={{ display: canSeeCRM ? undefined : 'none' }}>
-          <Slot key="crm-score" Component={CRMScoreDashboard} fallbackH={40} />
-        </div>
-        <div style={{ display: canSeeFinanceiro ? undefined : 'none' }}>
-          <Slot key="conciliacao" Component={ConciliacaoIAWidget} fallbackH={40} />
-        </div>
+      {/* Widgets BI row 1 — all slots always mounted with stable grid children */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div><Slot Component={DashboardKPIsComparativosWidget} fallbackH={40} /></div>
+        <div><Slot Component={DashboardMarketplaceWidget} fallbackH={40} /></div>
+        <div style={{ display: canSeeCRM === false ? 'none' : undefined }}><Slot Component={CRMScoreDashboard} fallbackH={40} /></div>
+        <div style={{ display: canSeeFinanceiro === false ? 'none' : undefined }}><Slot Component={ConciliacaoIAWidget} fallbackH={40} /></div>
       </div>
 
       {/* Widgets BI row 2 */}

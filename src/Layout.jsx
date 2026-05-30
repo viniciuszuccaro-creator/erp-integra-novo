@@ -1198,12 +1198,12 @@ function LayoutContent({ children, currentPageName }) {
         user={user} empresaAtual={empresaAtual} grupoAtual={grupoAtual}
         contexto={contexto} contextRef={contextRef}
       />
-      {modoEscuro && <div dangerouslySetInnerHTML={{ __html: darkModeStyles }} />}
-      
-      {/* Mobile page: render children directly without sidebar, but keep SidebarProvider stable */}
-      {isMobilePage && (
-        <div className="w-full h-full min-h-screen">{children}</div>
-      )}
+      {/* Dark mode styles — always mounted, innerHTML toggled to avoid fiber mismatches */}
+      <div dangerouslySetInnerHTML={{ __html: modoEscuro ? darkModeStyles : '' }} />
+
+      {/* Mobile page: always mounted, visibility toggled via display */}
+      <div className="w-full h-full min-h-screen" style={{ display: isMobilePage ? undefined : 'none' }}>{children}</div>
+
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-blue-50" style={{ display: isMobilePage ? 'none' : undefined }}>
         {/* Fase 2: preencher h-full com rolagem interna em todo conteúdo central */}
         <Sidebar className="border-r border-slate-200 bg-white/80 backdrop-blur-sm">

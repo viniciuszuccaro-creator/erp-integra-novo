@@ -192,12 +192,8 @@ export default function DashboardResumoTab({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Slot Component={DashboardKPIsComparativosWidget} fallbackH={40} />
         <Slot Component={DashboardMarketplaceWidget} fallbackH={40} />
-        <div style={{ display: canSeeCRM === false ? 'none' : undefined }}>
-          <Slot Component={CRMScoreDashboard} fallbackH={40} />
-        </div>
-        <div style={{ display: canSeeFinanceiro === false ? 'none' : undefined }}>
-          <Slot Component={ConciliacaoIAWidget} fallbackH={40} />
-        </div>
+        {canSeeCRM && <Slot Component={CRMScoreDashboard} fallbackH={40} />}
+        {canSeeFinanceiro && <Slot Component={ConciliacaoIAWidget} fallbackH={40} />}
       </div>
 
       {/* Widgets BI row 2 */}
@@ -241,13 +237,13 @@ export default function DashboardResumoTab({
       {/* Performance */}
       <Slot Component={DashboardPerformance} fallbackH={32} />
 
-      {/* Previsões Estoque — visibility toggled via CSS, Slot always mounted */}
-      <div style={{ display: canSeeEstoque ? undefined : 'none' }}>
+      {/* Previsões Estoque — conditionally rendered, not CSS-hidden */}
+      {canSeeEstoque && (
         <Slot Component={DashboardEstoquePrevisoesWidget} fallbackH={32} componentProps={{
           previsoesIA,
           loadingPrevIA,
         }} />
-      </div>
+      )}
 
       {/* Quick Access */}
       <Slot Component={QuickAccessModulesGrid} fallbackH={24} componentProps={{

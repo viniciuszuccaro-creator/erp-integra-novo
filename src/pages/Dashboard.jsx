@@ -706,7 +706,7 @@ export default function Dashboard() {
         </Suspense>
       </ErrorBoundary>
 
-      <ErrorBoundary key={`dashboard-main-${hasContextoAtivo}`}>
+      <ErrorBoundary>
       <Suspense fallback={<div className="h-96 w-full bg-slate-100 rounded animate-pulse" />}>
         <DashboardResumoTab
           statsCards={statsCards}

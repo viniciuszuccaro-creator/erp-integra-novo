@@ -31,13 +31,7 @@ export default function EmpresaOnboardingGuard({ children }) {
     return () => { cancelled = true; };
   }, [user?.id, navigate]);
 
-  if (!checked) {
-    return (
-      <div className="flex items-center justify-center min-h-[200px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-200 border-t-blue-600"></div>
-      </div>
-    );
-  }
-
+  // Always render children to keep a stable DOM anchor for Suspense boundaries.
+  // Swapping between a spinner div and children causes React's removeChild/insertBefore errors.
   return children;
 }

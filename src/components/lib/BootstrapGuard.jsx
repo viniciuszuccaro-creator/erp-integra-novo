@@ -42,18 +42,7 @@ export default function BootstrapGuard({ children }) {
     return () => window.clearTimeout(timeout);
   }, []);
 
-  const booting = !bootTimeoutReached && (loadingUser || loadingIA || loadingCtx);
-
-  if (booting) {
-    return (
-      <div className="w-full h-full flex items-center justify-center p-6 text-slate-600">
-        Inicializando o sistema…
-      </div>
-    );
-  }
-
-  if (!user) return children; // GuardRails tratará auth
-  if (!empresaAtual) return children; // GuardRails tratará empresa
-
+  // Always render children immediately to keep a stable DOM anchor for Suspense/lazy boundaries.
+  // Swapping between a loading div and children causes React removeChild/insertBefore errors.
   return children;
 }

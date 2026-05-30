@@ -112,7 +112,8 @@ export default function ProtectedSection({
     if (!isLoading && allowedFinal === false) setShowDenied(true);
   }, [isLoading, allowedFinal]);
 
-  if (isLoading || allowedFinal === null) return null;
+  // While loading, render children to keep a stable DOM anchor — avoids removeChild/insertBefore errors.
+  if (isLoading || allowedFinal === null) return <>{children}</>;
   if (!allowedFinal) {
     if (hideInstead) return fallback || null;
     if (disableInstead) {

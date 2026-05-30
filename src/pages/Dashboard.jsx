@@ -665,75 +665,97 @@ export default function Dashboard() {
   return (
     <div className="w-full h-full min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="flex-1 overflow-hidden p-6 space-y-6">
-        <ErrorBoundary>
-          {/* Single Suspense boundary wrapping all lazy sections — eliminates fiber sibling instability */}
+        {/* Each Suspense gets its own stable div container — prevents React fiber sibling DOM mismatch */}
+        <div>
           <Suspense fallback={<div className="h-12 w-full bg-slate-100 rounded animate-pulse" />}>
-            <DashboardHeader
-              empresaAtual={empresaAtual}
-              estaNoGrupo={estaNoGrupo}
-              grupoAtual={grupoAtual}
-              autoRefresh={autoRefresh}
-              setAutoRefresh={setAutoRefresh}
-              periodo={periodo}
-              setPeriodo={setPeriodo}
-            />
+            <ErrorBoundary>
+              <DashboardHeader
+                empresaAtual={empresaAtual}
+                estaNoGrupo={estaNoGrupo}
+                grupoAtual={grupoAtual}
+                autoRefresh={autoRefresh}
+                setAutoRefresh={setAutoRefresh}
+                periodo={periodo}
+                setPeriodo={setPeriodo}
+              />
+            </ErrorBoundary>
           </Suspense>
-          <Suspense fallback={<div className="h-0" />}>
-            <DashboardContextoBanner />
+        </div>
+        <div>
+          <Suspense fallback={<></>}>
+            <ErrorBoundary>
+              <DashboardContextoBanner />
+            </ErrorBoundary>
           </Suspense>
-          <Suspense fallback={<div className="h-0" />}>
-            <DashboardMultiempresaBar />
+        </div>
+        <div>
+          <Suspense fallback={<></>}>
+            <ErrorBoundary>
+              <DashboardMultiempresaBar />
+            </ErrorBoundary>
           </Suspense>
+        </div>
+        <div>
           <Suspense fallback={<div className="h-16 w-full bg-slate-100 rounded animate-pulse" />}>
-            <DashboardEssentialKPIs
-              totalVendas={totalVendas}
-              taxaInadimplencia={taxaInadimplencia}
-              valorVencido={valorVencido}
-              entregasPendentes={entregasPendentes}
-              produtosBaixoEstoque={produtosBaixoEstoque}
-              otd={otd}
-            />
+            <ErrorBoundary>
+              <DashboardEssentialKPIs
+                totalVendas={totalVendas}
+                taxaInadimplencia={taxaInadimplencia}
+                valorVencido={valorVencido}
+                entregasPendentes={entregasPendentes}
+                produtosBaixoEstoque={produtosBaixoEstoque}
+                otd={otd}
+              />
+            </ErrorBoundary>
           </Suspense>
-          <Suspense fallback={<div className="h-0" />}>
-            <DashboardStabilityNotice hasContextoAtivo={hasContextoAtivo} />
+        </div>
+        <div>
+          <Suspense fallback={<></>}>
+            <ErrorBoundary>
+              <DashboardStabilityNotice hasContextoAtivo={hasContextoAtivo} />
+            </ErrorBoundary>
           </Suspense>
+        </div>
+        <div>
           <Suspense fallback={<div className="h-96 w-full bg-slate-100 rounded animate-pulse" />}>
-            <DashboardResumoTab
-              statsCards={statsCards}
-              kpisOperacionais={kpisOperacionais}
-              kpiCards={kpiCards}
-              quickAccess={quickAccess}
-              pedidosRecentes={pedidosRecentes}
-              pedidosPendentes={pedidosPendentes}
-              pedidosAguardandoAprovacao={pedidosAguardandoAprovacao}
-              produtosBaixoEstoque={produtosBaixoEstoque}
-              receitasPendentes={receitasPendentes}
-              despesasPendentes={despesasPendentes}
-              fluxoCaixa={fluxoCaixa}
-              vendasUltimos30Dias={vendasUltimos30Dias}
-              fluxo7Dias={fluxo7Dias}
-              topProdutos={topProdutos}
-              dadosVendasStatus={dadosVendasStatus}
-              vendasPorMesData={vendasPorMesData}
-              top5ClientesData={top5ClientesData}
-              statusPedidosDataAll={statusPedidosDataAll}
-              fluxoCaixaMensalData={fluxoCaixaMensalData}
-              COLORS={COLORS}
-              anomaliasIA={anomaliasIA}
-              loadingAnomIA={loadingAnomIA}
-              previsoesIA={previsoesIA}
-              previsoesIA30={previsoesIA30}
-              loadingPrevIA={loadingPrevIA}
-              ccMetrics={ccMetrics}
-              botMetrics={botMetrics}
-              canSeeFinanceiro={canSeeFinanceiro}
-              canSeeCRM={canSeeCRM}
-              canSeeEstoque={canSeeEstoque}
-              onDrillDown={handleDrillDown}
-              empresaId={empresaAtual?.id}
-            />
+            <ErrorBoundary>
+              <DashboardResumoTab
+                statsCards={statsCards}
+                kpisOperacionais={kpisOperacionais}
+                kpiCards={kpiCards}
+                quickAccess={quickAccess}
+                pedidosRecentes={pedidosRecentes}
+                pedidosPendentes={pedidosPendentes}
+                pedidosAguardandoAprovacao={pedidosAguardandoAprovacao}
+                produtosBaixoEstoque={produtosBaixoEstoque}
+                receitasPendentes={receitasPendentes}
+                despesasPendentes={despesasPendentes}
+                fluxoCaixa={fluxoCaixa}
+                vendasUltimos30Dias={vendasUltimos30Dias}
+                fluxo7Dias={fluxo7Dias}
+                topProdutos={topProdutos}
+                dadosVendasStatus={dadosVendasStatus}
+                vendasPorMesData={vendasPorMesData}
+                top5ClientesData={top5ClientesData}
+                statusPedidosDataAll={statusPedidosDataAll}
+                fluxoCaixaMensalData={fluxoCaixaMensalData}
+                COLORS={COLORS}
+                anomaliasIA={anomaliasIA}
+                loadingAnomIA={loadingAnomIA}
+                previsoesIA={previsoesIA}
+                previsoesIA30={previsoesIA30}
+                loadingPrevIA={loadingPrevIA}
+                ccMetrics={ccMetrics}
+                botMetrics={botMetrics}
+                canSeeFinanceiro={canSeeFinanceiro}
+                canSeeCRM={canSeeCRM}
+                canSeeEstoque={canSeeEstoque}
+                onDrillDown={handleDrillDown}
+                empresaId={empresaAtual?.id}
+              />
+            </ErrorBoundary>
           </Suspense>
-        </ErrorBoundary>
+        </div>
       </div>
     </div>
   );

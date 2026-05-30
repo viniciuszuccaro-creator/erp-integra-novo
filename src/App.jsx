@@ -27,21 +27,13 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
 
-  // Show loading spinner while checking app public settings or auth
-  if (isLoadingPublicSettings || isLoadingAuth) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  const isLoading = isLoadingPublicSettings || isLoadingAuth;
 
-  // Handle authentication errors
-  if (authError) {
+  // Handle authentication errors (only after loading completes)
+  if (!isLoading && authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
       navigateToLogin();
       return null;
     }
@@ -68,8 +60,16 @@ const AuthenticatedApp = () => {
     DashboardCorporativo: 'Dashboard',
   };
 
-  // Render the main app
+  // Render the main app — always keep Routes mounted to avoid Suspense fiber tree destruction.
+  // Loading spinner is rendered as an overlay on top, never replacing the Routes subtree.
   return (
+    <>
+      {/* Loading overlay — sits on top, Routes always mounted underneath */}
+      {isLoading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-white/80 z-50">
+          <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+        </div>
+      )}
     <Routes>
       <Route path="/EmpresaOnboarding" element={<EmpresaOnboarding />} />
       <Route path="/" element={
@@ -110,6 +110,7 @@ const AuthenticatedApp = () => {
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>
+    </>
   );
 };
 

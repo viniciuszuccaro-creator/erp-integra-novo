@@ -1,19 +1,32 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, BarChart, Bar, PieChart as RechartsPie, Pie, Cell, Legend } from "recharts";
 import { BarChart3, Users, ShoppingCart, DollarSign } from "lucide-react";
-import DashboardForecastWidget from "./DashboardForecastWidget";
-import DashboardAnomaliaWidget from "./DashboardAnomaliaWidget";
-import IAChurnWidget from "@/components/crm/IAChurnWidget";
+import ErrorBoundary from "@/components/lib/ErrorBoundary";
+
+const DashboardForecastWidget = React.lazy(() => import("./DashboardForecastWidget"));
+const DashboardAnomaliaWidget  = React.lazy(() => import("./DashboardAnomaliaWidget"));
+const IAChurnWidget            = React.lazy(() => import("@/components/crm/IAChurnWidget"));
+
+const Skel = () => <div className="h-40 rounded-lg bg-slate-100 animate-pulse w-full" />;
+function Slot({ Component, props = {} }) {
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<Skel />}>
+        <Component {...props} />
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
 
 export default function AdvancedAnalysisSection({ vendasPorMes, top5Clientes, statusPedidos, fluxoCaixaMensal, COLORS }) {
   return (
     <div>
       <h2 className="text-xl font-bold text-slate-900 mb-4">Análise Detalhada</h2>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-        <DashboardForecastWidget />
-        <DashboardAnomaliaWidget />
-        <IAChurnWidget compact />
+        <Slot Component={DashboardForecastWidget} />
+        <Slot Component={DashboardAnomaliaWidget} />
+        <Slot Component={IAChurnWidget} props={{ compact: true }} />
       </div>
       <div className="grid lg:grid-cols-2 gap-6">
         <Card className="border-0 shadow-md">

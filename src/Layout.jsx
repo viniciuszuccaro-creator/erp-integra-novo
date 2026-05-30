@@ -1221,7 +1221,7 @@ function LayoutContent({ children, currentPageName }) {
           
           <SidebarContent className="p-3">
             {Object.entries(groupedItems).map(([groupName, items]) => {
-              if (items.length === 0) return null;
+              if (items.length === 0) return <React.Fragment key={groupName} />;
               
               const groupLabels = {
                 principal: "Principal",

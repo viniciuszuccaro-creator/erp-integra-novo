@@ -665,85 +665,97 @@ export default function Dashboard() {
   return (
     <div className="w-full h-full min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="flex-1 overflow-hidden p-6 space-y-6">
-      <ErrorBoundary>
-        <Suspense fallback={<div className="h-12 w-full bg-slate-100 rounded animate-pulse" />}>
-          <DashboardHeader
-            empresaAtual={empresaAtual}
-            estaNoGrupo={estaNoGrupo}
-            grupoAtual={grupoAtual}
-            autoRefresh={autoRefresh}
-            setAutoRefresh={setAutoRefresh}
-            periodo={periodo}
-            setPeriodo={setPeriodo}
-          />
-        </Suspense>
-      </ErrorBoundary>
-      <ErrorBoundary>
-        <Suspense fallback={null}>
-          <DashboardContextoBanner />
-        </Suspense>
-      </ErrorBoundary>
-      <ErrorBoundary>
-        <Suspense fallback={null}>
-          <DashboardMultiempresaBar />
-        </Suspense>
-      </ErrorBoundary>
-      <ErrorBoundary>
-        <Suspense fallback={<div className="h-16 w-full bg-slate-100 rounded animate-pulse" />}>
-          <DashboardEssentialKPIs
-            totalVendas={totalVendas}
-            taxaInadimplencia={taxaInadimplencia}
-            valorVencido={valorVencido}
-            entregasPendentes={entregasPendentes}
-            produtosBaixoEstoque={produtosBaixoEstoque}
-            otd={otd}
-          />
-        </Suspense>
-      </ErrorBoundary>
-      <ErrorBoundary>
-        <Suspense fallback={null}>
-          <DashboardStabilityNotice hasContextoAtivo={hasContextoAtivo} />
-        </Suspense>
-      </ErrorBoundary>
-
-      <ErrorBoundary>
-      <Suspense fallback={<div className="h-96 w-full bg-slate-100 rounded animate-pulse" />}>
-        <DashboardResumoTab
-          statsCards={statsCards}
-          kpisOperacionais={kpisOperacionais}
-          kpiCards={kpiCards}
-          quickAccess={quickAccess}
-          pedidosRecentes={pedidosRecentes}
-          pedidosPendentes={pedidosPendentes}
-          pedidosAguardandoAprovacao={pedidosAguardandoAprovacao}
-          produtosBaixoEstoque={produtosBaixoEstoque}
-          receitasPendentes={receitasPendentes}
-          despesasPendentes={despesasPendentes}
-          fluxoCaixa={fluxoCaixa}
-          vendasUltimos30Dias={vendasUltimos30Dias}
-          fluxo7Dias={fluxo7Dias}
-          topProdutos={topProdutos}
-          dadosVendasStatus={dadosVendasStatus}
-          vendasPorMesData={vendasPorMesData}
-          top5ClientesData={top5ClientesData}
-          statusPedidosDataAll={statusPedidosDataAll}
-          fluxoCaixaMensalData={fluxoCaixaMensalData}
-          COLORS={COLORS}
-          anomaliasIA={anomaliasIA}
-          loadingAnomIA={loadingAnomIA}
-          previsoesIA={previsoesIA}
-          previsoesIA30={previsoesIA30}
-          loadingPrevIA={loadingPrevIA}
-          ccMetrics={ccMetrics}
-          botMetrics={botMetrics}
-          canSeeFinanceiro={canSeeFinanceiro}
-          canSeeCRM={canSeeCRM}
-          canSeeEstoque={canSeeEstoque}
-          onDrillDown={handleDrillDown}
-          empresaId={empresaAtual?.id}
-        />
-      </Suspense>
-      </ErrorBoundary>
+      {/* All top-level sections wrapped in stable divs so sibling count never changes */}
+      <div>
+        <ErrorBoundary>
+          <Suspense fallback={<div className="h-12 w-full bg-slate-100 rounded animate-pulse" />}>
+            <DashboardHeader
+              empresaAtual={empresaAtual}
+              estaNoGrupo={estaNoGrupo}
+              grupoAtual={grupoAtual}
+              autoRefresh={autoRefresh}
+              setAutoRefresh={setAutoRefresh}
+              periodo={periodo}
+              setPeriodo={setPeriodo}
+            />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+      <div>
+        <ErrorBoundary>
+          <Suspense fallback={null}>
+            <DashboardContextoBanner />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+      <div>
+        <ErrorBoundary>
+          <Suspense fallback={null}>
+            <DashboardMultiempresaBar />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+      <div>
+        <ErrorBoundary>
+          <Suspense fallback={<div className="h-16 w-full bg-slate-100 rounded animate-pulse" />}>
+            <DashboardEssentialKPIs
+              totalVendas={totalVendas}
+              taxaInadimplencia={taxaInadimplencia}
+              valorVencido={valorVencido}
+              entregasPendentes={entregasPendentes}
+              produtosBaixoEstoque={produtosBaixoEstoque}
+              otd={otd}
+            />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+      <div>
+        <ErrorBoundary>
+          <Suspense fallback={null}>
+            <DashboardStabilityNotice hasContextoAtivo={hasContextoAtivo} />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+      <div>
+        <ErrorBoundary>
+          <Suspense fallback={<div className="h-96 w-full bg-slate-100 rounded animate-pulse" />}>
+            <DashboardResumoTab
+              statsCards={statsCards}
+              kpisOperacionais={kpisOperacionais}
+              kpiCards={kpiCards}
+              quickAccess={quickAccess}
+              pedidosRecentes={pedidosRecentes}
+              pedidosPendentes={pedidosPendentes}
+              pedidosAguardandoAprovacao={pedidosAguardandoAprovacao}
+              produtosBaixoEstoque={produtosBaixoEstoque}
+              receitasPendentes={receitasPendentes}
+              despesasPendentes={despesasPendentes}
+              fluxoCaixa={fluxoCaixa}
+              vendasUltimos30Dias={vendasUltimos30Dias}
+              fluxo7Dias={fluxo7Dias}
+              topProdutos={topProdutos}
+              dadosVendasStatus={dadosVendasStatus}
+              vendasPorMesData={vendasPorMesData}
+              top5ClientesData={top5ClientesData}
+              statusPedidosDataAll={statusPedidosDataAll}
+              fluxoCaixaMensalData={fluxoCaixaMensalData}
+              COLORS={COLORS}
+              anomaliasIA={anomaliasIA}
+              loadingAnomIA={loadingAnomIA}
+              previsoesIA={previsoesIA}
+              previsoesIA30={previsoesIA30}
+              loadingPrevIA={loadingPrevIA}
+              ccMetrics={ccMetrics}
+              botMetrics={botMetrics}
+              canSeeFinanceiro={canSeeFinanceiro}
+              canSeeCRM={canSeeCRM}
+              canSeeEstoque={canSeeEstoque}
+              onDrillDown={handleDrillDown}
+              empresaId={empresaAtual?.id}
+            />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
       </div>
     </div>
   );

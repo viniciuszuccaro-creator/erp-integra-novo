@@ -125,14 +125,14 @@ export default function DashboardResumoTab({
       {/* KPIs secundários */}
       <Slot key="kpis-sec" Component={SecondaryKPIsSection} fallbackH={16} componentProps={{ kpis: kpiCards }} />
 
-      {/* Mapa tempo real */}
-      {canSeeExpedicao !== false && (
-        <Card key="mapa-card" className="bg-white/80 backdrop-blur-sm rounded-md shadow-sm">
+      {/* Mapa tempo real — container always mounted to keep stable DOM anchor */}
+      <div key="mapa-card" style={{ display: canSeeExpedicao === false ? 'none' : undefined }}>
+        <Card className="bg-white/80 backdrop-blur-sm rounded-md shadow-sm">
           <CardContent className="p-0 overflow-hidden rounded-md">
             <Slot key="mapa" Component={MapaTempoReal} fallbackH={40} />
           </CardContent>
         </Card>
-      )}
+      </div>
 
       {/* Pedidos resumo */}
       <Slot key="pedidos-resumo" Component={PedidosResumoPanel} fallbackH={24} componentProps={{
@@ -142,9 +142,9 @@ export default function DashboardResumoTab({
         onVerTodos: () => onDrillDown(createPageUrl("Comercial")),
       }} />
 
-      {/* Anomalias Financeiras */}
-      {canSeeFinanceiro && (
-        <Card key="anomalias-card" className="bg-white/80 backdrop-blur-sm">
+      {/* Anomalias Financeiras — container always mounted */}
+      <div key="anomalias-card" style={{ display: canSeeFinanceiro ? undefined : 'none' }}>
+        <Card className="bg-white/80 backdrop-blur-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-rose-600" />
@@ -165,7 +165,7 @@ export default function DashboardResumoTab({
             )}
           </CardContent>
         </Card>
-      )}
+      </div>
 
       {/* Estoque Crítico */}
       <Slot key="estoque-critico" Component={WidgetEstoqueCritico} fallbackH={20} componentProps={{
@@ -188,12 +188,16 @@ export default function DashboardResumoTab({
         COLORS,
       }} />
 
-      {/* Widgets BI row 1 */}
+      {/* Widgets BI row 1 — all slots always mounted */}
       <div key="bi-row1" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Slot key="kpis-comp" Component={DashboardKPIsComparativosWidget} fallbackH={40} />
         <Slot key="marketplace" Component={DashboardMarketplaceWidget} fallbackH={40} />
-        {canSeeCRM && <Slot key="crm-score" Component={CRMScoreDashboard} fallbackH={40} />}
-        {canSeeFinanceiro && <Slot key="conciliacao" Component={ConciliacaoIAWidget} fallbackH={40} />}
+        <div style={{ display: canSeeCRM ? undefined : 'none' }}>
+          <Slot key="crm-score" Component={CRMScoreDashboard} fallbackH={40} />
+        </div>
+        <div style={{ display: canSeeFinanceiro ? undefined : 'none' }}>
+          <Slot key="conciliacao" Component={ConciliacaoIAWidget} fallbackH={40} />
+        </div>
       </div>
 
       {/* Widgets BI row 2 */}
@@ -237,13 +241,13 @@ export default function DashboardResumoTab({
       {/* Performance */}
       <Slot key="performance" Component={DashboardPerformance} fallbackH={32} />
 
-      {/* Previsões Estoque */}
-      {canSeeEstoque && (
-        <Slot key="prev-estoque" Component={DashboardEstoquePrevisoesWidget} fallbackH={32} componentProps={{
+      {/* Previsões Estoque — container always mounted */}
+      <div key="prev-estoque" style={{ display: canSeeEstoque ? undefined : 'none' }}>
+        <Slot Component={DashboardEstoquePrevisoesWidget} fallbackH={32} componentProps={{
           previsoesIA,
           loadingPrevIA,
         }} />
-      )}
+      </div>
 
       {/* Quick Access */}
       <Slot key="quick-access" Component={QuickAccessModulesGrid} fallbackH={24} componentProps={{

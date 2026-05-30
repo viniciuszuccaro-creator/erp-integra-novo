@@ -61,7 +61,26 @@ Deno.serve(async (req) => {
       const emp = await base44.asServiceRole.entities.Empresa.filter({ id: empresaId }, undefined, 1).then(r => r?.[0]).catch(() => null);
       groupId = emp?.group_id || null;
     }
-    if (!groupId) return Response.json({ error: 'group_id obrigatório' }, { status: 400 });
+
+    // Automação agendada não recebe group_id — busca o primeiro GrupoEmpresarial ativo automaticamente
+    if (!groupId) {
+      const grupo = await base44.asServiceRole.entities.GrupoEmpresarial
+        .filter({ status: 'Ativo' }, undefined, 1)
+        .then(r => r?.[0])
+        .catch(() => null);
+      groupId = grupo?.id || null;
+    }
+
+    // Último fallback: pega qualquer grupo existente
+    if (!groupId) {
+      const grupo = await base44.asServiceRole.entities.GrupoEmpresarial
+        .list(undefined, 1)
+        .then(r => r?.[0])
+        .catch(() => null);
+      groupId = grupo?.id || null;
+    }
+
+    if (!groupId) return Response.json({ error: 'group_id obrigatório — nenhum GrupoEmpresarial encontrado' }, { status: 400 });
 
     const empresas = await base44.asServiceRole.entities.Empresa.filter({ group_id: groupId }, undefined, 500).catch(() => []);
     const targetEmpresas = Array.isArray(empresas_ids) && empresas_ids.length

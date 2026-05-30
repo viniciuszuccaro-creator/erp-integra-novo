@@ -1185,15 +1185,6 @@ function LayoutContent({ children, currentPageName }) {
     publico: itemsFiltrados.filter(item => item.group === "publico"),
   };
 
-  if (isMobilePage) {
-    return (
-      <>
-        {modoEscuro && <div dangerouslySetInnerHTML={{ __html: darkModeStyles }} />}
-        <div className="w-full h-full min-h-screen">{children}</div>
-      </>
-    );
-  }
-
   return (
     <SidebarProvider>
       {/* Efeitos extraídos — sem renderização visual */}
@@ -1209,7 +1200,11 @@ function LayoutContent({ children, currentPageName }) {
       />
       {modoEscuro && <div dangerouslySetInnerHTML={{ __html: darkModeStyles }} />}
       
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* Mobile page: render children directly without sidebar, but keep SidebarProvider stable */}
+      {isMobilePage && (
+        <div className="w-full h-full min-h-screen">{children}</div>
+      )}
+      <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-blue-50" style={{ display: isMobilePage ? 'none' : undefined }}>
         {/* Fase 2: preencher h-full com rolagem interna em todo conteúdo central */}
         <Sidebar className="border-r border-slate-200 bg-white/80 backdrop-blur-sm">
           <SidebarHeader className="border-b border-slate-200 p-6">
@@ -1387,10 +1382,9 @@ function LayoutContent({ children, currentPageName }) {
 
           <div className="flex-1 overflow-auto">
             <ErrorBoundary>
-              <Suspense fallback={<div className="p-6 text-slate-500">Carregando…</div>}>
-                <BootstrapGuard>
-                  <EmpresaOnboardingGuard>
-                   <ProtectedSection module={moduleName || 'Sistema'} action="ver" fallback={<div className="p-10 text-center text-slate-600">Acesso negado a este módulo.</div>}>
+              <BootstrapGuard>
+                <EmpresaOnboardingGuard>
+                  <ProtectedSection module={moduleName || 'Sistema'} action="ver" fallback={<div className="p-10 text-center text-slate-600">Acesso negado a este módulo.</div>}>
                     <GuardRails currentPageName={currentPageName}>
                       <div className="w-full h-full">
                         <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-4 space-y-4">
@@ -1399,9 +1393,8 @@ function LayoutContent({ children, currentPageName }) {
                       </div>
                     </GuardRails>
                   </ProtectedSection>
-                  </EmpresaOnboardingGuard>
-                </BootstrapGuard>
-              </Suspense>
+                </EmpresaOnboardingGuard>
+              </BootstrapGuard>
             </ErrorBoundary>
           </div>
         </main>

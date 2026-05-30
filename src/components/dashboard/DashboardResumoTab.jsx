@@ -110,7 +110,7 @@ export default function DashboardResumoTab({
   }, {});
 
   return (
-    <div className="w-full space-y-6 mt-4">
+    <div className="w-full h-full space-y-6 mt-4">
 
       {/* Sticky KPIs */}
       <Slot Component={DashboardStickyKpis} fallbackH={12} componentProps={{

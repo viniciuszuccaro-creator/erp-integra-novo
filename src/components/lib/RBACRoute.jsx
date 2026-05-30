@@ -18,33 +18,35 @@ export default function RBACRoute({ module, action = 'ver', children, fallback =
         {children}
       </div>
 
-      {/* Loading overlay */}
-      {showLoading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 z-40">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-            <p className="text-sm text-slate-600">Verificando permissões...</p>
-          </div>
+      {/* Loading overlay — always mounted, toggled via display */}
+      <div
+        className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 z-40"
+        style={{ display: showLoading ? 'flex' : 'none' }}
+      >
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          <p className="text-sm text-slate-600">Verificando permissões...</p>
         </div>
-      )}
+      </div>
 
-      {/* Access denied overlay */}
-      {showDenied && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 p-4 z-40">
-          {fallback || (
-            <div className="text-center">
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">Acesso Negado</h1>
-              <p className="text-slate-600 mb-6">Você não tem permissão para acessar este módulo.</p>
-              <a
-                href="/"
-                className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Voltar ao Dashboard
-              </a>
-            </div>
-          )}
-        </div>
-      )}
+      {/* Access denied overlay — always mounted, toggled via display */}
+      <div
+        className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 p-4 z-40"
+        style={{ display: showDenied ? 'flex' : 'none' }}
+      >
+        {fallback || (
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Acesso Negado</h1>
+            <p className="text-slate-600 mb-6">Você não tem permissão para acessar este módulo.</p>
+            <a
+              href="/"
+              className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Voltar ao Dashboard
+            </a>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

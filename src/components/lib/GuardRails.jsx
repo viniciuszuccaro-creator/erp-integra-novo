@@ -65,16 +65,18 @@ export default function GuardRails({ children, currentPageName }) {
       <div style={{ visibility: denied ? 'hidden' : 'visible' }}>
         {children}
       </div>
-      {denied && (
-        <div className="absolute inset-0 flex items-center justify-center p-6 bg-white/80 z-10">
-          <Card className="bg-white">
-            <CardHeader><CardTitle>Acesso restrito</CardTitle></CardHeader>
-            <CardContent>
-              <p className="text-slate-600">Você não possui permissão para acessar este módulo.</p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      {/* Overlay always mounted, toggled via display to prevent fiber tree shifts */}
+      <div
+        className="absolute inset-0 flex items-center justify-center p-6 bg-white/80 z-10"
+        style={{ display: denied ? 'flex' : 'none' }}
+      >
+        <Card className="bg-white">
+          <CardHeader><CardTitle>Acesso restrito</CardTitle></CardHeader>
+          <CardContent>
+            <p className="text-slate-600">Você não possui permissão para acessar este módulo.</p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

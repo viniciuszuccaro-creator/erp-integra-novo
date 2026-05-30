@@ -142,43 +142,44 @@ export default function ProtectedSection({
         {children}
       </div>
 
-      {/* Denied overlay rendered on top when needed */}
-      {denied && (
-        <div className="absolute inset-0 w-full p-6 flex flex-col items-center justify-center gap-4 text-center bg-white/80 backdrop-blur-sm z-10">
-          {fallback}
-          <div className="max-w-sm w-full bg-white border border-red-100 rounded-xl shadow-sm p-5">
-            <p className="font-semibold text-slate-800 mb-1">Permissão negada</p>
-            <p className="text-sm text-slate-500 mb-3">
-              Você não possui permissão para acessar <strong>{section || modulo || 'esta seção'}</strong>.
-            </p>
-            {requestedAccess ? (
-              <p className="text-xs text-emerald-600">Pedido de acesso enviado para aprovação.</p>
-            ) : (
-              <Button
-                size="sm"
-                disabled={requestingAccess}
-                onClick={async () => {
-                  try {
-                    setRequestingAccess(true);
-                    await base44.functions.invoke('solicitacoesAprovacao', {
-                      module: modulo || 'Sistema',
-                      section,
-                      action,
-                      empresa_id: empresaAtual?.id || null,
-                      group_id: grupoAtual?.id || null,
-                    });
-                    setRequestedAccess(true);
-                  } finally {
-                    setRequestingAccess(false);
-                  }
-                }}
-              >
-                {requestingAccess ? 'Solicitando…' : 'Solicitar acesso'}
-              </Button>
-            )}
-          </div>
+      {/* Denied overlay — always mounted, toggled via display to avoid fiber tree shifts */}
+      <div
+        className="absolute inset-0 w-full p-6 flex flex-col items-center justify-center gap-4 text-center bg-white/80 backdrop-blur-sm z-10"
+        style={{ display: denied ? 'flex' : 'none' }}
+      >
+        {fallback}
+        <div className="max-w-sm w-full bg-white border border-red-100 rounded-xl shadow-sm p-5">
+          <p className="font-semibold text-slate-800 mb-1">Permissão negada</p>
+          <p className="text-sm text-slate-500 mb-3">
+            Você não possui permissão para acessar <strong>{section || modulo || 'esta seção'}</strong>.
+          </p>
+          {requestedAccess ? (
+            <p className="text-xs text-emerald-600">Pedido de acesso enviado para aprovação.</p>
+          ) : (
+            <Button
+              size="sm"
+              disabled={requestingAccess}
+              onClick={async () => {
+                try {
+                  setRequestingAccess(true);
+                  await base44.functions.invoke('solicitacoesAprovacao', {
+                    module: modulo || 'Sistema',
+                    section,
+                    action,
+                    empresa_id: empresaAtual?.id || null,
+                    group_id: grupoAtual?.id || null,
+                  });
+                  setRequestedAccess(true);
+                } finally {
+                  setRequestingAccess(false);
+                }
+              }}
+            >
+              {requestingAccess ? 'Solicitando…' : 'Solicitar acesso'}
+            </Button>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

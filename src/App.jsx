@@ -63,8 +63,48 @@ const AuthenticatedApp = () => {
   // Render the main app — always keep Routes mounted to avoid Suspense fiber tree destruction.
   // Overlays sit on top; the Routes subtree is never unmounted/swapped.
   return (
-    <>
-      {/* Loading overlay */}
+    <div className="w-full h-full">
+      <Routes>
+        <Route path="/EmpresaOnboarding" element={<EmpresaOnboarding />} />
+        <Route path="/" element={
+          <EmpresaSelectorGuard>
+            <LayoutWrapper currentPageName={mainPageKey}>
+              <MainPage />
+            </LayoutWrapper>
+          </EmpresaSelectorGuard>
+        } />
+        {Object.entries(Pages).map(([path, Page]) => {
+          const moduleName = pageModuleMap[path];
+          const requiredAction = moduleName ? 'ver' : undefined;
+
+          return (
+            <Route
+              key={path}
+              path={`/${path}`}
+              element={
+                moduleName ? (
+                  <RBACRoute module={moduleName} action={requiredAction}>
+                    <EmpresaSelectorGuard>
+                      <LayoutWrapper currentPageName={path}>
+                        <Page />
+                      </LayoutWrapper>
+                    </EmpresaSelectorGuard>
+                  </RBACRoute>
+                ) : (
+                  <EmpresaSelectorGuard>
+                    <LayoutWrapper currentPageName={path}>
+                      <Page />
+                    </LayoutWrapper>
+                  </EmpresaSelectorGuard>
+                )
+              }
+            />
+          );
+        })}
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+
+      {/* Loading overlay — always above Routes, never replaces it */}
       {isLoading && (
         <div className="fixed inset-0 flex items-center justify-center bg-white/80 z-50">
           <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
@@ -76,47 +116,7 @@ const AuthenticatedApp = () => {
           <UserNotRegisteredError />
         </div>
       )}
-    <Routes>
-      <Route path="/EmpresaOnboarding" element={<EmpresaOnboarding />} />
-      <Route path="/" element={
-        <EmpresaSelectorGuard>
-          <LayoutWrapper currentPageName={mainPageKey}>
-            <MainPage />
-          </LayoutWrapper>
-        </EmpresaSelectorGuard>
-      } />
-      {Object.entries(Pages).map(([path, Page]) => {
-        const moduleName = pageModuleMap[path];
-        const requiredAction = moduleName ? 'ver' : undefined;
-
-        return (
-          <Route
-            key={path}
-            path={`/${path}`}
-            element={
-              moduleName ? (
-                <RBACRoute module={moduleName} action={requiredAction}>
-                  <EmpresaSelectorGuard>
-                    <LayoutWrapper currentPageName={path}>
-                      <Page />
-                    </LayoutWrapper>
-                  </EmpresaSelectorGuard>
-                </RBACRoute>
-              ) : (
-                <EmpresaSelectorGuard>
-                  <LayoutWrapper currentPageName={path}>
-                    <Page />
-                  </LayoutWrapper>
-                </EmpresaSelectorGuard>
-              )
-            }
-          />
-        );
-      })}
-
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
-    </>
+    </div>
   );
 };
 

@@ -1363,21 +1363,15 @@ function LayoutContent({ children, currentPageName }) {
                 </Link>
               </div>
               </div>
-              {isOffline && (
-              <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-amber-800 text-sm">
+              <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-amber-800 text-sm" style={{ display: isOffline ? undefined : 'none' }}>
                 Modo offline: exibindo dados em cache (última sincronização). Algumas ações podem não estar disponíveis.
               </div>
-              )}
-              {(!empresaAtual?.id && contexto !== 'grupo') && (
-              <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-amber-800 text-sm">
+              <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-amber-800 text-sm" style={{ display: (!empresaAtual?.id && contexto !== 'grupo') ? undefined : 'none' }}>
                 Selecione uma empresa para carregar os dados. O acesso está bloqueado sem empresa selecionada.
               </div>
-              )}
-              {!integracoesOk && hasPermission('Sistema', null, 'ver') && (
-              <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-amber-800 text-sm">
+              <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-amber-800 text-sm" style={{ display: (!integracoesOk && hasPermission('Sistema', null, 'ver')) ? undefined : 'none' }}>
                 Integrações fiscais pendentes nesta empresa. <Link to={createPageUrl("AdministracaoSistema?tab=integracoes")} className="underline">Configurar agora</Link>.
               </div>
-              )}
               </header>
 
           <div className="flex-1 overflow-auto">

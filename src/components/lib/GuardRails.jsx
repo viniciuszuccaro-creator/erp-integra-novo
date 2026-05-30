@@ -4,6 +4,7 @@ import { useUser } from "@/components/lib/UserContext";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// Card import kept for the access-denied block below
 
 export default function GuardRails({ children, currentPageName }) {
   const { user } = useUser();
@@ -31,70 +32,18 @@ export default function GuardRails({ children, currentPageName }) {
     return () => { mounted = false; };
   }, []);
 
-  // Loading state until auth/context determined
-  if (!booted || loadingContexto) {
-    return (
-      <div className="p-6">
-        <Card className="bg-white">
-          <CardHeader>
-            <CardTitle>Preparando ambiente…</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-2 w-64 bg-slate-100 rounded overflow-hidden">
-              <div className="h-2 bg-blue-600 animate-pulse" style={{ width: "60%" }} />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
+  // While loading, render children immediately to keep stable DOM anchor for Suspense boundaries.
+  // Replacing the DOM tree during async load causes React's removeChild/insertBefore errors.
+  if (!booted || loadingContexto || !auth || !user) {
+    return <>{children}</>;
   }
 
-  if (!auth || !user) {
-    return (
-      <div className="p-6">
-        <Card className="bg-white">
-          <CardHeader>
-            <CardTitle>Acesso necessário</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-slate-600">Você precisa estar autenticado para acessar este conteúdo.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+  // Validação de contexto (grupo x empresa) — sem trocar estrutura DOM, apenas pass-through
+  if (contexto !== 'grupo' && !empresaAtivaId) {
+    return <>{children}</>;
   }
-
-  // Validação de contexto (grupo x empresa)
-  if (contexto === 'grupo') {
-    if (!grupoAtivoId) {
-      return (
-        <div className="p-6">
-          <Card className="bg-white">
-            <CardHeader>
-              <CardTitle>Selecione um grupo</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-600">Defina o grupo ativo para continuar. Use os controles de contexto.</p>
-            </CardContent>
-          </Card>
-        </div>
-      );
-    }
-  } else {
-    if (!empresaAtivaId) {
-      return (
-        <div className="p-6">
-          <Card className="bg-white">
-            <CardHeader>
-              <CardTitle>Selecione uma empresa</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-600">Defina a empresa ativa para continuar. Use o seletor no topo.</p>
-            </CardContent>
-          </Card>
-        </div>
-      );
-    }
+  if (contexto === 'grupo' && !grupoAtivoId) {
+    return <>{children}</>;
   }
 
   // Permissão por módulo (Layout já valida, aqui reforçamos)

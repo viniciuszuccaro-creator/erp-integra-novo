@@ -218,10 +218,10 @@ export default function DashboardResumoTab({
 
       {/* IA Widgets */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Slot Component={DashboardSaudeWidget} fallbackH={40} />
-        <Slot Component={DashboardForecastWidget} fallbackH={40} />
-        <Slot Component={DashboardVendasPrevisaoWidget} fallbackH={40} />
-        <Slot Component={DashboardIAInsightsPanel} fallbackH={40} />
+        <div><Slot Component={DashboardSaudeWidget} fallbackH={40} /></div>
+        <div><Slot Component={DashboardForecastWidget} fallbackH={40} /></div>
+        <div><Slot Component={DashboardVendasPrevisaoWidget} fallbackH={40} /></div>
+        <div><Slot Component={DashboardIAInsightsPanel} fallbackH={40} /></div>
       </div>
 
       {/* Análise Avançada */}

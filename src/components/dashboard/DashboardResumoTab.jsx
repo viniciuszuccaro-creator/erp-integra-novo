@@ -192,28 +192,28 @@ export default function DashboardResumoTab({
 
       {/* Widgets BI row 1 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Slot Component={DashboardKPIsComparativosWidget} fallbackH={40} />
-        <Slot Component={DashboardMarketplaceWidget} fallbackH={40} />
-        {canSeeCRM && <Slot Component={CRMScoreDashboard} fallbackH={40} />}
-        {canSeeFinanceiro && <Slot Component={ConciliacaoIAWidget} fallbackH={40} />}
+        <div><Slot Component={DashboardKPIsComparativosWidget} fallbackH={40} /></div>
+        <div><Slot Component={DashboardMarketplaceWidget} fallbackH={40} /></div>
+        {canSeeCRM && <div><Slot Component={CRMScoreDashboard} fallbackH={40} /></div>}
+        {canSeeFinanceiro && <div><Slot Component={ConciliacaoIAWidget} fallbackH={40} /></div>}
       </div>
 
       {/* Widgets BI row 2 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Slot Component={DashboardBI3DWidget} fallbackH={40} />
-        <Slot Component={DashboardAutomacaoFluxosWidget} fallbackH={40} />
+        <div><Slot Component={DashboardBI3DWidget} fallbackH={40} /></div>
+        <div><Slot Component={DashboardAutomacaoFluxosWidget} fallbackH={40} /></div>
       </div>
 
       {/* Widgets BI row 3 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Slot Component={RastreamentoGPSWidget} fallbackH={40} />
-        <Slot Component={ApontamentoProdutoMobileWidget} fallbackH={40} />
+        <div><Slot Component={RastreamentoGPSWidget} fallbackH={40} /></div>
+        <div><Slot Component={ApontamentoProdutoMobileWidget} fallbackH={40} /></div>
       </div>
 
       {/* Widgets BI row 4 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Slot Component={ComplianceISO27001Widget} fallbackH={40} />
-        <Slot Component={ContratosEletronicosWidget} fallbackH={40} />
+        <div><Slot Component={ComplianceISO27001Widget} fallbackH={40} /></div>
+        <div><Slot Component={ContratosEletronicosWidget} fallbackH={40} /></div>
       </div>
 
       {/* IA Widgets */}

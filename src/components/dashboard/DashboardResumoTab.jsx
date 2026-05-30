@@ -241,10 +241,12 @@ export default function DashboardResumoTab({
 
       {/* Previsões Estoque — conditionally rendered, not CSS-hidden */}
       {canSeeEstoque && (
-        <Slot Component={DashboardEstoquePrevisoesWidget} fallbackH={32} componentProps={{
-          previsoesIA,
-          loadingPrevIA,
-        }} />
+        <div>
+          <Slot Component={DashboardEstoquePrevisoesWidget} fallbackH={32} componentProps={{
+            previsoesIA,
+            loadingPrevIA,
+          }} />
+        </div>
       )}
 
       {/* Quick Access */}

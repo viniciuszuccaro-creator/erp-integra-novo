@@ -69,18 +69,18 @@ export default function ToggleConfigGlobal({
   };
 
   return (
-    <div className="flex items-start justify-between py-3 px-4 bg-slate-50 rounded-lg border border-slate-200">
-      <div className="flex-1">
-        <Label className="block font-semibold text-slate-900 cursor-pointer">{label}</Label>
-        {description && <p className="text-sm text-slate-600 mt-1">{description}</p>}
+    <div className="flex items-start justify-between py-3 px-3 bg-white rounded border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all">
+      <div className="flex-1 min-w-0">
+        <Label className="block font-medium text-slate-900 cursor-pointer text-sm">{label}</Label>
+        {description && <p className="text-xs text-slate-500 mt-1 leading-relaxed">{description}</p>}
       </div>
 
-      <div className="flex items-center gap-3 ml-4">
+      <div className="flex items-center gap-2 ml-3 flex-shrink-0">
         <Switch checked={value} onCheckedChange={handleToggle} disabled={loading} />
 
-        {syncStatus === "saving" && <Loader2 className="w-4 h-4 animate-spin text-blue-600" />}
-        {syncStatus === "saved" && <CheckCircle2 className="w-4 h-4 text-green-600" />}
-        {syncStatus === "error" && <AlertCircle className="w-4 h-4 text-red-600" />}
+        {syncStatus === "saving" && <Loader2 className="w-3 h-3 animate-spin text-blue-600" />}
+        {syncStatus === "saved" && <CheckCircle2 className="w-3 h-3 text-green-600" />}
+        {syncStatus === "error" && <AlertCircle className="w-3 h-3 text-red-600" />}
       </div>
     </div>
   );

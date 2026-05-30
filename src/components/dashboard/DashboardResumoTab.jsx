@@ -137,14 +137,14 @@ export default function DashboardResumoTab({
         <Slot Component={SecondaryKPIsSection} fallbackH={16} componentProps={{ kpis: kpiCards }} />
       </div>
 
-      {/* Mapa tempo real — conditionally rendered */}
-      {canSeeExpedicao && (
+      {/* Mapa tempo real */}
+      <div style={{ display: canSeeExpedicao ? undefined : 'none' }}>
         <Card className="bg-white/80 backdrop-blur-sm rounded-md shadow-sm">
           <CardContent className="p-0 overflow-hidden rounded-md">
             <Slot Component={MapaTempoReal} fallbackH={40} />
           </CardContent>
         </Card>
-      )}
+      </div>
 
       {/* Pedidos resumo */}
       <div>
@@ -156,8 +156,8 @@ export default function DashboardResumoTab({
         }} />
       </div>
 
-      {/* Anomalias Financeiras — conditionally rendered */}
-      {canSeeFinanceiro && (
+      {/* Anomalias Financeiras */}
+      <div style={{ display: canSeeFinanceiro ? undefined : 'none' }}>
         <Card className="bg-white/80 backdrop-blur-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
@@ -177,7 +177,7 @@ export default function DashboardResumoTab({
             )}
           </CardContent>
         </Card>
-      )}
+      </div>
 
       {/* Estoque Crítico */}
       <div>
@@ -210,8 +210,8 @@ export default function DashboardResumoTab({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div><Slot Component={DashboardKPIsComparativosWidget} fallbackH={40} /></div>
         <div><Slot Component={DashboardMarketplaceWidget} fallbackH={40} /></div>
-        {canSeeCRM && <div><Slot Component={CRMScoreDashboard} fallbackH={40} /></div>}
-        {canSeeFinanceiro && <div><Slot Component={ConciliacaoIAWidget} fallbackH={40} /></div>}
+        <div style={{ display: canSeeCRM ? undefined : 'none' }}><Slot Component={CRMScoreDashboard} fallbackH={40} /></div>
+        <div style={{ display: canSeeFinanceiro ? undefined : 'none' }}><Slot Component={ConciliacaoIAWidget} fallbackH={40} /></div>
       </div>
 
       {/* Widgets BI row 2 */}
@@ -261,15 +261,13 @@ export default function DashboardResumoTab({
         <Slot Component={DashboardPerformance} fallbackH={32} />
       </div>
 
-      {/* Previsões Estoque — conditionally rendered, not CSS-hidden */}
-      {canSeeEstoque && (
-        <div>
-          <Slot Component={DashboardEstoquePrevisoesWidget} fallbackH={32} componentProps={{
-            previsoesIA,
-            loadingPrevIA,
-          }} />
-        </div>
-      )}
+      {/* Previsões Estoque */}
+      <div style={{ display: canSeeEstoque ? undefined : 'none' }}>
+        <Slot Component={DashboardEstoquePrevisoesWidget} fallbackH={32} componentProps={{
+          previsoesIA,
+          loadingPrevIA,
+        }} />
+      </div>
 
       {/* Quick Access */}
       <div>

@@ -88,15 +88,12 @@ export default function Cadastros() {
       </Tabs>
 
       {/* ABA: APPS EXTERNOS */}
-      {abaGerenciamento === "apps-externos" && (
-        <div className="mt-4">
-          <ExternalAppsHub />
-        </div>
-      )}
+      <div style={{ display: abaGerenciamento === "apps-externos" ? undefined : 'none' }} className="mt-4">
+        <ExternalAppsHub />
+      </div>
 
       {/* ABA: CADASTROS */}
-      {abaGerenciamento === "cadastros" && (
-        <div className="space-y-6 mt-6 w-full">
+      <div style={{ display: abaGerenciamento === "cadastros" ? undefined : 'none' }} className="space-y-6 mt-6 w-full">
           {!contextoAtivo && (
             <Card className="rounded-sm border border-amber-200 bg-amber-50">
               <CardContent className="p-3 text-sm text-amber-900">
@@ -275,8 +272,7 @@ export default function Cadastros() {
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

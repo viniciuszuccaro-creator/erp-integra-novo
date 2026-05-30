@@ -665,9 +665,8 @@ export default function Dashboard() {
   return (
     <div className="w-full h-full min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="flex-1 overflow-hidden p-6 space-y-6">
-      {/* All top-level sections wrapped in stable divs so sibling count never changes */}
-      <div>
         <ErrorBoundary>
+          {/* Single Suspense boundary wrapping all lazy sections — eliminates fiber sibling instability */}
           <Suspense fallback={<div className="h-12 w-full bg-slate-100 rounded animate-pulse" />}>
             <DashboardHeader
               empresaAtual={empresaAtual}
@@ -679,24 +678,12 @@ export default function Dashboard() {
               setPeriodo={setPeriodo}
             />
           </Suspense>
-        </ErrorBoundary>
-      </div>
-      <div>
-        <ErrorBoundary>
-          <Suspense fallback={null}>
+          <Suspense fallback={<div className="h-0" />}>
             <DashboardContextoBanner />
           </Suspense>
-        </ErrorBoundary>
-      </div>
-      <div>
-        <ErrorBoundary>
-          <Suspense fallback={null}>
+          <Suspense fallback={<div className="h-0" />}>
             <DashboardMultiempresaBar />
           </Suspense>
-        </ErrorBoundary>
-      </div>
-      <div>
-        <ErrorBoundary>
           <Suspense fallback={<div className="h-16 w-full bg-slate-100 rounded animate-pulse" />}>
             <DashboardEssentialKPIs
               totalVendas={totalVendas}
@@ -707,17 +694,9 @@ export default function Dashboard() {
               otd={otd}
             />
           </Suspense>
-        </ErrorBoundary>
-      </div>
-      <div>
-        <ErrorBoundary>
-          <Suspense fallback={null}>
+          <Suspense fallback={<div className="h-0" />}>
             <DashboardStabilityNotice hasContextoAtivo={hasContextoAtivo} />
           </Suspense>
-        </ErrorBoundary>
-      </div>
-      <div>
-        <ErrorBoundary>
           <Suspense fallback={<div className="h-96 w-full bg-slate-100 rounded animate-pulse" />}>
             <DashboardResumoTab
               statsCards={statsCards}
@@ -755,7 +734,6 @@ export default function Dashboard() {
             />
           </Suspense>
         </ErrorBoundary>
-      </div>
       </div>
     </div>
   );

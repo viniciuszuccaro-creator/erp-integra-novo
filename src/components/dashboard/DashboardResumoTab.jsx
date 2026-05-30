@@ -156,13 +156,15 @@ export default function DashboardResumoTab({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div style={{ display: loadingAnomIA ? undefined : 'none' }} className="h-8 rounded bg-slate-100 animate-pulse" />
-            <p style={{ display: (!loadingAnomIA && !anomList.length) ? undefined : 'none' }} className="text-sm text-slate-500">Nenhuma anomalia detectada.</p>
-            <div style={{ display: (!loadingAnomIA && anomList.length > 0) ? undefined : 'none' }} className="flex flex-wrap gap-2 text-sm">
-              <Badge className="bg-red-100 text-red-700">Alta: {anomResumo.alto || 0}</Badge>
-              <Badge className="bg-amber-100 text-amber-700">Média: {anomResumo.medio || 0}</Badge>
-              <Badge variant="outline">Baixa: {anomResumo.baixo || 0}</Badge>
-            </div>
+            {loadingAnomIA && <div className="h-8 rounded bg-slate-100 animate-pulse" />}
+            {!loadingAnomIA && !anomList.length && <p className="text-sm text-slate-500">Nenhuma anomalia detectada.</p>}
+            {!loadingAnomIA && anomList.length > 0 && (
+              <div className="flex flex-wrap gap-2 text-sm">
+                <Badge className="bg-red-100 text-red-700">Alta: {anomResumo.alto || 0}</Badge>
+                <Badge className="bg-amber-100 text-amber-700">Média: {anomResumo.medio || 0}</Badge>
+                <Badge variant="outline">Baixa: {anomResumo.baixo || 0}</Badge>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

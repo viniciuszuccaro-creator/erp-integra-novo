@@ -131,11 +131,13 @@ export default function DashboardResumoTab({
 
       {/* Mapa tempo real — conditionally rendered */}
       {canSeeExpedicao && (
-        <Card className="bg-white/80 backdrop-blur-sm rounded-md shadow-sm">
-          <CardContent className="p-0 overflow-hidden rounded-md">
-            <Slot Component={MapaTempoReal} fallbackH={40} />
-          </CardContent>
-        </Card>
+        <div>
+          <Card className="bg-white/80 backdrop-blur-sm rounded-md shadow-sm">
+            <CardContent className="p-0 overflow-hidden rounded-md">
+              <Slot Component={MapaTempoReal} fallbackH={40} />
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Pedidos resumo */}
@@ -148,25 +150,27 @@ export default function DashboardResumoTab({
 
       {/* Anomalias Financeiras — conditionally rendered */}
       {canSeeFinanceiro && (
-        <Card className="bg-white/80 backdrop-blur-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-600" />
-              Anomalias Financeiras
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loadingAnomIA && <div className="h-8 rounded bg-slate-100 animate-pulse" />}
-            {!loadingAnomIA && !anomList.length && <p className="text-sm text-slate-500">Nenhuma anomalia detectada.</p>}
-            {!loadingAnomIA && anomList.length > 0 && (
-              <div className="flex flex-wrap gap-2 text-sm">
-                <Badge className="bg-red-100 text-red-700">Alta: {anomResumo.alto || 0}</Badge>
-                <Badge className="bg-amber-100 text-amber-700">Média: {anomResumo.medio || 0}</Badge>
-                <Badge variant="outline">Baixa: {anomResumo.baixo || 0}</Badge>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <div>
+          <Card className="bg-white/80 backdrop-blur-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600" />
+                Anomalias Financeiras
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingAnomIA && <div className="h-8 rounded bg-slate-100 animate-pulse" />}
+              {!loadingAnomIA && !anomList.length && <p className="text-sm text-slate-500">Nenhuma anomalia detectada.</p>}
+              {!loadingAnomIA && anomList.length > 0 && (
+                <div className="flex flex-wrap gap-2 text-sm">
+                  <Badge className="bg-red-100 text-red-700">Alta: {anomResumo.alto || 0}</Badge>
+                  <Badge className="bg-amber-100 text-amber-700">Média: {anomResumo.medio || 0}</Badge>
+                  <Badge variant="outline">Baixa: {anomResumo.baixo || 0}</Badge>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* Estoque Crítico */}

@@ -148,9 +148,6 @@ function LayoutContent({ children, currentPageName }) {
         const { user } = useUser();
         const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
         const { hasPermission } = usePermissions();
-        contextRef.current = { user, empresaAtual, grupoAtual, contexto, moduleName };
-
-
         const [pesquisaOpen, setPesquisaOpen] = useState(false);
         const [modoEscuro, setModoEscuro] = useState(false);
         const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
@@ -158,6 +155,8 @@ function LayoutContent({ children, currentPageName }) {
         const { prefetch: prefetchModule } = usePrefetchModuleData();
         const queryClient = useQueryClient();
         const contextRef = useRef({ user, empresaAtual, grupoAtual, contexto, moduleName });
+
+        contextRef.current = { user, empresaAtual, grupoAtual, contexto, moduleName };
 
         // Fase 2: Barramento de invalidação seletiva — substitui broadcast global por keys específicas
         useInvalidationBus([

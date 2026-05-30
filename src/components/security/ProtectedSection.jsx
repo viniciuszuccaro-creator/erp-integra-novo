@@ -112,7 +112,7 @@ export default function ProtectedSection({
     if (!isLoading && allowedFinal === false) setShowDenied(true);
   }, [isLoading, allowedFinal]);
 
-  if (isLoading || allowedFinal === null) return <div className="contents" data-ps-loading />;
+  if (isLoading || allowedFinal === null) return null;
   if (!allowedFinal) {
     if (hideInstead) return fallback || null;
     if (disableInstead) {

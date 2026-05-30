@@ -104,18 +104,20 @@ const AuthenticatedApp = () => {
         <Route path="*" element={<PageNotFound />} />
       </Routes>
 
-      {/* Loading overlay — always above Routes, never replaces it */}
-      {isLoading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white/80 z-50">
-          <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
-        </div>
-      )}
-      {/* User not registered overlay — keeps Routes mounted underneath */}
-      {showUserNotRegistered && (
-        <div className="fixed inset-0 z-50 bg-white">
-          <UserNotRegisteredError />
-        </div>
-      )}
+      {/* Loading overlay — always mounted, toggled via display to prevent fiber tree shifts */}
+      <div
+        className="fixed inset-0 flex items-center justify-center bg-white/80 z-50"
+        style={{ display: isLoading ? 'flex' : 'none' }}
+      >
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+      </div>
+      {/* User not registered overlay — always mounted, toggled via display */}
+      <div
+        className="fixed inset-0 z-50 bg-white"
+        style={{ display: showUserNotRegistered ? 'flex' : 'none' }}
+      >
+        <UserNotRegisteredError />
+      </div>
     </div>
   );
 };

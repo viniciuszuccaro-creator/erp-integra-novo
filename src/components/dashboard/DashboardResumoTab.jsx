@@ -113,86 +113,98 @@ export default function DashboardResumoTab({
     <div className="w-full h-full space-y-6 mt-4">
 
       {/* Sticky KPIs */}
-      <Slot Component={DashboardStickyKpis} fallbackH={12} componentProps={{
-        pedidos: [],
-        pedidosPendentes,
-        pedidosAguardandoAprovacao,
-        produtosBaixoEstoque,
-      }} />
+      <div>
+        <Slot Component={DashboardStickyKpis} fallbackH={12} componentProps={{
+          pedidos: [],
+          pedidosPendentes,
+          pedidosAguardandoAprovacao,
+          produtosBaixoEstoque,
+        }} />
+      </div>
 
       {/* Stats principais */}
-      <Slot Component={StatsSection} fallbackH={24} componentProps={{ statsCards, empresaId }} />
+      <div>
+        <Slot Component={StatsSection} fallbackH={24} componentProps={{ statsCards, empresaId }} />
+      </div>
 
       {/* KPIs operacionais */}
-      <Slot Component={KPIsOperacionaisSection} fallbackH={20} componentProps={{ kpis: kpisOperacionais }} />
+      <div>
+        <Slot Component={KPIsOperacionaisSection} fallbackH={20} componentProps={{ kpis: kpisOperacionais }} />
+      </div>
 
       {/* KPIs secundários */}
-      <Slot Component={SecondaryKPIsSection} fallbackH={16} componentProps={{ kpis: kpiCards }} />
+      <div>
+        <Slot Component={SecondaryKPIsSection} fallbackH={16} componentProps={{ kpis: kpiCards }} />
+      </div>
 
       {/* Mapa tempo real — conditionally rendered */}
       {canSeeExpedicao && (
-        <div>
-          <Card className="bg-white/80 backdrop-blur-sm rounded-md shadow-sm">
-            <CardContent className="p-0 overflow-hidden rounded-md">
-              <Slot Component={MapaTempoReal} fallbackH={40} />
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="bg-white/80 backdrop-blur-sm rounded-md shadow-sm">
+          <CardContent className="p-0 overflow-hidden rounded-md">
+            <Slot Component={MapaTempoReal} fallbackH={40} />
+          </CardContent>
+        </Card>
       )}
 
       {/* Pedidos resumo */}
-      <Slot Component={PedidosResumoPanel} fallbackH={24} componentProps={{
-        pedidosRecentes,
-        pedidosPendentes,
-        pedidosAguardandoAprovacao,
-        onVerTodos: () => onDrillDown(createPageUrl("Comercial")),
-      }} />
+      <div>
+        <Slot Component={PedidosResumoPanel} fallbackH={24} componentProps={{
+          pedidosRecentes,
+          pedidosPendentes,
+          pedidosAguardandoAprovacao,
+          onVerTodos: () => onDrillDown(createPageUrl("Comercial")),
+        }} />
+      </div>
 
       {/* Anomalias Financeiras — conditionally rendered */}
       {canSeeFinanceiro && (
-        <div>
-          <Card className="bg-white/80 backdrop-blur-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-600" />
-                Anomalias Financeiras
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loadingAnomIA && <div className="h-8 rounded bg-slate-100 animate-pulse" />}
-              {!loadingAnomIA && !anomList.length && <p className="text-sm text-slate-500">Nenhuma anomalia detectada.</p>}
-              {!loadingAnomIA && anomList.length > 0 && (
-                <div className="flex flex-wrap gap-2 text-sm">
-                  <Badge className="bg-red-100 text-red-700">Alta: {anomResumo.alto || 0}</Badge>
-                  <Badge className="bg-amber-100 text-amber-700">Média: {anomResumo.medio || 0}</Badge>
-                  <Badge variant="outline">Baixa: {anomResumo.baixo || 0}</Badge>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="bg-white/80 backdrop-blur-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-600" />
+              Anomalias Financeiras
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingAnomIA && <div className="h-8 rounded bg-slate-100 animate-pulse" />}
+            {!loadingAnomIA && !anomList.length && <p className="text-sm text-slate-500">Nenhuma anomalia detectada.</p>}
+            {!loadingAnomIA && anomList.length > 0 && (
+              <div className="flex flex-wrap gap-2 text-sm">
+                <Badge className="bg-red-100 text-red-700">Alta: {anomResumo.alto || 0}</Badge>
+                <Badge className="bg-amber-100 text-amber-700">Média: {anomResumo.medio || 0}</Badge>
+                <Badge variant="outline">Baixa: {anomResumo.baixo || 0}</Badge>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {/* Estoque Crítico */}
-      <Slot Component={WidgetEstoqueCritico} fallbackH={20} componentProps={{
-        preds14Count: preds14,
-        preds30Count: preds30,
-        count: produtosBaixoEstoque,
-        onNavigate: () => onDrillDown(createPageUrl("Estoque")),
-      }} />
+      <div>
+        <Slot Component={WidgetEstoqueCritico} fallbackH={20} componentProps={{
+          preds14Count: preds14,
+          preds30Count: preds30,
+          count: produtosBaixoEstoque,
+          onNavigate: () => onDrillDown(createPageUrl("Estoque")),
+        }} />
+      </div>
 
       {/* Gráficos 30d + 7d */}
-      <Slot Component={ChartsSection} fallbackH={48} componentProps={{
-        vendasUltimos30Dias,
-        fluxo7Dias,
-      }} />
+      <div>
+        <Slot Component={ChartsSection} fallbackH={48} componentProps={{
+          vendasUltimos30Dias,
+          fluxo7Dias,
+        }} />
+      </div>
 
       {/* Top Produtos + Status */}
-      <Slot Component={TopProdutosStatusPeriodoSection} fallbackH={48} componentProps={{
-        topProdutos,
-        dadosVendasStatus,
-        COLORS,
-      }} />
+      <div>
+        <Slot Component={TopProdutosStatusPeriodoSection} fallbackH={48} componentProps={{
+          topProdutos,
+          dadosVendasStatus,
+          COLORS,
+        }} />
+      </div>
 
       {/* Widgets BI row 1 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -229,19 +241,25 @@ export default function DashboardResumoTab({
       </div>
 
       {/* Análise Avançada */}
-      <Slot Component={AdvancedAnalysisSection} fallbackH={64} componentProps={{
-        vendasPorMes: vendasPorMesData,
-        top5Clientes: top5ClientesData,
-        statusPedidos: statusPedidosDataAll,
-        fluxoCaixaMensal: fluxoCaixaMensalData,
-        COLORS,
-      }} />
+      <div>
+        <Slot Component={AdvancedAnalysisSection} fallbackH={64} componentProps={{
+          vendasPorMes: vendasPorMesData,
+          top5Clientes: top5ClientesData,
+          statusPedidos: statusPedidosDataAll,
+          fluxoCaixaMensal: fluxoCaixaMensalData,
+          COLORS,
+        }} />
+      </div>
 
       {/* Command Center */}
-      <Slot Component={DashboardCommandCenter} fallbackH={32} componentProps={{ ccMetrics, botMetrics }} />
+      <div>
+        <Slot Component={DashboardCommandCenter} fallbackH={32} componentProps={{ ccMetrics, botMetrics }} />
+      </div>
 
       {/* Performance */}
-      <Slot Component={DashboardPerformance} fallbackH={32} />
+      <div>
+        <Slot Component={DashboardPerformance} fallbackH={32} />
+      </div>
 
       {/* Previsões Estoque — conditionally rendered, not CSS-hidden */}
       {canSeeEstoque && (
@@ -254,17 +272,21 @@ export default function DashboardResumoTab({
       )}
 
       {/* Quick Access */}
-      <Slot Component={QuickAccessModulesGrid} fallbackH={24} componentProps={{
-        modules: quickAccess,
-        onClick: onDrillDown,
-      }} />
+      <div>
+        <Slot Component={QuickAccessModulesGrid} fallbackH={24} componentProps={{
+          modules: quickAccess,
+          onClick: onDrillDown,
+        }} />
+      </div>
 
       {/* Financial Summary */}
-      <Slot Component={FinancialSummary} fallbackH={20} componentProps={{
-        receitasPendentes,
-        despesasPendentes,
-        fluxoCaixa,
-      }} />
+      <div>
+        <Slot Component={FinancialSummary} fallbackH={20} componentProps={{
+          receitasPendentes,
+          despesasPendentes,
+          fluxoCaixa,
+        }} />
+      </div>
 
       {/* Rankings */}
       <div>
@@ -272,7 +294,9 @@ export default function DashboardResumoTab({
           <Trophy className="w-5 h-5 text-yellow-600" />
           Rankings de Performance
         </h2>
-        <Slot Component={GamificacaoOperacoes} fallbackH={32} />
+        <div>
+          <Slot Component={GamificacaoOperacoes} fallbackH={32} />
+        </div>
       </div>
 
     </div>

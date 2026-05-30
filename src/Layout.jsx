@@ -1340,21 +1340,15 @@ function LayoutContent({ children, currentPageName }) {
                 <AcoesRapidasGlobal />
 
                 <NotificationCenter />
-                {hasPermission('Estoque', null, 'visualizar') && (
-                  <button onClick={handleIAEstoque} className="px-2 py-1 rounded-lg hover:bg-slate-100 text-sm text-slate-600 hidden lg:inline" title="Previsões de Estoque (IA)">
-                    IA Estoque
-                  </button>
-                )}
-                {hasPermission('Financeiro', null, 'visualizar') && (
-                  <button onClick={handleIAFinanceiro} className="px-2 py-1 rounded-lg hover:bg-slate-100 text-sm text-slate-600 hidden lg:inline" title="Anomalias Financeiras (IA)">
-                    IA Financeiro
-                  </button>
-                )}
-                {hasPermission('Comercial', null, 'visualizar') && (
-                  <Link to={createPageUrl('Comercial')} className="px-2 py-1 rounded-lg hover:bg-slate-100 text-sm text-slate-600 hidden lg:inline" title="Funil e KPIs Comerciais">
-                    Funil/KPIs
-                  </Link>
-                )}
+                <button onClick={handleIAEstoque} className="px-2 py-1 rounded-lg hover:bg-slate-100 text-sm text-slate-600" title="Previsões de Estoque (IA)" style={{ display: hasPermission('Estoque', null, 'visualizar') ? undefined : 'none' }}>
+                  IA Estoque
+                </button>
+                <button onClick={handleIAFinanceiro} className="px-2 py-1 rounded-lg hover:bg-slate-100 text-sm text-slate-600" title="Anomalias Financeiras (IA)" style={{ display: hasPermission('Financeiro', null, 'visualizar') ? undefined : 'none' }}>
+                  IA Financeiro
+                </button>
+                <Link to={createPageUrl('Comercial')} className="px-2 py-1 rounded-lg hover:bg-slate-100 text-sm text-slate-600" title="Funil e KPIs Comerciais" style={{ display: hasPermission('Comercial', null, 'visualizar') ? undefined : 'none' }}>
+                  Funil/KPIs
+                </Link>
                 
                 <Link to={createPageUrl("ConfiguracoesUsuario")}>
                   <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">

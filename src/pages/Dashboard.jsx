@@ -56,48 +56,13 @@ import usePermissions from "@/components/lib/usePermissions";
 import useDashboardDerivedData from "@/components/dashboard/hooks/useDashboardDerivedData";
 import { DASHBOARD_LIST_LIMIT, DASHBOARD_REFETCH_INTERVAL_MS, dashboardQueryDefaults } from "@/components/dashboard/config/dashboardQueryConfig";
 
-// Lazy-loaded components (must be after all static imports)
-const PainelOperacoes3D = React.lazy(() => import("../components/dashboard/PainelOperacoes3D"));
-const GamificacaoOperacoes = React.lazy(() => import("../components/dashboard/GamificacaoOperacoes"));
-const DashboardTempoReal = React.lazy(() => import('../components/dashboard/DashboardTempoReal'));
-const DashboardOperacionalBI = React.lazy(() => import("@/components/dashboard/DashboardOperacionalBI"));
-const MapaTempoReal = React.lazy(() => import("@/components/expedicao/MapaTempoReal"));
-const DashboardPerformance = React.lazy(() => import("@/components/sistema/DashboardPerformance"));
-const DashboardTabsNav = React.lazy(() => import("@/components/dashboard/DashboardTabsNav"));
-const WidgetCanaisOrigem = React.lazy(() => import("@/components/dashboard/WidgetCanaisOrigem"));
-const DashboardHeader = React.lazy(() => import("@/components/dashboard/DashboardHeader"));
-const DashboardContextoBanner = React.lazy(() => import("@/components/dashboard/DashboardContextoBanner"));
-const DashboardMultiempresaBar = React.lazy(() => import("@/components/dashboard/DashboardMultiempresaBar"));
-const DashboardEssentialKPIs = React.lazy(() => import("@/components/dashboard/DashboardEssentialKPIs"));
-const DashboardEstoquePrevisoesWidget = React.lazy(() => import("@/components/dashboard/DashboardEstoquePrevisoesWidget"));
-const StatsSection = React.lazy(() => import("@/components/dashboard/StatsSection"));
-const KPIsOperacionaisSection = React.lazy(() => import("@/components/dashboard/KPIsOperacionaisSection"));
-const SecondaryKPIsSection = React.lazy(() => import("@/components/dashboard/SecondaryKPIsSection"));
-const ChartsSection = React.lazy(() => import("@/components/dashboard/ChartsSection"));
-const TopProdutosStatusPeriodoSection = React.lazy(() => import("@/components/dashboard/TopProdutosStatusPeriodoSection"));
-const AdvancedAnalysisSection = React.lazy(() => import("@/components/dashboard/AdvancedAnalysisSection"));
-const QuickAccessModulesGrid = React.lazy(() => import("@/components/dashboard/QuickAccessModulesGrid"));
-const FinancialSummary = React.lazy(() => import("@/components/dashboard/FinancialSummary"));
-const WidgetEstoqueCritico = React.lazy(() => import("@/components/estoque/WidgetEstoqueCritico"));
-const DashboardStabilityNotice = React.lazy(() => import("@/components/dashboard/DashboardStabilityNotice"));
-const DashboardStickyKpis = React.lazy(() => import("@/components/dashboard/DashboardStickyKpis"));
-const DashboardForecastWidget = React.lazy(() => import("@/components/dashboard/DashboardForecastWidget"));
-const DashboardIAInsightsPanel = React.lazy(() => import("@/components/dashboard/DashboardIAInsightsPanel"));
-const DashboardSaudeWidget = React.lazy(() => import("@/components/dashboard/DashboardSaudeWidget"));
-const DashboardVendasPrevisaoWidget = React.lazy(() => import("@/components/dashboard/DashboardVendasPrevisaoWidget"));
-const DashboardKPIsComparativosWidget = React.lazy(() => import("@/components/dashboard/DashboardKPIsComparativosWidget"));
-const DashboardMarketplaceWidget = React.lazy(() => import("@/components/dashboard/DashboardMarketplaceWidget"));
-const ConciliacaoIAWidget = React.lazy(() => import("@/components/financeiro/ConciliacaoIAWidget"));
-const CRMScoreDashboard = React.lazy(() => import("@/components/crm/CRMScoreDashboard"));
-const DashboardBI3DWidget = React.lazy(() => import("@/components/dashboard/DashboardBI3DWidget"));
-const DashboardAutomacaoFluxosWidget = React.lazy(() => import("@/components/dashboard/DashboardAutomacaoFluxosWidget"));
-const RastreamentoGPSWidget = React.lazy(() => import("@/components/logistica/RastreamentoGPSWidget"));
-const ApontamentoProdutoMobileWidget = React.lazy(() => import("@/components/producao/ApontamentoProdutoMobileWidget"));
-const ComplianceISO27001Widget = React.lazy(() => import("@/components/administracao-sistema/ComplianceISO27001Widget"));
-const ContratosEletronicosWidget = React.lazy(() => import("@/components/contratos/ContratosEletronicosWidget"));
-const PedidosResumoPanel = React.lazy(() => import("@/components/dashboard/PedidosResumoPanel"));
-const ResizableRow = React.lazy(() => import("@/components/dashboard/ResizableRow"));
-const DashboardResumoTab = React.lazy(() => import("@/components/dashboard/DashboardResumoTab"));
+// Lazy-loaded components — only those used directly in this page's JSX
+const DashboardHeader           = React.lazy(() => import("@/components/dashboard/DashboardHeader"));
+const DashboardContextoBanner   = React.lazy(() => import("@/components/dashboard/DashboardContextoBanner"));
+const DashboardMultiempresaBar  = React.lazy(() => import("@/components/dashboard/DashboardMultiempresaBar"));
+const DashboardEssentialKPIs   = React.lazy(() => import("@/components/dashboard/DashboardEssentialKPIs"));
+const DashboardStabilityNotice  = React.lazy(() => import("@/components/dashboard/DashboardStabilityNotice"));
+const DashboardResumoTab        = React.lazy(() => import("@/components/dashboard/DashboardResumoTab"));
 
 
 export default function Dashboard() {
@@ -701,30 +666,46 @@ export default function Dashboard() {
     <ProtectedSection module="Dashboard" action="ver">
     <div className="w-full h-full min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="flex-1 overflow-hidden p-6 space-y-6">
-      <Suspense fallback={<div className="h-12 w-full bg-slate-100 rounded animate-pulse" />}>
-      <div key={`dashboard-header-${hasContextoAtivo}`} suppressHydrationWarning>
-        <DashboardHeader
-          empresaAtual={empresaAtual}
-          estaNoGrupo={estaNoGrupo}
-          grupoAtual={grupoAtual}
-          autoRefresh={autoRefresh}
-          setAutoRefresh={setAutoRefresh}
-          periodo={periodo}
-          setPeriodo={setPeriodo}
-        />
-        <DashboardContextoBanner />
-        <DashboardMultiempresaBar />
-        <DashboardEssentialKPIs
-          totalVendas={totalVendas}
-          taxaInadimplencia={taxaInadimplencia}
-          valorVencido={valorVencido}
-          entregasPendentes={entregasPendentes}
-          produtosBaixoEstoque={produtosBaixoEstoque}
-          otd={otd}
-        />
-      </div>
-      <DashboardStabilityNotice hasContextoAtivo={hasContextoAtivo} />
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={<div className="h-12 w-full bg-slate-100 rounded animate-pulse" />}>
+          <DashboardHeader
+            empresaAtual={empresaAtual}
+            estaNoGrupo={estaNoGrupo}
+            grupoAtual={grupoAtual}
+            autoRefresh={autoRefresh}
+            setAutoRefresh={setAutoRefresh}
+            periodo={periodo}
+            setPeriodo={setPeriodo}
+          />
+        </Suspense>
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <Suspense fallback={null}>
+          <DashboardContextoBanner />
+        </Suspense>
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <Suspense fallback={null}>
+          <DashboardMultiempresaBar />
+        </Suspense>
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <Suspense fallback={<div className="h-16 w-full bg-slate-100 rounded animate-pulse" />}>
+          <DashboardEssentialKPIs
+            totalVendas={totalVendas}
+            taxaInadimplencia={taxaInadimplencia}
+            valorVencido={valorVencido}
+            entregasPendentes={entregasPendentes}
+            produtosBaixoEstoque={produtosBaixoEstoque}
+            otd={otd}
+          />
+        </Suspense>
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <Suspense fallback={null}>
+          <DashboardStabilityNotice hasContextoAtivo={hasContextoAtivo} />
+        </Suspense>
+      </ErrorBoundary>
 
       <ErrorBoundary key={`dashboard-main-${hasContextoAtivo}`}>
       <Suspense fallback={<div className="h-96 w-full bg-slate-100 rounded animate-pulse" />}>

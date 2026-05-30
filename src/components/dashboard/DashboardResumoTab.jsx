@@ -129,14 +129,14 @@ export default function DashboardResumoTab({
       {/* KPIs secundários */}
       <Slot Component={SecondaryKPIsSection} fallbackH={16} componentProps={{ kpis: kpiCards }} />
 
-      {/* Mapa tempo real — container always mounted to keep stable DOM anchor */}
-      <div style={{ display: canSeeExpedicao === false ? 'none' : undefined }}>
+      {/* Mapa tempo real — conditionally rendered */}
+      {canSeeExpedicao && (
         <Card className="bg-white/80 backdrop-blur-sm rounded-md shadow-sm">
           <CardContent className="p-0 overflow-hidden rounded-md">
-            <div><Slot Component={MapaTempoReal} fallbackH={40} /></div>
+            <Slot Component={MapaTempoReal} fallbackH={40} />
           </CardContent>
         </Card>
-      </div>
+      )}
 
       {/* Pedidos resumo */}
       <Slot Component={PedidosResumoPanel} fallbackH={24} componentProps={{
@@ -146,8 +146,8 @@ export default function DashboardResumoTab({
         onVerTodos: () => onDrillDown(createPageUrl("Comercial")),
       }} />
 
-      {/* Anomalias Financeiras — container always mounted */}
-      <div key="anomalias-card" style={{ display: canSeeFinanceiro ? undefined : 'none' }}>
+      {/* Anomalias Financeiras — conditionally rendered */}
+      {canSeeFinanceiro && (
         <Card className="bg-white/80 backdrop-blur-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
@@ -165,7 +165,7 @@ export default function DashboardResumoTab({
             </div>
           </CardContent>
         </Card>
-      </div>
+      )}
 
       {/* Estoque Crítico */}
       <Slot Component={WidgetEstoqueCritico} fallbackH={20} componentProps={{

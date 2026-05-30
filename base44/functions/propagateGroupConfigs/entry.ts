@@ -12,7 +12,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    const raw = await req.json().catch(() => ({}));
+    let raw = {};
+    try {
+      const text = await req.text();
+      raw = text ? JSON.parse(text) : {};
+    } catch (_) { raw = {}; }
     const event = raw?.event || null;
     const data = raw?.data || null;
 

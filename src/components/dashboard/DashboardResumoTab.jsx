@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 
 // ─── Lazy imports ────────────────────────────────────────────────────────────
+const WidgetPropagacaoStatus = React.lazy(() => import("@/components/dashboard/WidgetPropagacaoStatus"));
 const ChartsSection                   = React.lazy(() => import("@/components/dashboard/ChartsSection"));
 const TopProdutosStatusPeriodoSection = React.lazy(() => import("@/components/dashboard/TopProdutosStatusPeriodoSection"));
 const AdvancedAnalysisSection         = React.lazy(() => import("@/components/dashboard/AdvancedAnalysisSection"));
@@ -275,6 +276,11 @@ export default function DashboardResumoTab({
           modules: quickAccess,
           onClick: onDrillDown,
         }} />
+      </div>
+
+      {/* Widget Propagação */}
+      <div>
+        <Slot Component={WidgetPropagacaoStatus} fallbackH={8} />
       </div>
 
       {/* Financial Summary */}

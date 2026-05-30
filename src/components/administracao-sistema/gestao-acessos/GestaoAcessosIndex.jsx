@@ -24,6 +24,7 @@ import { getAccessScope, isUserInAccessScope } from "@/components/administracao-
 import RBACStatsBar from "@/components/administracao-sistema/gestao-acessos/RBACStatsBar";
 import IAAccessAnalyzer from "@/components/administracao-sistema/gestao-acessos/IAAccessAnalyzer";
 import CoberturaMultiempresa from "@/components/administracao-sistema/gestao-acessos/CoberturaMultiempresa";
+import RBACDashboard from "@/components/administracao-sistema/gestao-acessos/RBACDashboard";
 
 export default function GestaoAcessosIndex() {
   const { hasPermission, isAdmin } = usePermissions();
@@ -164,6 +165,9 @@ export default function GestaoAcessosIndex() {
               Auditoria
               <Badge className="ml-1.5 text-[9px] bg-slate-200 text-slate-700 px-1">{auditoriasAcesso.length}</Badge>
             </TabsTrigger>
+            <TabsTrigger value="mapa-rbac" data-action="RBAC.tab.mapa" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              🗺 Mapa RBAC
+            </TabsTrigger>
             <TabsTrigger value="ia-acesso" data-action="RBAC.tab.ia" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-purple-600 data-[state=active]:text-white">
               ✦ IA
             </TabsTrigger>
@@ -226,6 +230,12 @@ export default function GestaoAcessosIndex() {
         <TabsContent value="auditoria" className="mt-3 w-full">
           <div className="w-full space-y-3">
             <AccessAuditTimeline auditorias={auditoriasAcesso} />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="mapa-rbac" className="mt-3 w-full">
+          <div className="w-full">
+            <RBACDashboard />
           </div>
         </TabsContent>
 

@@ -23,8 +23,9 @@ export default function DashboardMultiempresaBar() {
     staleTime: 300_000,
   });
 
-  // Não mostra se não há grupo ou empresas múltiplas
-  if (!gId || empresas.length <= 1) return null;
+  // Não mostra se não há grupo ou empresas múltiplas — return empty fragment to keep stable fiber
+  if (!gId || empresas.length <= 1) return <></>;
+
 
   return (
     <div className="w-full flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">

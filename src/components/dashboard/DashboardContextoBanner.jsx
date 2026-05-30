@@ -20,8 +20,9 @@ export default function DashboardContextoBanner() {
     ? (grupoAtual?.nome_do_grupo || "Grupo")
     : (empresaAtual?.nome_fantasia || empresaAtual?.razao_social || "Empresa");
 
-  // Não mostrar se não há contexto definido
-  if (!empresaAtual?.id && !grupoAtual?.id) return null;
+  // Não mostrar se não há contexto definido — return empty fragment to keep stable fiber
+  if (!empresaAtual?.id && !grupoAtual?.id) return <></>;
+
 
   return (
     <div className={`flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl border text-sm ${

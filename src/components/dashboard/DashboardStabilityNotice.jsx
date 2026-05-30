@@ -26,5 +26,5 @@ export default function DashboardStabilityNotice({ hasContextoAtivo, activeTab }
     );
   }
 
-  return null;
+  return <></>;
 }

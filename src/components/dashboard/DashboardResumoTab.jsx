@@ -108,22 +108,22 @@ export default function DashboardResumoTab({
   return (
     <div className="w-full space-y-6 mt-4">
 
-      {/* Sticky KPIs */}
-      <Slot key="sticky-kpis" Component={DashboardStickyKpis} fallbackH={12} componentProps={{
+      {/* Sticky KPIs — each top-level Slot in its own div for stable fiber anchor */}
+      <div><Slot Component={DashboardStickyKpis} fallbackH={12} componentProps={{
         pedidos: [],
         pedidosPendentes,
         pedidosAguardandoAprovacao,
         produtosBaixoEstoque,
-      }} />
+      }} /></div>
 
       {/* Stats principais */}
-      <Slot key="stats" Component={StatsSection} fallbackH={24} componentProps={{ statsCards, empresaId }} />
+      <div><Slot Component={StatsSection} fallbackH={24} componentProps={{ statsCards, empresaId }} /></div>
 
       {/* KPIs operacionais */}
-      <Slot key="kpis-ops" Component={KPIsOperacionaisSection} fallbackH={20} componentProps={{ kpis: kpisOperacionais }} />
+      <div><Slot Component={KPIsOperacionaisSection} fallbackH={20} componentProps={{ kpis: kpisOperacionais }} /></div>
 
       {/* KPIs secundários */}
-      <Slot key="kpis-sec" Component={SecondaryKPIsSection} fallbackH={16} componentProps={{ kpis: kpiCards }} />
+      <div><Slot Component={SecondaryKPIsSection} fallbackH={16} componentProps={{ kpis: kpiCards }} /></div>
 
       {/* Mapa tempo real — container always mounted to keep stable DOM anchor */}
       <div key="mapa-card" style={{ display: canSeeExpedicao === false ? 'none' : undefined }}>
@@ -135,12 +135,12 @@ export default function DashboardResumoTab({
       </div>
 
       {/* Pedidos resumo */}
-      <Slot key="pedidos-resumo" Component={PedidosResumoPanel} fallbackH={24} componentProps={{
+      <div><Slot Component={PedidosResumoPanel} fallbackH={24} componentProps={{
         pedidosRecentes,
         pedidosPendentes,
         pedidosAguardandoAprovacao,
         onVerTodos: () => onDrillDown(createPageUrl("Comercial")),
-      }} />
+      }} /></div>
 
       {/* Anomalias Financeiras — container always mounted */}
       <div key="anomalias-card" style={{ display: canSeeFinanceiro ? undefined : 'none' }}>
@@ -164,25 +164,25 @@ export default function DashboardResumoTab({
       </div>
 
       {/* Estoque Crítico */}
-      <Slot key="estoque-critico" Component={WidgetEstoqueCritico} fallbackH={20} componentProps={{
+      <div><Slot Component={WidgetEstoqueCritico} fallbackH={20} componentProps={{
         preds14Count: preds14,
         preds30Count: preds30,
         count: produtosBaixoEstoque,
         onNavigate: () => onDrillDown(createPageUrl("Estoque")),
-      }} />
+      }} /></div>
 
       {/* Gráficos 30d + 7d */}
-      <Slot key="charts" Component={ChartsSection} fallbackH={48} componentProps={{
+      <div><Slot Component={ChartsSection} fallbackH={48} componentProps={{
         vendasUltimos30Dias,
         fluxo7Dias,
-      }} />
+      }} /></div>
 
       {/* Top Produtos + Status */}
-      <Slot key="top-produtos" Component={TopProdutosStatusPeriodoSection} fallbackH={48} componentProps={{
+      <div><Slot Component={TopProdutosStatusPeriodoSection} fallbackH={48} componentProps={{
         topProdutos,
         dadosVendasStatus,
         COLORS,
-      }} />
+      }} /></div>
 
       {/* Widgets BI row 1 — all slots always mounted with stable grid children */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -192,46 +192,46 @@ export default function DashboardResumoTab({
         <div style={{ display: canSeeFinanceiro === false ? 'none' : undefined }}><Slot Component={ConciliacaoIAWidget} fallbackH={40} /></div>
       </div>
 
-      {/* Widgets BI row 2 */}
-      <div key="bi-row2" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Slot key="bi-3d" Component={DashboardBI3DWidget} fallbackH={40} />
-        <Slot key="automacao" Component={DashboardAutomacaoFluxosWidget} fallbackH={40} />
+      {/* Widgets BI row 2 — each Slot in own div for stable DOM anchor */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><Slot Component={DashboardBI3DWidget} fallbackH={40} /></div>
+        <div><Slot Component={DashboardAutomacaoFluxosWidget} fallbackH={40} /></div>
       </div>
 
       {/* Widgets BI row 3 */}
-      <div key="bi-row3" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Slot key="gps" Component={RastreamentoGPSWidget} fallbackH={40} />
-        <Slot key="apontamento" Component={ApontamentoProdutoMobileWidget} fallbackH={40} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><Slot Component={RastreamentoGPSWidget} fallbackH={40} /></div>
+        <div><Slot Component={ApontamentoProdutoMobileWidget} fallbackH={40} /></div>
       </div>
 
       {/* Widgets BI row 4 */}
-      <div key="bi-row4" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Slot key="compliance" Component={ComplianceISO27001Widget} fallbackH={40} />
-        <Slot key="contratos" Component={ContratosEletronicosWidget} fallbackH={40} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><Slot Component={ComplianceISO27001Widget} fallbackH={40} /></div>
+        <div><Slot Component={ContratosEletronicosWidget} fallbackH={40} /></div>
       </div>
 
       {/* IA Widgets */}
-      <div key="ia-row" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Slot key="saude" Component={DashboardSaudeWidget} fallbackH={40} />
-        <Slot key="forecast" Component={DashboardForecastWidget} fallbackH={40} />
-        <Slot key="vendas-prev" Component={DashboardVendasPrevisaoWidget} fallbackH={40} />
-        <Slot key="ia-insights" Component={DashboardIAInsightsPanel} fallbackH={40} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div><Slot Component={DashboardSaudeWidget} fallbackH={40} /></div>
+        <div><Slot Component={DashboardForecastWidget} fallbackH={40} /></div>
+        <div><Slot Component={DashboardVendasPrevisaoWidget} fallbackH={40} /></div>
+        <div><Slot Component={DashboardIAInsightsPanel} fallbackH={40} /></div>
       </div>
 
       {/* Análise Avançada */}
-      <Slot key="advanced" Component={AdvancedAnalysisSection} fallbackH={64} componentProps={{
+      <div><Slot Component={AdvancedAnalysisSection} fallbackH={64} componentProps={{
         vendasPorMes: vendasPorMesData,
         top5Clientes: top5ClientesData,
         statusPedidos: statusPedidosDataAll,
         fluxoCaixaMensal: fluxoCaixaMensalData,
         COLORS,
-      }} />
+      }} /></div>
 
       {/* Command Center */}
-      <Slot key="command-center" Component={DashboardCommandCenter} fallbackH={32} componentProps={{ ccMetrics, botMetrics }} />
+      <div><Slot Component={DashboardCommandCenter} fallbackH={32} componentProps={{ ccMetrics, botMetrics }} /></div>
 
       {/* Performance */}
-      <Slot key="performance" Component={DashboardPerformance} fallbackH={32} />
+      <div><Slot Component={DashboardPerformance} fallbackH={32} /></div>
 
       {/* Previsões Estoque — container always mounted */}
       <div key="prev-estoque" style={{ display: canSeeEstoque ? undefined : 'none' }}>
@@ -242,25 +242,25 @@ export default function DashboardResumoTab({
       </div>
 
       {/* Quick Access */}
-      <Slot key="quick-access" Component={QuickAccessModulesGrid} fallbackH={24} componentProps={{
+      <div><Slot Component={QuickAccessModulesGrid} fallbackH={24} componentProps={{
         modules: quickAccess,
         onClick: onDrillDown,
-      }} />
+      }} /></div>
 
       {/* Financial Summary */}
-      <Slot key="financial-summary" Component={FinancialSummary} fallbackH={20} componentProps={{
+      <div><Slot Component={FinancialSummary} fallbackH={20} componentProps={{
         receitasPendentes,
         despesasPendentes,
         fluxoCaixa,
-      }} />
+      }} /></div>
 
       {/* Rankings */}
-      <div key="rankings">
+      <div>
         <h2 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-600" />
           Rankings de Performance
         </h2>
-        <Slot key="gamificacao" Component={GamificacaoOperacoes} fallbackH={32} />
+        <div><Slot Component={GamificacaoOperacoes} fallbackH={32} /></div>
       </div>
 
     </div>

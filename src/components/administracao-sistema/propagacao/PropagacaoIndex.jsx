@@ -10,6 +10,7 @@ import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
 import PropagacaoStatusCard from "./PropagacaoStatusCard";
+import PropagacaoEmpresaSelector from "./PropagacaoEmpresaSelector";
 
 /**
  * PropagacaoIndex v5.0
@@ -62,6 +63,7 @@ export default function PropagacaoIndex() {
   const [activeTab, setActiveTab] = useState("overview");
   const [filtroGrupo, setFiltroGrupo] = useState("Todos");
   const [logs, setLogs] = useState([]);
+  const [selectedForEmpresa, setSelectedForEmpresa] = useState(null);
 
   const addLog = (msg, type = "info") =>
     setLogs(prev => [{ msg, type, ts: new Date().toLocaleTimeString("pt-BR") }, ...prev].slice(0, 100));
@@ -241,17 +243,36 @@ export default function PropagacaoIndex() {
         </div>
       )}
 
+      {/* ── Seletor de empresa específica ── */}
+      {activeTab === "overview" && (
+        <div className="bg-slate-50 rounded-lg border border-slate-200 px-4 py-3">
+          <p className="text-xs font-medium text-slate-600 mb-1">Sincronização para empresa específica:</p>
+          <PropagacaoEmpresaSelector
+            entityName={selectedForEmpresa || "Produto"}
+            onResult={(data) => addLog(`✅ Empresa específica: ${data?.total_processados ?? 0} reg. sincronizados`, "ok")}
+          />
+          <p className="text-[10px] text-slate-400 mt-1.5">
+            Selecione uma entidade no grid e depois escolha a empresa de destino.
+          </p>
+        </div>
+      )}
+
       {/* ── Grid de Entidades ── */}
       {activeTab === "overview" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {entidadesFiltradas.map(entity => (
-            <PropagacaoStatusCard
+            <div
               key={entity.name}
-              entity={entity}
-              st={status[entity.name]}
-              globalLoading={globalLoading || runningCount > 0}
-              onSync={runPropagation}
-            />
+              onClick={() => setSelectedForEmpresa(entity.name)}
+              className="cursor-pointer"
+            >
+              <PropagacaoStatusCard
+                entity={entity}
+                st={status[entity.name]}
+                globalLoading={globalLoading || runningCount > 0}
+                onSync={runPropagation}
+              />
+            </div>
           ))}
         </div>
       )}

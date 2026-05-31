@@ -22,6 +22,7 @@ const DashboardEssentialKPIs   = React.lazy(() => import("@/components/dashboard
 const DashboardResumoTab       = React.lazy(() => import("@/components/dashboard/DashboardResumoTab"));
 const ERPHealthBanner          = React.lazy(() => import("@/components/dashboard/ERPHealthBanner"));
 const DashboardMultiempresaStatus = React.lazy(() => import("@/components/dashboard/DashboardMultiempresaStatus"));
+const DashboardMultiempresaBanner = React.lazy(() => import("@/components/dashboard/DashboardMultiempresaBanner"));
 
 
 export default function Dashboard() {
@@ -602,6 +603,14 @@ export default function Dashboard() {
                 periodo={periodo}
                 setPeriodo={setPeriodo}
               />
+            </ErrorBoundary>
+          </Suspense>
+        </div>
+        {/* Banner multiempresa: contexto grupo/empresa + status propagação */}
+        <div>
+          <Suspense fallback={<></>}>
+            <ErrorBoundary>
+              <DashboardMultiempresaBanner />
             </ErrorBoundary>
           </Suspense>
         </div>

@@ -40,6 +40,17 @@ const DEFAULT_CONFIGS = [
   { chave: 'ia_preditiva_vendas',              ativa: false, categoria: 'ia' },
   { chave: 'ia_anomalia_financeira',           ativa: false, categoria: 'ia' },
   { chave: 'ia_churn_clientes',               ativa: false, categoria: 'ia' },
+  { chave: 'ia_precificacao_inteligente',      ativa: false, categoria: 'ia' },
+  { chave: 'ia_roteirizacao_automatica',       ativa: false, categoria: 'ia' },
+  // Comercial & CRM
+  { chave: 'crm_pipeline_ativo',               ativa: true,  categoria: 'crm' },
+  { chave: 'comercial_aprovacao_pedido_ativa',  ativa: true,  categoria: 'comercial' },
+  { chave: 'comercial_desconto_aprovacao',      ativa: true,  categoria: 'comercial' },
+  { chave: 'crm_follow_up_automatico',          ativa: false, categoria: 'crm' },
+  // RH
+  { chave: 'rh_ponto_eletronico_ativo',         ativa: false, categoria: 'rh' },
+  { chave: 'rh_ferias_aprovacao',               ativa: true,  categoria: 'rh' },
+  { chave: 'rh_gamificacao_producao',           ativa: false, categoria: 'rh' },
 ];
 
 Deno.serve(async (req) => {

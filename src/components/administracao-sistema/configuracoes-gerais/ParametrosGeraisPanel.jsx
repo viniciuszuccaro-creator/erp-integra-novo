@@ -7,7 +7,7 @@
 import React, { useState } from "react";
 import {
   Settings, ArrowDownUp, Shield, Bell, Globe, Zap, Package,
-  DollarSign, Truck, ChevronDown, ChevronRight
+  DollarSign, Truck, ChevronDown, ChevronRight, Users, Briefcase
 } from "lucide-react";
 import ToggleConfigGlobal from "@/components/sistema/ToggleConfigGlobal";
 
@@ -201,6 +201,56 @@ export default function ParametrosGeraisPanel() {
           />
         </Section>
 
+        {/* ─ Comercial & CRM ─ */}
+        <Section title="Comercial & CRM" icon={Briefcase} defaultOpen={false}>
+          <ToggleConfigGlobal
+            configKey="crm_pipeline_ativo"
+            label="Pipeline de vendas ativo"
+            description="Habilitar funil de vendas com estágios de oportunidade"
+            defaultValue={true}
+          />
+          <ToggleConfigGlobal
+            configKey="comercial_aprovacao_pedido_ativa"
+            label="Aprovação de pedidos ativada"
+            description="Pedidos acima do limite exigem aprovação de gestor"
+            defaultValue={true}
+          />
+          <ToggleConfigGlobal
+            configKey="comercial_desconto_aprovacao"
+            label="Aprovação hierárquica de descontos"
+            description="Descontos acima do limite exigem aprovação do gerente"
+            defaultValue={true}
+          />
+          <ToggleConfigGlobal
+            configKey="crm_follow_up_automatico"
+            label="Follow-up automático de oportunidades"
+            description="Sistema cria lembretes automáticos para oportunidades paradas"
+            defaultValue={false}
+          />
+        </Section>
+
+        {/* ─ RH & Operações ─ */}
+        <Section title="RH & Operações" icon={Users} defaultOpen={false}>
+          <ToggleConfigGlobal
+            configKey="rh_ponto_eletronico_ativo"
+            label="Ponto eletrônico ativo"
+            description="Habilitar registro de ponto eletrônico para colaboradores"
+            defaultValue={false}
+          />
+          <ToggleConfigGlobal
+            configKey="rh_ferias_aprovacao"
+            label="Aprovação de férias por gestor"
+            description="Solicitações de férias exigem aprovação do responsável"
+            defaultValue={true}
+          />
+          <ToggleConfigGlobal
+            configKey="rh_gamificacao_producao"
+            label="Gamificação de produção"
+            description="Sistema de pontos e metas para equipes de produção"
+            defaultValue={false}
+          />
+        </Section>
+
         {/* ─ IA & Automação ─ */}
         <Section title="IA & Automação" icon={Zap} defaultOpen={false}>
           <ToggleConfigGlobal
@@ -219,6 +269,18 @@ export default function ParametrosGeraisPanel() {
             configKey="ia_churn_clientes"
             label="Análise de risco de churn de clientes"
             description="Identificar clientes com risco de abandono"
+            defaultValue={false}
+          />
+          <ToggleConfigGlobal
+            configKey="ia_precificacao_inteligente"
+            label="Precificação inteligente por IA"
+            description="IA sugere preços ótimos com base em histórico e concorrência"
+            defaultValue={false}
+          />
+          <ToggleConfigGlobal
+            configKey="ia_roteirizacao_automatica"
+            label="Roteirização automática de entregas"
+            description="IA otimiza rotas de entrega automaticamente ao emitir romaneio"
             defaultValue={false}
           />
         </Section>

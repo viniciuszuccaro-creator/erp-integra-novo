@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowDown, ArrowUp, Loader2, CheckCircle2, AlertCircle, Clock } from "lucide-react";
+import { ArrowDown, ArrowUp, Loader2, CheckCircle2, AlertCircle, Clock, RefreshCw } from "lucide-react";
 
 /**
  * PropagacaoStatusCard — card individual de entidade na propagação.
@@ -11,6 +11,7 @@ export default function PropagacaoStatusCard({ entity, st, globalLoading, onSync
   const isErr = st?.status === "error";
   const isOk = st?.status === "ok";
   const isRunning = st?.status === "checking";
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <div className={`p-3 rounded-xl border bg-white space-y-2 transition-all shadow-sm hover:shadow ${
@@ -44,35 +45,44 @@ export default function PropagacaoStatusCard({ entity, st, globalLoading, onSync
         </Badge>
       )}
 
-      <div className="flex gap-1 pt-1">
+      <div className="flex gap-1 pt-1 flex-wrap">
         <Button
           size="sm" variant="outline"
           disabled={globalLoading || isRunning}
           onClick={() => onSync(entity.name, "down")}
-          className="flex-1 text-xs h-7 gap-1"
+          className="flex-1 text-xs h-7 gap-1 min-w-[36px]"
           title="Grupo → Empresa"
         >
-          <ArrowDown className="w-3 h-3" /> ↓
+          <ArrowDown className="w-3 h-3" />
+          <span className="hidden sm:inline">↓</span>
         </Button>
         <Button
           size="sm" variant="outline"
           disabled={globalLoading || isRunning}
           onClick={() => onSync(entity.name, "up")}
-          className="flex-1 text-xs h-7 gap-1"
+          className="flex-1 text-xs h-7 gap-1 min-w-[36px]"
           title="Empresa → Grupo"
         >
-          <ArrowUp className="w-3 h-3" /> ↑
+          <ArrowUp className="w-3 h-3" />
+          <span className="hidden sm:inline">↑</span>
         </Button>
         <Button
           size="sm" variant="ghost"
           disabled={globalLoading || isRunning}
           onClick={() => onSync(entity.name, "both")}
-          className="flex-1 text-xs h-7"
+          className="flex-1 text-xs h-7 min-w-[36px]"
           title="Bidirecional"
         >
-          ⇅
+          {isRunning ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
         </Button>
       </div>
+
+      {/* Status de erro expandido */}
+      {isErr && (
+        <div className="mt-1 text-[10px] text-red-600 bg-red-50 px-2 py-1 rounded border border-red-100 break-words">
+          {st?.message}
+        </div>
+      )}
     </div>
   );
 }

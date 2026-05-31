@@ -12,6 +12,7 @@ import ContextoConfigBanner from "@/components/administracao-sistema/common/Cont
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import ParametrosGeraisPanel from "@/components/administracao-sistema/configuracoes-gerais/ParametrosGeraisPanel";
 import PropagacaoAutomacaoPanel from "@/components/administracao-sistema/propagacao/PropagacaoAutomacaoPanel";
+import PropagacaoResumoStatus from "@/components/administracao-sistema/propagacao/PropagacaoResumoStatus";
 import { Settings2 } from "lucide-react";
 
 const ConfigGlobal = lazy(() => import("@/components/sistema/ConfigGlobal"));
@@ -27,6 +28,9 @@ export default function ConfiguracoesGeraisIndex() {
     <div className="w-full h-full flex flex-col gap-4">
       {/* Contexto atual */}
       <ContextoConfigBanner />
+
+      {/* Resumo de propagação */}
+      <PropagacaoResumoStatus />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 w-full">
 

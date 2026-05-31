@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Building2, Users, ShoppingCart, FileText, Upload, Package } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import { useWindow } from "@/components/lib/useWindow";
@@ -27,7 +28,7 @@ const OrdemCompraForm = React.lazy(() => import("../components/compras/OrdemComp
 
 export default function Compras() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
-  const { filtrarPorContexto, getFiltroContexto, empresaAtual, grupoAtual, createInContext } = useContextoVisual();
+  const { getFiltroContexto, empresaAtual, grupoAtual, createInContext } = useContextoVisual();
   const { user } = useUser();
   const { openWindow } = useWindow();
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
@@ -35,83 +36,26 @@ export default function Compras() {
   const contextoValido = contextKey !== "sem-contexto";
   const podeCriarOC = hasPermission("Compras", "Ordens de Compra", "criar") || hasPermission("Compras", "Ordens Compra", "criar");
 
-  const { data: fornecedores = [] } = useQuery({
-    queryKey: ['fornecedores', contextKey],
-    queryFn: async () => {
-      try {
-        return await filtrarPorContexto('Fornecedor', {}, '-created_date', 100, 'empresa_dona_id');
-      } catch (err) {
-        console.error('Erro ao buscar fornecedores:', err);
-        return [];
-      }
-    },
-    staleTime: 30000,
-    retry: 2,
-    enabled: contextoValido
-  });
+  // Queries via useRLSQuery (escopo multi-empresa automático)
+  const { data: fornecedores = [] } = useRLSQuery(
+    'Fornecedor', {}, '-created_date', 100,
+    { staleTime: 30000, retry: 2, enabled: contextoValido }
+  );
+  const { data: ordensCompra = [] } = useRLSQuery(
+    'OrdemCompra', {}, '-created_date', 100,
+    { staleTime: 30000, retry: 2, enabled: contextoValido }
+  );
+  const { data: solicitacoes = [] } = useRLSQuery(
+    'SolicitacaoCompra', {}, '-data_solicitacao', 100,
+    { staleTime: 30000, retry: 1, enabled: contextoValido }
+  );
+  const { data: empresas = [] } = useRLSQuery(
+    'Empresa', {}, '-created_date', 9999,
+    { staleTime: 60000, retry: 1, enabled: contextoValido }
+  );
 
-  const { data: totalFornecedores = 0 } = useQuery({
-    queryKey: ['fornecedores-count-compras', contextKey],
-    queryFn: async () => {
-      try {
-        const response = await base44.functions.invoke('countEntities', {
-          entityName: 'Fornecedor',
-          filter: getFiltroContexto('empresa_dona_id', true)
-        });
-        return response.data?.count || fornecedores.length;
-      } catch {
-        return fornecedores.length;
-      }
-    },
-    staleTime: 60000,
-    retry: 1,
-    enabled: contextoValido
-  });
-
-  const { data: ordensCompra = [] } = useQuery({
-    queryKey: ['ordensCompra', contextKey],
-    queryFn: async () => {
-      try {
-        return await filtrarPorContexto('OrdemCompra', {}, '-created_date', 100);
-      } catch (err) {
-        console.error('Erro ao buscar ordens de compra:', err);
-        return [];
-      }
-    },
-    staleTime: 30000,
-    retry: 2,
-    enabled: contextoValido
-  });
-
-  const { data: solicitacoes = [] } = useQuery({
-    queryKey: ['solicitacoes-compra', contextKey],
-    queryFn: async () => {
-      try {
-        return await filtrarPorContexto('SolicitacaoCompra', {}, '-data_solicitacao', 100);
-      } catch (err) {
-        console.error('Erro ao buscar solicitações:', err);
-        return [];
-      }
-    },
-    staleTime: 30000,
-    retry: 1,
-    enabled: contextoValido
-  });
-
-  const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas', contextKey],
-    queryFn: async () => {
-      try {
-        return await filtrarPorContexto('Empresa', {}, '-created_date', 9999);
-      } catch (err) {
-        console.error('Erro ao buscar empresas:', err);
-        return [];
-      }
-    },
-    staleTime: 60000,
-    retry: 1,
-    enabled: contextoValido
-  });
+  // Contagem derivada diretamente da lista
+  const totalFornecedores = fornecedores.length;
 
   // Dados já vêm filtrados do servidor
   const fornecedoresFiltrados = fornecedores;
@@ -223,7 +167,7 @@ export default function Compras() {
   return (
     <ProtectedSection module="Compras" action="visualizar">
     <ErrorBoundary>
-      <ModuleLayout title="Compras e Suprimentos" subtitle="Fornecedores, OCs e recebimento" actions={<div className="flex items-center gap-2"><Button size="sm" disabled={!contextoValido || !podeCriarOC} onClick={() => openWindow(OrdemCompraForm, { windowMode: true, onSubmit: (data) => createInContext('OrdemCompra', data) }, { title: 'Nova Ordem de Compra', width: 1200, height: 780 })}>Nova OC</Button></div>}>
+      <ModuleLayout title="Compras e Suprimentos" subtitle="Fornecedores, OCs e recebimento" actions={<div className="flex items-center gap-2"><Button size="sm" disabled={!contextoValido || !podeCriarOC} onClick={() => openWindow(OrdemCompraForm, { windowMode: true, onSubmit: (data) => base44.entities.OrdemCompra.create(data) }, { title: 'Nova Ordem de Compra', width: 1200, height: 780 })}>Nova OC</Button></div>}>
         <ModuleKPIs>
           <KPIsCompras
             totalFornecedores={totalFornecedores}

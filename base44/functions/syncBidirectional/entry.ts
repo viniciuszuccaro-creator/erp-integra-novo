@@ -17,16 +17,23 @@ const BLOCKED_FIELDS = new Set(['id', 'created_date', 'updated_date', 'created_b
 
 // Entidades que suportam propagação DOWN (Grupo→Empresa)
 const DOWN_ENTITIES = new Set([
+  // Cadastros Gerais
   'ConfiguracaoSistema', 'FormaPagamento', 'PlanoDeContas', 'CentroCusto',
-  'TabelaPreco', 'PerfilAcesso', 'Cliente', 'Fornecedor', 'Produto',
-  'Marca', 'GrupoProduto', 'ContaReceber', 'ContaPagar', 'NotaFiscal',
-  'Entrega', 'Transportadora', 'Representante', 'OrdemCompra', 'Colaborador',
+  'TabelaPreco', 'PerfilAcesso', 'Marca', 'GrupoProduto', 'SetorAtividade',
+  'UnidadeMedida', 'TipoDespesa', 'Banco', 'CondicaoComercial',
+  // Pessoas & Produtos
+  'Cliente', 'Fornecedor', 'Produto', 'Transportadora', 'Representante', 'Colaborador',
+  // Cadastros Organizacionais
+  'Departamento', 'Cargo', 'Turno', 'RegiaoAtendimento', 'SegmentoCliente',
+  // Operacional
+  'ContaReceber', 'ContaPagar', 'NotaFiscal', 'Entrega', 'OrdemCompra',
 ]);
 
 // Entidades que suportam propagação UP (Empresa→Grupo)
 const UP_ENTITIES = new Set([
   'ContaReceber', 'ContaPagar', 'Pedido', 'NotaFiscal', 'Entrega',
-  'Cliente', 'Produto', 'Fornecedor',
+  'Cliente', 'Produto', 'Fornecedor', 'OrdemCompra', 'MovimentacaoEstoque',
+  'Oportunidade', 'Comissao',
 ]);
 
 function stripBlocked(data) {

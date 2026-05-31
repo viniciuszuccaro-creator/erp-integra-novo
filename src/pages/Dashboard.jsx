@@ -19,6 +19,7 @@ import { DASHBOARD_LIST_LIMIT, DASHBOARD_REFETCH_INTERVAL_MS, dashboardQueryDefa
 // Lazy-loaded components — only those used directly in this page's JSX
 const DashboardHeader          = React.lazy(() => import("@/components/dashboard/DashboardHeader"));
 const DashboardEssentialKPIs   = React.lazy(() => import("@/components/dashboard/DashboardEssentialKPIs"));
+const DashboardKPIStrip        = React.lazy(() => import("@/components/dashboard/DashboardKPIStrip"));
 const DashboardResumoTab       = React.lazy(() => import("@/components/dashboard/DashboardResumoTab"));
 const ERPHealthBanner          = React.lazy(() => import("@/components/dashboard/ERPHealthBanner"));
 const DashboardMultiempresaStatus = React.lazy(() => import("@/components/dashboard/DashboardMultiempresaStatus"));
@@ -633,13 +634,13 @@ export default function Dashboard() {
         <div>
           <Suspense fallback={<div className="h-16 w-full bg-slate-100 rounded animate-pulse" />}>
             <ErrorBoundary>
-              <DashboardEssentialKPIs
+              <DashboardKPIStrip
                 totalVendas={totalVendas}
-                taxaInadimplencia={taxaInadimplencia}
-                valorVencido={valorVencido}
+                fluxoCaixa={fluxoCaixa}
                 entregasPendentes={entregasPendentes}
                 produtosBaixoEstoque={produtosBaixoEstoque}
                 otd={otd}
+                taxaInadimplencia={taxaInadimplencia}
               />
             </ErrorBoundary>
           </Suspense>

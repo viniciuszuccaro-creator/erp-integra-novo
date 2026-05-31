@@ -15,6 +15,7 @@ import AdminStatusBarCompact from "@/components/administracao-sistema/AdminStatu
 import SystemHealthWidget from "@/components/administracao-sistema/SystemHealthWidget";
 import AdminKPIBar from "@/components/administracao-sistema/AdminKPIBar";
 import AdminQuickActions from "@/components/administracao-sistema/AdminQuickActions";
+import SystemCheckupPanel from "@/components/administracao-sistema/SystemCheckupPanel";
 
 import ConfiguracoesGeraisIndex from "@/components/administracao-sistema/configuracoes-gerais/ConfiguracoesGeraisIndex";
 import IntegracoesIndex from "@/components/administracao-sistema/IntegracoesIndex";
@@ -96,7 +97,11 @@ export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtua
           <AdminStatusBarCompact />
           <AdminQuickActions onTabChange={handleTabChange} />
         </div>
-        {resolvedTab === "gerais" && <SystemHealthWidget />}
+        {resolvedTab === "gerais" && (
+          <div className="mt-2">
+            <SystemCheckupPanel />
+          </div>
+        )}
       </div>
 
       {/* ── PARÂMETROS GERAIS ── */}

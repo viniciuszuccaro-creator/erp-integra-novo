@@ -51,6 +51,16 @@ const DEFAULT_CONFIGS = [
   { chave: 'rh_ponto_eletronico_ativo',         ativa: false, categoria: 'rh' },
   { chave: 'rh_ferias_aprovacao',               ativa: true,  categoria: 'rh' },
   { chave: 'rh_gamificacao_producao',           ativa: false, categoria: 'rh' },
+  // Novos — Propagação avançada
+  { chave: 'propagacao_cadastros_ativa',        ativa: true,  categoria: 'propagacao' },
+  { chave: 'propagacao_rh_ativa',               ativa: true,  categoria: 'propagacao' },
+  { chave: 'propagacao_comercial_ativa',        ativa: true,  categoria: 'propagacao' },
+  // Novos — IA Operacional
+  { chave: 'ia_sugestao_compras',               ativa: false, categoria: 'ia' },
+  { chave: 'ia_classificacao_clientes',         ativa: false, categoria: 'ia' },
+  // Novos — Segurança
+  { chave: 'sessao_timeout_ativo',              ativa: true,  categoria: 'seguranca' },
+  { chave: 'login_multiplos_dispositivos',      ativa: true,  categoria: 'seguranca' },
 ];
 
 Deno.serve(async (req) => {

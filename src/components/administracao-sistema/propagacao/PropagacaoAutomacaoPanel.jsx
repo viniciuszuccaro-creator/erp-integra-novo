@@ -41,6 +41,11 @@ export default function PropagacaoAutomacaoPanel({ grupoAtual }) {
         "Cliente", "Fornecedor", "Produto", "Pedido",
         "ContaReceber", "ContaPagar", "CentroCusto", "FormaPagamento",
         "PlanoDeContas", "TabelaPreco", "GrupoProduto", "Marca",
+        "Representante", "Oportunidade", "Comissao", "CondicaoComercial",
+        "OrdemCompra", "SetorAtividade", "UnidadeMedida", "MovimentacaoEstoque",
+        "TipoDespesa", "Banco", "NotaFiscal", "Entrega", "Transportadora",
+        "Colaborador", "Departamento", "Cargo", "Turno",
+        "SegmentoCliente", "RegiaoAtendimento", "ConfiguracaoSistema", "PerfilAcesso",
       ];
       let ok = 0, err = 0;
       for (const entityName of entities) {

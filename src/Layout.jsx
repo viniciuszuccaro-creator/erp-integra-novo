@@ -26,6 +26,7 @@ import {
         Zap,
         Building2,
         AlertCircle,
+        Lock,
         Mic
       } from "lucide-react";
 import {
@@ -109,6 +110,7 @@ const navigationItems = [
 
   { title: "Blockchain Audit & Compliance", url: "/BlockchainAudit", icon: Shield, group: "sistema" },
   { title: "ESG & Sustentabilidade", url: "/ESGScorecard", icon: CheckCircle2, group: "sistema" },
+  { title: "Quantum Security", url: "/QuantumSecurity", icon: Lock, group: "sistema" },
   { title: "Administração do Sistema", url: createPageUrl("AdministracaoSistema?tab=integracoes"), icon: Settings, group: "sistema" },
 
   

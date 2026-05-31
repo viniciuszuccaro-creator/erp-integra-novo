@@ -1,76 +1,86 @@
-/**
- * QuantumKeyDistribution v1.0
- * Distribuição de chaves quântica (QKD)
- * Passo 30: Chaves criptográficas à prova do quântico
- */
-import { useState } from 'react';
-import { Card } from '@/components/ui/card';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Lock } from 'lucide-react';
+import { Zap, Key, ShieldCheck, RefreshCw } from 'lucide-react';
 
-const QKD_SESSIONS = [
-  { id: 'QKD-001', origem: 'Zuccaro SP', destino: 'Zuccaro MG', bits: 2048, status: 'ativo', segurança: 'SHA-3 + NTRU' },
-  { id: 'QKD-002', origem: 'Zuccaro SP', destino: 'AWS Cloud', bits: 4096, status: 'ativo', segurança: 'Dilithium + KYBER' },
-  { id: 'QKD-003', origem: 'Zuccaro MG', destino: 'Portal', bits: 2048, status: 'ativo', segurança: 'FALCON + SPHINCS' },
-  { id: 'QKD-004', origem: 'API Gateway', destino: 'Database', bits: 8192, status: 'ativo', segurança: 'NTRU-Prime' },
-];
+export default function QuantumKeyDistribution() {
+  const chaves = [
+    { id: 'QK001', tipo: 'Post-Quantum RSA', algoritmo: 'CRYSTALS-Kyber', bits: 3072, expira: '2027-01-01', status: 'ativa' },
+    { id: 'QK002', tipo: 'Digital Signature', algoritmo: 'CRYSTALS-Dilithium', bits: 2048, expira: '2026-06-30', status: 'ativa' },
+    { id: 'QK003', tipo: 'Hash Function', algoritmo: 'SPHINCS+', bits: 4096, expira: '2027-12-01', status: 'ativa' },
+    { id: 'QK004', tipo: 'Key Exchange', algoritmo: 'NTRU', bits: 2048, expira: '2026-09-15', status: 'rotacionar' },
+  ];
 
-export default function QuantumKeyDistribution({ empresa }) {
-  const [sessions] = useState(QKD_SESSIONS);
+  const roadmap = [
+    { fase: 'Fase 1: Inventário', concluida: true, desc: 'Mapeamento de todos os algoritmos vulneráveis a quantum' },
+    { fase: 'Fase 2: Algoritmos PQC', concluida: true, desc: 'Implementação de CRYSTALS-Kyber e Dilithium (NIST PQC)' },
+    { fase: 'Fase 3: Migração Gradual', concluida: false, desc: 'Troca dos RSA-2048 por post-quantum — 60% concluído' },
+    { fase: 'Fase 4: Quantum-Native', concluida: false, desc: 'Infraestrutura 100% quantum-resistant até 2027' },
+  ];
+
+  const metricas = [
+    { label: 'Algoritmos PQC Ativos', valor: '3/4', cor: 'text-purple-400' },
+    { label: 'Chaves Rotacionadas (30d)', valor: '18', cor: 'text-blue-400' },
+    { label: 'Vulnerabilidade Quântica', valor: '12%', cor: 'text-amber-400' },
+    { label: 'Maturidade PQC', valor: '72%', cor: 'text-emerald-400' },
+  ];
 
   return (
-    <div className="w-full h-full flex flex-col gap-4 p-6 bg-gradient-to-br from-slate-900 to-indigo-950 overflow-auto">
-      <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-        <Lock className="w-6 h-6 text-cyan-400" />
-        Quantum Key Distribution (QKD)
-      </h2>
-
-      <div className="space-y-3">
-        {sessions.map((session) => (
-          <Card key={session.id} className="p-4 bg-white/5 border border-cyan-500/30 rounded-lg">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <p className="font-bold text-white">{session.id}</p>
-                <p className="text-xs text-slate-400">
-                  {session.origem} → {session.destino}
-                </p>
-              </div>
-              <Badge className="bg-green-500/20 text-green-300">● ATIVO</Badge>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2 text-xs">
-              <div className="p-2 bg-white/5 rounded border border-white/10">
-                <p className="text-slate-400">Bits</p>
-                <p className="text-white font-bold">{session.bits}</p>
-              </div>
-              <div className="p-2 bg-white/5 rounded border border-white/10">
-                <p className="text-slate-400">Algoritmo</p>
-                <p className="text-cyan-300 font-semibold">{session.segurança.split(' + ')[0]}</p>
-              </div>
-              <div className="p-2 bg-white/5 rounded border border-white/10">
-                <p className="text-slate-400">Pós-Quântico</p>
-                <p className="text-green-300 font-bold">✓ SIM</p>
-              </div>
-            </div>
-
-            <div className="mt-2 p-2 bg-indigo-500/10 rounded text-xs text-indigo-300">
-              🔐 {session.segurança} — À prova de computadores quânticos
-            </div>
+    <div className="w-full h-full overflow-auto space-y-4 p-1">
+      {/* Métricas */}
+      <div className="grid grid-cols-2 gap-3">
+        {metricas.map((m, idx) => (
+          <Card key={idx} className="bg-slate-800 border-slate-700">
+            <CardContent className="p-3">
+              <p className="text-xs text-slate-400">{m.label}</p>
+              <p className={`text-xl font-bold ${m.cor}`}>{m.valor}</p>
+            </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Info */}
-      <Card className="p-4 bg-cyan-500/10 border border-cyan-400/40 rounded-lg">
-        <p className="text-sm text-cyan-300 font-semibold mb-2">🔐 Algoritmos Pós-Quânticos</p>
-        <ul className="text-xs text-slate-300 space-y-1">
-          <li>✓ <strong>NTRU / NTRU-Prime</strong>: Criptografia baseada em látices</li>
-          <li>✓ <strong>Dilithium</strong>: Assinatura digital pós-quântica</li>
-          <li>✓ <strong>KYBER / Kyber-512/768/1024</strong>: Encapsulamento de chaves</li>
-          <li>✓ <strong>FALCON</strong>: Assinatura rápida</li>
-          <li>✓ <strong>SPHINCS+</strong>: Hash-based stateless signature</li>
-        </ul>
-      </Card>
+      {/* Chaves Post-Quantum */}
+      <div className="space-y-2">
+        <h3 className="text-sm font-semibold text-slate-400 uppercase">Chaves Post-Quantum (PQC)</h3>
+        {chaves.map(c => (
+          <Card key={c.id} className="bg-slate-800 border-slate-700">
+            <CardContent className="p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3 flex-1">
+                  <Key className={`w-5 h-5 shrink-0 mt-0.5 ${c.status === 'ativa' ? 'text-emerald-400' : 'text-amber-400'}`} />
+                  <div className="min-w-0">
+                    <p className="font-semibold text-white text-sm">{c.tipo}</p>
+                    <p className="text-xs text-slate-400">{c.algoritmo} • {c.bits} bits</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Expira: {c.expira}</p>
+                  </div>
+                </div>
+                <Badge className={`text-xs ${c.status === 'ativa' ? 'bg-emerald-900 text-emerald-200' : 'bg-amber-900 text-amber-200'}`}>
+                  {c.status === 'ativa' ? 'Ativa' : 'Rotacionar'}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Roadmap */}
+      <div className="space-y-2">
+        <h3 className="text-sm font-semibold text-slate-400 uppercase">Roadmap Quantum-Ready</h3>
+        {roadmap.map((r, idx) => (
+          <Card key={idx} className={`border ${r.concluida ? 'bg-emerald-900/20 border-emerald-800' : 'bg-slate-800 border-slate-700'}`}>
+            <CardContent className="p-3">
+              <div className="flex gap-3">
+                <ShieldCheck className={`w-5 h-5 shrink-0 mt-0.5 ${r.concluida ? 'text-emerald-400' : 'text-slate-400'}`} />
+                <div>
+                  <p className="font-semibold text-white text-sm">{r.fase}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">{r.desc}</p>
+                </div>
+                {r.concluida && <Badge className="ml-auto shrink-0 bg-emerald-900 text-emerald-200 text-xs">✓</Badge>}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

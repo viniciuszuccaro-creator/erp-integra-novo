@@ -84,33 +84,27 @@ const navigationItems = [
         { title: "Dashboard", url: createPageUrl("Dashboard"), icon: LayoutDashboard, group: "principal" },
         { title: "Dashboard Corporativo", url: createPageUrl("DashboardCorporativo"), icon: BarChart3, group: "principal" },
         { title: "Relatórios e Análises", url: createPageUrl("Relatorios"), icon: BarChart3, group: "principal" },
-        { title: "Business Intelligence (IA)", url: "/AdvancedAnalytics", icon: BarChart3, group: "principal" },
-        { title: "Executive Monitoring", url: "/ExecutiveMonitoring", icon: AlertCircle, group: "principal" },
+
         { title: "Agenda e Calendário", url: createPageUrl("Agenda"), icon: Calendar, group: "principal" },
         { title: "CRM - Relacionamento", url: createPageUrl("CRM"), icon: Users, group: "principal" },
-  { title: "Collaborative Workspace", url: "/CollaborativeWorkspace", icon: Users, group: "principal" },
-  { title: "Customer Intelligence (IA)", url: "/CustomerIntelligence", icon: Users, group: "principal" },
+
   { title: "Cadastros Gerais", url: createPageUrl("Cadastros"), icon: Users, group: "cadastros" },
   { title: "Comercial e Vendas", url: createPageUrl("Comercial"), icon: ShoppingCart, group: "operacional" },
   { title: "Estoque e Almoxarifado", url: createPageUrl("Estoque"), icon: Box, group: "operacional" },
   { title: "Compras e Suprimentos", url: createPageUrl("Compras"), icon: Package, group: "operacional" },
   { title: "Expedição e Logística", url: createPageUrl("Expedicao"), icon: Truck, group: "operacional" },
   { title: "Produção e Manufatura", url: createPageUrl("Producao"), icon: Factory, group: "operacional" },
-  { title: "Smart Operations (IA)", url: "/SmartOperations", icon: Factory, group: "operacional" },
-  { title: "Digital Twin & IoT", url: "/DigitalTwin", icon: Zap, group: "operacional" },
+
 
 
 
   { title: "Financeiro e Contábil", url: createPageUrl("Financeiro"), icon: DollarSign, group: "administrativo" },
   { title: "Recursos Humanos", url: createPageUrl("RH"), icon: UserCircle, group: "administrativo" },
-  { title: "Orquestrador RH (IA)", url: "/WorkforceOrchestrator", icon: Zap, group: "administrativo" },
-  { title: "Cadeia de Suprimentos (IA)", url: "/SupplyChainIntelligence", icon: Package, group: "operacional" },
-  { title: "Inteligência Financeira (IA)", url: "/FinancialIntelligence", icon: DollarSign, group: "administrativo" },
+
   { title: "Fiscal e Tributário", url: createPageUrl("Fiscal"), icon: FileText, group: "administrativo" },
   { title: "Gestão de Contratos", url: createPageUrl("Contratos"), icon: FileText, group: "administrativo" },
 
-  { title: "Blockchain Audit & Compliance", url: "/BlockchainAudit", icon: Shield, group: "sistema" },
-  { title: "ESG & Sustentabilidade", url: "/ESGScorecard", icon: CheckCircle2, group: "sistema" },
+
   { title: "Administração do Sistema", url: createPageUrl("AdministracaoSistema?tab=integracoes"), icon: Settings, group: "sistema" },
 
   
@@ -118,12 +112,7 @@ const navigationItems = [
   
   
   { title: "Hub de Atendimento", url: createPageUrl("HubAtendimento"), icon: MessageCircle, group: "principal" },
-  { title: "Voice AI & Conversational", url: "/VoiceAI", icon: Mic, group: "principal" },
-  { title: "Risk Management & Compliance", url: "/RiskManagement", icon: AlertCircle, group: "sistema" },
-  { title: "Knowledge Hub (IA)", url: "/KnowledgeHub", icon: BookOpen, group: "principal" },
-  { title: "Autonomous Intelligence (IA)", url: "/AutonomousIntelligence", icon: Brain, group: "principal" },
-  { title: "Realtime Collaboration Hub", url: "/RealtimeCollaboration", icon: Users, group: "principal" },
-  { title: "Quality Management", url: "/QualityManagement", icon: CheckCircle2, group: "operacional" },
+
 
   ];
 

@@ -1,6 +1,6 @@
-import React from "react";
+import React, { startTransition } from "react";
 import { base44 } from "@/api/base44Client";
-import { Wallet, DollarSign, TrendingUp, TrendingDown, BarChart3, CreditCard, ArrowLeftRight, Globe, FileText, AlertCircle, Activity } from "lucide-react";
+import { DollarSign, TrendingUp, TrendingDown, BarChart3, CreditCard, ArrowLeftRight, Globe, FileText, AlertCircle, Activity } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
 import useRLSQuery from "@/components/lib/useRLSQuery";
@@ -14,9 +14,7 @@ import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
 import KPIsFinanceiroLaunchpad from "@/components/financeiro/KPIsFinanceiroLaunchpad";
 import MetricasSecundariasLaunchpad from "@/components/financeiro/MetricasSecundariasLaunchpad";
-
 import ModulosGridFinanceiro from "@/components/financeiro/ModulosGridFinanceiro";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import useFinanceiroDerivedData from "@/components/financeiro/hooks/useFinanceiroDerivedData";
 import { FINANCEIRO_CONFIG_LIMIT, FINANCEIRO_LIST_LIMIT, FINANCEIRO_SMALL_LIST_LIMIT } from "@/components/financeiro/config/financeiroQueryConfig";
 
@@ -36,7 +34,6 @@ const LogisticaFinanceiroPanel = React.lazy(() => import("../components/expedica
 
 export default function Financeiro() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
-  const canSeeFinanceiro = hasPermission('Financeiro', null, 'ver');
   const { openWindow } = useWindow();
   const { user } = useUser();
 
@@ -45,7 +42,6 @@ export default function Financeiro() {
     grupoAtual,
     empresaAtual,
     empresasDoGrupo,
-    adicionarColunasContexto,
   } = useContextoVisual();
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || empresasDoGrupo?.[0]?.group_id || null;
   const contextKey = empresaAtual?.id || groupId || 'sem-contexto';
@@ -53,49 +49,38 @@ export default function Financeiro() {
 
   const { data: contasReceber = [] } = useRLSQuery(
     'ContaReceber', {}, 'data_vencimento', FINANCEIRO_LIST_LIMIT,
-    { staleTime: 60000, enabled: canSeeFinanceiro && contextoValido }
+    { staleTime: 60000, enabled: contextoValido }
   );
-
-  const totalContasReceber = contasReceber.length;
 
   const { data: contasPagar = [] } = useRLSQuery(
     'ContaPagar', {}, 'data_vencimento', FINANCEIRO_LIST_LIMIT,
-    { staleTime: 60000, enabled: canSeeFinanceiro && contextoValido }
+    { staleTime: 60000, enabled: contextoValido }
   );
-
-  const totalContasPagar = contasPagar.length;
 
   const { data: rateios = [] } = useRLSQuery(
     'RateioFinanceiro', {}, '-created_date', FINANCEIRO_SMALL_LIST_LIMIT,
-    { staleTime: 60000, enabled: canSeeFinanceiro && contextoValido }
+    { staleTime: 60000, enabled: contextoValido }
   );
 
   const { data: extratosBancarios = [] } = useRLSQuery(
     'ExtratoBancario', {}, '-data_movimento', FINANCEIRO_LIST_LIMIT,
-    { staleTime: 60000, enabled: canSeeFinanceiro && contextoValido }
+    { staleTime: 60000, enabled: contextoValido }
   );
 
   const { data: configsGateway = [] } = useRLSQuery(
     'ConfiguracaoGatewayPagamento', {}, '-created_date', FINANCEIRO_CONFIG_LIMIT,
-    { staleTime: 60000, enabled: canSeeFinanceiro && contextoValido }
+    { staleTime: 60000, enabled: contextoValido }
   );
 
   const { data: ordensLiquidacao = [] } = useRLSQuery(
     'CaixaOrdemLiquidacao', {}, '-created_date', FINANCEIRO_SMALL_LIST_LIMIT,
-    { staleTime: 60000, enabled: canSeeFinanceiro && contextoValido }
+    { staleTime: 60000, enabled: contextoValido }
   );
 
   const { data: pedidosPendentesAprovacao = [] } = useRLSQuery(
     'Pedido', { status_aprovacao: 'pendente' }, '-created_date', FINANCEIRO_SMALL_LIST_LIMIT,
-    { staleTime: 60000, enabled: canSeeFinanceiro && contextoValido }
+    { staleTime: 60000, enabled: contextoValido }
   );
-
-  // Dados já vêm filtrados do servidor
-  const contasReceberFiltradas = contasReceber;
-  const contasPagarFiltradas = contasPagar;
-
-  const contasReceberComContexto = adicionarColunasContexto(contasReceberFiltradas);
-  const contasPagarComContexto = adicionarColunasContexto(contasPagarFiltradas);
 
   const {
     receberPendente,
@@ -111,8 +96,8 @@ export default function Financeiro() {
     ordensLiquidacaoPendentes,
     totalPendentesAprovacao,
   } = useFinanceiroDerivedData({
-    contasReceber: contasReceberFiltradas,
-    contasPagar: contasPagarFiltradas,
+    contasReceber,
+    contasPagar,
     extratosBancarios,
     configsGateway,
     ordensLiquidacao,
@@ -190,7 +175,7 @@ export default function Financeiro() {
       windowTitle: '📈 Contas a Receber',
       width: 1500,
       height: 850,
-      props: { contas: contasReceberComContexto }
+      props: { contas: contasReceber }
     },
     {
       title: 'Contas a Pagar',
@@ -201,7 +186,7 @@ export default function Financeiro() {
       windowTitle: '📉 Contas a Pagar',
       width: 1500,
       height: 850,
-      props: { contas: contasPagarComContexto }
+      props: { contas: contasPagar }
     },
     {
       title: 'Aprovações Descontos',
@@ -277,9 +262,8 @@ export default function Financeiro() {
 
   const allowedAllModules = allModules.filter(m => hasPermission('Financeiro', (m.sectionKey || m.title), 'ver'));
 
-   const handleModuleClick = (module) => {
-    React.startTransition(() => {
-      // Auditoria de abertura de seção
+  const handleModuleClick = (module) => {
+    startTransition(() => {
       void base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário',
         usuario_id: user?.id || null,

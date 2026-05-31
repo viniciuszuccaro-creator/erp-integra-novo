@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { TrendingUp, Target, MessageSquare, Mail, Sparkles, AlertTriangle, BarChart3, Users } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import { useWindow } from "@/components/lib/useWindow";
@@ -31,56 +32,31 @@ const IAChurnDetection = React.lazy(() => import("../components/crm/IAChurnDetec
 
 export default function CRMPage() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
-  const { filterInContext, getFiltroContexto, empresaAtual, estaNoGrupo, grupoAtual } = useContextoVisual();
+  const { getFiltroContexto, empresaAtual, estaNoGrupo, grupoAtual } = useContextoVisual();
   const bloqueadoSemEmpresa = !estaNoGrupo && !empresaAtual;
   const { openWindow } = useWindow();
   const { user } = useUser();
 
-  const { data: oportunidades = [] } = useQuery({
-    queryKey: ['oportunidades', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-    queryFn: () => filterInContext('Oportunidade', {}, '-created_date', CRM_LIST_LIMIT),
-    ...crmQueryDefaults,
-    enabled: !bloqueadoSemEmpresa
-  });
+  // Queries via useRLSQuery (escopo multi-empresa automático)
+  const { data: oportunidades = [] } = useRLSQuery(
+    'Oportunidade', {}, '-created_date', CRM_LIST_LIMIT,
+    { ...crmQueryDefaults, enabled: !bloqueadoSemEmpresa }
+  );
+  const { data: interacoes = [] } = useRLSQuery(
+    'Interacao', {}, '-created_date', CRM_LIST_LIMIT,
+    { ...crmQueryDefaults, enabled: !bloqueadoSemEmpresa }
+  );
+  const { data: campanhas = [] } = useRLSQuery(
+    'Campanha', {}, '-created_date', CRM_CAMPAIGN_LIMIT,
+    { ...crmQueryDefaults, enabled: !bloqueadoSemEmpresa }
+  );
+  const { data: clientes = [] } = useRLSQuery(
+    'Cliente', {}, '-created_date', CRM_LIST_LIMIT,
+    { ...crmQueryDefaults, enabled: !bloqueadoSemEmpresa }
+  );
 
-  const { data: interacoes = [] } = useQuery({
-    queryKey: ['interacoes', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-    queryFn: () => filterInContext('Interacao', {}, '-created_date', CRM_LIST_LIMIT),
-    ...crmQueryDefaults,
-    enabled: !bloqueadoSemEmpresa
-  });
-
-  const { data: campanhas = [] } = useQuery({
-    queryKey: ['campanhas', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-    queryFn: () => filterInContext('Campanha', {}, '-created_date', CRM_CAMPAIGN_LIMIT, 'empresa_dona_id'),
-    ...crmQueryDefaults,
-    enabled: !bloqueadoSemEmpresa
-  });
-
-  const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-    queryFn: () => filterInContext('Cliente', {}, '-created_date', CRM_LIST_LIMIT),
-    ...crmQueryDefaults,
-    enabled: !bloqueadoSemEmpresa
-  });
-
-  const { data: totalClientes = 0 } = useQuery({
-    queryKey: ['clientes-count-crm', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-    queryFn: async () => {
-      try {
-        const response = await base44.functions.invoke('countEntities', {
-          entityName: 'Cliente',
-          filter: getFiltroContexto('empresa_id', true)
-        });
-        return response.data?.count || clientes.length;
-      } catch {
-        return clientes.length;
-      }
-    },
-    staleTime: 300000,
-    retry: false,
-    enabled: !bloqueadoSemEmpresa
-  });
+  // Contagem derivada diretamente da lista
+  const totalClientes = clientes.length;
 
   // Dados já vêm filtrados do servidor
   const oportunidadesFiltradas = oportunidades;

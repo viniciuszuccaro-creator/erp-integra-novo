@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import {
   DollarSign, TrendingUp, Users, ShoppingCart,
   Package, Truck, UserCircle, AlertCircle,
@@ -28,7 +29,7 @@ const DashboardMultiempresaBanner = React.lazy(() => import("@/components/dashbo
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { empresaAtual, estaNoGrupo, grupoAtual, filterInContext, getFiltroContexto } = useContextoVisual();
+  const { empresaAtual, estaNoGrupo, grupoAtual, getFiltroContexto } = useContextoVisual();
   const { hasPermission } = usePermissions();
   const canSeeFinanceiro = hasPermission('Financeiro', null, 'ver');
   const canSeeCRM = hasPermission('CRM', null, 'ver');
@@ -64,190 +65,48 @@ export default function Dashboard() {
   const hasContextoAtivo = Boolean(empresaAtual?.id || estaNoGrupo || grupoAtual?.id);
   const refetchInterval = (empresaAtual?.id || estaNoGrupo) ? (autoRefresh ? DASHBOARD_REFETCH_INTERVAL_MS : false) : false; // evita zero-dados sem contexto
 
-  const { data: pedidos = [] } = useQuery({
-       enabled: Boolean(canSeeComercial && hasContextoAtivo),
-       queryKey: ['pedidos', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-       queryFn: async () => {
-         if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
-         // Se em modo grupo sem empresa, agregar dados do grupo inteiro
-         if (estaNoGrupo && grupoAtual?.id && !empresaAtual?.id) {
-           return await base44.entities.Pedido.filter({ group_id: grupoAtual.id }, '-created_date', DASHBOARD_LIST_LIMIT);
-         }
-         return await filterInContext('Pedido', {}, '-created_date', DASHBOARD_LIST_LIMIT);
-       },
-     ...dashboardQueryDefaults,
-     refetchInterval
-   });
+  // Queries via useRLSQuery (escopo multi-empresa automático)
+  const { data: pedidos = [] } = useRLSQuery(
+    'Pedido', {}, '-created_date', DASHBOARD_LIST_LIMIT,
+    { enabled: Boolean(canSeeComercial && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval }
+  );
+  const { data: contasReceber = [] } = useRLSQuery(
+    'ContaReceber', {}, '-data_vencimento', DASHBOARD_LIST_LIMIT,
+    { enabled: Boolean(canSeeFinanceiro && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval }
+  );
+  const { data: contasPagar = [] } = useRLSQuery(
+    'ContaPagar', {}, '-data_vencimento', DASHBOARD_LIST_LIMIT,
+    { enabled: Boolean(canSeeFinanceiro && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval }
+  );
+  const { data: entregas = [] } = useRLSQuery(
+    'Entrega', {}, '-created_date', DASHBOARD_LIST_LIMIT,
+    { enabled: Boolean(canSeeExpedicao && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval }
+  );
+  const { data: colaboradores = [] } = useRLSQuery(
+    'Colaborador', {}, '-created_date', DASHBOARD_LIST_LIMIT,
+    { enabled: Boolean(canSeeRH && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval }
+  );
+  const { data: produtos = [] } = useRLSQuery(
+    'Produto', {}, '-created_date', DASHBOARD_LIST_LIMIT,
+    { enabled: Boolean(canSeeEstoque && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval }
+  );
+  const { data: clientes = [] } = useRLSQuery(
+    'Cliente', {}, '-created_date', DASHBOARD_LIST_LIMIT,
+    { enabled: Boolean(canSeeCRM && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval }
+  );
+  const { data: ordensProducao = [] } = useRLSQuery(
+    'OrdemProducao', {}, '-data_emissao', DASHBOARD_LIST_LIMIT,
+    { enabled: Boolean(canSeeProducao && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval }
+  );
+  const { data: notasFiscais = [] } = useRLSQuery(
+    'NotaFiscal', {}, '-created_date', DASHBOARD_LIST_LIMIT,
+    { enabled: Boolean((canSeeFinanceiro || hasPermission('Fiscal', null, 'ver') || canSeeComercial) && hasContextoAtivo), staleTime: 120000, refetchOnWindowFocus: false, refetchOnReconnect: false, retry: false, refetchInterval }
+  );
 
-  const { data: contasReceber = [] } = useQuery({
-       enabled: Boolean(canSeeFinanceiro && hasContextoAtivo),
-       queryKey: ['contasReceber', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-       queryFn: async () => {
-         if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
-         if (estaNoGrupo && grupoAtual?.id && !empresaAtual?.id) {
-           return await base44.entities.ContaReceber.filter({ group_id: grupoAtual.id }, '-data_vencimento', DASHBOARD_LIST_LIMIT);
-         }
-         return await filterInContext('ContaReceber', {}, '-data_vencimento', DASHBOARD_LIST_LIMIT);
-       },
-     ...dashboardQueryDefaults,
-     refetchInterval
-   });
-
-  const { data: contasPagar = [] } = useQuery({
-      enabled: Boolean(canSeeFinanceiro && hasContextoAtivo),
-      queryKey: ['contasPagar', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-      queryFn: async () => {
-        if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
-        return await filterInContext('ContaPagar', {}, '-data_vencimento', DASHBOARD_LIST_LIMIT);
-      },
-    ...dashboardQueryDefaults,
-    refetchInterval
-  });
-
-  const { data: entregas = [] } = useQuery({
-      enabled: Boolean(canSeeExpedicao && hasContextoAtivo),
-      queryKey: ['entregas', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-      queryFn: async () => {
-        if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
-        return await filterInContext('Entrega', {}, '-created_date', DASHBOARD_LIST_LIMIT);
-      },
-    ...dashboardQueryDefaults,
-    refetchInterval
-  });
-
-  const { data: colaboradores = [] } = useQuery({
-      enabled: Boolean(canSeeRH && hasContextoAtivo),
-      queryKey: ['colaboradores', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-      queryFn: async () => {
-        if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
-        return await filterInContext('Colaborador', {}, '-created_date', DASHBOARD_LIST_LIMIT);
-      },
-    ...dashboardQueryDefaults,
-    refetchInterval
-  });
-
-  const { data: produtos = [] } = useQuery({
-       enabled: Boolean(canSeeEstoque && hasContextoAtivo),
-       queryKey: ['produtos', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-       queryFn: async () => {
-         if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
-         if (estaNoGrupo && grupoAtual?.id && !empresaAtual?.id) {
-           return await base44.entities.Produto.filter({ group_id: grupoAtual.id }, '-created_date', DASHBOARD_LIST_LIMIT);
-         }
-         return await filterInContext('Produto', {}, '-created_date', DASHBOARD_LIST_LIMIT);
-       },
-     ...dashboardQueryDefaults,
-     refetchInterval
-   });
-
-  const { data: totalProdutos = 0 } = useQuery({
-    enabled: Boolean(hasContextoAtivo && canSeeEstoque),
-    queryKey: ['produtos-count-dash', empresaAtual?.id, grupoAtual?.id],
-    queryFn: async () => {
-      try {
-        // Filtro simples: o backend expande corretamente sem duplicação
-        const filtro = grupoAtual?.id && !empresaAtual?.id
-          ? { group_id: grupoAtual.id }
-          : empresaAtual?.id ? { empresa_id: empresaAtual.id } : {};
-        const response = await base44.functions.invoke('countEntities', {
-          entityName: 'Produto',
-          filter: filtro
-        });
-        return response.data?.count || produtos.length;
-      } catch {
-        return produtos.length;
-      }
-    },
-    staleTime: 60000,
-    retry: 1,
-    retryDelay: 1000,
-  });
-
-  const { data: clientes = [] } = useQuery({
-       enabled: Boolean(canSeeCRM && hasContextoAtivo),
-       queryKey: ['clientes', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-       queryFn: async () => {
-         if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
-         if (estaNoGrupo && grupoAtual?.id && !empresaAtual?.id) {
-           return await base44.entities.Cliente.filter({ group_id: grupoAtual.id }, '-created_date', DASHBOARD_LIST_LIMIT);
-         }
-         return await filterInContext('Cliente', {}, '-created_date', DASHBOARD_LIST_LIMIT);
-       },
-     ...dashboardQueryDefaults,
-     refetchInterval
-    });
-
-  const { data: totalClientes = 0 } = useQuery({
-    enabled: Boolean(hasContextoAtivo && canSeeCRM),
-    queryKey: ['clientes-count', empresaAtual?.id, grupoAtual?.id],
-    queryFn: async () => {
-      try {
-        // Filtro simples: o backend expande corretamente sem duplicação
-        const filtro = grupoAtual?.id && !empresaAtual?.id
-          ? { group_id: grupoAtual.id }
-          : empresaAtual?.id ? { empresa_id: empresaAtual.id } : {};
-        const response = await base44.functions.invoke('countEntities', {
-          entityName: 'Cliente',
-          filter: filtro
-        });
-        return response.data?.count || clientes.length;
-      } catch {
-        return clientes.length;
-      }
-    },
-    staleTime: 60000,
-    retry: 1,
-    retryDelay: 1000,
-  });
-
-  const { data: totalColaboradoresDash = 0 } = useQuery({
-    enabled: Boolean(hasContextoAtivo && canSeeRH),
-    queryKey: ['colaboradores-count-dash', empresaAtual?.id, grupoAtual?.id],
-    queryFn: async () => {
-      try {
-        // Filtro simples: o backend mapeia empresa_id → empresa_alocada_id para Colaborador
-        const filtro = grupoAtual?.id && !empresaAtual?.id
-          ? { group_id: grupoAtual.id }
-          : empresaAtual?.id ? { empresa_id: empresaAtual.id } : {};
-        const response = await base44.functions.invoke('countEntities', {
-          entityName: 'Colaborador',
-          filter: filtro
-        });
-        return response.data?.count || colaboradores.length;
-      } catch {
-        return colaboradores.length;
-      }
-    },
-    staleTime: 60000,
-    retry: 1,
-    retryDelay: 1000,
-  });
-
-  const { data: ordensProducao = [] } = useQuery({
-      enabled: Boolean(canSeeProducao && hasContextoAtivo),
-      queryKey: ['ordensProducao', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-      queryFn: async () => {
-        if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
-        return await filterInContext('OrdemProducao', {}, '-data_emissao', DASHBOARD_LIST_LIMIT);
-      },
-    ...dashboardQueryDefaults,
-    refetchInterval
-  });
-
-  const { data: notasFiscais = [] } = useQuery({
-      enabled: Boolean((canSeeFinanceiro || hasPermission('Fiscal', null, 'ver') || canSeeComercial) && hasContextoAtivo),
-      queryKey: ['notasFiscais', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-      queryFn: async () => {
-        if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
-        return await filterInContext('NotaFiscal', {}, '-created_date', DASHBOARD_LIST_LIMIT);
-      },
-    refetchInterval,
-    staleTime: 120000,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    retry: false,
-    initialData: []
-  });
+  // Contagens derivadas direto das listas (evita chamadas extras ao backend)
+  const totalProdutos = produtos.length;
+  const totalClientes = clientes.length;
+  const totalColaboradoresDash = colaboradores.length;
 
   const nfAutorizadas = (notasFiscais || []).filter(n => n?.status === 'Autorizada').length;
 
@@ -351,7 +210,7 @@ export default function Dashboard() {
     queryKey: ['bot-metrics-24h', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
     queryFn: async () => {
       const since = Date.now() - 24 * 60 * 60 * 1000;
-      const items = await filterInContext('ChatbotInteracao', {}, '-created_date', 500);
+      const items = await base44.entities.ChatbotInteracao.filter({}, '-created_date', 500);
       const within = (items || []).filter(i => new Date(i?.created_date || Date.now()).getTime() >= since);
       const sla = within.reduce((acc, i) => {
         const ms = Number(i?.tempo_primeira_resposta_ms || 0);

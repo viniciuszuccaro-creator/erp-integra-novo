@@ -29,16 +29,17 @@ import {
   Printer
 } from "lucide-react";
 import GerarNFeModal from "./GerarNFeModal";
-import useContextoVisual from "@/components/lib/useContextoVisual";
 import { mockCancelarNFe } from "@/components/integracoes/MockIntegracoes";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
 import { ProtectedAction } from "@/components/ProtectedAction";
 import { ImprimirDANFESimplificado } from "@/components/lib/impressao";
 import ERPDataTable from "@/components/ui/erp/DataTable";
 import usePersistedSort from "@/components/lib/usePersistedSort";
-import useEntityListSorted from "@/components/lib/useEntityListSorted";
 import useBackendPagination from "@/components/lib/useBackendPagination";
 import { sanitizeOnWrite } from "@/components/lib/sanitizeOnWrite";
+import useRLS from "@/components/lib/useRLS";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 export default function NotasFiscaisTab({ notasFiscais, pedidos, clientes, onCreateNFe }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -55,7 +56,7 @@ export default function NotasFiscaisTab({ notasFiscais, pedidos, clientes, onCre
   // Paginação e ordenação persistente (backend)
   const { page, setPage, pageSize, setPageSize } = useBackendPagination('NotaFiscal', 20);
   const [sortField, setSortField, sortDirection, setSortDirection] = usePersistedSort('NotaFiscal', 'data_emissao', 'desc');
-  const { data: notasBackend = [] } = useEntityListSorted('NotaFiscal', {}, { sortField, sortDirection, page, pageSize, limit: pageSize });
+  const { data: notasBackend = [] } = useRLSQuery('NotaFiscal', {}, `-${sortField}`, pageSize, { staleTime: 120000 });
   const notasList = Array.isArray(notasFiscais) && notasFiscais.length ? notasFiscais : notasBackend;
 
   const exportarNotasCSV = (lista) => {
@@ -75,7 +76,8 @@ export default function NotasFiscaisTab({ notasFiscais, pedidos, clientes, onCre
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { empresaAtual, empresasDoGrupo, createInContext, updateInContext } = useContextoVisual();
+  const { create: createRLS, update: updateRLS, empresaAtual } = useRLS();
+  const { empresasDoGrupo } = useContextoVisual();
   const { hasPermission } = usePermissions();
 
   const [formData, setFormData] = useState({
@@ -90,9 +92,9 @@ export default function NotasFiscaisTab({ notasFiscais, pedidos, clientes, onCre
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => createInContext('NotaFiscal', data),
+    mutationFn: (data) => createRLS('NotaFiscal', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notasfiscais'] });
+      queryClient.invalidateQueries({ queryKey: ['NotaFiscal'] });
       setIsDialogOpen(false);
       resetForm();
       toast({ title: "✅ Nota Fiscal criada!" });
@@ -100,11 +102,11 @@ export default function NotasFiscaisTab({ notasFiscais, pedidos, clientes, onCre
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => updateInContext('NotaFiscal', id, data),
+    mutationFn: ({ id, data }) => updateRLS('NotaFiscal', id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notasfiscais'] });
+      queryClient.invalidateQueries({ queryKey: ['NotaFiscal'] });
       setIsDialogOpen(false);
-      setSelectedNF(null); // Changed from setEditingNota
+      setSelectedNF(null);
       resetForm();
       toast({ title: "✅ Nota Fiscal atualizada!" });
     },

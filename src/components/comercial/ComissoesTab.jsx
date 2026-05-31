@@ -31,6 +31,8 @@ import usePermissions from "@/components/lib/usePermissions";
 import { ProtectedAction } from "@/components/ProtectedAction";
 import DetalhesComissao from "./DetalhesComissao";
 import { useWindow } from "@/components/lib/useWindow";
+import useRLS from "@/components/lib/useRLS";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import { toast as sonnerToast } from "sonner";
 
 export default function ComissoesTab({ comissoes, pedidos, empresas = [] }) {
@@ -54,54 +56,48 @@ export default function ComissoesTab({ comissoes, pedidos, empresas = [] }) {
 
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
-
-
+  const { update: updateRLS, create: createRLS } = useRLS();
+  const { data: comissoesBackend = [] } = useRLSQuery('Comissao', {}, '-data_venda', 200);
+  const comissoesList = Array.isArray(comissoes) && comissoes.length ? comissoes : comissoesBackend;
 
   const aprovarComissaoMutation = useMutation({
-    mutationFn: ({ id, aprovador }) => base44.entities.Comissao.update(id, {
+    mutationFn: ({ id, aprovador }) => updateRLS('Comissao', id, {
       status: 'Aprovada',
-      aprovador: aprovador,
+      aprovador,
       data_aprovacao: new Date().toISOString().split('T')[0]
     }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['comissoes'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['Comissao'] }),
   });
 
   const recusarComissaoMutation = useMutation({
-    mutationFn: ({ id, motivo }) => base44.entities.Comissao.update(id, {
+    mutationFn: ({ id, motivo, obs }) => updateRLS('Comissao', id, {
       status: 'Cancelada',
-      observacoes: `${comissoes.find(c => c.id === id)?.observacoes || ''}\n\nRecusada: ${motivo}`
+      observacoes: `${obs || ''}\n\nRecusada: ${motivo}`
     }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['comissoes'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['Comissao'] }),
   });
 
   const pagarComissaoMutation = useMutation({
     mutationFn: async ({ id, comissao }) => {
-      // Atualizar status da comissão
-      await base44.entities.Comissao.update(id, {
+      await updateRLS('Comissao', id, {
         status: 'Paga',
         data_pagamento: new Date().toISOString().split('T')[0]
       });
-
-      // Criar conta a pagar no financeiro
-      await base44.entities.ContaPagar.create({
+      await createRLS('ContaPagar', {
         descricao: `Comissão - ${comissao.vendedor}`,
         fornecedor: comissao.vendedor,
         categoria: 'Comissões',
         valor: comissao.valor_comissao,
         data_emissao: new Date().toISOString().split('T')[0],
-        data_vencimento: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // +7 dias
+        data_vencimento: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         status: 'Pendente',
         forma_pagamento: 'Transferência',
         observacoes: `Referente à comissão de vendas. Pedidos: ${comissao.numero_pedido}`
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['comissoes'] });
-      queryClient.invalidateQueries({ queryKey: ['contasPagar'] });
+      queryClient.invalidateQueries({ queryKey: ['Comissao'] });
+      queryClient.invalidateQueries({ queryKey: ['ContaPagar'] });
       alert('Comissão aprovada para pagamento!\n\nTítulo criado no Financeiro.');
     },
   });
@@ -116,7 +112,7 @@ export default function ComissoesTab({ comissoes, pedidos, empresas = [] }) {
   const handleRecusar = (comissao) => {
     const motivo = prompt("Digite o motivo da recusa:");
     if (motivo) {
-      recusarComissaoMutation.mutate({ id: comissao.id, motivo });
+      recusarComissaoMutation.mutate({ id: comissao.id, motivo, obs: comissao.observacoes });
     }
   };
 
@@ -127,7 +123,7 @@ export default function ComissoesTab({ comissoes, pedidos, empresas = [] }) {
   };
 
   // Filtros e KPIs - BUSCA UNIVERSAL COMPLETA
-  const comissoesFiltradas = comissoes.filter(c => {
+  const comissoesFiltradas = comissoesList.filter(c => {
     const searchLower = searchTerm.toLowerCase();
     const matchSearch = c.vendedor?.toLowerCase().includes(searchLower) ||
       c.numero_pedido?.toLowerCase().includes(searchLower) ||
@@ -139,19 +135,19 @@ export default function ComissoesTab({ comissoes, pedidos, empresas = [] }) {
     return matchSearch && matchStatus;
   });
 
-  const comissoesPendentes = comissoes.filter(c => c.status === 'Pendente').length;
-  const comissoesAprovadas = comissoes.filter(c => c.status === 'Aprovada').length;
-  const totalPendente = comissoes
+  const comissoesPendentes = comissoesList.filter(c => c.status === 'Pendente').length;
+  const comissoesAprovadas = comissoesList.filter(c => c.status === 'Aprovada').length;
+  const totalPendente = comissoesList
     .filter(c => c.status === 'Pendente')
     .reduce((sum, c) => sum + (c.valor_comissao || 0), 0);
-  const totalPago = comissoes
+  const totalPago = comissoesList
     .filter(c => c.status === 'Paga')
     .reduce((sum, c) => sum + (c.valor_comissao || 0), 0);
 
   // Relatório por vendedor
   const relatorioPorVendedor = () => {
     const porVendedor = {};
-    comissoes.forEach(c => {
+    comissoesList.forEach(c => {
       const vendedor = c.vendedor || 'Sem Vendedor';
       if (!porVendedor[vendedor]) {
         porVendedor[vendedor] = {

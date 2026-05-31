@@ -25,6 +25,7 @@ const ConfiguracaoProducao = React.lazy(() => import("../components/producao/Con
 const DashboardProducaoRealtime = React.lazy(() => import("../components/producao/DashboardProducaoRealtime"));
 const IADiagnosticoEquipamentos = React.lazy(() => import("../components/producao/IADiagnosticoEquipamentos"));
 const DocumentosProducao = React.lazy(() => import("../components/producao/DocumentosProducao"));
+const OrdensProducaoListagem = React.lazy(() => import("@/components/producao/OrdensProducaoListagem"));
 
 export default function Producao() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
@@ -37,7 +38,6 @@ export default function Producao() {
     { staleTime: 30000, retry: 2 }
   );
 
-  const totalOPs = ordensProducao.length;
   const opsLiberadas = ordensProducao.filter(op => op.status === "Liberada").length;
   const opsEmProducao = ordensProducao.filter(op =>
     ["Em Corte", "Em Dobra", "Em Armação"].includes(op.status)
@@ -69,7 +69,7 @@ export default function Producao() {
       description: 'Listagem OPs',
       icon: Factory,
       color: 'orange',
-      component: React.lazy(() => import("@/components/producao/OrdensProducaoListagem")),
+      component: OrdensProducaoListagem,
       windowTitle: '🏭 Ordens de Produção',
       width: 1500,
       height: 850,
@@ -155,7 +155,6 @@ export default function Producao() {
 
   const handleModuleClick = (module) => {
     startTransition(() => {
-      // Auditoria de abertura de seção
       void base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário',
         acao: 'Visualização',
@@ -192,7 +191,7 @@ export default function Producao() {
         <ModuleKPIs>
           <ProducaoIAPanel ordensProducao={ordensProducao} />
           <KPIsProducao
-            totalOPs={totalOPs}
+            totalOPs={ordensProducao.length}
             opsLiberadas={opsLiberadas}
             opsEmProducao={opsEmProducao}
             opsFinalizadas={opsFinalizadas}

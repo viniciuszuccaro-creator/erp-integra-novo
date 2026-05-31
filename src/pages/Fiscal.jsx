@@ -29,14 +29,18 @@ const ImportarXMLNFe = React.lazy(() => import('../components/fiscal/ImportarXML
 
 export default function FiscalPage() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
-  const { empresaAtual } = useContextoVisual();
+  const { filtrarPorContexto, empresaAtual } = useContextoVisual();
   const { openWindow } = useWindow();
   const { user } = useUser();
 
-  const { data: notasFiltradasContexto = [] } = useRLSQuery(
+  // Query via useRLSQuery (escopo multi-empresa automático)
+  const { data: notasFiscais = [] } = useRLSQuery(
     'NotaFiscal', {}, '-created_date', 100,
     { staleTime: 30000, retry: 2 }
   );
+
+  // Dados já vêm filtrados do servidor
+  const notasFiltradasContexto = notasFiscais;
 
   const statusCounts = {
     total: notasFiltradasContexto.length,

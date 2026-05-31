@@ -55,144 +55,39 @@ export default function Financeiro() {
   const contextKey = empresaAtual?.id || groupId || 'sem-contexto';
   const contextoValido = contextKey !== 'sem-contexto';
 
-  const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contasReceber', contextKey],
-    queryFn: async () => {
-      try {
-        return await filtrarPorContexto('ContaReceber', {}, 'data_vencimento', FINANCEIRO_LIST_LIMIT);
-      } catch (err) {
-        console.error('Erro ao buscar contas a receber:', err);
-        return [];
-      }
-    },
-    ...financeiroQueryDefaults,
-    enabled: canSeeFinanceiro && contextoValido
-  });
-
-  const { data: totalContasReceber = 0 } = useQuery({
-    queryKey: ['contas-receber-count', contextKey],
-    queryFn: async () => {
-      try {
-        const response = await base44.functions.invoke('countEntities', {
-          entityName: 'ContaReceber',
-          filter: getFiltroContexto('empresa_id', true)
-        });
-        return response.data?.count || contasReceber.length;
-      } catch {
-        return contasReceber.length;
-      }
-    },
-    staleTime: 120000,
-    retry: 1,
-    enabled: canSeeFinanceiro && contextoValido
-  });
-
-  const { data: contasPagar = [] } = useQuery({
-    queryKey: ['contasPagar', contextKey],
-    queryFn: async () => {
-      try {
-        return await filtrarPorContexto('ContaPagar', {}, 'data_vencimento', FINANCEIRO_LIST_LIMIT);
-      } catch (err) {
-        console.error('Erro ao buscar contas a pagar:', err);
-        return [];
-      }
-    },
-    ...financeiroQueryDefaults,
-    enabled: canSeeFinanceiro && contextoValido
-  });
-
-  const { data: totalContasPagar = 0 } = useQuery({
-    queryKey: ['contas-pagar-count', contextKey],
-    queryFn: async () => {
-      try {
-        const response = await base44.functions.invoke('countEntities', {
-          entityName: 'ContaPagar',
-          filter: getFiltroContexto('empresa_id', true)
-        });
-        return response.data?.count || contasPagar.length;
-      } catch {
-        return contasPagar.length;
-      }
-    },
-    staleTime: 120000,
-    retry: 1,
-    enabled: canSeeFinanceiro && contextoValido
-  });
-
-  const { data: rateios = [] } = useQuery({
-    queryKey: ['rateios', contextKey],
-    queryFn: async () => {
-      try {
-        return await filtrarPorContexto('RateioFinanceiro', {}, '-created_date', FINANCEIRO_SMALL_LIST_LIMIT);
-      } catch (err) {
-        console.error('Erro ao buscar rateios:', err);
-        return [];
-      }
-    },
-    ...financeiroQueryDefaults,
-    enabled: canSeeFinanceiro && contextoValido
-  });
-
-  const { data: extratosBancarios = [] } = useQuery({
-    queryKey: ['extratos', contextKey],
-    queryFn: async () => {
-      try {
-        return await filtrarPorContexto('ExtratoBancario', {}, '-data_movimento', FINANCEIRO_LIST_LIMIT);
-      } catch (err) {
-        console.error('Erro ao buscar extratos:', err);
-        return [];
-      }
-    },
-    ...financeiroQueryDefaults,
-    enabled: canSeeFinanceiro && contextoValido
-  });
-
-  const { data: configsGateway = [] } = useQuery({
-    queryKey: ['configs-gateway', contextKey],
-    queryFn: async () => {
-      try {
-        return await filtrarPorContexto('ConfiguracaoGatewayPagamento', {}, '-created_date', FINANCEIRO_CONFIG_LIMIT);
-      } catch (err) {
-        console.error('Erro ao buscar configs gateway:', err);
-        return [];
-      }
-    },
-    ...financeiroQueryDefaults,
-    enabled: canSeeFinanceiro && contextoValido
-  });
-
-  const { data: ordensLiquidacao = [] } = useQuery({
-    queryKey: ['caixa-ordens-liquidacao', contextKey],
-    queryFn: async () => {
-      try {
-        return await filtrarPorContexto('CaixaOrdemLiquidacao', {}, '-created_date', FINANCEIRO_SMALL_LIST_LIMIT);
-      } catch (err) {
-        console.error('Erro ao buscar ordens de liquidação:', err);
-        return [];
-      }
-    },
-    ...financeiroQueryDefaults,
-    enabled: canSeeFinanceiro && contextoValido
-  });
-
-  const { data: pedidosPendentesAprovacao = [] } = useQuery({
-    queryKey: ['pedidos-pendentes-aprovacao', contextKey],
-    queryFn: async () => {
-      try {
-        return await filtrarPorContexto('Pedido', { status_aprovacao: 'pendente' }, '-created_date', FINANCEIRO_SMALL_LIST_LIMIT);
-      } catch (err) {
-        console.error('Erro ao buscar pedidos pendentes:', err);
-        return [];
-      }
-    },
-    ...financeiroQueryDefaults,
-    enabled: canSeeFinanceiro && contextoValido
-  });
+  // Queries via useRLSQuery (escopo multi-empresa automático)
+  const { data: contasReceber = [] } = useRLSQuery(
+    'ContaReceber', {}, 'data_vencimento', FINANCEIRO_LIST_LIMIT,
+    { staleTime: 60000, retry: 1, enabled: canSeeFinanceiro && contextoValido }
+  );
+  const { data: contasPagar = [] } = useRLSQuery(
+    'ContaPagar', {}, 'data_vencimento', FINANCEIRO_LIST_LIMIT,
+    { staleTime: 60000, retry: 1, enabled: canSeeFinanceiro && contextoValido }
+  );
+  const { data: rateios = [] } = useRLSQuery(
+    'RateioFinanceiro', {}, '-created_date', FINANCEIRO_SMALL_LIST_LIMIT,
+    { staleTime: 60000, retry: 1, enabled: canSeeFinanceiro && contextoValido }
+  );
+  const { data: extratosBancarios = [] } = useRLSQuery(
+    'ExtratoBancario', {}, '-data_movimento', FINANCEIRO_LIST_LIMIT,
+    { staleTime: 60000, retry: 1, enabled: canSeeFinanceiro && contextoValido }
+  );
+  const { data: configsGateway = [] } = useRLSQuery(
+    'ConfiguracaoGatewayPagamento', {}, '-created_date', FINANCEIRO_CONFIG_LIMIT,
+    { staleTime: 60000, retry: 1, enabled: canSeeFinanceiro && contextoValido }
+  );
+  const { data: ordensLiquidacao = [] } = useRLSQuery(
+    'CaixaOrdemLiquidacao', {}, '-created_date', FINANCEIRO_SMALL_LIST_LIMIT,
+    { staleTime: 60000, retry: 1, enabled: canSeeFinanceiro && contextoValido }
+  );
+  const { data: pedidosPendentesAprovacao = [] } = useRLSQuery(
+    'Pedido', { status_aprovacao: 'pendente' }, '-created_date', FINANCEIRO_SMALL_LIST_LIMIT,
+    { staleTime: 60000, retry: 1, enabled: canSeeFinanceiro && contextoValido }
+  );
 
   // Dados já vêm filtrados do servidor
   const contasReceberFiltradas = contasReceber;
   const contasPagarFiltradas = contasPagar;
-
   const contasReceberComContexto = adicionarColunasContexto(contasReceberFiltradas);
   const contasPagarComContexto = adicionarColunasContexto(contasPagarFiltradas);
 

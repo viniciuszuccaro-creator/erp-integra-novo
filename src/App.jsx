@@ -102,6 +102,15 @@ const AuthenticatedApp = () => {
             />
           );
         })}
+        <Route path="/WorkforceOrchestrator" element={
+          <RBACRoute module="RH" action="ver">
+            <EmpresaSelectorGuard>
+              <LayoutWrapper currentPageName="WorkforceOrchestrator">
+                <WorkforceOrchestratorHub />
+              </LayoutWrapper>
+            </EmpresaSelectorGuard>
+          </RBACRoute>
+        } />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
 

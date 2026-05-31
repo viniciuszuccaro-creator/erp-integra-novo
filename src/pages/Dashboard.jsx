@@ -26,7 +26,7 @@ const DashboardMultiempresaStatus = React.lazy(() => import("@/components/dashbo
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { empresaAtual, estaNoGrupo, grupoAtual, filterInContext, getFiltroContexto, alternarContexto } = useContextoVisual();
+  const { empresaAtual, estaNoGrupo, grupoAtual, filterInContext, getFiltroContexto } = useContextoVisual();
   const { hasPermission } = usePermissions();
   const canSeeFinanceiro = hasPermission('Financeiro', null, 'ver');
   const canSeeCRM = hasPermission('CRM', null, 'ver');
@@ -34,7 +34,6 @@ export default function Dashboard() {
   const canSeeEstoque = hasPermission('Estoque', null, 'ver');
   const canSeeExpedicao = hasPermission('Expedição', null, 'ver');
   const canSeeRH = hasPermission('RH', null, 'ver');
-  const canSeeCompras = hasPermission('Compras', null, 'ver');
   const canSeeProducao = hasPermission('Produção', null, 'ver');
 
   const [periodo, setPeriodo] = useState(() => {

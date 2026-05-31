@@ -13,6 +13,8 @@ import { useUser } from "@/components/lib/UserContext";
 // Sub-modules
 import AdminStatusBarCompact from "@/components/administracao-sistema/AdminStatusBarCompact";
 import SystemHealthWidget from "@/components/administracao-sistema/SystemHealthWidget";
+import AdminKPIBar from "@/components/administracao-sistema/AdminKPIBar";
+import AdminQuickActions from "@/components/administracao-sistema/AdminQuickActions";
 
 import ConfiguracoesGeraisIndex from "@/components/administracao-sistema/configuracoes-gerais/ConfiguracoesGeraisIndex";
 import IntegracoesIndex from "@/components/administracao-sistema/IntegracoesIndex";
@@ -87,9 +89,13 @@ export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtua
 
       </TabsList>
 
-      {/* ── STATUS BAR + HEALTH ── */}
-      <div className="mt-3 space-y-2">
-        <AdminStatusBarCompact />
+      {/* ── KPIs + STATUS BAR + HEALTH ── */}
+      <div className="mt-3 space-y-3">
+        <AdminKPIBar />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <AdminStatusBarCompact />
+          <AdminQuickActions onTabChange={handleTabChange} />
+        </div>
         {resolvedTab === "gerais" && <SystemHealthWidget />}
       </div>
 

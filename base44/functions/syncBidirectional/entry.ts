@@ -13,7 +13,21 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
  */
 
 // Campos que NUNCA devem ser copiados na réplica
-const BLOCKED_FIELDS = new Set(['id', 'created_date', 'updated_date', 'created_by']);
+const BLOCKED_FIELDS = new Set(['id', 'created_date', 'updated_date', 'created_by', 'created_by_id']);
+
+// Entidades que suportam propagação DOWN (Grupo→Empresa)
+const DOWN_ENTITIES = new Set([
+  'ConfiguracaoSistema', 'FormaPagamento', 'PlanoDeContas', 'CentroCusto',
+  'TabelaPreco', 'PerfilAcesso', 'Cliente', 'Fornecedor', 'Produto',
+  'Marca', 'GrupoProduto', 'ContaReceber', 'ContaPagar', 'NotaFiscal',
+  'Entrega', 'Transportadora', 'Representante', 'OrdemCompra', 'Colaborador',
+]);
+
+// Entidades que suportam propagação UP (Empresa→Grupo)
+const UP_ENTITIES = new Set([
+  'ContaReceber', 'ContaPagar', 'Pedido', 'NotaFiscal', 'Entrega',
+  'Cliente', 'Produto', 'Fornecedor',
+]);
 
 function stripBlocked(data) {
   const out = { ...data };
@@ -62,45 +76,63 @@ Deno.serve(async (req) => {
       return Response.json({ ok: true, skipped: 'no context' });
     }
 
-    // Dados insuficientes para operações de create/update → abortar (evita 422)
+    // hasRealData: true se há dados reais para propagar, false = modo "full sync" (busca do banco)
     const hasRealData = eventData && typeof eventData === 'object' && Object.keys(eventData).length > 3;
-    if (!hasRealData && eventType !== 'delete') {
-      return Response.json({ ok: true, skipped: 'no_real_data', reason: 'payload vazio ou insuficiente — propagação abortada' });
-    }
 
     const results = [];
     const isBoth = direction === 'both';
-    const isDown = isBoth || (!!group_id && (!empresa_id || direction === 'down'));
-    const isUp   = isBoth || (!!empresa_id && !!group_id && direction === 'up');
+    const isDown = (isBoth || direction === 'down') && !!group_id && DOWN_ENTITIES.has(entityName);
+    const isUp   = (isBoth || direction === 'up') && !!empresa_id && !!group_id && UP_ENTITIES.has(entityName);
     const srcId  = entityId || eventData?.id;
 
     // ===== DOWN: Grupo → Empresas =====
-    if (isDown && eventData && eventType !== 'delete') {
+    if (isDown && eventType !== 'delete') {
+      // Se não há dados específicos, buscar os registros do grupo para propagar
+      let recordsToProp = [];
+      if (hasRealData && eventData) {
+        recordsToProp = [eventData];
+      } else {
+        // Modo "full sync": buscar todos os registros do grupo
+        recordsToProp = await base44.asServiceRole.entities[entityName]
+          .filter({ group_id, e_replicado: false }, null, 500)
+          .catch(() => []);
+        // Fallback: busca sem filtro e_replicado
+        if (!recordsToProp.length) {
+          recordsToProp = await base44.asServiceRole.entities[entityName]
+            .filter({ group_id }, null, 500)
+            .catch(() => []);
+        }
+      }
+
       const empresas = await base44.asServiceRole.entities.Empresa.filter({ group_id }, null, 100).catch(() => []);
 
       for (const emp of empresas) {
-        try {
-          const newData = stripBlocked({
-            ...eventData,
-            empresa_id: emp.id,
-            documento_grupo_id: srcId,
-            e_replicado: true,
-            group_id,
-          });
+        for (const record of recordsToProp) {
+          const recId = record.id || srcId;
+          if (!recId) continue;
+          try {
+            const newData = stripBlocked({
+              ...record,
+              empresa_id: emp.id,
+              documento_grupo_id: recId,
+              e_replicado: true,
+              group_id,
+            });
 
-          const existing = await base44.asServiceRole.entities[entityName]
-            .filter({ documento_grupo_id: srcId, empresa_id: emp.id }, null, 1)
-            .catch(() => []);
+            const existing = await base44.asServiceRole.entities[entityName]
+              .filter({ documento_grupo_id: recId, empresa_id: emp.id }, null, 1)
+              .catch(() => []);
 
-          if (existing?.length > 0) {
-            await base44.asServiceRole.entities[entityName].update(existing[0].id, newData);
-            results.push({ empresa_id: emp.id, empresa_nome: emp.nome_fantasia || emp.razao_social, status: 'updated' });
-          } else {
-            await base44.asServiceRole.entities[entityName].create(newData);
-            results.push({ empresa_id: emp.id, empresa_nome: emp.nome_fantasia || emp.razao_social, status: 'created' });
+            if (existing?.length > 0) {
+              await base44.asServiceRole.entities[entityName].update(existing[0].id, newData);
+              results.push({ empresa_id: emp.id, empresa_nome: emp.nome_fantasia || emp.razao_social, status: 'updated', entity: entityName });
+            } else {
+              await base44.asServiceRole.entities[entityName].create(newData);
+              results.push({ empresa_id: emp.id, empresa_nome: emp.nome_fantasia || emp.razao_social, status: 'created', entity: entityName });
+            }
+          } catch (e) {
+            results.push({ empresa_id: emp.id, status: 'error', entity: entityName, msg: e.message });
           }
-        } catch (e) {
-          results.push({ empresa_id: emp.id, status: 'error', msg: e.message });
         }
       }
     }

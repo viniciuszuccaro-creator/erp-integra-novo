@@ -5,11 +5,13 @@
  */
 import { useEffect, useCallback } from 'react';
 import useCountEntitiesOptimized from './useCountEntitiesOptimized';
+import useSyncedAlerts from './useSyncedAlerts';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function useCounterWithNotification(entityNames = [], options = {}) {
   const { toast } = useToast();
   const { counts, circuitState, loadCounts, isProtected } = useCountEntitiesOptimized(entityNames);
+  const { alertedEntities } = useSyncedAlerts(counts, options.enableAlerts !== false);
   const prevStateRef = { current: null };
 
   // Notificar quando circuit abre/fecha

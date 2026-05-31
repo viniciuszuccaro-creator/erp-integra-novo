@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 // AdminTabs v3 — 5 abas enxutas (IA absorvida em Segurança & Gov)
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Settings, Users, Shield, FileText, Plug, ArrowDownUp } from "lucide-react";
+import { Settings, Users, Shield, FileText, Plug, ArrowDownUp, Heart } from "lucide-react";
 import usePermissions from "@/components/lib/usePermissions";
 import ProtectedSection from "@/components/security/ProtectedSection";
 
@@ -18,9 +18,11 @@ import DashboardPropagacaoMonitor from "@/components/administracao-sistema/Dashb
 import TestTogglePainel from "@/components/sistema/TestTogglePainel";
 import TestValidacaoRBAC from "@/components/administracao-sistema/TestValidacaoRBAC";
 import Monitor429RateLimit from "@/components/administracao-sistema/Monitor429RateLimit";
+import SystemHealthDashboard from "@/components/administracao-sistema/critical/SystemHealthDashboard";
 
 
 const TAB_DEFS = [
+  { value: "saude",       label: "🏥 Saúde do Sistema",    icon: Heart,       perm: "Configurações",     color: "blue" },
   { value: "checkup",     label: "Status Sistema",        icon: Settings,    perm: "Configurações",     color: "blue" },
   { value: "gerais",      label: "Parâmetros Gerais",     icon: Settings,    perm: "Configurações",     color: "blue" },
   { value: "propagacao",  label: "Propagação Grupo↔Emp",  icon: ArrowDownUp, perm: "Configurações",     color: "blue" },

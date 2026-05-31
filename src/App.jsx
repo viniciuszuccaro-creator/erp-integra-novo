@@ -29,6 +29,7 @@ import ESGScorecardHub from '@/components/esg/ESGScorecardHub';
 import DigitalTwinHub from '@/components/digital-twin/DigitalTwinHub';
 import VoiceAIHub from '@/components/voice-ai/VoiceAIHub';
 import RiskManagementHub from '@/components/risk-compliance/RiskManagementHub';
+import KnowledgeManagementHub from '@/components/knowledge-hub/KnowledgeManagementHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -194,6 +195,13 @@ const AuthenticatedApp = () => {
               </LayoutWrapper>
             </EmpresaSelectorGuard>
           </RBACRoute>
+        } />
+        <Route path="/KnowledgeHub" element={
+          <EmpresaSelectorGuard>
+            <LayoutWrapper currentPageName="KnowledgeHub">
+              <KnowledgeManagementHub />
+            </LayoutWrapper>
+          </EmpresaSelectorGuard>
         } />
         <Route path="/RiskManagement" element={
           <RBACRoute module="Sistema" action="ver">

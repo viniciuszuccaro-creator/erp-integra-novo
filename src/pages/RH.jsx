@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Users, Clock, Calendar, Activity, Trophy, FileText, UserCircle } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import { useWindow } from "@/components/lib/useWindow";
@@ -43,100 +44,26 @@ const ColaboradoresWindow = () => (
 export default function RH() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
   const canSeeRH = hasPermission('RH', null, 'ver');
-  const { filterInContext, getFiltroContexto, empresaAtual } = useContextoVisual();
+  const { empresaAtual } = useContextoVisual();
   const { openWindow } = useWindow();
   const { user } = useUser();
 
-  const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores', empresaAtual?.id],
-    queryFn: async () => {
-      try {
-        return await filterInContext('Colaborador', {}, '-created_date', 100, 'empresa_alocada_id');
-      } catch (err) {
-        console.error('Erro ao buscar colaboradores:', err);
-        return [];
-      }
-    },
-    staleTime: 30000,
-    retry: 2,
-    enabled: canSeeRH
-  });
+  const { data: colaboradores = [] } = useRLSQuery(
+    'Colaborador', {}, '-created_date', 100,
+    { staleTime: 30000, retry: 2, enabled: canSeeRH }
+  );
+  const { data: pontos = [] } = useRLSQuery(
+    'Ponto', {}, '-data', 100,
+    { staleTime: 30000, retry: 1, enabled: canSeeRH }
+  );
+  const { data: ferias = [] } = useRLSQuery(
+    'Ferias', {}, '-created_date', 50,
+    { staleTime: 30000, retry: 1, enabled: canSeeRH }
+  );
 
-  const { data: totalColaboradores = 0 } = useQuery({
-    queryKey: ['colaboradores-count-rh', empresaAtual?.id],
-    queryFn: async () => {
-      try {
-        const response = await base44.functions.invoke('countEntities', {
-          entityName: 'Colaborador',
-          filter: getFiltroContexto('empresa_alocada_id', true)
-        });
-        return response.data?.count ?? colaboradores.length;
-      } catch {
-        return colaboradores.length;
-      }
-    },
-    staleTime: 60000,
-    retry: 1,
-    enabled: canSeeRH
-  });
-
-  // Contagem confiável de colaboradores ATIVOS (não limitada a 100 registros)
-  const { data: colaboradoresAtivosCount = null } = useQuery({
-    queryKey: ['colaboradores-ativos-count-rh', empresaAtual?.id],
-    queryFn: async () => {
-      try {
-        const filtroBase = getFiltroContexto('empresa_alocada_id', true);
-        const filtroAtivos = { ...(filtroBase || {}), status: 'Ativo' };
-        const response = await base44.functions.invoke('countEntities', {
-          entityName: 'Colaborador',
-          filter: filtroAtivos
-        });
-        return response.data?.count ?? null;
-      } catch {
-        return null;
-      }
-    },
-    staleTime: 60000,
-    retry: 1,
-    enabled: canSeeRH
-  });
-
-  const { data: pontos = [] } = useQuery({
-    queryKey: ['pontos', empresaAtual?.id],
-    queryFn: async () => {
-        try {
-          return await filterInContext('Ponto', {}, '-data', 100);
-        } catch (err) {
-          console.error('Erro ao buscar pontos:', err);
-          return [];
-        }
-      },
-      staleTime: 30000,
-      retry: 1,
-    enabled: canSeeRH
-    });
-
-  const { data: ferias = [] } = useQuery({
-    queryKey: ['ferias', empresaAtual?.id],
-    queryFn: async () => {
-        try {
-          return await filterInContext('Ferias', {}, '-created_date', 50);
-        } catch (err) {
-          console.error('Erro ao buscar férias:', err);
-          return [];
-        }
-      },
-      staleTime: 30000,
-      retry: 1,
-    enabled: canSeeRH
-    });
-
-  // Dados já vêm filtrados do servidor
   const colaboradoresFiltrados = colaboradores;
-  const localAtivos = colaboradoresFiltrados.filter(c => (c.status || '').toString().trim().toLowerCase() === 'ativo').length;
-  const colaboradoresAtivos = (typeof colaboradoresAtivosCount === 'number')
-    ? (colaboradoresAtivosCount === 0 ? localAtivos : colaboradoresAtivosCount)
-    : localAtivos;
+  const totalColaboradores = colaboradores.length;
+  const colaboradoresAtivos = colaboradoresFiltrados.filter(c => (c.status || '').toString().trim().toLowerCase() === 'ativo').length;
   const feriasAprovadas = ferias.filter(f => f.status === "Aprovada").length;
   const feriasPendentes = ferias.filter(f => f.status === "Solicitada").length;
 

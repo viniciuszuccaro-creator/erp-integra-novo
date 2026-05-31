@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Factory, LayoutGrid, Clock, CheckCircle, AlertTriangle, Settings, BarChart3, Activity, Zap, FileText, Sparkles } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import { useWindow } from "@/components/lib/useWindow";
@@ -29,41 +30,16 @@ const DocumentosProducao = React.lazy(() => import("../components/producao/Docum
 
 export default function Producao() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
-  const { filtrarPorContexto, getFiltroContexto, empresaAtual } = useContextoVisual();
+  const { empresaAtual } = useContextoVisual();
   const { openWindow } = useWindow();
   const { user } = useUser();
 
-  const { data: ordensProducao = [] } = useQuery({
-    queryKey: ['ordens-producao', empresaAtual?.id],
-    queryFn: async () => {
-      try {
-        const filtro = empresaAtual?.id ? { empresa_id: empresaAtual.id } : {};
-        return await filtrarPorContexto('OrdemProducao', {}, '-created_date', 100);
-      } catch (err) {
-        console.error('Erro ao buscar ordens de produção:', err);
-        return [];
-      }
-    },
-    staleTime: 30000,
-    retry: 2
-  });
+  const { data: ordensProducao = [] } = useRLSQuery(
+    'OrdemProducao', {}, '-created_date', 100,
+    { staleTime: 30000, retry: 2 }
+  );
 
-  const { data: totalOrdensProducao = 0 } = useQuery({
-    queryKey: ['ordens-producao-count', empresaAtual?.id],
-    queryFn: async () => {
-      try {
-        const response = await base44.functions.invoke('countEntities', {
-          entityName: 'OrdemProducao',
-          filter: getFiltroContexto('empresa_id')
-        });
-        return response.data?.count || ordensProducao.length;
-      } catch {
-        return ordensProducao.length;
-      }
-    },
-    staleTime: 60000,
-    retry: 1
-  });
+  const totalOrdensProducao = ordensProducao.length;
 
   const totalOPs = ordensProducao.length;
   const opsLiberadas = ordensProducao.filter(op => op.status === "Liberada").length;

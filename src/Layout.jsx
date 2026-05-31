@@ -103,6 +103,7 @@ const navigationItems = [
   
   
   { title: "Hub de Atendimento", url: createPageUrl("HubAtendimento"), icon: MessageCircle, group: "principal" },
+  { title: "Customer Intelligence", url: createPageUrl("CustomerIntelligence"), icon: Users, group: "principal" },
   ];
 
 // React Query client centralizado (padrões seguros + performance)

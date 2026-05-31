@@ -101,6 +101,9 @@ export function useEntityCounts(entities = []) {
     queryFn: async () => {
       if (!normalized.length) return {};
 
+      // Aguarda para evitar bombardeio de requisições em renders paralelos (HMR)
+      await new Promise(r => setTimeout(r, 50));
+
       const batchPayload = [];
 
       for (const entityName of normalized) {
@@ -136,11 +139,11 @@ export function useEntityCounts(entities = []) {
       }
       return result;
     },
-    staleTime: 30_000,      // 30s — contagens ficam atualizadas
+    staleTime: 60_000,      // 60s — mais conservador para evitar invalidação frequente
     gcTime: 300_000,
     placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,
-    refetchOnMount: 'always',
+    refetchOnMount: false,  // Desabilita refetch ao montar (evita HMR loops)
     retry: 1,
     enabled: canFetch,
   });

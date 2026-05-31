@@ -76,7 +76,8 @@ export default function CadastrosGroupCountBadge({ groupName }) {
     staleTime: 180_000,
     gcTime: 300_000,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: 'stale',  // Refetch apenas se stale (evita loops)
+    retry: 1,
     enabled: !!(empresaId || groupId) && entityList.length > 0,
   });
 

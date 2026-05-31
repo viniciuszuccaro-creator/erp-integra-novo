@@ -25,6 +25,7 @@ import CustomerIntelligenceHub from '@/components/customer-intelligence/Customer
 import SmartOperationsHub from '@/components/smart-operations/SmartOperationsHub';
 import CollaborativeWorkspaceHub from '@/components/collaborative-workspace/CollaborativeWorkspaceHub';
 import BlockchainAuditHub from '@/components/blockchain-audit/BlockchainAuditHub';
+import ESGScorecardHub from '@/components/esg/ESGScorecardHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -160,6 +161,15 @@ const AuthenticatedApp = () => {
             <EmpresaSelectorGuard>
               <LayoutWrapper currentPageName="BlockchainAudit">
                 <BlockchainAuditHub />
+              </LayoutWrapper>
+            </EmpresaSelectorGuard>
+          </RBACRoute>
+        } />
+        <Route path="/ESGScorecard" element={
+          <RBACRoute module="Dashboard" action="ver">
+            <EmpresaSelectorGuard>
+              <LayoutWrapper currentPageName="ESGScorecard">
+                <ESGScorecardHub />
               </LayoutWrapper>
             </EmpresaSelectorGuard>
           </RBACRoute>

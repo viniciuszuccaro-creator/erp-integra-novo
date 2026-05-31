@@ -106,6 +106,8 @@ const navigationItems = [
   { title: "Gestão de Contratos", url: createPageUrl("Contratos"), icon: FileText, group: "administrativo" },
 
   { title: "Blockchain Audit & Compliance", url: "/BlockchainAudit", icon: Shield, group: "sistema" },
+  { title: "Blockchain Audit & Compliance", url: "/BlockchainAudit", icon: Shield, group: "sistema" },
+  { title: "ESG & Sustentabilidade", url: "/ESGScorecard", icon: CheckCircle2, group: "sistema" },
   { title: "Administração do Sistema", url: createPageUrl("AdministracaoSistema?tab=integracoes"), icon: Settings, group: "sistema" },
 
   

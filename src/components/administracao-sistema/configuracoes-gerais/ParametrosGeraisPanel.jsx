@@ -6,9 +6,9 @@
  */
 import React, { useState } from "react";
 import {
-  Settings, ArrowDownUp, Shield, Bell, Globe, Zap, Package,
+  Settings, Shield, Bell, Globe, Zap, Package,
   DollarSign, Truck, ChevronDown, ChevronRight, Users, Briefcase,
-  ShoppingCart, BarChart3, FileText, Lock, MessageCircle, Monitor
+  ShoppingCart, BarChart3, MessageCircle, Monitor
 } from "lucide-react";
 import ToggleConfigGlobal from "@/components/sistema/ToggleConfigGlobal";
 
@@ -61,34 +61,6 @@ export default function ParametrosGeraisPanel() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-6">
-
-        {/* ─ Propagação (aberto por padrão) ─ */}
-        <Section title="Propagação Grupo ↔ Empresas" icon={ArrowDownUp} defaultOpen color="blue">
-          <ToggleConfigGlobal configKey="propagacao_grupo_empresas_ativa"
-            label="Propagação automática (Grupo → Empresas)"
-            description="Replica cadastros e configs do grupo para todas as empresas vinculadas"
-            defaultValue={true} />
-          <ToggleConfigGlobal configKey="propagacao_empresa_grupo_ativa"
-            label="Sincronização (Empresa → Grupo)"
-            description="Operações em empresa sobem automaticamente ao grupo"
-            defaultValue={true} />
-          <ToggleConfigGlobal configKey="propagacao_financeiro_ativa"
-            label="Propagar baixas financeiras"
-            description="Baixar título no grupo reflete na empresa correspondente"
-            defaultValue={true} />
-          <ToggleConfigGlobal configKey="propagacao_cadastros_ativa"
-            label="Propagar cadastros de base"
-            description="Clientes, fornecedores, produtos, transportadoras"
-            defaultValue={true} />
-          <ToggleConfigGlobal configKey="propagacao_comercial_ativa"
-            label="Propagar dados comerciais"
-            description="Pedidos, tabelas de preço, comissões, representantes"
-            defaultValue={true} />
-          <ToggleConfigGlobal configKey="propagacao_rh_ativa"
-            label="Propagar dados de RH"
-            description="Colaboradores, cargos, departamentos, turnos"
-            defaultValue={true} />
-        </Section>
 
         {/* ─ Segurança ─ */}
         <Section title="Segurança & RBAC" icon={Shield} defaultOpen color="red">

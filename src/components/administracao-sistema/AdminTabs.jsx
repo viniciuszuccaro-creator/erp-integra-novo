@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-// AdminTabs v2 — inclui aba de Propagação Grupo↔Empresas (7 abas)
+// AdminTabs v3 — 5 abas enxutas (IA absorvida em Segurança & Gov)
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Settings, Users, Shield, FileText, Brain, Plug, ArrowDownUp } from "lucide-react";
+import { Settings, Users, Shield, FileText, Plug, ArrowDownUp } from "lucide-react";
 import usePermissions from "@/components/lib/usePermissions";
 import ProtectedSection from "@/components/security/ProtectedSection";
 
@@ -11,20 +11,17 @@ import ConfiguracoesGeraisIndex from "@/components/administracao-sistema/configu
 import IntegracoesIndex from "@/components/administracao-sistema/IntegracoesIndex";
 import AuditoriaLogsIndex from "@/components/administracao-sistema/auditoria-logs/AuditoriaLogsIndex";
 import SegurancaGovernancaIndex from "@/components/administracao-sistema/seguranca-governanca/SegurancaGovernancaIndex";
-import IAOtimizacaoIndex from "@/components/administracao-sistema/IAOtimizacaoIndex";
 import GestaoAcessosIndex from "@/components/administracao-sistema/gestao-acessos/GestaoAcessosIndex";
 import PropagacaoIndex from "@/components/administracao-sistema/propagacao/PropagacaoIndex";
 
 
 const TAB_DEFS = [
-  { value: "gerais",      label: "Parâmetros Gerais",     icon: Settings,    perm: "Configurações",    color: "blue" },
-  { value: "propagacao",  label: "Propagação Grupo↔Emp",  icon: ArrowDownUp, perm: "Configurações",    color: "blue" },
-  { value: "integracoes", label: "Integrações",            icon: Plug,        perm: "Integrações",      color: "blue" },
-  { value: "acessos",     label: "Gestão de Acessos",     icon: Users,       perm: "Controle de Acesso",color: "blue" },
-  { value: "seguranca",   label: "Segurança & Gov.",      icon: Shield,      perm: "Segurança",        color: "blue" },
-  { value: "ia",          label: "IA & Otimização",        icon: Brain,       perm: "IA",               color: "purple" },
-  { value: "auditoria",   label: "Auditoria e Logs",      icon: FileText,    perm: "Auditoria",        color: "blue" },
-
+  { value: "gerais",      label: "Parâmetros Gerais",     icon: Settings,    perm: "Configurações",     color: "blue" },
+  { value: "propagacao",  label: "Propagação Grupo↔Emp",  icon: ArrowDownUp, perm: "Configurações",     color: "blue" },
+  { value: "integracoes", label: "Integrações",            icon: Plug,        perm: "Integrações",       color: "blue" },
+  { value: "acessos",     label: "Gestão de Acessos",     icon: Users,       perm: "Controle de Acesso", color: "blue" },
+  { value: "seguranca",   label: "Segurança, IA & Gov.",  icon: Shield,      perm: "Segurança",         color: "blue" },
+  { value: "auditoria",   label: "Auditoria e Logs",      icon: FileText,    perm: "Auditoria",         color: "blue" },
 ];
 
 export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtual }) {
@@ -124,18 +121,6 @@ export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtua
         >
           <div className="w-full h-full">
             <SegurancaGovernancaIndex />
-          </div>
-        </ProtectedSection>
-      </TabsContent>
-
-      {/* ── IA & OTIMIZAÇÃO ── */}
-      <TabsContent value="ia" className="mt-4">
-        <ProtectedSection
-          module="Sistema" section={["IA"]} action="visualizar"
-          fallback={<p className="p-4 text-sm text-slate-500">Acesso restrito às configurações de IA.</p>}
-        >
-          <div className="w-full h-full">
-            <IAOtimizacaoIndex />
           </div>
         </ProtectedSection>
       </TabsContent>

@@ -149,7 +149,6 @@ function LayoutContent({ children, currentPageName }) {
         const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
         const { hasPermission } = usePermissions();
         const [pesquisaOpen, setPesquisaOpen] = useState(false);
-        const [modoEscuro, setModoEscuro] = useState(false);
         const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
         const [integracoesOk, setIntegracoesOk] = useState(true);
         const { prefetch: prefetchModule } = usePrefetchModuleData();
@@ -302,23 +301,13 @@ function LayoutContent({ children, currentPageName }) {
         window.location.href = createPageUrl('Comercial');
       }
 
-      if (ctrl && e.key === 'm') {
-        e.preventDefault();
-        setModoEscuro(prev => !prev);
-      }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  useEffect(() => {
-    if (modoEscuro) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [modoEscuro]);
+
 
   // Offline status + basic offline shell cache (last data snapshot)
   useEffect(() => {
@@ -544,53 +533,7 @@ function LayoutContent({ children, currentPageName }) {
     };
   }, []); */
 
-  const darkModeStyles = modoEscuro ? `
-    <style>
-      :root.dark {
-        --background: 222.2 84% 4.9%;
-        --foreground: 210 40% 98%;
-        --card: 222.2 84% 4.9%;
-        --card-foreground: 210 40% 98%;
-        --primary: 217.2 91.2% 59.8%;
-        --slate-50: #0f172a;
-        --slate-100: #1e293b;
-        --slate-200: #334155;
-        --slate-600: #cbd5e1;
-        --slate-700: #e2e8f0;
-        --slate-900: #f1f5f9;
-      }
-      
-      .dark body {
-        background: linear-gradient(to bottom right, #0f172a, #1e293b);
-        color: #f1f5f9;
-      }
-      
-      .dark .bg-white {
-        background-color: #1e293b !important;
-        color: #f1f5f9 !important;
-      }
-      
-      .dark .bg-slate-50 {
-        background-color: #0f172a !important;
-      }
-      
-      .dark .text-slate-900 {
-        color: #f1f5f9 !important;
-      }
-      
-      .dark .text-slate-600 {
-        color: #cbd5e1 !important;
-      }
-      
-      .dark .border-slate-200 {
-        border-color: #334155 !important;
-      }
-      
-      .dark .shadow-md {
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
-      }
-    </style>
-  ` : '';
+
 
   // Entity subscriptions — delegado ao LayoutEffects
   /* useEffect(() => {
@@ -1197,8 +1140,7 @@ function LayoutContent({ children, currentPageName }) {
         user={user} empresaAtual={empresaAtual} grupoAtual={grupoAtual}
         contexto={contexto} contextRef={contextRef}
       />
-      {/* Dark mode styles — always mounted, innerHTML toggled to avoid fiber mismatches */}
-      <div dangerouslySetInnerHTML={{ __html: modoEscuro ? darkModeStyles : '' }} />
+
 
       {/* Mobile page: always mounted, visibility toggled via display */}
       <div className="w-full h-full min-h-screen" style={{ display: isMobilePage ? undefined : 'none' }}>{children}</div>
@@ -1291,15 +1233,7 @@ function LayoutContent({ children, currentPageName }) {
               </button>
             </div>
             
-            <div className="mt-2 pt-2 border-t border-slate-200">
-              <button
-                onClick={() => setModoEscuro(!modoEscuro)}
-                className="w-full flex items-center gap-2 p-2 rounded hover:bg-slate-100 text-sm text-slate-600 transition-colors"
-                title="Ctrl+M"
-              >
-                {modoEscuro ? '☀️ Modo Claro' : '🌙 Modo Escuro'}
-              </button>
-            </div>
+
           </SidebarFooter>
         </Sidebar>
 

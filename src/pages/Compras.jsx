@@ -1,6 +1,6 @@
 import React, { startTransition } from "react";
 import { base44 } from "@/api/base44Client";
-import { Building2, Users, ShoppingCart, FileText, Upload, Package } from "lucide-react";
+import { Users, ShoppingCart, FileText, Upload } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
@@ -33,7 +33,6 @@ export default function Compras() {
   const contextoValido = contextKey !== "sem-contexto";
   const podeCriarOC = hasPermission("Compras", "Ordens de Compra", "criar") || hasPermission("Compras", "Ordens Compra", "criar");
 
-  // Queries via useRLSQuery (escopo multi-empresa automático)
   const { data: fornecedores = [] } = useRLSQuery(
     'Fornecedor', {}, '-created_date', 100,
     { staleTime: 30000, retry: 2, enabled: contextoValido }
@@ -56,7 +55,7 @@ export default function Compras() {
     .reduce((sum, o) => sum + (o.valor_total || 0), 0);
 
   const fornecedoresAtivos = fornecedores.filter(f => f.status === 'Ativo').length;
-  const solicitacoesPendentes = solicitacoes.filter(s => s.status === 'Pendente').length;
+  const solicitacoesPendentes = solicitacoes.filter(s => s.status === 'Pendente').length; 
 
   if (loadingPermissions) {
     return (
@@ -129,6 +128,9 @@ export default function Compras() {
     startTransition(() => {
       void base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário',
+        usuario_id: user?.id || null,
+        empresa_id: empresaAtual?.id || null,
+        group_id: groupId || null,
         acao: 'Visualização',
         modulo: 'Compras',
         tipo_auditoria: 'acesso',

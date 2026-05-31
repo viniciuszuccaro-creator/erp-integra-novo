@@ -1,7 +1,7 @@
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useState, startTransition } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Truck, Package, FileText, Route, Activity, BarChart3, Settings, Map, MessageCircle, Camera, Scan, Building2 } from "lucide-react";
+import { Truck, Package, FileText, Route, Activity, BarChart3, Settings, Map, MessageCircle, Camera, Scan } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
@@ -11,7 +11,6 @@ import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import ModuleLayout from "@/components/layout/ModuleLayout";
 import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
@@ -45,7 +44,7 @@ const RelatorioFinanceiroLogistica = React.lazy(() => import("../components/expe
 
 export default function Expedicao() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
-  const canSeeExpedicao = hasPermission('Expedição', null, 'ver');
+  const canSeeExpedicao = hasPermission('Expedição', null, 'visualizar');
   const { openWindow } = useWindow();
   const { user } = useUser();
   const { toast } = useToast();
@@ -80,21 +79,16 @@ export default function Expedicao() {
     { staleTime: 30000, retry: 1, enabled: canSeeExpedicao }
   );
 
-  // Contagem derivada diretamente da lista
-  const totalEntregas = entregas.length;
-
-  // Dados já vêm filtrados do servidor
-  const entregasFiltradas = entregas;
   const { data: entregasRealtime, hasChanges } = useRealtimeEntregas(empresaAtual?.id);
 
   const statusCounts = {
-    total: entregasFiltradas.length,
-    aguardando: entregasFiltradas.filter(e => e.status === "Aguardando Separação").length,
-    separacao: entregasFiltradas.filter(e => e.status === "Em Separação").length,
-    pronto: entregasFiltradas.filter(e => e.status === "Pronto para Expedir").length,
-    transito: entregasFiltradas.filter(e => e.status === "Em Trânsito" || e.status === "Saiu para Entrega").length,
-    entregue: entregasFiltradas.filter(e => e.status === "Entregue").length,
-    frustrada: entregasFiltradas.filter(e => e.status === "Entrega Frustrada").length,
+    total: entregas.length,
+    aguardando: entregas.filter(e => e.status === "Aguardando Separação").length,
+    separacao: entregas.filter(e => e.status === "Em Separação").length,
+    pronto: entregas.filter(e => e.status === "Pronto para Expedir").length,
+    transito: entregas.filter(e => e.status === "Em Trânsito" || e.status === "Saiu para Entrega").length,
+    entregue: entregas.filter(e => e.status === "Entregue").length,
+    frustrada: entregas.filter(e => e.status === "Entrega Frustrada").length,
   };
 
   if (loadingPermissions) {
@@ -111,7 +105,7 @@ export default function Expedicao() {
       windowTitle: '🚚 Entregas',
       width: 1600,
       height: 900,
-      props: { entregas: entregasFiltradas, clientes, pedidos, empresasDoGrupo, estaNoGrupo }
+      props: { entregas, clientes, pedidos, empresasDoGrupo, estaNoGrupo }
     },
     {
       title: 'Separação',
@@ -143,7 +137,7 @@ export default function Expedicao() {
       windowTitle: '🗺️ Rotas e Mapa',
       width: 1400,
       height: 800,
-      props: { entregas: entregasFiltradas.filter(e => e.status === "Pronto para Expedir"), empresaId: empresaAtual?.id }
+      props: { entregas: entregas.filter(e => e.status === "Pronto para Expedir"), empresaId: empresaAtual?.id }
     },
     {
       title: 'Roteirização IA',
@@ -223,18 +217,20 @@ export default function Expedicao() {
 
   const allowedModules = modules.filter(m => hasPermission('Expedição', (m.sectionKey || m.title), 'ver'));
 
-   const handleModuleClick = (module) => {
-    React.startTransition(() => {
-      // Auditoria de abertura de seção
-      base44.entities.AuditLog.create({
+  const handleModuleClick = (module) => {
+    startTransition(() => {
+      void base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário',
+        usuario_id: user?.id || null,
+        empresa_id: empresaAtual?.id || null,
+        group_id: grupoAtual?.id || null,
         acao: 'Visualização',
         modulo: 'Expedição',
         tipo_auditoria: 'acesso',
         entidade: 'Seção',
         descricao: `Abrir seção: ${module.title}`,
         data_hora: new Date().toISOString(),
-      });
+      }).catch(() => {});
       openWindow(
          module.component,
         { ...(module.props || {}), windowMode: true },
@@ -253,13 +249,8 @@ export default function Expedicao() {
     <ErrorBoundary>
       <ModuleLayout title="Expedição e Logística" subtitle="Entregas, romaneios e rotas" actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'expedicao_primary_action' })}>Nova Entrega</Button></div>}>
         <ModuleKPIs>
-          <ExpedicaoIAPanel entregas={entregasFiltradas} />
-          <KPIsExpedicao statusCounts={statusCounts} />
-          {estaNoGrupo && (
-            <Badge className="bg-blue-100 text-blue-700 px-3 py-1.5">
-              <Building2 className="w-3 h-3 mr-2" /> Visão Consolidada do Grupo
-            </Badge>
-          )}
+          <ExpedicaoIAPanel entregas={entregas} />
+           <KPIsExpedicao statusCounts={statusCounts} />
         </ModuleKPIs>
         <ModuleContent>
           <ModuleTabs

@@ -23,7 +23,7 @@ import AdvancedAnalyticsHub from '@/components/business-intelligence/AdvancedAna
 import ExecutiveMonitoringHub from '@/components/executive-monitoring/ExecutiveMonitoringHub';
 import CustomerIntelligenceHub from '@/components/customer-intelligence/CustomerIntelligenceHub';
 import SmartOperationsHub from '@/components/smart-operations/SmartOperationsHub';
-import AICopilotHub from '@/components/ai-copilot/AICopilotHub';
+import CollaborativeWorkspaceHub from '@/components/collaborative-workspace/CollaborativeWorkspaceHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -154,17 +154,17 @@ const AuthenticatedApp = () => {
             </EmpresaSelectorGuard>
           </RBACRoute>
         } />
-        <Route path="/AICopilot" element={
-          <RBACRoute module="Dashboard" action="ver">
+        <Route path="/CollaborativeWorkspace" element={
+          <RBACRoute module="Administrativo" action="ver">
             <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="AICopilot">
-                <AICopilotHub />
+              <LayoutWrapper currentPageName="CollaborativeWorkspace">
+                <CollaborativeWorkspaceHub />
               </LayoutWrapper>
             </EmpresaSelectorGuard>
           </RBACRoute>
         } />
         <Route path="/SmartOperations" element={
-          <RBACRoute module="Dashboard" action="ver">
+          <RBACRoute module="Producao" action="ver">
             <EmpresaSelectorGuard>
               <LayoutWrapper currentPageName="SmartOperations">
                 <SmartOperationsHub />

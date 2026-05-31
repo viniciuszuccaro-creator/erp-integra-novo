@@ -25,9 +25,7 @@ import {
         Trophy,
         Zap,
         Building2,
-        AlertCircle,
-        Activity,
-        Lightbulb
+        AlertCircle
       } from "lucide-react";
 import {
   Sidebar,
@@ -87,6 +85,7 @@ const navigationItems = [
         { title: "Executive Monitoring", url: "/ExecutiveMonitoring", icon: AlertCircle, group: "principal" },
         { title: "Agenda e Calendário", url: createPageUrl("Agenda"), icon: Calendar, group: "principal" },
         { title: "CRM - Relacionamento", url: createPageUrl("CRM"), icon: Users, group: "principal" },
+  { title: "Collaborative Workspace", url: "/CollaborativeWorkspace", icon: Users, group: "principal" },
   { title: "Customer Intelligence (IA)", url: "/CustomerIntelligence", icon: Users, group: "principal" },
   { title: "Cadastros Gerais", url: createPageUrl("Cadastros"), icon: Users, group: "cadastros" },
   { title: "Comercial e Vendas", url: createPageUrl("Comercial"), icon: ShoppingCart, group: "operacional" },
@@ -94,13 +93,12 @@ const navigationItems = [
   { title: "Compras e Suprimentos", url: createPageUrl("Compras"), icon: Package, group: "operacional" },
   { title: "Expedição e Logística", url: createPageUrl("Expedicao"), icon: Truck, group: "operacional" },
   { title: "Produção e Manufatura", url: createPageUrl("Producao"), icon: Factory, group: "operacional" },
+  { title: "Smart Operations (IA)", url: "/SmartOperations", icon: Factory, group: "operacional" },
 
 
 
   { title: "Financeiro e Contábil", url: createPageUrl("Financeiro"), icon: DollarSign, group: "administrativo" },
   { title: "Recursos Humanos", url: createPageUrl("RH"), icon: UserCircle, group: "administrativo" },
-  { title: "Smart Operations (IA)", url: "/SmartOperations", icon: Activity, group: "operacional" },
-  { title: "IA Copilot", url: "/AICopilot", icon: Lightbulb, group: "principal" },
   { title: "Orquestrador RH (IA)", url: "/WorkforceOrchestrator", icon: Zap, group: "administrativo" },
   { title: "Cadeia de Suprimentos (IA)", url: "/SupplyChainIntelligence", icon: Package, group: "operacional" },
   { title: "Inteligência Financeira (IA)", url: "/FinancialIntelligence", icon: DollarSign, group: "administrativo" },

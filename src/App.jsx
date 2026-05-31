@@ -24,6 +24,7 @@ import ExecutiveMonitoringHub from '@/components/executive-monitoring/ExecutiveM
 import CustomerIntelligenceHub from '@/components/customer-intelligence/CustomerIntelligenceHub';
 import SmartOperationsHub from '@/components/smart-operations/SmartOperationsHub';
 import CollaborativeWorkspaceHub from '@/components/collaborative-workspace/CollaborativeWorkspaceHub';
+import BlockchainAuditHub from '@/components/blockchain-audit/BlockchainAuditHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -150,6 +151,15 @@ const AuthenticatedApp = () => {
             <EmpresaSelectorGuard>
               <LayoutWrapper currentPageName="ExecutiveMonitoring">
                 <ExecutiveMonitoringHub />
+              </LayoutWrapper>
+            </EmpresaSelectorGuard>
+          </RBACRoute>
+        } />
+        <Route path="/BlockchainAudit" element={
+          <RBACRoute module="Sistema" action="ver">
+            <EmpresaSelectorGuard>
+              <LayoutWrapper currentPageName="BlockchainAudit">
+                <BlockchainAuditHub />
               </LayoutWrapper>
             </EmpresaSelectorGuard>
           </RBACRoute>

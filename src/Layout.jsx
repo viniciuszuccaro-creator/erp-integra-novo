@@ -105,6 +105,7 @@ const navigationItems = [
   { title: "Fiscal e Tributário", url: createPageUrl("Fiscal"), icon: FileText, group: "administrativo" },
   { title: "Gestão de Contratos", url: createPageUrl("Contratos"), icon: FileText, group: "administrativo" },
 
+  { title: "Blockchain Audit & Compliance", url: "/BlockchainAudit", icon: Shield, group: "sistema" },
   { title: "Administração do Sistema", url: createPageUrl("AdministracaoSistema?tab=integracoes"), icon: Settings, group: "sistema" },
 
   

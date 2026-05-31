@@ -94,6 +94,7 @@ const navigationItems = [
   { title: "Financeiro e Contábil", url: createPageUrl("Financeiro"), icon: DollarSign, group: "administrativo" },
   { title: "Recursos Humanos", url: createPageUrl("RH"), icon: UserCircle, group: "administrativo" },
   { title: "Orquestrador RH (IA)", url: "/WorkforceOrchestrator", icon: Zap, group: "administrativo" },
+  { title: "Cadeia de Suprimentos (IA)", url: "/SupplyChainIntelligence", icon: Package, group: "operacional" },
   { title: "Fiscal e Tributário", url: createPageUrl("Fiscal"), icon: FileText, group: "administrativo" },
   { title: "Gestão de Contratos", url: createPageUrl("Contratos"), icon: FileText, group: "administrativo" },
 

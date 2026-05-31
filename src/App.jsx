@@ -17,6 +17,7 @@ import ErrorBoundary from '@/components/lib/ErrorBoundary';
 import RBACRoute from '@/components/lib/RBACRoute';
 import { RBAC_MODULES } from '@/lib/rbacModuleMap';
 import WorkforceOrchestratorHub from '@/components/workforce-orchestrator/WorkforceOrchestratorHub';
+import SupplyChainIntelligenceHub from '@/components/supply-chain-intelligence/SupplyChainIntelligenceHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -107,6 +108,15 @@ const AuthenticatedApp = () => {
             <EmpresaSelectorGuard>
               <LayoutWrapper currentPageName="WorkforceOrchestrator">
                 <WorkforceOrchestratorHub />
+              </LayoutWrapper>
+            </EmpresaSelectorGuard>
+          </RBACRoute>
+        } />
+        <Route path="/SupplyChainIntelligence" element={
+          <RBACRoute module="Compras" action="ver">
+            <EmpresaSelectorGuard>
+              <LayoutWrapper currentPageName="SupplyChainIntelligence">
+                <SupplyChainIntelligenceHub />
               </LayoutWrapper>
             </EmpresaSelectorGuard>
           </RBACRoute>

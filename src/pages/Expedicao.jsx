@@ -241,24 +241,14 @@ export default function Expedicao() {
       height: 700,
     },
     {
-      title: 'Dashboard IA',
-      description: 'Analytics inteligente',
+      title: 'Dashboard Logístico',
+      description: 'Analytics e métricas',
       icon: BarChart3,
       color: 'blue',
-      component: DashboardLogisticaInteligente,
-      windowTitle: '📊 Dashboard IA',
-      width: 1300,
-      height: 750,
-    },
-    {
-      title: 'Dashboard Entregas',
-      description: 'Visão geral realtime',
-      icon: Activity,
-      color: 'cyan',
       component: DashboardEntregasRealtime,
-      windowTitle: '📊 Dashboard Entregas',
-      width: 1300,
-      height: 750,
+      windowTitle: '📊 Dashboard Logístico',
+      width: 1400,
+      height: 800,
       props: { empresaId: empresaAtual?.id }
     },
     {
@@ -304,17 +294,6 @@ export default function Expedicao() {
       height: 700,
       props: { empresaId: empresaAtual?.id }
     },
-  {
-    title: 'Painel Logístico',
-    description: 'Mapa + filas em tempo real',
-    icon: Activity,
-    color: 'teal',
-    component: DashboardLogistico,
-    windowTitle: '🗺️ Painel Logístico',
-    width: 1400,
-    height: 800,
-    props: { empresaId: empresaAtual?.id, entregas: entregasFiltradas }
-  }
   ];
 
   const allowedModules = modules.filter(m => hasPermission('Expedição', (m.sectionKey || m.title), 'ver'));

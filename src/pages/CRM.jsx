@@ -123,28 +123,7 @@ export default function CRMPage() {
       height: 900,
       props: { oportunidades: oportunidadesFiltradas, windowMode: true }
     },
-    {
-      title: 'Funil IA',
-      description: 'Análise inteligente',
-      icon: Sparkles,
-      color: 'purple',
-      component: FunilComercialInteligente,
-      windowTitle: '🤖 Funil IA',
-      width: 1500,
-      height: 850,
-      props: { windowMode: true }
-    },
-    {
-      title: 'Funil Avançado',
-      description: 'Scoring automático',
-      icon: Target,
-      color: 'cyan',
-      component: FunilVendasAvancado,
-      windowTitle: '🎯 Funil Avançado',
-      width: 1500,
-      height: 850,
-      props: { windowMode: true }
-    },
+
     {
       title: 'Oportunidades',
       description: 'Gestão completa',

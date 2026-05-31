@@ -31,8 +31,8 @@ const IAReposicao = React.lazy(() => import("../components/estoque/IAReposicao")
 
 export default function Estoque() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
-  const canExportEstoque = hasPermission('Estoque', null, 'exportar') || hasPermission('Estoque', 'Relatórios', 'exportar') || hasPermission('Estoque', 'Relatorios', 'exportar');
-  const canTransferirEstoque = hasPermission('Estoque', 'Transferências', 'criar') || hasPermission('Estoque', 'Transferencias', 'criar') || hasPermission('Estoque', 'Movimentações', 'criar') || hasPermission('Estoque', 'Movimentacoes', 'criar');
+  const canExportEstoque = hasPermission('Estoque', 'Relatórios', 'exportar');
+  const canTransferirEstoque = hasPermission('Estoque', 'Transferências', 'criar');
   const { openWindow } = useWindow();
   const { user } = useUser();
   const { estaNoGrupo, empresaAtual, grupoAtual, empresasDoGrupo } = useContextoVisual();
@@ -52,13 +52,6 @@ export default function Estoque() {
     producao: produtosParaKPIs.filter(p => p.tipo_item === 'Matéria-Prima Produção').length,
     estoqueBaixo: produtosParaKPIs.filter(isProdutoEstoqueBaixo).length,
   }), [produtosParaKPIs]);
-
-  React.useEffect(() => {
-    const unsubscribe = base44.entities.Produto.subscribe(() => {
-      if (contextoValido) refetchContagens();
-    });
-    return unsubscribe;
-  }, [refetchContagens, contextoValido]);
 
   const { data: movimentacoes = [] } = useRLSQuery(
     'MovimentacaoEstoque', {}, '-data_movimentacao', ESTOQUE_LIST_LIMIT,
@@ -119,17 +112,18 @@ export default function Estoque() {
     return <div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div>;
   }
 
+  const InventarioForm = React.lazy(() => import('../components/estoque/InventarioForm'));
+
   const modules = [
     {
       title: 'Inventário',
       description: 'Contagem e ajustes',
       icon: Box,
       color: 'cyan',
-      component: React.lazy(() => import('../components/estoque/InventarioForm')),
+      component: InventarioForm,
       windowTitle: '📋 Inventário',
       width: 1200,
       height: 800,
-      props: {}
     },
     {
       title: 'Produtos',
@@ -140,7 +134,6 @@ export default function Estoque() {
       windowTitle: '📦 Produtos',
       width: 1500,
       height: 850,
-      props: {}
     },
     {
       title: 'Movimentações',
@@ -151,7 +144,7 @@ export default function Estoque() {
       windowTitle: '📊 Movimentações',
       width: 1500,
       height: 850,
-      props: { movimentacoes, produtos: produtosParaKPIs }
+      props: { movimentacoes, produtos: produtosParaKPIs },
     },
     {
       title: 'Recebimento',
@@ -162,7 +155,7 @@ export default function Estoque() {
       windowTitle: '📥 Recebimento',
       width: 1400,
       height: 800,
-      props: { recebimentos, ordensCompra, produtos: produtosParaKPIs }
+      props: { recebimentos, ordensCompra, produtos: produtosParaKPIs },
     },
     {
       title: 'Requisições Almox.',
@@ -173,7 +166,7 @@ export default function Estoque() {
       windowTitle: '📤 Requisições Almoxarifado',
       width: 1400,
       height: 800,
-      props: { requisicoes: requisicoesAlmoxarifado, produtos: produtosParaKPIs }
+      props: { requisicoes: requisicoesAlmoxarifado, produtos: produtosParaKPIs },
     },
     {
       title: 'Solicitações Compra',
@@ -184,7 +177,7 @@ export default function Estoque() {
       windowTitle: '📋 Solicitações Compra',
       width: 1400,
       height: 800,
-      props: { solicitacoes, produtos: produtosParaKPIs }
+      props: { solicitacoes, produtos: produtosParaKPIs },
     },
     {
       title: 'Lotes e Validade',
@@ -195,7 +188,7 @@ export default function Estoque() {
       windowTitle: '⏰ Lotes e Validade',
       width: 1400,
       height: 800,
-      props: { empresaId: empresaAtual?.id }
+      props: { empresaId: empresaAtual?.id },
     },
     {
       title: 'Relatórios',
@@ -206,7 +199,7 @@ export default function Estoque() {
       windowTitle: '📈 Relatórios Estoque',
       width: 1400,
       height: 800,
-      props: { produtos: produtosParaKPIs, movimentacoes }
+      props: { produtos: produtosParaKPIs, movimentacoes },
     },
     {
       title: 'IA Reposição',
@@ -217,15 +210,14 @@ export default function Estoque() {
       windowTitle: '🤖 IA Reposição',
       width: 1300,
       height: 750,
-      props: { empresaId: empresaAtual?.id }
+      props: { empresaId: empresaAtual?.id },
     },
   ];
 
   const allowedModules = modules.filter(m => hasPermission('Estoque', (m.sectionKey || m.title), 'ver'));
 
-   const handleModuleClick = (module) => {
+  const handleModuleClick = (module) => {
     startTransition(() => {
-      // Auditoria de abertura de seção
       void base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário',
         usuario_id: user?.id || null,

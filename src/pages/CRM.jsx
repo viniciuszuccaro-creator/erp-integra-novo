@@ -1,16 +1,15 @@
 import React from "react";
 import { base44 } from "@/api/base44Client";
-import { TrendingUp, Target, MessageSquare, Mail, Sparkles, AlertTriangle, BarChart3, Users } from "lucide-react";
+import { TrendingUp, Target, MessageSquare, Mail, Sparkles, AlertTriangle } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import { useWindow } from "@/components/lib/useWindow";
 import usePermissions from "@/components/lib/usePermissions";
-import HeaderCRMCompacto from "@/components/crm/crm-launchpad/HeaderCRMCompacto";
+import { useUser } from "@/components/lib/UserContext";
 import KPIsCRM from "@/components/crm/crm-launchpad/KPIsCRM";
 import ModulosGridCRM from "@/components/crm/crm-launchpad/ModulosGridCRM";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import ModuleLayout from "@/components/layout/ModuleLayout";
 import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
@@ -19,15 +18,15 @@ import { Button } from "@/components/ui/button";
 import useCRMDerivedData from "@/components/crm/hooks/useCRMDerivedData";
 import CRMIAPanel from "@/components/crm/CRMIAPanel";
 import CRMScoreClienteWidget from "@/components/crm/CRMScoreClienteWidget";
-import { useUser } from "@/components/lib/UserContext";
-import { CRM_CAMPAIGN_LIMIT, CRM_LIST_LIMIT } from "@/components/crm/config/crmQueryConfig";
+import { CRM_CAMPAIGN_LIMIT, CRM_LIST_LIMIT, crmQueryDefaults } from "@/components/crm/config/crmQueryConfig";
 
 const OportunidadesListagem = React.lazy(() => import("../components/crm/OportunidadesListagem"));
 const InteracoesListagem = React.lazy(() => import("../components/crm/InteracoesListagem"));
 const FunilVisual = React.lazy(() => import("../components/crm/FunilVisual"));
-
 const IALeadsPriorizacao = React.lazy(() => import("../components/crm/IALeadsPriorizacao"));
 const IAChurnDetection = React.lazy(() => import("../components/crm/IAChurnDetection"));
+
+
 
 export default function CRMPage() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
@@ -39,19 +38,19 @@ export default function CRMPage() {
   // Queries via useRLSQuery (escopo multi-empresa automático)
   const { data: oportunidades = [] } = useRLSQuery(
     'Oportunidade', {}, '-created_date', CRM_LIST_LIMIT,
-    { staleTime: 30000, enabled: !bloqueadoSemEmpresa }
+    { ...crmQueryDefaults, enabled: !bloqueadoSemEmpresa }
   );
   const { data: interacoes = [] } = useRLSQuery(
     'Interacao', {}, '-created_date', CRM_LIST_LIMIT,
-    { staleTime: 30000, enabled: !bloqueadoSemEmpresa }
+    { ...crmQueryDefaults, enabled: !bloqueadoSemEmpresa }
   );
   const { data: campanhas = [] } = useRLSQuery(
     'Campanha', {}, '-created_date', CRM_CAMPAIGN_LIMIT,
-    { staleTime: 30000, enabled: !bloqueadoSemEmpresa }
+    { ...crmQueryDefaults, enabled: !bloqueadoSemEmpresa }
   );
   const { data: clientes = [] } = useRLSQuery(
     'Cliente', {}, '-created_date', CRM_LIST_LIMIT,
-    { staleTime: 30000, enabled: !bloqueadoSemEmpresa }
+    { ...crmQueryDefaults, enabled: !bloqueadoSemEmpresa }
   );
 
   // Contagem derivada diretamente da lista

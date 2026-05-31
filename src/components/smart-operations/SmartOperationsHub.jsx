@@ -2,88 +2,102 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Activity, Zap, Link2, Brain, Settings } from 'lucide-react';
 import usePermissions from '@/components/lib/usePermissions';
-import OperationsKPIBar from './OperationsKPIBar';
-import RealtimeOpsMonitor from './RealtimeOpsMonitor';
-import ProcessAutomationCenter from './ProcessAutomationCenter';
-import CrossModuleOrchestrator from './CrossModuleOrchestrator';
-import PredictiveOpsEngine from './PredictiveOpsEngine';
+import { Factory, Wrench, ShieldCheck, BarChart3 } from 'lucide-react';
+import ProductionRealtime from './ProductionRealtime';
+import PredictiveMaintenancePanel from './PredictiveMaintenancePanel';
+import QualityControlPanel from './QualityControlPanel';
+import OperationsKPIPanel from './OperationsKPIPanel';
 
 export default function SmartOperationsHub() {
   const { hasPermission } = usePermissions();
-  const [activeTab, setActiveTab] = useState('realtime');
+  const [activeTab, setActiveTab] = useState('producao');
 
-  const canAccess = hasPermission('Dashboard', null, 'ver') || hasPermission('Comercial', null, 'ver');
+  const canAccess = hasPermission('Producao', null, 'ver') || hasPermission('Estoque', null, 'ver');
 
   if (!canAccess) {
     return (
       <Card className="bg-red-900/20 border-red-600 w-full">
         <CardContent className="p-6 text-center">
           <p className="text-red-400 font-semibold">Acesso Negado</p>
-          <p className="text-red-200 text-sm mt-2">Permissão insuficiente para o Smart Operations Hub.</p>
+          <p className="text-red-200 text-sm mt-2">Você não tem permissão para acessar o Smart Operations Hub.</p>
         </CardContent>
       </Card>
     );
   }
 
+  const kpis = [
+    { label: 'OEE Médio', valor: '83%', cor: 'text-blue-400' },
+    { label: 'Linhas Ativas', valor: '3/5', cor: 'text-emerald-400' },
+    { label: 'Ativos em Risco', valor: '2', cor: 'text-red-400' },
+    { label: 'Taxa Aprovação', valor: '96.2%', cor: 'text-purple-400' },
+  ];
+
   return (
     <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-900 to-slate-950">
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700 p-6">
-        <div className="flex justify-between items-start mb-4">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-              <Settings className="w-7 h-7 text-cyan-400" />
-              Smart Operations Center
+              <Factory className="w-7 h-7 text-blue-400" />
+              Smart Operations Hub
             </h1>
-            <p className="text-slate-400 text-sm mt-1">
-              Monitoramento Real-time • Automação de Processos • Orquestração Multi-Módulo • IA Preditiva
-            </p>
+            <p className="text-slate-400 text-sm mt-1">Produção em Tempo Real • Manutenção Preditiva • Qualidade SPC • KPIs</p>
           </div>
           <div className="flex gap-2">
-            <Badge className="bg-emerald-900 text-emerald-200 animate-pulse">● Sistema Operacional</Badge>
-            <Badge className="bg-purple-900 text-purple-200">IA v3.1</Badge>
+            <Badge className="bg-emerald-900 text-emerald-200">Multi-Empresa</Badge>
+            <Badge className="bg-blue-900 text-blue-200">IA Ativa</Badge>
           </div>
         </div>
-        {/* KPI Bar */}
-        <OperationsKPIBar />
+
+        {/* KPIs Header */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+          {kpis.map((kpi, idx) => (
+            <div key={idx} className="bg-slate-700/30 border border-slate-600 rounded-lg p-3">
+              <p className="text-xs text-slate-400">{kpi.label}</p>
+              <p className={`text-lg font-bold ${kpi.cor}`}>{kpi.valor}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex-1 overflow-auto p-4">
+      <div className="flex-1 overflow-auto p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
           <TabsList className="grid w-full grid-cols-4 bg-slate-800 border-b border-slate-700 mb-4">
-            <TabsTrigger value="realtime" className="data-[state=active]:bg-emerald-700 text-xs">
-              <Activity className="w-4 h-4 mr-1" />
-              <span className="hidden sm:inline">Realtime</span>
+            <TabsTrigger value="producao" className="data-[state=active]:bg-blue-600">
+              <Factory className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Produção</span>
             </TabsTrigger>
-            <TabsTrigger value="automacoes" className="data-[state=active]:bg-blue-700 text-xs">
-              <Zap className="w-4 h-4 mr-1" />
-              <span className="hidden sm:inline">Automações</span>
+            <TabsTrigger value="manutencao" className="data-[state=active]:bg-yellow-600">
+              <Wrench className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Manutenção</span>
             </TabsTrigger>
-            <TabsTrigger value="orquestrador" className="data-[state=active]:bg-cyan-700 text-xs">
-              <Link2 className="w-4 h-4 mr-1" />
-              <span className="hidden sm:inline">Orquestrador</span>
+            <TabsTrigger value="qualidade" className="data-[state=active]:bg-emerald-600">
+              <ShieldCheck className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Qualidade</span>
             </TabsTrigger>
-            <TabsTrigger value="preditivo" className="data-[state=active]:bg-purple-700 text-xs">
-              <Brain className="w-4 h-4 mr-1" />
-              <span className="hidden sm:inline">Preditivo</span>
+            <TabsTrigger value="kpis" className="data-[state=active]:bg-purple-600">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">KPIs</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="realtime" className="m-0">
-            <RealtimeOpsMonitor />
-          </TabsContent>
-          <TabsContent value="automacoes" className="m-0">
-            <ProcessAutomationCenter />
-          </TabsContent>
-          <TabsContent value="orquestrador" className="m-0">
-            <CrossModuleOrchestrator />
-          </TabsContent>
-          <TabsContent value="preditivo" className="m-0">
-            <PredictiveOpsEngine />
-          </TabsContent>
+          <div className="h-full">
+            <TabsContent value="producao" className="h-full m-0">
+              <ProductionRealtime />
+            </TabsContent>
+            <TabsContent value="manutencao" className="h-full m-0">
+              <PredictiveMaintenancePanel />
+            </TabsContent>
+            <TabsContent value="qualidade" className="h-full m-0">
+              <QualityControlPanel />
+            </TabsContent>
+            <TabsContent value="kpis" className="h-full m-0">
+              <OperationsKPIPanel />
+            </TabsContent>
+          </div>
         </Tabs>
       </div>
     </div>

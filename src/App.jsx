@@ -154,7 +154,7 @@ const AuthenticatedApp = () => {
           </RBACRoute>
         } />
         <Route path="/SmartOperations" element={
-          <RBACRoute module="Dashboard" action="ver">
+          <RBACRoute module="Producao" action="ver">
             <EmpresaSelectorGuard>
               <LayoutWrapper currentPageName="SmartOperations">
                 <SmartOperationsHub />

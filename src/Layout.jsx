@@ -25,8 +25,7 @@ import {
         Trophy,
         Zap,
         Building2,
-        AlertCircle,
-        Activity
+        AlertCircle
       } from "lucide-react";
 import {
   Sidebar,
@@ -93,12 +92,12 @@ const navigationItems = [
   { title: "Compras e Suprimentos", url: createPageUrl("Compras"), icon: Package, group: "operacional" },
   { title: "Expedição e Logística", url: createPageUrl("Expedicao"), icon: Truck, group: "operacional" },
   { title: "Produção e Manufatura", url: createPageUrl("Producao"), icon: Factory, group: "operacional" },
+  { title: "Smart Operations (IA)", url: "/SmartOperations", icon: Factory, group: "operacional" },
 
 
 
   { title: "Financeiro e Contábil", url: createPageUrl("Financeiro"), icon: DollarSign, group: "administrativo" },
   { title: "Recursos Humanos", url: createPageUrl("RH"), icon: UserCircle, group: "administrativo" },
-  { title: "Smart Operations (IA)", url: "/SmartOperations", icon: Activity, group: "operacional" },
   { title: "Orquestrador RH (IA)", url: "/WorkforceOrchestrator", icon: Zap, group: "administrativo" },
   { title: "Cadeia de Suprimentos (IA)", url: "/SupplyChainIntelligence", icon: Package, group: "operacional" },
   { title: "Inteligência Financeira (IA)", url: "/FinancialIntelligence", icon: DollarSign, group: "administrativo" },

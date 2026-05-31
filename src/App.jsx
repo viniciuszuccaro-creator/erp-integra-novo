@@ -28,7 +28,7 @@ import BlockchainAuditHub from '@/components/blockchain-audit/BlockchainAuditHub
 import ESGScorecardHub from '@/components/esg/ESGScorecardHub';
 import DigitalTwinHub from '@/components/digital-twin/DigitalTwinHub';
 import VoiceAIHub from '@/components/voice-ai/VoiceAIHub';
-import QuantumSecurityHub from '@/components/security-quantum/QuantumSecurityHub';
+import RiskManagementHub from '@/components/risk-compliance/RiskManagementHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -195,11 +195,11 @@ const AuthenticatedApp = () => {
             </EmpresaSelectorGuard>
           </RBACRoute>
         } />
-        <Route path="/QuantumSecurity" element={
+        <Route path="/RiskManagement" element={
           <RBACRoute module="Sistema" action="ver">
             <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="QuantumSecurity">
-                <QuantumSecurityHub />
+              <LayoutWrapper currentPageName="RiskManagement">
+                <RiskManagementHub />
               </LayoutWrapper>
             </EmpresaSelectorGuard>
           </RBACRoute>

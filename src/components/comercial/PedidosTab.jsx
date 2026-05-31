@@ -35,10 +35,10 @@ import { useToast } from "@/components/ui/use-toast";
 import SearchInput from "../ui/SearchInput";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useWindow } from "@/components/lib/useWindow";
-import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLS from "@/components/lib/useRLS";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import CentralAprovacoesManager from "./CentralAprovacoesManager";
 import usePermissions from "@/components/lib/usePermissions";
-import useEntityListSorted from "@/components/lib/useEntityListSorted";
 import usePersistedSort from "@/components/lib/usePersistedSort";
 import AutomacaoFluxoPedido from "./AutomacaoFluxoPedido";
 import useBackendPagination from "@/components/lib/useBackendPagination";
@@ -49,9 +49,8 @@ export default function PedidosTab({ pedidos, clientes, isLoading, empresas, onC
   const { page, setPage, pageSize, setPageSize } = useBackendPagination('Pedido', 20);
   const [sortField, setSortField, sortDirection, setSortDirection] = usePersistedSort('Pedido', 'data_pedido', 'desc');
 
-  // persistência de sort movida para usePersistedSort
-
-  const { data: pedidosBackend = [] } = useEntityListSorted('Pedido', {}, { sortField, sortDirection, page, pageSize, limit: pageSize, campo: 'empresa_id' });
+  const { data: pedidosBackend = [] } = useRLSQuery('Pedido', {}, `-${sortField}`, pageSize, { staleTime: 120000 });
+  const { update: updatePedido } = useRLS();
   const pedidosList = Array.isArray(pedidos) && pedidos.length ? pedidos : pedidosBackend;
   // V21.6: Multi-empresa
   const [searchTerm, setSearchTerm] = useState("");
@@ -59,7 +58,6 @@ export default function PedidosTab({ pedidos, clientes, isLoading, empresas, onC
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { openWindow, closeWindow } = useWindow();
-  const { updateInContext } = useContextoVisual();
 
   // Seleção em massa + exportação
   const [selectedPedidos, setSelectedPedidos] = useState([]);
@@ -223,14 +221,13 @@ export default function PedidosTab({ pedidos, clientes, isLoading, empresas, onC
                data-permission="Comercial.Pedido.marcarProntoFaturar"
                onClick={async () => {
                 try {
-                  await updateInContext('Pedido', pedido.id, { status: 'Pronto para Faturar' });
+                  await updatePedido('Pedido', pedido.id, { status: 'Pronto para Faturar' });
                   toast({ title: '✅ Pedido fechado para entrega!' });
-                  queryClient.invalidateQueries({ queryKey: ['pedidos'] });
-                  try { await base44.entities.AuditLog.create({ acao: 'Edição', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Status → Pronto para Faturar', data_hora: new Date().toISOString(), sucesso: true }); } catch {}
+                  queryClient.invalidateQueries({ queryKey: ['Pedido'] });
                 } catch {
                   toast({ title: '❌ Erro ao fechar pedido', variant: 'destructive' });
                 }
-              }}
+               }}
               className="h-8 px-2 bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold border border-blue-200"
             >
               <Truck className="w-4 h-4 mr-1" />

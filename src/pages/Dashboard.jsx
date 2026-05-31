@@ -57,10 +57,11 @@ import useDashboardDerivedData from "@/components/dashboard/hooks/useDashboardDe
 import { DASHBOARD_LIST_LIMIT, DASHBOARD_REFETCH_INTERVAL_MS, dashboardQueryDefaults } from "@/components/dashboard/config/dashboardQueryConfig";
 
 // Lazy-loaded components — only those used directly in this page's JSX
-const DashboardHeader     = React.lazy(() => import("@/components/dashboard/DashboardHeader"));
-const DashboardStatusPanel= React.lazy(() => import("@/components/dashboard/DashboardStatusPanel"));
+const DashboardHeader      = React.lazy(() => import("@/components/dashboard/DashboardHeader"));
+const DashboardStatusPanel = React.lazy(() => import("@/components/dashboard/DashboardStatusPanel"));
 const DashboardEssentialKPIs = React.lazy(() => import("@/components/dashboard/DashboardEssentialKPIs"));
-const DashboardResumoTab  = React.lazy(() => import("@/components/dashboard/DashboardResumoTab"));
+const DashboardResumoTab   = React.lazy(() => import("@/components/dashboard/DashboardResumoTab"));
+const ERPHealthBanner      = React.lazy(() => import("@/components/dashboard/ERPHealthBanner"));
 
 
 export default function Dashboard() {
@@ -339,37 +340,27 @@ export default function Dashboard() {
 
   // Dados e gráficos agora são providos por useDashboardDerivedData()
 
-  // IA: apenas quando autoRefresh ativo (evita chamadas desnecessárias)
-  const { data: previsoesIA = {}, isLoading: loadingPrevIA } = useQuery({
-    queryKey: ['iaPrevEstoque', empresaAtual?.id, grupoAtual?.id],
-    queryFn: async () => {
-      if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return { previsoes: [] };
-      const filtros = getFiltroContexto('empresa_id', true);
-      const res = await base44.functions.invoke('iaFinanceAnomalyScan', {
-        filtros,
-        previsao_estoque: { enabled: true, horizon_days: 14 }
-      });
-      return res?.data || { previsoes: [] };
-    },
-    staleTime: 900000,
-    enabled: Boolean(canSeeEstoque && hasContextoAtivo && autoRefresh)
-  });
-
-  // previsoesIA30 consolidado junto com anomalias — mesmo endpoint, uma chamada só
+  // IA consolidado: uma única query para anomalias + previsões (evita 2 chamadas ao mesmo endpoint)
   const { data: iaConsolidado = {}, isLoading: loadingAnomIA } = useQuery({
     queryKey: ['iaConsolidado', empresaAtual?.id, grupoAtual?.id],
     queryFn: async () => {
       if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return { details: [], previsoes: [] };
       const filtros = getFiltroContexto('empresa_id', true);
-      const res = await base44.functions.invoke('iaFinanceAnomalyScan', { filtros });
+      const res = await base44.functions.invoke('iaFinanceAnomalyScan', {
+        filtros,
+        previsao_estoque: { enabled: true, horizon_days: 14 }
+      });
       return res?.data || { details: [], previsoes: [] };
     },
     staleTime: 900000,
     enabled: Boolean((canSeeFinanceiro || canSeeEstoque) && hasContextoAtivo && autoRefresh)
   });
 
+  // Aliases para compatibilidade com subcomponentes
   const anomaliasIA = iaConsolidado;
+  const previsoesIA = iaConsolidado;
   const previsoesIA30 = iaConsolidado;
+  const loadingPrevIA = loadingAnomIA;
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
@@ -655,11 +646,11 @@ export default function Dashboard() {
             </ErrorBoundary>
           </Suspense>
         </div>
-        {/* Status compacto: contexto + propagação (substitui 3 banners anteriores) */}
+        {/* Banner de saúde compacto: contexto + integrações + propagação */}
         <div>
           <Suspense fallback={<></>}>
             <ErrorBoundary>
-              <DashboardStatusPanel />
+              <ERPHealthBanner />
             </ErrorBoundary>
           </Suspense>
         </div>

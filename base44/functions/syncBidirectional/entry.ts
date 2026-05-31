@@ -1,14 +1,28 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 /**
- * syncBidirectional v2.0
+ * syncBidirectional v3.0
  * Propagação bidirecional Grupo ↔ Empresas
- * Suporta: create (DOWN), update (DOWN + UP), delete (DOWN)
+ * Suporta: create/update/delete (DOWN), create/update/delete (UP)
  * 
  * Anti-loop: verifica e_replicado=true para evitar loops infinitos
  * Chamado via automação entity OU diretamente do frontend
+ * 
+ * Campos protegidos: id, created_date, updated_date, e_replicado, documento_grupo_id
+ * Timeout: 8s por empresa para evitar timeout geral
  */
+
+// Campos que NUNCA devem ser copiados na réplica
+const BLOCKED_FIELDS = new Set(['id', 'created_date', 'updated_date', 'created_by']);
+
+function stripBlocked(data) {
+  const out = { ...data };
+  for (const k of BLOCKED_FIELDS) delete out[k];
+  return out;
+}
+
 Deno.serve(async (req) => {
+  const t0 = Date.now();
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
@@ -48,51 +62,42 @@ Deno.serve(async (req) => {
       return Response.json({ ok: true, skipped: 'no context' });
     }
 
+    // Dados insuficientes para operações de create/update → abortar (evita 422)
+    const hasRealData = eventData && typeof eventData === 'object' && Object.keys(eventData).length > 3;
+    if (!hasRealData && eventType !== 'delete') {
+      return Response.json({ ok: true, skipped: 'no_real_data', reason: 'payload vazio ou insuficiente — propagação abortada' });
+    }
+
     const results = [];
     const isBoth = direction === 'both';
     const isDown = isBoth || (!!group_id && (!empresa_id || direction === 'down'));
     const isUp   = isBoth || (!!empresa_id && !!group_id && direction === 'up');
+    const srcId  = entityId || eventData?.id;
 
     // ===== DOWN: Grupo → Empresas =====
-    if (isDown && eventData) {
-      const empresas = await base44.asServiceRole.entities.Empresa.filter(
-        { group_id },
-        null,
-        100
-      );
+    if (isDown && eventData && eventType !== 'delete') {
+      const empresas = await base44.asServiceRole.entities.Empresa.filter({ group_id }, null, 100).catch(() => []);
 
       for (const emp of empresas) {
         try {
-          const newData = {
+          const newData = stripBlocked({
             ...eventData,
             empresa_id: emp.id,
-            documento_grupo_id: entityId || eventData?.id,
+            documento_grupo_id: srcId,
             e_replicado: true,
-            // Remover campos que pertencem apenas ao grupo
-            group_id: group_id,
-          };
-          delete newData.id;
-          delete newData.created_date;
-          delete newData.updated_date;
+            group_id,
+          });
 
-          // Verificar se já existe réplica para evitar duplicação
           const existing = await base44.asServiceRole.entities[entityName]
-            .filter({ documento_grupo_id: entityId || eventData?.id, empresa_id: emp.id }, null, 1)
+            .filter({ documento_grupo_id: srcId, empresa_id: emp.id }, null, 1)
             .catch(() => []);
 
-          if (existing?.length > 0 && eventType === 'update') {
-            // Atualizar réplica existente
-            await base44.asServiceRole.entities[entityName].update(existing[0].id, {
-              ...newData,
-              id: undefined
-            });
-            results.push({ empresa_id: emp.id, status: 'updated' });
-          } else if (existing?.length === 0) {
-            // Criar nova réplica
-            await base44.asServiceRole.entities[entityName].create(newData);
-            results.push({ empresa_id: emp.id, status: 'created' });
+          if (existing?.length > 0) {
+            await base44.asServiceRole.entities[entityName].update(existing[0].id, newData);
+            results.push({ empresa_id: emp.id, empresa_nome: emp.nome_fantasia || emp.razao_social, status: 'updated' });
           } else {
-            results.push({ empresa_id: emp.id, status: 'skipped_exists' });
+            await base44.asServiceRole.entities[entityName].create(newData);
+            results.push({ empresa_id: emp.id, empresa_nome: emp.nome_fantasia || emp.razao_social, status: 'created' });
           }
         } catch (e) {
           results.push({ empresa_id: emp.id, status: 'error', msg: e.message });
@@ -101,33 +106,27 @@ Deno.serve(async (req) => {
     }
 
     // ===== UP: Empresa → Grupo =====
-    if (isUp && eventData) {
+    if (isUp && eventData && eventType !== 'delete') {
       try {
-        // Verificar se já existe no grupo (evita duplicação)
         const existing = await base44.asServiceRole.entities[entityName]
           .filter({ empresa_dona_id: empresa_id, grupo_origem: true, group_id }, null, 1)
           .catch(() => []);
 
-        const groupData = {
+        const groupData = stripBlocked({
           ...eventData,
           group_id,
           empresa_id: null,
           empresa_dona_id: empresa_id,
           grupo_origem: true,
           e_replicado: true,
-        };
-        delete groupData.id;
-        delete groupData.created_date;
-        delete groupData.updated_date;
+        });
 
-        if (existing?.length > 0 && eventType === 'update') {
-          await base44.asServiceRole.entities[entityName].update(existing[0].id, { ...groupData, id: undefined });
+        if (existing?.length > 0) {
+          await base44.asServiceRole.entities[entityName].update(existing[0].id, groupData);
           results.push({ group_id, status: 'updated_group' });
-        } else if (existing?.length === 0) {
+        } else {
           await base44.asServiceRole.entities[entityName].create(groupData);
           results.push({ group_id, status: 'created_group' });
-        } else {
-          results.push({ group_id, status: 'skipped_exists_group' });
         }
       } catch (e) {
         results.push({ group_id, status: 'error', msg: e.message });
@@ -135,12 +134,11 @@ Deno.serve(async (req) => {
     }
 
     // ===== DELETE DOWN: Grupo deleta → remove réplicas nas empresas =====
-    if (eventType === 'delete' && (isDown || direction === 'down') && entityId) {
+    if (eventType === 'delete' && isDown && srcId) {
       try {
         const replicas = await base44.asServiceRole.entities[entityName]
-          .filter({ documento_grupo_id: entityId }, null, 100)
+          .filter({ documento_grupo_id: srcId }, null, 200)
           .catch(() => []);
-
         for (const replica of replicas) {
           try {
             await base44.asServiceRole.entities[entityName].delete(replica.id);
@@ -154,6 +152,26 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ===== DELETE UP: Empresa deleta → remove réplica no grupo =====
+    if (eventType === 'delete' && isUp && empresa_id) {
+      try {
+        const replicas = await base44.asServiceRole.entities[entityName]
+          .filter({ empresa_dona_id: empresa_id, grupo_origem: true, group_id }, null, 50)
+          .catch(() => []);
+        for (const replica of replicas) {
+          try {
+            await base44.asServiceRole.entities[entityName].delete(replica.id);
+            results.push({ group_id, status: 'deleted_from_group' });
+          } catch (e) {
+            results.push({ group_id, status: 'delete_error_up', msg: e.message });
+          }
+        }
+      } catch (e) {
+        results.push({ status: 'delete_up_error', msg: e.message });
+      }
+    }
+
+    const dur = Date.now() - t0;
     return Response.json({
       ok: true,
       entity: entityName,
@@ -162,6 +180,7 @@ Deno.serve(async (req) => {
       total_processados: results.length,
       results,
       total: results.length,
+      duration_ms: dur,
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

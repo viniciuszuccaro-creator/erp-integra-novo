@@ -10,10 +10,10 @@ import { CheckCircle2, AlertCircle, Activity, Zap, ArrowDownUp, Clock } from "lu
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-function Metric({ icon: Icon, label, value, color = "text-slate-700", bg = "bg-slate-50" }) {
+function Metric({ icon: MetricIcon, label, value, color = "text-slate-700", bg = "bg-slate-50" }) {
   return (
     <div className={`flex items-center gap-2 p-3 rounded-lg ${bg}`}>
-      <Icon className={`w-4 h-4 ${color} shrink-0`} />
+      <MetricIcon className={`w-4 h-4 ${color} shrink-0`} />
       <div>
         <div className={`text-lg font-bold leading-tight ${color}`}>{value}</div>
         <div className="text-xs text-slate-500">{label}</div>
@@ -35,8 +35,8 @@ export default function SystemHealthWidget() {
       const seguranca = recent.filter(l => l?.tipo_auditoria === "seguranca").length;
       return { erros, operacoes, propagacoes, seguranca };
     },
-    staleTime: 120000,
-    refetchInterval: 180000,
+    staleTime: 300000,
+    refetchInterval: 600000,
   });
 
   if (isLoading) {

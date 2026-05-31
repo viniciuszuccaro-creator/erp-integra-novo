@@ -1,11 +1,12 @@
 import React from "react";
-import { Settings, ArrowDownUp, Shield, Bell, Globe } from "lucide-react";
+import { Settings, ArrowDownUp, Shield, Bell, Globe, Zap, Package, DollarSign, Truck } from "lucide-react";
 import ToggleConfigGlobal from "@/components/sistema/ToggleConfigGlobal";
 
 /**
- * ParametrosGeraisPanel v2.1
+ * ParametrosGeraisPanel v3.0
  * Painel de parâmetros globais com toggles persistentes
  * Layout responsivo 2-colunas com melhor organização
+ * Novos toggles: Estoque, Financeiro, Logística, Produção
  */
 
 function Section({ title, icon: Icon, children }) {
@@ -121,6 +122,94 @@ export default function ParametrosGeraisPanel() {
               configKey="marketplace_sync_ativo"
               label="Sincronização com Marketplaces"
               description="Sincronizar pedidos e estoque com marketplaces externos"
+              defaultValue={false}
+            />
+          </Section>
+
+          {/* ─ Estoque & Produção ─ */}
+          <Section title="Estoque & Produção" icon={Package}>
+            <ToggleConfigGlobal
+              configKey="estoque_alerta_minimo_ativo"
+              label="Alerta de estoque mínimo"
+              description="Notifica quando produto abaixo do estoque mínimo definido"
+              defaultValue={true}
+            />
+            <ToggleConfigGlobal
+              configKey="estoque_reserva_automatica"
+              label="Reserva automática ao confirmar pedido"
+              description="Reservar estoque automaticamente ao aprovar pedidos de venda"
+              defaultValue={true}
+            />
+            <ToggleConfigGlobal
+              configKey="producao_apontamento_mobile"
+              label="Apontamento de produção via mobile"
+              description="Habilitar app mobile para apontamento de produção na fábrica"
+              defaultValue={false}
+            />
+          </Section>
+
+          {/* ─ Financeiro ─ */}
+          <Section title="Financeiro & Fiscal" icon={DollarSign}>
+            <ToggleConfigGlobal
+              configKey="financeiro_aprovacao_despesa_ativa"
+              label="Aprovação de despesas ativada"
+              description="Despesas acima do limite exigem aprovação de gestor"
+              defaultValue={true}
+            />
+            <ToggleConfigGlobal
+              configKey="conciliacao_bancaria_automatica"
+              label="Conciliação bancária automática"
+              description="Conciliar lançamentos automaticamente ao importar extrato"
+              defaultValue={false}
+            />
+            <ToggleConfigGlobal
+              configKey="boleto_envio_automatico"
+              label="Envio automático de boletos"
+              description="Enviar boleto por e-mail/WhatsApp ao gerar"
+              defaultValue={false}
+            />
+          </Section>
+
+          {/* ─ Logística ─ */}
+          <Section title="Logística & Expedição" icon={Truck}>
+            <ToggleConfigGlobal
+              configKey="logistica_rastreamento_ativo"
+              label="Rastreamento em tempo real ativo"
+              description="Habilitar rastreamento GPS de entregas"
+              defaultValue={false}
+            />
+            <ToggleConfigGlobal
+              configKey="logistica_assinatura_digital"
+              label="Assinatura digital de entrega"
+              description="Exigir assinatura digital do recebedor na entrega"
+              defaultValue={false}
+            />
+            <ToggleConfigGlobal
+              configKey="logistica_roteirizacao_ia"
+              label="Roteirização inteligente por IA"
+              description="Otimizar rotas de entrega automaticamente usando IA"
+              defaultValue={false}
+            />
+          </Section>
+
+          {/* ─ IA & Automação ─ */}
+          <Section title="IA & Automação" icon={Zap}>
+            <ToggleConfigGlobal
+              configKey="ia_preditiva_vendas"
+              label="Previsão preditiva de vendas"
+              description="IA analisa histórico e prevê vendas para os próximos 30 dias"
+              defaultValue={false}
+            />
+            <ToggleConfigGlobal
+              configKey="ia_anomalia_financeira"
+              label="Detecção de anomalias financeiras"
+              description="IA monitora lançamentos e alerta sobre inconsistências"
+              defaultValue={false}
+            />
+            <ToggleConfigGlobal
+              configKey="ia_churn_clientes"
+              label="Análise de risco de churn de clientes"
+              description="Identificar clientes com risco de abandono automaticamente"
               defaultValue={false}
             />
           </Section>

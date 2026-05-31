@@ -34,8 +34,8 @@ export default function AdminStatusBarCompact() {
       } catch (_) { return []; }
     },
     enabled: !!(eId || gId),
-    staleTime: 60000,
-    refetchInterval: 120000,
+    staleTime: 300000,
+    refetchInterval: 600000,
   });
 
   const getToggle = (chave) => {

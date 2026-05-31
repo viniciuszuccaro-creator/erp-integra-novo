@@ -4,33 +4,40 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowDownUp, CheckCircle2, AlertCircle, Loader2,
-  Play, RefreshCw, Building2, Clock, ArrowDown, ArrowUp
+  RefreshCw, Building2, Clock, ArrowDown, ArrowUp,
+  Zap, Activity
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
 
 /**
- * PropagacaoIndex v3.0 — Propagação bidirecional real via backend
- * Grupo → Empresas (down) e Empresas → Grupo (up)
+ * PropagacaoIndex v4.0 — Propagação bidirecional real via backend
+ * Grupo → Empresas (down), Empresas → Grupo (up), Delete (ambos sentidos)
+ * Com logs de execução, filtros por módulo e feedback visual
  */
 
 const ENTITIES = [
-  { name: "Cliente",       label: "Clientes",         icon: "👥", grupo: "Comercial" },
-  { name: "Fornecedor",    label: "Fornecedores",      icon: "🏭", grupo: "Compras" },
-  { name: "Produto",       label: "Produtos",          icon: "📦", grupo: "Estoque" },
-  { name: "Pedido",        label: "Pedidos",           icon: "📋", grupo: "Comercial" },
-  { name: "ContaReceber",  label: "Contas a Receber",  icon: "💰", grupo: "Financeiro" },
-  { name: "ContaPagar",    label: "Contas a Pagar",    icon: "💸", grupo: "Financeiro" },
-  { name: "NotaFiscal",    label: "Notas Fiscais",     icon: "📄", grupo: "Fiscal" },
-  { name: "Entrega",       label: "Entregas",          icon: "🚚", grupo: "Expedição" },
-  { name: "Colaborador",   label: "Colaboradores",     icon: "👤", grupo: "RH" },
-  { name: "CentroCusto",   label: "Centro de Custo",   icon: "🏦", grupo: "Financeiro" },
-  { name: "TabelaPreco",   label: "Tabelas de Preço",  icon: "🏷️", grupo: "Comercial" },
-  { name: "FormaPagamento",label: "Formas Pagamento",  icon: "💳", grupo: "Financeiro" },
-  { name: "GrupoProduto",  label: "Grupos de Produto", icon: "🗂️", grupo: "Estoque" },
-  { name: "Marca",         label: "Marcas",            icon: "🎯", grupo: "Estoque" },
-];
+  { name: "Cliente",        label: "Clientes",          icon: "👥", grupo: "Comercial" },
+  { name: "Fornecedor",     label: "Fornecedores",       icon: "🏭", grupo: "Compras" },
+  { name: "Produto",        label: "Produtos",           icon: "📦", grupo: "Estoque" },
+  { name: "Pedido",         label: "Pedidos",            icon: "📋", grupo: "Comercial" },
+  { name: "ContaReceber",   label: "Contas a Receber",   icon: "💰", grupo: "Financeiro" },
+  { name: "ContaPagar",     label: "Contas a Pagar",     icon: "💸", grupo: "Financeiro" },
+  { name: "NotaFiscal",     label: "Notas Fiscais",      icon: "📄", grupo: "Fiscal" },
+  { name: "Entrega",        label: "Entregas",           icon: "🚚", grupo: "Expedição" },
+  { name: "Colaborador",    label: "Colaboradores",      icon: "👤", grupo: "RH" },
+  { name: "CentroCusto",    label: "Centro de Custo",    icon: "🏦", grupo: "Financeiro" },
+  { name: "TabelaPreco",    label: "Tabelas de Preço",   icon: "🏷️", grupo: "Comercial" },
+  { name: "FormaPagamento", label: "Formas Pagamento",   icon: "💳", grupo: "Financeiro" },
+  { name: "GrupoProduto",   label: "Grupos de Produto",  icon: "🗂️", grupo: "Estoque" },
+  { name: "Marca",          label: "Marcas",             icon: "🎯", grupo: "Estoque" },
+  { name: "OrdemCompra",    label: "Ordens de Compra",   icon: "🛒", grupo: "Compras" },
+  { name: "Transportadora", label: "Transportadoras",    icon: "🚛", grupo: "Expedição" },
+  { name: "Representante",  label: "Representantes",     icon: "🤝", grupo: "Comercial" },
+  { name: "CentroCusto",    label: "Centro de Custo",    icon: "🏦", grupo: "Financeiro" },
+  { name: "PlanoDeContas",  label: "Plano de Contas",    icon: "📊", grupo: "Financeiro" },
+].filter((e, i, arr) => arr.findIndex(x => x.name === e.name) === i); // deduplicar
 
 const STATUS_INIT = () =>
   Object.fromEntries(ENTITIES.map(e => [e.name, { status: "idle", message: "Aguardando", lastSync: null, total: 0 }]));
@@ -124,24 +131,26 @@ export default function PropagacaoIndex() {
   return (
     <div className="w-full h-full space-y-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
         <div>
           <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
             <ArrowDownUp className="w-5 h-5 text-blue-600" />
             Propagação Grupo ↔ Empresas
           </h2>
           <p className="text-sm text-slate-500 mt-0.5">
-            Grupo: <span className="font-semibold text-slate-700">{grupoAtual.nome_do_grupo}</span>
-            {" "}·{" "}
-            <span className="text-blue-600">{empresasDoGrupo.length} empresa(s) vinculada(s)</span>
+            <span className="font-semibold text-blue-700">{grupoAtual.nome_do_grupo}</span>
+            {" · "}
+            <span className="text-indigo-600">{empresasDoGrupo.length} empresa(s)</span>
+            {" · "}
+            <span className="text-slate-500">{ENTITIES.length} entidades disponíveis</span>
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button onClick={() => runAll("down")} disabled={globalLoading} size="sm" className="gap-2">
-            <ArrowDown className="w-4 h-4" />
-            {globalLoading ? "Sincronizando..." : "Grupo → Empresas"}
+          <Button onClick={() => runAll("down")} disabled={globalLoading} size="sm" className="gap-2 bg-blue-600 hover:bg-blue-700">
+            {globalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowDown className="w-4 h-4" />}
+            Grupo → Empresas
           </Button>
-          <Button onClick={() => runAll("up")} disabled={globalLoading} variant="outline" size="sm" className="gap-2">
+          <Button onClick={() => runAll("up")} disabled={globalLoading} variant="outline" size="sm" className="gap-2 border-blue-300 text-blue-700 hover:bg-blue-50">
             <ArrowUp className="w-4 h-4" />
             Empresas → Grupo
           </Button>
@@ -153,20 +162,33 @@ export default function PropagacaoIndex() {
       </div>
 
       {/* KPI Bar */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-4 gap-3">
         <div className="p-3 bg-green-50 rounded-lg text-center border border-green-100">
           <p className="text-2xl font-bold text-green-600">{okCount}</p>
-          <p className="text-xs text-slate-600">Sincronizadas</p>
+          <p className="text-xs text-slate-600">✅ Sincronizadas</p>
         </div>
         <div className="p-3 bg-red-50 rounded-lg text-center border border-red-100">
           <p className="text-2xl font-bold text-red-600">{errCount}</p>
-          <p className="text-xs text-slate-600">Com Erro</p>
+          <p className="text-xs text-slate-600">❌ Com Erro</p>
         </div>
         <div className="p-3 bg-slate-50 rounded-lg text-center border border-slate-100">
           <p className="text-2xl font-bold text-slate-500">{idleCount}</p>
-          <p className="text-xs text-slate-600">Pendentes</p>
+          <p className="text-xs text-slate-600">⏳ Pendentes</p>
+        </div>
+        <div className="p-3 bg-blue-50 rounded-lg text-center border border-blue-100">
+          <p className="text-2xl font-bold text-blue-600">{ENTITIES.length}</p>
+          <p className="text-xs text-slate-600">📦 Total Entidades</p>
         </div>
       </div>
+      {/* Barra de progresso */}
+      {(okCount + errCount) > 0 && (
+        <div className="w-full bg-slate-200 rounded-full h-2">
+          <div
+            className="bg-green-500 h-2 rounded-full transition-all duration-500"
+            style={{ width: `${Math.round(((okCount) / ENTITIES.length) * 100)}%` }}
+          />
+        </div>
+      )}
 
       {/* Tabs Nav */}
       <div className="flex gap-2 border-b border-slate-200 pb-0">

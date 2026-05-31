@@ -18,6 +18,7 @@ import RBACRoute from '@/components/lib/RBACRoute';
 import { RBAC_MODULES } from '@/lib/rbacModuleMap';
 import WorkforceOrchestratorHub from '@/components/workforce-orchestrator/WorkforceOrchestratorHub';
 import SupplyChainIntelligenceHub from '@/components/supply-chain-intelligence/SupplyChainIntelligenceHub';
+import FinancialIntelligenceHub from '@/components/financial-intelligence/FinancialIntelligenceHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -117,6 +118,15 @@ const AuthenticatedApp = () => {
             <EmpresaSelectorGuard>
               <LayoutWrapper currentPageName="SupplyChainIntelligence">
                 <SupplyChainIntelligenceHub />
+              </LayoutWrapper>
+            </EmpresaSelectorGuard>
+          </RBACRoute>
+        } />
+        <Route path="/FinancialIntelligence" element={
+          <RBACRoute module="Financeiro" action="ver">
+            <EmpresaSelectorGuard>
+              <LayoutWrapper currentPageName="FinancialIntelligence">
+                <FinancialIntelligenceHub />
               </LayoutWrapper>
             </EmpresaSelectorGuard>
           </RBACRoute>

@@ -1,6 +1,6 @@
-import React from "react";
+import React, { startTransition } from "react";
 import { base44 } from "@/api/base44Client";
-import { Factory, LayoutGrid, Clock, CheckCircle, AlertTriangle, Settings, BarChart3, Activity, Zap, FileText, Sparkles } from "lucide-react";
+import { Factory, LayoutGrid, Clock, AlertTriangle, Settings, BarChart3, Activity, Zap, FileText } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
@@ -8,7 +8,6 @@ import ProtectedSection from "@/components/security/ProtectedSection";
 import { useWindow } from "@/components/lib/useWindow";
 import { useUser } from "@/components/lib/UserContext";
 import usePermissions from "@/components/lib/usePermissions";
-import HeaderProducaoCompacto from "@/components/producao/producao-launchpad/HeaderProducaoCompacto";
 import KPIsProducao from "@/components/producao/producao-launchpad/KPIsProducao";
 import ModulosGridProducao from "@/components/producao/producao-launchpad/ModulosGridProducao";
 import ModuleLayout from "@/components/layout/ModuleLayout";
@@ -37,8 +36,6 @@ export default function Producao() {
     'OrdemProducao', {}, '-created_date', 100,
     { staleTime: 30000, retry: 2 }
   );
-
-  const totalOrdensProducao = ordensProducao.length;
 
   const totalOPs = ordensProducao.length;
   const opsLiberadas = ordensProducao.filter(op => op.status === "Liberada").length;
@@ -157,9 +154,9 @@ export default function Producao() {
   ];
 
   const handleModuleClick = (module) => {
-    React.startTransition(() => {
+    startTransition(() => {
       // Auditoria de abertura de seção
-      base44.entities.AuditLog.create({
+      void base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário',
         acao: 'Visualização',
         modulo: 'Produção',
@@ -167,7 +164,7 @@ export default function Producao() {
         entidade: 'Seção',
         descricao: `Abrir seção: ${module.title}`,
         data_hora: new Date().toISOString(),
-      });
+      }).catch(() => {});
       openWindow(
         module.component,
         { 

@@ -13,9 +13,11 @@ import AuditoriaLogsIndex from "@/components/administracao-sistema/auditoria-log
 import SegurancaGovernancaIndex from "@/components/administracao-sistema/seguranca-governanca/SegurancaGovernancaIndex";
 import GestaoAcessosIndex from "@/components/administracao-sistema/gestao-acessos/GestaoAcessosIndex";
 import PropagacaoIndex from "@/components/administracao-sistema/propagacao/PropagacaoIndex";
+import CheckupRelatorio from "@/components/sistema/CheckupRelatorio";
 
 
 const TAB_DEFS = [
+  { value: "checkup",     label: "Status Sistema",        icon: Settings,    perm: "Configurações",     color: "blue" },
   { value: "gerais",      label: "Parâmetros Gerais",     icon: Settings,    perm: "Configurações",     color: "blue" },
   { value: "propagacao",  label: "Propagação Grupo↔Emp",  icon: ArrowDownUp, perm: "Configurações",     color: "blue" },
   { value: "integracoes", label: "Integrações",            icon: Plug,        perm: "Integrações",       color: "blue" },
@@ -76,6 +78,18 @@ export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtua
         ))}
 
       </TabsList>
+
+      {/* ── STATUS SISTEMA ── */}
+      <TabsContent value="checkup" className="mt-4">
+        <ProtectedSection
+          module="Sistema" section={["Configurações"]} action="visualizar"
+          fallback={<p className="p-4 text-sm text-slate-500">Acesso restrito ao Status do Sistema.</p>}
+        >
+          <div className="w-full h-full">
+            <CheckupRelatorio />
+          </div>
+        </ProtectedSection>
+      </TabsContent>
 
       {/* ── PARÂMETROS GERAIS ── */}
       <TabsContent value="gerais" className="mt-4">

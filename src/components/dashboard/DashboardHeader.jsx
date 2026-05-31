@@ -44,7 +44,6 @@ export default function DashboardHeader({ empresaAtual, estaNoGrupo, grupoAtual,
         </Select>
       </div>
     </div>
-    <IAContextualModulo modulo="Dashboard" compact />
     </div>
   );
 }

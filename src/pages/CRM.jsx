@@ -1,6 +1,6 @@
 import React, { startTransition } from "react";
 import { base44 } from "@/api/base44Client";
-import { TrendingUp, Target, MessageSquare, Mail, Sparkles, AlertTriangle } from "lucide-react";
+import { TrendingUp, Target, MessageSquare, Sparkles, AlertTriangle } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";

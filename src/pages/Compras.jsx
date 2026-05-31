@@ -1,6 +1,6 @@
-import React from "react";
+import React, { startTransition } from "react";
 import { base44 } from "@/api/base44Client";
-import { Users, ShoppingCart, FileText, Upload } from "lucide-react";
+import { Building2, Users, ShoppingCart, FileText, Upload, Package } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
@@ -51,16 +51,12 @@ export default function Compras() {
     { staleTime: 60000, retry: 1, enabled: contextoValido }
   );
 
-  const fornecedoresFiltrados = fornecedores;
-  const ordensCompraFiltradas = ordensCompra;
-  const solicitacoesFiltradas = solicitacoes;
-
-  const totalCompras = ordensCompraFiltradas
+  const totalCompras = ordensCompra
     .filter(o => o.status !== 'Cancelada')
     .reduce((sum, o) => sum + (o.valor_total || 0), 0);
 
-  const fornecedoresAtivos = fornecedoresFiltrados.filter(f => f.status === 'Ativo').length;
-  const solicitacoesPendentes = solicitacoesFiltradas.filter(s => s.status === 'Pendente').length;
+  const fornecedoresAtivos = fornecedores.filter(f => f.status === 'Ativo').length;
+  const solicitacoesPendentes = solicitacoes.filter(s => s.status === 'Pendente').length;
 
   if (loadingPermissions) {
     return (
@@ -80,7 +76,7 @@ export default function Compras() {
       windowTitle: '👥 Fornecedores',
       width: 1500,
       height: 850,
-      props: { fornecedores: fornecedoresFiltrados }
+      props: { fornecedores, isLoading: false }
     },
     {
       title: 'Recebimento NF-e',
@@ -101,7 +97,7 @@ export default function Compras() {
       windowTitle: '📋 Solicitações de Compra',
       width: 1400,
       height: 800,
-      props: { solicitacoes: solicitacoesFiltradas },
+      props: { solicitacoes },
       badge: solicitacoesPendentes > 0 ? `${solicitacoesPendentes} pendentes` : null
     },
     {
@@ -123,16 +119,15 @@ export default function Compras() {
       windowTitle: '🛒 Ordens de Compra',
       width: 1500,
       height: 850,
-      props: { ordensCompra: ordensCompraFiltradas, fornecedores: fornecedoresFiltrados, empresas }
+      props: { ordensCompra, fornecedores, empresas, isLoading: false }
     },
   ];
 
   const allowedModules = modules.filter(m => hasPermission('Compras', (m.sectionKey || m.title), 'ver'));
 
-   const handleModuleClick = (module) => {
-    React.startTransition(() => {
-      // Auditoria de abertura de seção
-      base44.entities.AuditLog.create({
+  const handleModuleClick = (module) => {
+    startTransition(() => {
+      void base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário',
         acao: 'Visualização',
         modulo: 'Compras',
@@ -140,7 +135,7 @@ export default function Compras() {
         entidade: 'Seção',
         descricao: `Abrir seção: ${module.title}`,
         data_hora: new Date().toISOString(),
-      });
+      }).catch(() => {});
       openWindow(
         module.component,
         { 
@@ -162,10 +157,10 @@ export default function Compras() {
     <ErrorBoundary>
       <ModuleLayout title="Compras e Suprimentos" subtitle="Fornecedores, OCs e recebimento" actions={<div className="flex items-center gap-2"><Button size="sm" disabled={!contextoValido || !podeCriarOC} onClick={() => openWindow(OrdemCompraForm, { windowMode: true, onSubmit: (data) => base44.entities.OrdemCompra.create(data) }, { title: 'Nova Ordem de Compra', width: 1200, height: 780 })}>Nova OC</Button></div>}>
         <ModuleKPIs>
-           <KPIsCompras
-             totalFornecedores={fornecedoresFiltrados.length}
-             fornecedoresAtivos={fornecedoresAtivos}
-            totalOrdens={ordensCompraFiltradas.length}
+          <KPIsCompras
+            totalFornecedores={fornecedores.length}
+            fornecedoresAtivos={fornecedoresAtivos}
+            totalOrdens={ordensCompra.length}
             totalCompras={totalCompras}
           />
         </ModuleKPIs>

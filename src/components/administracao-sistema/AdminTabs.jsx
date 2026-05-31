@@ -14,6 +14,7 @@ import SegurancaGovernancaIndex from "@/components/administracao-sistema/seguran
 import GestaoAcessosIndex from "@/components/administracao-sistema/gestao-acessos/GestaoAcessosIndex";
 import PropagacaoIndex from "@/components/administracao-sistema/propagacao/PropagacaoIndex";
 import CheckupRelatorio from "@/components/sistema/CheckupRelatorio";
+import DashboardPropagacaoMonitor from "@/components/administracao-sistema/DashboardPropagacaoMonitor";
 
 
 const TAB_DEFS = [

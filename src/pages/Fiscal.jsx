@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { FileText, Settings, Book, BarChart3, Upload, Sparkles } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import { useWindow } from "@/components/lib/useWindow";
@@ -28,27 +29,14 @@ const ImportarXMLNFe = React.lazy(() => import('../components/fiscal/ImportarXML
 
 export default function FiscalPage() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
-  const { filtrarPorContexto, empresaAtual } = useContextoVisual();
+  const { empresaAtual } = useContextoVisual();
   const { openWindow } = useWindow();
   const { user } = useUser();
 
-  const { data: notasFiscais = [] } = useQuery({
-    queryKey: ['notasFiscais', empresaAtual?.id],
-    queryFn: async () => {
-      try {
-        const filtro = empresaAtual?.id ? { empresa_faturamento_id: empresaAtual.id } : {};
-        return await filtrarPorContexto('NotaFiscal', {}, '-created_date', 100, 'empresa_faturamento_id');
-      } catch (err) {
-        console.error('Erro ao buscar notas fiscais:', err);
-        return [];
-      }
-    },
-    staleTime: 30000,
-    retry: 2
-  });
-
-  // Dados já vêm filtrados do servidor
-  const notasFiltradasContexto = notasFiscais;
+  const { data: notasFiltradasContexto = [] } = useRLSQuery(
+    'NotaFiscal', {}, '-created_date', 100,
+    { staleTime: 30000, retry: 2 }
+  );
 
   const statusCounts = {
     total: notasFiltradasContexto.length,

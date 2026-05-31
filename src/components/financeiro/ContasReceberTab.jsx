@@ -14,7 +14,7 @@ import SimularPagamentoModal from "./SimularPagamentoModal";
 import GerarLinkPagamentoModal from "./GerarLinkPagamentoModal";
 import ContaReceberForm from "./ContaReceberForm";
 import { useWindow } from "@/components/lib/useWindow";
-import { useContextoVisual } from "@/components/lib/useContextoVisual";
+// useContextoVisual removed — using useRLS for operations
 import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
 import { useUser } from "@/components/lib/UserContext";
 import usePermissions from "@/components/lib/usePermissions";
@@ -22,18 +22,17 @@ import HeaderReceberCompacto from "./contas-receber/HeaderReceberCompacto";
 import KPIsReceber from "./contas-receber/KPIsReceber";
 import FiltrosReceber from "./contas-receber/FiltrosReceber";
 import TabelaReceber from "./contas-receber/TabelaReceber";
-import useEntityListSorted from "@/components/lib/useEntityListSorted";
 import useBackendPagination from "@/components/lib/useBackendPagination";
 import usePersistedSort from "@/components/lib/usePersistedSort";
+import useRLS from "@/components/lib/useRLS";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 export default function ContasReceberTab({ contas, empresas = [], windowMode = false }) {
-  const { createInContext, updateInContext } = useContextoVisual();
+  const { create: createRLS, update: updateRLS } = useRLS();
   const { page, setPage, pageSize, setPageSize } = useBackendPagination('ContaReceber', 20);
   const [sortField, setSortField, sortDirection, setSortDirection] = usePersistedSort('ContaReceber', 'data_vencimento', 'asc');
 
-  // persistência de sort movida para usePersistedSort
-
-  const { data: contasBackend = [] } = useEntityListSorted('ContaReceber', {}, { sortField, sortDirection, page, pageSize, limit: pageSize });
+  const { data: contasBackend = [] } = useRLSQuery('ContaReceber', {}, 'data_vencimento', pageSize);
   const contasList = Array.isArray(contas) && contas.length ? contas : contasBackend;
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -111,7 +110,7 @@ export default function ContasReceberTab({ contas, empresas = [], windowMode = f
 
   const baixarTituloMutation = useMutation({
     mutationFn: async ({ id, dados }) => {
-        const titulo = await updateInContext('ContaReceber', id, {
+        const titulo = await updateRLS('ContaReceber', id, {
           status: "Recebido",
           data_recebimento: dados.data_recebimento,
           valor_recebido: dados.valor_recebido,
@@ -124,7 +123,7 @@ export default function ContasReceberTab({ contas, empresas = [], windowMode = f
 
         const conta = contasList.find(c => c.id === id);
         if (conta?.cliente_id) {
-          await createInContext('HistoricoCliente', {
+          await createRLS('HistoricoCliente', {
             group_id: conta.group_id,
             empresa_id: conta.empresa_id,
             cliente_id: conta.cliente_id,
@@ -149,7 +148,7 @@ export default function ContasReceberTab({ contas, empresas = [], windowMode = f
         acao: 'Edição', modulo: 'Financeiro', entidade: 'ContaReceber', registro_id: vars?.id,
         descricao: 'Baixa de título registrada', data_hora: new Date().toISOString()
       });
-      queryClient.invalidateQueries({ queryKey: ['contasReceber'] });
+      queryClient.invalidateQueries({ queryKey: ['ContaReceber'] });
       setDialogBaixaOpen(false);
       setContaAtual(null);
       toast({ title: "✅ Título baixado com sucesso!" });
@@ -179,8 +178,7 @@ export default function ContasReceberTab({ contas, empresas = [], windowMode = f
 
   const enviarWhatsAppMutation = useMutation({
     mutationFn: async (contaId) => {
-      const conta = contasList.find(c => c.id === contaId);
-      await updateInContext('ContaReceber', contaId, {
+      await updateRLS('ContaReceber', contaId, {
         data_envio_cobranca: new Date().toISOString()
       });
       return { sucesso: true };
@@ -310,12 +308,12 @@ export default function ContasReceberTab({ contas, empresas = [], windowMode = f
         onNovaConta={() => { if (!hasPermission('Financeiro','ContaReceber','criar')) { toast({ title: '⛔ Sem permissão para criar', variant: 'destructive' }); return; } openWindow(ContaReceberForm, {
           windowMode: true,
           onSubmit: async (data) => {
-            await createInContext('ContaReceber', {
+            await createRLS('ContaReceber', {
               ...data,
               criado_por: authUser?.full_name || authUser?.email,
               criado_por_id: authUser?.id
             });
-            queryClient.invalidateQueries({ queryKey: ['contasReceber'] });
+            queryClient.invalidateQueries({ queryKey: ['ContaReceber'] });
             toast({ title: "✅ Conta criada!" });
           }
         }, { title: '💰 Nova Conta a Receber', width: 900, height: 600 })}}
@@ -340,8 +338,8 @@ export default function ContasReceberTab({ contas, empresas = [], windowMode = f
           readonly: !editar,
           onSubmit: async (data) => {
             if (editar) {
-              await updateInContext('ContaReceber', conta.id, data);
-              queryClient.invalidateQueries({ queryKey: ['contasReceber'] });
+              await updateRLS('ContaReceber', conta.id, data);
+              queryClient.invalidateQueries({ queryKey: ['ContaReceber'] });
               toast({ title: "✅ Conta atualizada!" });
             }
           }

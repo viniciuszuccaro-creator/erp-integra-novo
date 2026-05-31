@@ -11,7 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { ImprimirBoleto } from "@/components/lib/ImprimirBoleto";
 import ContaPagarForm from "./ContaPagarForm";
 import { useWindow } from "@/components/lib/useWindow";
-import { useContextoVisual } from "@/components/lib/useContextoVisual";
+// useContextoVisual removed — using useRLS for operations
 import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
 import { useUser } from "@/components/lib/UserContext";
 import usePermissions from "@/components/lib/usePermissions";
@@ -19,18 +19,17 @@ import HeaderPagarCompacto from "./contas-pagar/HeaderPagarCompacto";
 import KPIsPagar from "./contas-pagar/KPIsPagar";
 import FiltrosPagar from "./contas-pagar/FiltrosPagar";
 import TabelaPagar from "./contas-pagar/TabelaPagar";
-import useEntityListSorted from "@/components/lib/useEntityListSorted";
 import useBackendPagination from "@/components/lib/useBackendPagination";
 import usePersistedSort from "@/components/lib/usePersistedSort";
+import useRLS from "@/components/lib/useRLS";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 export default function ContasPagarTab({ contas, windowMode = false }) {
-  const { createInContext, updateInContext } = useContextoVisual();
+  const { create: createRLS, update: updateRLS } = useRLS();
   const { page, setPage, pageSize, setPageSize } = useBackendPagination('ContaPagar', 20);
   const [sortField, setSortField, sortDirection, setSortDirection] = usePersistedSort('ContaPagar', 'data_vencimento', 'asc');
 
-  // persistência de sort movida para usePersistedSort
-
-  const { data: contasBackend = [] } = useEntityListSorted('ContaPagar', {}, { sortField, sortDirection, page, pageSize, limit: pageSize });
+  const { data: contasBackend = [] } = useRLSQuery('ContaPagar', {}, 'data_vencimento', pageSize);
   const contasList = Array.isArray(contas) && contas.length ? contas : contasBackend;
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -91,10 +90,10 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
 
   const baixarTituloMutation = useMutation({
     mutationFn: async ({ id, dados }) => {
-      const conta = contas.find(c => c.id === id);
+      const conta = contasList.find(c => c.id === id);
       const valorTotal = (conta?.valor || 0) + (dados.juros || 0) + (dados.multa || 0) - (dados.desconto || 0);
       
-      await createInContext('CaixaMovimento', {
+      await createRLS('CaixaMovimento', {
         empresa_id: conta.empresa_id,
         group_id: conta.group_id,
         tipo_movimento: 'Saída',
@@ -113,7 +112,7 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
         usuario_responsavel_id: authUser?.id
       });
 
-      return await updateInContext('ContaPagar', id, {
+      return await updateRLS('ContaPagar', id, {
         status: "Pago",
         data_pagamento: dados.data_pagamento,
         valor_pago: valorTotal,
@@ -125,7 +124,7 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contasPagar'] });
+      queryClient.invalidateQueries({ queryKey: ['ContaPagar'] });
       queryClient.invalidateQueries({ queryKey: ['caixa-movimentos'] });
       setDialogBaixaOpen(false);
       setContaAtual(null);
@@ -151,7 +150,7 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
 
   const aprovarPagamentoMutation = useMutation({
     mutationFn: async (contaId) => {
-      return await updateInContext('ContaPagar', contaId, {
+      return await updateRLS('ContaPagar', contaId, {
         status_pagamento: "Aprovado",
         aprovado_por: authUser?.full_name || authUser?.email,
         aprovado_por_id: authUser?.id,
@@ -159,7 +158,7 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
       });
     },
     onSuccess: async (_data, id) => {
-      queryClient.invalidateQueries({ queryKey: ['contasPagar'] });
+      queryClient.invalidateQueries({ queryKey: ['ContaPagar'] });
       toast({ title: "✅ Pagamento aprovado!" });
       try { await base44.entities.AuditLog.create({ acao: 'Edição', modulo: 'Financeiro', entidade: 'ContaPagar', registro_id: id, descricao: 'Aprovação de pagamento', data_hora: new Date().toISOString() }); } catch(_) {}
     }
@@ -279,12 +278,12 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
         onNovaConta={() => { if (!hasPermission('Financeiro','ContaPagar','criar')) { toast({ title: '⛔ Sem permissão para criar', variant: 'destructive' }); return; } openWindow(ContaPagarForm, {
           windowMode: true,
           onSubmit: async (data) => {
-            await createInContext('ContaPagar', {
+            await createRLS('ContaPagar', {
               ...data,
               criado_por: authUser?.full_name || authUser?.email,
               criado_por_id: authUser?.id
             });
-            queryClient.invalidateQueries({ queryKey: ['contasPagar'] });
+            queryClient.invalidateQueries({ queryKey: ['ContaPagar'] });
             toast({ title: "✅ Conta criada!" });
           }
         }, { title: '💸 Nova Conta a Pagar', width: 900, height: 600 }) }}
@@ -308,8 +307,8 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
           conta,
           windowMode: true,
           onSubmit: async (data) => {
-            await updateInContext('ContaPagar', conta.id, data);
-            queryClient.invalidateQueries({ queryKey: ['contasPagar'] });
+            await updateRLS('ContaPagar', conta.id, data);
+            queryClient.invalidateQueries({ queryKey: ['ContaPagar'] });
             toast({ title: "✅ Conta atualizada!" });
           }
         }, { title: `✏️ Editar: ${conta.fornecedor}`, width: 900, height: 600 })}}

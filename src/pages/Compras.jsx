@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { base44 } from "@/api/base44Client";
-import { Building2, Users, ShoppingCart, FileText, Upload, Package } from "lucide-react";
+import { Users, ShoppingCart, FileText, Upload } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
@@ -8,10 +8,8 @@ import ProtectedSection from "@/components/security/ProtectedSection";
 import { useWindow } from "@/components/lib/useWindow";
 import usePermissions from "@/components/lib/usePermissions";
 import { useUser } from "@/components/lib/UserContext";
-import HeaderComprasCompacto from "@/components/compras/compras-launchpad/HeaderComprasCompacto";
 import KPIsCompras from "@/components/compras/compras-launchpad/KPIsCompras";
 import ModulosGridCompras from "@/components/compras/compras-launchpad/ModulosGridCompras";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import ModuleLayout from "@/components/layout/ModuleLayout";
 import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
@@ -27,7 +25,7 @@ const OrdemCompraForm = React.lazy(() => import("../components/compras/OrdemComp
 
 export default function Compras() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
-  const { getFiltroContexto, empresaAtual, grupoAtual, createInContext } = useContextoVisual();
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const { user } = useUser();
   const { openWindow } = useWindow();
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
@@ -53,10 +51,6 @@ export default function Compras() {
     { staleTime: 60000, retry: 1, enabled: contextoValido }
   );
 
-  // Contagem derivada diretamente da lista
-  const totalFornecedores = fornecedores.length;
-
-  // Dados já vêm filtrados do servidor
   const fornecedoresFiltrados = fornecedores;
   const ordensCompraFiltradas = ordensCompra;
   const solicitacoesFiltradas = solicitacoes;
@@ -86,7 +80,7 @@ export default function Compras() {
       windowTitle: '👥 Fornecedores',
       width: 1500,
       height: 850,
-      props: { fornecedores: fornecedoresFiltrados, isLoading: false }
+      props: { fornecedores: fornecedoresFiltrados }
     },
     {
       title: 'Recebimento NF-e',
@@ -129,7 +123,7 @@ export default function Compras() {
       windowTitle: '🛒 Ordens de Compra',
       width: 1500,
       height: 850,
-      props: { ordensCompra: ordensCompraFiltradas, fornecedores: fornecedoresFiltrados, empresas, isLoading: false }
+      props: { ordensCompra: ordensCompraFiltradas, fornecedores: fornecedoresFiltrados, empresas }
     },
   ];
 
@@ -168,9 +162,9 @@ export default function Compras() {
     <ErrorBoundary>
       <ModuleLayout title="Compras e Suprimentos" subtitle="Fornecedores, OCs e recebimento" actions={<div className="flex items-center gap-2"><Button size="sm" disabled={!contextoValido || !podeCriarOC} onClick={() => openWindow(OrdemCompraForm, { windowMode: true, onSubmit: (data) => base44.entities.OrdemCompra.create(data) }, { title: 'Nova Ordem de Compra', width: 1200, height: 780 })}>Nova OC</Button></div>}>
         <ModuleKPIs>
-          <KPIsCompras
-            totalFornecedores={totalFornecedores}
-            fornecedoresAtivos={fornecedoresAtivos}
+           <KPIsCompras
+             totalFornecedores={fornecedoresFiltrados.length}
+             fornecedoresAtivos={fornecedoresAtivos}
             totalOrdens={ordensCompraFiltradas.length}
             totalCompras={totalCompras}
           />

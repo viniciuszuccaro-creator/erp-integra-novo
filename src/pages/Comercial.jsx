@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, startTransition } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Users, ShoppingCart, FileText, TrendingUp, ShieldCheck, Truck, Package, AlertCircle } from "lucide-react";
@@ -41,12 +41,7 @@ const MonitoramentoCanaisRealtime = React.lazy(() => import("@/components/comerc
 
 export default function Comercial() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
-  const canViewComercial = (section = null) => (
-    hasPermission('Comercial', section, 'visualizar')
-    || hasPermission('Comercial', section, 'ver')
-    || hasPermission('Comercial', null, 'visualizar')
-    || hasPermission('Comercial', null, 'ver')
-  );
+  const canViewComercial = (section = null) => hasPermission('Comercial', section, 'visualizar');
   const canSeeComercial = canViewComercial();
   const { openWindow, closeWindow } = useWindow();
   const { createInContext, updateInContext, empresaAtual, grupoAtual, estaNoGrupo } = useContextoVisual();
@@ -60,23 +55,19 @@ export default function Comercial() {
     { staleTime: 30000, enabled: !bloqueadoSemEmpresa && canSeeComercial }
   );
 
-  const pedidosResult = useRLSQuery(
+  const { data: pedidos = [], refetch: refetchPedidos } = useRLSQuery(
     'Pedido', {}, '-created_date', COMERCIAL_LIST_LIMIT,
     { staleTime: 30000, enabled: !bloqueadoSemEmpresa && canSeeComercial }
   );
-  const pedidosQuery = pedidosResult;
-  const { data: pedidos = [] } = pedidosResult;
 
-  // Realtime: atualiza pedidos em tempo real via subscribe (multiempresa + RBAC já aplicados no wrapper do Layout)
   useEffect(() => {
     if (!(empresaAtual?.id || estaNoGrupo)) return;
     if (!base44.entities?.Pedido?.subscribe) return;
-    const un = base44.entities.Pedido.subscribe((evt) => {
-      // Invalida apenas a lista de pedidos do contexto atual
-      try { queryClient.invalidateQueries({ queryKey: ['pedidos', empresaAtual?.id, estaNoGrupo, grupoAtual?.id] }); } catch (_) {}
+    const un = base44.entities.Pedido.subscribe(() => {
+      try { queryClient.invalidateQueries({ queryKey: ['Pedido'] }); } catch (_) {}
     });
-    return () => { try { un && un(); } catch (_) {} };
-  }, [empresaAtual?.id, grupoAtual?.id, estaNoGrupo]);
+    return () => { try { un?.(); } catch (_) {} };
+  }, [empresaAtual?.id, grupoAtual?.id, estaNoGrupo, queryClient]);
 
   // Realtime adicional: Comissões e NF-e
   useEffect(() => {
@@ -120,11 +111,6 @@ export default function Comercial() {
     { staleTime: 30000, enabled: !bloqueadoSemEmpresa && canSeeComercial }
   );
 
-  // Dados já vêm filtrados do servidor
-  const clientesFiltrados = clientes;
-  const pedidosFiltrados = pedidos;
-  const notasFiscaisFiltradas = notasFiscais;
-
   const {
     pedidosExternosPendentes,
     totalVendas,
@@ -133,7 +119,7 @@ export default function Comercial() {
     pedidosPendentesAprovacao,
     pedidosEntrega,
     pedidosRetirada,
-  } = useComercialDerivedData({ pedidos: pedidosFiltrados, clientes: clientesFiltrados, pedidosExternos });
+  } = useComercialDerivedData({ pedidos, clientes, pedidosExternos });
 
   const handleCreateNewPedido = () => {
     let pedidoCriado = false;
@@ -153,7 +139,7 @@ export default function Comercial() {
               vendedor_id: formData.vendedor_id || user?.id
             });
             toast.success("Pedido criado!");
-            await pedidosQuery.refetch();
+            await refetchPedidos();
           } catch (error) {
             pedidoCriado = false;
             toast.error("Erro: " + error.message);
@@ -178,7 +164,7 @@ export default function Comercial() {
           try {
             await updateInContext('Pedido', formData.id, formData);
             toast.success("Pedido atualizado!");
-            await pedidosQuery.refetch();
+            await refetchPedidos();
             if (windowIdRef) closeWindow(windowIdRef);
           } catch (error) {
             atualizacaoEmAndamento = false;
@@ -218,7 +204,7 @@ export default function Comercial() {
       windowTitle: ' Clientes',
       width: 1500,
       height: 850,
-      props: { clientes, isLoading: false }
+      props: { clientes }
     },
     {
       title: 'Pedidos',
@@ -230,7 +216,7 @@ export default function Comercial() {
       windowTitle: ' Pedidos',
       width: 1500,
       height: 850,
-      props: { pedidos: pedidosFiltrados, clientes: clientesFiltrados, isLoading: false, empresas, onCreatePedido: handleCreateNewPedido, onEditPedido: handleEditPedido }
+      props: { pedidos, clientes, empresas, onCreatePedido: handleCreateNewPedido, onEditPedido: handleEditPedido }
     },
     {
       title: 'Logística Entrega',
@@ -276,7 +262,7 @@ export default function Comercial() {
       windowTitle: ' Notas Fiscais',
       width: 1500,
       height: 850,
-      props: { notasFiscais: notasFiscaisFiltradas, pedidos: pedidosFiltrados, clientes: clientesFiltrados }
+      props: { notasFiscais, pedidos, clientes }
     },
     {
       title: 'Aprovações',
@@ -323,25 +309,19 @@ export default function Comercial() {
       toast.error('Sem permissao para visualizar esta area do Comercial.');
       return;
     }
-    React.startTransition(() => {
-      // Auditoria de abertura de seção (somente se autenticado)
-      (async () => {
-        try {
-          if (await base44.auth.isAuthenticated()) {
-            await base44.entities.AuditLog.create({
-              usuario: user?.full_name || user?.email || 'Usuário',
-              acao: 'Visualização',
-              modulo: 'Comercial',
-              tipo_auditoria: 'acesso',
-              entidade: 'Seção',
-              descricao: `Abrir seção: ${module.title}`,
-              empresa_id: empresaAtual?.id || null,
-              group_id: grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null,
-              data_hora: new Date().toISOString(),
-            });
-          }
-        } catch (_) {}
-      })();
+    startTransition(() => {
+      void base44.entities.AuditLog.create({
+        usuario: user?.full_name || user?.email || 'Usuário',
+        usuario_id: user?.id || null,
+        acao: 'Visualização',
+        modulo: 'Comercial',
+        tipo_auditoria: 'acesso',
+        entidade: 'Seção',
+        descricao: `Abrir seção: ${module.title}`,
+        empresa_id: empresaAtual?.id || null,
+        group_id: grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null,
+        data_hora: new Date().toISOString(),
+      }).catch(() => {});
       openWindow(
         module.component,
         { ...(module.props || {}), windowMode: true },
@@ -376,12 +356,12 @@ export default function Comercial() {
             >
               <ModuleKPIs>
                 <KPIsComercial
-                  totalClientes={clientesFiltrados.length}
-                  clientesAtivos={clientesAtivos}
-                  totalPedidos={pedidosFiltrados.length}
-                  totalVendas={totalVendas}
-                  ticketMedio={ticketMedio}
-                />
+                   totalClientes={clientes.length}
+                   clientesAtivos={clientesAtivos}
+                   totalPedidos={pedidos.length}
+                   totalVendas={totalVendas}
+                   ticketMedio={ticketMedio}
+                 />
                 {pedidosExternosPendentes > 0 && (
                   <Badge className="bg-orange-100 text-orange-700 px-3 py-2 text-sm font-medium">
                     <AlertCircle className="w-3 h-3 mr-2" />

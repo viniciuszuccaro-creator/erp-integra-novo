@@ -24,7 +24,8 @@ import {
         CheckCircle2,
         Trophy,
         Zap,
-        Building2
+        Building2,
+        AlertCircle
       } from "lucide-react";
 import {
   Sidebar,
@@ -81,6 +82,7 @@ const navigationItems = [
         { title: "Dashboard Corporativo", url: createPageUrl("DashboardCorporativo"), icon: BarChart3, group: "principal" },
         { title: "Relatórios e Análises", url: createPageUrl("Relatorios"), icon: BarChart3, group: "principal" },
         { title: "Business Intelligence (IA)", url: "/AdvancedAnalytics", icon: BarChart3, group: "principal" },
+        { title: "Executive Monitoring", url: "/ExecutiveMonitoring", icon: AlertCircle, group: "principal" },
         { title: "Agenda e Calendário", url: createPageUrl("Agenda"), icon: Calendar, group: "principal" },
         { title: "CRM - Relacionamento", url: createPageUrl("CRM"), icon: Users, group: "principal" },
   { title: "Cadastros Gerais", url: createPageUrl("Cadastros"), icon: Users, group: "cadastros" },

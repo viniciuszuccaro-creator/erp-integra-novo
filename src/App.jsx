@@ -20,6 +20,7 @@ import WorkforceOrchestratorHub from '@/components/workforce-orchestrator/Workfo
 import SupplyChainIntelligenceHub from '@/components/supply-chain-intelligence/SupplyChainIntelligenceHub';
 import FinancialIntelligenceHub from '@/components/financial-intelligence/FinancialIntelligenceHub';
 import AdvancedAnalyticsHub from '@/components/business-intelligence/AdvancedAnalyticsHub';
+import ExecutiveMonitoringHub from '@/components/executive-monitoring/ExecutiveMonitoringHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -137,6 +138,15 @@ const AuthenticatedApp = () => {
             <EmpresaSelectorGuard>
               <LayoutWrapper currentPageName="AdvancedAnalytics">
                 <AdvancedAnalyticsHub />
+              </LayoutWrapper>
+            </EmpresaSelectorGuard>
+          </RBACRoute>
+        } />
+        <Route path="/ExecutiveMonitoring" element={
+          <RBACRoute module="Dashboard" action="ver">
+            <EmpresaSelectorGuard>
+              <LayoutWrapper currentPageName="ExecutiveMonitoring">
+                <ExecutiveMonitoringHub />
               </LayoutWrapper>
             </EmpresaSelectorGuard>
           </RBACRoute>

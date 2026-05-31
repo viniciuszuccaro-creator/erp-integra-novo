@@ -1,126 +1,96 @@
-/**
- * VoiceAIHub v1.0
- * Hub central de controle por voz + NLP
- * Passo 32: Português 100% • Comandos naturais • IA embedding
- * Regra-Mãe: w-full, h-full, multi-empresa, real-time, acessibilidade
- */
-import { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Mic, Volume2, Brain, Activity } from 'lucide-react';
+import usePermissions from '@/components/lib/usePermissions';
+import { Mic, MessageSquare, Brain, BarChart3 } from 'lucide-react';
 import VoiceCommandCenter from './VoiceCommandCenter';
-import NLPProcessor from './NLPProcessor';
-import VoiceAnalytics from './VoiceAnalytics';
+import ConversationAnalyzer from './ConversationAnalyzer';
+import OmnichannelRouter from './OmnichannelRouter';
 
 export default function VoiceAIHub() {
-  const [activeTab, setActiveTab] = useState('commands');
-  const [empresa, setEmpresa] = useState('Zuccaro SP');
-  const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef(null);
+  const { hasPermission } = usePermissions();
+  const [activeTab, setActiveTab] = useState('voz');
 
-  const empresas = ['Zuccaro SP', 'Zuccaro MG', 'Zuccaro Brasil'];
+  const canAccess = hasPermission('HubAtendimento', null, 'ver') || hasPermission('CRM', null, 'ver');
 
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.lang = 'pt-BR';
-      recognitionRef.current.continuous = false;
-    }
-  }, []);
+  if (!canAccess) {
+    return (
+      <Card className="bg-red-900/20 border-red-600 w-full">
+        <CardContent className="p-6 text-center">
+          <p className="text-red-400 font-semibold">Acesso Negado</p>
+          <p className="text-red-200 text-sm mt-2">Você não tem permissão para acessar o Voice AI Hub.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
-  const handleVoiceToggle = () => {
-    if (isListening) {
-      recognitionRef.current?.stop();
-      setIsListening(false);
-    } else {
-      recognitionRef.current?.start();
-      setIsListening(true);
-    }
-  };
+  const kpis = [
+    { label: 'Conversas Processadas', valor: '847', cor: 'text-blue-400' },
+    { label: 'Taxa de Resolução IA', valor: '76%', cor: 'text-emerald-400' },
+    { label: 'Sentimento Médio', valor: '8.2/10', cor: 'text-purple-400' },
+    { label: 'Tempo Resposta', valor: '2.1s', cor: 'text-cyan-400' },
+  ];
 
   return (
-    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950">
+    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-900 to-slate-950">
       {/* Header */}
-      <div className="bg-white/5 backdrop-blur border-b border-blue-500/30 px-6 py-4 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-500/20 rounded-lg relative">
-              <Mic className={`w-8 h-8 ${isListening ? 'text-red-400 animate-pulse' : 'text-blue-400'}`} />
-              {isListening && <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />}
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white">Voice AI Hub</h1>
-              <p className="text-sm text-slate-300">Português • Comandos Naturais • NLP Embarcado</p>
-            </div>
+      <div className="bg-gradient-to-r from-purple-900/40 to-slate-900 border-b border-slate-700 p-6">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+              <Mic className="w-7 h-7 text-purple-400" />
+              Voice AI & Conversational Intelligence
+            </h1>
+            <p className="text-slate-400 text-sm mt-1">IA Conversacional • Análise Sentimento • Omnichannel</p>
           </div>
-
-          {/* Controls */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleVoiceToggle}
-              className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                isListening
-                  ? 'bg-red-600 text-white animate-pulse'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-            >
-              {isListening ? '⏹ Ouvindo...' : '🎤 Falar'}
-            </button>
-
-            {/* Empresa */}
-            <div className="flex gap-2">
-              {empresas.map((emp) => (
-                <button
-                  key={emp}
-                  onClick={() => setEmpresa(emp)}
-                  className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
-                    empresa === emp
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white/10 text-slate-300 hover:bg-white/20'
-                  }`}
-                >
-                  {emp.replace('Zuccaro ', '')}
-                </button>
-              ))}
-            </div>
+          <div className="flex gap-2">
+            <Badge className="bg-purple-900 text-purple-200">Voice AI</Badge>
+            <Badge className="bg-blue-900 text-blue-200">NLU</Badge>
+            <Badge className="bg-emerald-900 text-emerald-200">Real-Time</Badge>
           </div>
+        </div>
+
+        {/* KPIs */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+          {kpis.map((k, idx) => (
+            <div key={idx} className="bg-slate-700/30 border border-slate-600 rounded-lg p-3">
+              <p className="text-xs text-slate-400">{k.label}</p>
+              <p className={`text-lg font-bold ${k.cor}`}>{k.valor}</p>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex-1 overflow-hidden">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
-          <TabsList className="w-full rounded-none border-b border-white/20 bg-white/5 h-auto p-0 flex-shrink-0">
-            {[
-              { value: 'commands', label: 'Comandos', icon: Mic },
-              { value: 'nlp', label: 'NLP', icon: Brain },
-              { value: 'analytics', label: 'Análise', icon: Activity },
-            ].map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:bg-white/10 data-[state=active]:text-white text-slate-400 px-4 py-3"
-                >
-                  <Icon className="w-4 h-4 mr-2" />
-                  {tab.label}
-                </TabsTrigger>
-              );
-            })}
+      <div className="flex-1 overflow-auto p-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
+          <TabsList className="grid w-full grid-cols-3 bg-slate-800 border-b border-slate-700 mb-4">
+            <TabsTrigger value="voz" className="data-[state=active]:bg-purple-600">
+              <Mic className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Voz</span>
+            </TabsTrigger>
+            <TabsTrigger value="analise" className="data-[state=active]:bg-brain-600">
+              <Brain className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Análise</span>
+            </TabsTrigger>
+            <TabsTrigger value="omnichannel" className="data-[state=active]:bg-blue-600">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Canais</span>
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="commands" className="flex-1 m-0 overflow-auto">
-            <VoiceCommandCenter empresa={empresa} isListening={isListening} />
-          </TabsContent>
-          <TabsContent value="nlp" className="flex-1 m-0 overflow-auto">
-            <NLPProcessor empresa={empresa} />
-          </TabsContent>
-          <TabsContent value="analytics" className="flex-1 m-0 overflow-auto">
-            <VoiceAnalytics empresa={empresa} />
-          </TabsContent>
+          <div className="h-full">
+            <TabsContent value="voz" className="h-full m-0">
+              <VoiceCommandCenter />
+            </TabsContent>
+            <TabsContent value="analise" className="h-full m-0">
+              <ConversationAnalyzer />
+            </TabsContent>
+            <TabsContent value="omnichannel" className="h-full m-0">
+              <OmnichannelRouter />
+            </TabsContent>
+          </div>
         </Tabs>
       </div>
     </div>

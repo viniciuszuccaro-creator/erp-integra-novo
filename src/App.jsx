@@ -27,6 +27,7 @@ import CollaborativeWorkspaceHub from '@/components/collaborative-workspace/Coll
 import BlockchainAuditHub from '@/components/blockchain-audit/BlockchainAuditHub';
 import ESGScorecardHub from '@/components/esg/ESGScorecardHub';
 import DigitalTwinHub from '@/components/digital-twin/DigitalTwinHub';
+import VoiceAIHub from '@/components/voice-ai/VoiceAIHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -180,6 +181,15 @@ const AuthenticatedApp = () => {
             <EmpresaSelectorGuard>
               <LayoutWrapper currentPageName="DigitalTwin">
                 <DigitalTwinHub />
+              </LayoutWrapper>
+            </EmpresaSelectorGuard>
+          </RBACRoute>
+        } />
+        <Route path="/VoiceAI" element={
+          <RBACRoute module="HubAtendimento" action="ver">
+            <EmpresaSelectorGuard>
+              <LayoutWrapper currentPageName="VoiceAI">
+                <VoiceAIHub />
               </LayoutWrapper>
             </EmpresaSelectorGuard>
           </RBACRoute>

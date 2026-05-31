@@ -25,7 +25,8 @@ import {
         Trophy,
         Zap,
         Building2,
-        AlertCircle
+        AlertCircle,
+        Mic
       } from "lucide-react";
 import {
   Sidebar,
@@ -107,7 +108,6 @@ const navigationItems = [
   { title: "Gestão de Contratos", url: createPageUrl("Contratos"), icon: FileText, group: "administrativo" },
 
   { title: "Blockchain Audit & Compliance", url: "/BlockchainAudit", icon: Shield, group: "sistema" },
-  { title: "Blockchain Audit & Compliance", url: "/BlockchainAudit", icon: Shield, group: "sistema" },
   { title: "ESG & Sustentabilidade", url: "/ESGScorecard", icon: CheckCircle2, group: "sistema" },
   { title: "Administração do Sistema", url: createPageUrl("AdministracaoSistema?tab=integracoes"), icon: Settings, group: "sistema" },
 
@@ -116,6 +116,7 @@ const navigationItems = [
   
   
   { title: "Hub de Atendimento", url: createPageUrl("HubAtendimento"), icon: MessageCircle, group: "principal" },
+  { title: "Voice AI & Conversational", url: "/VoiceAI", icon: Mic, group: "principal" },
   ];
 
 // React Query client centralizado (padrões seguros + performance)

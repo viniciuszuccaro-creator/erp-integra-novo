@@ -19,6 +19,7 @@ import { RBAC_MODULES } from '@/lib/rbacModuleMap';
 import WorkforceOrchestratorHub from '@/components/workforce-orchestrator/WorkforceOrchestratorHub';
 import SupplyChainIntelligenceHub from '@/components/supply-chain-intelligence/SupplyChainIntelligenceHub';
 import FinancialIntelligenceHub from '@/components/financial-intelligence/FinancialIntelligenceHub';
+import AdvancedAnalyticsHub from '@/components/business-intelligence/AdvancedAnalyticsHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -127,6 +128,15 @@ const AuthenticatedApp = () => {
             <EmpresaSelectorGuard>
               <LayoutWrapper currentPageName="FinancialIntelligence">
                 <FinancialIntelligenceHub />
+              </LayoutWrapper>
+            </EmpresaSelectorGuard>
+          </RBACRoute>
+        } />
+        <Route path="/AdvancedAnalytics" element={
+          <RBACRoute module="Dashboard" action="ver">
+            <EmpresaSelectorGuard>
+              <LayoutWrapper currentPageName="AdvancedAnalytics">
+                <AdvancedAnalyticsHub />
               </LayoutWrapper>
             </EmpresaSelectorGuard>
           </RBACRoute>

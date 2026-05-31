@@ -1,14 +1,13 @@
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, startTransition } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { createPageUrl } from "@/utils";
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import {
   DollarSign, TrendingUp, Users, ShoppingCart,
-  Package, Truck, UserCircle, AlertCircle,
-  Box, CheckCircle, Percent, FileText,
+  Package, Truck, UserCircle, AlertCircle, Percent,
+  CheckCircle, FileText,
 } from "lucide-react";
 
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
@@ -31,13 +30,14 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { empresaAtual, estaNoGrupo, grupoAtual, getFiltroContexto } = useContextoVisual();
   const { hasPermission } = usePermissions();
-  const canSeeFinanceiro = hasPermission('Financeiro', null, 'ver');
-  const canSeeCRM = hasPermission('CRM', null, 'ver');
-  const canSeeComercial = hasPermission('Comercial', null, 'ver');
-  const canSeeEstoque = hasPermission('Estoque', null, 'ver');
-  const canSeeExpedicao = hasPermission('Expedição', null, 'ver');
-  const canSeeRH = hasPermission('RH', null, 'ver');
-  const canSeeProducao = hasPermission('Produção', null, 'ver');
+  const canSeeFinanceiro = hasPermission('Financeiro', null, 'visualizar');
+  const canSeeCRM = hasPermission('CRM', null, 'visualizar');
+  const canSeeComercial = hasPermission('Comercial', null, 'visualizar');
+  const canSeeEstoque = hasPermission('Estoque', null, 'visualizar');
+  const canSeeExpedicao = hasPermission('Expedição', null, 'visualizar');
+  const canSeeRH = hasPermission('RH', null, 'visualizar');
+  const canSeeProducao = hasPermission('Produção', null, 'visualizar');
+  const canSeeFiscal = hasPermission('Fiscal', null, 'visualizar');
 
   const [periodo, setPeriodo] = useState(() => {
     try {
@@ -100,7 +100,7 @@ export default function Dashboard() {
   );
   const { data: notasFiscais = [] } = useRLSQuery(
     'NotaFiscal', {}, '-created_date', DASHBOARD_LIST_LIMIT,
-    { enabled: Boolean((canSeeFinanceiro || hasPermission('Fiscal', null, 'ver') || canSeeComercial) && hasContextoAtivo), staleTime: 120000, refetchOnWindowFocus: false, refetchOnReconnect: false, retry: false, refetchInterval }
+    { enabled: Boolean((canSeeFinanceiro || canSeeFiscal || canSeeComercial) && hasContextoAtivo), staleTime: 120000, refetchOnWindowFocus: false, refetchOnReconnect: false, retry: false, refetchInterval }
   );
 
   // Contagens derivadas direto das listas (evita chamadas extras ao backend)
@@ -243,9 +243,10 @@ export default function Dashboard() {
   // Pré-computos para seções avançadas (evita recalcular em cada render de subcomponente)
   // Pré-cálculos fornecidos pelo hook useDashboardDerivedData
 
-  // DRILL-DOWN - Função para navegar ao clicar em KPI
   const handleDrillDown = (rota) => {
-    navigate(rota);
+    startTransition(() => {
+      navigate(rota);
+    });
   };
 
   const statsCards = [
@@ -257,8 +258,7 @@ export default function Dashboard() {
       color: "from-green-500 to-green-600",
       bgColor: "bg-green-50",
       textColor: "text-green-600",
-      link: createPageUrl("Comercial"),
-      drillDown: () => handleDrillDown(createPageUrl("Comercial"))
+      drillDown: () => handleDrillDown("/comercial")
     },
     {
       title: "Ticket Médio",
@@ -268,8 +268,7 @@ export default function Dashboard() {
       color: "from-blue-500 to-blue-600",
       bgColor: "bg-blue-50",
       textColor: "text-blue-600",
-      link: createPageUrl("Comercial"),
-      drillDown: () => handleDrillDown(createPageUrl("Comercial"))
+      drillDown: () => handleDrillDown("/comercial")
     },
     {
       title: "Fluxo de Caixa",
@@ -279,8 +278,7 @@ export default function Dashboard() {
       color: fluxoCaixa >= 0 ? "from-emerald-500 to-emerald-600" : "from-orange-500 to-orange-600",
       bgColor: fluxoCaixa >= 0 ? "bg-emerald-50" : "bg-orange-50",
       textColor: fluxoCaixa >= 0 ? "text-emerald-600" : "text-orange-600",
-      link: createPageUrl("Financeiro"),
-      drillDown: () => handleDrillDown(createPageUrl("Financeiro"))
+      drillDown: () => handleDrillDown("/financeiro")
     },
     {
       title: "Taxa de Conversão",
@@ -290,8 +288,7 @@ export default function Dashboard() {
       color: "from-purple-500 to-purple-600",
       bgColor: "bg-purple-50",
       textColor: "text-purple-600",
-      link: createPageUrl("Comercial"),
-      drillDown: () => handleDrillDown(createPageUrl("Comercial"))
+      drillDown: () => handleDrillDown("/comercial")
     }
   ];
 
@@ -305,7 +302,7 @@ export default function Dashboard() {
       icon: CheckCircle,
       color: otd >= 90 ? "text-green-600" : otd >= 70 ? "text-orange-600" : "text-red-600",
       bgColor: otd >= 90 ? "bg-green-50" : otd >= 70 ? "bg-orange-50" : "bg-red-50",
-      drillDown: () => handleDrillDown(createPageUrl("Expedicao"))
+      drillDown: () => handleDrillDown("/expedicao")
     },
     {
       title: "Peso Produzido",
@@ -314,7 +311,7 @@ export default function Dashboard() {
       icon: Package,
       color: "text-indigo-600",
       bgColor: "bg-indigo-50",
-      drillDown: () => handleDrillDown(createPageUrl("Producao"))
+      drillDown: () => handleDrillDown("/producao")
     },
     {
       title: "Aproveitamento",
@@ -323,7 +320,7 @@ export default function Dashboard() {
       icon: Percent,
       color: aproveitamentoBarra >= 90 ? "text-green-600" : aproveitamentoBarra >= 80 ? "text-orange-600" : "text-red-600",
       bgColor: aproveitamentoBarra >= 90 ? "bg-green-50" : aproveitamentoBarra >= 80 ? "bg-orange-50" : "bg-red-50",
-      drillDown: () => handleDrillDown(createPageUrl("Producao"))
+      drillDown: () => handleDrillDown("/producao")
     },
     {
       title: "Inadimplência",
@@ -332,7 +329,7 @@ export default function Dashboard() {
       icon: AlertCircle,
       color: taxaInadimplencia < 5 ? "text-green-600" : taxaInadimplencia < 10 ? "text-orange-600" : "text-red-600",
       bgColor: taxaInadimplencia < 5 ? "bg-green-50" : taxaInadimplencia < 10 ? "bg-orange-50" : "bg-red-50",
-      drillDown: () => handleDrillDown(createPageUrl("Financeiro"))
+      drillDown: () => handleDrillDown("/financeiro")
     }
   ];
 
@@ -343,7 +340,7 @@ export default function Dashboard() {
       icon: Users,
       color: "text-blue-600",
       bgColor: "bg-blue-50",
-      drillDown: () => handleDrillDown(createPageUrl("Comercial"))
+      drillDown: () => handleDrillDown("/comercial")
     },
     {
       title: "Produtos Cadastrados",
@@ -351,7 +348,7 @@ export default function Dashboard() {
       icon: Package,
       color: "text-indigo-600",
       bgColor: "bg-indigo-50",
-      drillDown: () => handleDrillDown(createPageUrl("Estoque"))
+      drillDown: () => handleDrillDown("/estoque")
     },
     {
       title: "Colaboradores",
@@ -359,7 +356,7 @@ export default function Dashboard() {
       icon: UserCircle,
       color: "text-pink-600",
       bgColor: "bg-pink-50",
-      drillDown: () => handleDrillDown(createPageUrl("RH"))
+      drillDown: () => handleDrillDown("/rh")
     },
     {
       title: "Entregas Pendentes",
@@ -367,7 +364,7 @@ export default function Dashboard() {
       icon: Truck,
       color: "text-orange-600",
       bgColor: "bg-orange-50",
-      drillDown: () => handleDrillDown(createPageUrl("Expedicao"))
+      drillDown: () => handleDrillDown("/expedicao")
     },
     {
       title: "Estoque Baixo",
@@ -376,7 +373,7 @@ export default function Dashboard() {
       color: "text-red-600",
       bgColor: "bg-red-50",
       alert: produtosBaixoEstoque > 0,
-      drillDown: () => handleDrillDown(createPageUrl("Estoque"))
+      drillDown: () => handleDrillDown("/estoque")
     },
     {
       title: "Total Pedidos",
@@ -384,7 +381,7 @@ export default function Dashboard() {
       icon: ShoppingCart,
       color: "text-cyan-600",
       bgColor: "bg-cyan-50",
-      drillDown: () => handleDrillDown(createPageUrl("Comercial"))
+      drillDown: () => handleDrillDown("/comercial")
     },
     {
       title: "NF-e Autorizadas",
@@ -392,7 +389,7 @@ export default function Dashboard() {
       icon: FileText,
       color: "text-emerald-600",
       bgColor: "bg-emerald-50",
-      drillDown: () => handleDrillDown(createPageUrl("Fiscal"))
+      drillDown: () => handleDrillDown("/fiscal")
     },
     {
       title: "Cobranças Pagas",
@@ -400,7 +397,7 @@ export default function Dashboard() {
       icon: DollarSign,
       color: "text-green-600",
       bgColor: "bg-green-50",
-      drillDown: () => handleDrillDown(createPageUrl("Financeiro"))
+      drillDown: () => handleDrillDown("/financeiro")
     }
   ];
 
@@ -410,15 +407,15 @@ export default function Dashboard() {
       description: "Gestão de Clientes e Vendas",
       icon: ShoppingCart,
       color: "from-purple-500 to-purple-600",
-      url: createPageUrl("Comercial"),
+      url: "/comercial",
       count: pedidosPeriodo.length
     },
     {
       title: "Estoque e Almoxarifado",
       description: "Produtos e Movimentações",
-      icon: Box,
+      icon: Package,
       color: "from-indigo-500 to-indigo-600",
-      url: createPageUrl("Estoque"),
+      url: "/estoque",
       count: produtosBaixoEstoque > 0 ? produtosBaixoEstoque : null,
       alert: produtosBaixoEstoque > 0
     },
@@ -427,7 +424,7 @@ export default function Dashboard() {
       description: "Entregas e Logística",
       icon: Truck,
       color: "from-orange-500 to-orange-600",
-      url: createPageUrl("Expedicao"),
+      url: "/expedicao",
       count: entregasPendentes
     },
     {
@@ -435,7 +432,7 @@ export default function Dashboard() {
       description: "Contas e Fluxo de Caixa",
       icon: DollarSign,
       color: "from-green-500 to-green-600",
-      url: createPageUrl("Financeiro"),
+      url: "/financeiro",
       count: null
     },
   ];

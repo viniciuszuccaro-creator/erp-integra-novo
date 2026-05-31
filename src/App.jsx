@@ -22,6 +22,7 @@ import FinancialIntelligenceHub from '@/components/financial-intelligence/Financ
 import AdvancedAnalyticsHub from '@/components/business-intelligence/AdvancedAnalyticsHub';
 import ExecutiveMonitoringHub from '@/components/executive-monitoring/ExecutiveMonitoringHub';
 import CustomerIntelligenceHub from '@/components/customer-intelligence/CustomerIntelligenceHub';
+import SmartOperationsHub from '@/components/smart-operations/SmartOperationsHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -148,6 +149,15 @@ const AuthenticatedApp = () => {
             <EmpresaSelectorGuard>
               <LayoutWrapper currentPageName="ExecutiveMonitoring">
                 <ExecutiveMonitoringHub />
+              </LayoutWrapper>
+            </EmpresaSelectorGuard>
+          </RBACRoute>
+        } />
+        <Route path="/SmartOperations" element={
+          <RBACRoute module="Dashboard" action="ver">
+            <EmpresaSelectorGuard>
+              <LayoutWrapper currentPageName="SmartOperations">
+                <SmartOperationsHub />
               </LayoutWrapper>
             </EmpresaSelectorGuard>
           </RBACRoute>

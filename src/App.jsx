@@ -30,6 +30,7 @@ import DigitalTwinHub from '@/components/digital-twin/DigitalTwinHub';
 import VoiceAIHub from '@/components/voice-ai/VoiceAIHub';
 import RiskManagementHub from '@/components/risk-compliance/RiskManagementHub';
 import KnowledgeManagementHub from '@/components/knowledge-hub/KnowledgeManagementHub';
+import AutonomousIntelligenceHub from '@/components/autonomous-intelligence/AutonomousIntelligenceHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -202,6 +203,15 @@ const AuthenticatedApp = () => {
               <KnowledgeManagementHub />
             </LayoutWrapper>
           </EmpresaSelectorGuard>
+        } />
+        <Route path="/AutonomousIntelligence" element={
+          <RBACRoute module="Dashboard" action="ver">
+            <EmpresaSelectorGuard>
+              <LayoutWrapper currentPageName="AutonomousIntelligence">
+                <AutonomousIntelligenceHub />
+              </LayoutWrapper>
+            </EmpresaSelectorGuard>
+          </RBACRoute>
         } />
         <Route path="/RiskManagement" element={
           <RBACRoute module="Sistema" action="ver">

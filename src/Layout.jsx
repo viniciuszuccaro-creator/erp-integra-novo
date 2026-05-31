@@ -27,7 +27,8 @@ import {
         Building2,
         AlertCircle,
         Mic,
-        Lock
+        Lock,
+        Brain
       } from "lucide-react";
 import {
   Sidebar,
@@ -120,6 +121,7 @@ const navigationItems = [
   { title: "Voice AI & Conversational", url: "/VoiceAI", icon: Mic, group: "principal" },
   { title: "Risk Management & Compliance", url: "/RiskManagement", icon: AlertCircle, group: "sistema" },
   { title: "Knowledge Hub (IA)", url: "/KnowledgeHub", icon: BookOpen, group: "principal" },
+  { title: "Autonomous Intelligence (IA)", url: "/AutonomousIntelligence", icon: Brain, group: "principal" },
   ];
 
 // React Query client centralizado (padrões seguros + performance)

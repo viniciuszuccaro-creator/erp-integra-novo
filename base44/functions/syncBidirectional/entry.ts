@@ -153,7 +153,10 @@ Deno.serve(async (req) => {
     }
 
     // ===== UP: Empresa → Grupo =====
+    // Entidades que usam empresa_id direto (não empresa_dona_id)
+    const UP_DIRECT_EMPRESA_ID = new Set(['Pedido','ContaReceber','ContaPagar','Entrega','Romaneio','NotaFiscal','OrdemCompra','MovimentacaoEstoque','CaixaMovimento','LancamentoContabil','OrdemProducao','ApontamentoProducao','InspecaoQualidade']);
     if (isUp && eventData && eventType !== 'delete') {
+      const isDirectId = UP_DIRECT_EMPRESA_ID.has(entityName);
       try {
         const existing = await fetchWithFallback(api, entityName, {
           empresa_dona_id: empresa_id, grupo_origem: true, group_id
@@ -162,7 +165,7 @@ Deno.serve(async (req) => {
         const groupData = stripBlocked({
           ...eventData,
           group_id,
-          empresa_id: null,
+          ...(isDirectId ? {} : { empresa_id: null }),
           empresa_dona_id: empresa_id,
           grupo_origem: true,
           e_replicado: true,

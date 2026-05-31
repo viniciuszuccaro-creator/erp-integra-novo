@@ -1,6 +1,9 @@
 import React from "react";
-import { Settings, Building2, Users, Shield } from "lucide-react";
+import { Settings, Building2, Users, Shield, ArrowDownUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { useUser } from "@/components/lib/UserContext";
 
@@ -45,6 +48,14 @@ export default function AdminHeader() {
               Administrador
             </Badge>
           )}
+
+          {/* Acesso rápido à propagação */}
+          <Button asChild size="sm" variant="outline" className="hidden sm:flex gap-1.5 text-xs border-blue-200 text-blue-700 hover:bg-blue-50">
+            <Link to={createPageUrl("AdministracaoSistema?tab=propagacao")}>
+              <ArrowDownUp className="w-3.5 h-3.5" />
+              Propagação
+            </Link>
+          </Button>
         </div>
       </div>
     </header>

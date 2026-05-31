@@ -120,14 +120,15 @@ export default function PropagacaoIndex() {
   const runAll = useCallback(async (direction = "down") => {
     if (!grupoAtual?.id) { toast.error("Selecione um grupo."); return; }
     setGlobalLoading(true);
-    addLog(`🚀 Iniciando sincronização completa [${direction}] — ${ENTITIES.length} entidades`, "info");
-    for (const e of ENTITIES) {
+    const lista = filtroGrupo === "Todos" ? ENTITIES : ENTITIES.filter(e => e.grupo === filtroGrupo);
+    addLog(`🚀 Iniciando sincronização [${direction}] — ${lista.length} entidades${filtroGrupo !== "Todos" ? ` (${filtroGrupo})` : ""}`, "info");
+    for (const e of lista) {
       await runPropagation(e.name, direction);
     }
     setGlobalLoading(false);
-    addLog("🏁 Sincronização completa finalizada", "info");
-    toast.success("Sincronização completa concluída!");
-  }, [grupoAtual?.id, runPropagation]);
+    addLog("🏁 Sincronização finalizada", "info");
+    toast.success(`Sincronização ${filtroGrupo !== "Todos" ? filtroGrupo : "completa"} concluída!`);
+  }, [grupoAtual?.id, runPropagation, filtroGrupo]);
 
   const resetAll = () => {
     setStatus(STATUS_INIT());
@@ -183,8 +184,9 @@ export default function PropagacaoIndex() {
           <Button onClick={() => runAll("up")} disabled={globalLoading} variant="outline" size="sm" className="gap-2 border-blue-300 text-blue-700 hover:bg-blue-50">
             <ArrowUp className="w-4 h-4" /> Empresas → Grupo
           </Button>
-          <Button onClick={() => runAll("both")} disabled={globalLoading} variant="outline" size="sm" className="gap-1">
-            <RefreshCw className="w-4 h-4" /> Bidirecional
+          <Button onClick={() => runAll("both")} disabled={globalLoading} variant="outline" size="sm" className="gap-1 border-purple-300 text-purple-700 hover:bg-purple-50">
+            <RefreshCw className="w-4 h-4" />
+            {filtroGrupo !== "Todos" ? `Bidirecional (${filtroGrupo})` : "Bidirecional"}
           </Button>
           <Button onClick={resetAll} disabled={globalLoading} variant="ghost" size="sm" className="text-slate-500">
             Resetar

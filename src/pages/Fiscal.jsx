@@ -1,6 +1,5 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
 import { FileText, Settings, Book, BarChart3, Upload, Sparkles } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
@@ -29,7 +28,7 @@ const ImportarXMLNFe = React.lazy(() => import('../components/fiscal/ImportarXML
 
 export default function FiscalPage() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
-  const { filtrarPorContexto, empresaAtual } = useContextoVisual();
+  const { empresaAtual } = useContextoVisual();
   const { openWindow } = useWindow();
   const { user } = useUser();
 

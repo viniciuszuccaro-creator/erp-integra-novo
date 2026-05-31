@@ -1,6 +1,5 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
 import { Users, Clock, Calendar, Activity, Trophy, FileText, UserCircle } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";

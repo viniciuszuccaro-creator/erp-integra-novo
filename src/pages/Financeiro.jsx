@@ -1,6 +1,5 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
 import { Wallet, DollarSign, TrendingUp, TrendingDown, BarChart3, CreditCard, ArrowLeftRight, Globe, FileText, AlertCircle, Activity } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
@@ -19,7 +18,7 @@ import MetricasSecundariasLaunchpad from "@/components/financeiro/MetricasSecund
 import ModulosGridFinanceiro from "@/components/financeiro/ModulosGridFinanceiro";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import useFinanceiroDerivedData from "@/components/financeiro/hooks/useFinanceiroDerivedData";
-import { FINANCEIRO_CONFIG_LIMIT, FINANCEIRO_LIST_LIMIT, FINANCEIRO_SMALL_LIST_LIMIT, financeiroCountQueryDefaults, financeiroQueryDefaults } from "@/components/financeiro/config/financeiroQueryConfig";
+import { FINANCEIRO_CONFIG_LIMIT, FINANCEIRO_LIST_LIMIT, FINANCEIRO_SMALL_LIST_LIMIT } from "@/components/financeiro/config/financeiroQueryConfig";
 
 const CaixaCentralLiquidacao = React.lazy(() => import("../components/financeiro/CaixaCentralLiquidacao"));
 const ContasReceberTab = React.lazy(() => import("../components/financeiro/ContasReceberTab"));

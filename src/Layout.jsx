@@ -94,6 +94,7 @@ const navigationItems = [
   { title: "Expedição e Logística", url: createPageUrl("Expedicao"), icon: Truck, group: "operacional" },
   { title: "Produção e Manufatura", url: createPageUrl("Producao"), icon: Factory, group: "operacional" },
   { title: "Smart Operations (IA)", url: "/SmartOperations", icon: Factory, group: "operacional" },
+  { title: "Digital Twin & IoT", url: "/DigitalTwin", icon: Zap, group: "operacional" },
 
 
 

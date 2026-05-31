@@ -87,6 +87,16 @@ export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtua
 
       </TabsList>
 
+      {/* ── SAÚDE DO SISTEMA ── */}
+      <TabsContent value="saude" className="mt-4 flex-1 overflow-hidden">
+        <ProtectedSection
+          module="Sistema" section={["Configurações"]} action="visualizar"
+          fallback={<p className="p-4 text-sm text-slate-500">Acesso restrito.</p>}
+        >
+          <SystemHealthDashboard />
+        </ProtectedSection>
+      </TabsContent>
+
       {/* ── STATUS SISTEMA ── */}
       <TabsContent value="checkup" className="mt-4">
         <ProtectedSection

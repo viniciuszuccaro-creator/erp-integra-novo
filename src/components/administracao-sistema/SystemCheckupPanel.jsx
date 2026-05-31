@@ -35,8 +35,7 @@ function CheckItem({ label, status, detail }) {
   );
 }
 
-function Section({ title, icon: IconComp, children }) {
-  const Icon = IconComp;
+function Section({ title, icon: Icon, children }) {
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b border-slate-200">

@@ -26,6 +26,9 @@ const ENTITIES = [
   { name: "Pedido",           label: "Pedidos",            icon: "📋", grupo: "Comercial" },
   { name: "TabelaPreco",      label: "Tabelas de Preço",   icon: "🏷️", grupo: "Comercial" },
   { name: "Representante",    label: "Representantes",     icon: "🤝", grupo: "Comercial" },
+  { name: "Oportunidade",     label: "Oportunidades",      icon: "🎯", grupo: "Comercial" },
+  { name: "Comissao",         label: "Comissões",          icon: "💵", grupo: "Comercial" },
+  { name: "CondicaoComercial",label: "Condições Comerciais",icon: "📑", grupo: "Comercial" },
   // Compras
   { name: "Fornecedor",       label: "Fornecedores",       icon: "🏭", grupo: "Compras" },
   { name: "OrdemCompra",      label: "Ordens de Compra",   icon: "🛒", grupo: "Compras" },
@@ -33,19 +36,31 @@ const ENTITIES = [
   { name: "Produto",          label: "Produtos",           icon: "📦", grupo: "Estoque" },
   { name: "GrupoProduto",     label: "Grupos de Produto",  icon: "🗂️", grupo: "Estoque" },
   { name: "Marca",            label: "Marcas",             icon: "🎯", grupo: "Estoque" },
+  { name: "SetorAtividade",   label: "Setores de Atividade",icon: "🏗️", grupo: "Estoque" },
+  { name: "UnidadeMedida",    label: "Unidades de Medida", icon: "📐", grupo: "Estoque" },
+  { name: "MovimentacaoEstoque",label: "Movimentações Est.",icon: "🔄", grupo: "Estoque" },
   // Financeiro
   { name: "ContaReceber",     label: "Contas a Receber",   icon: "💰", grupo: "Financeiro" },
   { name: "ContaPagar",       label: "Contas a Pagar",     icon: "💸", grupo: "Financeiro" },
   { name: "CentroCusto",      label: "Centro de Custo",    icon: "🏦", grupo: "Financeiro" },
   { name: "PlanoDeContas",    label: "Plano de Contas",    icon: "📊", grupo: "Financeiro" },
   { name: "FormaPagamento",   label: "Formas Pagamento",   icon: "💳", grupo: "Financeiro" },
+  { name: "TipoDespesa",      label: "Tipos de Despesa",   icon: "📉", grupo: "Financeiro" },
+  { name: "Banco",            label: "Bancos",             icon: "🏛️", grupo: "Financeiro" },
   // Fiscal
   { name: "NotaFiscal",       label: "Notas Fiscais",      icon: "📄", grupo: "Fiscal" },
-  // Expedição
+  // Expedição & Logística
   { name: "Entrega",          label: "Entregas",           icon: "🚚", grupo: "Expedição" },
   { name: "Transportadora",   label: "Transportadoras",    icon: "🚛", grupo: "Expedição" },
+  { name: "Veiculo",          label: "Veículos",           icon: "🚗", grupo: "Expedição" },
   // RH
   { name: "Colaborador",      label: "Colaboradores",      icon: "👤", grupo: "RH" },
+  { name: "Departamento",     label: "Departamentos",      icon: "🏢", grupo: "RH" },
+  { name: "Cargo",            label: "Cargos",             icon: "👔", grupo: "RH" },
+  { name: "Turno",            label: "Turnos",             icon: "⏰", grupo: "RH" },
+  // CRM
+  { name: "SegmentoCliente",  label: "Segmentos de Cliente",icon: "🎨", grupo: "CRM" },
+  { name: "RegiaoAtendimento",label: "Regiões de Atendimento",icon: "🗺️", grupo: "CRM" },
   // Sistema
   { name: "ConfiguracaoSistema", label: "Configurações",  icon: "⚙️", grupo: "Sistema" },
   { name: "PerfilAcesso",     label: "Perfis de Acesso",   icon: "🔐", grupo: "Sistema" },

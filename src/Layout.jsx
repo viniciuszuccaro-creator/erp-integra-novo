@@ -122,6 +122,7 @@ const navigationItems = [
   { title: "Risk Management & Compliance", url: "/RiskManagement", icon: AlertCircle, group: "sistema" },
   { title: "Knowledge Hub (IA)", url: "/KnowledgeHub", icon: BookOpen, group: "principal" },
   { title: "Autonomous Intelligence (IA)", url: "/AutonomousIntelligence", icon: Brain, group: "principal" },
+  { title: "Realtime Collaboration Hub", url: "/RealtimeCollaboration", icon: Users, group: "principal" },
   ];
 
 // React Query client centralizado (padrões seguros + performance)

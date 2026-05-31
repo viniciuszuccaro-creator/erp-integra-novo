@@ -1,4 +1,4 @@
-import React, { Suspense, useState, useMemo } from "react";
+import React, { useEffect, useMemo, startTransition } from "react";
 import { base44 } from "@/api/base44Client";
 import { Box, TrendingUp, PackageCheck, PackageMinus, PackageOpen, Clock, BarChart3, Sparkles, ArrowLeftRight, Download } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
@@ -9,14 +9,12 @@ import { useUser } from "@/components/lib/UserContext";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import { Button } from "@/components/ui/button";
-import HeaderEstoqueCompacto from "@/components/estoque/estoque-launchpad/HeaderEstoqueCompacto";
 import ModuleLayout from "@/components/layout/ModuleLayout";
 import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
 import KPIsEstoque from "@/components/estoque/estoque-launchpad/KPIsEstoque";
 import ModulosGridEstoque from "@/components/estoque/estoque-launchpad/ModulosGridEstoque";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import useEstoqueDerivedData from "@/components/estoque/hooks/useEstoqueDerivedData";
 import TransferenciaEntreEmpresasForm from "../components/estoque/TransferenciaEntreEmpresasForm";
 import { ESTOQUE_LIST_LIMIT, ESTOQUE_PRODUCTS_LIMIT } from "@/components/estoque/config/estoqueQueryConfig";
@@ -43,10 +41,6 @@ export default function Estoque() {
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
   const contextKey = empresaAtual?.id || groupId || 'sem-contexto';
   const contextoValido = contextKey !== 'sem-contexto';
-  
-  // Estados removidos - VisualizadorUniversalEntidade gerencia tudo internamente
-
-  // Query removida - VisualizadorUniversalEntidade busca os dados
 
   // Contagens derivadas diretamente da lista de produtos (useRLSQuery abaixo)
   const { data: produtosParaKPIs = [], refetch: refetchContagens } = useRLSQuery(
@@ -54,7 +48,7 @@ export default function Estoque() {
     { staleTime: 300000, enabled: canSeeEstoque && contextoValido }
   );
 
-  const contagensTotais = React.useMemo(() => ({
+  const contagensTotais = useMemo(() => ({
     total: produtosParaKPIs.length,
     revenda: produtosParaKPIs.filter(p => p.tipo_item === 'Revenda').length,
     producao: produtosParaKPIs.filter(p => p.tipo_item === 'Matéria-Prima Produção').length,
@@ -62,7 +56,7 @@ export default function Estoque() {
   }), [produtosParaKPIs]);
 
   // Real-time update via subscription
-  React.useEffect(() => {
+  useEffect(() => {
     const unsubscribe = base44.entities.Produto.subscribe(() => {
       if (contextoValido) refetchContagens();
     });
@@ -84,12 +78,8 @@ export default function Estoque() {
     { staleTime: 30000, enabled: canSeeEstoque && contextoValido }
   );
 
-
-
-  const movimentacoesFiltradas = movimentacoes;
-
   const { totalReservado, estoqueDisponivel, recebimentos, requisicoesAlmoxarifado } = useEstoqueDerivedData({
-    movimentacoes: movimentacoesFiltradas,
+    movimentacoes,
     produtos: produtosParaKPIs,
   });
 
@@ -164,7 +154,7 @@ export default function Estoque() {
       windowTitle: '📊 Movimentações',
       width: 1500,
       height: 850,
-      props: { movimentacoes: movimentacoesFiltradas, produtos: produtosParaKPIs }
+      props: { movimentacoes, produtos: produtosParaKPIs }
     },
     {
       title: 'Recebimento',
@@ -219,7 +209,7 @@ export default function Estoque() {
       windowTitle: '📈 Relatórios Estoque',
       width: 1400,
       height: 800,
-      props: { produtos: produtosParaKPIs, movimentacoes: movimentacoesFiltradas }
+      props: { produtos: produtosParaKPIs, movimentacoes }
     },
     {
       title: 'IA Reposição',
@@ -237,7 +227,7 @@ export default function Estoque() {
   const allowedModules = modules.filter(m => hasPermission('Estoque', (m.sectionKey || m.title), 'ver'));
 
    const handleModuleClick = (module) => {
-    React.startTransition(() => {
+    startTransition(() => {
       // Auditoria de abertura de seção
       void base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário',

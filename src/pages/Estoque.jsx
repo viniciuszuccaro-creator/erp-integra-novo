@@ -31,7 +31,6 @@ const IAReposicao = React.lazy(() => import("../components/estoque/IAReposicao")
 
 export default function Estoque() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
-  const canSeeEstoque = hasPermission('Estoque', null, 'ver');
   const canExportEstoque = hasPermission('Estoque', null, 'exportar') || hasPermission('Estoque', 'Relatórios', 'exportar') || hasPermission('Estoque', 'Relatorios', 'exportar');
   const canTransferirEstoque = hasPermission('Estoque', 'Transferências', 'criar') || hasPermission('Estoque', 'Transferencias', 'criar') || hasPermission('Estoque', 'Movimentações', 'criar') || hasPermission('Estoque', 'Movimentacoes', 'criar');
   const { openWindow } = useWindow();
@@ -42,10 +41,9 @@ export default function Estoque() {
   const contextKey = empresaAtual?.id || groupId || 'sem-contexto';
   const contextoValido = contextKey !== 'sem-contexto';
 
-  // Contagens derivadas diretamente da lista de produtos (useRLSQuery abaixo)
   const { data: produtosParaKPIs = [], refetch: refetchContagens } = useRLSQuery(
     'Produto', {}, undefined, ESTOQUE_PRODUCTS_LIMIT,
-    { staleTime: 300000, enabled: canSeeEstoque && contextoValido }
+    { staleTime: 300000, enabled: contextoValido }
   );
 
   const contagensTotais = useMemo(() => ({
@@ -55,8 +53,7 @@ export default function Estoque() {
     estoqueBaixo: produtosParaKPIs.filter(isProdutoEstoqueBaixo).length,
   }), [produtosParaKPIs]);
 
-  // Real-time update via subscription
-  useEffect(() => {
+  React.useEffect(() => {
     const unsubscribe = base44.entities.Produto.subscribe(() => {
       if (contextoValido) refetchContagens();
     });
@@ -65,17 +62,17 @@ export default function Estoque() {
 
   const { data: movimentacoes = [] } = useRLSQuery(
     'MovimentacaoEstoque', {}, '-data_movimentacao', ESTOQUE_LIST_LIMIT,
-    { staleTime: 30000, enabled: canSeeEstoque && contextoValido }
+    { staleTime: 30000, enabled: contextoValido }
   );
 
   const { data: solicitacoes = [] } = useRLSQuery(
     'SolicitacaoCompra', {}, '-data_solicitacao', ESTOQUE_LIST_LIMIT,
-    { staleTime: 30000, enabled: canSeeEstoque && contextoValido }
+    { staleTime: 30000, enabled: contextoValido }
   );
 
   const { data: ordensCompra = [] } = useRLSQuery(
     'OrdemCompra', {}, '-data_solicitacao', ESTOQUE_LIST_LIMIT,
-    { staleTime: 30000, enabled: canSeeEstoque && contextoValido }
+    { staleTime: 30000, enabled: contextoValido }
   );
 
   const { totalReservado, estoqueDisponivel, recebimentos, requisicoesAlmoxarifado } = useEstoqueDerivedData({

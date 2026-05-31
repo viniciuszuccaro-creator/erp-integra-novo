@@ -34,6 +34,7 @@ import AutonomousIntelligenceHub from '@/components/autonomous-intelligence/Auto
 import RealtimeCollaborationHub from '@/components/realtime-collaboration/RealtimeCollaborationHub';
 import QualityManagementHub from '@/components/quality-management/QualityManagementHub';
 import SupplyChainResilienceHub from '@/components/supply-chain-resilience/SupplyChainResilienceHub';
+import QuantumSecurityHub from '@/components/quantum-security/QuantumSecurityHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -239,6 +240,15 @@ const AuthenticatedApp = () => {
             <EmpresaSelectorGuard>
               <LayoutWrapper currentPageName="SupplyChainResilience">
                 <SupplyChainResilienceHub />
+              </LayoutWrapper>
+            </EmpresaSelectorGuard>
+          </RBACRoute>
+        } />
+        <Route path="/QuantumSecurity" element={
+          <RBACRoute module="Sistema" action="ver">
+            <EmpresaSelectorGuard>
+              <LayoutWrapper currentPageName="QuantumSecurity">
+                <QuantumSecurityHub />
               </LayoutWrapper>
             </EmpresaSelectorGuard>
           </RBACRoute>

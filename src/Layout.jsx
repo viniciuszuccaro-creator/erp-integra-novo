@@ -125,6 +125,7 @@ const navigationItems = [
   { title: "Realtime Collaboration Hub", url: "/RealtimeCollaboration", icon: Users, group: "principal" },
   { title: "Quality Management", url: "/QualityManagement", icon: CheckCircle2, group: "operacional" },
   { title: "Supply Chain Resilience", url: "/SupplyChainResilience", icon: Shield, group: "operacional" },
+  { title: "Quantum-Safe Security", url: "/QuantumSecurity", icon: Lock, group: "sistema" },
   ];
 
 // React Query client centralizado (padrões seguros + performance)

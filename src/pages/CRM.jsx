@@ -1,4 +1,4 @@
-import React from "react";
+import React, { startTransition } from "react";
 import { base44 } from "@/api/base44Client";
 import { TrendingUp, Target, MessageSquare, Mail, Sparkles, AlertTriangle } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
@@ -26,8 +26,6 @@ const FunilVisual = React.lazy(() => import("../components/crm/FunilVisual"));
 const IALeadsPriorizacao = React.lazy(() => import("../components/crm/IALeadsPriorizacao"));
 const IAChurnDetection = React.lazy(() => import("../components/crm/IAChurnDetection"));
 
-
-
 export default function CRMPage() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
   const { empresaAtual, estaNoGrupo, grupoAtual } = useContextoVisual();
@@ -53,10 +51,7 @@ export default function CRMPage() {
     { staleTime: 60000, enabled: !bloqueadoSemEmpresa }
   );
 
-  const oportunidadesFiltradas = oportunidades;
-  const interacoesFiltradas = interacoes;
-
-  const { totalOportunidades, oportunidadesAbertas, valorPipeline, valorPonderado, taxaConversao } = useCRMDerivedData({ oportunidades: oportunidadesFiltradas });
+  const { totalOportunidades, oportunidadesAbertas, valorPipeline, valorPonderado, taxaConversao } = useCRMDerivedData({ oportunidades });
 
   if (loadingPermissions) {
     return (
@@ -89,9 +84,8 @@ export default function CRMPage() {
       windowTitle: '🎯 Funil Visual',
       width: 1600,
       height: 900,
-      props: { oportunidades: oportunidadesFiltradas, windowMode: true }
+      props: { oportunidades, windowMode: true }
     },
-
     {
       title: 'Oportunidades',
       description: 'Gestão completa',
@@ -113,16 +107,6 @@ export default function CRMPage() {
       height: 800,
     },
     {
-      title: 'Campanhas',
-      description: 'Marketing ativo',
-      icon: Mail,
-      color: 'pink',
-      component: () => <div className="p-4">Campanhas Marketing (em desenvolvimento)</div>,
-      windowTitle: '📧 Campanhas',
-      width: 1400,
-      height: 800,
-    },
-    {
       title: 'IA Leads',
       description: 'Priorização automática',
       icon: Sparkles,
@@ -131,7 +115,7 @@ export default function CRMPage() {
       windowTitle: '🤖 IA Leads',
       width: 1400,
       height: 800,
-      props: { oportunidades: oportunidadesFiltradas, windowMode: true }
+      props: { oportunidades, windowMode: true }
     },
     {
       title: 'IA Churn',
@@ -147,7 +131,7 @@ export default function CRMPage() {
   ];
 
   const handleModuleClick = (module) => {
-    React.startTransition(() => {
+    startTransition(() => {
       // Auditoria de abertura de seção
       void base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário',
@@ -182,7 +166,7 @@ export default function CRMPage() {
     <ErrorBoundary>
       <ModuleLayout title="CRM - Relacionamento" subtitle="Relacionamento, funil e campanhas" actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'crm_primary_action' })}>Novo</Button></div>}>
         <ModuleKPIs>
-          <CRMIAPanel oportunidades={oportunidadesFiltradas} clientes={clientes} interacoes={interacoesFiltradas} />
+          <CRMIAPanel oportunidades={oportunidades} clientes={clientes} interacoes={interacoes} />
           <CRMScoreClienteWidget compact />
           <KPIsCRM
             oportunidadesAbertas={oportunidadesAbertas}

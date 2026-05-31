@@ -1,4 +1,4 @@
-import React from "react";
+import React, { startTransition } from "react";
 import { base44 } from "@/api/base44Client";
 import { FileText, Settings, Book, BarChart3, Upload, Sparkles } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
@@ -8,10 +8,8 @@ import ProtectedSection from "@/components/security/ProtectedSection";
 import { useWindow } from "@/components/lib/useWindow";
 import { useUser } from "@/components/lib/UserContext";
 import usePermissions from "@/components/lib/usePermissions";
-import HeaderFiscalCompacto from "@/components/fiscal/fiscal-launchpad/HeaderFiscalCompacto";
 import KPIsFiscal from "@/components/fiscal/fiscal-launchpad/KPIsFiscal";
 import ModulosGridFiscal from "@/components/fiscal/fiscal-launchpad/ModulosGridFiscal";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import ModuleLayout from "@/components/layout/ModuleLayout";
 import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
@@ -28,25 +26,21 @@ const ImportarXMLNFe = React.lazy(() => import('../components/fiscal/ImportarXML
 
 export default function FiscalPage() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
-  const { empresaAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const { openWindow } = useWindow();
   const { user } = useUser();
 
-  // Query via useRLSQuery (escopo multi-empresa automático)
   const { data: notasFiscais = [] } = useRLSQuery(
     'NotaFiscal', {}, '-created_date', 100,
     { staleTime: 30000, retry: 2 }
   );
 
-  // Dados já vêm filtrados do servidor
-  const notasFiltradasContexto = notasFiscais;
-
   const statusCounts = {
-    total: notasFiltradasContexto.length,
-    autorizadas: notasFiltradasContexto.filter(n => n.status === "Autorizada").length,
-    rascunho: notasFiltradasContexto.filter(n => n.status === "Rascunho").length,
-    rejeitadas: notasFiltradasContexto.filter(n => n.status === "Rejeitada").length,
-    canceladas: notasFiltradasContexto.filter(n => n.status === "Cancelada").length
+    total: notasFiscais.length,
+    autorizadas: notasFiscais.filter(n => n.status === "Autorizada").length,
+    rascunho: notasFiscais.filter(n => n.status === "Rascunho").length,
+    rejeitadas: notasFiscais.filter(n => n.status === "Rejeitada").length,
+    canceladas: notasFiscais.filter(n => n.status === "Cancelada").length
   };
 
   if (loadingPermissions) {
@@ -136,20 +130,22 @@ export default function FiscalPage() {
     },
   ];
 
-  const allowedModules = modules.filter(m => hasPermission('Fiscal', (m.sectionKey || m.title), 'ver'));
+  const allowedModules = modules.filter(m => hasPermission('Fiscal', (m.sectionKey || m.title), 'visualizar'));
 
-   const handleModuleClick = (module) => {
-    React.startTransition(() => {
-      // Auditoria de abertura de seção
-      base44.entities.AuditLog.create({
+  const handleModuleClick = (module) => {
+    startTransition(() => {
+      void base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário',
+        usuario_id: user?.id || null,
+        empresa_id: empresaAtual?.id || null,
+        group_id: grupoAtual?.id || null,
         acao: 'Visualização',
         modulo: 'Fiscal',
         tipo_auditoria: 'acesso',
         entidade: 'Seção',
         descricao: `Abrir seção: ${module.title}`,
         data_hora: new Date().toISOString(),
-      });
+      }).catch(() => {});
       openWindow(
          module.component,
         { 
@@ -171,7 +167,7 @@ export default function FiscalPage() {
     <ErrorBoundary>
       <ModuleLayout title="Fiscal e Tributário" subtitle="NF-e, tributos e relatórios" actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'fiscal_primary_action' })}>Nova NF-e</Button></div>}>
         <ModuleKPIs>
-          <FiscalIAPanel notas={notasFiltradasContexto} empresaAtual={empresaAtual} />
+          <FiscalIAPanel notas={notasFiscais} empresaAtual={empresaAtual} />
           <KPIsFiscal
             total={statusCounts.total}
             autorizadas={statusCounts.autorizadas}

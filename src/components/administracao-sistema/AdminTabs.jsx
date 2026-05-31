@@ -17,6 +17,7 @@ import CheckupRelatorio from "@/components/sistema/CheckupRelatorio";
 import DashboardPropagacaoMonitor from "@/components/administracao-sistema/DashboardPropagacaoMonitor";
 import TestTogglePainel from "@/components/sistema/TestTogglePainel";
 import TestValidacaoRBAC from "@/components/administracao-sistema/TestValidacaoRBAC";
+import Monitor429RateLimit from "@/components/administracao-sistema/Monitor429RateLimit";
 
 
 const TAB_DEFS = [
@@ -24,6 +25,7 @@ const TAB_DEFS = [
   { value: "gerais",      label: "Parâmetros Gerais",     icon: Settings,    perm: "Configurações",     color: "blue" },
   { value: "propagacao",  label: "Propagação Grupo↔Emp",  icon: ArrowDownUp, perm: "Configurações",     color: "blue" },
   { value: "integracoes", label: "Integrações",            icon: Plug,        perm: "Integrações",       color: "blue" },
+  { value: "monitor429",  label: "🚨 Rate Limit (429s)",  icon: ArrowDownUp, perm: "Configurações",     color: "blue" },
   { value: "acessos",     label: "Gestão de Acessos",     icon: Users,       perm: "Controle de Acesso", color: "blue" },
   { value: "seguranca",   label: "Segurança, IA & Gov.",  icon: Shield,      perm: "Segurança",         color: "blue" },
   { value: "auditoria",   label: "Auditoria e Logs",      icon: FileText,    perm: "Auditoria",         color: "blue" },
@@ -164,6 +166,16 @@ export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtua
           <div className="w-full h-full">
             <AuditoriaLogsIndex />
           </div>
+        </ProtectedSection>
+      </TabsContent>
+
+      {/* ── RATE LIMIT (429s) ── */}
+      <TabsContent value="monitor429" className="mt-4">
+        <ProtectedSection
+          module="Sistema" section={["Configurações"]} action="visualizar"
+          fallback={<p className="p-4 text-sm text-slate-500">Acesso restrito ao Monitoramento.</p>}
+        >
+          <Monitor429RateLimit />
         </ProtectedSection>
       </TabsContent>
 

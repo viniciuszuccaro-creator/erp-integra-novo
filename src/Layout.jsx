@@ -1,6 +1,6 @@
-import React, { useState, useEffect, Suspense, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
 import { createPageUrl } from "@/utils";
+import { useLocation } from "react-router-dom";
 import { 
         LayoutDashboard, 
         Users, 
@@ -9,8 +9,6 @@ import {
         DollarSign, 
         Package,
         UserCircle,
-        Menu,
-        LogOut,
         Box,
         FileText,
         Settings,
@@ -19,7 +17,6 @@ import {
         BarChart3,
         Factory,
         BookOpen,
-        Search,
         MessageCircle,
         CheckCircle2,
         Trophy,
@@ -31,89 +28,53 @@ import {
         Brain
       } from "lucide-react";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarHeader,
-  SidebarFooter,
   SidebarProvider,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { base44 } from "@/api/base44Client";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import usePermissions from "@/components/lib/usePermissions";
-import NotificationCenter from "@/components/NotificationCenter";
-import EmpresaSwitcher from "@/components/EmpresaSwitcher";
 import { UserProvider, useUser } from "@/components/lib/UserContext";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
-import AcoesRapidasGlobal from "@/components/AcoesRapidasGlobal";
 import PesquisaUniversal from "@/components/PesquisaUniversal";
-import MiniMapaNavegacao from "@/components/MiniMapaNavegacao";
 import { WindowProvider } from "@/components/lib/WindowManager";
-import WindowRenderer from "@/components/lib/WindowRenderer";
-import MinimizedWindowsBar from "@/components/lib/MinimizedWindowsBar";
-import AtalhosTecladoInfo from "@/components/sistema/AtalhosTecladoInfo";
 import ZIndexGuard from "@/components/lib/ZIndexFix";
-import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import "@/components/lib/networkGuard";
 import BootstrapGuard from "@/components/lib/BootstrapGuard";
 import GlobalNetworkErrorHandler from "@/components/lib/GlobalNetworkErrorHandler";
-import GuardRails from "@/components/lib/GuardRails";
 import GlobalContextStamp from "@/components/lib/GlobalContextStamp";
-import ProtectedSection from "@/components/security/ProtectedSection";
-import { sanitizeOnWrite } from "@/components/lib/sanitizeOnWrite";
 import { usePrefetchModuleData } from "@/components/lib/usePrefetchModuleData";
 import { useInvalidationBus } from "@/components/lib/useInvalidationBus";
 import { useNavHistory } from "@/components/lib/useNavHistory";
 import { usePredictivePrefetch } from "@/components/lib/usePredictivePrefetch";
-import { idbClearExpired } from "@/components/lib/useIndexedDBCache";
 
 import EmpresaOnboardingGuard from "@/components/sistema/EmpresaOnboardingGuard";
 import LayoutEffects from "@/components/layout/LayoutEffects";
 import LayoutRBACWrapper from "@/components/layout/LayoutRBACWrapper";
+import LayoutSidebar from "@/components/layout/LayoutSidebar";
+import LayoutHeaderBar from "@/components/layout/LayoutHeaderBar";
+import LayoutMainContent from "@/components/layout/LayoutMainContent";
 // v21.9 — layout refatorado (ciclos UI resolvidos)
 
 
 const navigationItems = [
-        { title: "Dashboard", url: createPageUrl("Dashboard"), icon: LayoutDashboard, group: "principal" },
-        { title: "Dashboard Corporativo", url: createPageUrl("DashboardCorporativo"), icon: BarChart3, group: "principal" },
-        { title: "Relatórios e Análises", url: createPageUrl("Relatorios"), icon: BarChart3, group: "principal" },
-
-        { title: "Agenda e Calendário", url: createPageUrl("Agenda"), icon: Calendar, group: "principal" },
-        { title: "CRM - Relacionamento", url: createPageUrl("CRM"), icon: Users, group: "principal" },
-
-  { title: "Cadastros Gerais", url: createPageUrl("Cadastros"), icon: Users, group: "cadastros" },
-  { title: "Comercial e Vendas", url: createPageUrl("Comercial"), icon: ShoppingCart, group: "operacional" },
-  { title: "Estoque e Almoxarifado", url: createPageUrl("Estoque"), icon: Box, group: "operacional" },
-  { title: "Compras e Suprimentos", url: createPageUrl("Compras"), icon: Package, group: "operacional" },
-  { title: "Expedição e Logística", url: createPageUrl("Expedicao"), icon: Truck, group: "operacional" },
-  { title: "Produção e Manufatura", url: createPageUrl("Producao"), icon: Factory, group: "operacional" },
-
-
-
-
-  { title: "Financeiro e Contábil", url: createPageUrl("Financeiro"), icon: DollarSign, group: "administrativo" },
-  { title: "Recursos Humanos", url: createPageUrl("RH"), icon: UserCircle, group: "administrativo" },
-
-  { title: "Fiscal e Tributário", url: createPageUrl("Fiscal"), icon: FileText, group: "administrativo" },
-  { title: "Gestão de Contratos", url: createPageUrl("Contratos"), icon: FileText, group: "administrativo" },
-
-
-  { title: "Administração do Sistema", url: createPageUrl("AdministracaoSistema?tab=integracoes"), icon: Settings, group: "sistema" },
-
-  
-  
-  
-  
-  { title: "Hub de Atendimento", url: createPageUrl("HubAtendimento"), icon: MessageCircle, group: "principal" },
-
-
+    { title: "Dashboard", url: "/Dashboard", icon: LayoutDashboard, group: "principal" },
+    { title: "Dashboard Corporativo", url: "/DashboardCorporativo", icon: BarChart3, group: "principal" },
+    { title: "Relatórios e Análises", url: "/Relatorios", icon: BarChart3, group: "principal" },
+    { title: "Agenda e Calendário", url: "/Agenda", icon: Calendar, group: "principal" },
+    { title: "CRM - Relacionamento", url: "/CRM", icon: Users, group: "principal" },
+    { title: "Cadastros Gerais", url: "/Cadastros", icon: Users, group: "cadastros" },
+    { title: "Comercial e Vendas", url: "/Comercial", icon: ShoppingCart, group: "operacional" },
+    { title: "Estoque e Almoxarifado", url: "/Estoque", icon: Box, group: "operacional" },
+    { title: "Compras e Suprimentos", url: "/Compras", icon: Package, group: "operacional" },
+    { title: "Expedição e Logística", url: "/Expedicao", icon: Truck, group: "operacional" },
+    { title: "Produção e Manufatura", url: "/Producao", icon: Factory, group: "operacional" },
+    { title: "Financeiro e Contábil", url: "/Financeiro", icon: DollarSign, group: "administrativo" },
+    { title: "Recursos Humanos", url: "/RH", icon: UserCircle, group: "administrativo" },
+    { title: "Fiscal e Tributário", url: "/Fiscal", icon: FileText, group: "administrativo" },
+    { title: "Gestão de Contratos", url: "/Contratos", icon: FileText, group: "administrativo" },
+    { title: "Administração do Sistema", url: "/AdministracaoSistema?tab=integracoes", icon: Settings, group: "sistema" },
+    { title: "Hub de Atendimento", url: "/HubAtendimento", icon: MessageCircle, group: "principal" },
   ];
 
 // React Query client centralizado (padrões seguros + performance)
@@ -132,7 +93,6 @@ const queryClient = new QueryClient({
 });
 
 function LayoutContent({ children, currentPageName }) {
-  // Módulo atual da página (definido no topo para evitar TDZ)
   const pageToModule = {
     CRM: 'CRM',
     Comercial: 'Comercial',
@@ -154,19 +114,18 @@ function LayoutContent({ children, currentPageName }) {
     PlanoMelhoria: 'Sistema',
   };
   const moduleName = pageToModule?.[currentPageName] || 'Sistema';
-              // AppLayout + Sidebar + Topbar padrão já implementados; reforço de h-full/scroll interno preservado
-        const location = useLocation();
-        const { user } = useUser();
-        const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
-        const { hasPermission } = usePermissions();
-        const [pesquisaOpen, setPesquisaOpen] = useState(false);
-        const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
-        const [integracoesOk, setIntegracoesOk] = useState(true);
-        const { prefetch: prefetchModule } = usePrefetchModuleData();
-        const queryClient = useQueryClient();
-        const contextRef = useRef({ user, empresaAtual, grupoAtual, contexto, moduleName });
+  const location = useLocation();
+  const { user } = useUser();
+  const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const { hasPermission } = usePermissions();
+  const [pesquisaOpen, setPesquisaOpen] = useState(false);
+  const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
+  const [integracoesOk, setIntegracoesOk] = useState(true);
+  const { prefetch: prefetchModule } = usePrefetchModuleData();
+  const queryClient = useQueryClient();
+  const contextRef = useRef({ user, empresaAtual, grupoAtual, contexto, moduleName });
 
-        contextRef.current = { user, empresaAtual, grupoAtual, contexto, moduleName };
+  contextRef.current = { user, empresaAtual, grupoAtual, contexto, moduleName };
 
         // Fase 2: Barramento de invalidação seletiva — substitui broadcast global por keys específicas
         useInvalidationBus([
@@ -1140,7 +1099,6 @@ function LayoutContent({ children, currentPageName }) {
 
   return (
     <SidebarProvider>
-      {/* Efeitos extraídos — sem renderização visual */}
       <LayoutEffects
         user={user} empresaAtual={empresaAtual} grupoAtual={grupoAtual}
         contexto={contexto} moduleName={moduleName} currentPageName={currentPageName}
@@ -1152,208 +1110,49 @@ function LayoutContent({ children, currentPageName }) {
         contexto={contexto} contextRef={contextRef}
       />
 
-
-      {/* Mobile page: always mounted, visibility toggled via display */}
       <div className="w-full h-full min-h-screen" style={{ display: isMobilePage ? undefined : 'none' }}>{children}</div>
 
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-blue-50" style={{ display: isMobilePage ? 'none' : undefined }}>
-        {/* Fase 2: preencher h-full com rolagem interna em todo conteúdo central */}
-        <Sidebar className="border-r border-slate-200 bg-white/80 backdrop-blur-sm">
-          <SidebarHeader className="border-b border-slate-200 p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-                <FileText className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="font-bold text-xl text-slate-900">ERP Zuccaro</h2>
-                <p className="text-xs text-slate-500">V21.5 • Sistema Completo</p>
-              </div>
-            </div>
-          </SidebarHeader>
-          
-          <SidebarContent className="p-3">
-            {Object.entries(groupedItems).map(([groupName, items]) => {
-              if (items.length === 0) return null;
-              
-              const groupLabels = {
-                principal: "Principal",
-                cadastros: "Cadastros",
-                operacional: "Operacional",
-                administrativo: "Administrativo",
-                sistema: "Sistema",
-                publico: "Público"
-              };
-
-              return (
-                <SidebarGroup key={groupName}>
-                  <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2 mb-1">
-                    {groupLabels[groupName]}
-                  </SidebarGroupLabel>
-                  <SidebarGroupContent>
-                    <SidebarMenu>
-                      {items.map((item) => {
-                        const isActive = location.pathname === item.url;
-                        return (
-                          <SidebarMenuItem key={item.title}>
-                            <SidebarMenuButton 
-                              asChild 
-                              className={`transition-all duration-200 rounded-lg mb-1 ${
-                                isActive 
-                                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200' 
-                                  : 'hover:bg-slate-100 text-slate-700'
-                              }`}
-                            >
-                              <Link to={item.url} onMouseEnter={() => { prefetchForItem(item.title); prefetchModule(item.title); }} className="flex items-center gap-3 px-4 py-3">
-                                <item.icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-500'}`} />
-                                <span className="font-medium">{item.title}</span>
-                              </Link>
-                            </SidebarMenuButton>
-                          </SidebarMenuItem>
-                        );
-                      })}
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </SidebarGroup>
-              );
-            })}
-          </SidebarContent>
-
-          <SidebarFooter className="border-t border-slate-200 p-4 bg-slate-50/50">
-            <div className="flex items-center justify-between">
-              <Link to={createPageUrl("ConfiguracoesUsuario")} className="flex items-center gap-3 hover:bg-slate-100 p-2 rounded-lg transition-colors flex-1">
-                <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-semibold text-sm">
-                    {user?.full_name?.[0] || 'U'}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-slate-900 text-sm truncate">
-                    {user?.full_name || 'Usuário'}
-                  </p>
-                  <p className="text-xs text-slate-500 truncate">
-                    {user?.role === 'admin' ? 'Administrador' : 'Usuário'}
-                  </p>
-                </div>
-              </Link>
-              <button
-                onClick={() => base44.auth.logout()}
-                className="p-2 hover:bg-slate-200 rounded-lg transition-colors"
-                title="Sair"
-              >
-                <LogOut className="w-4 h-4 text-slate-500" />
-              </button>
-            </div>
-          </SidebarFooter>
-        </Sidebar>
+        <LayoutSidebar navigationItems={navigationItems} groupedItems={groupedItems} />
 
         <main className="flex-1 flex flex-col">
-          <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 px-6 py-4 sticky top-0 z-10">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4 flex-1">
-                <div className="lg:hidden">
-                  <SidebarTrigger className="hover:bg-slate-100 p-2 rounded-lg transition-colors">
-                    <Menu className="w-5 h-5" />
-                  </SidebarTrigger>
-                </div>
-                
-                <div className="hidden lg:block flex-1 max-w-md">
-                  <MiniMapaNavegacao />
-                </div>
-              </div>
+          <LayoutHeaderBar
+            pesquisaOpen={pesquisaOpen}
+            setPesquisaOpen={setPesquisaOpen}
+            handleIAEstoque={handleIAEstoque}
+            handleIAFinanceiro={handleIAFinanceiro}
+            isOffline={isOffline}
+            contexto={contexto}
+            empresaAtual={empresaAtual}
+            integracoesOk={integracoesOk}
+          />
 
-              <div className="hidden sm:block">
-                <EmpresaSwitcher />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => setPesquisaOpen(true)}
-                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors hidden md:flex items-center gap-2"
-                  title="Pesquisa Universal (Ctrl+K)"
-                >
-                  <Search className="w-5 h-5 text-slate-600" />
-                  <span className="text-sm text-slate-500 hidden lg:inline">Ctrl+K</span>
-                </button>
-
-                <AtalhosTecladoInfo />
-
-                <LanguageSwitcher />
-
-                <AcoesRapidasGlobal />
-
-                <NotificationCenter />
-                <button onClick={handleIAEstoque} className="px-2 py-1 rounded-lg hover:bg-slate-100 text-sm text-slate-600" title="Previsões de Estoque (IA)" style={{ display: hasPermission('Estoque', null, 'visualizar') ? undefined : 'none' }}>
-                  IA Estoque
-                </button>
-                <button onClick={handleIAFinanceiro} className="px-2 py-1 rounded-lg hover:bg-slate-100 text-sm text-slate-600" title="Anomalias Financeiras (IA)" style={{ display: hasPermission('Financeiro', null, 'visualizar') ? undefined : 'none' }}>
-                  IA Financeiro
-                </button>
-                <Link to={createPageUrl('Comercial')} className="px-2 py-1 rounded-lg hover:bg-slate-100 text-sm text-slate-600" title="Funil e KPIs Comerciais" style={{ display: hasPermission('Comercial', null, 'visualizar') ? undefined : 'none' }}>
-                  Funil/KPIs
-                </Link>
-                
-                <Link to={createPageUrl("ConfiguracoesUsuario")}>
-                  <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                    <Settings className="w-5 h-5 text-slate-600" />
-                  </button>
-                </Link>
-              </div>
-              </div>
-              <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-amber-800 text-sm" style={{ display: isOffline ? undefined : 'none' }}>
-                Modo offline: exibindo dados em cache (última sincronização). Algumas ações podem não estar disponíveis.
-              </div>
-              <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-amber-800 text-sm" style={{ display: (!empresaAtual?.id && contexto !== 'grupo') ? undefined : 'none' }}>
-                Selecione uma empresa para carregar os dados. O acesso está bloqueado sem empresa selecionada.
-              </div>
-              <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-amber-800 text-sm" style={{ display: (!integracoesOk && hasPermission('Sistema', null, 'ver')) ? undefined : 'none' }}>
-                Integrações fiscais pendentes nesta empresa. <Link to={createPageUrl("AdministracaoSistema?tab=integracoes")} className="underline">Configurar agora</Link>.
-              </div>
-              </header>
-
-          <div className="flex-1 overflow-auto">
-            <ErrorBoundary>
-              <BootstrapGuard>
-                <EmpresaOnboardingGuard>
-                  <ProtectedSection module={moduleName || 'Sistema'} action="ver" fallback={<div className="p-10 text-center text-slate-600">Acesso negado a este módulo.</div>}>
-                    <GuardRails currentPageName={currentPageName}>
-                      <div className="w-full h-full">
-                        <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-4 space-y-4">
-                          {children}
-                        </div>
-                      </div>
-                    </GuardRails>
-                  </ProtectedSection>
-                </EmpresaOnboardingGuard>
-              </BootstrapGuard>
-            </ErrorBoundary>
-          </div>
+          <LayoutMainContent
+            moduleName={moduleName}
+            currentPageName={currentPageName}
+          >
+            {children}
+          </LayoutMainContent>
         </main>
 
-        <PesquisaUniversal 
-          open={pesquisaOpen} 
-          onOpenChange={setPesquisaOpen} 
-        />
-
-        {/* Sistema de Janelas Multitarefa V21.0 */}
-        <WindowRenderer />
-        <MinimizedWindowsBar />
-        </div>
-        </SidebarProvider>
-        );
-        }
+        <PesquisaUniversal open={pesquisaOpen} onOpenChange={setPesquisaOpen} />
+      </div>
+    </SidebarProvider>
+  );
+}
 
 
 export default function Layout({ children, currentPageName }) {
   return (
     <QueryClientProvider client={queryClient}>
       <UserProvider>
-      <WindowProvider>
-        <ZIndexGuard>
-          <GlobalNetworkErrorHandler />
-          <GlobalContextStamp />
-          <LayoutContent children={children} currentPageName={currentPageName} />
-        </ZIndexGuard>
-      </WindowProvider>
+        <WindowProvider>
+          <ZIndexGuard>
+            <GlobalNetworkErrorHandler />
+            <GlobalContextStamp />
+            <LayoutContent children={children} currentPageName={currentPageName} />
+          </ZIndexGuard>
+        </WindowProvider>
       </UserProvider>
     </QueryClientProvider>
   );

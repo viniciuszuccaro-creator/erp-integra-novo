@@ -1,7 +1,5 @@
 import React, { Suspense, useState, useMemo } from "react";
-import React, { useEffect, lazy, startTransition } from 'react';
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
 import { Box, TrendingUp, PackageCheck, PackageMinus, PackageOpen, Clock, BarChart3, Sparkles, ArrowLeftRight, Download } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
@@ -21,17 +19,17 @@ import ModulosGridEstoque from "@/components/estoque/estoque-launchpad/ModulosGr
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import useEstoqueDerivedData from "@/components/estoque/hooks/useEstoqueDerivedData";
 import TransferenciaEntreEmpresasForm from "../components/estoque/TransferenciaEntreEmpresasForm";
-import { ESTOQUE_BATCH_SIZE, ESTOQUE_LIST_LIMIT, ESTOQUE_PRODUCTS_LIMIT, estoqueQueryDefaults } from "@/components/estoque/config/estoqueQueryConfig";
+import { ESTOQUE_LIST_LIMIT, ESTOQUE_PRODUCTS_LIMIT } from "@/components/estoque/config/estoqueQueryConfig";
 import { isProdutoEstoqueBaixo } from "@/components/estoque/utils/estoqueSafeData";
 
-const ProdutosTab = lazy(() => import("../components/estoque/ProdutosTab"));
-const MovimentacoesTab = lazy(() => import("../components/estoque/MovimentacoesTab"));
-const SolicitacoesTab = lazy(() => import("../components/estoque/SolicitacoesTab"));
-const RecebimentoTab = lazy(() => import("../components/estoque/RecebimentoTab"));
-const RequisicoesAlmoxarifadoTab = lazy(() => import("../components/estoque/RequisicoesAlmoxarifadoTab"));
-const ControleLotesValidade = lazy(() => import("../components/estoque/ControleLotesValidade"));
-const RelatoriosEstoque = lazy(() => import("../components/estoque/RelatoriosEstoque"));
-const IAReposicao = lazy(() => import("../components/estoque/IAReposicao"));
+const ProdutosTab = React.lazy(() => import("../components/estoque/ProdutosTab"));
+const MovimentacoesTab = React.lazy(() => import("../components/estoque/MovimentacoesTab"));
+const SolicitacoesTab = React.lazy(() => import("../components/estoque/SolicitacoesTab"));
+const RecebimentoTab = React.lazy(() => import("../components/estoque/RecebimentoTab"));
+const RequisicoesAlmoxarifadoTab = React.lazy(() => import("../components/estoque/RequisicoesAlmoxarifadoTab"));
+const ControleLotesValidade = React.lazy(() => import("../components/estoque/ControleLotesValidade"));
+const RelatoriosEstoque = React.lazy(() => import("../components/estoque/RelatoriosEstoque"));
+const IAReposicao = React.lazy(() => import("../components/estoque/IAReposicao"));
 
 export default function Estoque() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
@@ -41,6 +39,7 @@ export default function Estoque() {
   const { openWindow } = useWindow();
   const { user } = useUser();
   const { estaNoGrupo, empresaAtual, grupoAtual, empresasDoGrupo } = useContextoVisual();
+
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
   const contextKey = empresaAtual?.id || groupId || 'sem-contexto';
   const contextoValido = contextKey !== 'sem-contexto';
@@ -49,52 +48,21 @@ export default function Estoque() {
 
   // Query removida - VisualizadorUniversalEntidade busca os dados
 
-  // ✅ Contagens via backend otimizado - CARREGA TUDO para cálculo correto
-  const { data: contagensTotais = { total: 0, revenda: 0, producao: 0, estoqueBaixo: 0 }, isLoading: loadingContagens, refetch: refetchContagens } = useQuery({
-    queryKey: ['produtos-contagens-dashboard', contextKey],
-    queryFn: async () => {
-      const filtroBase = empresaAtual?.id ? { empresa_id: empresaAtual.id } : grupoAtual?.id ? { group_id: grupoAtual.id } : {};
+  // Contagens derivadas diretamente da lista de produtos (useRLSQuery abaixo)
+  const { data: produtosParaKPIs = [], refetch: refetchContagens } = useRLSQuery(
+    'Produto', {}, undefined, ESTOQUE_PRODUCTS_LIMIT,
+    { staleTime: 300000, enabled: canSeeEstoque && contextoValido }
+  );
 
-      // Buscar TODOS os produtos para contagem correta
-      let todosProdutos = [];
-      let skip = 0;
-      const batchSize = ESTOQUE_BATCH_SIZE;
-      let hasMore = true;
-      const MAX_PAGES = 20; // segurança: máximo 20 páginas (20×200 = 4000 produtos)
-      let page = 0;
-      
-      while (hasMore && page < MAX_PAGES) {
-        const batch = await base44.entities.Produto.filter(filtroBase, undefined, batchSize, skip);
-        if (!batch || batch.length === 0) {
-          hasMore = false;
-        } else {
-          todosProdutos = [...todosProdutos, ...batch];
-          if (batch.length < batchSize) {
-            hasMore = false;
-          } else {
-            skip += batchSize;
-            page++;
-          }
-        }
-      }
+  const contagensTotais = React.useMemo(() => ({
+    total: produtosParaKPIs.length,
+    revenda: produtosParaKPIs.filter(p => p.tipo_item === 'Revenda').length,
+    producao: produtosParaKPIs.filter(p => p.tipo_item === 'Matéria-Prima Produção').length,
+    estoqueBaixo: produtosParaKPIs.filter(isProdutoEstoqueBaixo).length,
+  }), [produtosParaKPIs]);
 
-      const total = todosProdutos.length;
-      const revenda = todosProdutos.filter(p => p.tipo_item === 'Revenda').length;
-      const producao = todosProdutos.filter(p => p.tipo_item === 'Matéria-Prima Produção').length;
-      const estoqueBaixo = todosProdutos.filter((p) => isProdutoEstoqueBaixo(p)).length;
-
-      return { total, revenda, producao, estoqueBaixo };
-    },
-    staleTime: 300000,
-    gcTime: 600000,
-    refetchOnWindowFocus: false,
-    refetchInterval: false,
-    retry: false,
-    enabled: canSeeEstoque && contextoValido
-  });
-
-  // ✅ Real-time update via subscription
-  useEffect(() => {
+  // Real-time update via subscription
+  React.useEffect(() => {
     const unsubscribe = base44.entities.Produto.subscribe(() => {
       if (contextoValido) refetchContagens();
     });
@@ -116,10 +84,7 @@ export default function Estoque() {
     { staleTime: 30000, enabled: canSeeEstoque && contextoValido }
   );
 
-  const { data: produtosParaKPIs = [] } = useRLSQuery(
-    'Produto', {}, undefined, ESTOQUE_PRODUCTS_LIMIT,
-    { staleTime: 30000, enabled: canSeeEstoque && contextoValido }
-  );
+
 
   const movimentacoesFiltradas = movimentacoes;
 
@@ -272,7 +237,7 @@ export default function Estoque() {
   const allowedModules = modules.filter(m => hasPermission('Estoque', (m.sectionKey || m.title), 'ver'));
 
    const handleModuleClick = (module) => {
-    startTransition(() => {
+    React.startTransition(() => {
       // Auditoria de abertura de seção
       void base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário',

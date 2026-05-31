@@ -1,6 +1,6 @@
 import React, { Suspense, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Users, ShoppingCart, FileText, TrendingUp, ShieldCheck, Truck, Package, AlertCircle } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
@@ -62,10 +62,12 @@ export default function Comercial() {
     { staleTime: 30000, enabled: !bloqueadoSemEmpresa && canSeeComercial }
   );
 
-  const { data: pedidos = [] } = useRLSQuery(
+  const pedidosResult = useRLSQuery(
     'Pedido', {}, '-created_date', COMERCIAL_LIST_LIMIT,
     { staleTime: 30000, enabled: !bloqueadoSemEmpresa && canSeeComercial }
   );
+  const pedidosQuery = pedidosResult;
+  const { data: pedidos = [] } = pedidosResult;
 
   // Realtime: atualiza pedidos em tempo real via subscribe (multiempresa + RBAC já aplicados no wrapper do Layout)
   useEffect(() => {
@@ -153,6 +155,7 @@ export default function Comercial() {
               vendedor_id: formData.vendedor_id || user?.id
             });
             toast.success("Pedido criado!");
+            await pedidosQuery.refetch();
           } catch (error) {
             pedidoCriado = false;
             toast.error("Erro: " + error.message);
@@ -177,6 +180,7 @@ export default function Comercial() {
           try {
             await updateInContext('Pedido', formData.id, formData);
             toast.success("Pedido atualizado!");
+            await pedidosQuery.refetch();
             if (windowIdRef) closeWindow(windowIdRef);
           } catch (error) {
             atualizacaoEmAndamento = false;

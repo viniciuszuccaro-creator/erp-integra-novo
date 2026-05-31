@@ -32,6 +32,7 @@ import RiskManagementHub from '@/components/risk-compliance/RiskManagementHub';
 import KnowledgeManagementHub from '@/components/knowledge-hub/KnowledgeManagementHub';
 import AutonomousIntelligenceHub from '@/components/autonomous-intelligence/AutonomousIntelligenceHub';
 import RealtimeCollaborationHub from '@/components/realtime-collaboration/RealtimeCollaborationHub';
+import QualityManagementHub from '@/components/quality-management/QualityManagementHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -219,6 +220,15 @@ const AuthenticatedApp = () => {
             <EmpresaSelectorGuard>
               <LayoutWrapper currentPageName="RealtimeCollaboration">
                 <RealtimeCollaborationHub />
+              </LayoutWrapper>
+            </EmpresaSelectorGuard>
+          </RBACRoute>
+        } />
+        <Route path="/QualityManagement" element={
+          <RBACRoute module="Producao" action="ver">
+            <EmpresaSelectorGuard>
+              <LayoutWrapper currentPageName="QualityManagement">
+                <QualityManagementHub />
               </LayoutWrapper>
             </EmpresaSelectorGuard>
           </RBACRoute>

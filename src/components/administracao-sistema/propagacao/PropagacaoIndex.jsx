@@ -1,272 +1,292 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowDownUp, CheckCircle2, AlertCircle, Loader2, Play } from "lucide-react";
+import {
+  ArrowDownUp, CheckCircle2, AlertCircle, Loader2,
+  Play, RefreshCw, Building2, Clock, ArrowDown, ArrowUp
+} from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
 
 /**
- * PropagacaoIndex v2.0
- * Controle centralizado de propagação Grupo ↔ Empresas
- * Monitora e executa sincronização bidirecional
+ * PropagacaoIndex v3.0 — Propagação bidirecional real via backend
+ * Grupo → Empresas (down) e Empresas → Grupo (up)
  */
 
-const ENTITIES_TO_PROPAGATE = [
-  { name: "Cliente", label: "Clientes", icon: "👥" },
-  { name: "Fornecedor", label: "Fornecedores", icon: "🏭" },
-  { name: "Produto", label: "Produtos", icon: "📦" },
-  { name: "Pedido", label: "Pedidos", icon: "📋" },
+const ENTITIES = [
+  { name: "Cliente",      label: "Clientes",        icon: "👥" },
+  { name: "Fornecedor",   label: "Fornecedores",     icon: "🏭" },
+  { name: "Produto",      label: "Produtos",         icon: "📦" },
+  { name: "Pedido",       label: "Pedidos",          icon: "📋" },
   { name: "ContaReceber", label: "Contas a Receber", icon: "💰" },
-  { name: "ContaPagar", label: "Contas a Pagar", icon: "💸" },
-  { name: "NotaFiscal", label: "Notas Fiscais", icon: "📄" },
-  { name: "Entrega", label: "Entregas", icon: "🚚" },
+  { name: "ContaPagar",   label: "Contas a Pagar",   icon: "💸" },
+  { name: "NotaFiscal",   label: "Notas Fiscais",    icon: "📄" },
+  { name: "Entrega",      label: "Entregas",         icon: "🚚" },
+  { name: "Colaborador",  label: "Colaboradores",    icon: "👤" },
+  { name: "CentroCusto",  label: "Centro de Custo",  icon: "🏦" },
 ];
+
+const STATUS_INIT = () =>
+  Object.fromEntries(ENTITIES.map(e => [e.name, { status: "idle", message: "Aguardando", lastSync: null, total: 0 }]));
 
 export default function PropagacaoIndex() {
   const { grupoAtual, empresasDoGrupo } = useContextoVisual();
-  const [status, setStatus] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState(STATUS_INIT);
+  const [globalLoading, setGlobalLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [logs, setLogs] = useState([]);
 
-  useEffect(() => {
-    // Carregar status inicial
-    checkPropagationStatus();
-  }, []);
-
-  const checkPropagationStatus = async () => {
-    try {
-      const result = {};
-      for (const entity of ENTITIES_TO_PROPAGATE) {
-        result[entity.name] = {
-          status: "checking",
-          message: "Verificando...",
-        };
-      }
-      setStatus(result);
-
-      // Mock: em produção seria chamada backend function
-      await new Promise((r) => setTimeout(r, 500));
-      const newStatus = {};
-      ENTITIES_TO_PROPAGATE.forEach((e) => {
-        newStatus[e.name] = {
-          status: "ok",
-          message: "Sincronizado",
-          lastSync: new Date().toLocaleString("pt-BR"),
-        };
-      });
-      setStatus(newStatus);
-    } catch (err) {
-      toast.error("Erro ao verificar status: " + err.message);
-    }
+  const addLog = (msg, type = "info") => {
+    setLogs(prev => [{ msg, type, ts: new Date().toLocaleTimeString("pt-BR") }, ...prev].slice(0, 50));
   };
 
-  const runPropagation = async (entityName, direction = "down") => {
+  const runPropagation = useCallback(async (entityName, direction = "down") => {
+    if (!grupoAtual?.id) {
+      toast.error("Selecione um grupo antes de sincronizar.");
+      return;
+    }
+
+    setStatus(prev => ({
+      ...prev,
+      [entityName]: { ...prev[entityName], status: "checking", message: "Sincronizando..." }
+    }));
+
     try {
-      setLoading(true);
-      const result = await base44.functions.invoke("propagateGroupData", {
-        action: "create",
+      const res = await base44.functions.invoke("syncBidirectional", {
         entityName,
-        groupId: grupoAtual?.id,
-        mode: direction,
+        groupId: grupoAtual.id,
+        direction, // "down" = Grupo→Empresa | "up" = Empresa→Grupo | "both"
       });
 
-      setStatus((prev) => ({
+      const total = res?.data?.total_processados ?? res?.data?.synced ?? 0;
+      const msg = `${total} registro(s) sincronizado(s)`;
+
+      setStatus(prev => ({
         ...prev,
         [entityName]: {
           status: "ok",
-          message: `${result.data?.total_processados || 0} registros sincronizados`,
+          message: msg,
           lastSync: new Date().toLocaleString("pt-BR"),
-        },
+          total,
+        }
       }));
-      toast.success(`${entityName} sincronizado com sucesso!`);
+      addLog(`✅ ${entityName} [${direction}]: ${msg}`, "ok");
+      toast.success(`${entityName}: ${msg}`);
     } catch (err) {
-      setStatus((prev) => ({
+      const errMsg = err?.message || String(err);
+      setStatus(prev => ({
         ...prev,
-        [entityName]: {
-          status: "error",
-          message: err.message,
-        },
+        [entityName]: { status: "error", message: errMsg, lastSync: null, total: 0 }
       }));
-      toast.error(`Erro ao sincronizar ${entityName}: ${err.message}`);
-    } finally {
-      setLoading(false);
+      addLog(`❌ ${entityName} [${direction}]: ${errMsg}`, "error");
+      toast.error(`Erro ao sincronizar ${entityName}`);
     }
-  };
+  }, [grupoAtual?.id]);
+
+  const runAll = useCallback(async (direction = "down") => {
+    if (!grupoAtual?.id) { toast.error("Selecione um grupo."); return; }
+    setGlobalLoading(true);
+    addLog(`🚀 Iniciando sincronização completa [${direction}]`, "info");
+    for (const e of ENTITIES) {
+      await runPropagation(e.name, direction);
+    }
+    setGlobalLoading(false);
+    addLog("🏁 Sincronização completa finalizada", "info");
+    toast.success("Sincronização completa concluída!");
+  }, [grupoAtual?.id, runPropagation]);
+
+  const okCount = Object.values(status).filter(s => s.status === "ok").length;
+  const errCount = Object.values(status).filter(s => s.status === "error").length;
+  const idleCount = Object.values(status).filter(s => s.status === "idle").length;
 
   if (!grupoAtual?.id) {
     return (
       <Card className="border-amber-200 bg-amber-50">
         <CardContent className="p-6 text-center text-amber-800">
           <AlertCircle className="w-6 h-6 mx-auto mb-2" />
-          <p className="font-semibold">Selecione um grupo para usar propagação</p>
+          <p className="font-semibold">Selecione um Grupo Empresarial para usar a propagação</p>
+          <p className="text-sm mt-1 text-amber-700">Use o seletor de empresa/grupo no topo da tela.</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <div className="w-full h-full space-y-6">
-      {/* ─ Header ─ */}
-      <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-slate-900">Propagação Grupo ↔ Empresas</h2>
-        <p className="text-sm text-slate-600">
-          Sincronize cadastros e transações entre {grupoAtual.nome_do_grupo} e suas empresas.
-        </p>
-      </div>
-
-      {/* ─ Status Overview ─ */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
+    <div className="w-full h-full space-y-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
             <ArrowDownUp className="w-5 h-5 text-blue-600" />
-            Status de Sincronização
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {ENTITIES_TO_PROPAGATE.map((entity) => {
-              const st = status[entity.name];
-              const isError = st?.status === "error";
-              const isOk = st?.status === "ok";
-              const isChecking = st?.status === "checking";
-
-              return (
-                <button
-                  key={entity.name}
-                  onClick={() => runPropagation(entity.name, "down")}
-                  disabled={loading}
-                  className={`p-3 rounded-lg border-2 text-left transition-all ${
-                    isError
-                      ? "border-red-200 bg-red-50"
-                      : isOk
-                        ? "border-green-200 bg-green-50 hover:shadow-md"
-                        : "border-slate-200 bg-white"
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">
-                        {entity.icon} {entity.label}
-                      </p>
-                      <p className="text-xs text-slate-600 mt-1">
-                        {st?.message || "Aguardando..."}
-                      </p>
-                    </div>
-                    {isChecking && <Loader2 className="w-4 h-4 animate-spin text-blue-600" />}
-                    {isError && <AlertCircle className="w-4 h-4 text-red-600" />}
-                    {isOk && <CheckCircle2 className="w-4 h-4 text-green-600" />}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* ─ Tabelas ─ */}
-      <div className="flex gap-2 mb-4">
-        <Button
-          variant={activeTab === "overview" ? "default" : "outline"}
-          onClick={() => setActiveTab("overview")}
-          size="sm"
-        >
-          Visão Geral
-        </Button>
-        <Button
-          variant={activeTab === "empresas" ? "default" : "outline"}
-          onClick={() => setActiveTab("empresas")}
-          size="sm"
-        >
-          Empresas Vinculadas ({empresasDoGrupo.length})
-        </Button>
-        <Button
-          variant={activeTab === "logs" ? "default" : "outline"}
-          onClick={() => setActiveTab("logs")}
-          size="sm"
-        >
-          Logs de Sincronização
-        </Button>
+            Propagação Grupo ↔ Empresas
+          </h2>
+          <p className="text-sm text-slate-500 mt-0.5">
+            Grupo: <span className="font-semibold text-slate-700">{grupoAtual.nome_do_grupo}</span>
+            {" "}·{" "}
+            <span className="text-blue-600">{empresasDoGrupo.length} empresa(s) vinculada(s)</span>
+          </p>
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          <Button onClick={() => runAll("down")} disabled={globalLoading} size="sm" className="gap-2">
+            <ArrowDown className="w-4 h-4" />
+            {globalLoading ? "Sincronizando..." : "Grupo → Empresas"}
+          </Button>
+          <Button onClick={() => runAll("up")} disabled={globalLoading} variant="outline" size="sm" className="gap-2">
+            <ArrowUp className="w-4 h-4" />
+            Empresas → Grupo
+          </Button>
+          <Button onClick={() => runAll("both")} disabled={globalLoading} variant="outline" size="sm" className="gap-2">
+            <RefreshCw className="w-4 h-4" />
+            Bidirecional
+          </Button>
+        </div>
       </div>
 
-      {activeTab === "overview" && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Resumo Executivo</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-slate-600">Total de Empresas</p>
-                <p className="text-2xl font-bold text-blue-600">{empresasDoGrupo.length}</p>
-              </div>
-              <div className="p-4 bg-green-50 rounded-lg">
-                <p className="text-sm text-slate-600">Sincronizadas</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {Object.values(status).filter((s) => s?.status === "ok").length}
-                </p>
-              </div>
-              <div className="p-4 bg-red-50 rounded-lg">
-                <p className="text-sm text-slate-600">Com Erro</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {Object.values(status).filter((s) => s?.status === "error").length}
-                </p>
-              </div>
-            </div>
+      {/* KPI Bar */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="p-3 bg-green-50 rounded-lg text-center border border-green-100">
+          <p className="text-2xl font-bold text-green-600">{okCount}</p>
+          <p className="text-xs text-slate-600">Sincronizadas</p>
+        </div>
+        <div className="p-3 bg-red-50 rounded-lg text-center border border-red-100">
+          <p className="text-2xl font-bold text-red-600">{errCount}</p>
+          <p className="text-xs text-slate-600">Com Erro</p>
+        </div>
+        <div className="p-3 bg-slate-50 rounded-lg text-center border border-slate-100">
+          <p className="text-2xl font-bold text-slate-500">{idleCount}</p>
+          <p className="text-xs text-slate-600">Pendentes</p>
+        </div>
+      </div>
 
-            <div className="mt-4 pt-4 border-t">
-              <Button
-                onClick={() => {
-                  ENTITIES_TO_PROPAGATE.forEach((e) => runPropagation(e.name, "down"));
-                }}
-                disabled={loading}
-                className="w-full"
-              >
-                <Play className="w-4 h-4 mr-2" />
-                {loading ? "Sincronizando..." : "Sincronizar Tudo"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Tabs Nav */}
+      <div className="flex gap-2 border-b border-slate-200 pb-0">
+        {["overview", "empresas", "logs"].map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === tab
+                ? "border-blue-600 text-blue-700"
+                : "border-transparent text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            {tab === "overview" ? "Entidades" : tab === "empresas" ? `Empresas (${empresasDoGrupo.length})` : "Logs"}
+          </button>
+        ))}
+      </div>
+
+      {/* Grid de Entidades */}
+      {activeTab === "overview" && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          {ENTITIES.map(entity => {
+            const st = status[entity.name];
+            const isErr = st?.status === "error";
+            const isOk = st?.status === "ok";
+            const isRunning = st?.status === "checking";
+
+            return (
+              <Card key={entity.name} className={`transition-all ${isErr ? "border-red-200" : isOk ? "border-green-200" : "border-slate-200"}`}>
+                <CardContent className="p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-sm text-slate-900">
+                      {entity.icon} {entity.label}
+                    </span>
+                    {isRunning && <Loader2 className="w-4 h-4 animate-spin text-blue-500" />}
+                    {isErr && <AlertCircle className="w-4 h-4 text-red-500" />}
+                    {isOk && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                  </div>
+                  <p className="text-xs text-slate-500 truncate">{st?.message}</p>
+                  {st?.lastSync && (
+                    <p className="text-xs text-slate-400 flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {st.lastSync}
+                    </p>
+                  )}
+                  <div className="flex gap-1 pt-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={globalLoading || isRunning}
+                      onClick={() => runPropagation(entity.name, "down")}
+                      className="flex-1 text-xs h-7"
+                    >
+                      <ArrowDown className="w-3 h-3 mr-1" /> ↓
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={globalLoading || isRunning}
+                      onClick={() => runPropagation(entity.name, "up")}
+                      className="flex-1 text-xs h-7"
+                    >
+                      <ArrowUp className="w-3 h-3 mr-1" /> ↑
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={globalLoading || isRunning}
+                      onClick={() => runPropagation(entity.name, "both")}
+                      className="flex-1 text-xs h-7"
+                    >
+                      ⇅
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       )}
 
+      {/* Empresas vinculadas */}
       {activeTab === "empresas" && (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Empresas do Grupo</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {empresasDoGrupo.length === 0 ? (
-                <p className="text-sm text-slate-600 text-center py-4">
-                  Nenhuma empresa vinculada a este grupo
-                </p>
-              ) : (
-                empresasDoGrupo.map((emp) => (
-                  <div key={emp.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+          <CardContent className="p-4 space-y-2">
+            {empresasDoGrupo.length === 0 ? (
+              <p className="text-sm text-slate-500 text-center py-6">Nenhuma empresa vinculada a este grupo.</p>
+            ) : (
+              empresasDoGrupo.map(emp => (
+                <div key={emp.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Building2 className="w-4 h-4 text-blue-500" />
                     <div>
-                      <p className="font-semibold text-slate-900">{emp.nome_fantasia || emp.razao_social}</p>
-                      <p className="text-xs text-slate-600">{emp.cnpj}</p>
+                      <p className="font-semibold text-sm text-slate-900">{emp.nome_fantasia || emp.razao_social}</p>
+                      <p className="text-xs text-slate-500">{emp.cnpj}</p>
                     </div>
-                    <Badge variant="outline">Ativo</Badge>
                   </div>
-                ))
-              )}
-            </div>
+                  <Badge variant="outline" className="text-green-700 border-green-300">Ativa</Badge>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
       )}
 
+      {/* Logs de sincronização */}
       {activeTab === "logs" && (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Última Sincronização</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center justify-between">
+              <span>Log de Sincronização</span>
+              <Button variant="ghost" size="sm" onClick={() => setLogs([])}>Limpar</Button>
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-slate-600 text-center py-6">
-              Nenhum log de sincronização ainda. Execute uma sincronização para começar.
-            </p>
+            {logs.length === 0 ? (
+              <p className="text-sm text-slate-500 text-center py-6">
+                Execute uma sincronização para ver os logs aqui.
+              </p>
+            ) : (
+              <div className="space-y-1 max-h-80 overflow-auto font-mono text-xs">
+                {logs.map((l, i) => (
+                  <div key={i} className={`flex gap-2 p-1.5 rounded ${l.type === "error" ? "bg-red-50 text-red-700" : l.type === "ok" ? "bg-green-50 text-green-700" : "bg-slate-50 text-slate-600"}`}>
+                    <span className="text-slate-400 shrink-0">{l.ts}</span>
+                    <span>{l.msg}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

@@ -291,22 +291,8 @@ export default function Dashboard() {
 
   const nfAutorizadas = (notasFiscais || []).filter(n => n?.status === 'Autorizada').length;
 
-  const { data: cobrancas = [] } = useQuery({
-      enabled: Boolean(canSeeFinanceiro && hasContextoAtivo),
-      queryKey: ['cobrancas', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
-      queryFn: async () => {
-        if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return [];
-        return await filterInContext('ContaReceber', {}, '-data_vencimento', DASHBOARD_LIST_LIMIT);
-      },
-    refetchInterval,
-    staleTime: 120000,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    retry: false,
-    initialData: []
-  });
-
-  const cobrancasPagas = (cobrancas || []).filter(c => (c?.status === 'Recebido') || (c?.status_cobranca === 'paga')).length;
+  // cobrancasPagas derivado do mesmo contasReceber (evita query duplicada)
+  const cobrancasPagas = (contasReceber || []).filter(c => (c?.status === 'Recebido') || (c?.status_cobranca === 'paga')).length;
 
   const {
      pedidosPeriodo,

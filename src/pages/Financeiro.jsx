@@ -1,14 +1,13 @@
 import React, { Suspense } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Wallet } from "lucide-react";
+import { Wallet, DollarSign, TrendingUp, TrendingDown, BarChart3, CreditCard, ArrowLeftRight, Globe, FileText, AlertCircle, Activity } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
 import { useWindow } from "@/components/lib/useWindow";
 import { useUser } from "@/components/lib/UserContext";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
-import HeaderFinanceiroCompacto from "@/components/financeiro/HeaderFinanceiroCompacto";
 import ModuleLayout from "@/components/layout/ModuleLayout";
 import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
@@ -230,7 +229,7 @@ export default function Financeiro() {
     {
       title: 'Caixa Central',
       description: 'Hub unificado de liquidações',
-      icon: Wallet,
+      icon: DollarSign,
       color: 'green',
       component: CaixaCentralLiquidacao,
       windowTitle: '💰 Caixa Central V22.0',
@@ -242,7 +241,7 @@ export default function Financeiro() {
     {
       title: 'Formas de Pagamento',
       description: 'Gestão centralizada de meios',
-      icon: Wallet,
+      icon: CreditCard,
       color: 'indigo',
       component: DashboardFormasPagamento,
       windowTitle: '🏦 Formas de Pagamento',
@@ -252,7 +251,7 @@ export default function Financeiro() {
     {
       title: 'Caixa PDV Completo',
       description: 'Vendas e liquidações multi-operador',
-      icon: Wallet,
+      icon: Activity,
       color: 'emerald',
       component: CaixaPDVCompleto,
       windowTitle: '💵 Caixa PDV Completo',
@@ -263,7 +262,7 @@ export default function Financeiro() {
     {
       title: 'Vendas Multicanal',
       description: 'E-commerce e marketplaces',
-      icon: Wallet,
+      icon: Globe,
       color: 'blue',
       component: VendasMulticanal,
       windowTitle: '🌐 Vendas Multicanal',
@@ -273,7 +272,7 @@ export default function Financeiro() {
     {
       title: 'Remessa/Retorno CNAB',
       description: 'Arquivos bancários automatizados',
-      icon: Wallet,
+      icon: FileText,
       color: 'purple',
       component: GestaoRemessaRetorno,
       windowTitle: '🏦 Gestão CNAB',
@@ -283,7 +282,7 @@ export default function Financeiro() {
     {
       title: 'Contas a Receber',
       description: 'Títulos e cobranças completas',
-      icon: Wallet,
+      icon: TrendingUp,
       color: 'green',
       component: ContasReceberTab,
       windowTitle: '📈 Contas a Receber',
@@ -294,7 +293,7 @@ export default function Financeiro() {
     {
       title: 'Contas a Pagar',
       description: 'Fornecedores e obrigações',
-      icon: Wallet,
+      icon: TrendingDown,
       color: 'red',
       component: ContasPagarTab,
       windowTitle: '📉 Contas a Pagar',
@@ -305,7 +304,7 @@ export default function Financeiro() {
     {
       title: 'Aprovações Descontos',
       description: 'Hierarquia de aprovações',
-      icon: Wallet,
+      icon: AlertCircle,
       color: 'orange',
       component: AprovacaoDescontosManager,
       windowTitle: '⚠️ Aprovações de Descontos',
@@ -316,7 +315,7 @@ export default function Financeiro() {
     {
       title: 'Conciliação Bancária',
       description: 'Matching automático de extratos',
-      icon: Wallet,
+      icon: ArrowLeftRight,
       color: 'cyan',
       component: ConciliacaoBancaria,
       windowTitle: '💳 Conciliação Bancária',
@@ -326,7 +325,7 @@ export default function Financeiro() {
     {
       title: 'Custos Logísticos',
       description: 'Conciliação e relatórios (LOG)',
-      icon: Wallet,
+      icon: BarChart3,
       color: 'teal',
       component: LogisticaFinanceiroPanel,
       windowTitle: '\ud83d\udee3\ufe0f Custos Logísticos (LOG)',
@@ -337,7 +336,7 @@ export default function Financeiro() {
     {
       title: 'Relatórios Financeiros',
       description: 'DRE, fluxo e análises',
-      icon: Wallet,
+      icon: BarChart3,
       color: 'indigo',
       component: RelatorioFinanceiro,
       windowTitle: '📊 Relatórios Financeiros',
@@ -348,7 +347,7 @@ export default function Financeiro() {
     {
       title: 'Alertas por Empresa',
       description: 'Notificações e riscos',
-      icon: Wallet,
+      icon: AlertCircle,
       color: 'orange',
       component: AlertasFinanceirosEmpresa,
       windowTitle: '⚠️ Alertas Financeiros',
@@ -362,7 +361,7 @@ export default function Financeiro() {
     {
       title: 'Rateio Multi-Empresa',
       description: 'Distribuição consolidada de custos',
-      icon: Wallet,
+      icon: ArrowLeftRight,
       color: 'purple',
       component: RateioMultiempresa,
       windowTitle: '🔀 Rateio Multi-Empresa',

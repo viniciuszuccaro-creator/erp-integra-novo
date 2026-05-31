@@ -58,8 +58,10 @@ export default function Estoque() {
       let skip = 0;
       const batchSize = ESTOQUE_BATCH_SIZE;
       let hasMore = true;
+      const MAX_PAGES = 20; // segurança: máximo 20 páginas (20×200 = 4000 produtos)
+      let page = 0;
       
-      while (hasMore) {
+      while (hasMore && page < MAX_PAGES) {
         const batch = await base44.entities.Produto.filter(filtroBase, undefined, batchSize, skip);
         if (!batch || batch.length === 0) {
           hasMore = false;
@@ -69,6 +71,7 @@ export default function Estoque() {
             hasMore = false;
           } else {
             skip += batchSize;
+            page++;
           }
         }
       }

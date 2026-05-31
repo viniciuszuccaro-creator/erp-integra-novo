@@ -51,33 +51,21 @@ export default function Comercial() {
   );
   const canSeeComercial = canViewComercial();
   const { openWindow, closeWindow } = useWindow();
-  const { filterInContext, getFiltroContexto, createInContext, updateInContext, empresaAtual, grupoAtual, estaNoGrupo } = useContextoVisual();
+  const { createInContext, updateInContext, empresaAtual, grupoAtual, estaNoGrupo } = useContextoVisual();
   const { user } = useUser();
   const queryClient = useQueryClient();
 
   const bloqueadoSemEmpresa = !estaNoGrupo && !empresaAtual;
 
-  const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes', empresaAtual?.id, estaNoGrupo, grupoAtual?.id],
-    queryFn: async () => {
-      if (!(empresaAtual?.id || estaNoGrupo)) return [];
-      return await filterInContext('Cliente', {}, '-created_date', COMERCIAL_LIST_LIMIT);
-    },
-    ...comercialQueryDefaults,
-    enabled: !bloqueadoSemEmpresa && canSeeComercial
-  });
+  const { data: clientes = [] } = useRLSQuery(
+    'Cliente', {}, '-created_date', COMERCIAL_LIST_LIMIT,
+    { staleTime: 30000, enabled: !bloqueadoSemEmpresa && canSeeComercial }
+  );
 
-  const pedidosQuery = useQuery({
-    queryKey: ['pedidos', empresaAtual?.id, estaNoGrupo, grupoAtual?.id],
-    queryFn: async () => {
-      if (!(empresaAtual?.id || estaNoGrupo)) return [];
-      return await filterInContext('Pedido', {}, '-created_date', COMERCIAL_LIST_LIMIT);
-    },
-    ...comercialQueryDefaults,
-    enabled: !bloqueadoSemEmpresa && canSeeComercial
-  });
-
-  const { data: pedidos = [] } = pedidosQuery;
+  const { data: pedidos = [] } = useRLSQuery(
+    'Pedido', {}, '-created_date', COMERCIAL_LIST_LIMIT,
+    { staleTime: 30000, enabled: !bloqueadoSemEmpresa && canSeeComercial }
+  );
 
   // Realtime: atualiza pedidos em tempo real via subscribe (multiempresa + RBAC já aplicados no wrapper do Layout)
   useEffect(() => {
@@ -107,55 +95,30 @@ export default function Comercial() {
     return () => { unsubs.forEach(u => { try { u && u(); } catch (_) {} }); };
   }, [empresaAtual?.id, grupoAtual?.id, estaNoGrupo]);
 
-  const { data: comissoes = [] } = useQuery({
-    queryKey: ['comissoes', empresaAtual?.id, estaNoGrupo, grupoAtual?.id],
-    queryFn: async () => {
-      if (!(empresaAtual?.id || estaNoGrupo)) return [];
-      return await filterInContext('Comissao', {}, '-created_date', COMERCIAL_SHORT_LIMIT);
-    },
-    ...comercialQueryDefaults,
-    enabled: !bloqueadoSemEmpresa && canSeeComercial
-  });
+  const { data: comissoes = [] } = useRLSQuery(
+    'Comissao', {}, '-created_date', COMERCIAL_SHORT_LIMIT,
+    { staleTime: 30000, enabled: !bloqueadoSemEmpresa && canSeeComercial }
+  );
 
-  const { data: notasFiscais = [] } = useQuery({
-    queryKey: ['notasFiscais', empresaAtual?.id, estaNoGrupo, grupoAtual?.id],
-    queryFn: async () => {
-      if (!(empresaAtual?.id || estaNoGrupo)) return [];
-      return await filterInContext('NotaFiscal', {}, '-created_date', COMERCIAL_SHORT_LIMIT, 'empresa_faturamento_id');
-    },
-    ...comercialQueryDefaults,
-    enabled: !bloqueadoSemEmpresa && canSeeComercial
-  });
+  const { data: notasFiscais = [] } = useRLSQuery(
+    'NotaFiscal', {}, '-created_date', COMERCIAL_SHORT_LIMIT,
+    { staleTime: 30000, enabled: !bloqueadoSemEmpresa && canSeeComercial }
+  );
 
-  const { data: tabelasPreco = [] } = useQuery({
-    queryKey: ['tabelas-preco', empresaAtual?.id, estaNoGrupo, grupoAtual?.id],
-    queryFn: async () => {
-      if (!(empresaAtual?.id || estaNoGrupo)) return [];
-      return await filterInContext('TabelaPreco', {}, '-updated_date', COMERCIAL_SHORT_LIMIT);
-    },
-    ...comercialQueryDefaults,
-    enabled: !bloqueadoSemEmpresa && canSeeComercial
-  });
+  const { data: tabelasPreco = [] } = useRLSQuery(
+    'TabelaPreco', {}, '-updated_date', COMERCIAL_SHORT_LIMIT,
+    { staleTime: 30000, enabled: !bloqueadoSemEmpresa && canSeeComercial }
+  );
 
-  const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas', empresaAtual?.id, estaNoGrupo, grupoAtual?.id],
-    queryFn: async () => {
-      if (!(empresaAtual?.id || estaNoGrupo)) return [];
-      return await filterInContext('Empresa', {}, '-created_date', COMERCIAL_COMPANY_LIMIT);
-    },
-    ...comercialQueryDefaults,
-    enabled: Boolean(canSeeComercial && (empresaAtual?.id || estaNoGrupo))
-  });
+  const { data: empresas = [] } = useRLSQuery(
+    'Empresa', {}, '-created_date', COMERCIAL_COMPANY_LIMIT,
+    { staleTime: 30000, enabled: Boolean(canSeeComercial && (empresaAtual?.id || estaNoGrupo)) }
+  );
 
-  const { data: pedidosExternos = [] } = useQuery({
-    queryKey: ['pedidos-externos', empresaAtual?.id, estaNoGrupo, grupoAtual?.id],
-    queryFn: async () => {
-      if (!(empresaAtual?.id || estaNoGrupo)) return [];
-      return await filterInContext('PedidoExterno', {}, '-created_date', COMERCIAL_EXTERNAL_LIMIT);
-    },
-    ...comercialQueryDefaults,
-    enabled: !bloqueadoSemEmpresa && canSeeComercial
-  });
+  const { data: pedidosExternos = [] } = useRLSQuery(
+    'PedidoExterno', {}, '-created_date', COMERCIAL_EXTERNAL_LIMIT,
+    { staleTime: 30000, enabled: !bloqueadoSemEmpresa && canSeeComercial }
+  );
 
   // Dados já vêm filtrados do servidor
   const clientesFiltrados = clientes;
@@ -190,7 +153,6 @@ export default function Comercial() {
               vendedor_id: formData.vendedor_id || user?.id
             });
             toast.success("Pedido criado!");
-            await pedidosQuery.refetch();
           } catch (error) {
             pedidoCriado = false;
             toast.error("Erro: " + error.message);
@@ -215,7 +177,6 @@ export default function Comercial() {
           try {
             await updateInContext('Pedido', formData.id, formData);
             toast.success("Pedido atualizado!");
-            await pedidosQuery.refetch();
             if (windowIdRef) closeWindow(windowIdRef);
           } catch (error) {
             atualizacaoEmAndamento = false;

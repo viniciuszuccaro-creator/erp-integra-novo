@@ -3,8 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Wallet, DollarSign, TrendingUp, TrendingDown, BarChart3, CreditCard, ArrowLeftRight, Globe, FileText, AlertCircle, Activity } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
-import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import { useWindow } from "@/components/lib/useWindow";
 import { useUser } from "@/components/lib/UserContext";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
@@ -42,52 +42,59 @@ export default function Financeiro() {
   const { user } = useUser();
 
   const {
-    contexto,
     estaNoGrupo,
     grupoAtual,
     empresaAtual,
     empresasDoGrupo,
-    filtrarPorContexto,
     adicionarColunasContexto,
-    getFiltroContexto
   } = useContextoVisual();
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || empresasDoGrupo?.[0]?.group_id || null;
   const contextKey = empresaAtual?.id || groupId || 'sem-contexto';
   const contextoValido = contextKey !== 'sem-contexto';
 
-  // Queries via useRLSQuery (escopo multi-empresa automático)
   const { data: contasReceber = [] } = useRLSQuery(
     'ContaReceber', {}, 'data_vencimento', FINANCEIRO_LIST_LIMIT,
-    { staleTime: 60000, retry: 1, enabled: canSeeFinanceiro && contextoValido }
+    { staleTime: 60000, enabled: canSeeFinanceiro && contextoValido }
   );
+
+  const totalContasReceber = contasReceber.length;
+
   const { data: contasPagar = [] } = useRLSQuery(
     'ContaPagar', {}, 'data_vencimento', FINANCEIRO_LIST_LIMIT,
-    { staleTime: 60000, retry: 1, enabled: canSeeFinanceiro && contextoValido }
+    { staleTime: 60000, enabled: canSeeFinanceiro && contextoValido }
   );
+
+  const totalContasPagar = contasPagar.length;
+
   const { data: rateios = [] } = useRLSQuery(
     'RateioFinanceiro', {}, '-created_date', FINANCEIRO_SMALL_LIST_LIMIT,
-    { staleTime: 60000, retry: 1, enabled: canSeeFinanceiro && contextoValido }
+    { staleTime: 60000, enabled: canSeeFinanceiro && contextoValido }
   );
+
   const { data: extratosBancarios = [] } = useRLSQuery(
     'ExtratoBancario', {}, '-data_movimento', FINANCEIRO_LIST_LIMIT,
-    { staleTime: 60000, retry: 1, enabled: canSeeFinanceiro && contextoValido }
+    { staleTime: 60000, enabled: canSeeFinanceiro && contextoValido }
   );
+
   const { data: configsGateway = [] } = useRLSQuery(
     'ConfiguracaoGatewayPagamento', {}, '-created_date', FINANCEIRO_CONFIG_LIMIT,
-    { staleTime: 60000, retry: 1, enabled: canSeeFinanceiro && contextoValido }
+    { staleTime: 60000, enabled: canSeeFinanceiro && contextoValido }
   );
+
   const { data: ordensLiquidacao = [] } = useRLSQuery(
     'CaixaOrdemLiquidacao', {}, '-created_date', FINANCEIRO_SMALL_LIST_LIMIT,
-    { staleTime: 60000, retry: 1, enabled: canSeeFinanceiro && contextoValido }
+    { staleTime: 60000, enabled: canSeeFinanceiro && contextoValido }
   );
+
   const { data: pedidosPendentesAprovacao = [] } = useRLSQuery(
     'Pedido', { status_aprovacao: 'pendente' }, '-created_date', FINANCEIRO_SMALL_LIST_LIMIT,
-    { staleTime: 60000, retry: 1, enabled: canSeeFinanceiro && contextoValido }
+    { staleTime: 60000, enabled: canSeeFinanceiro && contextoValido }
   );
 
   // Dados já vêm filtrados do servidor
   const contasReceberFiltradas = contasReceber;
   const contasPagarFiltradas = contasPagar;
+
   const contasReceberComContexto = adicionarColunasContexto(contasReceberFiltradas);
   const contasPagarComContexto = adicionarColunasContexto(contasPagarFiltradas);
 

@@ -1,4 +1,5 @@
 import React, { Suspense, useState, useMemo } from "react";
+import React, { useEffect, lazy, startTransition } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Box, TrendingUp, PackageCheck, PackageMinus, PackageOpen, Clock, BarChart3, Sparkles, ArrowLeftRight, Download } from "lucide-react";
@@ -23,14 +24,14 @@ import TransferenciaEntreEmpresasForm from "../components/estoque/TransferenciaE
 import { ESTOQUE_BATCH_SIZE, ESTOQUE_LIST_LIMIT, ESTOQUE_PRODUCTS_LIMIT, estoqueQueryDefaults } from "@/components/estoque/config/estoqueQueryConfig";
 import { isProdutoEstoqueBaixo } from "@/components/estoque/utils/estoqueSafeData";
 
-const ProdutosTab = React.lazy(() => import("../components/estoque/ProdutosTab"));
-const MovimentacoesTab = React.lazy(() => import("../components/estoque/MovimentacoesTab"));
-const SolicitacoesTab = React.lazy(() => import("../components/estoque/SolicitacoesTab"));
-const RecebimentoTab = React.lazy(() => import("../components/estoque/RecebimentoTab"));
-const RequisicoesAlmoxarifadoTab = React.lazy(() => import("../components/estoque/RequisicoesAlmoxarifadoTab"));
-const ControleLotesValidade = React.lazy(() => import("../components/estoque/ControleLotesValidade"));
-const RelatoriosEstoque = React.lazy(() => import("../components/estoque/RelatoriosEstoque"));
-const IAReposicao = React.lazy(() => import("../components/estoque/IAReposicao"));
+const ProdutosTab = lazy(() => import("../components/estoque/ProdutosTab"));
+const MovimentacoesTab = lazy(() => import("../components/estoque/MovimentacoesTab"));
+const SolicitacoesTab = lazy(() => import("../components/estoque/SolicitacoesTab"));
+const RecebimentoTab = lazy(() => import("../components/estoque/RecebimentoTab"));
+const RequisicoesAlmoxarifadoTab = lazy(() => import("../components/estoque/RequisicoesAlmoxarifadoTab"));
+const ControleLotesValidade = lazy(() => import("../components/estoque/ControleLotesValidade"));
+const RelatoriosEstoque = lazy(() => import("../components/estoque/RelatoriosEstoque"));
+const IAReposicao = lazy(() => import("../components/estoque/IAReposicao"));
 
 export default function Estoque() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
@@ -39,7 +40,7 @@ export default function Estoque() {
   const canTransferirEstoque = hasPermission('Estoque', 'Transferências', 'criar') || hasPermission('Estoque', 'Transferencias', 'criar') || hasPermission('Estoque', 'Movimentações', 'criar') || hasPermission('Estoque', 'Movimentacoes', 'criar');
   const { openWindow } = useWindow();
   const { user } = useUser();
-  const { estaNoGrupo, empresaAtual, grupoAtual, empresasDoGrupo, filtrarPorContexto, getFiltroContexto } = useContextoVisual();
+  const { estaNoGrupo, empresaAtual, grupoAtual, empresasDoGrupo } = useContextoVisual();
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
   const contextKey = empresaAtual?.id || groupId || 'sem-contexto';
   const contextoValido = contextKey !== 'sem-contexto';
@@ -52,7 +53,7 @@ export default function Estoque() {
   const { data: contagensTotais = { total: 0, revenda: 0, producao: 0, estoqueBaixo: 0 }, isLoading: loadingContagens, refetch: refetchContagens } = useQuery({
     queryKey: ['produtos-contagens-dashboard', contextKey],
     queryFn: async () => {
-      const filtroBase = getFiltroContexto('empresa_id', true);
+      const filtroBase = empresaAtual?.id ? { empresa_id: empresaAtual.id } : grupoAtual?.id ? { group_id: grupoAtual.id } : {};
 
       // Buscar TODOS os produtos para contagem correta
       let todosProdutos = [];
@@ -93,69 +94,32 @@ export default function Estoque() {
   });
 
   // ✅ Real-time update via subscription
-  React.useEffect(() => {
+  useEffect(() => {
     const unsubscribe = base44.entities.Produto.subscribe(() => {
       if (contextoValido) refetchContagens();
     });
     return unsubscribe;
   }, [refetchContagens, contextoValido]);
 
-  const { data: movimentacoes = [] } = useQuery({
-    queryKey: ['movimentacoes', contextKey],
-    queryFn: async () => {
-      try {
-        return await filtrarPorContexto('MovimentacaoEstoque', {}, '-data_movimentacao', ESTOQUE_LIST_LIMIT);
-      } catch (err) {
-        console.error('Erro ao buscar movimentações:', err);
-        return [];
-      }
-    },
-    ...estoqueQueryDefaults,
-    enabled: canSeeEstoque && contextoValido
-  });
+  const { data: movimentacoes = [] } = useRLSQuery(
+    'MovimentacaoEstoque', {}, '-data_movimentacao', ESTOQUE_LIST_LIMIT,
+    { staleTime: 30000, enabled: canSeeEstoque && contextoValido }
+  );
 
-  const { data: solicitacoes = [] } = useQuery({
-    queryKey: ['solicitacoes', contextKey],
-    queryFn: async () => {
-      try {
-        return await filtrarPorContexto('SolicitacaoCompra', {}, '-data_solicitacao', ESTOQUE_LIST_LIMIT);
-      } catch (err) {
-        console.error('Erro ao buscar solicitações:', err);
-        return [];
-      }
-    },
-    ...estoqueQueryDefaults,
-    enabled: canSeeEstoque && contextoValido
-  });
+  const { data: solicitacoes = [] } = useRLSQuery(
+    'SolicitacaoCompra', {}, '-data_solicitacao', ESTOQUE_LIST_LIMIT,
+    { staleTime: 30000, enabled: canSeeEstoque && contextoValido }
+  );
 
-  const { data: ordensCompra = [] } = useQuery({
-    queryKey: ['ordensCompra', contextKey],
-    queryFn: async () => {
-      try {
-        return await filtrarPorContexto('OrdemCompra', {}, '-data_solicitacao', ESTOQUE_LIST_LIMIT);
-      } catch (err) {
-        console.error('Erro ao buscar ordens:', err);
-        return [];
-      }
-    },
-    ...estoqueQueryDefaults,
-    enabled: canSeeEstoque && contextoValido
-  });
+  const { data: ordensCompra = [] } = useRLSQuery(
+    'OrdemCompra', {}, '-data_solicitacao', ESTOQUE_LIST_LIMIT,
+    { staleTime: 30000, enabled: canSeeEstoque && contextoValido }
+  );
 
-  // Buscar produtos simples para KPIs de valor de estoque
-  const { data: produtosParaKPIs = [] } = useQuery({
-    queryKey: ['produtos-kpis', contextKey],
-    queryFn: async () => {
-      try {
-        return await filtrarPorContexto('Produto', {}, undefined, ESTOQUE_PRODUCTS_LIMIT);
-      } catch (err) {
-        console.error('Erro ao buscar produtos para KPIs:', err);
-        return [];
-      }
-    },
-    ...estoqueQueryDefaults,
-    enabled: canSeeEstoque && contextoValido
-  });
+  const { data: produtosParaKPIs = [] } = useRLSQuery(
+    'Produto', {}, undefined, ESTOQUE_PRODUCTS_LIMIT,
+    { staleTime: 30000, enabled: canSeeEstoque && contextoValido }
+  );
 
   const movimentacoesFiltradas = movimentacoes;
 
@@ -308,7 +272,7 @@ export default function Estoque() {
   const allowedModules = modules.filter(m => hasPermission('Estoque', (m.sectionKey || m.title), 'ver'));
 
    const handleModuleClick = (module) => {
-    React.startTransition(() => {
+    startTransition(() => {
       // Auditoria de abertura de seção
       void base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário',

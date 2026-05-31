@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle, Factory, ShoppingCart, Plus, Upload, Package } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-
+import useRLS from "@/components/lib/useRLS";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import ProdutoFormV22_Completo from "@/components/cadastros/ProdutoFormV22_Completo";
@@ -20,88 +20,28 @@ import VisualizadorUniversalEntidade from "@/components/cadastros/VisualizadorUn
 export default function ProdutosTab(props) {
   const { hasPermission } = usePermissions();
   const { openWindow } = useWindow();
-  const { getFiltroContexto, createInContext, empresaAtual, grupoAtual } = useContextoVisual();
-  const filtroEmpresaKey = React.useMemo(() => JSON.stringify(getFiltroContexto('empresa_id', true) || {}), [getFiltroContexto, empresaAtual?.id, grupoAtual?.id]);
+  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const { create: createRLS } = useRLS();
   const [filtroEstoqueBaixo, setFiltroEstoqueBaixo] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const calcularContagensLocal = (produtos) => {
-    const total = produtos.length;
-    const revenda = produtos.filter(p => p.tipo_item === 'Revenda').length;
-    const producao = produtos.filter(p => p.tipo_item === 'Matéria-Prima Produção').length;
-    const estoqueBaixo = produtos.filter(p => 
-      p.status === 'Ativo' && (p.estoque_disponivel || 0) <= (p.estoque_minimo || 0)
-    ).length;
-    
+  // Queries via useRLSQuery (com escopo automático)
+  const { data: produtosRLS = [] } = useRLSQuery('Produto', { status: 'Ativo' }, '-updated_date', 300);
+  
+  const contagensTotais = useMemo(() => {
+    const total = produtosRLS.filter(p => p.status === 'Ativo').length;
+    const revenda = produtosRLS.filter(p => p.tipo_item === 'Revenda').length;
+    const producao = produtosRLS.filter(p => p.tipo_item === 'Matéria-Prima Produção').length;
+    const estoqueBaixo = produtosRLS.filter(p => (p.estoque_disponivel || 0) <= (p.estoque_minimo || 0)).length;
     return { total, revenda, producao, estoqueBaixo };
-  };
+  }, [produtosRLS]);
 
-  // Contagens rápidas via backend (sem carregar todos os produtos)
-  const { data: totalCount = 0 } = useQuery({
-    queryKey: ['produtos-count-total', filtroEmpresaKey],
-    queryFn: async () => {
-      const filtro = getFiltroContexto('empresa_id', true) || {};
-      const { data } = await base44.functions.invoke('countEntities', { entityName: 'Produto', filter: filtro });
-      return data?.count || 0;
-    },
-    staleTime: 60000,
-    keepPreviousData: true
-  });
-  const { data: revendaCount = 0 } = useQuery({
-    queryKey: ['produtos-count-revenda', filtroEmpresaKey],
-    queryFn: async () => {
-      const filtro = { ...(getFiltroContexto('empresa_id', true) || {}), tipo_item: 'Revenda' };
-      const { data } = await base44.functions.invoke('countEntities', { entityName: 'Produto', filter: filtro });
-      return data?.count || 0;
-    },
-    staleTime: 60000,
-    keepPreviousData: true
-  });
-  const { data: producaoCount = 0 } = useQuery({
-    queryKey: ['produtos-count-producao', filtroEmpresaKey],
-    queryFn: async () => {
-      const filtro = { ...(getFiltroContexto('empresa_id', true) || {}), tipo_item: 'Matéria-Prima Produção' };
-      const { data } = await base44.functions.invoke('countEntities', { entityName: 'Produto', filter: filtro });
-      return data?.count || 0;
-    },
-    staleTime: 60000,
-    keepPreviousData: true
-  });
-
-  // Estoque baixo ainda precisa avaliar campo <= mínimo (sem suporte direto no count): fallback leve por lote
-  const { data: produtosParaEstoqueBaixo = [] } = useQuery({
-    queryKey: ['produtos-estoque-baixo', filtroEmpresaKey],
-    queryFn: async () => {
-      const filtro = { ...(getFiltroContexto('empresa_id', true) || {}), status: 'Ativo' };
-      // Carrega apenas coluna necessária em lotes pequenos
-      const { data } = await base44.functions.invoke('entityListSorted', {
-        entityName: 'Produto',
-        filter: filtro,
-        sortField: 'updated_date',
-        sortDirection: 'desc',
-        limit: 300
-      });
-      return Array.isArray(data) ? data : [];
-    },
-    staleTime: 30000,
-    keepPreviousData: true
-  });
-
-  const estoqueBaixoCalc = useMemo(() => (produtosParaEstoqueBaixo || []).filter(p => (p.status === 'Ativo') && ((p.estoque_disponivel || 0) <= (p.estoque_minimo || 0))).length, [produtosParaEstoqueBaixo]);
-
-  const contagensTotais = useMemo(() => ({
-    total: totalCount,
-    revenda: revendaCount,
-    producao: producaoCount,
-    estoqueBaixo: estoqueBaixoCalc,
-  }), [totalCount, revendaCount, producaoCount, estoqueBaixoCalc]);
-  const isLoadingContagens = totalCount === 0 && revendaCount === 0 && producaoCount === 0 && (produtosParaEstoqueBaixo || []).length === 0;
+  const isLoadingContagens = produtosRLS.length === 0;
 
   React.useEffect(() => {
     const unsubscribe = base44.entities.Produto.subscribe(() => {
-      queryClient.invalidateQueries({ queryKey: ['produtos-todos-contagem'] });
-      queryClient.invalidateQueries({ queryKey: ['produtos'] });
+      queryClient.invalidateQueries({ queryKey: ['Produto'] });
     });
     return unsubscribe;
   }, [queryClient]);
@@ -264,18 +204,18 @@ export default function ProdutosTab(props) {
               className="bg-blue-600 hover:bg-blue-700" 
               data-permission="Estoque.Produtos.criar"
               onClick={() => openWindow(ProdutoFormV22_Completo, {
-              windowMode: true,
-              onSubmit: async (data) => {
-                try {
-                  await createInContext('Produto', data);
-                  queryClient.invalidateQueries({ queryKey: ['produtos'] });
-                  try { await base44.entities.AuditLog.create({ acao: 'Criação', modulo: 'Estoque', entidade: 'Produto', descricao: 'Produto criado', data_hora: new Date().toISOString() }); } catch(_) {}
-                  toast({ title: "✅ Produto criado!" });
-                } catch (error) {
-                  toast({ title: "❌ Erro", description: error.message, variant: "destructive" });
-                }
-              }
-            }, {
+               windowMode: true,
+               onSubmit: async (data) => {
+                 try {
+                   await createRLS('Produto', data);
+                   queryClient.invalidateQueries({ queryKey: ['Produto'] });
+                   try { await base44.entities.AuditLog.create({ acao: 'Criação', modulo: 'Estoque', entidade: 'Produto', descricao: 'Produto criado', data_hora: new Date().toISOString() }); } catch(_) {}
+                   toast({ title: "✅ Produto criado!" });
+                 } catch (error) {
+                   toast({ title: "❌ Erro", description: error.message, variant: "destructive" });
+                 }
+               }
+              }, {
               title: '📦 Novo Produto',
               width: 1200,
               height: 700

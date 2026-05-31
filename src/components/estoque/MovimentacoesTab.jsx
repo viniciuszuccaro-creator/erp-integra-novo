@@ -13,7 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import MovimentacaoForm from "./MovimentacaoForm";
 import { useWindow } from "@/components/lib/useWindow";
-import useEntityListSorted from "@/components/lib/useEntityListSorted";
+import useRLS from "@/components/lib/useRLS";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
 import { toast } from "sonner";
@@ -24,12 +25,12 @@ export default function MovimentacoesTab({ movimentacoes, produtos }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { openWindow } = useWindow();
-  const { empresaAtual, grupoAtual, getFiltroContexto, createInContext, updateInContext } = useContextoVisual();
+  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const { create: createRLS, update: updateRLS } = useRLS();
   const { canCreate } = usePermissions();
   const contextoValido = Boolean(empresaAtual?.id || grupoAtual?.id);
   const canCreateMovimentacao = canCreate('Estoque', 'Movimentações') || canCreate('Estoque', 'Movimentacoes');
-  const filtroMovimentacoes = getFiltroContexto('empresa_id', true) || {};
-  const { data: movsBackend = [] } = useEntityListSorted('MovimentacaoEstoque', filtroMovimentacoes, { sortField: 'data_movimentacao', sortDirection: 'desc', limit: 500, enabled: contextoValido });
+  const { data: movsBackend = [] } = useRLSQuery('MovimentacaoEstoque', {}, '-data_movimentacao', 500);
   const movList = Array.isArray(movimentacoes) && movimentacoes.length ? movimentacoes : movsBackend;
   const [novaMovimentacao, setNovaMovimentacao] = useState({
     tipo_movimentacao: "",
@@ -78,7 +79,6 @@ export default function MovimentacoesTab({ movimentacoes, produtos }) {
       }
       const movimentacaoData = {
         tipo_movimentacao: data.tipo_movimentacao,
-        empresa_id: data.empresa_id || empresaAtual?.id,
         produto_id: data.produto_id,
         produto_descricao: data.produto_nome,
         quantidade: parseFloat(data.quantidade),
@@ -88,7 +88,7 @@ export default function MovimentacoesTab({ movimentacoes, produtos }) {
         responsavel: data.responsavel
       };
 
-      const novaMovimentacao = await createInContext('MovimentacaoEstoque', movimentacaoData);
+      const novaMovimentacao = await createRLS('MovimentacaoEstoque', movimentacaoData);
       
       const produto = produtos.find(p => p.id === data.produto_id);
       if (produto) {
@@ -105,7 +105,7 @@ export default function MovimentacoesTab({ movimentacoes, produtos }) {
           novoEstoque = qtd;
         }
         
-        await updateInContext('Produto', produto.id, {
+        await updateRLS('Produto', produto.id, {
           estoque_atual: novoEstoque
         });
       }
@@ -113,8 +113,8 @@ export default function MovimentacoesTab({ movimentacoes, produtos }) {
       return novaMovimentacao;
     },
     onSuccess: async (novaMov) => {
-      await queryClient.invalidateQueries({ queryKey: ['movimentacoes'] });
-      await queryClient.invalidateQueries({ queryKey: ['produtos'] });
+      await queryClient.invalidateQueries({ queryKey: ['MovimentacaoEstoque'] });
+      await queryClient.invalidateQueries({ queryKey: ['Produto'] });
       
       setIsDialogOpen(false);
       resetForm();

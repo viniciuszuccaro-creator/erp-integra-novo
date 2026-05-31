@@ -1162,7 +1162,7 @@ function LayoutContent({ children, currentPageName }) {
           
           <SidebarContent className="p-3">
             {Object.entries(groupedItems).map(([groupName, items]) => {
-              if (items.length === 0) return <React.Fragment key={groupName} />;
+              if (items.length === 0) return null;
               
               const groupLabels = {
                 principal: "Principal",
@@ -1232,8 +1232,6 @@ function LayoutContent({ children, currentPageName }) {
                 <LogOut className="w-4 h-4 text-slate-500" />
               </button>
             </div>
-            
-
           </SidebarFooter>
         </Sidebar>
 

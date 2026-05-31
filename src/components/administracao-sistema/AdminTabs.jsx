@@ -15,6 +15,8 @@ import GestaoAcessosIndex from "@/components/administracao-sistema/gestao-acesso
 import PropagacaoIndex from "@/components/administracao-sistema/propagacao/PropagacaoIndex";
 import CheckupRelatorio from "@/components/sistema/CheckupRelatorio";
 import DashboardPropagacaoMonitor from "@/components/administracao-sistema/DashboardPropagacaoMonitor";
+import TestTogglePainel from "@/components/sistema/TestTogglePainel";
+import TestValidacaoRBAC from "@/components/administracao-sistema/TestValidacaoRBAC";
 
 
 const TAB_DEFS = [
@@ -25,6 +27,7 @@ const TAB_DEFS = [
   { value: "acessos",     label: "Gestão de Acessos",     icon: Users,       perm: "Controle de Acesso", color: "blue" },
   { value: "seguranca",   label: "Segurança, IA & Gov.",  icon: Shield,      perm: "Segurança",         color: "blue" },
   { value: "auditoria",   label: "Auditoria e Logs",      icon: FileText,    perm: "Auditoria",         color: "blue" },
+  { value: "testes",      label: "🧪 Testes",             icon: Settings,    perm: "Configurações",     color: "blue" },
 ];
 
 export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtual }) {
@@ -160,6 +163,19 @@ export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtua
         >
           <div className="w-full h-full">
             <AuditoriaLogsIndex />
+          </div>
+        </ProtectedSection>
+      </TabsContent>
+
+      {/* ── TESTES ── */}
+      <TabsContent value="testes" className="mt-4">
+        <ProtectedSection
+          module="Sistema" section={["Configurações"]} action="visualizar"
+          fallback={<p className="p-4 text-sm text-slate-500">Acesso restrito aos Testes.</p>}
+        >
+          <div className="w-full h-full grid grid-cols-1 lg:grid-cols-2 gap-4 overflow-auto">
+            <TestTogglePainel />
+            <TestValidacaoRBAC />
           </div>
         </ProtectedSection>
       </TabsContent>

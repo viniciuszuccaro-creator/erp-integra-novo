@@ -35,6 +35,7 @@ import RealtimeCollaborationHub from '@/components/realtime-collaboration/Realti
 import QualityManagementHub from '@/components/quality-management/QualityManagementHub';
 import SupplyChainResilienceHub from '@/components/supply-chain-resilience/SupplyChainResilienceHub';
 import QuantumSecurityHub from '@/components/quantum-security/QuantumSecurityHub';
+import MetaverseERPHub from '@/components/metaverse-erp/MetaverseERPHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -249,6 +250,15 @@ const AuthenticatedApp = () => {
             <EmpresaSelectorGuard>
               <LayoutWrapper currentPageName="QuantumSecurity">
                 <QuantumSecurityHub />
+              </LayoutWrapper>
+            </EmpresaSelectorGuard>
+          </RBACRoute>
+        } />
+        <Route path="/MetaverseERP" element={
+          <RBACRoute module="Dashboard" action="ver">
+            <EmpresaSelectorGuard>
+              <LayoutWrapper currentPageName="MetaverseERP">
+                <MetaverseERPHub />
               </LayoutWrapper>
             </EmpresaSelectorGuard>
           </RBACRoute>

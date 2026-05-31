@@ -1,6 +1,6 @@
-import React from "react";
+import React, { startTransition } from "react";
 import { base44 } from "@/api/base44Client";
-import { Users, Clock, Calendar, Activity, Trophy, FileText, UserCircle } from "lucide-react";
+import { Users, Clock, Calendar, Activity, Trophy, UserCircle } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
@@ -9,12 +9,10 @@ import { useWindow } from "@/components/lib/useWindow";
 import { useUser } from "@/components/lib/UserContext";
 import usePermissions from "@/components/lib/usePermissions";
 import { Button } from "@/components/ui/button";
-import HeaderRHCompacto from "@/components/rh/rh-launchpad/HeaderRHCompacto";
 import KPIsRH from "@/components/rh/rh-launchpad/KPIsRH";
 import VisualizadorUniversalEntidade from "@/components/cadastros/VisualizadorUniversalEntidade";
 import ColaboradorForm from "@/components/rh/ColaboradorForm";
 import ModulosGridRH from "@/components/rh/rh-launchpad/ModulosGridRH";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import ModuleLayout from "@/components/layout/ModuleLayout";
 import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
@@ -60,9 +58,8 @@ export default function RH() {
     { staleTime: 30000, retry: 1, enabled: canSeeRH }
   );
 
-  const colaboradoresFiltrados = colaboradores;
   const totalColaboradores = colaboradores.length;
-  const colaboradoresAtivos = colaboradoresFiltrados.filter(c => (c.status || '').toString().trim().toLowerCase() === 'ativo').length;
+  const colaboradoresAtivos = colaboradores.filter(c => (c.status || '').toString().trim().toLowerCase() === 'ativo').length;
   const feriasAprovadas = ferias.filter(f => f.status === "Aprovada").length;
   const feriasPendentes = ferias.filter(f => f.status === "Solicitada").length;
 
@@ -94,7 +91,7 @@ export default function RH() {
       windowTitle: '⏰ Ponto',
       width: 1400,
       height: 800,
-      props: { pontos, colaboradores: colaboradoresFiltrados, canApprove: true, windowMode: true }
+      props: { pontos, colaboradores, canApprove: true, windowMode: true }
     },
     {
       title: 'Ponto Biométrico',
@@ -155,10 +152,9 @@ export default function RH() {
 
   const allowedModules = modules.filter(m => hasPermission('RH', (m.sectionKey || m.title), 'ver'));
 
-   const handleModuleClick = (module) => {
-    React.startTransition(() => {
-      // Auditoria de abertura de seção
-      base44.entities.AuditLog.create({
+  const handleModuleClick = (module) => {
+    startTransition(() => {
+      void base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário',
         acao: 'Visualização',
         modulo: 'RH',
@@ -166,7 +162,7 @@ export default function RH() {
         entidade: 'Seção',
         descricao: `Abrir seção: ${module.title}`,
         data_hora: new Date().toISOString(),
-      });
+      }).catch(() => {});
       openWindow(
          module.component,
         { 
@@ -188,7 +184,7 @@ export default function RH() {
     <ErrorBoundary>
       <ModuleLayout title="Recursos Humanos" subtitle="Colaboradores, ponto e indicadores" actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'rh_primary_action' })}>Novo Colaborador</Button></div>}>
         <ModuleKPIs>
-          <RHIAPanel colaboradores={colaboradoresFiltrados} pontos={pontos} ferias={ferias} />
+          <RHIAPanel colaboradores={colaboradores} pontos={pontos} ferias={ferias} />
           <KPIsRH
             colaboradoresAtivos={colaboradoresAtivos}
             totalColaboradores={totalColaboradores}

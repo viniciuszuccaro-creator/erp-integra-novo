@@ -4,18 +4,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Settings, Users, Shield, FileText, Brain, Plug, ArrowDownUp } from "lucide-react";
 import usePermissions from "@/components/lib/usePermissions";
 import ProtectedSection from "@/components/security/ProtectedSection";
-import { Button } from "@/components/ui/button";
-import { base44 } from "@/api/base44Client";
-import { Card, CardContent } from "@/components/ui/card";
-import { toast } from "sonner";
-import { useUser } from "@/components/lib/UserContext";
+
 
 // Sub-modules
-import AdminStatusBarCompact from "@/components/administracao-sistema/AdminStatusBarCompact";
-import AdminKPIBar from "@/components/administracao-sistema/AdminKPIBar";
-import AdminQuickActions from "@/components/administracao-sistema/AdminQuickActions";
-import SystemCheckupPanel from "@/components/administracao-sistema/SystemCheckupPanel";
-
 import ConfiguracoesGeraisIndex from "@/components/administracao-sistema/configuracoes-gerais/ConfiguracoesGeraisIndex";
 import IntegracoesIndex from "@/components/administracao-sistema/IntegracoesIndex";
 import AuditoriaLogsIndex from "@/components/administracao-sistema/auditoria-logs/AuditoriaLogsIndex";
@@ -88,18 +79,6 @@ export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtua
         ))}
 
       </TabsList>
-
-      {/* ── KPIs + STATUS BAR + HEALTH ── */}
-      <div className="mt-3 space-y-3">
-        <AdminKPIBar />
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <AdminStatusBarCompact />
-          <AdminQuickActions onTabChange={handleTabChange} />
-        </div>
-        <div className="mt-2" style={{ display: resolvedTab === "gerais" ? undefined : "none" }}>
-          <SystemCheckupPanel />
-        </div>
-      </div>
 
       {/* ── PARÂMETROS GERAIS ── */}
       <TabsContent value="gerais" className="mt-4">

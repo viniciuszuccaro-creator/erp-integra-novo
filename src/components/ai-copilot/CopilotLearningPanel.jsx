@@ -1,139 +1,129 @@
-/**
- * CopilotLearningPanel v1.0 — Passo 37
- * Painel de aprendizado adaptativo da IA por perfil de usuário
- * Regra-Mãe: w-full h-full, IA que evolui, personalização contínua
- */
-import { Card } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Brain, User, TrendingUp, Star, Zap } from 'lucide-react';
+import { Brain, CheckCircle, BookOpen, Zap } from 'lucide-react';
 
-const USER_PROFILES = [
-  {
-    perfil: 'Diretor Comercial',
-    usuario: 'Carlos M.',
-    precisao: 96,
-    interacoes: 1247,
-    topicos: ['Pedidos', 'Clientes', 'Comissões'],
-    adaptacoes: ['Prioriza alertas de churn', 'Resume métricas em 3 linhas', 'Foca no funil de vendas'],
-    nivel: 'Expert',
-  },
-  {
-    perfil: 'CFO',
-    usuario: 'Ana S.',
-    precisao: 94,
-    interacoes: 876,
-    topicos: ['DRE', 'Fluxo de Caixa', 'Inadimplência'],
-    adaptacoes: ['Exibe análise de desvio orçamentário', 'Alerta EBITDA em tempo real', 'Foca em cenários pessimistas'],
-    nivel: 'Expert',
-  },
-  {
-    perfil: 'Gerente de Estoque',
-    usuario: 'Paulo R.',
-    precisao: 89,
-    interacoes: 532,
-    topicos: ['Reposição', 'Giro', 'Inventário'],
-    adaptacoes: ['Agrupa alertas por almoxarifado', 'Sugere OC automática', 'Monitora validade de lotes'],
-    nivel: 'Avançado',
-  },
-];
+export default function CopilotLearningPanel() {
+  const [expanded, setExpanded] = useState(null);
 
-const MODEL_METRICS = [
-  { label: 'Total de Interações', value: '2.655', icon: Zap, color: 'text-violet-400' },
-  { label: 'Precisão Média', value: '93.0%', icon: Star, color: 'text-yellow-400' },
-  { label: 'Perfis Aprendidos', value: '3', icon: User, color: 'text-blue-400' },
-  { label: 'Melhoria Contínua', value: '+1.2%/sem', icon: TrendingUp, color: 'text-green-400' },
-];
+  const aprendizados = [
+    {
+      id: 1,
+      titulo: 'Padrão: Desconto + Margem',
+      descricao: 'IA aprendeu que descontos > 15% reduzem margem abaixo de 12%. Sugerir aumento de volume ao invés de desconto.',
+      tipo: 'insight',
+      frequencia: 'Detectado em 23 pedidos',
+      acao: 'Aplicar automaticamente',
+    },
+    {
+      id: 2,
+      titulo: 'Previsão de Churn',
+      descricao: 'Clientes sem compra > 45 dias têm 72% de risco de churn. Score melhora com contato pessoal.',
+      tipo: 'comportamento',
+      frequencia: '5 clientes identificados',
+      acao: 'Disparar campanha reativação',
+    },
+    {
+      id: 3,
+      titulo: 'Sazonalidade Produção',
+      descricao: 'OEE cai 8% às quartas. Manutenção planejada impacta segunda seguinte.',
+      tipo: 'operacional',
+      frequencia: 'Observado 4 semanas',
+      acao: 'Rescheduler para terça',
+    },
+    {
+      id: 4,
+      titulo: 'Otimização de Rota',
+      descricao: 'Rota A + B economizam 120km vs rota AB. Economia: R$ 850/semana.',
+      tipo: 'logística',
+      frequencia: 'Validado 3x',
+      acao: 'Implementar padrão',
+    },
+  ];
 
-const NIVEL_CONFIG = {
-  Expert: 'bg-yellow-500/20 text-yellow-300',
-  Avançado: 'bg-blue-500/20 text-blue-300',
-  Iniciante: 'bg-slate-500/20 text-slate-300',
-};
+  const tipoIcon = (tipo) => {
+    switch (tipo) {
+      case 'insight': return '💡';
+      case 'comportamento': return '👥';
+      case 'operacional': return '⚙️';
+      case 'logística': return '🚚';
+      default: return '📊';
+    }
+  };
 
-export default function CopilotLearningPanel({ empresa }) {
+  const tipoCor = (tipo) => {
+    switch (tipo) {
+      case 'insight': return 'bg-yellow-900 text-yellow-200';
+      case 'comportamento': return 'bg-purple-900 text-purple-200';
+      case 'operacional': return 'bg-blue-900 text-blue-200';
+      case 'logística': return 'bg-emerald-900 text-emerald-200';
+      default: return 'bg-slate-700 text-slate-200';
+    }
+  };
+
   return (
-    <div className="w-full h-full flex flex-col gap-4 p-5 bg-gradient-to-br from-slate-900 to-violet-950 overflow-auto">
-      <h2 className="text-xl font-bold text-white flex items-center gap-2 flex-shrink-0">
-        <Brain className="w-5 h-5 text-violet-400 animate-pulse" />
-        Aprendizado Adaptativo — {empresa}
-      </h2>
-
-      {/* Model Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 flex-shrink-0">
-        {MODEL_METRICS.map((m) => {
-          const Icon = m.icon;
-          return (
-            <Card key={m.label} className="p-4 bg-white/5 border border-white/10 rounded-xl">
-              <Icon className={`w-5 h-5 mb-2 ${m.color}`} />
-              <p className="text-xl font-black text-white">{m.value}</p>
-              <p className="text-xs text-slate-400 mt-1">{m.label}</p>
-            </Card>
-          );
-        })}
+    <div className="w-full h-full overflow-auto space-y-3 p-1">
+      <div className="flex items-center gap-2 px-2 mb-3">
+        <Brain className="w-5 h-5 text-yellow-400" />
+        <h3 className="text-sm font-bold text-white">Aprendizados IA — Recomendações Validadas</h3>
       </div>
 
-      {/* Evolution bar */}
-      <Card className="p-4 bg-violet-500/10 border border-violet-400/30 rounded-xl flex-shrink-0">
-        <div className="flex justify-between mb-2">
-          <p className="text-sm font-semibold text-violet-300">Evolução do Modelo (últimas 4 semanas)</p>
-          <span className="text-sm font-bold text-white">93.0%</span>
-        </div>
-        <div className="h-3 bg-white/10 rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-violet-600 to-indigo-500 rounded-full" style={{ width: '93%' }} />
-        </div>
-        <p className="text-xs text-slate-400 mt-2">Modelo atualizado diariamente com novos padrões de uso</p>
+      {aprendizados.map((ap) => (
+        <Card key={ap.id} className="bg-slate-800 border-slate-700 cursor-pointer hover:border-slate-600" onClick={() => setExpanded(expanded === ap.id ? null : ap.id)}>
+          <CardContent className="p-3">
+            <div className="flex items-start gap-3">
+              <div className="text-2xl shrink-0">{tipoIcon(ap.tipo)}</div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <p className="text-sm font-bold text-white">{ap.titulo}</p>
+                  <Badge className={tipoCor(ap.tipo)}>
+                    {ap.tipo}
+                  </Badge>
+                </div>
+                <p className="text-xs text-slate-400 mb-2">{ap.descricao}</p>
+                <p className="text-xs text-slate-500 mb-2">📍 {ap.frequencia}</p>
+
+                {expanded === ap.id && (
+                  <div className="mt-3 pt-3 border-t border-slate-700">
+                    <button className="flex items-center gap-2 px-3 py-1.5 rounded text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold">
+                      <CheckCircle className="w-4 h-4" />
+                      {ap.acao}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+
+      {/* Confiança da IA */}
+      <Card className="bg-slate-800 border-slate-700">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm text-white flex items-center gap-2">
+            <Zap className="w-4 h-4 text-yellow-400" />
+            Nível de Confiança IA
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {[
+            { area: 'Insights Comerciais', confianca: 87 },
+            { area: 'Previsões Operacionais', confianca: 79 },
+            { area: 'Detecção Anomalias', confianca: 92 },
+            { area: 'Recomendações Logísticas', confianca: 85 },
+          ].map((item, idx) => (
+            <div key={idx}>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-slate-300">{item.area}</span>
+                <span className="font-bold text-emerald-400">{item.confianca}%</span>
+              </div>
+              <div className="bg-slate-700 rounded-full h-1.5">
+                <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${item.confianca}%` }} />
+              </div>
+            </div>
+          ))}
+        </CardContent>
       </Card>
-
-      {/* User Profiles */}
-      <div className="space-y-3">
-        {USER_PROFILES.map((profile) => (
-          <Card key={profile.perfil} className="p-4 bg-white/5 border border-white/10 rounded-xl">
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-violet-600/40 flex items-center justify-center">
-                  <User className="w-5 h-5 text-violet-300" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-white">{profile.usuario}</p>
-                  <p className="text-xs text-slate-400">{profile.perfil}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <Badge className={NIVEL_CONFIG[profile.nivel]}>{profile.nivel}</Badge>
-                <p className="text-xs text-slate-400 mt-1">{profile.interacoes} interações</p>
-              </div>
-            </div>
-
-            {/* Precisão */}
-            <div className="mb-3">
-              <div className="flex justify-between mb-1">
-                <span className="text-xs text-slate-400">Precisão personalizada</span>
-                <span className="text-xs font-bold text-white">{profile.precisao}%</span>
-              </div>
-              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-violet-500 to-indigo-400 rounded-full" style={{ width: `${profile.precisao}%` }} />
-              </div>
-            </div>
-
-            {/* Tópicos */}
-            <div className="flex gap-1 flex-wrap mb-2">
-              {profile.topicos.map((t) => (
-                <Badge key={t} className="bg-white/10 text-slate-300 text-xs">{t}</Badge>
-              ))}
-            </div>
-
-            {/* Adaptações */}
-            <div className="space-y-1">
-              {profile.adaptacoes.map((a) => (
-                <p key={a} className="text-xs text-slate-400 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400 flex-shrink-0" />
-                  {a}
-                </p>
-              ))}
-            </div>
-          </Card>
-        ))}
-      </div>
     </div>
   );
 }

@@ -1,89 +1,110 @@
-/**
- * AICopilotHub v1.0 — Passo 37
- * Hub do IA Copiloto Adaptativo — aprende com o usuário
- * Regra-Mãe: w-full h-full, multi-empresa, IA, futurista
- */
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bot, Brain, TrendingUp, Lightbulb } from 'lucide-react';
+import { Lightbulb, MessageCircle, DollarSign, Brain } from 'lucide-react';
 import CopilotChat from './CopilotChat';
 import CopilotInsightsFeed from './CopilotInsightsFeed';
-import CopilotLearningPanel from './CopilotLearningPanel';
 import CopilotFinancialIntelligence from './CopilotFinancialIntelligence';
-
-const EMPRESAS = ['Zuccaro SP', 'Zuccaro MG', 'Zuccaro Brasil'];
-
-const TABS = [
-  { value: 'chat',     label: 'CoPilot Chat',     Icon: Bot },
-  { value: 'insights', label: 'Insights Feed',    Icon: Lightbulb },
-  { value: 'finance',  label: 'Intel. Financeira', Icon: TrendingUp },
-  { value: 'learning', label: 'Aprendizado IA',   Icon: Brain },
-];
+import CopilotLearningPanel from './CopilotLearningPanel';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 export default function AICopilotHub() {
-  const [activeTab, setActiveTab] = useState('chat');
-  const [empresa, setEmpresa] = useState('Zuccaro SP');
+  const { empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const [modulo, setModulo] = useState('geral');
+
+  const modulos = [
+    { id: 'geral', label: 'Geral', icon: '🏢' },
+    { id: 'comercial', label: 'Comercial', icon: '📊' },
+    { id: 'estoque', label: 'Estoque', icon: '📦' },
+    { id: 'financeiro', label: 'Financeiro', icon: '💰' },
+    { id: 'producao', label: 'Produção', icon: '🏭' },
+    { id: 'crm', label: 'CRM', icon: '👥' },
+  ];
 
   return (
-    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-950 via-violet-950 to-slate-950">
+    <div className="w-full h-full overflow-auto space-y-4 p-4">
       {/* Header */}
-      <div className="bg-white/5 backdrop-blur border-b border-violet-500/30 px-6 py-4 flex-shrink-0">
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-violet-500/20 rounded-xl">
-              <Bot className="w-8 h-8 text-violet-400 animate-pulse" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white">IA CoPilot Adaptativo</h1>
-              <p className="text-sm text-slate-300">Aprende • Prevê • Decide • Otimiza em Tempo Real</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right hidden sm:block">
-              <p className="text-xs text-slate-400">Precisão do Modelo</p>
-              <p className="text-xl font-black text-violet-300">97.4%</p>
-            </div>
-            <div className="flex gap-2">
-              {EMPRESAS.map((emp) => (
-                <button
-                  key={emp}
-                  onClick={() => setEmpresa(emp)}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                    empresa === emp
-                      ? 'bg-violet-600 text-white shadow-lg'
-                      : 'bg-white/10 text-slate-300 hover:bg-white/20'
-                  }`}
-                >
-                  {emp.replace('Zuccaro ', '')}
-                </button>
-              ))}
-            </div>
-          </div>
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Lightbulb className="w-6 h-6 text-yellow-400" />
+          <h1 className="text-2xl font-bold text-white">IA Copilot — Assistente Inteligente</h1>
         </div>
+        <p className="text-sm text-slate-400">Seu assistente IA contextual, com insights em tempo real e recomendações inteligentes</p>
+      </div>
+
+      {/* Seletor de Módulo */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        {modulos.map(m => (
+          <button
+            key={m.id}
+            onClick={() => setModulo(m.id)}
+            className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all ${modulo === m.id ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+          >
+            {m.icon} {m.label}
+          </button>
+        ))}
       </div>
 
       {/* Tabs */}
-      <div className="flex-1 overflow-hidden">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
-          <TabsList className="w-full rounded-none border-b border-white/10 bg-white/5 h-auto p-0 flex-shrink-0">
-            {TABS.map(({ value, label, Icon }) => (
-              <TabsTrigger
-                key={value}
-                value={value}
-                className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-violet-500 data-[state=active]:bg-white/10 data-[state=active]:text-white text-slate-400 px-3 py-3 text-xs sm:text-sm"
-              >
-                <Icon className="w-4 h-4 mr-1 sm:mr-2 flex-shrink-0" />
-                <span className="hidden sm:inline">{label}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
+      <Tabs defaultValue="insights" className="w-full">
+        <TabsList className="grid w-full grid-cols-4 bg-slate-800 border border-slate-700">
+          <TabsTrigger value="insights" className="text-xs data-[state=active]:bg-blue-600">
+            <Lightbulb className="w-4 h-4 mr-1" />
+            Insights
+          </TabsTrigger>
+          <TabsTrigger value="chat" className="text-xs data-[state=active]:bg-blue-600">
+            <MessageCircle className="w-4 h-4 mr-1" />
+            Chat
+          </TabsTrigger>
+          <TabsTrigger value="financeiro" className="text-xs data-[state=active]:bg-blue-600">
+            <DollarSign className="w-4 h-4 mr-1" />
+            Financeiro
+          </TabsTrigger>
+          <TabsTrigger value="aprendizados" className="text-xs data-[state=active]:bg-blue-600">
+            <Brain className="w-4 h-4 mr-1" />
+            Aprendizados
+          </TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="chat"     className="flex-1 m-0 overflow-hidden"><CopilotChat empresa={empresa} /></TabsContent>
-          <TabsContent value="insights" className="flex-1 m-0 overflow-auto"><CopilotInsightsFeed empresa={empresa} /></TabsContent>
-          <TabsContent value="finance"  className="flex-1 m-0 overflow-auto"><CopilotFinancialIntelligence empresa={empresa} /></TabsContent>
-          <TabsContent value="learning" className="flex-1 m-0 overflow-auto"><CopilotLearningPanel empresa={empresa} /></TabsContent>
-        </Tabs>
-      </div>
+        {/* Insights */}
+        <TabsContent value="insights" className="h-96">
+          <CopilotInsightsFeed modulo={modulo} />
+        </TabsContent>
+
+        {/* Chat */}
+        <TabsContent value="chat" className="h-96">
+          <Card className="bg-slate-800 border-slate-700 h-full flex flex-col">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-white">Chat com IA Copilot</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 flex items-center justify-center">
+              <p className="text-sm text-slate-400">Use o botão de IA Copilot na corner inferior direita da tela para conversar.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Financeiro */}
+        <TabsContent value="financeiro" className="h-96">
+          <CopilotFinancialIntelligence />
+        </TabsContent>
+
+        {/* Aprendizados */}
+        <TabsContent value="aprendizados" className="h-96">
+          <CopilotLearningPanel />
+        </TabsContent>
+      </Tabs>
+
+      {/* Status Contexto */}
+      <Card className="bg-slate-800/50 border-slate-700">
+        <CardContent className="p-3">
+          <p className="text-xs text-slate-400">
+            Contexto: {contexto === 'grupo' ? '📊 Grupo' : '🏢 Empresa'} {empresaAtual?.nome_fantasia || empresaAtual?.razao_social} | IA Confiança: 85% | Último Update: agora
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Copilot Chat Widget */}
+      <CopilotChat />
     </div>
   );
 }

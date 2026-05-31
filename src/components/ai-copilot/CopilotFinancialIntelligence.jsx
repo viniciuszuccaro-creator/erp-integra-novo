@@ -1,140 +1,117 @@
-/**
- * CopilotFinancialIntelligence v1.0 — Passo 37
- * Inteligência financeira em tempo real com IA
- * Regra-Mãe: w-full h-full, multi-empresa, dashboards financeiros adaptativos
- */
-import { useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { TrendingUp, TrendingDown, DollarSign, BarChart3, RefreshCw } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { base44 } from '@/api/base44Client';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { DollarSign, TrendingDown, AlertTriangle } from 'lucide-react';
 
-const RECEITA_DATA = [
-  { mes: 'Dez', real: 2340, previsto: 2200 },
-  { mes: 'Jan', real: 2780, previsto: 2600 },
-  { mes: 'Fev', real: 2420, previsto: 2500 },
-  { mes: 'Mar', real: 3100, previsto: 2900 },
-  { mes: 'Abr', real: 2950, previsto: 3000 },
-  { mes: 'Mai', real: 3380, previsto: 3200 },
-  { mes: 'Jun', real: null, previsto: 3500 },
-];
+export default function CopilotFinancialIntelligence() {
+  const [view, setView] = useState('fluxo');
 
-const FLUXO_DATA = [
-  { dia: 'Seg', entrada: 145, saida: 98 },
-  { dia: 'Ter', entrada: 230, saida: 140 },
-  { dia: 'Qua', entrada: 175, saida: 120 },
-  { dia: 'Qui', entrada: 310, saida: 190 },
-  { dia: 'Sex', entrada: 280, saida: 160 },
-];
+  const fluxoCaixa = [
+    { dia: '31/5', entrada: 42000, saida: 28000, saldo: 185000 },
+    { dia: '1/6', entrada: 15000, saida: 42000, saldo: 158000 },
+    { dia: '2/6', entrada: 0, saida: 8000, saldo: 150000 },
+    { dia: '3/6', entrada: 65000, saida: 35000, saldo: 180000 },
+    { dia: '4/6', entrada: 22000, saida: 18000, saldo: 184000 },
+    { dia: '5/6', entrada: 0, saida: 12000, saldo: 172000 },
+  ];
 
-const KPI_CARDS = [
-  { label: 'Receita Maio', value: 'R$ 3,38M', trend: '+14.8%', up: true },
-  { label: 'Margem Líquida', value: '18.4%', trend: '+2.1pp', up: true },
-  { label: 'Inadimplência', value: 'R$ 143k', trend: '+8.3%', up: false },
-  { label: 'Fluxo 30 dias', value: 'R$ 890k', trend: 'positivo', up: true },
-];
+  const rentabilidade = [
+    { produto: 'CA-50', margem: 18, volume: 250 },
+    { produto: 'CA-60', margem: 22, volume: 180 },
+    { produto: 'Tubo Gal.', margem: 16, volume: 320 },
+    { produto: 'Parafuso', margem: 12, volume: 500 },
+    { produto: 'Chapa', margem: 14, volume: 400 },
+  ];
 
-export default function CopilotFinancialIntelligence({ empresa }) {
-  const [analise, setAnalise] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const gerarAnalise = async () => {
-    setLoading(true);
-    setAnalise('');
-    try {
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Você é CFO do ERP Zuccaro — empresa ${empresa}.
-Com base nos dados: Receita Maio R$ 3.38M (+14.8%), Margem 18.4% (+2.1pp), Inadimplência R$ 143k (+8.3%), Fluxo 30d R$ 890k.
-Gere uma análise financeira executiva de 3 linhas com recomendações táticas imediatas. Use emojis relevantes.`,
-      });
-      setAnalise(typeof res === 'string' ? res : res?.response || JSON.stringify(res));
-    } catch {
-      setAnalise('⚠️ Erro ao gerar análise. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const alertas = [
+    { titulo: 'Inadimplência R$180k', descricao: '12 clientes em atraso', cor: 'text-red-400' },
+    { titulo: 'Fluxo Negativo em 2 dias', descricao: 'Saída > Entrada. Reavaliar prazos?', cor: 'text-yellow-400' },
+    { titulo: 'Produto com Menor Margem', descricao: 'Parafuso M12 em 12%. Revisão de preço sugerida.', cor: 'text-orange-400' },
+  ];
 
   return (
-    <div className="w-full h-full flex flex-col gap-4 p-5 bg-gradient-to-br from-slate-900 to-violet-950 overflow-auto">
-      <div className="flex items-center justify-between flex-wrap gap-2 flex-shrink-0">
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-          <DollarSign className="w-5 h-5 text-violet-400" />
-          Inteligência Financeira — {empresa}
-        </h2>
-        <button
-          onClick={gerarAnalise}
-          disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 rounded-lg text-white text-sm font-semibold transition-all"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          Análise IA
-        </button>
-      </div>
-
-      {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 flex-shrink-0">
-        {KPI_CARDS.map((kpi) => (
-          <Card key={kpi.label} className="p-4 bg-white/5 border border-white/10 rounded-xl">
-            <p className="text-xs text-slate-400 mb-1">{kpi.label}</p>
-            <p className="text-lg font-black text-white">{kpi.value}</p>
-            <div className={`flex items-center gap-1 text-xs font-semibold mt-1 ${kpi.up ? 'text-green-400' : 'text-red-400'}`}>
-              {kpi.up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-              {kpi.trend}
-            </div>
+    <div className="w-full h-full overflow-auto space-y-4 p-1">
+      {/* Alertas Críticos */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {alertas.map((alerta, idx) => (
+          <Card key={idx} className="bg-slate-800 border-slate-700">
+            <CardContent className="p-3">
+              <div className="flex gap-2">
+                <AlertTriangle className={`w-5 h-5 ${alerta.cor} shrink-0 mt-0.5`} />
+                <div>
+                  <p className={`text-sm font-bold ${alerta.cor}`}>{alerta.titulo}</p>
+                  <p className="text-xs text-slate-400">{alerta.descricao}</p>
+                </div>
+              </div>
+            </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* IA Analysis */}
-      {analise && (
-        <Card className="p-4 bg-violet-500/10 border border-violet-400/40 rounded-xl flex-shrink-0">
-          <Badge className="bg-violet-500/30 text-violet-200 mb-2">🤖 Análise CFO IA</Badge>
-          <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">{analise}</p>
+      {/* Tabs */}
+      <div className="flex gap-2">
+        {['fluxo', 'rentabilidade'].map(v => (
+          <button key={v} onClick={() => setView(v)} className={`px-3 py-2 text-sm rounded-lg font-semibold ${view === v ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300'}`}>
+            {v === 'fluxo' ? 'Fluxo de Caixa' : 'Rentabilidade'}
+          </button>
+        ))}
+      </div>
+
+      {/* Fluxo de Caixa */}
+      {view === 'fluxo' && (
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-white flex items-center gap-2">
+              <DollarSign className="w-4 h-4" />
+              Previsão Fluxo 7 Dias
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={fluxoCaixa}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                <XAxis dataKey="dia" stroke="#94a3b8" />
+                <YAxis stroke="#94a3b8" />
+                <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569' }} formatter={(v) => `R$ ${v.toLocaleString()}`} />
+                <Bar dataKey="entrada" fill="#10b981" name="Entrada" />
+                <Bar dataKey="saida" fill="#ef4444" name="Saída" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
         </Card>
       )}
 
-      {/* Receita Chart */}
-      <Card className="p-4 bg-white/5 border border-white/10 rounded-xl flex-shrink-0">
-        <p className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-          <BarChart3 className="w-4 h-4 text-violet-400" />
-          Receita Real vs Previsto (R$ mil)
-        </p>
-        <ResponsiveContainer width="100%" height={180}>
-          <AreaChart data={RECEITA_DATA}>
-            <defs>
-              <linearGradient id="colorReal" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.6} />
-                <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="colorPrev" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#4ade80" stopOpacity={0.4} />
-                <stop offset="95%" stopColor="#4ade80" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <XAxis dataKey="mes" tick={{ fill: '#94a3b8', fontSize: 11 }} />
-            <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} />
-            <Tooltip contentStyle={{ background: '#1e1b4b', border: '1px solid #4c1d95', borderRadius: 8 }} />
-            <Area type="monotone" dataKey="real" stroke="#7c3aed" fill="url(#colorReal)" name="Real" strokeWidth={2} />
-            <Area type="monotone" dataKey="previsto" stroke="#4ade80" fill="url(#colorPrev)" name="Previsto" strokeWidth={2} strokeDasharray="5 5" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </Card>
-
-      {/* Fluxo Semanal */}
-      <Card className="p-4 bg-white/5 border border-white/10 rounded-xl flex-shrink-0">
-        <p className="text-sm font-semibold text-white mb-3">📊 Fluxo de Caixa Semanal (R$ mil)</p>
-        <ResponsiveContainer width="100%" height={150}>
-          <BarChart data={FLUXO_DATA}>
-            <XAxis dataKey="dia" tick={{ fill: '#94a3b8', fontSize: 11 }} />
-            <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} />
-            <Tooltip contentStyle={{ background: '#1e1b4b', border: '1px solid #4c1d95', borderRadius: 8 }} />
-            <Bar dataKey="entrada" fill="#4ade80" name="Entrada" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="saida" fill="#f87171" name="Saída" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </Card>
+      {/* Rentabilidade */}
+      {view === 'rentabilidade' && (
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-white">Análise Rentabilidade por Produto</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {rentabilidade.map((r, idx) => (
+                <div key={idx} className="flex items-center justify-between p-2 bg-slate-700/50 rounded">
+                  <span className="text-sm text-slate-300">{r.produto}</span>
+                  <div className="flex gap-4">
+                    <div className="text-right">
+                      <p className="text-xs text-slate-400">Margem</p>
+                      <p className="text-sm font-bold text-emerald-400">{r.margem}%</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-slate-400">Volume/mês</p>
+                      <p className="text-sm font-bold text-blue-400">{r.volume}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-yellow-400 mt-3 flex gap-2">
+              <TrendingDown className="w-4 h-4 shrink-0" />
+              Recomendação: Aumentar preço de Parafuso M12 em 8% (margem → 20%)
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

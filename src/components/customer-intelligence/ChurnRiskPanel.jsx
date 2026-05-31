@@ -1,139 +1,231 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, TrendingDown, Clock, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-
-const AT_RISK_CUSTOMERS = [
-  { 
-    id: 1,
-    name: 'Estruturas & Ferro Ltda',
-    riskScore: 92,
-    lastPurchase: '45 dias atrás',
-    signals: ['Sem compra 45+ dias', 'Redução 60% volume', 'NPS -8'],
-    arpu: 'R$ 18k',
-    ltv: 'R$ 320k',
-  },
-  {
-    id: 2,
-    name: 'Construtora Silva Bros',
-    riskScore: 78,
-    lastPurchase: '32 dias atrás',
-    signals: ['Redução 35% volume', '3 suporte reclamações', 'Sem acesso portal'],
-    arpu: 'R$ 12k',
-    ltv: 'R$ 180k',
-  },
-  {
-    id: 3,
-    name: 'Metalúrgica Industrial',
-    riskScore: 73,
-    lastPurchase: '28 dias atrás',
-    signals: ['Frequência -25%', 'Ticket médio -30%', 'NPS 3'],
-    arpu: 'R$ 8.5k',
-    ltv: 'R$ 145k',
-  },
-  {
-    id: 4,
-    name: 'Reforma & Obra',
-    riskScore: 68,
-    lastPurchase: '18 dias atrás',
-    signals: ['Redução 15% volume', 'Suporte 1 reclamação', 'Acesso reduzido'],
-    arpu: 'R$ 6k',
-    ltv: 'R$ 98k',
-  },
-];
-
-const getRiskColor = (score) => {
-  if (score >= 80) return 'bg-red-500/20 border-red-500/30 text-red-300';
-  if (score >= 70) return 'bg-orange-500/20 border-orange-500/30 text-orange-300';
-  return 'bg-yellow-500/20 border-yellow-500/30 text-yellow-300';
-};
-
-const getRiskIcon = (score) => {
-  if (score >= 80) return '#ef4444';
-  if (score >= 70) return '#f97316';
-  return '#eab308';
-};
+import { AlertCircle, TrendingDown, Clock, AlertTriangle } from 'lucide-react';
 
 export default function ChurnRiskPanel() {
-  const totalAtRisk = AT_RISK_CUSTOMERS.length;
-  const potentialLoss = AT_RISK_CUSTOMERS.reduce((sum, c) => sum + parseInt(c.arpu.replace(/\D/g, '')), 0);
+  const [riskFilter, setRiskFilter] = useState('todos');
+
+  const riskData = [
+    {
+      id: 'CLI045',
+      nome: 'Construção Beta Ltd',
+      risco: 92,
+      motivo: 'Sem compra há 78 dias (padrão: 28d)',
+      sinais: ['Queda 60% em volume', 'Contato frequente ignorado', 'Última compra: Mar 15'],
+      ltv: 45000,
+      valor_anual: 18000,
+      acao: 'Contato VIP + Renegociar SLA',
+      probabilidade: 'Crítica',
+    },
+    {
+      id: 'CLI112',
+      nome: 'Pequena Indústria Y',
+      risco: 78,
+      motivo: 'Ticket médio caindo, margem reclamação',
+      sinais: ['Queda 35% em compras', '3 reclamações qualidade', 'Avaliação NPS: 2/10'],
+      ltv: 32000,
+      valor_anual: 12000,
+      acao: 'Auditoria qualidade + Desconto retenção',
+      probabilidade: 'Alta',
+    },
+    {
+      id: 'CLI203',
+      nome: 'Varejo Regional Z',
+      risco: 65,
+      motivo: 'Aumentou compras com concorrente',
+      sinais: ['Frequência reduzida 40%', 'Teste com competitor detectado', 'Busca por alternativas'],
+      ltv: 78000,
+      valor_anual: 35000,
+      acao: 'Reunião estratégica + Bundle exclusivo',
+      probabilidade: 'Média',
+    },
+    {
+      id: 'CLI089',
+      nome: 'Logística Nordeste',
+      risco: 54,
+      motivo: 'Pequeno aumento em atrasos',
+      sinais: ['2 atrasos em 6 compras', 'Relacionamento estável', 'Satisfação: 4.2/5'],
+      ltv: 56000,
+      valor_anual: 22000,
+      acao: 'Melhorar SLA + Account review',
+      probabilidade: 'Baixa',
+    },
+    {
+      id: 'CLI267',
+      nome: 'Metalúrgica Central',
+      risco: 88,
+      motivo: 'Transição para novo fornecedor detectada',
+      sinais: ['Volume -75% em 60 dias', 'Contato reduzido 90%', 'CEO mudou responsabilidade'],
+      ltv: 125000,
+      valor_anual: 52000,
+      acao: 'Reunião C-level + Proposta retenção customizada',
+      probabilidade: 'Crítica',
+    },
+  ];
+
+  const riskColor = (risco) => {
+    if (risco >= 80) return { bg: 'bg-red-900/30', border: 'border-red-600', text: 'text-red-400' };
+    if (risco >= 65) return { bg: 'bg-orange-900/30', border: 'border-orange-600', text: 'text-orange-400' };
+    if (risco >= 50) return { bg: 'bg-yellow-900/30', border: 'border-yellow-600', text: 'text-yellow-400' };
+    return { bg: 'bg-slate-700/30', border: 'border-slate-600', text: 'text-slate-400' };
+  };
+
+  const probColor = (prob) => {
+    switch (prob) {
+      case 'Crítica': return 'bg-red-900 text-red-200';
+      case 'Alta': return 'bg-orange-900 text-orange-200';
+      case 'Média': return 'bg-yellow-900 text-yellow-200';
+      case 'Baixa': return 'bg-emerald-900 text-emerald-200';
+      default: return 'bg-slate-700 text-slate-200';
+    }
+  };
+
+  const filteredData = riskData.filter(r => {
+    if (riskFilter === 'criticos') return r.risco >= 80;
+    if (riskFilter === 'altos') return r.risco >= 65 && r.risco < 80;
+    if (riskFilter === 'medios') return r.risco >= 50 && r.risco < 65;
+    return true;
+  });
+
+  const resumo = {
+    em_risco: riskData.filter(r => r.risco >= 65).length,
+    valor_ameacado: riskData.filter(r => r.risco >= 65).reduce((acc, r) => acc + r.valor_anual, 0),
+    taxa_medio: Math.round(riskData.reduce((acc, r) => acc + r.risco, 0) / riskData.length),
+  };
 
   return (
-    <div className="w-full space-y-4">
-      {/* Risk Summary */}
-      <div className="grid grid-cols-2 gap-3">
-        <Card className="bg-gradient-to-br from-red-950/60 to-slate-950/60 border-red-900/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-slate-400">Clientes em Risco</p>
-                <p className="text-2xl font-bold text-red-400 mt-1">{totalAtRisk}</p>
-              </div>
-              <AlertTriangle className="w-5 h-5 text-red-400" />
-            </div>
+    <div className="w-full h-full overflow-auto space-y-4 p-1">
+      {/* Alertas Críticos */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <Card className="bg-red-900/30 border-red-600">
+          <CardContent className="p-3">
+            <p className="text-xs text-red-400">Em Risco Crítico/Alto</p>
+            <p className="text-2xl font-bold text-red-400">{resumo.em_risco}</p>
+            <p className="text-xs text-red-300 mt-1">
+              <AlertCircle className="w-3 h-3 inline mr-1" />
+              {resumo.valor_ameacado > 0 ? `R$ ${(resumo.valor_ameacado / 1000).toFixed(0)}k/ano` : 'Nenhum'}
+            </p>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-br from-orange-950/60 to-slate-950/60 border-orange-900/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-slate-400">Perda Potencial/Mês</p>
-                <p className="text-2xl font-bold text-orange-400 mt-1">R$ {(potentialLoss / 1000).toFixed(0)}k</p>
-              </div>
-              <TrendingDown className="w-5 h-5 text-orange-400" />
-            </div>
+        <Card className="bg-slate-800 border-slate-700">
+          <CardContent className="p-3">
+            <p className="text-xs text-slate-400">Risco Médio</p>
+            <p className="text-2xl font-bold text-yellow-400">{resumo.taxa_medio}%</p>
+            <p className="text-xs text-slate-400 mt-1">Score carteira</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-800 border-slate-700">
+          <CardContent className="p-3">
+            <p className="text-xs text-slate-400">Ação Recomendada</p>
+            <p className="text-sm font-bold text-blue-400">5 intervenções</p>
+            <p className="text-xs text-slate-400 mt-1">Automática/manual</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Risk List */}
+      {/* Filtro */}
+      <div className="flex gap-2 flex-wrap">
+        <button
+          onClick={() => setRiskFilter('todos')}
+          className={`px-3 py-2 text-sm rounded-lg font-semibold ${
+            riskFilter === 'todos' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300'
+          }`}
+        >
+          Todos ({riskData.length})
+        </button>
+        <button
+          onClick={() => setRiskFilter('criticos')}
+          className={`px-3 py-2 text-sm rounded-lg font-semibold ${
+            riskFilter === 'criticos' ? 'bg-red-600 text-white' : 'bg-slate-700 text-slate-300'
+          }`}
+        >
+          Crítico ({riskData.filter(r => r.risco >= 80).length})
+        </button>
+        <button
+          onClick={() => setRiskFilter('altos')}
+          className={`px-3 py-2 text-sm rounded-lg font-semibold ${
+            riskFilter === 'altos' ? 'bg-orange-600 text-white' : 'bg-slate-700 text-slate-300'
+          }`}
+        >
+          Alto ({riskData.filter(r => r.risco >= 65 && r.risco < 80).length})
+        </button>
+        <button
+          onClick={() => setRiskFilter('medios')}
+          className={`px-3 py-2 text-sm rounded-lg font-semibold ${
+            riskFilter === 'medios' ? 'bg-yellow-600 text-white' : 'bg-slate-700 text-slate-300'
+          }`}
+        >
+          Médio ({riskData.filter(r => r.risco >= 50 && r.risco < 65).length})
+        </button>
+      </div>
+
+      {/* Lista de Riscos */}
       <div className="space-y-3">
-        {AT_RISK_CUSTOMERS.map((customer) => (
-          <Card key={customer.id} className={`border ${getRiskColor(customer.riskScore)}`}>
-            <CardContent className="pt-6 space-y-3">
-              {/* Header */}
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h4 className="font-semibold text-slate-200">{customer.name}</h4>
-                  <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    Última compra: {customer.lastPurchase}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-bold text-slate-300">{customer.riskScore}%</div>
-                  <div className="text-xs text-slate-400">risco churn</div>
-                </div>
-              </div>
-
-              {/* Signals */}
-              <div className="space-y-2">
-                <p className="text-xs font-semibold text-slate-300 flex items-center gap-1">
-                  <MessageSquare className="w-3 h-3" />
-                  Sinais de alerta:
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {customer.signals.map((signal, idx) => (
-                    <Badge key={idx} variant="outline" className="bg-white/5 border-white/20 text-xs">
-                      {signal}
+        {filteredData.map((cliente) => {
+          const colors = riskColor(cliente.risco);
+          return (
+            <Card key={cliente.id} className={`bg-slate-800 border-2 ${colors.bg} ${colors.border}`}>
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="font-bold text-white text-sm">{cliente.nome}</p>
+                    <p className="text-xs text-slate-400">{cliente.id}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="text-center">
+                      <p className={`text-2xl font-bold ${colors.text}`}>{cliente.risco}%</p>
+                      <p className="text-xs text-slate-400">Risco</p>
+                    </div>
+                    <Badge className={probColor(cliente.probabilidade)}>
+                      <AlertTriangle className="w-3 h-3 mr-1" />
+                      {cliente.probabilidade}
                     </Badge>
-                  ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Footer: LTV + ARPU */}
-              <div className="flex justify-between items-center pt-2 border-t border-white/10">
-                <div className="text-xs">
-                  <p className="text-slate-400">ARPU: <span className="text-slate-200 font-semibold">{customer.arpu}</span></p>
-                  <p className="text-slate-400">LTV: <span className="text-slate-200 font-semibold">{customer.ltv}</span></p>
+                <p className="text-xs text-slate-400 mb-3">
+                  <Clock className="w-3 h-3 inline mr-1" />
+                  {cliente.motivo}
+                </p>
+
+                {/* Sinais */}
+                <div className="bg-slate-700/50 p-2 rounded mb-3">
+                  <p className="text-xs text-slate-400 mb-1 font-semibold">Sinais de Churn</p>
+                  <ul className="text-xs text-slate-300 space-y-1">
+                    {cliente.sinais.map((sinal, idx) => (
+                      <li key={idx} className="flex gap-2">
+                        <span className="text-red-400">•</span>
+                        <span>{sinal}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <button className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded text-xs font-semibold text-slate-300 transition-all">
-                  Ações IA →
+
+                {/* Valores */}
+                <div className="grid grid-cols-2 gap-2 mb-3 text-xs">
+                  <div>
+                    <p className="text-slate-400">LTV Ameaçado</p>
+                    <p className="text-red-400 font-bold">R$ {(cliente.ltv / 1000).toFixed(0)}k</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-400">Receita Anual</p>
+                    <p className="text-orange-400 font-bold">R$ {(cliente.valor_anual / 1000).toFixed(0)}k</p>
+                  </div>
+                </div>
+
+                {/* Ação */}
+                <div className="bg-blue-900/30 p-2 rounded border border-blue-600 mb-2">
+                  <p className="text-xs text-blue-200 font-semibold">{cliente.acao}</p>
+                </div>
+
+                <button className="w-full px-3 py-2 rounded text-xs bg-red-600 text-white hover:bg-red-700 font-semibold">
+                  Iniciar Ação de Retenção
                 </button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

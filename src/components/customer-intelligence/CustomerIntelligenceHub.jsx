@@ -1,112 +1,107 @@
 import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { Trophy, Users, DollarSign, AlertTriangle, Heart } from 'lucide-react';
-
-import CustomerScorePinboard from './CustomerScorePinboard';
-import SegmentationPanel from './SegmentationPanel';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import usePermissions from '@/components/lib/usePermissions';
+import { Users, Zap, TrendingUp, Target } from 'lucide-react';
+import CustomerSegmentationPanel from './CustomerSegmentationPanel';
 import LifetimeValueAnalyzer from './LifetimeValueAnalyzer';
 import ChurnRiskPanel from './ChurnRiskPanel';
 import SatisfactionPulsePanel from './SatisfactionPulsePanel';
 
-const TABS_CONFIG = [
-  { value: 'score', label: 'Score', icon: Trophy },
-  { value: 'segmentation', label: 'Segmentação', icon: Users },
-  { value: 'ltv', label: 'LTV', icon: DollarSign },
-  { value: 'churn', label: 'Churn', icon: AlertTriangle },
-  { value: 'satisfaction', label: 'Satisfação', icon: Heart },
-];
-
-const HEADER_STATS = [
-  { label: 'Score Médio', value: '7.8/10', color: 'text-emerald-400' },
-  { label: 'Saúde IA', value: '87%', color: 'text-blue-400' },
-  { label: 'Clientes Ativos', value: '1,245', color: 'text-slate-300' },
-];
-
 export default function CustomerIntelligenceHub() {
-  const [activeTab, setActiveTab] = useState('score');
+  const { hasPermission } = usePermissions();
+  const [activeTab, setActiveTab] = useState('segmentacao');
+
+  // Verificar permissão de CRM
+  const canAccessCRM = hasPermission('CRM', null, 'ver');
+
+  if (!canAccessCRM) {
+    return (
+      <Card className="bg-red-900/20 border-red-600 w-full">
+        <CardContent className="p-6 text-center">
+          <p className="text-red-400 font-semibold">Acesso Negado</p>
+          <p className="text-red-200 text-sm mt-2">Você não tem permissão para acessar a Inteligência de Clientes.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const kpis = [
+    { label: 'Clientes Totais', valor: 3125, icone: Users, cor: 'text-blue-400' },
+    { label: 'Score Médio NPS', valor: '48', icone: Zap, cor: 'text-emerald-400' },
+    { label: 'LTV Médio', valor: 'R$ 82k', icone: TrendingUp, cor: 'text-purple-400' },
+    { label: 'Em Risco Crítico', valor: '2', icone: Target, cor: 'text-red-400' },
+  ];
 
   return (
-    <div className="w-full h-full min-h-screen bg-gradient-to-br from-slate-950 to-slate-900 p-4 md:p-6 space-y-6">
+    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-900 to-slate-950">
       {/* Header */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-100 flex items-center gap-2">
-              <Trophy className="w-8 h-8 text-emerald-400" />
-              Customer Intelligence Hub
-            </h1>
-            <p className="text-slate-400 mt-2">Segmentação, Score & Retenção com IA</p>
-          </div>
-          <div className="text-right">
-            <div className="text-sm text-slate-400">Grupo: <span className="font-semibold text-slate-200">Zuccaro</span></div>
-            <div className="text-sm text-slate-400 mt-1">Dark Mode <span className="text-emerald-400">●</span></div>
-          </div>
-        </div>
+      <div className="bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700 p-6">
+        <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+          <Users className="w-7 h-7 text-blue-400" />
+          Customer Intelligence Hub
+        </h1>
+        <p className="text-slate-400 text-sm mt-2">Segmentação IA • Lifetime Value • Churn Risk • NPS Pulsante</p>
 
-        {/* Header Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {HEADER_STATS.map((stat) => (
-            <Card key={stat.label} className="bg-gradient-to-br from-slate-900/60 to-slate-950/60 border-slate-800/30">
-              <CardContent className="pt-4">
-                <p className="text-xs text-slate-400">{stat.label}</p>
-                <p className={`text-2xl font-bold ${stat.color} mt-2`}>{stat.value}</p>
-              </CardContent>
-            </Card>
-          ))}
+        {/* KPIs */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+          {kpis.map((kpi, idx) => {
+            const Icon = kpi.icone;
+            return (
+              <div key={idx} className="bg-slate-700/30 border border-slate-600 rounded-lg p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Icon className={`w-4 h-4 ${kpi.cor}`} />
+                  <p className="text-xs text-slate-400">{kpi.label}</p>
+                </div>
+                <p className={`text-lg font-bold ${kpi.cor}`}>{kpi.valor}</p>
+              </div>
+            );
+          })}
         </div>
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full rounded-none border-b border-slate-800 bg-transparent h-auto p-0 flex-shrink-0 overflow-x-auto">
-          {TABS_CONFIG.map(({ value, label, icon: TabIcon }) => (
-            <TabsTrigger
-              key={value}
-              value={value}
-              className="flex-1 min-w-fit rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-500 data-[state=active]:bg-white/5 data-[state=active]:text-slate-100 text-slate-400 px-4 py-3 text-sm flex-shrink-0 transition-all"
-            >
-              <TabIcon className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">{label}</span>
+      <div className="flex-1 overflow-auto p-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
+          <TabsList className="grid w-full grid-cols-4 bg-slate-800 border-b border-slate-700 mb-4">
+            <TabsTrigger value="segmentacao" className="data-[state=active]:bg-blue-600">
+              <Users className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Segmentação</span>
             </TabsTrigger>
-          ))}
-        </TabsList>
+            <TabsTrigger value="ltv" className="data-[state=active]:bg-purple-600">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">LTV</span>
+            </TabsTrigger>
+            <TabsTrigger value="churn" className="data-[state=active]:bg-red-600">
+              <Target className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Churn Risk</span>
+            </TabsTrigger>
+            <TabsTrigger value="satisfacao" className="data-[state=active]:bg-emerald-600">
+              <Zap className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">NPS</span>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Score Tab */}
-        <TabsContent value="score" className="mt-6 w-full">
-          <CustomerScorePinboard />
-        </TabsContent>
+          {/* Conteúdo Abas */}
+          <div className="h-full">
+            <TabsContent value="segmentacao" className="h-full m-0">
+              <CustomerSegmentationPanel />
+            </TabsContent>
 
-        {/* Segmentation Tab */}
-        <TabsContent value="segmentation" className="mt-6 w-full">
-          <SegmentationPanel />
-        </TabsContent>
+            <TabsContent value="ltv" className="h-full m-0">
+              <LifetimeValueAnalyzer />
+            </TabsContent>
 
-        {/* LTV Tab */}
-        <TabsContent value="ltv" className="mt-6 w-full">
-          <LifetimeValueAnalyzer />
-        </TabsContent>
+            <TabsContent value="churn" className="h-full m-0">
+              <ChurnRiskPanel />
+            </TabsContent>
 
-        {/* Churn Tab */}
-        <TabsContent value="churn" className="mt-6 w-full">
-          <ChurnRiskPanel />
-        </TabsContent>
-
-        {/* Satisfaction Tab */}
-        <TabsContent value="satisfaction" className="mt-6 w-full">
-          <SatisfactionPulsePanel />
-        </TabsContent>
-      </Tabs>
-
-      {/* Footer Info */}
-      <Card className="bg-gradient-to-r from-emerald-950/40 to-slate-950/40 border-emerald-900/20 mt-8">
-        <CardContent className="pt-4">
-          <p className="text-xs text-slate-400">
-            ℹ️ Dados atualizados em tempo real via IA. Segmentação automática diária. 
-            <span className="text-emerald-400 ml-1">→ Próximo passo: Ações personalizadas por segmento</span>
-          </p>
-        </CardContent>
-      </Card>
+            <TabsContent value="satisfacao" className="h-full m-0">
+              <SatisfactionPulsePanel />
+            </TabsContent>
+          </div>
+        </Tabs>
+      </div>
     </div>
   );
 }

@@ -21,6 +21,7 @@ import SupplyChainIntelligenceHub from '@/components/supply-chain-intelligence/S
 import FinancialIntelligenceHub from '@/components/financial-intelligence/FinancialIntelligenceHub';
 import AdvancedAnalyticsHub from '@/components/business-intelligence/AdvancedAnalyticsHub';
 import ExecutiveMonitoringHub from '@/components/executive-monitoring/ExecutiveMonitoringHub';
+import CustomerIntelligenceHub from '@/components/customer-intelligence/CustomerIntelligenceHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -147,6 +148,15 @@ const AuthenticatedApp = () => {
             <EmpresaSelectorGuard>
               <LayoutWrapper currentPageName="ExecutiveMonitoring">
                 <ExecutiveMonitoringHub />
+              </LayoutWrapper>
+            </EmpresaSelectorGuard>
+          </RBACRoute>
+        } />
+        <Route path="/CustomerIntelligence" element={
+          <RBACRoute module="CRM" action="ver">
+            <EmpresaSelectorGuard>
+              <LayoutWrapper currentPageName="CustomerIntelligence">
+                <CustomerIntelligenceHub />
               </LayoutWrapper>
             </EmpresaSelectorGuard>
           </RBACRoute>

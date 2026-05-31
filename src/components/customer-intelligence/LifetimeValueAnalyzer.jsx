@@ -1,104 +1,191 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
-import { TrendingUp, DollarSign } from 'lucide-react';
-
-const LTV_CAC_DATA = [
-  { name: 'Cliente A', ltv: 450000, cac: 8500, roi: 52 },
-  { name: 'Cliente B', ltv: 280000, cac: 6200, roi: 45 },
-  { name: 'Cliente C', ltv: 720000, cac: 12000, roi: 59 },
-  { name: 'Cliente D', ltv: 145000, cac: 4800, roi: 29 },
-  { name: 'Cliente E', ltv: 580000, cac: 9500, roi: 60 },
-];
-
-const TOP_CUSTOMERS = [
-  { rank: 1, name: 'Construtora MRV', ltv: 'R$ 720k', contribution: '18%', monthlyArpu: 'R$ 12k' },
-  { rank: 2, name: 'Ind. Siderúrgica Vale', ltv: 'R$ 580k', contribution: '15%', monthlyArpu: 'R$ 9.5k' },
-  { rank: 3, name: 'Metal Arts Ltda', ltv: 'R$ 450k', contribution: '11%', monthlyArpu: 'R$ 7.2k' },
-  { rank: 4, name: 'Arquitetura & Estrutura', ltv: 'R$ 320k', contribution: '8%', monthlyArpu: 'R$ 5.1k' },
-  { rank: 5, name: 'Reforma & Cia', ltv: 'R$ 280k', contribution: '7%', monthlyArpu: 'R$ 4.5k' },
-];
+import { DollarSign, Zap } from 'lucide-react';
 
 export default function LifetimeValueAnalyzer() {
-  const avgLtv = (LTV_CAC_DATA.reduce((sum, x) => sum + x.ltv, 0) / LTV_CAC_DATA.length).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
-  const totalRevenue = LTV_CAC_DATA.reduce((sum, x) => sum + x.ltv, 0).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
-  const avgRoi = (LTV_CAC_DATA.reduce((sum, x) => sum + x.roi, 0) / LTV_CAC_DATA.length).toFixed(0);
+  const [sortBy, setSortBy] = useState('ltv');
+
+  const ltvData = [
+    { id: 'CLI001', nome: 'Metalúrgica ABC', ltv: 125000, valor_gasto: 45000, compras: 24, dias_cliente: 1200, retencao: 95, potencial: 'Alto' },
+    { id: 'CLI002', nome: 'Construção XYZ', ltv: 89000, valor_gasto: 38000, compras: 18, dias_cliente: 950, retencao: 88, potencial: 'Médio' },
+    { id: 'CLI003', nome: 'Ind. Têxtil M', ltv: 156000, valor_gasto: 52000, compras: 32, dias_cliente: 1400, retencao: 98, potencial: 'Alto' },
+    { id: 'CLI004', nome: 'Serv. Logística', ltv: 67000, valor_gasto: 28000, compras: 12, dias_cliente: 600, retencao: 75, potencial: 'Médio' },
+    { id: 'CLI005', nome: 'Varejo Online', ltv: 234000, valor_gasto: 78000, compras: 48, dias_cliente: 1800, retencao: 96, potencial: 'Alto' },
+    { id: 'CLI006', nome: 'Pequena Obra', ltv: 32000, valor_gasto: 12000, compras: 6, dias_cliente: 300, retencao: 62, potencial: 'Baixo' },
+  ];
+
+  const projecaoLTV = [
+    { mes: 'Jun', base: 82000, otimista: 95000, conservadora: 72000 },
+    { mes: 'Jul', base: 88000, otimista: 105000, conservadora: 76000 },
+    { mes: 'Ago', base: 92000, otimista: 115000, conservadora: 80000 },
+    { mes: 'Set', base: 98000, otimista: 128000, conservadora: 85000 },
+    { mes: 'Out', base: 105000, otimista: 142000, conservadora: 91000 },
+  ];
+
+  const scatterData = ltvData.map(cli => ({
+    x: cli.valor_gasto,
+    y: cli.compras,
+    z: cli.ltv,
+    nome: cli.nome.substring(0, 10),
+    r: Math.sqrt(cli.ltv) / 10,
+  }));
+
+  const sortedData = [...ltvData].sort((a, b) => {
+    if (sortBy === 'ltv') return b.ltv - a.ltv;
+    if (sortBy === 'potencial') return b.valor_gasto - a.valor_gasto;
+    if (sortBy === 'risco') return a.retencao - b.retencao;
+    return 0;
+  });
+
+  const estatisticas = {
+    ltv_medio: Math.round(ltvData.reduce((acc, c) => acc + c.ltv, 0) / ltvData.length),
+    ltv_total: ltvData.reduce((acc, c) => acc + c.ltv, 0),
+    clientes_alto_valor: ltvData.filter(c => c.ltv > 100000).length,
+    retencao_media: Math.round(ltvData.reduce((acc, c) => acc + c.retencao, 0) / ltvData.length),
+  };
 
   return (
-    <div className="w-full space-y-4">
-      {/* Overview KPIs */}
-      <div className="grid grid-cols-3 gap-3">
-        <Card className="bg-gradient-to-br from-emerald-950/60 to-slate-950/60 border-emerald-900/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-slate-400">LTV Médio</p>
-                <p className="text-lg font-bold text-emerald-400 mt-1">{avgLtv}</p>
-              </div>
-              <DollarSign className="w-5 h-5 text-emerald-400" />
-            </div>
+    <div className="w-full h-full overflow-auto space-y-4 p-1">
+      {/* Estatísticas */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Card className="bg-slate-800 border-slate-700">
+          <CardContent className="p-3">
+            <p className="text-xs text-slate-400">LTV Médio</p>
+            <p className="text-lg font-bold text-emerald-400">
+              R$ {(estatisticas.ltv_medio / 1000).toFixed(0)}k
+            </p>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-br from-emerald-950/60 to-slate-950/60 border-emerald-900/30">
-          <CardContent className="pt-6">
-            <div>
-              <p className="text-xs text-slate-400">Receita Total</p>
-              <p className="text-lg font-bold text-blue-400 mt-1">{totalRevenue}</p>
-            </div>
+        <Card className="bg-slate-800 border-slate-700">
+          <CardContent className="p-3">
+            <p className="text-xs text-slate-400">LTV Total</p>
+            <p className="text-lg font-bold text-blue-400">
+              R$ {(estatisticas.ltv_total / 1000000).toFixed(1)}M
+            </p>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-br from-emerald-950/60 to-slate-950/60 border-emerald-900/30">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-slate-400">ROI Médio</p>
-                <p className="text-lg font-bold text-amber-400 mt-1">{avgRoi}x</p>
-              </div>
-              <TrendingUp className="w-5 h-5 text-amber-400" />
-            </div>
+        <Card className="bg-slate-800 border-slate-700">
+          <CardContent className="p-3">
+            <p className="text-xs text-slate-400">Clientes Premium</p>
+            <p className="text-lg font-bold text-purple-400">{estatisticas.clientes_alto_valor}</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-800 border-slate-700">
+          <CardContent className="p-3">
+            <p className="text-xs text-slate-400">Retenção Média</p>
+            <p className="text-lg font-bold text-cyan-400">{estatisticas.retencao_media}%</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Scatter: LTV vs CAC */}
-      <Card className="bg-gradient-to-br from-emerald-950/60 to-slate-950/60 border-emerald-900/30">
-        <CardHeader>
-          <CardTitle className="text-slate-200">LTV vs Custo de Aquisição</CardTitle>
+      {/* Projeção LTV */}
+      <Card className="bg-slate-800 border-slate-700">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm text-white">Projeção LTV (Próximos 5 Meses)</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={250}>
+        <CardContent className="h-48">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={projecaoLTV}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+              <XAxis dataKey="mes" stroke="#94a3b8" tick={{ fontSize: 11 }} />
+              <YAxis stroke="#94a3b8" />
+              <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569' }} />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              <Bar dataKey="conservadora" fill="#f59e0b" name="Conservadora" />
+              <Bar dataKey="base" fill="#3b82f6" name="Base" />
+              <Bar dataKey="otimista" fill="#10b981" name="Otimista" />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Scatter: Gasto vs Compras */}
+      <Card className="bg-slate-800 border-slate-700">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm text-white">Análise: Valor Gasto vs Frequência de Compra</CardTitle>
+        </CardHeader>
+        <CardContent className="h-56">
+          <ResponsiveContainer width="100%" height="100%">
             <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-              <CartesianGrid stroke="rgba(255,255,255,0.1)" />
-              <XAxis dataKey="cac" name="CAC (R$)" tick={{ fill: '#94a3b8', fontSize: 11 }} />
-              <YAxis dataKey="ltv" name="LTV (R$)" tick={{ fill: '#94a3b8', fontSize: 11 }} />
-              <Tooltip 
-                cursor={{ strokeDasharray: '3 3' }}
-                contentStyle={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)' }}
-                labelStyle={{ color: '#e2e8f0' }}
-                formatter={(value) => value.toLocaleString('pt-BR')}
-              />
-              <Scatter name="Clientes" data={LTV_CAC_DATA} fill="#10b981" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+              <XAxis type="number" dataKey="x" stroke="#94a3b8" name="Valor Gasto (R$)" />
+              <YAxis type="number" dataKey="y" stroke="#94a3b8" name="Compras/Ano" />
+              <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#1e293b' }} />
+              <Scatter name="Clientes" data={scatterData} fill="#3b82f6" />
             </ScatterChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
-      {/* Top 5 Customers */}
-      <Card className="bg-gradient-to-br from-emerald-950/60 to-slate-950/60 border-emerald-900/30">
-        <CardHeader>
-          <CardTitle className="text-slate-200 text-sm">Top 5 Clientes (por LTV)</CardTitle>
+      {/* Ranking */}
+      <Card className="bg-slate-800 border-slate-700">
+        <CardHeader className="pb-3">
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-sm text-white">Ranking de Clientes</CardTitle>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setSortBy('ltv')}
+                className={`px-2 py-1 text-xs rounded ${sortBy === 'ltv' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-400'}`}
+              >
+                LTV
+              </button>
+              <button
+                onClick={() => setSortBy('potencial')}
+                className={`px-2 py-1 text-xs rounded ${sortBy === 'potencial' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-400'}`}
+              >
+                Potencial
+              </button>
+              <button
+                onClick={() => setSortBy('risco')}
+                className={`px-2 py-1 text-xs rounded ${sortBy === 'risco' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-400'}`}
+              >
+                Risco
+              </button>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-2">
-          {TOP_CUSTOMERS.map((cust) => (
-            <div key={cust.rank} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-emerald-400 text-sm">#{cust.rank}</span>
-                  <span className="text-sm text-slate-200">{cust.name}</span>
+        <CardContent className="space-y-2 max-h-80 overflow-y-auto">
+          {sortedData.map((cli, idx) => (
+            <div key={cli.id} className="bg-slate-700/50 p-3 rounded-lg border border-slate-600">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <p className="font-semibold text-white text-sm">
+                    #{idx + 1} — {cli.nome}
+                  </p>
+                  <p className="text-xs text-slate-400">{cli.id}</p>
                 </div>
-                <p className="text-xs text-slate-400 mt-1">{cust.monthlyArpu}/mês • {cust.contribution} do total</p>
+                <Badge
+                  className={
+                    cli.potencial === 'Alto'
+                      ? 'bg-emerald-900 text-emerald-200'
+                      : cli.potencial === 'Médio'
+                      ? 'bg-yellow-900 text-yellow-200'
+                      : 'bg-red-900 text-red-200'
+                  }
+                >
+                  {cli.potencial}
+                </Badge>
               </div>
-              <span className="text-sm font-semibold text-emerald-400">{cust.ltv}</span>
+              <div className="grid grid-cols-4 gap-2 text-xs">
+                <div>
+                  <p className="text-slate-400">LTV</p>
+                  <p className="text-emerald-400 font-bold">R$ {(cli.ltv / 1000).toFixed(0)}k</p>
+                </div>
+                <div>
+                  <p className="text-slate-400">Compras</p>
+                  <p className="text-blue-400 font-bold">{cli.compras}/ano</p>
+                </div>
+                <div>
+                  <p className="text-slate-400">Retenção</p>
+                  <p className="text-cyan-400 font-bold">{cli.retencao}%</p>
+                </div>
+                <div>
+                  <p className="text-slate-400">Cliente há</p>
+                  <p className="text-purple-400 font-bold">{Math.floor(cli.dias_cliente / 365)} anos</p>
+                </div>
+              </div>
             </div>
           ))}
         </CardContent>

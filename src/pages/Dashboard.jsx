@@ -5,63 +5,23 @@ import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import {
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
-  Users,
-  ShoppingCart,
-  Package,
-  Truck,
-  UserCircle,
-  ArrowRight,
-  AlertCircle,
-  Box,
-  Calendar,
-  BarChart3,
-  PieChart,
-  Clock,
-  CheckCircle,
-  Percent,
-  Trophy,
-  Activity,
-  Shield,
-  FileText,
-  MessageCircle
+  DollarSign, TrendingUp, Users, ShoppingCart,
+  Package, Truck, UserCircle, AlertCircle,
+  Box, CheckCircle, Percent, FileText,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart as RechartsPie,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  Area,
-  AreaChart
-} from "recharts";
 
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
-import ProtectedSection from "@/components/security/ProtectedSection";
+
 import usePermissions from "@/components/lib/usePermissions";
 import useDashboardDerivedData from "@/components/dashboard/hooks/useDashboardDerivedData";
 import { DASHBOARD_LIST_LIMIT, DASHBOARD_REFETCH_INTERVAL_MS, dashboardQueryDefaults } from "@/components/dashboard/config/dashboardQueryConfig";
 
 // Lazy-loaded components — only those used directly in this page's JSX
-const DashboardHeader      = React.lazy(() => import("@/components/dashboard/DashboardHeader"));
-const DashboardStatusPanel = React.lazy(() => import("@/components/dashboard/DashboardStatusPanel"));
-const DashboardEssentialKPIs = React.lazy(() => import("@/components/dashboard/DashboardEssentialKPIs"));
-const DashboardResumoTab   = React.lazy(() => import("@/components/dashboard/DashboardResumoTab"));
-const ERPHealthBanner      = React.lazy(() => import("@/components/dashboard/ERPHealthBanner"));
+const DashboardHeader          = React.lazy(() => import("@/components/dashboard/DashboardHeader"));
+const DashboardEssentialKPIs   = React.lazy(() => import("@/components/dashboard/DashboardEssentialKPIs"));
+const DashboardResumoTab       = React.lazy(() => import("@/components/dashboard/DashboardResumoTab"));
+const ERPHealthBanner          = React.lazy(() => import("@/components/dashboard/ERPHealthBanner"));
+const DashboardMultiempresaStatus = React.lazy(() => import("@/components/dashboard/DashboardMultiempresaStatus"));
 
 
 export default function Dashboard() {
@@ -651,6 +611,14 @@ export default function Dashboard() {
           <Suspense fallback={<></>}>
             <ErrorBoundary>
               <ERPHealthBanner />
+            </ErrorBoundary>
+          </Suspense>
+        </div>
+        {/* Status multiempresa — visível apenas no contexto de grupo */}
+        <div>
+          <Suspense fallback={<></>}>
+            <ErrorBoundary>
+              <DashboardMultiempresaStatus />
             </ErrorBoundary>
           </Suspense>
         </div>

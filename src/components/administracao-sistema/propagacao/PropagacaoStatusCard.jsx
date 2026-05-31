@@ -1,33 +1,77 @@
-/**
- * PropagacaoStatusCard — Card de status de uma entidade propagada.
- * Mostra contagem de registros sincronizados e última sincronização.
- */
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, AlertCircle, Clock, ArrowDownUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowDown, ArrowUp, Loader2, CheckCircle2, AlertCircle, Clock } from "lucide-react";
 
-export default function PropagacaoStatusCard({ entidade, criados = 0, atualizados = 0, pulados = 0, total = 0, erro = null, direction }) {
-  const ok = !erro && (criados + atualizados) >= 0;
+/**
+ * PropagacaoStatusCard — card individual de entidade na propagação.
+ * Extrai lógica de renderização do PropagacaoIndex para manter arquivos pequenos.
+ */
+export default function PropagacaoStatusCard({ entity, st, globalLoading, onSync }) {
+  const isErr = st?.status === "error";
+  const isOk = st?.status === "ok";
+  const isRunning = st?.status === "checking";
+
   return (
-    <div className={`flex items-center justify-between p-3 rounded-lg border ${erro ? "border-red-200 bg-red-50" : "border-green-200 bg-green-50"}`}>
-      <div className="flex items-center gap-2 min-w-0">
-        {erro
-          ? <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
-          : <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
-        }
-        <span className="text-sm font-medium text-slate-800 truncate">{entidade}</span>
-        {direction && (
-          <Badge className="text-[10px] px-1 py-0 h-4 bg-blue-100 text-blue-700 flex items-center gap-0.5">
-            <ArrowDownUp className="w-2.5 h-2.5" />{direction}
+    <div className={`p-3 rounded-xl border bg-white space-y-2 transition-all shadow-sm hover:shadow ${
+      isErr ? "border-red-200" : isOk ? "border-green-200" : "border-slate-200"
+    }`}>
+      <div className="flex items-center justify-between gap-1">
+        <span className="font-semibold text-sm text-slate-900 truncate">
+          {entity.icon} {entity.label}
+        </span>
+        <div className="flex items-center gap-1 shrink-0">
+          <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 text-slate-500 border-slate-200">
+            {entity.grupo}
           </Badge>
-        )}
+          {isRunning && <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500" />}
+          {isErr && <AlertCircle className="w-3.5 h-3.5 text-red-500" />}
+          {isOk && <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />}
+        </div>
       </div>
-      <div className="flex items-center gap-2 shrink-0 text-xs text-slate-500">
-        {criados > 0 && <span className="text-green-600 font-medium">+{criados}</span>}
-        {atualizados > 0 && <span className="text-blue-600 font-medium">~{atualizados}</span>}
-        {pulados > 0 && <span className="text-slate-400">{pulados} skip</span>}
-        <span>/{total} total</span>
-        {erro && <span className="text-red-600 text-[10px] truncate max-w-[100px]">{String(erro).slice(0, 40)}</span>}
+
+      <p className="text-xs text-slate-500 truncate">{st?.message || "Aguardando"}</p>
+
+      {st?.lastSync && (
+        <p className="text-xs text-slate-400 flex items-center gap-1">
+          <Clock className="w-3 h-3" /> {st.lastSync}
+        </p>
+      )}
+
+      {isOk && st?.total > 0 && (
+        <Badge className="bg-green-50 text-green-700 border-green-200 text-[10px]">
+          {st.total} reg. sincronizado(s)
+        </Badge>
+      )}
+
+      <div className="flex gap-1 pt-1">
+        <Button
+          size="sm" variant="outline"
+          disabled={globalLoading || isRunning}
+          onClick={() => onSync(entity.name, "down")}
+          className="flex-1 text-xs h-7 gap-1"
+          title="Grupo → Empresa"
+        >
+          <ArrowDown className="w-3 h-3" /> ↓
+        </Button>
+        <Button
+          size="sm" variant="outline"
+          disabled={globalLoading || isRunning}
+          onClick={() => onSync(entity.name, "up")}
+          className="flex-1 text-xs h-7 gap-1"
+          title="Empresa → Grupo"
+        >
+          <ArrowUp className="w-3 h-3" /> ↑
+        </Button>
+        <Button
+          size="sm" variant="ghost"
+          disabled={globalLoading || isRunning}
+          onClick={() => onSync(entity.name, "both")}
+          className="flex-1 text-xs h-7"
+          title="Bidirecional"
+        >
+          ⇅
+        </Button>
       </div>
     </div>
   );

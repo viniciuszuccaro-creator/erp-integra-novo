@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { base44 } from "@/api/base44Client";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
- * ToggleConfigGlobal — componente para toggles que persistem via backend
- * Otimistic UI + backend persistence
- * Uso: <ToggleConfigGlobal configKey="propagacao_ativa" label="Ativar Propagação" />
+ * ToggleConfigGlobal v3.0
+ * - API corrigida para usar upsertConfig com { chave, data, scope }
+ * - Carrega valor via getEntityRecord (mais confiável que upsertConfig read)
+ * - Optimistic UI + rollback em erro
+ * - Contexto multiempresa (group_id + empresa_id)
  */
-
 export default function ToggleConfigGlobal({
   configKey,
   label,
@@ -17,51 +19,90 @@ export default function ToggleConfigGlobal({
   onChangeLocal,
   defaultValue = false,
 }) {
+  const { grupoAtual, empresaAtual } = useContextoVisual();
   const [value, setValue] = useState(defaultValue);
-  const [loading, setLoading] = useState(false);
-  const [syncStatus, setSyncStatus] = useState("idle"); // idle | saving | saved | error
+  const [loading, setLoading] = useState(true); // começa loading até buscar
+  const [syncStatus, setSyncStatus] = useState("idle");
+  const loadedRef = useRef(false);
+  const prevContextRef = useRef(`${grupoAtual?.id}-${empresaAtual?.id}`);
 
-  // Carrega valor inicial do backend
+  const scopeObj = {
+    group_id: grupoAtual?.id || null,
+    empresa_id: empresaAtual?.id || null,
+  };
+
   useEffect(() => {
-    loadConfigValue();
-  }, []);
+    const ctxKey = `${grupoAtual?.id}-${empresaAtual?.id}`;
+    const contextChanged = prevContextRef.current !== ctxKey;
+    if (!loadedRef.current || contextChanged) {
+      loadedRef.current = true;
+      prevContextRef.current = ctxKey;
+      loadConfigValue();
+    }
+  }, [grupoAtual?.id, empresaAtual?.id]);
 
   const loadConfigValue = async () => {
+    setLoading(true);
     try {
-      const result = await base44.functions.invoke("upsertConfig", {
-        key: configKey,
-        operation: "read",
-      });
-      if (result.data?.value !== undefined) {
-        setValue(result.data.value);
+      // Busca progressiva: escopo exato → grupo → sem escopo
+      const attempts = [];
+      if (scopeObj.empresa_id && scopeObj.group_id) {
+        attempts.push({ chave: configKey, empresa_id: scopeObj.empresa_id, group_id: scopeObj.group_id });
       }
-    } catch (err) {
-      console.warn("Erro ao carregar config:", err.message);
+      if (scopeObj.empresa_id) {
+        attempts.push({ chave: configKey, empresa_id: scopeObj.empresa_id });
+      }
+      if (scopeObj.group_id) {
+        attempts.push({ chave: configKey, group_id: scopeObj.group_id });
+      }
+      attempts.push({ chave: configKey }); // fallback global
+
+      let record = null;
+      for (const filter of attempts) {
+        const res = await base44.functions.invoke("getEntityRecord", {
+          entityName: "ConfiguracaoSistema",
+          filter,
+          limit: 1,
+        });
+        const data = Array.isArray(res?.data) ? res.data : [];
+        if (data.length > 0) { record = data[0]; break; }
+      }
+
+      if (record) {
+        setValue(record.ativa === true);
+      } else {
+        setValue(defaultValue);
+      }
+    } catch (_) {
+      setValue(defaultValue);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleToggle = async (newValue) => {
-    // Optimistic UI
-    setValue(newValue);
+    const prev = value;
+    setValue(newValue); // Optimistic UI
     setSyncStatus("saving");
     setLoading(true);
 
     try {
       await base44.functions.invoke("upsertConfig", {
-        key: configKey,
-        value: newValue,
-        operation: "write",
+        chave: configKey,
+        data: {
+          chave: configKey,
+          ativa: newValue,           // boolean — campo correto no schema
+          categoria: "sistema",
+        },
+        scope: scopeObj,
       });
-
       setSyncStatus("saved");
       if (onChangeLocal) onChangeLocal(newValue);
-
       setTimeout(() => setSyncStatus("idle"), 2000);
     } catch (err) {
-      // Rollback
-      setValue(!newValue);
+      setValue(prev); // rollback
       setSyncStatus("error");
-      console.error("Erro ao salvar config:", err.message);
+      console.error("Erro ao salvar config:", err?.message || err);
       setTimeout(() => setSyncStatus("idle"), 3000);
     } finally {
       setLoading(false);
@@ -76,8 +117,15 @@ export default function ToggleConfigGlobal({
       </div>
 
       <div className="flex items-center gap-2 ml-3 flex-shrink-0">
-        <Switch checked={value} onCheckedChange={handleToggle} disabled={loading} />
-
+        {loading && syncStatus !== "saving" ? (
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-400" />
+        ) : null}
+        <Switch
+          checked={value}
+          onCheckedChange={handleToggle}
+          disabled={loading}
+          className={value ? "data-[state=checked]:bg-blue-600" : ""}
+        />
         {syncStatus === "saving" && <Loader2 className="w-3 h-3 animate-spin text-blue-600" />}
         {syncStatus === "saved" && <CheckCircle2 className="w-3 h-3 text-green-600" />}
         {syncStatus === "error" && <AlertCircle className="w-3 h-3 text-red-600" />}

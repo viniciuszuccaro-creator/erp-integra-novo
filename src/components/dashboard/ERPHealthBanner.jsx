@@ -10,8 +10,7 @@ import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import {
-  CheckCircle2, AlertCircle, Building2, ArrowDownUp,
-  Zap, XCircle
+  CheckCircle2, AlertCircle, Building2, ArrowDownUp, XCircle
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -61,9 +60,9 @@ export default function ERPHealthBanner() {
     : (empresaAtual?.nome_fantasia || empresaAtual?.razao_social || "Empresa");
 
   const integracoes = [
-    { label: "NF-e",    ok: getToggle("integracao_nfe"),       icon: CheckCircle2 },
-    { label: "Boleto",  ok: getToggle("integracao_boletos"),    icon: Zap },
-    { label: "WPP",     ok: getToggle("integracao_whatsapp"),   icon: Zap },
+    { label: "NF-e",   ok: getToggle("integracao_nfe")      },
+    { label: "Boleto", ok: getToggle("integracao_boletos")  },
+    { label: "WPP",    ok: getToggle("integracao_whatsapp") },
   ];
   const totalOk = integracoes.filter((i) => i.ok).length;
 
@@ -85,8 +84,8 @@ export default function ERPHealthBanner() {
       {/* Integrações */}
       <div className="flex items-center gap-1">
         <span className="text-slate-400">Integr.:</span>
-        {integracoes.map(({ label, ok, icon }) => (
-          <Pill key={label} label={label} ok={ok} icon={ok ? CheckCircle2 : XCircle} />
+        {integracoes.map(({ label, ok }) => (
+          <Pill key={label} label={label} ok={ok} />
         ))}
       </div>
 

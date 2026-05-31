@@ -21,7 +21,22 @@ Deno.serve(async (req) => {
     let body = {};
     try { body = await req.json(); } catch (_) {}
 
-    const { id, chave, data, scope } = body;
+    // Retrocompatibilidade com API antiga: { key, value, operation: "read"|"write" }
+    let { id, chave, data, scope } = body;
+    if (!chave && body.key) chave = body.key;
+    if (!data && body.operation === 'write' && body.value !== undefined) {
+      // Retrocompatibilidade: salva apenas o campo `ativa` (boolean)
+      data = { ativa: !!body.value };
+    }
+    if (body.operation === 'read' && chave) {
+      // Leitura rápida por chave
+      const api = base44.asServiceRole.entities.ConfiguracaoSistema;
+      const rows = await api.filter({ chave }, '-updated_date', 5).catch(() => []);
+      const record = Array.isArray(rows) ? (rows[0] || null) : null;
+      if (!record) return Response.json({ value: undefined, found: false });
+      const val = record.ativa !== undefined ? record.ativa : record.valor;
+      return Response.json({ value: val, record, found: true });
+    }
 
     if (!data || typeof data !== 'object') {
       return Response.json({ error: 'data é obrigatório' }, { status: 400 });

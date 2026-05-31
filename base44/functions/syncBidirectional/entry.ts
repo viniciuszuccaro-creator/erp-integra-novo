@@ -14,20 +14,24 @@ Deno.serve(async (req) => {
     const body = await req.json();
 
     // Suporte tanto ao payload manual quanto ao payload de automação entity
-    const eventData = body?.data || body;
-    const eventType = body?.event?.type || 'create';
+    // Automação entity envia: { event: {type, entity_name, entity_id}, data: {...}, old_data: {...} }
+    // Frontend envia: { entityName, groupId, direction, data: {...} }
+    const isEntityAutomation = !!(body?.event?.entity_name);
+    const eventData = body?.data || (isEntityAutomation ? null : body) || {};
+    const eventType = body?.event?.type || body?.eventType || 'create';
     // suporte a snake_case (automações) e camelCase (frontend)
     const entityName = body?.event?.entity_name || body?.entity_name || body?.entityName;
-    const entityId = body?.event?.entity_id || body?.entity_id || body?.entityId;
+    const entityId = body?.event?.entity_id || body?.entity_id || body?.entityId || eventData?.id;
 
     const {
-      // suporte a groupId (camelCase do frontend) e group_id (snake_case da automação)
-      group_id: _gid = eventData?.group_id,
+      // suporte a groupId (camelCase do frontend) e group_id (snake_case da automação/data)
+      group_id: _gid,
       groupId,
-      empresa_id = eventData?.empresa_id,
+      empresa_id: _empId,
       direction,
     } = body;
-    const group_id = _gid || groupId;
+    const group_id = _gid || groupId || eventData?.group_id;
+    const empresa_id = _empId || eventData?.empresa_id;
 
     // Anti-loop: se o registro já é replicado, não propagar novamente
     if (eventData?.e_replicado === true) {

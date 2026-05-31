@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { CheckCircle2, AlertCircle, XCircle, Wifi, ArrowDownUp, RefreshCw } from "lucide-react";
-import PropagacaoStatusWidget from "@/components/administracao-sistema/PropagacaoStatusWidget";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -149,12 +148,6 @@ export default function AdminStatusBar() {
         )}
       </div>
 
-      {/* Propagação inline */}
-      {(eId || gId) && (
-        <div className="w-full mt-2 border-t border-slate-200 pt-2">
-          <PropagacaoStatusWidget />
-        </div>
-      )}
     </div>
   );
 }

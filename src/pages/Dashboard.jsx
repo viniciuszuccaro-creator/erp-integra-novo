@@ -57,12 +57,10 @@ import useDashboardDerivedData from "@/components/dashboard/hooks/useDashboardDe
 import { DASHBOARD_LIST_LIMIT, DASHBOARD_REFETCH_INTERVAL_MS, dashboardQueryDefaults } from "@/components/dashboard/config/dashboardQueryConfig";
 
 // Lazy-loaded components — only those used directly in this page's JSX
-const DashboardHeader           = React.lazy(() => import("@/components/dashboard/DashboardHeader"));
-const DashboardContextoBanner   = React.lazy(() => import("@/components/dashboard/DashboardContextoBanner"));
-const DashboardMultiempresaBar  = React.lazy(() => import("@/components/dashboard/DashboardMultiempresaBar"));
-const DashboardEssentialKPIs   = React.lazy(() => import("@/components/dashboard/DashboardEssentialKPIs"));
-const DashboardStabilityNotice  = React.lazy(() => import("@/components/dashboard/DashboardStabilityNotice"));
-const DashboardResumoTab        = React.lazy(() => import("@/components/dashboard/DashboardResumoTab"));
+const DashboardHeader     = React.lazy(() => import("@/components/dashboard/DashboardHeader"));
+const DashboardStatusPanel= React.lazy(() => import("@/components/dashboard/DashboardStatusPanel"));
+const DashboardEssentialKPIs = React.lazy(() => import("@/components/dashboard/DashboardEssentialKPIs"));
+const DashboardResumoTab  = React.lazy(() => import("@/components/dashboard/DashboardResumoTab"));
 
 
 export default function Dashboard() {
@@ -341,8 +339,9 @@ export default function Dashboard() {
 
   // Dados e gráficos agora são providos por useDashboardDerivedData()
 
+  // IA: apenas quando autoRefresh ativo (evita chamadas desnecessárias)
   const { data: previsoesIA = {}, isLoading: loadingPrevIA } = useQuery({
-    queryKey: ['iaPrevEstoque14', empresaAtual?.id, grupoAtual?.id, periodo],
+    queryKey: ['iaPrevEstoque', empresaAtual?.id, grupoAtual?.id],
     queryFn: async () => {
       if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return { previsoes: [] };
       const filtros = getFiltroContexto('empresa_id', true);
@@ -352,36 +351,25 @@ export default function Dashboard() {
       });
       return res?.data || { previsoes: [] };
     },
-    staleTime: 600000,
+    staleTime: 900000,
     enabled: Boolean(canSeeEstoque && hasContextoAtivo && autoRefresh)
   });
 
-  const { data: previsoesIA30 = {} } = useQuery({
-    queryKey: ['iaPrevEstoque30', empresaAtual?.id, grupoAtual?.id, periodo],
+  // previsoesIA30 consolidado junto com anomalias — mesmo endpoint, uma chamada só
+  const { data: iaConsolidado = {}, isLoading: loadingAnomIA } = useQuery({
+    queryKey: ['iaConsolidado', empresaAtual?.id, grupoAtual?.id],
     queryFn: async () => {
-      if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return { previsoes: [] };
-      const filtros = getFiltroContexto('empresa_id', true);
-      const res = await base44.functions.invoke('iaFinanceAnomalyScan', {
-        filtros,
-        previsao_estoque: { enabled: true, horizon_days: 30 }
-      });
-      return res?.data || { previsoes: [] };
-    },
-    staleTime: 600000,
-    enabled: Boolean(canSeeEstoque && hasContextoAtivo && autoRefresh)
-  });
-
-  const { data: anomaliasIA = {}, isLoading: loadingAnomIA } = useQuery({
-    queryKey: ['iaAnomaliasFinanceiro', empresaAtual?.id, grupoAtual?.id],
-    queryFn: async () => {
-      if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return { details: [] };
+      if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return { details: [], previsoes: [] };
       const filtros = getFiltroContexto('empresa_id', true);
       const res = await base44.functions.invoke('iaFinanceAnomalyScan', { filtros });
-      return res?.data || { details: [] };
+      return res?.data || { details: [], previsoes: [] };
     },
-    staleTime: 600000,
-    enabled: Boolean(canSeeFinanceiro && hasContextoAtivo && autoRefresh)
+    staleTime: 900000,
+    enabled: Boolean((canSeeFinanceiro || canSeeEstoque) && hasContextoAtivo && autoRefresh)
   });
+
+  const anomaliasIA = iaConsolidado;
+  const previsoesIA30 = iaConsolidado;
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
@@ -667,17 +655,11 @@ export default function Dashboard() {
             </ErrorBoundary>
           </Suspense>
         </div>
+        {/* Status compacto: contexto + propagação (substitui 3 banners anteriores) */}
         <div>
           <Suspense fallback={<></>}>
             <ErrorBoundary>
-              <DashboardContextoBanner />
-            </ErrorBoundary>
-          </Suspense>
-        </div>
-        <div>
-          <Suspense fallback={<></>}>
-            <ErrorBoundary>
-              <DashboardMultiempresaBar />
+              <DashboardStatusPanel />
             </ErrorBoundary>
           </Suspense>
         </div>
@@ -692,13 +674,6 @@ export default function Dashboard() {
                 produtosBaixoEstoque={produtosBaixoEstoque}
                 otd={otd}
               />
-            </ErrorBoundary>
-          </Suspense>
-        </div>
-        <div>
-          <Suspense fallback={<></>}>
-            <ErrorBoundary>
-              <DashboardStabilityNotice hasContextoAtivo={hasContextoAtivo} />
             </ErrorBoundary>
           </Suspense>
         </div>

@@ -16,16 +16,20 @@ import { toast } from "sonner";
  */
 
 const ENTITIES = [
-  { name: "Cliente",      label: "Clientes",        icon: "👥" },
-  { name: "Fornecedor",   label: "Fornecedores",     icon: "🏭" },
-  { name: "Produto",      label: "Produtos",         icon: "📦" },
-  { name: "Pedido",       label: "Pedidos",          icon: "📋" },
-  { name: "ContaReceber", label: "Contas a Receber", icon: "💰" },
-  { name: "ContaPagar",   label: "Contas a Pagar",   icon: "💸" },
-  { name: "NotaFiscal",   label: "Notas Fiscais",    icon: "📄" },
-  { name: "Entrega",      label: "Entregas",         icon: "🚚" },
-  { name: "Colaborador",  label: "Colaboradores",    icon: "👤" },
-  { name: "CentroCusto",  label: "Centro de Custo",  icon: "🏦" },
+  { name: "Cliente",       label: "Clientes",         icon: "👥", grupo: "Comercial" },
+  { name: "Fornecedor",    label: "Fornecedores",      icon: "🏭", grupo: "Compras" },
+  { name: "Produto",       label: "Produtos",          icon: "📦", grupo: "Estoque" },
+  { name: "Pedido",        label: "Pedidos",           icon: "📋", grupo: "Comercial" },
+  { name: "ContaReceber",  label: "Contas a Receber",  icon: "💰", grupo: "Financeiro" },
+  { name: "ContaPagar",    label: "Contas a Pagar",    icon: "💸", grupo: "Financeiro" },
+  { name: "NotaFiscal",    label: "Notas Fiscais",     icon: "📄", grupo: "Fiscal" },
+  { name: "Entrega",       label: "Entregas",          icon: "🚚", grupo: "Expedição" },
+  { name: "Colaborador",   label: "Colaboradores",     icon: "👤", grupo: "RH" },
+  { name: "CentroCusto",   label: "Centro de Custo",   icon: "🏦", grupo: "Financeiro" },
+  { name: "TabelaPreco",   label: "Tabelas de Preço",  icon: "🏷️", grupo: "Comercial" },
+  { name: "FormaPagamento",label: "Formas Pagamento",  icon: "💳", grupo: "Financeiro" },
+  { name: "GrupoProduto",  label: "Grupos de Produto", icon: "🗂️", grupo: "Estoque" },
+  { name: "Marca",         label: "Marcas",            icon: "🎯", grupo: "Estoque" },
 ];
 
 const STATUS_INIT = () =>
@@ -96,6 +100,10 @@ export default function PropagacaoIndex() {
     addLog("🏁 Sincronização completa finalizada", "info");
     toast.success("Sincronização completa concluída!");
   }, [grupoAtual?.id, runPropagation]);
+
+  const [filtroGrupo, setFiltroGrupo] = useState("Todos");
+  const gruposDisponiveis = ["Todos", ...new Set(ENTITIES.map(e => e.grupo))];
+  const entidadesFiltradas = filtroGrupo === "Todos" ? ENTITIES : ENTITIES.filter(e => e.grupo === filtroGrupo);
 
   const okCount = Object.values(status).filter(s => s.status === "ok").length;
   const errCount = Object.values(status).filter(s => s.status === "error").length;
@@ -177,10 +185,27 @@ export default function PropagacaoIndex() {
         ))}
       </div>
 
+      {/* Filtro de módulo */}
+      {activeTab === "overview" && (
+        <div className="flex flex-wrap gap-1.5">
+          {gruposDisponiveis.map(g => (
+            <button
+              key={g}
+              onClick={() => setFiltroGrupo(g)}
+              className={`px-3 py-1 rounded-full text-xs font-medium border transition-all ${
+                filtroGrupo === g ? "bg-blue-600 text-white border-blue-600" : "bg-white text-slate-600 border-slate-200 hover:border-blue-300"
+              }`}
+            >
+              {g}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Grid de Entidades */}
       {activeTab === "overview" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {ENTITIES.map(entity => {
+          {entidadesFiltradas.map(entity => {
             const st = status[entity.name];
             const isErr = st?.status === "error";
             const isOk = st?.status === "ok";
@@ -189,13 +214,16 @@ export default function PropagacaoIndex() {
             return (
               <Card key={entity.name} className={`transition-all ${isErr ? "border-red-200" : isOk ? "border-green-200" : "border-slate-200"}`}>
                 <CardContent className="p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-sm text-slate-900">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="font-semibold text-sm text-slate-900 truncate">
                       {entity.icon} {entity.label}
                     </span>
-                    {isRunning && <Loader2 className="w-4 h-4 animate-spin text-blue-500" />}
-                    {isErr && <AlertCircle className="w-4 h-4 text-red-500" />}
-                    {isOk && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full">{entity.grupo}</span>
+                      {isRunning && <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500" />}
+                      {isErr && <AlertCircle className="w-3.5 h-3.5 text-red-500" />}
+                      {isOk && <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />}
+                    </div>
                   </div>
                   <p className="text-xs text-slate-500 truncate">{st?.message}</p>
                   {st?.lastSync && (

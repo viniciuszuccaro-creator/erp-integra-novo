@@ -98,11 +98,14 @@ Deno.serve(async (req) => {
     let recordData = data;
     let previousData = oldData;
     try {
-      if ((!recordData || body?.payload_too_large) && event?.entity_name && event?.entity_id) {
-        const rows = await base44.asServiceRole.entities?.[event.entity_name]?.filter?.({ id: event.entity_id }, undefined, 1);
-        recordData = rows?.[0] || recordData;
+      if (body?.payload_too_large && event?.entity_name && event?.entity_id) {
+        const rows = await Promise.race([
+          base44.asServiceRole.entities?.[event.entity_name]?.filter?.({ id: event.entity_id }, undefined, 1),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 4000))
+        ]);
+        recordData = Array.isArray(rows) ? (rows[0] || recordData) : recordData;
       }
-    } catch (_) {}
+    } catch (_) { /* mantém recordData original */ }
 
     const entidade = event.entity_name;
     const tipoEvento = event.type; // create | update | delete

@@ -1,0 +1,65 @@
+/**
+ * usePropagacaoGrupoEmpresa — Hook para disparar propagação bidirecional
+ * de qualquer módulo do ERP de forma simples e padronizada.
+ * 
+ * Uso:
+ *   const { propagar, propagando } = usePropagacaoGrupoEmpresa();
+ *   await propagar("Cliente", "down"); // Grupo → Empresas
+ *   await propagar("Pedido", "both");  // Bidirecional
+ */
+import { useState, useCallback } from "react";
+import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { toast } from "sonner";
+
+export default function usePropagacaoGrupoEmpresa() {
+  const { grupoAtual, empresaAtual } = useContextoVisual();
+  const [propagando, setPropagando] = useState(false);
+  const [ultimoResultado, setUltimoResultado] = useState(null);
+
+  const propagar = useCallback(async (entityName, direction = "down", data = null) => {
+    if (!grupoAtual?.id && !empresaAtual?.id) {
+      toast.error("Selecione um grupo ou empresa antes de sincronizar.");
+      return null;
+    }
+
+    setPropagando(true);
+    try {
+      const payload = {
+        entityName,
+        groupId: grupoAtual?.id || null,
+        empresa_id: empresaAtual?.id || null,
+        direction,
+      };
+      if (data) payload.data = data;
+
+      const res = await base44.functions.invoke("syncBidirectional", payload);
+      const result = res?.data;
+      const total = result?.total_processados ?? result?.total ?? 0;
+
+      setUltimoResultado(result);
+      if (total > 0) {
+        toast.success(`${entityName}: ${total} registro(s) propagado(s) [${direction}]`);
+      }
+      return result;
+    } catch (err) {
+      toast.error(`Erro ao propagar ${entityName}: ${err?.message || String(err)}`);
+      return null;
+    } finally {
+      setPropagando(false);
+    }
+  }, [grupoAtual?.id, empresaAtual?.id]);
+
+  const propagarRegistro = useCallback(async (entityName, record, direction = "both") => {
+    return await propagar(entityName, direction, record);
+  }, [propagar]);
+
+  return {
+    propagar,
+    propagarRegistro,
+    propagando,
+    ultimoResultado,
+    grupoId: grupoAtual?.id,
+    empresaId: empresaAtual?.id,
+  };
+}

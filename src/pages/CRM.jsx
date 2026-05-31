@@ -1,6 +1,5 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
 import { TrendingUp, Target, MessageSquare, Mail, Sparkles, AlertTriangle, BarChart3, Users } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
@@ -23,7 +22,7 @@ import CRMScoreClienteWidget from "@/components/crm/CRMScoreClienteWidget";
 const OportunidadesListagem = React.lazy(() => import("../components/crm/OportunidadesListagem"));
 const InteracoesListagem = React.lazy(() => import("../components/crm/InteracoesListagem"));
 import { useUser } from "@/components/lib/UserContext";
-import { CRM_CAMPAIGN_LIMIT, CRM_LIST_LIMIT, crmQueryDefaults } from "@/components/crm/config/crmQueryConfig";
+import { CRM_CAMPAIGN_LIMIT, CRM_LIST_LIMIT } from "@/components/crm/config/crmQueryConfig";
 
 const FunilVisual = React.lazy(() => import("../components/crm/FunilVisual"));
 
@@ -32,28 +31,28 @@ const IAChurnDetection = React.lazy(() => import("../components/crm/IAChurnDetec
 
 export default function CRMPage() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
-  const { getFiltroContexto, empresaAtual, estaNoGrupo, grupoAtual } = useContextoVisual();
+  const { empresaAtual, estaNoGrupo, grupoAtual } = useContextoVisual();
   const bloqueadoSemEmpresa = !estaNoGrupo && !empresaAtual;
   const { openWindow } = useWindow();
   const { user } = useUser();
 
   // Queries via useRLSQuery (escopo multi-empresa automático)
-  const { data: oportunidades = [] } = useRLSQuery(
-    'Oportunidade', {}, '-created_date', CRM_LIST_LIMIT,
-    { ...crmQueryDefaults, enabled: !bloqueadoSemEmpresa }
-  );
-  const { data: interacoes = [] } = useRLSQuery(
-    'Interacao', {}, '-created_date', CRM_LIST_LIMIT,
-    { ...crmQueryDefaults, enabled: !bloqueadoSemEmpresa }
-  );
-  const { data: campanhas = [] } = useRLSQuery(
-    'Campanha', {}, '-created_date', CRM_CAMPAIGN_LIMIT,
-    { ...crmQueryDefaults, enabled: !bloqueadoSemEmpresa }
-  );
-  const { data: clientes = [] } = useRLSQuery(
-    'Cliente', {}, '-created_date', CRM_LIST_LIMIT,
-    { ...crmQueryDefaults, enabled: !bloqueadoSemEmpresa }
-  );
+   const { data: oportunidades = [] } = useRLSQuery(
+     'Oportunidade', {}, '-created_date', CRM_LIST_LIMIT,
+     { staleTime: 60000, enabled: !bloqueadoSemEmpresa }
+   );
+   const { data: interacoes = [] } = useRLSQuery(
+     'Interacao', {}, '-created_date', CRM_LIST_LIMIT,
+     { staleTime: 60000, enabled: !bloqueadoSemEmpresa }
+   );
+   const { data: campanhas = [] } = useRLSQuery(
+     'Campanha', {}, '-created_date', CRM_CAMPAIGN_LIMIT,
+     { staleTime: 60000, enabled: !bloqueadoSemEmpresa }
+   );
+   const { data: clientes = [] } = useRLSQuery(
+     'Cliente', {}, '-created_date', CRM_LIST_LIMIT,
+     { staleTime: 60000, enabled: !bloqueadoSemEmpresa }
+   );
 
   // Contagem derivada diretamente da lista
   const totalClientes = clientes.length;

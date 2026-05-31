@@ -16,14 +16,18 @@ Deno.serve(async (req) => {
     // Suporte tanto ao payload manual quanto ao payload de automação entity
     const eventData = body?.data || body;
     const eventType = body?.event?.type || 'create';
-    const entityName = body?.event?.entity_name || body?.entity_name;
-    const entityId = body?.event?.entity_id || body?.entity_id;
+    // suporte a snake_case (automações) e camelCase (frontend)
+    const entityName = body?.event?.entity_name || body?.entity_name || body?.entityName;
+    const entityId = body?.event?.entity_id || body?.entity_id || body?.entityId;
 
     const {
-      group_id = eventData?.group_id,
+      // suporte a groupId (camelCase do frontend) e group_id (snake_case da automação)
+      group_id: _gid = eventData?.group_id,
+      groupId,
       empresa_id = eventData?.empresa_id,
       direction,
     } = body;
+    const group_id = _gid || groupId;
 
     // Anti-loop: se o registro já é replicado, não propagar novamente
     if (eventData?.e_replicado === true) {
@@ -41,11 +45,12 @@ Deno.serve(async (req) => {
     }
 
     const results = [];
-    const isDown = !!group_id && !empresa_id; // Grupo → Empresas
-    const isUp   = !!empresa_id && !!group_id;  // Empresa → Grupo
+    const isBoth = direction === 'both';
+    const isDown = isBoth || (!!group_id && (!empresa_id || direction === 'down'));
+    const isUp   = isBoth || (!!empresa_id && !!group_id && direction === 'up');
 
     // ===== DOWN: Grupo → Empresas =====
-    if ((isDown || direction === 'down') && eventData) {
+    if (isDown && eventData) {
       const empresas = await base44.asServiceRole.entities.Empresa.filter(
         { group_id },
         null,
@@ -92,7 +97,7 @@ Deno.serve(async (req) => {
     }
 
     // ===== UP: Empresa → Grupo =====
-    if ((isUp || direction === 'up') && eventData) {
+    if (isUp && eventData) {
       try {
         // Verificar se já existe no grupo (evita duplicação)
         const existing = await base44.asServiceRole.entities[entityName]
@@ -149,7 +154,8 @@ Deno.serve(async (req) => {
       ok: true,
       entity: entityName,
       event: eventType,
-      direction: isDown ? 'down' : isUp ? 'up' : direction || 'auto',
+      direction: isBoth ? 'both' : isDown ? 'down' : isUp ? 'up' : direction || 'auto',
+      total_processados: results.length,
       results,
       total: results.length,
     });

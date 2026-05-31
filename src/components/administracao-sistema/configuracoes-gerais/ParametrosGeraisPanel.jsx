@@ -33,7 +33,7 @@ export default function ParametrosGeraisPanel() {
             <Settings className="w-6 h-6 text-slate-600" />
             <h2 className="text-2xl font-bold text-slate-900">Configurações Globais do Sistema</h2>
           </div>
-          <p className="text-sm text-slate-600 ml-8">Controle centralizad o de todas as funcionalidades do ERP</p>
+          <p className="text-sm text-slate-600 ml-8">Controle centralizado de todas as funcionalidades do ERP</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-8">

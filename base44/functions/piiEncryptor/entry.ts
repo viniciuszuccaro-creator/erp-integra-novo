@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 // Encrypt/decrypt PII fields for selected entities using AES-GCM with BACKUP_ENCRYPTION_KEY
 // Payload: { entity_name: 'Cliente'|'Colaborador', id: string, action?: 'encrypt'|'decrypt', fields?: string[] }

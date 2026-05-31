@@ -1,15 +1,13 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 /**
- * syncBidirectional v4.0
+ * syncBidirectional v4.1
  * Propagação bidirecional Grupo ↔ Empresas
  * - DOWN: Grupo → todas as empresas do grupo
  * - UP: Empresa → Grupo (consolida)
  * - DELETE: remove réplicas em cascata
  * Anti-loop via e_replicado=true
  */
-
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const BLOCKED_FIELDS = new Set([
   'id', 'created_date', 'updated_date', 'created_by', 'created_by_id', 'e_replicado', 'documento_grupo_id'

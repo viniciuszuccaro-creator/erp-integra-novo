@@ -33,6 +33,7 @@ import KnowledgeManagementHub from '@/components/knowledge-hub/KnowledgeManageme
 import AutonomousIntelligenceHub from '@/components/autonomous-intelligence/AutonomousIntelligenceHub';
 import RealtimeCollaborationHub from '@/components/realtime-collaboration/RealtimeCollaborationHub';
 import QualityManagementHub from '@/components/quality-management/QualityManagementHub';
+import SupplyChainResilienceHub from '@/components/supply-chain-resilience/SupplyChainResilienceHub';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -229,6 +230,15 @@ const AuthenticatedApp = () => {
             <EmpresaSelectorGuard>
               <LayoutWrapper currentPageName="QualityManagement">
                 <QualityManagementHub />
+              </LayoutWrapper>
+            </EmpresaSelectorGuard>
+          </RBACRoute>
+        } />
+        <Route path="/SupplyChainResilience" element={
+          <RBACRoute module="Compras" action="ver">
+            <EmpresaSelectorGuard>
+              <LayoutWrapper currentPageName="SupplyChainResilience">
+                <SupplyChainResilienceHub />
               </LayoutWrapper>
             </EmpresaSelectorGuard>
           </RBACRoute>

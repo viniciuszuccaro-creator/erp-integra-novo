@@ -124,6 +124,7 @@ const navigationItems = [
   { title: "Autonomous Intelligence (IA)", url: "/AutonomousIntelligence", icon: Brain, group: "principal" },
   { title: "Realtime Collaboration Hub", url: "/RealtimeCollaboration", icon: Users, group: "principal" },
   { title: "Quality Management", url: "/QualityManagement", icon: CheckCircle2, group: "operacional" },
+  { title: "Supply Chain Resilience", url: "/SupplyChainResilience", icon: Shield, group: "operacional" },
   ];
 
 // React Query client centralizado (padrões seguros + performance)

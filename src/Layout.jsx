@@ -28,8 +28,7 @@ import {
         AlertCircle,
         Mic,
         Lock,
-        Brain,
-        Globe
+        Brain
       } from "lucide-react";
 import {
   Sidebar,
@@ -125,9 +124,7 @@ const navigationItems = [
   { title: "Autonomous Intelligence (IA)", url: "/AutonomousIntelligence", icon: Brain, group: "principal" },
   { title: "Realtime Collaboration Hub", url: "/RealtimeCollaboration", icon: Users, group: "principal" },
   { title: "Quality Management", url: "/QualityManagement", icon: CheckCircle2, group: "operacional" },
-  { title: "Supply Chain Resilience", url: "/SupplyChainResilience", icon: Shield, group: "operacional" },
-  { title: "Quantum-Safe Security", url: "/QuantumSecurity", icon: Lock, group: "sistema" },
-  { title: "Metaverse & Immersive ERP", url: "/MetaverseERP", icon: Globe, group: "principal" },
+
   ];
 
 // React Query client centralizado (padrões seguros + performance)

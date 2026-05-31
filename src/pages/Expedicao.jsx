@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Truck, Package, FileText, Route, Activity, BarChart3, Settings, Map, MessageCircle, Camera, Scan, Building2 } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
 import { useWindow } from "@/components/lib/useWindow";
 import { useUser } from "@/components/lib/UserContext";
@@ -49,7 +50,7 @@ export default function Expedicao() {
   const { user } = useUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { estaNoGrupo, empresaAtual, empresasDoGrupo, filtrarPorContexto, getFiltroContexto, grupoAtual } = useContextoVisual();
+  const { estaNoGrupo, empresaAtual, empresasDoGrupo, grupoAtual } = useContextoVisual();
 
   const [comprovanteModal, setComprovanteModal] = React.useState(null);
   const [entregaSelecionada, setEntregaSelecionada] = React.useState(null);
@@ -57,104 +58,30 @@ export default function Expedicao() {
   const [comprovanteOpen, setComprovanteOpen] = React.useState(false);
   const [ocorrenciaOpen, setOcorrenciaOpen] = React.useState(false);
 
-  const { data: entregas = [] } = useQuery({
-    queryKey: ['entregas', empresaAtual?.id],
-    queryFn: async () => {
-      try {
-        const filtro = empresaAtual?.id ? { empresa_id: empresaAtual.id } : {};
-        return await filtrarPorContexto('Entrega', {}, '-created_date', 100);
-      } catch (err) {
-        console.error('Erro ao buscar entregas:', err);
-        return [];
-      }
-    },
-    staleTime: 30000,
-    retry: 2,
-    enabled: canSeeExpedicao
-  });
+  // Queries via useRLSQuery (escopo multi-empresa automático)
+  const { data: entregas = [] } = useRLSQuery(
+    'Entrega', {}, '-created_date', 100,
+    { staleTime: 30000, retry: 2, enabled: canSeeExpedicao }
+  );
+  const { data: clientes = [] } = useRLSQuery(
+    'Cliente', {}, '-created_date', 100,
+    { staleTime: 30000, retry: 1, enabled: canSeeExpedicao }
+  );
+  const { data: pedidos = [] } = useRLSQuery(
+    'Pedido', {}, '-created_date', 100,
+    { staleTime: 30000, retry: 1, enabled: canSeeExpedicao }
+  );
+  const { data: romaneios = [] } = useRLSQuery(
+    'Romaneio', {}, '-created_date', 50,
+    { staleTime: 30000, retry: 1, enabled: canSeeExpedicao }
+  );
+  const { data: rotas = [] } = useRLSQuery(
+    'Rota', {}, '-created_date', 50,
+    { staleTime: 30000, retry: 1, enabled: canSeeExpedicao }
+  );
 
-  const { data: totalEntregas = 0 } = useQuery({
-    queryKey: ['entregas-count', empresaAtual?.id],
-    queryFn: async () => {
-      try {
-        const filtro = empresaAtual?.id ? { empresa_id: empresaAtual.id } : {};
-        const response = await base44.functions.invoke('countEntities', {
-          entityName: 'Entrega',
-          filter: getFiltroContexto('empresa_id')
-        });
-        return response.data?.count || entregas.length;
-      } catch {
-        return entregas.length;
-      }
-    },
-    staleTime: 60000,
-    retry: 1,
-    enabled: canSeeExpedicao
-  });
-
-  const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes', empresaAtual?.id],
-    queryFn: async () => {
-      try {
-        const filtro = empresaAtual?.id ? { empresa_id: empresaAtual.id } : {};
-        return await filtrarPorContexto('Cliente', {}, '-created_date', 100);
-      } catch (err) {
-        console.error('Erro ao buscar clientes:', err);
-        return [];
-      }
-    },
-    staleTime: 30000,
-    retry: 1,
-    enabled: canSeeExpedicao
-  });
-
-  const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos', empresaAtual?.id],
-    queryFn: async () => {
-      try {
-        const filtro = empresaAtual?.id ? { empresa_id: empresaAtual.id } : {};
-        return await filtrarPorContexto('Pedido', {}, '-created_date', 100);
-      } catch (err) {
-        console.error('Erro ao buscar pedidos:', err);
-        return [];
-      }
-    },
-    staleTime: 30000,
-    retry: 1,
-    enabled: canSeeExpedicao
-  });
-
-  const { data: romaneios = [] } = useQuery({
-    queryKey: ['romaneios', empresaAtual?.id],
-    queryFn: async () => {
-      try {
-        const filtro = empresaAtual?.id ? { empresa_id: empresaAtual.id } : {};
-        return await filtrarPorContexto('Romaneio', {}, '-created_date', 50);
-      } catch (err) {
-        console.error('Erro ao buscar romaneios:', err);
-        return [];
-      }
-    },
-    staleTime: 30000,
-    retry: 1,
-    enabled: canSeeExpedicao
-  });
-
-  const { data: rotas = [] } = useQuery({
-    queryKey: ['rotas', empresaAtual?.id],
-    queryFn: async () => {
-      try {
-        const filtro = empresaAtual?.id ? { empresa_id: empresaAtual.id } : {};
-        return await filtrarPorContexto('Rota', {}, '-created_date', 50);
-      } catch (err) {
-        console.error('Erro ao buscar rotas:', err);
-        return [];
-      }
-    },
-    staleTime: 30000,
-    retry: 1,
-    enabled: canSeeExpedicao
-  });
+  // Contagem derivada diretamente da lista
+  const totalEntregas = entregas.length;
 
   // Dados já vêm filtrados do servidor
   const entregasFiltradas = entregas;

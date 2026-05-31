@@ -14,7 +14,6 @@ import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
 import KPIsFinanceiroLaunchpad from "@/components/financeiro/KPIsFinanceiroLaunchpad";
-import FinanceiroIAPanel from "@/components/financeiro/FinanceiroIAPanel";
 import MetricasSecundariasLaunchpad from "@/components/financeiro/MetricasSecundariasLaunchpad";
 
 import ModulosGridFinanceiro from "@/components/financeiro/ModulosGridFinanceiro";
@@ -414,7 +413,6 @@ export default function Financeiro() {
     <ErrorBoundary>
       <ModuleLayout title="Financeiro e Contábil" subtitle="Pagamentos, recebimentos e conciliação">
         <ModuleKPIs>
-          <FinanceiroIAPanel contasReceber={contasReceberFiltradas} contasPagar={contasPagarFiltradas} saldo={saldo} />
           <KPIsFinanceiroLaunchpad
             receberPendente={receberPendente}
             pagarPendente={pagarPendente}

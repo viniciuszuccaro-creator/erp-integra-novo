@@ -32,8 +32,6 @@ const SeparacaoConferencia = React.lazy(() => import("../components/expedicao/Se
 const SeparacaoConferenciaIA = React.lazy(() => import("@/components/expedicao/SeparacaoConferenciaIA"));
 const RoteirizacaoInteligente = React.lazy(() => import("@/components/expedicao/RoteirizacaoInteligente"));
 const PainelMetricasRealtime = React.lazy(() => import("../components/logistica/PainelMetricasRealtime"));
-const DashboardLogisticaInteligente = React.lazy(() => import("../components/logistica/DashboardLogisticaInteligente"));
-const DashboardLogistico = React.lazy(() => import("../components/expedicao/DashboardLogistico"));
 const DashboardEntregasRealtime = React.lazy(() => import("../components/expedicao/DashboardEntregasRealtime"));
 const RelatoriosLogistica = React.lazy(() => import("../components/expedicao/RelatoriosLogistica"));
 const ConfiguracaoExpedicao = React.lazy(() => import("../components/expedicao/ConfiguracaoExpedicao"));

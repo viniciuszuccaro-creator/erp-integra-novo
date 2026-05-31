@@ -23,7 +23,6 @@ const ApontamentoProducao = React.lazy(() => import("@/components/producao/Apont
 const ControleRefugo = React.lazy(() => import("@/components/producao/ControleRefugo"));
 const RelatoriosProducao = React.lazy(() => import("@/components/producao/RelatoriosProducao"));
 const ConfiguracaoProducao = React.lazy(() => import("../components/producao/ConfiguracaoProducao"));
-const DashboardRefugoIA = React.lazy(() => import("../components/producao/DashboardRefugoIA"));
 const DashboardProducaoRealtime = React.lazy(() => import("../components/producao/DashboardProducaoRealtime"));
 const IADiagnosticoEquipamentos = React.lazy(() => import("../components/producao/IADiagnosticoEquipamentos"));
 const DocumentosProducao = React.lazy(() => import("../components/producao/DocumentosProducao"));
@@ -126,23 +125,12 @@ export default function Producao() {
       props: { ops: ordensProducao, windowMode: true }
     },
     {
-      title: 'Dashboard IA',
-      description: 'Análise refugo',
-      icon: Sparkles,
-      color: 'cyan',
-      component: DashboardRefugoIA,
-      windowTitle: '🤖 Dashboard Refugo IA',
-      width: 1400,
-      height: 800,
-      props: { empresaId: empresaAtual?.id, windowMode: true }
-    },
-    {
-      title: 'Dashboard Realtime',
-      description: 'Métricas ao vivo',
+      title: 'Dashboard',
+      description: 'Métricas e análise IA',
       icon: Activity,
       color: 'green',
       component: DashboardProducaoRealtime,
-      windowTitle: '📊 Dashboard Realtime',
+      windowTitle: '📊 Dashboard Produção',
       width: 1500,
       height: 850,
       props: { empresaId: empresaAtual?.id, windowMode: true }

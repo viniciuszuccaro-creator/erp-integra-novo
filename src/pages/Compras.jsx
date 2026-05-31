@@ -17,8 +17,6 @@ import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
 import { Button } from "@/components/ui/button";
-import ComprasIAInsights from "@/components/compras/ComprasIAInsights";
-import ComprasPerformancePanel from "@/components/compras/ComprasPerformancePanel";
 
 const FornecedoresTab = React.lazy(() => import("../components/compras/FornecedoresTab"));
 const OrdensCompraTab = React.lazy(() => import("../components/compras/OrdensCompraTab"));

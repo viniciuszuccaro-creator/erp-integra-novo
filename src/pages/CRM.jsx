@@ -25,8 +25,7 @@ import { useUser } from "@/components/lib/UserContext";
 import { CRM_CAMPAIGN_LIMIT, CRM_LIST_LIMIT, crmQueryDefaults } from "@/components/crm/config/crmQueryConfig";
 
 const FunilVisual = React.lazy(() => import("../components/crm/FunilVisual"));
-const FunilComercialInteligente = React.lazy(() => import("@/components/crm/FunilComercialInteligente"));
-const FunilVendasAvancado = React.lazy(() => import("@/components/crm/FunilVendasAvancado"));
+
 const IALeadsPriorizacao = React.lazy(() => import("../components/crm/IALeadsPriorizacao"));
 const IAChurnDetection = React.lazy(() => import("../components/crm/IAChurnDetection"));
 

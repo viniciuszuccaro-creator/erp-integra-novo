@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import useCRMDerivedData from "@/components/crm/hooks/useCRMDerivedData";
 import CRMIAPanel from "@/components/crm/CRMIAPanel";
 import CRMScoreClienteWidget from "@/components/crm/CRMScoreClienteWidget";
-import { CRM_CAMPAIGN_LIMIT, CRM_LIST_LIMIT, crmQueryDefaults } from "@/components/crm/config/crmQueryConfig";
+import { CRM_CAMPAIGN_LIMIT, CRM_LIST_LIMIT } from "@/components/crm/config/crmQueryConfig";
 
 const OportunidadesListagem = React.lazy(() => import("../components/crm/OportunidadesListagem"));
 const InteracoesListagem = React.lazy(() => import("../components/crm/InteracoesListagem"));
@@ -38,28 +38,23 @@ export default function CRMPage() {
   // Queries via useRLSQuery (escopo multi-empresa automático)
   const { data: oportunidades = [] } = useRLSQuery(
     'Oportunidade', {}, '-created_date', CRM_LIST_LIMIT,
-    { ...crmQueryDefaults, enabled: !bloqueadoSemEmpresa }
+    { staleTime: 60000, enabled: !bloqueadoSemEmpresa }
   );
   const { data: interacoes = [] } = useRLSQuery(
     'Interacao', {}, '-created_date', CRM_LIST_LIMIT,
-    { ...crmQueryDefaults, enabled: !bloqueadoSemEmpresa }
+    { staleTime: 60000, enabled: !bloqueadoSemEmpresa }
   );
   const { data: campanhas = [] } = useRLSQuery(
     'Campanha', {}, '-created_date', CRM_CAMPAIGN_LIMIT,
-    { ...crmQueryDefaults, enabled: !bloqueadoSemEmpresa }
+    { staleTime: 60000, enabled: !bloqueadoSemEmpresa }
   );
   const { data: clientes = [] } = useRLSQuery(
     'Cliente', {}, '-created_date', CRM_LIST_LIMIT,
-    { ...crmQueryDefaults, enabled: !bloqueadoSemEmpresa }
+    { staleTime: 60000, enabled: !bloqueadoSemEmpresa }
   );
 
-  // Contagem derivada diretamente da lista
-  const totalClientes = clientes.length;
-
-  // Dados já vêm filtrados do servidor
   const oportunidadesFiltradas = oportunidades;
   const interacoesFiltradas = interacoes;
-  const campanhasFiltradas = campanhas;
 
   const { totalOportunidades, oportunidadesAbertas, valorPipeline, valorPonderado, taxaConversao } = useCRMDerivedData({ oportunidades: oportunidadesFiltradas });
 

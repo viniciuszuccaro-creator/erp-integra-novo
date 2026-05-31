@@ -21,14 +21,12 @@ import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
 import KPIsComercial from "@/components/comercial/comercial-launchpad/KPIsComercial";
 import ModulosGridComercial from "@/components/comercial/comercial-launchpad/ModulosGridComercial";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import useComercialDerivedData from "@/components/comercial/hooks/useComercialDerivedData";
 import {
   COMERCIAL_COMPANY_LIMIT,
   COMERCIAL_EXTERNAL_LIMIT,
   COMERCIAL_LIST_LIMIT,
   COMERCIAL_SHORT_LIMIT,
-  comercialQueryDefaults,
 } from "@/components/comercial/config/comercialQueryConfig";
 
 const ClientesTab = React.lazy(() => import("../components/comercial/ClientesTab"));

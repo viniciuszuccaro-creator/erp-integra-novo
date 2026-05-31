@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -135,9 +135,10 @@ export default function PropagacaoIndex() {
     toast.info("Status resetado.");
   };
 
-  const entidadesFiltradas = filtroGrupo === "Todos"
-    ? ENTITIES
-    : ENTITIES.filter(e => e.grupo === filtroGrupo);
+  const entidadesFiltradas = useMemo(() =>
+    filtroGrupo === "Todos" ? ENTITIES : ENTITIES.filter(e => e.grupo === filtroGrupo),
+    [filtroGrupo]
+  );
 
   const okCount = Object.values(status).filter(s => s.status === "ok").length;
   const errCount = Object.values(status).filter(s => s.status === "error").length;

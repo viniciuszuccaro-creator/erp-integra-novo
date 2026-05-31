@@ -7,6 +7,7 @@
 import React, { Suspense, lazy } from "react";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import AdminHeader from "@/components/administracao-sistema/AdminHeader";
+import AdminSaudeBar from "@/components/administracao-sistema/AdminSaudeBar";
 import AdminTabs from "@/components/administracao-sistema/AdminTabs";
 import usePermissions from "@/components/lib/usePermissions";
 import { useUser } from "@/components/lib/UserContext";
@@ -63,6 +64,7 @@ export default function AdministracaoSistema() {
       <div className="w-full min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50/30">
         {/* Header sticky */}
         <AdminHeader />
+        <AdminSaudeBar />
 
         {/* Conteúdo principal */}
         <div className="flex-1 w-full overflow-auto">

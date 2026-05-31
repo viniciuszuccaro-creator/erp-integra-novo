@@ -29,11 +29,15 @@ const DOWN_ENTITIES = new Set([
   // Logística
   'Veiculo', 'Motorista', 'TipoFrete', 'RotaPadrao',
   // Financeiro
-  'ContaReceber', 'ContaPagar',
+  'ContaReceber', 'ContaPagar', 'CaixaMovimento', 'LancamentoContabil',
   // Comercial & Fiscal
-  'NotaFiscal', 'OrdemCompra',
+  'NotaFiscal', 'OrdemCompra', 'Pedido', 'Oportunidade', 'Comissao',
   // Entrega
-  'Entrega',
+  'Entrega', 'Romaneio',
+  // Produção
+  'OrdemProducao', 'ApontamentoProducao', 'InspecaoQualidade',
+  // CRM
+  'Interacao', 'Campanha',
 ]);
 
 // Entidades suportadas UP (Empresa → Grupo)

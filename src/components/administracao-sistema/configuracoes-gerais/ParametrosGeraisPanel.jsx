@@ -8,7 +8,7 @@ import React, { useState } from "react";
 import {
   Settings, ArrowDownUp, Shield, Bell, Globe, Zap, Package,
   DollarSign, Truck, ChevronDown, ChevronRight, Users, Briefcase,
-  ShoppingCart, BarChart3, FileText, Lock
+  ShoppingCart, BarChart3, FileText, Lock, MessageCircle, Monitor
 } from "lucide-react";
 import ToggleConfigGlobal from "@/components/sistema/ToggleConfigGlobal";
 
@@ -287,6 +287,50 @@ export default function ParametrosGeraisPanel() {
           <ToggleConfigGlobal configKey="bi_forecast_ativo"
             label="Previsões BI ativas"
             description="Habilitar módulo de forecast e previsões de negócio"
+            defaultValue={false} />
+          <ToggleConfigGlobal configKey="relatorio_multiempresa_ativo"
+            label="Modo multiempresa nos relatórios"
+            description="Filtrar relatórios por empresa específica ou grupo consolidado"
+            defaultValue={true} />
+        </Section>
+
+        {/* ─ Portal & Omnicanal ─ */}
+        <Section title="Portal & Omnicanal" icon={Monitor} defaultOpen={false} color="purple">
+          <ToggleConfigGlobal configKey="portal_cliente_ativo"
+            label="Portal do Cliente ativo"
+            description="Habilitar acesso de clientes ao portal self-service"
+            defaultValue={false} />
+          <ToggleConfigGlobal configKey="portal_aprovacao_orcamento"
+            label="Aprovação de orçamentos pelo portal"
+            description="Cliente pode aprovar orçamentos diretamente no portal"
+            defaultValue={false} />
+          <ToggleConfigGlobal configKey="omnicanal_ativo"
+            label="Hub de Atendimento Omnicanal"
+            description="Centralizar atendimento de WhatsApp, e-mail e chat"
+            defaultValue={false} />
+          <ToggleConfigGlobal configKey="chatbot_ativo"
+            label="Chatbot de atendimento ativo"
+            description="Resposta automática para atendimento inicial de clientes"
+            defaultValue={false} />
+        </Section>
+
+        {/* ─ Multiempresa Avançado ─ */}
+        <Section title="Multiempresa Avançado" icon={Globe} defaultOpen={false} color="blue">
+          <ToggleConfigGlobal configKey="multiempresa_modo_grupo"
+            label="Modo grupo ativo"
+            description="Visualizar e operar no contexto consolidado do grupo"
+            defaultValue={true} />
+          <ToggleConfigGlobal configKey="multiempresa_segregar_dados"
+            label="Segregar dados por empresa"
+            description="Cada empresa vê apenas seus próprios dados (exceto admins)"
+            defaultValue={true} />
+          <ToggleConfigGlobal configKey="multiempresa_transferencia_inter"
+            label="Transferência entre empresas"
+            description="Habilitar transferência de estoque/financeiro entre empresas"
+            defaultValue={false} />
+          <ToggleConfigGlobal configKey="multiempresa_rateio_automatico"
+            label="Rateio automático de despesas"
+            description="Distribuir despesas do grupo proporcionalmente entre empresas"
             defaultValue={false} />
         </Section>
 

@@ -24,6 +24,7 @@ const DashboardResumoTab       = React.lazy(() => import("@/components/dashboard
 const ERPHealthBanner          = React.lazy(() => import("@/components/dashboard/ERPHealthBanner"));
 const DashboardMultiempresaStatus = React.lazy(() => import("@/components/dashboard/DashboardMultiempresaStatus"));
 const DashboardMultiempresaBanner = React.lazy(() => import("@/components/dashboard/DashboardMultiempresaBanner"));
+const DashboardAlertsBar       = React.lazy(() => import("@/components/dashboard/DashboardAlertsBar"));
 
 
 export default function Dashboard() {
@@ -468,6 +469,19 @@ export default function Dashboard() {
           <Suspense fallback={<></>}>
             <ErrorBoundary>
               <DashboardMultiempresaBanner />
+            </ErrorBoundary>
+          </Suspense>
+        </div>
+        {/* Barra de alertas prioritários */}
+        <div>
+          <Suspense fallback={<></>}>
+            <ErrorBoundary>
+              <DashboardAlertsBar
+                produtosBaixoEstoque={produtosBaixoEstoque}
+                taxaInadimplencia={taxaInadimplencia}
+                pedidosAguardando={pedidosAguardandoAprovacao.length}
+                anomaliasCount={(iaConsolidado?.details || []).filter(a => a.severity === 'alto').length}
+              />
             </ErrorBoundary>
           </Suspense>
         </div>

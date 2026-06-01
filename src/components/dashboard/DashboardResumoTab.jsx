@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 
-// ─── Apenas widgets essenciais ────────────────────────────────────────────────
+// ─── Widgets essenciais ──────────────────────────────────────────────────────
 const StatsSection            = React.lazy(() => import("@/components/dashboard/StatsSection"));
 const KPIsOperacionaisSection = React.lazy(() => import("@/components/dashboard/KPIsOperacionaisSection"));
 const SecondaryKPIsSection    = React.lazy(() => import("@/components/dashboard/SecondaryKPIsSection"));
@@ -18,6 +18,8 @@ const PedidosResumoPanel      = React.lazy(() => import("@/components/dashboard/
 const FinancialSummary        = React.lazy(() => import("@/components/dashboard/FinancialSummary"));
 const QuickAccessModulesGrid  = React.lazy(() => import("@/components/dashboard/QuickAccessModulesGrid"));
 const WidgetEstoqueCritico    = React.lazy(() => import("@/components/estoque/WidgetEstoqueCritico"));
+const DashboardAcoesRapidas   = React.lazy(() => import("@/components/dashboard/DashboardAcoesRapidas"));
+const DashboardTopProdutos    = React.lazy(() => import("@/components/dashboard/DashboardTopProdutos"));
 
 const Skel = ({ h = 32 }) => (
   <div style={{ height: `${h * 4}px` }} className="rounded bg-slate-100 animate-pulse w-full" />
@@ -57,7 +59,9 @@ export default function DashboardResumoTab({
   previsoesIA,
   loadingPrevIA,
   canSeeFinanceiro,
+  canSeeCRM,
   canSeeEstoque,
+  canSeeExpedicao,
   onDrillDown,
   empresaId,
 }) {
@@ -77,8 +81,22 @@ export default function DashboardResumoTab({
       {/* KPIs operacionais */}
       <Slot Component={KPIsOperacionaisSection} fallbackH={20} componentProps={{ kpis: kpisOperacionais }} />
 
-      {/* KPIs secundários (clientes, produtos, colaboradores, etc.) */}
+      {/* KPIs secundários */}
       <Slot Component={SecondaryKPIsSection} fallbackH={16} componentProps={{ kpis: kpiCards }} />
+
+      {/* Ações rápidas contextuais */}
+      <Slot Component={DashboardAcoesRapidas} fallbackH={20} componentProps={{
+        pedidosAguardandoAprovacao,
+        produtosBaixoEstoque,
+        entregasPendentes: kpisOperacionais?.find?.(k => k.title?.includes('OTD'))?.subtitle?.split('/')?.[0] || 0,
+        receitasPendentes,
+        despesasPendentes,
+        canSeeComercial: true,
+        canSeeEstoque,
+        canSeeFinanceiro,
+        canSeeExpedicao: true,
+        onDrillDown,
+      }} />
 
       {/* Pedidos recentes + pendentes */}
       <Slot Component={PedidosResumoPanel} fallbackH={24} componentProps={{
@@ -88,7 +106,7 @@ export default function DashboardResumoTab({
         onVerTodos: () => onDrillDown(createPageUrl("Comercial")),
       }} />
 
-      {/* Resumo financeiro (a receber / a pagar / fluxo) */}
+      {/* Resumo financeiro */}
       <div style={{ display: canSeeFinanceiro ? undefined : 'none' }}>
         <Slot Component={FinancialSummary} fallbackH={20} componentProps={{
           receitasPendentes,
@@ -97,16 +115,22 @@ export default function DashboardResumoTab({
         }} />
       </div>
 
-      {/* Estoque crítico */}
-      <div style={{ display: canSeeEstoque ? undefined : 'none' }}>
-        <Slot Component={WidgetEstoqueCritico} fallbackH={20} componentProps={{
-          preds14Count: preds14,
-          count: produtosBaixoEstoque,
+      {/* Top Produtos + Estoque crítico (lado a lado) */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {canSeeEstoque && (
+          <Slot Component={WidgetEstoqueCritico} fallbackH={20} componentProps={{
+            preds14Count: preds14,
+            count: produtosBaixoEstoque,
+            onNavigate: () => onDrillDown(createPageUrl("Estoque")),
+          }} />
+        )}
+        <Slot Component={DashboardTopProdutos} fallbackH={20} componentProps={{
+          topProdutos,
           onNavigate: () => onDrillDown(createPageUrl("Estoque")),
         }} />
       </div>
 
-      {/* Anomalias Financeiras (resumo compacto) */}
+      {/* Anomalias Financeiras */}
       {canSeeFinanceiro && anomList.length > 0 && (
         <Card className="bg-white/80 backdrop-blur-sm">
           <CardHeader className="pb-2">

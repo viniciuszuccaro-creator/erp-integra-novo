@@ -10,6 +10,7 @@ import { useUser } from "@/components/lib/UserContext";
 import usePermissions from "@/components/lib/usePermissions";
 import { Button } from "@/components/ui/button";
 import KPIsRH from "@/components/rh/rh-launchpad/KPIsRH";
+const FeriasTab = React.lazy(() => import('@/components/rh/FeriasTab'));
 import VisualizadorUniversalEntidade from "@/components/cadastros/VisualizadorUniversalEntidade";
 import ColaboradorForm from "@/components/rh/ColaboradorForm";
 import ModulosGridRH from "@/components/rh/rh-launchpad/ModulosGridRH";
@@ -39,7 +40,7 @@ const ColaboradoresWindow = () => (
 );
 
 export default function RH() {
-  const { hasPermission, isLoading: loadingPermissions } = usePermissions();
+  const { hasPermission, canCreate, isLoading: loadingPermissions } = usePermissions();
   const canSeeRH = hasPermission('RH', null, 'visualizar');
   const { empresaAtual } = useContextoVisual();
   const { openWindow } = useWindow();
@@ -120,7 +121,7 @@ export default function RH() {
       description: 'Solicitações e aprovações',
       icon: Calendar,
       color: 'orange',
-      component: () => <div className="p-4">Gestão de Férias (em desenvolvimento)</div>,
+      component: FeriasTab,
       windowTitle: '🏖️ Férias',
       width: 1200,
       height: 700,
@@ -182,7 +183,15 @@ export default function RH() {
   return (
     <ProtectedSection module="RH" action="visualizar">
     <ErrorBoundary>
-      <ModuleLayout title="Recursos Humanos" subtitle="Colaboradores, ponto e indicadores" actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'rh_primary_action' })}>Novo Colaborador</Button></div>}>
+      <ModuleLayout title="Recursos Humanos" subtitle="Colaboradores, ponto e indicadores" actions={
+        <div className="flex items-center gap-2">
+          {canCreate('RH') && (
+            <Button size="sm" className="bg-purple-600 hover:bg-purple-700" onClick={() => openWindow(ColaboradorForm, { windowMode: true, onSuccess: () => {} }, { title: '👤 Novo Colaborador', width: 1200, height: 750 })}>
+              + Colaborador
+            </Button>
+          )}
+        </div>
+      }>
         <ModuleKPIs>
           <RHIAPanel colaboradores={colaboradores} pontos={pontos} ferias={ferias} />
           <KPIsRH

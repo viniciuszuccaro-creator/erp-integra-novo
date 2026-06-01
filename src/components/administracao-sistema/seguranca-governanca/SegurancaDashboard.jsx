@@ -2,8 +2,9 @@ import React from "react";
 import DashboardSeguranca from "@/components/sistema/DashboardSeguranca";
 import SecurityMetricsPanel from "./SecurityMetricsPanel";
 import Fase1StatusCard from "./Fase1StatusCard";
+import Fase2StatusCard from "./Fase2StatusCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Activity, CheckSquare } from "lucide-react";
+import { Shield, Activity, CheckSquare, Building2 } from "lucide-react";
 
 export default function SegurancaDashboard() {
   return (
@@ -18,7 +19,10 @@ export default function SegurancaDashboard() {
               <Shield className="w-3.5 h-3.5" /> Governança & Perfis
             </TabsTrigger>
             <TabsTrigger value="fase1" className="text-xs gap-1.5">
-              <CheckSquare className="w-3.5 h-3.5" /> Fase 1 — Checklist
+              <CheckSquare className="w-3.5 h-3.5" /> Fase 1 — Segurança
+            </TabsTrigger>
+            <TabsTrigger value="fase2" className="text-xs gap-1.5">
+              <Building2 className="w-3.5 h-3.5" /> Fase 2 — Multi-empresa
             </TabsTrigger>
           </TabsList>
         </div>
@@ -34,6 +38,9 @@ export default function SegurancaDashboard() {
         </TabsContent>
         <TabsContent value="fase1" className="flex-1 overflow-auto p-4 mt-0">
           <Fase1StatusCard />
+        </TabsContent>
+        <TabsContent value="fase2" className="flex-1 overflow-auto p-4 mt-0">
+          <Fase2StatusCard />
         </TabsContent>
       </Tabs>
     </div>

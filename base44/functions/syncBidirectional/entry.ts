@@ -62,6 +62,14 @@ async function fetchWithFallback(api, entityName, filter, limit = 500) {
   }
 }
 
+// In-memory idempotency map to prevent race conditions (TTL 30s)
+const _inflight = new Map();
+const RACE_TTL = 30_000;
+
+function makeKey(entityName, entityId, direction) {
+  return `${entityName}:${entityId || 'bulk'}:${direction}`;
+}
+
 Deno.serve(async (req) => {
   const t0 = Date.now();
   try {
@@ -80,10 +88,22 @@ Deno.serve(async (req) => {
     const direction = body?.direction || 'auto';
     const targetEmpresaId = body?.targetEmpresaId || null; // para sync específico
 
-    // Anti-loop
+    // Anti-loop (campo e_replicado)
     if (eventData?.e_replicado === true) {
       return Response.json({ ok: true, skipped: 'anti-loop' });
     }
+
+    // Anti-race-condition: bloqueia execuções simultâneas do mesmo registro
+    const raceKey = makeKey(entityName, entityId, direction);
+    const now = Date.now();
+    // Limpa entradas expiradas
+    for (const [k, ts] of _inflight.entries()) {
+      if (now - ts > RACE_TTL) _inflight.delete(k);
+    }
+    if (_inflight.has(raceKey)) {
+      return Response.json({ ok: true, skipped: 'race-condition-lock', key: raceKey });
+    }
+    _inflight.set(raceKey, now);
 
     if (!entityName) {
       return Response.json({ ok: false, reason: 'entityName obrigatório' }, { status: 400 });
@@ -211,6 +231,9 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Libera lock anti-race
+    _inflight.delete(raceKey);
+
     const dur = Date.now() - t0;
     const okCount = results.filter(r => ['created','updated','created_group','updated_group','deleted','deleted_from_group'].includes(r.status)).length;
     const errCount = results.filter(r => r.status?.includes('error')).length;
@@ -227,6 +250,11 @@ Deno.serve(async (req) => {
       duration_ms: dur,
     });
   } catch (error) {
+    // Garante liberação do lock mesmo em caso de erro
+    try {
+      const entityName = (await req.clone().json().catch(() => ({}))).entity_name || 'unknown';
+      _inflight.delete(makeKey(entityName, undefined, 'auto'));
+    } catch (_) {}
     return Response.json({ error: error.message }, { status: 500 });
   }
 });

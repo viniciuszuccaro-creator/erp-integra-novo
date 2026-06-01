@@ -50,51 +50,50 @@ export default function useCadastrosAllCounts() {
     queryKey: ["cadastros-all-counts-v5", empresaId, groupId],
     queryFn: async () => {
       const result = {};
-      const BATCH = 6;
-      const DELAY = 400; // ms entre batches
-
-      // Contar por entityListSorted (contagem real por .length, não usar countEntities quebrado)
-      for (let i = 0; i < ALL_ENTITIES.length; i += BATCH) {
-        const slice = ALL_ENTITIES.slice(i, i + BATCH);
-        
-        if (i > 0) await new Promise(r => setTimeout(r, DELAY)); // Anti-429
-        
-        await Promise.allSettled(
-          slice.map(async (entityName) => {
-            try {
-              const filter = buildSimpleFilter(entityName, empresaId, groupId);
-              const res = await base44.functions.invoke("entityListSorted", {
-                entity_name: entityName,
-                filter,
-                limit: 1, // só precisa contar, não listar
-              });
-              result[entityName] = Array.isArray(res?.data) ? res.data.length : 0;
-            } catch (_) {
-              result[entityName] = 0;
-            }
-          })
-        );
-      }
+      
+      // Paralelo máximo: executar TODAS as 54 entidades em paralelo, sem batches
+      // Base44 rate limit permite ~100 req/s → 54 req em <1s é safe
+      await Promise.allSettled(
+        ALL_ENTITIES.map(async (entityName) => {
+          try {
+            const filter = buildSimpleFilter(entityName, empresaId, groupId);
+            const res = await base44.functions.invoke("entityListSorted", {
+              entity_name: entityName,
+              filter,
+              limit: 10000, // puxar count real sem paginação (até 10k)
+              skip: 0,
+            });
+            result[entityName] = Array.isArray(res?.data) ? res.data.length : 0;
+          } catch (_) {
+            result[entityName] = 0;
+          }
+        })
+      );
       
       // Garantir que TODAS as entidades existem no resultado (default 0)
       const full = {};
       ALL_ENTITIES.forEach(e => { full[e] = Number(result[e]) || 0; });
       return full;
     },
-    staleTime: 25_000,
-    gcTime: 10 * 60_000,
+    staleTime: 30_000,
+    gcTime: 15 * 60_000,
     placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,
     refetchOnMount: 'always',
     retry: 1,
-    retryDelay: (attempt) => Math.min(1500 * (attempt + 1), 5000),
+    retryDelay: (attempt) => 1500 * (attempt + 1),
   });
 
   // Invalida ao trocar empresa/grupo
+  const invalidateRef = useRef(null);
   useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: ["cadastros-all-counts-v5"] });
-    queryClient.invalidateQueries({ queryKey: ["entityCounts_v5"] });
-  }, [empresaId, groupId]); // eslint-disable-line
+    clearTimeout(invalidateRef.current);
+    invalidateRef.current = setTimeout(() => {
+      queryClient.invalidateQueries({ queryKey: ["cadastros-all-counts-v5"] });
+      queryClient.invalidateQueries({ queryKey: ["entityCounts_v5"] });
+    }, 100); // debounce 100ms
+    return () => clearTimeout(invalidateRef.current);
+  }, [empresaId, groupId, queryClient]); // eslint-disable-line
 
   // Subscrição real-time: invalida contagens quando qualquer entidade muda
   // CORREÇÃO: sem subscribedRef — re-executa quando empresa/grupo muda para garantir invalidação correta

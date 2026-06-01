@@ -50,32 +50,37 @@ export default function useCadastrosAllCounts() {
     queryKey: ["cadastros-all-counts-v6", empresaId, groupId],
     queryFn: async () => {
       const result = {};
+      const BATCH_SIZE = 6;      // 6 por vez → seguro contra 429
+      const BATCH_DELAY = 180;   // 180ms entre batches → ~54 entidades em ~1.8s
 
-      // SDK DIRETO (sem overhead de funções backend serverless → 5x mais rápido)
-      await Promise.allSettled(
-        ALL_ENTITIES.map(async (entityName) => {
-          try {
-            const api = base44.entities?.[entityName];
-            if (!api?.filter) { result[entityName] = 0; return; }
-            const filter = buildSimpleFilter(entityName, empresaId, groupId);
-            const rows = await api.filter(filter, '-created_date', 9999);
-            result[entityName] = Array.isArray(rows) ? rows.length : 0;
-          } catch (_) {
-            result[entityName] = 0;
-          }
-        })
-      );
+      for (let i = 0; i < ALL_ENTITIES.length; i += BATCH_SIZE) {
+        if (i > 0) await new Promise(r => setTimeout(r, BATCH_DELAY));
+        const batch = ALL_ENTITIES.slice(i, i + BATCH_SIZE);
+        await Promise.allSettled(
+          batch.map(async (entityName) => {
+            try {
+              const api = base44.entities?.[entityName];
+              if (!api?.filter) { result[entityName] = 0; return; }
+              const filter = buildSimpleFilter(entityName, empresaId, groupId);
+              const rows = await api.filter(filter, '-created_date', 9999);
+              result[entityName] = Array.isArray(rows) ? rows.length : 0;
+            } catch (_) {
+              result[entityName] = 0;
+            }
+          })
+        );
+      }
 
       const full = {};
       ALL_ENTITIES.forEach(e => { full[e] = Number(result[e]) || 0; });
       return full;
     },
-    staleTime: 60_000,
-    gcTime: 20 * 60_000,
+    staleTime: 5 * 60_000,       // 5 min — não re-fetch desnecessário
+    gcTime: 30 * 60_000,
     placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    retry: 0,
+    refetchOnMount: false,        // usa cache entre navegações
+    retry: 0,                     // sem retry — evita duplicar 429
   });
 
   // Invalida ao trocar empresa/grupo (debounce)

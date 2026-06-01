@@ -173,46 +173,16 @@ export default function usePermissions() {
     const modNode = getRootNode(perms, module);
     if (!modNode) return false;
 
-    // Se não houver seção especificada, verifica ação em qualquer subnível direto
+    // Se não houver seção especificada, verifica ação em qualquer subnível
     if (!section) {
       return nodeHasAction(modNode, desired);
-      return Object.values(modNode).some((node) => {
-        if (Array.isArray(node)) return node.includes(desired) || (desired === 'visualizar' && node.includes('ver'));
-        // Caso node seja objeto, verifica se algum filho é array com a ação
-        if (node && typeof node === 'object') {
-          return Object.values(node).some((v) => Array.isArray(v) && (v.includes(desired) || (desired === 'visualizar' && v.includes('ver'))));
-        }
-        return false;
-      });
     }
 
     // Suporta paths hierárquicos: "Pedidos.Financeiro.margens" ou ["Pedidos","Financeiro","margens"]
     const path = Array.isArray(section) ? section : String(section).split('.').filter(Boolean);
-    let cursor = getNodeByPath(modNode, path);
+    const cursor = getNodeByPath(modNode, path);
     if (cursor == null) return false;
     return nodeHasAction(cursor, desired);
-
-    if (!cursor) return false;
-
-    if (Array.isArray(cursor)) {
-      return cursor.includes(desired) || (desired === 'visualizar' && cursor.includes('ver'));
-    }
-
-    // Se o nó final ainda for um objeto, aceite se QUALQUER folha trouxer a ação
-    if (typeof cursor === 'object') {
-      const stack = [cursor];
-      while (stack.length) {
-        const node = stack.pop();
-        if (Array.isArray(node)) {
-          if (node.includes(desired) || (desired === 'visualizar' && node.includes('ver'))) return true;
-        } else if (node && typeof node === 'object') {
-          Object.values(node).forEach((v) => stack.push(v));
-        }
-      }
-      return false;
-    }
-
-    return false;
   };
 
   // Helpers específicos para granularidade

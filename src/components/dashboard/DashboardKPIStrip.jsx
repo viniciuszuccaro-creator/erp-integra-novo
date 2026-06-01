@@ -3,7 +3,7 @@
  * Compacto, responsivo, clicável (drill-down)
  */
 import React from "react";
-import { DollarSign, TrendingUp, AlertCircle, Truck, Package, CheckCircle } from "lucide-react";
+import { DollarSign, TrendingUp, AlertCircle, Truck, Package, CheckCircle, ShoppingCart, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -33,6 +33,8 @@ export default function DashboardKPIStrip({
   produtosBaixoEstoque = 0,
   otd = 0,
   taxaInadimplencia = 0,
+  totalPedidos = 0,
+  clientesAtivos = 0,
 }) {
   const fmt = (v) => `R$\u00a0${v.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
@@ -87,10 +89,26 @@ export default function DashboardKPIStrip({
       to: createPageUrl("Financeiro"),
       alert: taxaInadimplencia >= 10,
     },
+    {
+      label: "Pedidos",
+      value: totalPedidos,
+      icon: ShoppingCart,
+      color: "text-cyan-700",
+      bg: "bg-cyan-50",
+      to: createPageUrl("Comercial"),
+    },
+    {
+      label: "Clientes Ativos",
+      value: clientesAtivos,
+      icon: Users,
+      color: "text-violet-700",
+      bg: "bg-violet-50",
+      to: createPageUrl("Comercial"),
+    },
   ];
 
   return (
-    <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+    <div className="w-full grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
       {chips.map((c) => (
         <KPIChip key={c.label} {...c} />
       ))}

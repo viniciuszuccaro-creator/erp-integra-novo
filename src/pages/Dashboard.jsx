@@ -511,6 +511,8 @@ export default function Dashboard() {
                 produtosBaixoEstoque={produtosBaixoEstoque}
                 otd={otd}
                 taxaInadimplencia={taxaInadimplencia}
+                totalPedidos={pedidos.length}
+                clientesAtivos={clientesAtivos}
               />
             </ErrorBoundary>
           </Suspense>

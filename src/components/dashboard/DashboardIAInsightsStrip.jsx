@@ -39,31 +39,31 @@ export default function DashboardIAInsightsStrip({ anomaliasIA = {}, previsoesIA
     );
   }
 
-  const hasData = altas > 0 || medias > 0 || preds > 0;
-  if (!hasData) return null;
-
   return (
-    <div className="w-full">
+    <div className="w-full bg-gradient-to-r from-purple-50/60 to-blue-50/60 border border-purple-100 rounded-xl p-3">
       <div className="flex items-center gap-2 mb-2">
         <Brain className="w-4 h-4 text-purple-600" />
-        <span className="text-xs font-semibold text-purple-700">Insights IA</span>
+        <span className="text-xs font-semibold text-purple-700">IA Insights</span>
         <Badge className="bg-purple-100 text-purple-700 text-[10px] px-1.5 py-0">
           <Sparkles className="w-2.5 h-2.5 mr-1 inline" />Tempo real
         </Badge>
+        {loading && <span className="text-[10px] text-purple-400 animate-pulse ml-1">analisando...</span>}
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-        {altas > 0 && (
+        {altas > 0 ? (
           <InsightCard icon={AlertCircle} title="Anomalias Críticas" value={`${altas} detectada${altas > 1 ? 's' : ''}`} severity="critical" />
+        ) : (
+          <InsightCard icon={Sparkles} title="Anomalias" value="Nenhuma crítica" severity="ok" />
         )}
         {medias > 0 && (
           <InsightCard icon={AlertCircle} title="Anomalias Médias" value={`${medias} detectada${medias > 1 ? 's' : ''}`} severity="warning" />
         )}
-        {preds > 0 && (
-          <InsightCard icon={TrendingDown} title="Ruptura de Estoque" value={`${preds} produto${preds > 1 ? 's' : ''} em risco`} severity="warning" />
+        {preds > 0 ? (
+          <InsightCard icon={TrendingDown} title="Ruptura Estoque" value={`${preds} produto${preds > 1 ? 's' : ''} em risco`} severity="warning" />
+        ) : (
+          <InsightCard icon={Sparkles} title="Ruptura Estoque" value="Estoque estável" severity="ok" />
         )}
-        {altas === 0 && medias === 0 && preds === 0 && (
-          <InsightCard icon={Sparkles} title="Status IA" value="Tudo normal" severity="ok" />
-        )}
+        <InsightCard icon={Sparkles} title="Status Geral IA" value={altas === 0 && preds === 0 ? "Operação normal" : "Requer atenção"} severity={altas === 0 && preds === 0 ? "ok" : "warning"} />
       </div>
     </div>
   );

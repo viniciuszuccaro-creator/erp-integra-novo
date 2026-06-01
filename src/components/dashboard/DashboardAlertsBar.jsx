@@ -35,8 +35,20 @@ export default function DashboardAlertsBar({
   taxaInadimplencia = 0,
   pedidosAguardando = 0,
   anomaliasCount = 0,
+  vencendoHoje = 0,
 }) {
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(() => {
+    try {
+      const ts = Number(localStorage.getItem('alerts_dismissed_at') || 0);
+      // Auto-reexibir após 15 minutos
+      return ts > 0 && Date.now() - ts < 15 * 60 * 1000;
+    } catch { return false; }
+  });
+
+  const handleDismiss = () => {
+    try { localStorage.setItem('alerts_dismissed_at', String(Date.now())); } catch (_) {}
+    setDismissed(true);
+  };
 
   const alerts = [
     produtosBaixoEstoque > 0 && {
@@ -54,9 +66,14 @@ export default function DashboardAlertsBar({
       message: `${pedidosAguardando} pedido${pedidosAguardando > 1 ? 's' : ''} aguardando aprovação`,
       to: createPageUrl("Comercial"),
     },
+    vencendoHoje > 0 && {
+      type: "inadimplencia",
+      message: `${vencendoHoje} conta${vencendoHoje > 1 ? 's' : ''} vencendo hoje`,
+      to: createPageUrl("Financeiro"),
+    },
     anomaliasCount > 0 && {
       type: "anomalia",
-      message: `${anomaliasCount} anomalia${anomaliasCount > 1 ? 's' : ''} financeira${anomaliasCount > 1 ? 's' : ''} detectada${anomaliasCount > 1 ? 's' : ''}`,
+      message: `${anomaliasCount} anomalia${anomaliasCount > 1 ? 's' : ''} detectada${anomaliasCount > 1 ? 's' : ''}`,
       to: createPageUrl("Financeiro"),
     },
   ].filter(Boolean);
@@ -70,7 +87,7 @@ export default function DashboardAlertsBar({
       <div className="flex flex-wrap gap-2 flex-1 min-w-0">
         {alerts.map((a, i) => <AlertChip key={i} {...a} />)}
       </div>
-      <button onClick={() => setDismissed(true)} className="ml-auto flex-shrink-0 text-slate-400 hover:text-slate-600">
+      <button onClick={handleDismiss} className="ml-auto flex-shrink-0 text-slate-400 hover:text-slate-600">
         <X className="w-4 h-4" />
       </button>
     </div>

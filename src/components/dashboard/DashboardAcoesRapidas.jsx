@@ -4,7 +4,7 @@
  */
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ShoppingCart, Package, DollarSign, Truck, Users, AlertTriangle, CheckCircle, PlusCircle, FileText, TrendingUp } from "lucide-react";
+import { ShoppingCart, Package, DollarSign, Truck, Users, AlertTriangle, CheckCircle, PlusCircle, FileText, TrendingUp, BarChart2, UserPlus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,7 @@ export default function DashboardAcoesRapidas({
   canSeeEstoque = true,
   canSeeFinanceiro = true,
   canSeeExpedicao = true,
+  canSeeCRM = true,
   onDrillDown,
 }) {
   const navigate = useNavigate();
@@ -110,6 +111,22 @@ export default function DashboardAcoesRapidas({
       color: "text-indigo-600",
       bg: "bg-indigo-50",
       onClick: () => go("/estoque"),
+    },
+    canSeeCRM && {
+      icon: UserPlus,
+      label: "Novo Cliente",
+      desc: "Cadastrar cliente no CRM",
+      color: "text-cyan-600",
+      bg: "bg-cyan-50",
+      onClick: () => go("/crm"),
+    },
+    {
+      icon: BarChart2,
+      label: "Relatórios",
+      desc: "Análises e indicadores",
+      color: "text-slate-600",
+      bg: "bg-slate-50",
+      onClick: () => go("/relatorios"),
     },
   ].filter(Boolean);
 

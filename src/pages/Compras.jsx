@@ -189,6 +189,9 @@ export default function Compras() {
             fornecedoresAtivos={fornecedoresAtivos}
             totalOrdens={ordensCompra.length}
             totalCompras={totalCompras}
+            ocsPendentes={ocsPendentes}
+            valorEmAberto={valorEmAberto}
+            solicitacoesPendentes={solicitacoesPendentes}
           />
         </ModuleKPIs>
         <ModuleContent>

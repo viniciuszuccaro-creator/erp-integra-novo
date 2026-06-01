@@ -1,6 +1,6 @@
 import React, { startTransition } from "react";
 import { base44 } from "@/api/base44Client";
-import { TrendingUp, Target, MessageSquare, Sparkles, AlertTriangle } from "lucide-react";
+import { TrendingUp, Target, MessageSquare, Sparkles, AlertTriangle, Megaphone, PlusCircle } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
@@ -19,13 +19,13 @@ import useCRMDerivedData from "@/components/crm/hooks/useCRMDerivedData";
 import CRMIAPanel from "@/components/crm/CRMIAPanel";
 import CRMScoreClienteWidget from "@/components/crm/CRMScoreClienteWidget";
 import { CRM_CAMPAIGN_LIMIT, CRM_LIST_LIMIT } from "@/components/crm/config/crmQueryConfig";
-const OportunidadeForm = React.lazy(() => import("../components/crm/OportunidadeForm"));
 
 const OportunidadesListagem = React.lazy(() => import("../components/crm/OportunidadesListagem"));
 const InteracoesListagem = React.lazy(() => import("../components/crm/InteracoesListagem"));
 const FunilVisual = React.lazy(() => import("../components/crm/FunilVisual"));
 const IALeadsPriorizacao = React.lazy(() => import("../components/crm/IALeadsPriorizacao"));
 const IAChurnDetection = React.lazy(() => import("../components/crm/IAChurnDetection"));
+const OportunidadeForm = React.lazy(() => import("../components/crm/OportunidadeForm"));
 
 export default function CRMPage() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
@@ -53,6 +53,9 @@ export default function CRMPage() {
   );
 
   const { totalOportunidades, oportunidadesAbertas, valorPipeline, valorPonderado, taxaConversao } = useCRMDerivedData({ oportunidades });
+
+  const campanhasAtivas = campanhas.filter(c => c.status === 'Ativa' || c.status === 'Em andamento').length;
+  const clientesAtivos = clientes.filter(c => c.status === 'Ativo').length;
 
   if (loadingPermissions) {
     return (
@@ -129,6 +132,18 @@ export default function CRMPage() {
       height: 800,
       props: { clientes, windowMode: true }
     },
+    {
+      title: 'Campanhas',
+      description: `${campanhasAtivas} ativas`,
+      icon: Megaphone,
+      color: 'pink',
+      component: React.lazy(() => import('../components/crm/CampanhaForm')),
+      windowTitle: '📣 Campanhas CRM',
+      width: 1200,
+      height: 750,
+      props: { windowMode: true },
+      badge: campanhasAtivas > 0 ? `${campanhasAtivas} ativas` : null,
+    },
   ];
 
   const handleModuleClick = (module) => {
@@ -167,8 +182,8 @@ export default function CRMPage() {
     <ErrorBoundary>
       <ModuleLayout title="CRM - Relacionamento" subtitle="Relacionamento, funil e campanhas" actions={
         <div className="flex items-center gap-2">
-          <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700" onClick={() => openWindow(OportunidadeForm, { windowMode: true, onSubmit: async (data) => { await base44.entities.Oportunidade.create(data); } }, { title: '🎯 Nova Oportunidade', width: 900, height: 650, uniqueKey: 'nova-oportunidade' })}>
-            + Oportunidade
+          <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => openWindow(OportunidadeForm, { windowMode: true, onSuccess: () => {} }, { title: '🎯 Nova Oportunidade', width: 1000, height: 700 })}>
+            <PlusCircle className="w-4 h-4 mr-1" /> Oportunidade
           </Button>
         </div>
       }>
@@ -181,8 +196,8 @@ export default function CRMPage() {
             valorPipeline={valorPipeline}
             valorPonderado={valorPonderado}
             taxaConversao={taxaConversao}
-            totalClientes={clientes.length}
-            totalInteracoes={interacoes.length}
+            totalClientes={clientesAtivos}
+            campanhasAtivas={campanhasAtivas}
           />
         </ModuleKPIs>
         <ModuleContent>

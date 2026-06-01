@@ -19,6 +19,7 @@ import useCRMDerivedData from "@/components/crm/hooks/useCRMDerivedData";
 import CRMIAPanel from "@/components/crm/CRMIAPanel";
 import CRMScoreClienteWidget from "@/components/crm/CRMScoreClienteWidget";
 import { CRM_CAMPAIGN_LIMIT, CRM_LIST_LIMIT } from "@/components/crm/config/crmQueryConfig";
+const OportunidadeForm = React.lazy(() => import("../components/crm/OportunidadeForm"));
 
 const OportunidadesListagem = React.lazy(() => import("../components/crm/OportunidadesListagem"));
 const InteracoesListagem = React.lazy(() => import("../components/crm/InteracoesListagem"));
@@ -164,7 +165,13 @@ export default function CRMPage() {
   return (
     <ProtectedSection module="CRM" action="visualizar">
     <ErrorBoundary>
-      <ModuleLayout title="CRM - Relacionamento" subtitle="Relacionamento, funil e campanhas" actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'crm_primary_action' })}>Novo</Button></div>}>
+      <ModuleLayout title="CRM - Relacionamento" subtitle="Relacionamento, funil e campanhas" actions={
+        <div className="flex items-center gap-2">
+          <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700" onClick={() => openWindow(OportunidadeForm, { windowMode: true, onSubmit: async (data) => { await base44.entities.Oportunidade.create(data); } }, { title: '🎯 Nova Oportunidade', width: 900, height: 650, uniqueKey: 'nova-oportunidade' })}>
+            + Oportunidade
+          </Button>
+        </div>
+      }>
         <ModuleKPIs>
           <CRMIAPanel oportunidades={oportunidades} clientes={clientes} interacoes={interacoes} />
           <CRMScoreClienteWidget compact />
@@ -174,6 +181,8 @@ export default function CRMPage() {
             valorPipeline={valorPipeline}
             valorPonderado={valorPonderado}
             taxaConversao={taxaConversao}
+            totalClientes={clientes.length}
+            totalInteracoes={interacoes.length}
           />
         </ModuleKPIs>
         <ModuleContent>

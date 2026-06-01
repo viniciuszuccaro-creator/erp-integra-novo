@@ -1,6 +1,6 @@
 import React, { startTransition } from "react";
 import { base44 } from "@/api/base44Client";
-import { Users, ShoppingCart, FileText, Upload } from "lucide-react";
+import { Users, ShoppingCart, FileText, Upload, Brain, Star } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
@@ -22,6 +22,7 @@ const SolicitacoesCompraTab = React.lazy(() => import("../components/compras/Sol
 const CotacoesTab = React.lazy(() => import("../components/compras/CotacoesTab"));
 const ImportacaoNFeRecebimento = React.lazy(() => import("../components/compras/ImportacaoNFeRecebimento"));
 const OrdemCompraForm = React.lazy(() => import("../components/compras/OrdemCompraForm"));
+const ComprasIAInsights = React.lazy(() => import("../components/compras/ComprasIAInsights"));
 
 export default function Compras() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
@@ -55,7 +56,9 @@ export default function Compras() {
     .reduce((sum, o) => sum + (o.valor_total || 0), 0);
 
   const fornecedoresAtivos = fornecedores.filter(f => f.status === 'Ativo').length;
-  const solicitacoesPendentes = solicitacoes.filter(s => s.status === 'Pendente').length; 
+  const solicitacoesPendentes = solicitacoes.filter(s => s.status === 'Pendente').length;
+  const ocsPendentes = ordensCompra.filter(o => ['Rascunho','Enviada','Aguardando Aprovação'].includes(o.status)).length;
+  const valorEmAberto = ordensCompra.filter(o => o.status === 'Aprovada').reduce((s, o) => s + (o.valor_total || 0), 0); 
 
   if (loadingPermissions) {
     return (
@@ -120,9 +123,31 @@ export default function Compras() {
       height: 850,
       props: { ordensCompra, fornecedores, empresas, isLoading: false }
     },
+    {
+      title: 'IA Compras',
+      description: 'Insights e sugestões',
+      icon: Brain,
+      color: 'violet',
+      component: ComprasIAInsights,
+      windowTitle: '🤖 IA de Compras',
+      width: 1400,
+      height: 800,
+      props: { fornecedores, ordensCompra, solicitacoes, windowMode: true }
+    },
+    {
+      title: 'Avaliação Fornecedor',
+      description: 'Score e desempenho',
+      icon: Star,
+      color: 'amber',
+      component: React.lazy(() => import('../components/compras/AvaliacaoFornecedorForm')),
+      windowTitle: '⭐ Avaliação de Fornecedor',
+      width: 1200,
+      height: 700,
+      props: { fornecedores, windowMode: true }
+    },
   ];
 
-  const allowedModules = modules.filter(m => hasPermission('Compras', (m.sectionKey || m.title), 'ver'));
+  const allowedModules = modules.filter(m => hasPermission('Compras', (m.sectionKey || m.title), 'visualizar') || hasPermission('Compras', null, 'visualizar'));
 
   const handleModuleClick = (module) => {
     startTransition(() => {

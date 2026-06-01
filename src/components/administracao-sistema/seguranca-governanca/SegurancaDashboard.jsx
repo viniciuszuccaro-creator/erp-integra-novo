@@ -3,8 +3,9 @@ import DashboardSeguranca from "@/components/sistema/DashboardSeguranca";
 import SecurityMetricsPanel from "./SecurityMetricsPanel";
 import Fase1StatusCard from "./Fase1StatusCard";
 import Fase2StatusCard from "./Fase2StatusCard";
+import Fase3StatusCard from "./Fase3StatusCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Activity, CheckSquare, Building2 } from "lucide-react";
+import { Shield, Activity, CheckSquare, Building2, GitMerge } from "lucide-react";
 
 export default function SegurancaDashboard() {
   return (
@@ -24,6 +25,9 @@ export default function SegurancaDashboard() {
             <TabsTrigger value="fase2" className="text-xs gap-1.5">
               <Building2 className="w-3.5 h-3.5" /> Fase 2 — Multi-empresa
             </TabsTrigger>
+            <TabsTrigger value="fase3" className="text-xs gap-1.5">
+              <GitMerge className="w-3.5 h-3.5" /> Fase 3 — Orquestração
+            </TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="metricas" className="flex-1 overflow-auto p-4 mt-0">
@@ -41,6 +45,9 @@ export default function SegurancaDashboard() {
         </TabsContent>
         <TabsContent value="fase2" className="flex-1 overflow-auto p-4 mt-0">
           <Fase2StatusCard />
+        </TabsContent>
+        <TabsContent value="fase3" className="flex-1 overflow-auto p-4 mt-0">
+          <Fase3StatusCard />
         </TabsContent>
       </Tabs>
     </div>

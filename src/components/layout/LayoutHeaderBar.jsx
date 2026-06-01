@@ -9,18 +9,14 @@ import AtalhosTecladoInfo from '@/components/sistema/AtalhosTecladoInfo';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher';
 import AcoesRapidasGlobal from '@/components/AcoesRapidasGlobal';
 import NotificationCenter from '@/components/NotificationCenter';
-import usePermissions from '@/components/lib/usePermissions';
 
 export default function LayoutHeaderBar({
   pesquisaOpen,
   setPesquisaOpen,
-  handleIAEstoque,
-  handleIAFinanceiro,
   isOffline,
   contexto,
   empresaAtual,
 }) {
-  const { hasPermission } = usePermissions();
 
   return (
     <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 px-6 py-4 sticky top-0 z-10">
@@ -55,28 +51,6 @@ export default function LayoutHeaderBar({
           <LanguageSwitcher />
           <AcoesRapidasGlobal />
           <NotificationCenter />
-
-          <button
-            onClick={handleIAEstoque}
-            className="px-2 py-1 rounded-lg hover:bg-slate-100 text-sm text-slate-600"
-            title="Previsões de Estoque (IA)"
-            style={{ display: hasPermission('Estoque', null, 'visualizar') ? undefined : 'none' }}
-          >
-            IA Estoque
-          </button>
-
-          <button
-            onClick={handleIAFinanceiro}
-            className="px-2 py-1 rounded-lg hover:bg-slate-100 text-sm text-slate-600"
-            title="Anomalias Financeiras (IA)"
-            style={{ display: hasPermission('Financeiro', null, 'visualizar') ? undefined : 'none' }}
-          >
-            IA Financeiro
-          </button>
-
-          <Link to={createPageUrl('Comercial')} className="px-2 py-1 rounded-lg hover:bg-slate-100 text-sm text-slate-600" title="Funil e KPIs Comerciais" style={{ display: hasPermission('Comercial', null, 'visualizar') ? undefined : 'none' }}>
-            Funil/KPIs
-          </Link>
 
           <Link to={createPageUrl('ConfiguracoesUsuario')}>
             <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">

@@ -1119,12 +1119,9 @@ function LayoutContent({ children, currentPageName }) {
           <LayoutHeaderBar
             pesquisaOpen={pesquisaOpen}
             setPesquisaOpen={setPesquisaOpen}
-            handleIAEstoque={handleIAEstoque}
-            handleIAFinanceiro={handleIAFinanceiro}
             isOffline={isOffline}
             contexto={contexto}
             empresaAtual={empresaAtual}
-            integracoesOk={integracoesOk}
           />
 
           <LayoutMainContent

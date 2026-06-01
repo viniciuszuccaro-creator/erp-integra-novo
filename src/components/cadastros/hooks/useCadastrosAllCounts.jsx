@@ -49,49 +49,45 @@ export default function useCadastrosAllCounts() {
   const { data, isLoading } = useQuery({
     queryKey: ["cadastros-all-counts-v5", empresaId, groupId],
     queryFn: async () => {
-      const entities = ALL_ENTITIES.map(entityName => ({
-        entityName,
-        filter: buildSimpleFilter(entityName, empresaId, groupId),
-      }));
-
-      // Tentativa 1: batch completo (WINDOW=2 no backend, ~54/2 * 500ms ≈ 13s max)
-      try {
-        const res = await base44.functions.invoke("countEntities", { entities });
-        const raw = res?.data?.counts || res?.data || {};
-        if (raw && typeof raw === 'object' && Object.keys(raw).length > 0) {
-          // Garantir que TODAS as entidades estão no resultado (default 0)
-          const full = {};
-          ALL_ENTITIES.forEach(e => { full[e] = Number(raw[e]) || 0; });
-          return full;
-        }
-      } catch (_) {}
-
-      // Tentativa 2: batches de 8 com delay anti-429
       const result = {};
-      const BATCH = 8;
-      for (let i = 0; i < entities.length; i += BATCH) {
-        const slice = entities.slice(i, i + BATCH);
-        try {
-          if (i > 0) await new Promise(r => setTimeout(r, 600));
-          const res = await base44.functions.invoke("countEntities", { entities: slice });
-          const raw = res?.data?.counts || res?.data || {};
-          Object.assign(result, raw);
-        } catch (_) {
-          slice.forEach(e => { result[e.entityName] = result[e.entityName] ?? 0; });
-        }
+      const BATCH = 6;
+      const DELAY = 400; // ms entre batches
+
+      // Contar por entityListSorted (contagem real por .length, não usar countEntities quebrado)
+      for (let i = 0; i < ALL_ENTITIES.length; i += BATCH) {
+        const slice = ALL_ENTITIES.slice(i, i + BATCH);
+        
+        if (i > 0) await new Promise(r => setTimeout(r, DELAY)); // Anti-429
+        
+        await Promise.allSettled(
+          slice.map(async (entityName) => {
+            try {
+              const filter = buildSimpleFilter(entityName, empresaId, groupId);
+              const res = await base44.functions.invoke("entityListSorted", {
+                entity_name: entityName,
+                filter,
+                limit: 1, // só precisa contar, não listar
+              });
+              result[entityName] = Array.isArray(res?.data) ? res.data.length : 0;
+            } catch (_) {
+              result[entityName] = 0;
+            }
+          })
+        );
       }
-      // Normalização final: garante que TODAS as entidades têm valor (default 0)
+      
+      // Garantir que TODAS as entidades existem no resultado (default 0)
       const full = {};
       ALL_ENTITIES.forEach(e => { full[e] = Number(result[e]) || 0; });
       return full;
     },
-    staleTime: 20_000,
+    staleTime: 25_000,
     gcTime: 10 * 60_000,
     placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,
     refetchOnMount: 'always',
-    retry: 2,
-    retryDelay: (attempt) => Math.min(2000 * (attempt + 1), 8000),
+    retry: 1,
+    retryDelay: (attempt) => Math.min(1500 * (attempt + 1), 5000),
   });
 
   // Invalida ao trocar empresa/grupo

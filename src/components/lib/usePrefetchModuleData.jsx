@@ -61,14 +61,11 @@ export function usePrefetchModuleData() {
         queryKey: qKey,
         queryFn: async () => {
           try {
-            const res = await base44.functions.invoke('entityListSorted', {
-              entityName,
-              filter: ctxFilter,
-              sortField,
-              sortDirection,
-              limit: PREFETCH_LIMIT,
-            });
-            return Array.isArray(res?.data) ? res.data : [];
+            const api = base44.entities?.[entityName];
+            if (!api?.filter) return [];
+            const sortPrefix = sortDirection === 'asc' ? '' : '-';
+            const rows = await api.filter(ctxFilter, `${sortPrefix}${sortField}`, PREFETCH_LIMIT);
+            return Array.isArray(rows) ? rows : [];
           } catch (_) { return []; }
         },
         staleTime: PREFETCH_STALE_MS,

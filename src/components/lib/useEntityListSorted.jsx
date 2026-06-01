@@ -100,116 +100,48 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
     queryKey: ["entityListSorted", entityName, stableStringify(filtroFinal || {}), finalSortField, finalSortDirection, limit, page, pageSize],
     queryFn: async () => {
       const filtro = filtroFinal;
-
       const effLimit = Math.max(1, Math.min((typeof limit === 'number' && limit > 0) ? limit : pageSize, 500));
       const effSkip = (typeof page === 'number' && typeof pageSize === 'number') ? Math.max(0, (Math.max(1, page) - 1) * pageSize) : 0;
-
       const key = stableStringify({ entityName, filtro, finalSortField, finalSortDirection, limit: effLimit, skip: effSkip });
-      if (__elsInflight.has(key)) {
-        return __elsInflight.get(key);
-      }
+
+      // Dedupe: se já há uma chamada em voo para essa query exata, aguarda ela
+      if (__elsInflight.has(key)) return __elsInflight.get(key);
 
       const exec = async () => {
-        // Serializa globalmente para evitar bursts concorrentes entre módulos
-        if (__elsGlobalState.busy === true) {
-          const startWait = Date.now();
-          while (__elsGlobalState.busy === true && Date.now() - startWait < 4000) {
-            await new Promise(r => setTimeout(r, 120));
-          }
-        }
-        if (__elsEntityBusy.get(entityName) === true) {
-          const startWait = Date.now();
-          while (__elsEntityBusy.get(entityName) === true && Date.now() - startWait < 2500) {
-            await new Promise(r => setTimeout(r, 120));
-          }
-        }
-        __elsGlobalState.busy = true;
-        __elsEntityBusy.set(entityName, true);
+        try {
+          // SDK DIRETO — sem overhead de função backend serverless
+          const api = base44.entities?.[entityName];
+          if (!api?.filter) return [];
 
-        // Throttle por entidade
-        const now = Date.now();
-        const last = __elsLastCallAt.get(entityName) || 0;
-        const since = now - last;
-        const globalSince = now - (__elsGlobalState.lastCallAt || 0);
-        const minGap = 9000; // proteção anti-rate-limit por entidade
-        const globalMinGap = 1800; // proteção anti-rate-limit entre entidades
-        const cooldown = __elsCooldownUntil.get(entityName) || 0;
-        const waitMs = Math.max(0, __elsGlobalState.cooldownUntil - now, cooldown - now, since < minGap ? (minGap - since) : 0, globalSince < globalMinGap ? (globalMinGap - globalSince) : 0);
-        if (waitMs > 0) {
-          await new Promise(r => setTimeout(r, waitMs));
-        }
+          const sortPrefix = finalSortDirection === 'asc' ? '' : '-';
+          const sortParam = `${sortPrefix}${finalSortField}`;
+          const rows = await api.filter(filtro, sortParam, effLimit, effSkip);
+          const out = Array.isArray(rows) ? rows : [];
 
-        let attempt = 0;
-        while (true) {
+          __elsCache.set(key, out);
+          __elsCache.set(cacheKey, out);
+          idbSet(idbKey, out, 10 * 60 * 1000).catch(() => {});
+          return out;
+        } catch (_) {
+          // Fallback: cache em memória → IDB
+          if (__elsCache.has(key)) return __elsCache.get(key);
           try {
-            const res = await base44.functions.invoke("entityListSorted", {
-              entityName,
-              filter: filtro,
-              sortField: finalSortField,
-              sortDirection: finalSortDirection,
-              limit: effLimit,
-              skip: effSkip,
-              __headers: { 'Accept-Encoding': 'gzip' },
-            });
-            const out = Array.isArray(res?.data) ? res.data : [];
-            __elsCache.set(key, out);
-            __elsCache.set(cacheKey, out);
-            __elsLastCallAt.set(entityName, Date.now());
-            __elsGlobalState.lastCallAt = Date.now();
-            __elsStrikeCount.set(entityName, 0);
-            // Fase 3: persiste no IDB (TTL 10 min) para cache entre recarregamentos
-            idbSet(idbKey, out, 10 * 60 * 1000).catch(() => {});
-            return out;
-          } catch (err) {
-            const status = err?.response?.status || err?.status;
-            if (status === 429) {
-              const strikes = (__elsStrikeCount.get(entityName) || 0) + 1;
-              __elsStrikeCount.set(entityName, strikes);
-              if (attempt < 1) {
-                const sleep = 2500 + Math.floor(Math.random() * 500);
-                __elsCooldownUntil.set(entityName, Date.now() + 120000);
-                __elsGlobalState.cooldownUntil = Date.now() + 60000;
-                await new Promise(r => setTimeout(r, sleep));
-                attempt++;
-                continue;
-              }
-              if (__elsCache.has(key)) {
-                __elsCooldownUntil.set(entityName, Date.now() + 120000);
-                __elsGlobalState.cooldownUntil = Date.now() + 60000;
-                return __elsCache.get(key);
-              }
-              // Fase 3: fallback IDB no 429 sem cache em memória
-              try {
-                const idbFallback = await idbGet(idbKey);
-                if (Array.isArray(idbFallback)) return idbFallback;
-              } catch (_) {}
-            }
-            // Fallback a cache em memória (nunca deixa UI vazia)
-            if (__elsCache.has(key)) return __elsCache.get(key);
-            // Fase 3: último recurso — tenta IDB
-            try {
-              const idbFallback = await idbGet(idbKey);
-              if (Array.isArray(idbFallback)) return idbFallback;
-            } catch (_) {}
-            return [];
-          }
+            const idbFallback = await idbGet(idbKey);
+            if (Array.isArray(idbFallback)) return idbFallback;
+          } catch (_2) {}
+          return [];
         }
       };
 
-      const p = exec().finally(() => {
-        __elsInflight.delete(key);
-        __elsEntityBusy.set(entityName, false);
-        __elsGlobalState.busy = false;
-      });
+      const p = exec().finally(() => __elsInflight.delete(key));
       __elsInflight.set(key, p);
       return p;
     },
-    staleTime: 300_000,
-    gcTime: 900_000,
+    staleTime: 120_000,
+    gcTime: 600_000,
     placeholderData: (prev) => {
       if (prev !== undefined) return prev;
       if (__elsCache.has(cacheKey)) return __elsCache.get(cacheKey);
-      // Fase 3: IDB pré-carregado via ref (síncrono)
       if (idbRef.current !== undefined) return idbRef.current;
       return undefined;
     },
@@ -217,7 +149,6 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
     refetchOnMount: false,
     refetchOnReconnect: false,
     retry: 0,
-    retryDelay: 0,
     enabled: enabledFlag,
   });
 }

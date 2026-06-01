@@ -47,26 +47,13 @@ export function buildContextFilter(entityName, empresaId, groupId, empresasDoGru
   return {};
 }
 
-// Fallback: contagem individual via countEntities (single mode)
+// Contagem individual via SDK direto (sem overhead de função backend)
 async function countSingle(entityName, filter) {
   try {
-    const res = await base44.functions.invoke('countEntities', {
-      entityName,
-      filter: filter || {},
-    });
-    const d = res?.data;
-    if (typeof d?.count === 'number') return d.count;
-  } catch (_) {}
-  // Fallback via listagem
-  try {
-    const res = await base44.functions.invoke('entityListSorted', {
-      entityName,
-      filter: filter || {},
-      sortField: 'id',
-      sortDirection: 'asc',
-      limit: 2000,
-    });
-    return Array.isArray(res?.data) ? res.data.length : 0;
+    const api = base44.entities?.[entityName];
+    if (!api?.filter) return 0;
+    const rows = await api.filter(filter || {}, '-created_date', 9999);
+    return Array.isArray(rows) ? rows.length : 0;
   } catch (_) {}
   return 0;
 }
@@ -118,25 +105,13 @@ export function useEntityCounts(entities = []) {
 
       if (!batchPayload.length) return {};
 
-      // Batch API — 1 request para todas as entidades
-      try {
-        const res = await base44.functions.invoke('countEntities', {
-          entities: batchPayload,
-        });
-        const d = res?.data;
-        if (d?.counts && typeof d.counts === 'object') {
-          // CORREÇÃO: 'fixed' nunca existiu — ReferenceError silencioso zerrava todos os counts
-          return { ...d.counts };
-        }
-      } catch (_) {}
-
-      // Fallback sequencial com delay para evitar 429
+      // SDK direto em paralelo (sem função backend → sem rate limit de funções)
       const result = {};
-      for (let i = 0; i < batchPayload.length; i++) {
-        const { entityName, filter } = batchPayload[i];
-        result[entityName] = await countSingle(entityName, filter);
-        if (i < batchPayload.length - 1) await new Promise(r => setTimeout(r, 200));
-      }
+      await Promise.allSettled(
+        batchPayload.map(async ({ entityName, filter }) => {
+          result[entityName] = await countSingle(entityName, filter);
+        })
+      );
       return result;
     },
     staleTime: 60_000,      // 60s — mais conservador para evitar invalidação frequente

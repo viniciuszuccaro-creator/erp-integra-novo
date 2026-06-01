@@ -39,8 +39,9 @@ function set(obj, path, value) { const parts = path.split('.'); let cur = obj; f
 function get(obj, path) { return path.split('.').reduce((o,k)=> (o==null?undefined:o[k]), obj); }
 
 const DEFAULT_FIELDS = {
-  Cliente: ['cpf','rg','email_principal','telefone_principal','endereco_principal','contatos','documentos'],
-  Colaborador: ['cpf','rg','email','telefone','whatsapp','endereco','dados_bancarios','data_nascimento']
+  Cliente: ['cpf','rg','contatos','documentos','lgpd_autorizacoes'],
+  Colaborador: ['cpf','rg','email','telefone','whatsapp','endereco','dados_bancarios','data_nascimento'],
+  Fornecedor: ['dados_bancarios','cnpj','inscricao_estadual'],
 };
 
 Deno.serve(async (req) => {

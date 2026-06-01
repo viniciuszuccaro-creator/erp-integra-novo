@@ -90,6 +90,45 @@ Deno.serve(async (req) => {
       suspicious.push({ tipo: 'Funções lentas', severidade: max > 3000 ? 'Alta' : 'Média', detalhes: `${funcLatency.length} chamadas >1500ms (pico ${Math.round(max)}ms)` });
     }
 
+    // 6) Tentativas de acesso cruzado (RLS bloqueio)
+    const rlsBlocks = recent.filter((l) =>
+      l.acao === 'Bloqueio' && l.tipo_auditoria === 'seguranca' && /RLS:/i.test(l.descricao || '')
+    );
+    if (rlsBlocks.length >= 3) {
+      suspicious.push({ tipo: 'Acesso cruzado RLS', severidade: 'Alta', detalhes: `${rlsBlocks.length} tentativas de acesso a dados de outra empresa` });
+    }
+
+    // 7) Atividade fora do horário comercial (antes das 6h ou depois das 22h)
+    const offHourLogs = recent.filter((l) => {
+      const d = getLogDate(l);
+      if (!d) return false;
+      const h = d.getHours();
+      return (h < 6 || h >= 22) && ['Criação','Edição','Exclusão'].includes(l.acao || '');
+    });
+    if (offHourLogs.length >= 5) {
+      // Agrupa por usuário para melhor contexto
+      const byUser = offHourLogs.reduce((acc, l) => { const u = l.usuario || 'Desconhecido'; acc[u] = (acc[u] || 0) + 1; return acc; }, {});
+      const topUser = Object.entries(byUser).sort(([,a],[,b]) => b - a)[0];
+      suspicious.push({ tipo: 'Atividade fora do horário', severidade: 'Média', detalhes: `${offHourLogs.length} ações fora do horário comercial${topUser ? ' (principal: ' + topUser[0] + ')' : ''}` });
+    }
+
+    // 8) Brute-force de RBAC por usuário único
+    const rbacByUser = {};
+    recent.filter((l) => l.acao === 'Bloqueio').forEach((l) => {
+      const u = l.usuario_id || l.usuario || 'anon';
+      rbacByUser[u] = (rbacByUser[u] || 0) + 1;
+    });
+    const bruteUser = Object.entries(rbacByUser).find(([, c]) => c >= 8);
+    if (bruteUser) {
+      suspicious.push({ tipo: 'Possível brute-force RBAC', severidade: 'Alta', detalhes: `Usuário "${bruteUser[0]}" com ${bruteUser[1]} bloqueios em ${WINDOW_MIN} min` });
+    }
+
+    // 9) PII acessado em volume (decrypts em massa)
+    const piiOps = recent.filter((l) => l.tipo_auditoria === 'seguranca' && /PII/i.test(l.descricao || '') && l.acao === 'Edição');
+    if (piiOps.length >= 10) {
+      suspicious.push({ tipo: 'Acesso em massa a dados PII', severidade: 'Alta', detalhes: `${piiOps.length} operações PII encrypt/decrypt em ${WINDOW_MIN} min` });
+    }
+
     // Se nada suspeito, retorna rápido
     if (suspicious.length === 0) {
       return Response.json({ ok: true, message: 'Sem alertas', analyzed: recent.length });

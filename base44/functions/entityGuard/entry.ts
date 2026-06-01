@@ -173,8 +173,34 @@ Deno.serve(async (req) => {
       allowed = true;
     }
 
-    // Sem escopo multiempresa → permite (o frontend já valida o contexto)
-    // NÃO bloquear por falta de empresa_id pois algumas entidades são globais
+    // RLS de escopo multiempresa: se a action é escrita sensível e há empresa_id/group_id no payload,
+    // verificar se o usuário tem acesso ao escopo solicitado (evita escalada horizontal)
+    if (allowed && ['criar','editar','excluir'].includes(desired)) {
+      const reqEmpresaId = body?.empresa_id || null;
+      const reqGroupId = body?.group_id || null;
+      // Usuário com perfil que tem empresa_id diferente do escopo solicitado → bloquear
+      if (reqEmpresaId && user?.empresa_id && reqEmpresaId !== user.empresa_id && user.role !== 'admin') {
+        // só bloqueia se o usuário não tem company match ou group match
+        const userGroupId = user?.group_id || null;
+        if (!reqGroupId || !userGroupId || reqGroupId !== userGroupId) {
+          allowed = false;
+          try {
+            await base44.asServiceRole.entities.AuditLog.create({
+              usuario: user.full_name || user.email || 'Usuário',
+              usuario_id: user.id,
+              acao: 'Bloqueio',
+              modulo: moduleName,
+              tipo_auditoria: 'seguranca',
+              entidade: targetEntity || moduleName,
+              descricao: `RLS: acesso negado ao escopo empresa ${reqEmpresaId} por usuário de empresa ${user.empresa_id}`,
+              empresa_id: reqEmpresaId,
+              group_id: reqGroupId,
+              data_hora: new Date().toISOString(),
+            });
+          } catch {}
+        }
+      }
+    }
 
     __DECISION_CACHE.set(decisionKey, { allowed, ts: Date.now() });
     if (__DECISION_CACHE.size > 1000) {

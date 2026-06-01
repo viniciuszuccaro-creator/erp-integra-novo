@@ -72,6 +72,59 @@ export function detectSodConflicts(permissoes = {}) {
     });
   }
 
+  // EST-MOV-001: Criar e Aprovar Movimentações de Estoque
+  const estoque = perms['Estoque'] || [];
+  if (Array.isArray(estoque)) {
+    if (estoque.includes('criar') && estoque.includes('aprovar')) {
+      conflitos.push({
+        regra: 'EST-MOV-001',
+        severidade: 'Alta',
+        descricao: 'Mesmo perfil pode criar e aprovar movimentações de estoque.'
+      });
+    }
+  }
+
+  // CMP-OC-001: Criar Ordem de Compra e Aprovar Pagamento
+  const compras = perms['Compras'] || [];
+  const finAncer2 = perms['Financeiro'] || [];
+  if (Array.isArray(compras) && Array.isArray(finAncer2)) {
+    const temCriarOC = compras.includes('criar');
+    const temPagarFin = finAncer2.includes('liquidar') || finAncer2.includes('pago');
+    if (temCriarOC && temPagarFin) {
+      conflitos.push({
+        regra: 'CMP-OC-001',
+        severidade: 'Alta',
+        descricao: 'Mesmo perfil pode criar Ordem de Compra e liquidar pagamentos.'
+      });
+    }
+  }
+
+  // RH-SAL-001: Editar Salário e Aprovar Folha
+  const rh = perms['RH'] || [];
+  if (Array.isArray(rh)) {
+    if (rh.includes('editar') && rh.includes('aprovar')) {
+      conflitos.push({
+        regra: 'RH-SAL-001',
+        severidade: 'Média',
+        descricao: 'Mesmo perfil pode editar dados salariais e aprovar folha de pagamento.'
+      });
+    }
+  }
+
+  // ADM-USR-001: Criar usuários E editar perfis de acesso
+  const adm = perms['Administração'] || perms['Sistema'] || [];
+  if (Array.isArray(adm)) {
+    const temCriarUser = adm.includes('criar');
+    const temEditarPerfil = adm.includes('editar');
+    if (temCriarUser && temEditarPerfil) {
+      conflitos.push({
+        regra: 'ADM-USR-001',
+        severidade: 'Crítica',
+        descricao: 'Mesmo perfil pode criar usuários e editar perfis de acesso (escalada de privilégio).'
+      });
+    }
+  }
+
   const order = { Baixa: 1, Média: 2, Alta: 3, Crítica: 4 };
   const severidadeMax = conflitos.length > 0
     ? conflitos.reduce((max, item) => order[item.severidade] > order[max] ? item.severidade : max, 'Baixa')

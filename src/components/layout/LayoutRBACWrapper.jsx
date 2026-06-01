@@ -83,10 +83,17 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
         list: typeof api.list === "function" ? api.list.bind(api) : null,
       };
 
+      const PII_ENTITIES = new Set(["Cliente", "Colaborador", "Fornecedor"]);
+
       if (orig.create) {
         api.create = async (data) => {
           await checkRBAC(name, "criar");
-          return await orig.create(stamp(sanitizeOnWrite(data)));
+          const result = await orig.create(stamp(sanitizeOnWrite(data)));
+          // Auto-encrypt PII após criação
+          if (PII_ENTITIES.has(name) && result?.id) {
+            try { base44.functions.invoke("piiEncryptor", { entity_name: name, id: result.id, action: "encrypt" }); } catch {}
+          }
+          return result;
         };
       }
       if (orig.bulkCreate) {
@@ -98,7 +105,12 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
       if (orig.update) {
         api.update = async (id, data) => {
           await checkRBAC(name, "editar");
-          return await orig.update(id, stamp(sanitizeOnWrite(data)));
+          const result = await orig.update(id, stamp(sanitizeOnWrite(data)));
+          // Auto-encrypt PII após edição em entidades sensíveis
+          if (PII_ENTITIES.has(name) && id) {
+            try { base44.functions.invoke("piiEncryptor", { entity_name: name, id, action: "encrypt" }); } catch {}
+          }
+          return result;
         };
       }
       if (orig.delete) {
@@ -119,6 +131,43 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
         api.list = async (order, limit, skip) => {
           if (orig.filter) return await orig.filter(getScope(), order, limit, skip);
           return await orig.list(order, limit, skip);
+        };
+      }
+      // RLS em get() — valida escopo após busca para evitar acesso cruzado horizontal
+      if (typeof api.get === 'function' && !api.__origGet) {
+        const origGet = api.get.bind(api);
+        api.__origGet = origGet;
+        api.get = async (id) => {
+          const rec = await origGet(id);
+          if (!rec) return rec;
+          const scope = getScope();
+          if (scope.__blocked) return null;
+          // Só valida quando o registro tem escopo explícito
+          const recEmpresa = rec?.empresa_id || rec?.empresa_dona_id || null;
+          const recGroup = rec?.group_id || null;
+          const ctx = contextRef.current;
+          if (recEmpresa && ctx.empresaAtual?.id && recEmpresa !== ctx.empresaAtual.id) {
+            // Verifica se pertence ao mesmo grupo
+            if (!recGroup || recGroup !== ctx.grupoAtual?.id) {
+              // Acesso cruzado detectado — log silencioso + retorna null
+              try {
+                base44.entities.AuditLog.create({
+                  usuario: ctx.user?.full_name || 'Usuário',
+                  usuario_id: ctx.user?.id,
+                  empresa_id: ctx.empresaAtual?.id,
+                  acao: 'Bloqueio',
+                  modulo: 'Sistema',
+                  tipo_auditoria: 'seguranca',
+                  entidade: name,
+                  registro_id: id,
+                  descricao: `RLS: tentativa de get() em registro de empresa ${recEmpresa} por empresa ${ctx.empresaAtual?.id}`,
+                  data_hora: new Date().toISOString(),
+                });
+              } catch {}
+              return null;
+            }
+          }
+          return rec;
         };
       }
       api.__wrappedContext = true;

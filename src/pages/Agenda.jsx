@@ -1,39 +1,20 @@
-import React, { useState, useMemo, useEffect, Suspense } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import {
-  Calendar,
-  Plus,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  MapPin,
-  Users,
-  Video,
-  Bell,
-  Edit,
-  Trash2,
-  CheckCircle,
-  Info,
-  RefreshCw,
-  Link2,
-  Mail,
-  MessageSquare
+  Calendar, Clock, MapPin, Users, Video, Bell, Edit, Trash2,
+  CheckCircle, Info, RefreshCw, Link2,
 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { Switch } from "@/components/ui/switch";
 import EventoForm from "@/components/agenda/EventoForm";
 import AgendaPainelLateral from "@/components/agenda/AgendaPainelLateral";
 import AgendaIAPanel from "@/components/agenda/AgendaIAPanel";
+import AgendaCalendario from "@/components/agenda/AgendaCalendario";
 import { useWindow } from "@/components/lib/useWindow";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
@@ -938,7 +919,7 @@ function Agenda() {
       <ErrorBoundary>
       <div className="flex gap-4 w-full">
         {/* Painel lateral */}
-        <div className="hidden xl:flex flex-col w-72 shrink-0">
+        <div className="hidden xl:flex flex-col w-64 shrink-0">
           <AgendaPainelLateral
             eventos={eventos}
             dataAtual={dataAtual}
@@ -947,403 +928,53 @@ function Agenda() {
         </div>
         {/* Calendário principal */}
         <div className="flex-1 min-w-0">
-      <Card className="border-0 shadow-md">
-        <CardHeader className="border-b bg-slate-50">
-          <div className="flex flex-col sm:flex-row justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" onClick={navegarAnterior}>
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" onClick={irParaHoje}>
-                  Hoje
-                </Button>
-                <Button variant="outline" size="icon" onClick={navegarProximo}>
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
-              <h2 className="text-xl font-semibold">{getTituloCalendario()}</h2>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Select value={filtroUsuario} onValueChange={setFiltroUsuario}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filtrar por usuário" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  {[...new Set(eventos.map(e => e.responsavel))].filter(Boolean).map(resp => (
-                    <SelectItem key={resp} value={resp}>{resp}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <div className="flex gap-2">
-                <Button
-                  variant={visualizacao === 'mes' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setVisualizacao('mes')}
-                >
-                  Mês
-                </Button>
-                <Button
-                  variant={visualizacao === 'semana' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setVisualizacao('semana')}
-                >
-                  Semana
-                </Button>
-                <Button
-                  variant={visualizacao === 'dia' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setVisualizacao('dia')}
-                >
-                  Dia
-                </Button>
-              </div>
-
-              <Button 
-                className="bg-blue-600 hover:bg-blue-700"
-                onClick={() => openWindow(EventoForm, {
-                  windowMode: true,
-                  onSubmit: async (data) => {
-                    try {
-                      const dataInicio = `${data.data_inicio}T${data.hora_inicio || '00:00'}:00`;
-                      const dataFim = `${data.data_fim}T${data.hora_fim || '23:59'}:00`;
-                      await base44.entities.Evento.create(carimbarContexto({
-                       ...data,
-                       data_inicio: dataInicio,
-                       data_fim: dataFim,
-                       responsavel: user?.full_name || 'Usuário',
-                       responsavel_id: user?.id
-                      }));
-                      queryClient.invalidateQueries({ queryKey: ['eventos'] });
-                      toast({ title: "✅ Evento criado!" });
-                    } catch (error) {
-                      toast({ title: "❌ Erro", description: error.message, variant: "destructive" });
-                    }
-                  }
-                }, {
-                  title: '📅 Novo Evento',
-                  width: 1000,
-                  height: 650
-                })}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Novo Evento
-              </Button>
-              
-              {/* BACKUP: Dialog removido */}
-              <Dialog open={false}>
-                <DialogTrigger asChild>
-                  <Button className="hidden">Removido</Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>{editingEvento ? 'Editar Evento' : 'Novo Evento'}</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="col-span-2">
-                        <Label htmlFor="titulo">Título *</Label>
-                        <Input
-                          id="titulo"
-                          value={eventoForm.titulo}
-                          onChange={(e) => setEventoForm({ ...eventoForm, titulo: e.target.value })}
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="tipo">Tipo</Label>
-                        <Select
-                          value={eventoForm.tipo}
-                          onValueChange={(value) => setEventoForm({ ...eventoForm, tipo: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Reunião">Reunião</SelectItem>
-                            <SelectItem value="Ligação">Ligação</SelectItem>
-                            <SelectItem value="Visita">Visita</SelectItem>
-                            <SelectItem value="Tarefa">Tarefa</SelectItem>
-                            <SelectItem value="Follow-up">Follow-up</SelectItem>
-                            <SelectItem value="Evento">Evento</SelectItem>
-                            <SelectItem value="Lembrete">Lembrete</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="prioridade">Prioridade</Label>
-                        <Select
-                          value={eventoForm.prioridade}
-                          onValueChange={(value) => setEventoForm({ ...eventoForm, prioridade: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Baixa">Baixa</SelectItem>
-                            <SelectItem value="Normal">Normal</SelectItem>
-                            <SelectItem value="Alta">Alta</SelectItem>
-                            <SelectItem value="Urgente">Urgente</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="data_inicio">Data Início *</Label>
-                        <Input
-                          id="data_inicio"
-                          type="date"
-                          value={eventoForm.data_inicio}
-                          onChange={(e) => setEventoForm({ ...eventoForm, data_inicio: e.target.value })}
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="hora_inicio">Hora Início</Label>
-                        <Input
-                          id="hora_inicio"
-                          type="time"
-                          value={eventoForm.hora_inicio}
-                          onChange={(e) => setEventoForm({ ...eventoForm, hora_inicio: e.target.value })}
-                          disabled={eventoForm.dia_inteiro}
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="data_fim">Data Fim *</Label>
-                        <Input
-                          id="data_fim"
-                          type="date"
-                          value={eventoForm.data_fim}
-                          onChange={(e) => setEventoForm({ ...eventoForm, data_fim: e.target.value })}
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="hora_fim">Hora Fim</Label>
-                        <Input
-                          id="hora_fim"
-                          type="time"
-                          value={eventoForm.hora_fim}
-                          onChange={(e) => setEventoForm({ ...eventoForm, hora_fim: e.target.value })}
-                          disabled={eventoForm.dia_inteiro}
-                        />
-                      </div>
-
-                      <div className="col-span-2">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="dia_inteiro"
-                            checked={eventoForm.dia_inteiro}
-                            onCheckedChange={(checked) => setEventoForm({ ...eventoForm, dia_inteiro: checked })}
-                          />
-                          <Label htmlFor="dia_inteiro" className="font-normal cursor-pointer">
-                            Dia inteiro
-                          </Label>
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="cliente_nome">Cliente/Relacionado</Label>
-                        <Input
-                          id="cliente_nome"
-                          value={eventoForm.cliente_nome}
-                          onChange={(e) => setEventoForm({ ...eventoForm, cliente_nome: e.target.value })}
-                          list="clientes-list"
-                        />
-                        <datalist id="clientes-list">
-                          {clientes.map(c => (
-                            <option key={c.id} value={c.nome} />
-                          ))}
-                        </datalist>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="pedido_id">Pedido Relacionado</Label>
-                        <Select
-                          value={eventoForm.pedido_id}
-                          onValueChange={(value) => setEventoForm({ ...eventoForm, pedido_id: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value={null}>Nenhum</SelectItem>
-                            {pedidos.slice(0, 20).map(p => (
-                              <SelectItem key={p.id} value={p.id}>
-                                {p.numero_pedido} - {p.cliente_nome}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="local">Local</Label>
-                        <Input
-                          id="local"
-                          value={eventoForm.local}
-                          onChange={(e) => setEventoForm({ ...eventoForm, local: e.target.value })}
-                          placeholder="Endereço ou sala"
-                        />
-                      </div>
-
-                      <div className="col-span-2">
-                        <Label htmlFor="link_reuniao">Link da Reunião</Label>
-                        <Input
-                          id="link_reuniao"
-                          value={eventoForm.link_reuniao}
-                          onChange={(e) => setEventoForm({ ...eventoForm, link_reuniao: e.target.value })}
-                          placeholder="https://meet.google.com/..."
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="status">Status</Label>
-                        <Select
-                          value={eventoForm.status}
-                          onValueChange={(value) => setEventoForm({ ...eventoForm, status: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Agendado">Agendado</SelectItem>
-                            <SelectItem value="Confirmado">Confirmado</SelectItem>
-                            <SelectItem value="Em Andamento">Em Andamento</SelectItem>
-                            <SelectItem value="Concluído">Concluído</SelectItem>
-                            <SelectItem value="Cancelado">Cancelado</SelectItem>
-                            <SelectItem value="Adiado">Adiado</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="cor">Cor no Calendário</Label>
-                        <div className="flex gap-2 mt-2">
-                          {coresDisponiveis.map(({ cor, nome }) => (
-                            <button
-                              key={cor}
-                              type="button"
-                              className={`w-8 h-8 rounded-full border-2 ${
-                                eventoForm.cor === cor ? 'border-slate-900' : 'border-transparent'
-                              }`}
-                              style={{ backgroundColor: cor }}
-                              onClick={() => setEventoForm({ ...eventoForm, cor })}
-                              title={nome}
-                            />
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="col-span-2 space-y-3 border-t pt-4">
-                        <h4 className="font-semibold text-sm">Lembretes e Notificações</h4>
-
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="lembrete"
-                            checked={eventoForm.lembrete}
-                            onCheckedChange={(checked) => setEventoForm({ ...eventoForm, lembrete: checked })}
-                          />
-                          <Label htmlFor="lembrete" className="font-normal cursor-pointer">
-                            Ativar lembrete automático
-                          </Label>
-                        </div>
-
-                        {eventoForm.lembrete && (
-                          <div>
-                            <Label htmlFor="tempo_lembrete">Lembrar com (minutos de antecedência)</Label>
-                            <Input
-                              id="tempo_lembrete"
-                              type="number"
-                              value={eventoForm.tempo_lembrete}
-                              onChange={(e) => setEventoForm({ ...eventoForm, tempo_lembrete: parseInt(e.target.value) })}
-                              min="0"
-                            />
-                          </div>
-                        )}
-
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="notificar_email"
-                            checked={eventoForm.notificar_email}
-                            onCheckedChange={(checked) => setEventoForm({ ...eventoForm, notificar_email: checked })}
-                          />
-                          <Label htmlFor="notificar_email" className="font-normal cursor-pointer flex items-center gap-2">
-                            <Mail className="w-4 h-4" />
-                            Enviar lembrete por e-mail
-                          </Label>
-                        </div>
-
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="notificar_whatsapp"
-                            checked={eventoForm.notificar_whatsapp}
-                            onCheckedChange={(checked) => setEventoForm({ ...eventoForm, notificar_whatsapp: checked })}
-                          />
-                          <Label htmlFor="notificar_whatsapp" className="font-normal cursor-pointer flex items-center gap-2">
-                            <MessageSquare className="w-4 h-4" />
-                            Enviar lembrete por WhatsApp
-                          </Label>
-                        </div>
-                      </div>
-
-                      <div className="col-span-2">
-                        <Label htmlFor="descricao">Descrição</Label>
-                        <Textarea
-                          id="descricao"
-                          value={eventoForm.descricao}
-                          onChange={(e) => setEventoForm({ ...eventoForm, descricao: e.target.value })}
-                          rows={3}
-                        />
-                      </div>
-
-                      <div className="col-span-2">
-                        <Label htmlFor="observacoes">Observações</Label>
-                        <Textarea
-                          id="observacoes"
-                          value={eventoForm.observacoes}
-                          onChange={(e) => setEventoForm({ ...eventoForm, observacoes: e.target.value })}
-                          rows={2}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end gap-3 pt-4">
-                      <Button
-                        type="submit"
-                        disabled={createEventoMutation.isPending || updateEventoMutation.isPending}
-                        className="bg-blue-600 hover:bg-blue-700"
-                      >
-                        {createEventoMutation.isPending || updateEventoMutation.isPending
-                          ? 'Salvando...'
-                          : editingEvento
-                          ? 'Atualizar'
-                          : 'Criar Evento'}
-                      </Button>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent className="p-6">
-          {visualizacao === 'mes' && renderCalendarioMensal()}
-          {visualizacao === 'semana' && renderVisaoSemanal()}
-          {visualizacao === 'dia' && renderVisaoDiaria()}
-        </CardContent>
-      </Card>
-      </div>{/* fim flex-1 */}
-      </div>{/* fim flex gap-4 */}
+          <AgendaCalendario
+            dataAtual={dataAtual}
+            visualizacao={visualizacao}
+            eventosVisiveis={eventosVisiveis}
+            filtroUsuario={filtroUsuario}
+            eventos={eventos}
+            setFiltroUsuario={setFiltroUsuario}
+            setVisualizacao={setVisualizacao}
+            navegarAnterior={navegarAnterior}
+            navegarProximo={navegarProximo}
+            irParaHoje={irParaHoje}
+            onNovoEvento={() => openWindow(EventoForm, {
+              windowMode: true,
+              onSubmit: async (data) => {
+                try {
+                  const dataInicio = `${data.data_inicio}T${data.hora_inicio || '00:00'}:00`;
+                  const dataFim = `${data.data_fim}T${data.hora_fim || '23:59'}:00`;
+                  await base44.entities.Evento.create(carimbarContexto({
+                    ...data, data_inicio: dataInicio, data_fim: dataFim,
+                    responsavel: user?.full_name || 'Usuário', responsavel_id: user?.id
+                  }));
+                  queryClient.invalidateQueries({ queryKey: ['eventos'] });
+                  toast({ title: "✅ Evento criado!" });
+                } catch (error) {
+                  toast({ title: "❌ Erro", description: error.message, variant: "destructive" });
+                }
+              }
+            }, { title: '📅 Novo Evento', width: 1000, height: 650 })}
+            onEventoClick={(ev) => setVisualizandoEvento(ev)}
+            onDiaClick={(dataDia) => {
+              setEventoForm({ ...eventoForm, data_inicio: dataDia.toISOString().split('T')[0], data_fim: dataDia.toISOString().split('T')[0] });
+              setEventoDialogOpen(true);
+            }}
+            onSlotClick={(dataHora) => {
+              const hora = dataHora.getHours();
+              setEventoForm({
+                ...eventoForm,
+                data_inicio: dataHora.toISOString().split('T')[0],
+                hora_inicio: `${hora.toString().padStart(2,'0')}:00`,
+                data_fim: dataHora.toISOString().split('T')[0],
+                hora_fim: `${(hora+1).toString().padStart(2,'0')}:00`
+              });
+              setEventoDialogOpen(true);
+            }}
+          />
+        </div>
+      </div>
       </ErrorBoundary>
 
       {/* Dialog de Visualização do Evento */}

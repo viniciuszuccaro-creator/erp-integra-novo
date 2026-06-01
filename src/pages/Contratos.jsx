@@ -71,7 +71,7 @@ export default function ContratosPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { openWindow } = useWindow();
-  const { empresaAtual, filtrarPorContexto } = useContextoVisual();
+  const { empresaAtual, filterInContext } = useContextoVisual();
 
   const [formData, setFormData] = useState({
     numero_contrato: "",
@@ -127,10 +127,10 @@ export default function ContratosPage() {
     retry: false,
   });
 
-  // Multiempresa: aplicar contexto
-  const contratosContexto = (() => { const ctx = filtrarPorContexto(contratos, 'empresa_id'); return (ctx && ctx.length > 0) ? ctx : contratos; })();
-  const clientesFiltrados = (() => { const ctx = filtrarPorContexto(clientes, 'empresa_id'); return (ctx && ctx.length > 0) ? ctx : clientes; })();
-  const fornecedoresFiltrados = (() => { const ctx = filtrarPorContexto(fornecedores, 'empresa_dona_id'); return (ctx && ctx.length > 0) ? ctx : fornecedores; })();
+  // Multiempresa: usar dados diretos (queries já filtradas pelo contexto)
+  const contratosContexto = contratos;
+  const clientesFiltrados = clientes;
+  const fornecedoresFiltrados = fornecedores;
 
   const { data: user } = useQuery({
     queryKey: ['user'],

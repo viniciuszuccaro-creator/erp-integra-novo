@@ -1,7 +1,8 @@
 // Função utilitária consolidada de validações de segurança
 // Consolida: securityAlerts + sodValidator + conflictPolicy
+// NOTA: arquivo de lib puro — não usa Deno.serve nem export (usado apenas como referência de lógica)
 
-export function detectSodConflicts(permissoes = {}) {
+function detectSodConflicts(permissoes = {}) {
   const perms = permissoes || {};
   const conflitos = [];
 
@@ -87,7 +88,7 @@ export function detectSodConflicts(permissoes = {}) {
 }
 
 // Detecta alertas de segurança nos logs
-export function detectSecurityAlerts(logs, windowMinutes = 15) {
+function detectSecurityAlerts(logs, windowMinutes = 15) {
   const countBy = (arr, fn) => arr.reduce((acc, v) => {
     const k = fn(v);
     acc[k] = (acc[k] || 0) + 1;
@@ -157,7 +158,7 @@ export function detectSecurityAlerts(logs, windowMinutes = 15) {
 }
 
 // Detecta inconsistências de fluxo (Pedido → Entrega → NotaFiscal)
-export function detectFlowInconsistencies(pedido, entregas, notasFiscais) {
+function detectFlowInconsistencies(pedido, entregas, notasFiscais) {
   const issues = [];
   const status = pedido?.status || 'Rascunho';
   const hasEntrega = Array.isArray(entregas) && entregas.length > 0;

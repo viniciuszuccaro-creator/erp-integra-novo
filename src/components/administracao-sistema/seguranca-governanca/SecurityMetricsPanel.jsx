@@ -203,14 +203,18 @@ export default function SecurityMetricsPanel() {
         </Button>
       </div>
 
-      {/* KPI Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2">
+      {/* KPI Grid — 7 cards (inclui Admin-only blocks) */}
+      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-2">
         <MetricCard label="Bloqueios (15min)" value={metrics?.bloqueios15 ?? "–"} icon={Lock}
           color={metrics?.bloqueios15 > 10 ? "text-red-600" : "text-blue-600"}
           bg={metrics?.bloqueios15 > 10 ? "bg-red-50" : "bg-blue-50"} alert={metrics?.bloqueios15 > 10} />
         <MetricCard label="Acesso Cruzado RLS" value={metrics?.rlsBlocks ?? "–"} icon={Shield}
           color={metrics?.rlsBlocks > 0 ? "text-red-600" : "text-green-600"}
           bg={metrics?.rlsBlocks > 0 ? "bg-red-50" : "bg-green-50"} alert={metrics?.rlsBlocks > 0} />
+        <MetricCard label="Admin-Only Bloq." value={metrics?.adminOnlyBlocks ?? "–"} icon={Lock}
+          sub="Escrita em entidades protegidas"
+          color={metrics?.adminOnlyBlocks > 0 ? "text-red-600" : "text-green-600"}
+          bg={metrics?.adminOnlyBlocks > 0 ? "bg-red-50" : "bg-green-50"} alert={metrics?.adminOnlyBlocks > 0} />
         <MetricCard label="Ops. PII (24h)" value={metrics?.piiOps ?? "–"} icon={Eye}
           color={metrics?.piiOps > 20 ? "text-amber-600" : "text-violet-600"}
           bg={metrics?.piiOps > 20 ? "bg-amber-50" : "bg-violet-50"} alert={metrics?.piiOps > 20} />

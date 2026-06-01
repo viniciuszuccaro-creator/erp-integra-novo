@@ -126,7 +126,12 @@ Deno.serve(async (req) => {
       ContaReceber: ['valor','status','data_recebimento','forma_recebimento'],
       MovimentacaoEstoque: ['quantidade','tipo_movimento','localizacao_destino','valor_total'],
       NotaFiscal: ['status','valor_total','chave_acesso'],
-      Pedido: ['status_aprovacao','valor_total']
+      Pedido: ['status_aprovacao','valor_total'],
+      // Fase 1 RBAC — entidades de controle de acesso (campos críticos de segurança)
+      PerfilAcesso: ['permissoes','nivel_perfil','permissoes_sensiveis','requer_aprovacao_especial','ativo'],
+      User: ['role','email','perfil_acesso_id'],
+      Colaborador: ['salario','dados_bancarios','status','cargo'],
+      Fornecedor: ['dados_bancarios','status_fornecedor','cnpj'],
     };
     const sensitiveFields = sensitiveFieldsMap[entidade] || [];
     const diffSensitive = [];

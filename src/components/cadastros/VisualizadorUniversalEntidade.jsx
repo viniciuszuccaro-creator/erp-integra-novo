@@ -141,12 +141,13 @@ export default function VisualizadorUniversalEntidade({
         const api = base44.entities?.[ENTITY];
         if (!api) return [];
         
-        // Tenta com contexto se houver, senão lista tudo
-        if (hasContext && debouncedSearch.trim()) {
-          return await filterInContext(ENTITY, searchFilter, sortField, pageSize);
+        // Com contexto: usa filterInContext (multiempresa seguro)
+        if (hasContext) {
+          const filter = debouncedSearch.trim() ? searchFilter : {};
+          return await filterInContext(ENTITY, filter, sortField, pageSize);
         }
         
-        // Sem busca ou sem contexto: lista simples
+        // Sem contexto: tenta list com fallback vazio
         const res = await api.list(sortField, pageSize);
         return Array.isArray(res) ? res : [];
       } catch (err) {
@@ -329,7 +330,7 @@ export default function VisualizadorUniversalEntidade({
               {debouncedSearch ? `Nenhum resultado para "${debouncedSearch}"` : `Nenhum ${TITULO} encontrado`}
             </span>
             {!hasContext && (
-              <span className="text-xs text-amber-600">Selecione uma empresa para filtrar os dados</span>
+              <span className="text-xs text-amber-600">Selecione uma empresa/grupo no topo para carregar os dados do módulo</span>
             )}
           </div>
         ) : (

@@ -13,70 +13,9 @@ import { useEffect } from 'react';
  */
 export function useZIndexGuard() {
   useEffect(() => {
-    // Monitorar e corrigir z-index em tempo real - V21.6.2
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-          mutation.addedNodes.forEach((node) => {
-            if (node.nodeType === 1) { // Element node
-              // Corrigir Radix components - ABAIXO de janelas (999999)
-              if (node.hasAttribute('data-radix-select-content')) {
-                node.style.zIndex = '999999';
-              }
-              
-              if (node.hasAttribute('data-radix-dropdown-menu-content')) {
-                node.style.zIndex = '999999';
-              }
-              
-              if (node.hasAttribute('data-radix-popover-content')) {
-                node.style.zIndex = '999999';
-              }
-
-              if (node.hasAttribute('data-radix-dialog-content') && 
-                  node.closest('[cmdk-root]')) {
-                node.style.zIndex = '999999';
-              }
-
-              // Buscar recursivamente em filhos
-              const selects = node.querySelectorAll('[data-radix-select-content]');
-              const dropdowns = node.querySelectorAll('[data-radix-dropdown-menu-content]');
-              const popovers = node.querySelectorAll('[data-radix-popover-content]');
-              
-              [...selects, ...dropdowns, ...popovers].forEach(el => {
-                el.style.zIndex = '999999';
-              });
-            }
-          });
-        }
-      });
-    });
-
-    // Observar todo o body
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-
-    // Correção inicial
-    const fixExisting = () => {
-      const selects = document.querySelectorAll('[data-radix-select-content]');
-      const dropdowns = document.querySelectorAll('[data-radix-dropdown-menu-content]');
-      const popovers = document.querySelectorAll('[data-radix-popover-content]');
-      
-      [...selects, ...dropdowns, ...popovers].forEach(el => {
-        el.style.zIndex = '999999';
-      });
-    };
-
-    fixExisting();
-    
-    // Re-executar a cada segundo (garantia)
-    const interval = setInterval(fixExisting, 1000);
-
-    return () => {
-      observer.disconnect();
-      clearInterval(interval);
-    };
+    // Usar apenas CSS via <style> injetado — sem MutationObserver que conflita com React HMR
+    // O CSS já cobre todos os casos via seletores de atributo
+    return () => {};
   }, []);
 }
 

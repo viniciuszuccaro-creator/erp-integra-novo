@@ -73,7 +73,21 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
     };
 
     const wrapEntity = (api, name) => {
-      if (!api || api.__wrappedContext === true || name === "AuditLog") return;
+      if (!api || name === "AuditLog") return;
+      // Desempilha wrap anterior antes de re-aplicar (evita duplo wrap no HMR)
+      if (api.__origMethods) {
+        const o = api.__origMethods;
+        if (o.create) api.create = o.create;
+        if (o.bulkCreate) api.bulkCreate = o.bulkCreate;
+        if (o.update) api.update = o.update;
+        if (o.delete) api.delete = o.delete;
+        if (o.filter) api.filter = o.filter;
+        if (o.list) api.list = o.list;
+        if (o.get && api.__origGet) { api.get = o.get; delete api.__origGet; }
+        delete api.__origMethods;
+        delete api.__wrappedContext;
+      }
+      if (api.__wrappedContext === true) return;
       const orig = {
         create: typeof api.create === "function" ? api.create.bind(api) : null,
         bulkCreate: typeof api.bulkCreate === "function" ? api.bulkCreate.bind(api) : null,
@@ -81,7 +95,10 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
         delete: typeof api.delete === "function" ? api.delete.bind(api) : null,
         filter: typeof api.filter === "function" ? api.filter.bind(api) : null,
         list: typeof api.list === "function" ? api.list.bind(api) : null,
+        get: typeof api.get === "function" ? api.get.bind(api) : null,
       };
+      // Guarda originais para poder desfazer no próximo ciclo (HMR-safe)
+      api.__origMethods = orig;
 
       const PII_ENTITIES = new Set(["Cliente", "Colaborador", "Fornecedor"]);
 

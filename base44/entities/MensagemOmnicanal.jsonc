@@ -1,0 +1,278 @@
+{
+  "name": "MensagemOmnicanal",
+  "type": "object",
+  "properties": {
+    "conversa_id": {
+      "type": "string",
+      "description": "ID da conversa omnicanal"
+    },
+    "sessao_id": {
+      "type": "string",
+      "description": "ID da sess\u00e3o"
+    },
+    "canal": {
+      "type": "string",
+      "enum": [
+        "WhatsApp",
+        "Instagram",
+        "Facebook",
+        "Telegram",
+        "Email",
+        "WebChat",
+        "Portal",
+        "Site",
+        "App",
+        "SMS",
+        "VoIP"
+      ]
+    },
+    "tipo_remetente": {
+      "type": "string",
+      "enum": [
+        "Cliente",
+        "Bot",
+        "Atendente",
+        "Sistema",
+        "IA"
+      ],
+      "description": "Quem enviou a mensagem"
+    },
+    "remetente_id": {
+      "type": "string"
+    },
+    "remetente_nome": {
+      "type": "string"
+    },
+    "mensagem": {
+      "type": "string",
+      "description": "Conte\u00fado da mensagem"
+    },
+    "mensagem_formatada": {
+      "type": "string",
+      "description": "V21.6: Mensagem com markdown/formata\u00e7\u00e3o"
+    },
+    "tipo_conteudo": {
+      "type": "string",
+      "enum": [
+        "texto",
+        "imagem",
+        "video",
+        "audio",
+        "documento",
+        "localizacao",
+        "contato",
+        "sticker",
+        "reacao",
+        "template",
+        "lista",
+        "botoes"
+      ],
+      "default": "texto"
+    },
+    "midia_url": {
+      "type": "string"
+    },
+    "midia_tipo": {
+      "type": "string"
+    },
+    "midia_tamanho_kb": {
+      "type": "number"
+    },
+    "midia_thumbnail_url": {
+      "type": "string",
+      "description": "V21.6: Thumbnail para preview"
+    },
+    "template_id": {
+      "type": "string",
+      "description": "V21.6: ID do template usado"
+    },
+    "template_variaveis": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "V21.6: Vari\u00e1veis do template"
+    },
+    "botoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "resposta",
+              "url",
+              "telefone",
+              "acao"
+            ]
+          },
+          "valor": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "V21.6: Bot\u00f5es interativos"
+    },
+    "lista_opcoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "V21.6: Lista de op\u00e7\u00f5es selecion\u00e1veis"
+    },
+    "data_envio": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_leitura": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "lida": {
+      "type": "boolean",
+      "default": false
+    },
+    "entregue": {
+      "type": "boolean",
+      "default": false
+    },
+    "erro_envio": {
+      "type": "string"
+    },
+    "tentativas_envio": {
+      "type": "number",
+      "default": 1,
+      "description": "V21.6: N\u00famero de tentativas de envio"
+    },
+    "intent_detectado": {
+      "type": "string"
+    },
+    "confianca_intent": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "entidades_extraidas": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Entidades NER extra\u00eddas"
+    },
+    "sentimento": {
+      "type": "string",
+      "enum": [
+        "Positivo",
+        "Neutro",
+        "Negativo",
+        "Frustrado",
+        "Urgente",
+        "Satisfeito"
+      ]
+    },
+    "score_sentimento": {
+      "type": "number",
+      "minimum": -1,
+      "maximum": 1
+    },
+    "resposta_automatica": {
+      "type": "boolean",
+      "default": false
+    },
+    "sugestoes_acoes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "acao_executada": {
+      "type": "object",
+      "properties": {
+        "tipo": {
+          "type": "string"
+        },
+        "resultado": {
+          "type": "string"
+        },
+        "dados": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "description": "V21.6: A\u00e7\u00e3o executada a partir desta mensagem"
+    },
+    "id_mensagem_externa": {
+      "type": "string",
+      "description": "ID da mensagem no canal externo"
+    },
+    "metadata_canal": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "interno": {
+      "type": "boolean",
+      "default": false,
+      "description": "Mensagem interna (n\u00e3o vis\u00edvel para cliente)"
+    },
+    "citacao_mensagem_id": {
+      "type": "string",
+      "description": "ID da mensagem citada/respondida"
+    },
+    "reacao": {
+      "type": "string",
+      "description": "V21.6: Emoji de rea\u00e7\u00e3o"
+    },
+    "editada": {
+      "type": "boolean",
+      "default": false,
+      "description": "V21.6: Se foi editada"
+    },
+    "data_edicao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deletada": {
+      "type": "boolean",
+      "default": false,
+      "description": "V21.6: Se foi deletada (soft delete)"
+    },
+    "transcricao_audio": {
+      "type": "string",
+      "description": "V21.6: Transcri\u00e7\u00e3o de \u00e1udio pela IA"
+    },
+    "traducao": {
+      "type": "object",
+      "properties": {
+        "idioma_original": {
+          "type": "string"
+        },
+        "texto_traduzido": {
+          "type": "string"
+        }
+      },
+      "description": "V21.6: Tradu\u00e7\u00e3o autom\u00e1tica"
+    }
+  },
+  "required": [
+    "conversa_id",
+    "sessao_id",
+    "canal",
+    "tipo_remetente",
+    "mensagem",
+    "data_envio"
+  ]
+}

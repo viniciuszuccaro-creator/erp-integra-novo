@@ -1,0 +1,64 @@
+{
+  "name": "TabelaPrecoItem",
+  "type": "object",
+  "properties": {
+    "tabela_preco_id": {
+      "type": "string",
+      "description": "ID da tabela de pre\u00e7o"
+    },
+    "produto_id": {
+      "type": "string",
+      "description": "ID do produto"
+    },
+    "produto_descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do produto (snapshot)"
+    },
+    "produto_codigo": {
+      "type": "string",
+      "description": "C\u00f3digo do produto (snapshot)"
+    },
+    "setor_atividade_nome": {
+      "type": "string",
+      "description": "V21.0: Nome do setor (snapshot para filtros)"
+    },
+    "grupo_produto_nome": {
+      "type": "string",
+      "description": "V21.0: Nome do grupo (snapshot para filtros)"
+    },
+    "marca_nome": {
+      "type": "string",
+      "description": "V21.0: Nome da marca (snapshot para filtros)"
+    },
+    "custo_base": {
+      "type": "number",
+      "description": "Custo base usado no c\u00e1lculo"
+    },
+    "preco": {
+      "type": "number",
+      "description": "Pre\u00e7o de venda"
+    },
+    "desconto_maximo_percentual": {
+      "type": "number",
+      "default": 10,
+      "description": "Desconto m\u00e1ximo permitido (%)"
+    },
+    "margem_percentual": {
+      "type": "number",
+      "description": "Margem calculada (%)"
+    },
+    "markup_aplicado_ia": {
+      "type": "number",
+      "description": "V21.0: Markup sugerido pela IA (%)"
+    },
+    "sugestao_ia": {
+      "type": "string",
+      "description": "V21.0: Sugest\u00e3o da IA (promo\u00e7\u00e3o, etc)"
+    }
+  },
+  "required": [
+    "tabela_preco_id",
+    "produto_id",
+    "preco"
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "name": "CentroResultado",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa (se espec\u00edfico da empresa)"
+    },
+    "origem_escopo": {
+      "type": "string",
+      "enum": [
+        "grupo",
+        "empresa"
+      ],
+      "default": "empresa",
+      "description": "Indica se foi criado no grupo ou na empresa"
+    },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo do centro de resultado"
+    },
+    "nome": {
+      "type": "string",
+      "description": "Nome do centro de resultado"
+    },
+    "descricao": {
+      "type": "string"
+    },
+    "tipo_centro": {
+      "type": "string",
+      "enum": [
+        "Produto",
+        "Servi\u00e7o",
+        "Departamento",
+        "Projeto",
+        "Cliente",
+        "Regional",
+        "Outro"
+      ],
+      "default": "Departamento"
+    },
+    "centro_pai_id": {
+      "type": "string",
+      "description": "ID do centro de resultado pai (para hierarquia)"
+    },
+    "responsavel_id": {
+      "type": "string",
+      "description": "ID do usu\u00e1rio respons\u00e1vel"
+    },
+    "meta_receita_mensal": {
+      "type": "number",
+      "default": 0
+    },
+    "meta_despesa_mensal": {
+      "type": "number",
+      "default": 0
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "nome"
+  ]
+}

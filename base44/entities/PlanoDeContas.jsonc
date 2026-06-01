@@ -1,0 +1,102 @@
+{
+  "name": "PlanoDeContas",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa (se espec\u00edfico)"
+    },
+    "origem_escopo": {
+      "type": "string",
+      "enum": [
+        "grupo",
+        "empresa"
+      ],
+      "default": "grupo",
+      "description": "Indica se foi criado no grupo ou na empresa"
+    },
+    "codigo_conta": {
+      "type": "string",
+      "description": "C\u00f3digo da conta (ex: 1.1.1.01)"
+    },
+    "nome_conta": {
+      "type": "string",
+      "description": "Nome da conta"
+    },
+    "descricao": {
+      "type": "string"
+    },
+    "tipo_conta": {
+      "type": "string",
+      "enum": [
+        "Receita",
+        "Despesa",
+        "Ativo",
+        "Passivo",
+        "Patrim\u00f4nio L\u00edquido"
+      ],
+      "description": "Tipo da conta"
+    },
+    "natureza": {
+      "type": "string",
+      "enum": [
+        "Devedora",
+        "Credora"
+      ],
+      "description": "Natureza da conta"
+    },
+    "conta_pai_id": {
+      "type": "string",
+      "description": "ID da conta pai (para hierarquia)"
+    },
+    "nivel_hierarquico": {
+      "type": "number",
+      "description": "N\u00edvel na hierarquia (1, 2, 3, 4...)"
+    },
+    "eh_analitica": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se aceita lan\u00e7amentos diretos"
+    },
+    "eh_sintetica": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se \u00e9 conta sint\u00e9tica (apenas totalizadora)"
+    },
+    "centro_resultado_padrao_id": {
+      "type": "string",
+      "description": "ID do centro de resultado padr\u00e3o"
+    },
+    "aceita_lancamento_manual": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se aceita lan\u00e7amento manual"
+    },
+    "usa_em_sped": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se \u00e9 usada em SPED"
+    },
+    "usa_apenas_gerencial": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se \u00e9 apenas para controle gerencial"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "codigo_conta",
+    "nome_conta",
+    "tipo_conta"
+  ]
+}

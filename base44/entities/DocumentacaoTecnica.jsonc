@@ -1,0 +1,62 @@
+{
+  "name": "DocumentacaoTecnica",
+  "type": "object",
+  "properties": {
+    "titulo": {
+      "type": "string",
+      "description": "T\u00edtulo do documento/certificado"
+    },
+    "modulo": {
+      "type": "string",
+      "description": "M\u00f3dulo do sistema relacionado"
+    },
+    "versao": {
+      "type": "string",
+      "description": "Vers\u00e3o do sistema (ex: V21.5)"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "Certificado",
+        "README",
+        "Checklist",
+        "Manifesto",
+        "Valida\u00e7\u00e3o",
+        "Status",
+        "Guia"
+      ],
+      "default": "Certificado",
+      "description": "Tipo do documento"
+    },
+    "conteudo_markdown": {
+      "type": "string",
+      "description": "Conte\u00fado completo do documento em markdown"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Ativo",
+        "Arquivado",
+        "Em Revis\u00e3o"
+      ],
+      "default": "Ativo"
+    },
+    "data_certificacao": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da certifica\u00e7\u00e3o/cria\u00e7\u00e3o"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags para filtro e busca"
+    }
+  },
+  "required": [
+    "titulo",
+    "modulo",
+    "tipo"
+  ]
+}

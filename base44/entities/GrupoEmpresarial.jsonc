@@ -1,0 +1,159 @@
+{
+  "name": "GrupoEmpresarial",
+  "type": "object",
+  "properties": {
+    "nome_do_grupo": {
+      "type": "string",
+      "description": "Nome do grupo empresarial"
+    },
+    "cnpj_grupo": {
+      "type": "string",
+      "description": "CNPJ do grupo (quando existir)"
+    },
+    "razao_social_grupo": {
+      "type": "string",
+      "description": "Raz\u00e3o social do grupo"
+    },
+    "dados_contato": {
+      "type": "object",
+      "properties": {
+        "email_principal": {
+          "type": "string",
+          "format": "email"
+        },
+        "telefone_principal": {
+          "type": "string"
+        },
+        "site": {
+          "type": "string"
+        },
+        "endereco_sede": {
+          "type": "object",
+          "properties": {
+            "cep": {
+              "type": "string"
+            },
+            "logradouro": {
+              "type": "string"
+            },
+            "numero": {
+              "type": "string"
+            },
+            "complemento": {
+              "type": "string"
+            },
+            "bairro": {
+              "type": "string"
+            },
+            "cidade": {
+              "type": "string"
+            },
+            "estado": {
+              "type": "string"
+            },
+            "pais": {
+              "type": "string",
+              "default": "Brasil"
+            }
+          }
+        }
+      },
+      "description": "Dados de contato do grupo"
+    },
+    "logotipo_padrao_url": {
+      "type": "string",
+      "description": "URL do logotipo padr\u00e3o do grupo"
+    },
+    "politicas_globais": {
+      "type": "object",
+      "properties": {
+        "padrao_conciliacao_bancaria": {
+          "type": "string",
+          "enum": [
+            "Manual",
+            "Autom\u00e1tica",
+            "H\u00edbrida"
+          ],
+          "default": "H\u00edbrida"
+        },
+        "padrao_dia_vencimento": {
+          "type": "number",
+          "description": "Dia padr\u00e3o de vencimento para contas (1-31)"
+        },
+        "permitir_pedido_sem_nfe": {
+          "type": "boolean",
+          "default": true,
+          "description": "Se permite pedidos sem emiss\u00e3o de NF-e"
+        },
+        "exigir_aprovacao_pedido_acima_valor": {
+          "type": "number",
+          "default": 0,
+          "description": "Valor acima do qual exige aprova\u00e7\u00e3o"
+        },
+        "dashboard_consolidado_padrao": {
+          "type": "string",
+          "enum": [
+            "Executivo",
+            "Operacional",
+            "Financeiro",
+            "Personalizado"
+          ],
+          "default": "Executivo"
+        }
+      },
+      "description": "Pol\u00edticas globais herdadas pelas empresas"
+    },
+    "parametros_integracao": {
+      "type": "object",
+      "properties": {
+        "usa_integracao_contabil": {
+          "type": "boolean",
+          "default": false
+        },
+        "usa_integracao_bi": {
+          "type": "boolean",
+          "default": false
+        },
+        "sistema_contabil_externo": {
+          "type": "string"
+        },
+        "sistema_bi_externo": {
+          "type": "string"
+        }
+      },
+      "description": "Par\u00e2metros de integra\u00e7\u00e3o herdados pelas empresas"
+    },
+    "plano_contas_padrao_id": {
+      "type": "string",
+      "description": "ID do Plano de Contas padr\u00e3o do grupo"
+    },
+    "centros_custo_padrao": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos Centros de Custo padr\u00e3o criados no grupo"
+    },
+    "departamentos_padrao": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos Departamentos padr\u00e3o criados no grupo"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Ativo",
+        "Inativo"
+      ],
+      "default": "Ativo"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "nome_do_grupo"
+  ]
+}

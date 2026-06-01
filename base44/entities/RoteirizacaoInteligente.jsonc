@@ -1,0 +1,187 @@
+{
+  "name": "RoteirizacaoInteligente",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string"
+    },
+    "empresa_id": {
+      "type": "string"
+    },
+    "data_rota": {
+      "type": "string",
+      "format": "date"
+    },
+    "motorista_id": {
+      "type": "string"
+    },
+    "motorista_nome": {
+      "type": "string"
+    },
+    "veiculo_id": {
+      "type": "string"
+    },
+    "veiculo_placa": {
+      "type": "string"
+    },
+    "entregas_vinculadas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entrega_id": {
+            "type": "string"
+          },
+          "pedido_id": {
+            "type": "string"
+          },
+          "cliente_nome": {
+            "type": "string"
+          },
+          "endereco_completo": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "ordem_sequencia": {
+            "type": "number"
+          },
+          "janela_entrega_inicio": {
+            "type": "string"
+          },
+          "janela_entrega_fim": {
+            "type": "string"
+          },
+          "peso_kg": {
+            "type": "number"
+          },
+          "volume_m3": {
+            "type": "number"
+          },
+          "prioridade": {
+            "type": "string"
+          },
+          "tipo_descarga": {
+            "type": "string"
+          },
+          "tempo_estimado_descarga_minutos": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Entregas inclu\u00eddas nesta rota"
+    },
+    "otimizacao_ia": {
+      "type": "object",
+      "properties": {
+        "distancia_total_km": {
+          "type": "number"
+        },
+        "tempo_total_estimado_minutos": {
+          "type": "number"
+        },
+        "custo_estimado_frete": {
+          "type": "number"
+        },
+        "algoritmo_usado": {
+          "type": "string"
+        },
+        "fatores_considerados": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "economia_vs_rota_manual": {
+          "type": "object",
+          "properties": {
+            "km_economizados": {
+              "type": "number"
+            },
+            "tempo_economizado_minutos": {
+              "type": "number"
+            },
+            "custo_economizado": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "description": "Dados da otimiza\u00e7\u00e3o por IA"
+    },
+    "transito_historico": {
+      "type": "object",
+      "properties": {
+        "dados_considerados": {
+          "type": "string"
+        },
+        "previsao_congestionamento": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "horario": {
+                "type": "string"
+              },
+              "trecho": {
+                "type": "string"
+              },
+              "nivel_transito": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "mapa_rota_url": {
+      "type": "string",
+      "description": "URL do mapa da rota gerada"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Planejada",
+        "Em Execu\u00e7\u00e3o",
+        "Conclu\u00edda",
+        "Cancelada"
+      ],
+      "default": "Planejada"
+    },
+    "desempenho_real": {
+      "type": "object",
+      "properties": {
+        "distancia_real_km": {
+          "type": "number"
+        },
+        "tempo_real_minutos": {
+          "type": "number"
+        },
+        "custo_real": {
+          "type": "number"
+        },
+        "entregas_concluidas": {
+          "type": "number"
+        },
+        "entregas_frustradas": {
+          "type": "number"
+        },
+        "desvios_rota": {
+          "type": "number"
+        }
+      }
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "data_rota",
+    "motorista_id",
+    "veiculo_id"
+  ]
+}

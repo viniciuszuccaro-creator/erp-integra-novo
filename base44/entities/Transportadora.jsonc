@@ -1,0 +1,335 @@
+{
+  "name": "Transportadora",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_dona_id": {
+      "type": "string",
+      "description": "Empresa que cadastrou"
+    },
+    "empresas_compartilhadas_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Empresas que podem usar"
+    },
+    "razao_social": {
+      "type": "string"
+    },
+    "nome_fantasia": {
+      "type": "string"
+    },
+    "cnpj": {
+      "type": "string"
+    },
+    "inscricao_estadual": {
+      "type": "string"
+    },
+    "rntrc": {
+      "type": "string",
+      "description": "Registro Nacional de Transportadores de Carga"
+    },
+    "status_fiscal_receita": {
+      "type": "string",
+      "enum": [
+        "Ativa",
+        "Inapta",
+        "Suspensa",
+        "Baixada",
+        "N\u00e3o Verificado"
+      ],
+      "default": "N\u00e3o Verificado",
+      "description": "Status na Receita Federal"
+    },
+    "emails": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "Principal",
+              "Financeiro",
+              "Operacional"
+            ]
+          },
+          "principal": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "telefones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "numero": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "Comercial",
+              "Celular",
+              "WhatsApp"
+            ]
+          },
+          "principal": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "whatsapp": {
+      "type": "string"
+    },
+    "contato_responsavel": {
+      "type": "string"
+    },
+    "contatos_b2b_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos contatos B2B vinculados"
+    },
+    "endereco": {
+      "type": "string"
+    },
+    "cidade": {
+      "type": "string"
+    },
+    "estado": {
+      "type": "string"
+    },
+    "cep": {
+      "type": "string"
+    },
+    "tipos_veiculo": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tipos de ve\u00edculos suportados"
+    },
+    "capacidade_media_kg": {
+      "type": "number",
+      "description": "Capacidade m\u00e9dia em kg"
+    },
+    "capacidade_media_m3": {
+      "type": "number",
+      "description": "Capacidade m\u00e9dia em m\u00b3"
+    },
+    "regioes_atendimento": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Regi\u00f5es atendidas"
+    },
+    "tipos_carga_permitidos": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "A\u00e7o",
+          "Materiais Pesados",
+          "Fr\u00e1gil",
+          "Perec\u00edvel",
+          "Produtos Qu\u00edmicos",
+          "Geral"
+        ]
+      },
+      "description": "Tipos de carga permitidos"
+    },
+    "areas_atendimento": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o das \u00e1reas atendidas"
+    },
+    "prazo_entrega_padrao": {
+      "type": "number",
+      "description": "Prazo em dias"
+    },
+    "tempo_medio_entrega_real": {
+      "type": "number",
+      "default": 0,
+      "description": "Tempo m\u00e9dio real calculado por IA"
+    },
+    "indice_avarias": {
+      "type": "number",
+      "default": 0,
+      "description": "% de avarias calculado por IA"
+    },
+    "percentual_entregas_prazo": {
+      "type": "number",
+      "default": 0,
+      "description": "% de entregas no prazo"
+    },
+    "total_entregas": {
+      "type": "number",
+      "default": 0
+    },
+    "total_ocorrencias": {
+      "type": "number",
+      "default": 0
+    },
+    "valor_frete_minimo": {
+      "type": "number"
+    },
+    "tabela_frete_padrao": {
+      "type": "object",
+      "properties": {
+        "tipo_cobranca": {
+          "type": "string",
+          "enum": [
+            "Por KM",
+            "Por Regi\u00e3o",
+            "Fixo",
+            "Por Peso",
+            "Por Volume"
+          ],
+          "default": "Por KM"
+        },
+        "valor_por_km": {
+          "type": "number"
+        },
+        "valor_por_kg": {
+          "type": "number"
+        },
+        "valor_minimo": {
+          "type": "number"
+        },
+        "regioes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "regiao": {
+                "type": "string"
+              },
+              "valor_fixo": {
+                "type": "number"
+              },
+              "prazo_dias": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      },
+      "description": "Tabela de frete padr\u00e3o"
+    },
+    "integracao_rastreamento": {
+      "type": "object",
+      "properties": {
+        "possui_integracao": {
+          "type": "boolean",
+          "default": false
+        },
+        "api_url": {
+          "type": "string"
+        },
+        "api_token": {
+          "type": "string"
+        },
+        "modelo_integracao": {
+          "type": "string",
+          "enum": [
+            "REST API",
+            "SOAP",
+            "Webhook",
+            "Manual"
+          ]
+        },
+        "ultima_sincronizacao": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "Integra\u00e7\u00e3o de rastreamento"
+    },
+    "avaliacoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nota": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "criterios": {
+            "type": "object",
+            "properties": {
+              "pontualidade": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "cuidado_carga": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "comunicacao": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "custo_beneficio": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 5
+              }
+            }
+          },
+          "entrega_id": {
+            "type": "string"
+          },
+          "avaliador": {
+            "type": "string"
+          },
+          "comentario": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Avalia\u00e7\u00f5es de desempenho"
+    },
+    "nota_media": {
+      "type": "number",
+      "default": 0,
+      "description": "Nota m\u00e9dia (1-5)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Ativo",
+        "Inativo"
+      ],
+      "default": "Ativo"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "razao_social"
+  ]
+}

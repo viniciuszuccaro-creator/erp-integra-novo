@@ -1,0 +1,194 @@
+{
+  "name": "ConfiguracaoCobrancaEmpresa",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa"
+    },
+    "empresa_nome": {
+      "type": "string"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a configura\u00e7\u00e3o est\u00e1 ativa"
+    },
+    "provedor_cobranca": {
+      "type": "string",
+      "enum": [
+        "Nenhum",
+        "Asaas",
+        "Juno",
+        "Pagar.me",
+        "Mercado Pago",
+        "Banco do Brasil",
+        "Sicoob",
+        "Outro"
+      ],
+      "default": "Nenhum",
+      "description": "Provedor de cobran\u00e7a"
+    },
+    "api_url": {
+      "type": "string",
+      "description": "URL base da API"
+    },
+    "api_key": {
+      "type": "string",
+      "description": "Chave de API"
+    },
+    "api_token": {
+      "type": "string",
+      "description": "Token de autentica\u00e7\u00e3o"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "Client ID (OAuth)"
+    },
+    "client_secret": {
+      "type": "string",
+      "description": "Client Secret (OAuth)"
+    },
+    "conta_id": {
+      "type": "string",
+      "description": "ID da conta no provedor"
+    },
+    "habilitar_boleto": {
+      "type": "boolean",
+      "default": true,
+      "description": "Permite gerar boleto"
+    },
+    "habilitar_pix": {
+      "type": "boolean",
+      "default": true,
+      "description": "Permite gerar PIX"
+    },
+    "habilitar_cartao": {
+      "type": "boolean",
+      "default": false,
+      "description": "Permite cobran\u00e7a via cart\u00e3o"
+    },
+    "dias_vencimento_padrao": {
+      "type": "number",
+      "default": 3,
+      "description": "Dias ap\u00f3s emiss\u00e3o para vencimento"
+    },
+    "multa_pos_vencimento_percent": {
+      "type": "number",
+      "default": 2,
+      "description": "% de multa ap\u00f3s vencimento"
+    },
+    "juros_ao_dia_percent": {
+      "type": "number",
+      "default": 0.033,
+      "description": "% de juros por dia de atraso"
+    },
+    "desconto_antecipacao_percent": {
+      "type": "number",
+      "default": 0,
+      "description": "% de desconto para pagamento antecipado"
+    },
+    "mensagem_padrao_boleto": {
+      "type": "string",
+      "default": "N\u00e3o receber ap\u00f3s o vencimento. Sujeito a multa e juros."
+    },
+    "mensagem_padrao_pix": {
+      "type": "string",
+      "default": "PIX v\u00e1lido por 24h"
+    },
+    "webhook_url": {
+      "type": "string",
+      "description": "URL para receber notifica\u00e7\u00f5es de pagamento"
+    },
+    "webhook_token": {
+      "type": "string",
+      "description": "Token de seguran\u00e7a do webhook"
+    },
+    "enviar_email_automatico": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enviar e-mail ao gerar cobran\u00e7a"
+    },
+    "enviar_whatsapp_automatico": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enviar WhatsApp ao gerar cobran\u00e7a"
+    },
+    "modelo_email_boleto": {
+      "type": "string",
+      "description": "Template de e-mail para boleto"
+    },
+    "modelo_email_pix": {
+      "type": "string",
+      "description": "Template de e-mail para PIX"
+    },
+    "modelo_whatsapp_boleto": {
+      "type": "string",
+      "description": "Template WhatsApp para boleto"
+    },
+    "modelo_whatsapp_pix": {
+      "type": "string",
+      "description": "Template WhatsApp para PIX"
+    },
+    "pix_chave": {
+      "type": "string",
+      "description": "Chave PIX da empresa"
+    },
+    "pix_tipo": {
+      "type": "string",
+      "enum": [
+        "CPF",
+        "CNPJ",
+        "Email",
+        "Telefone",
+        "Aleatoria"
+      ],
+      "description": "Tipo da chave PIX"
+    },
+    "modo_simulacao": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se true, n\u00e3o chama API real (mock)"
+    },
+    "split_ativo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se usa split de pagamento (marketplace)"
+    },
+    "split_config": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Configura\u00e7\u00e3o de split entre empresas"
+    },
+    "ultima_sincronizacao": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltima vez que sincronizou com a API"
+    },
+    "status_conexao": {
+      "type": "string",
+      "enum": [
+        "nao_configurado",
+        "configurado",
+        "ativo",
+        "erro",
+        "desativado"
+      ],
+      "default": "nao_configurado"
+    },
+    "mensagem_erro": {
+      "type": "string"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "empresa_id",
+    "provedor_cobranca"
+  ]
+}

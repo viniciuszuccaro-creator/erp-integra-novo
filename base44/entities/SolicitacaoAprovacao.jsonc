@@ -1,0 +1,79 @@
+{
+  "name": "SolicitacaoAprovacao",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa solicitante"
+    },
+    "solicitante_id": {
+      "type": "string"
+    },
+    "solicitante_nome": {
+      "type": "string"
+    },
+    "aprovador_id": {
+      "type": "string",
+      "description": "Usu\u00e1rio designado a aprovar (opcional)"
+    },
+    "perfil_aprovador_necessario": {
+      "type": "string",
+      "description": "Perfil exigido (ex: Gerente Comercial)"
+    },
+    "tipo_solicitacao": {
+      "type": "string",
+      "enum": [
+        "desconto_pedido",
+        "alteracao_preco",
+        "cadastro_fornecedor",
+        "outro"
+      ],
+      "default": "desconto_pedido"
+    },
+    "entidade_alvo": {
+      "type": "string"
+    },
+    "entidade_alvo_id": {
+      "type": "string"
+    },
+    "dados_propostos": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "justificativa": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "aprovado",
+        "rejeitado",
+        "cancelado"
+      ],
+      "default": "pendente"
+    },
+    "comentarios_aprovacao": {
+      "type": "string"
+    },
+    "data_solicitacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_decisao": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "tipo_solicitacao",
+    "entidade_alvo",
+    "entidade_alvo_id",
+    "dados_propostos",
+    "justificativa"
+  ]
+}

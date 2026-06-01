@@ -1,0 +1,92 @@
+{
+  "name": "ChatbotInteracao",
+  "type": "object",
+  "properties": {
+    "sessao_id": {
+      "type": "string",
+      "description": "ID \u00fanico da sess\u00e3o de chat"
+    },
+    "canal": {
+      "type": "string",
+      "enum": [
+        "WhatsApp",
+        "Portal",
+        "Site",
+        "App"
+      ],
+      "description": "Canal de origem"
+    },
+    "cliente_id": {
+      "type": "string",
+      "description": "ID do cliente (se autenticado)"
+    },
+    "cliente_nome": {
+      "type": "string",
+      "description": "Nome do cliente"
+    },
+    "autenticado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o cliente est\u00e1 autenticado"
+    },
+    "mensagem_usuario": {
+      "type": "string",
+      "description": "Mensagem enviada pelo usu\u00e1rio"
+    },
+    "intent_detectado": {
+      "type": "string",
+      "description": "Intent identificado pela IA"
+    },
+    "confianca_intent": {
+      "type": "number",
+      "description": "% de confian\u00e7a na detec\u00e7\u00e3o (0-100)"
+    },
+    "requer_autenticacao": {
+      "type": "boolean",
+      "default": false
+    },
+    "autenticacao_solicitada": {
+      "type": "boolean",
+      "default": false
+    },
+    "resposta_bot": {
+      "type": "string",
+      "description": "Resposta gerada pelo bot"
+    },
+    "sentimento_detectado": {
+      "type": "string",
+      "enum": [
+        "Positivo",
+        "Neutro",
+        "Frustrado",
+        "Urgente"
+      ],
+      "description": "Sentimento da mensagem"
+    },
+    "palavras_chave_sentimento": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Palavras que indicaram o sentimento"
+    },
+    "transferido_atendente": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se foi transferido para atendente humano"
+    },
+    "vendedor_notificado_id": {
+      "type": "string",
+      "description": "ID do vendedor notificado (transbordo)"
+    },
+    "data_hora": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "sessao_id",
+    "canal",
+    "mensagem_usuario"
+  ]
+}

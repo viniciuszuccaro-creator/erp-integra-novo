@@ -1,0 +1,318 @@
+{
+  "name": "Contrato",
+  "type": "object",
+  "properties": {
+    "numero_contrato": {
+      "type": "string",
+      "description": "N\u00famero \u00fanico do contrato"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "Cliente",
+        "Fornecedor",
+        "Presta\u00e7\u00e3o de Servi\u00e7o",
+        "Loca\u00e7\u00e3o",
+        "Parceria",
+        "Outro"
+      ],
+      "default": "Cliente",
+      "description": "Tipo de contrato"
+    },
+    "parte_contratante": {
+      "type": "string",
+      "description": "Nome da empresa/pessoa"
+    },
+    "parte_contratante_id": {
+      "type": "string",
+      "description": "ID do cliente ou fornecedor"
+    },
+    "objeto": {
+      "type": "string",
+      "description": "Objeto do contrato"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o detalhada"
+    },
+    "valor_mensal": {
+      "type": "number",
+      "description": "Valor mensal do contrato"
+    },
+    "valor_total": {
+      "type": "number",
+      "description": "Valor total do contrato"
+    },
+    "data_inicio": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de in\u00edcio"
+    },
+    "data_fim": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de t\u00e9rmino"
+    },
+    "data_assinatura": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de assinatura"
+    },
+    "vigencia_meses": {
+      "type": "number",
+      "description": "Vig\u00eancia em meses"
+    },
+    "renovacao_automatica": {
+      "type": "boolean",
+      "default": false,
+      "description": "Renova\u00e7\u00e3o autom\u00e1tica ao vencer"
+    },
+    "prazo_aviso_renovacao": {
+      "type": "number",
+      "default": 30,
+      "description": "Dias de anteced\u00eancia para aviso de renova\u00e7\u00e3o"
+    },
+    "indice_reajuste": {
+      "type": "string",
+      "enum": [
+        "IPCA",
+        "IGPM",
+        "INPC",
+        "CDI",
+        "Fixo",
+        "Outro"
+      ],
+      "description": "\u00cdndice de reajuste"
+    },
+    "percentual_reajuste": {
+      "type": "number",
+      "description": "Percentual de reajuste anual"
+    },
+    "data_proximo_reajuste": {
+      "type": "string",
+      "format": "date",
+      "description": "Data do pr\u00f3ximo reajuste"
+    },
+    "forma_pagamento": {
+      "type": "string",
+      "enum": [
+        "Boleto",
+        "Transfer\u00eancia",
+        "Cart\u00e3o",
+        "PIX",
+        "Cheque"
+      ],
+      "default": "Boleto"
+    },
+    "dia_vencimento": {
+      "type": "number",
+      "description": "Dia do vencimento (1-31)"
+    },
+    "responsavel_empresa": {
+      "type": "string",
+      "description": "Respons\u00e1vel pela empresa"
+    },
+    "testemunhas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Lista de testemunhas"
+    },
+    "clausulas_especiais": {
+      "type": "string",
+      "description": "Cl\u00e1usulas especiais"
+    },
+    "multa_rescisao": {
+      "type": "number",
+      "description": "Multa por rescis\u00e3o antecipada (%)"
+    },
+    "arquivo_contrato": {
+      "type": "string",
+      "description": "URL do arquivo PDF"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Rascunho",
+        "Aguardando Assinatura",
+        "Vigente",
+        "Vencido",
+        "Rescindido",
+        "Renovado"
+      ],
+      "default": "Rascunho"
+    },
+    "observacoes": {
+      "type": "string"
+    },
+    "assinado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o contrato foi assinado eletronicamente"
+    },
+    "assinatura_digital": {
+      "type": "object",
+      "description": "Dados da assinatura eletr\u00f4nica",
+      "properties": {
+        "nome_completo": {
+          "type": "string"
+        },
+        "cpf": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "cargo": {
+          "type": "string"
+        },
+        "assinatura_imagem": {
+          "type": "string"
+        },
+        "data_hora": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "ip_address": {
+          "type": "string"
+        },
+        "dispositivo": {
+          "type": "string"
+        },
+        "navegador": {
+          "type": "string"
+        },
+        "geolocation": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        }
+      }
+    },
+    "gerar_cobranca_automatica": {
+      "type": "boolean",
+      "default": true,
+      "description": "Gerar boletos/contas automaticamente"
+    },
+    "ultima_cobranca_gerada": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da \u00faltima cobran\u00e7a gerada"
+    },
+    "proxima_cobranca": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da pr\u00f3xima cobran\u00e7a"
+    },
+    "contas_geradas_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs das contas a receber geradas"
+    },
+    "historico_renovacoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data_renovacao": {
+            "type": "string",
+            "format": "date"
+          },
+          "valor_anterior": {
+            "type": "number"
+          },
+          "valor_novo": {
+            "type": "number"
+          },
+          "percentual_reajuste": {
+            "type": "number"
+          },
+          "indice_utilizado": {
+            "type": "string"
+          },
+          "usuario": {
+            "type": "string"
+          },
+          "observacao": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Hist\u00f3rico de renova\u00e7\u00f5es e reajustes"
+    },
+    "historico_aditivos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "format": "date"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "valor_anterior": {
+            "type": "number"
+          },
+          "valor_novo": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Hist\u00f3rico de aditivos contratuais"
+    },
+    "alertas_enviados": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "Vencimento",
+              "Reajuste",
+              "Renova\u00e7\u00e3o",
+              "Inadimpl\u00eancia"
+            ]
+          },
+          "data_envio": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "destinatario": {
+            "type": "string"
+          },
+          "enviado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "description": "Hist\u00f3rico de alertas enviados"
+    },
+    "proximo_alerta_vencimento": {
+      "type": "string",
+      "format": "date",
+      "description": "Data do pr\u00f3ximo alerta de vencimento"
+    },
+    "proximo_alerta_reajuste": {
+      "type": "string",
+      "format": "date",
+      "description": "Data do pr\u00f3ximo alerta de reajuste"
+    }
+  },
+  "required": [
+    "numero_contrato",
+    "tipo",
+    "parte_contratante",
+    "objeto",
+    "data_inicio"
+  ]
+}

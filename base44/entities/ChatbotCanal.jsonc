@@ -1,0 +1,120 @@
+{
+  "name": "ChatbotCanal",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa"
+    },
+    "nome_canal": {
+      "type": "string",
+      "description": "Nome do canal"
+    },
+    "tipo_canal": {
+      "type": "string",
+      "enum": [
+        "WhatsApp",
+        "Site Widget",
+        "Portal",
+        "App Mobile",
+        "Telegram",
+        "Outro"
+      ],
+      "description": "Tipo de canal"
+    },
+    "whatsapp_numero": {
+      "type": "string",
+      "description": "N\u00famero do WhatsApp Business"
+    },
+    "whatsapp_token": {
+      "type": "string",
+      "description": "Token da API do WhatsApp"
+    },
+    "widget_codigo": {
+      "type": "string",
+      "description": "C\u00f3digo de incorpora\u00e7\u00e3o do widget"
+    },
+    "configuracoes_canal": {
+      "type": "object",
+      "properties": {
+        "mensagem_boas_vindas": {
+          "type": "string"
+        },
+        "mensagem_ausencia": {
+          "type": "string"
+        },
+        "horario_atendimento_inicio": {
+          "type": "string"
+        },
+        "horario_atendimento_fim": {
+          "type": "string"
+        },
+        "dias_semana_atendimento": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "timeout_inatividade_minutos": {
+          "type": "number",
+          "default": 15
+        },
+        "permite_anexos": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "intents_habilitadas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs das intents habilitadas neste canal"
+    },
+    "transfere_para_humano": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se permite transferir para atendente humano"
+    },
+    "usuarios_atendentes_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos usu\u00e1rios que podem atender este canal"
+    },
+    "total_conversas": {
+      "type": "number",
+      "default": 0
+    },
+    "total_mensagens": {
+      "type": "number",
+      "default": 0
+    },
+    "tempo_medio_resposta_segundos": {
+      "type": "number",
+      "default": 0
+    },
+    "taxa_resolucao_bot": {
+      "type": "number",
+      "default": 0,
+      "description": "% de conversas resolvidas sem humano"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "nome_canal",
+    "tipo_canal"
+  ]
+}

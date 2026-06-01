@@ -1,0 +1,132 @@
+{
+  "name": "AuditoriaGPS",
+  "type": "object",
+  "properties": {
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa"
+    },
+    "romaneio_id": {
+      "type": "string",
+      "description": "ID do romaneio"
+    },
+    "entrega_id": {
+      "type": "string",
+      "description": "ID da entrega"
+    },
+    "motorista_id": {
+      "type": "string",
+      "description": "ID do motorista"
+    },
+    "motorista_nome": {
+      "type": "string",
+      "description": "Nome do motorista"
+    },
+    "veiculo_id": {
+      "type": "string",
+      "description": "ID do ve\u00edculo"
+    },
+    "placa": {
+      "type": "string",
+      "description": "Placa do ve\u00edculo"
+    },
+    "tipo_evento": {
+      "type": "string",
+      "enum": [
+        "Sa\u00edda",
+        "Posi\u00e7\u00e3o Atualizada",
+        "Parada",
+        "Retorno",
+        "Entrega Iniciada",
+        "Entrega Conclu\u00edda",
+        "Desvio de Rota",
+        "Velocidade Excessiva",
+        "Bateria Baixa",
+        "Offline"
+      ],
+      "description": "Tipo de evento GPS"
+    },
+    "data_hora": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora do evento"
+    },
+    "latitude": {
+      "type": "number",
+      "description": "Latitude"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Longitude"
+    },
+    "precisao_metros": {
+      "type": "number",
+      "description": "Precis\u00e3o do GPS em metros"
+    },
+    "velocidade_kmh": {
+      "type": "number",
+      "description": "Velocidade em km/h"
+    },
+    "endereco_aproximado": {
+      "type": "string",
+      "description": "Endere\u00e7o aproximado"
+    },
+    "dentro_cerca_eletronica": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se est\u00e1 dentro da cerca eletr\u00f4nica (geofence)"
+    },
+    "distancia_destino_km": {
+      "type": "number",
+      "description": "Dist\u00e2ncia at\u00e9 o destino"
+    },
+    "eta_minutos": {
+      "type": "number",
+      "description": "Tempo estimado de chegada em minutos"
+    },
+    "desvio_rota": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se houve desvio da rota planejada"
+    },
+    "alerta_gerado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se gerou algum alerta"
+    },
+    "tipo_alerta": {
+      "type": "string",
+      "enum": [
+        "Nenhum",
+        "Desvio",
+        "Velocidade",
+        "Parada Longa",
+        "Bateria",
+        "Offline"
+      ],
+      "description": "Tipo de alerta gerado"
+    },
+    "conectividade": {
+      "type": "string",
+      "enum": [
+        "WiFi",
+        "4G",
+        "3G",
+        "Offline"
+      ]
+    },
+    "bateria_nivel": {
+      "type": "number",
+      "description": "N\u00edvel de bateria (%)"
+    },
+    "app_versao": {
+      "type": "string",
+      "description": "Vers\u00e3o do app m\u00f3vel"
+    }
+  },
+  "required": [
+    "data_hora",
+    "latitude",
+    "longitude"
+  ]
+}

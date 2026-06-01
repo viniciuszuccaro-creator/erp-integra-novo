@@ -1,0 +1,277 @@
+{
+  "name": "Romaneio",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa respons\u00e1vel"
+    },
+    "numero_romaneio": {
+      "type": "string",
+      "description": "N\u00famero sequencial do romaneio"
+    },
+    "data_romaneio": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de gera\u00e7\u00e3o"
+    },
+    "data_saida": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora de sa\u00edda"
+    },
+    "data_retorno": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora de retorno"
+    },
+    "motorista": {
+      "type": "string",
+      "description": "Nome do motorista"
+    },
+    "motorista_id": {
+      "type": "string",
+      "description": "ID do colaborador/motorista"
+    },
+    "motorista_telefone": {
+      "type": "string"
+    },
+    "ajudante": {
+      "type": "string",
+      "description": "Nome do ajudante"
+    },
+    "ajudante_id": {
+      "type": "string"
+    },
+    "veiculo": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do ve\u00edculo"
+    },
+    "veiculo_id": {
+      "type": "string"
+    },
+    "placa": {
+      "type": "string"
+    },
+    "tipo_veiculo": {
+      "type": "string",
+      "enum": [
+        "Carro",
+        "Van",
+        "Caminh\u00e3o",
+        "Caminhonete",
+        "Moto",
+        "Outro"
+      ],
+      "default": "Caminh\u00e3o"
+    },
+    "rota_id": {
+      "type": "string",
+      "description": "Rota otimizada vinculada"
+    },
+    "entregas_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs das entregas inclu\u00eddas"
+    },
+    "quantidade_entregas": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de entregas"
+    },
+    "quantidade_volumes": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de volumes"
+    },
+    "peso_total_kg": {
+      "type": "number",
+      "default": 0,
+      "description": "Peso total da carga"
+    },
+    "valor_total_mercadoria": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor total das mercadorias"
+    },
+    "capacidade_veiculo_kg": {
+      "type": "number",
+      "description": "Capacidade do ve\u00edculo (do cadastro) (V16.1)"
+    },
+    "percentual_ocupacao": {
+      "type": "number",
+      "description": "% de ocupa\u00e7\u00e3o do ve\u00edculo (V16.1)"
+    },
+    "alerta_sobrepeso": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a IA detectou sobrepeso (V16.1)"
+    },
+    "distancia_total_km": {
+      "type": "number",
+      "description": "Dist\u00e2ncia total prevista"
+    },
+    "tempo_previsto_minutos": {
+      "type": "number",
+      "description": "Tempo previsto de rota"
+    },
+    "tempo_real_minutos": {
+      "type": "number",
+      "description": "Tempo real gasto"
+    },
+    "km_inicial": {
+      "type": "number",
+      "description": "KM inicial do ve\u00edculo"
+    },
+    "km_final": {
+      "type": "number",
+      "description": "KM final do ve\u00edculo"
+    },
+    "km_rodado": {
+      "type": "number",
+      "description": "KM efetivamente rodado"
+    },
+    "combustivel_estimado_l": {
+      "type": "number",
+      "description": "Combust\u00edvel estimado pela IA (V16.1)"
+    },
+    "custo_combustivel_estimado": {
+      "type": "number",
+      "description": "Custo estimado de combust\u00edvel (V16.1)"
+    },
+    "rota_ecologica": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a IA priorizou rota ecol\u00f3gica (V16.1)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Aberto",
+        "Aprovado",
+        "Em Rota",
+        "Conclu\u00eddo",
+        "Cancelado"
+      ],
+      "default": "Aberto"
+    },
+    "observacoes": {
+      "type": "string"
+    },
+    "instrucoes_motorista": {
+      "type": "string",
+      "description": "Instru\u00e7\u00f5es especiais para o motorista"
+    },
+    "assinatura_motorista": {
+      "type": "string",
+      "description": "URL da assinatura digital do motorista"
+    },
+    "foto_carga": {
+      "type": "string",
+      "description": "URL da foto da carga antes de sair"
+    },
+    "checklist_saida": {
+      "type": "object",
+      "properties": {
+        "documentos_ok": {
+          "type": "boolean"
+        },
+        "veiculo_ok": {
+          "type": "boolean"
+        },
+        "carga_conferida": {
+          "type": "boolean"
+        },
+        "combustivel_ok": {
+          "type": "boolean"
+        },
+        "observacoes": {
+          "type": "string"
+        }
+      }
+    },
+    "ocorrencias": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data_hora": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "Atraso",
+              "Avaria",
+              "Ve\u00edculo",
+              "Cliente",
+              "Tr\u00e2nsito",
+              "Recusa Total",
+              "Devolu\u00e7\u00e3o Parcial",
+              "Outro"
+            ]
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "foto_url": {
+            "type": "string"
+          },
+          "causa_ia": {
+            "type": "string",
+            "description": "Causa classificada pela IA (V16.1)"
+          },
+          "acao_corretiva": {
+            "type": "string",
+            "description": "A\u00e7\u00e3o corretiva sugerida (V16.1)"
+          }
+        }
+      },
+      "description": "Ocorr\u00eancias durante a rota"
+    },
+    "entregas_realizadas": {
+      "type": "number",
+      "default": 0
+    },
+    "entregas_frustradas": {
+      "type": "number",
+      "default": 0
+    },
+    "custo_combustivel": {
+      "type": "number"
+    },
+    "custo_pedagio": {
+      "type": "number"
+    },
+    "custo_total": {
+      "type": "number"
+    },
+    "aprovado_por": {
+      "type": "string"
+    },
+    "data_aprovacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "pdf_romaneio_url": {
+      "type": "string",
+      "description": "URL do PDF gerado"
+    },
+    "link_publico_rastreamento": {
+      "type": "string",
+      "description": "Link p\u00fablico para rastreamento (V16.1)"
+    }
+  },
+  "required": [
+    "numero_romaneio",
+    "empresa_id",
+    "data_romaneio"
+  ]
+}

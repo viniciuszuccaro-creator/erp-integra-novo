@@ -4,8 +4,10 @@ import SecurityMetricsPanel from "./SecurityMetricsPanel";
 import Fase1StatusCard from "./Fase1StatusCard";
 import Fase2StatusCard from "./Fase2StatusCard";
 import Fase3StatusCard from "./Fase3StatusCard";
+import Fase4StatusCard from "./Fase4StatusCard";
+import Fase5StatusCard from "./Fase5StatusCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Activity, CheckSquare, Building2, GitMerge } from "lucide-react";
+import { Shield, Activity, CheckSquare, Building2, GitMerge, MessageCircle, Globe } from "lucide-react";
 
 export default function SegurancaDashboard() {
   return (
@@ -28,6 +30,12 @@ export default function SegurancaDashboard() {
             <TabsTrigger value="fase3" className="text-xs gap-1.5">
               <GitMerge className="w-3.5 h-3.5" /> Fase 3 — Orquestração
             </TabsTrigger>
+            <TabsTrigger value="fase4" className="text-xs gap-1.5">
+              <MessageCircle className="w-3.5 h-3.5" /> Fase 4 — Omnicanal
+            </TabsTrigger>
+            <TabsTrigger value="fase5" className="text-xs gap-1.5">
+              <Globe className="w-3.5 h-3.5" /> Fase 5 — Marketplace
+            </TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="metricas" className="flex-1 overflow-auto p-4 mt-0">
@@ -48,6 +56,12 @@ export default function SegurancaDashboard() {
         </TabsContent>
         <TabsContent value="fase3" className="flex-1 overflow-auto p-4 mt-0">
           <Fase3StatusCard />
+        </TabsContent>
+        <TabsContent value="fase4" className="flex-1 overflow-auto p-4 mt-0">
+          <Fase4StatusCard />
+        </TabsContent>
+        <TabsContent value="fase5" className="flex-1 overflow-auto p-4 mt-0">
+          <Fase5StatusCard />
         </TabsContent>
       </Tabs>
     </div>

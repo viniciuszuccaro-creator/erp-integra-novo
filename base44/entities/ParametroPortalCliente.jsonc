@@ -1,0 +1,155 @@
+{
+  "name": "ParametroPortalCliente",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa"
+    },
+    "portal_ativo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o portal est\u00e1 ativo para esta empresa"
+    },
+    "url_portal": {
+      "type": "string",
+      "description": "URL do portal (ex: portal.empresaX.com.br)"
+    },
+    "logo_portal_url": {
+      "type": "string",
+      "description": "Logo exibida no portal"
+    },
+    "cor_primaria": {
+      "type": "string",
+      "description": "Cor prim\u00e1ria do portal (hex)"
+    },
+    "cor_secundaria": {
+      "type": "string",
+      "description": "Cor secund\u00e1ria do portal (hex)"
+    },
+    "dados_visiveis": {
+      "type": "object",
+      "properties": {
+        "ver_pedidos": {
+          "type": "boolean",
+          "default": true
+        },
+        "ver_orcamentos": {
+          "type": "boolean",
+          "default": true
+        },
+        "ver_financeiro": {
+          "type": "boolean",
+          "default": true
+        },
+        "ver_boletos": {
+          "type": "boolean",
+          "default": true
+        },
+        "ver_entregas": {
+          "type": "boolean",
+          "default": true
+        },
+        "ver_nfe": {
+          "type": "boolean",
+          "default": true
+        },
+        "ver_historico_compras": {
+          "type": "boolean",
+          "default": true
+        },
+        "ver_produtos_favoritos": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "description": "Dados que o cliente pode visualizar"
+    },
+    "acoes_permitidas": {
+      "type": "object",
+      "properties": {
+        "aprovar_orcamento": {
+          "type": "boolean",
+          "default": false
+        },
+        "baixar_boleto": {
+          "type": "boolean",
+          "default": true
+        },
+        "baixar_nfe": {
+          "type": "boolean",
+          "default": true
+        },
+        "abrir_chamado": {
+          "type": "boolean",
+          "default": true
+        },
+        "atualizar_cadastro": {
+          "type": "boolean",
+          "default": true
+        },
+        "solicitar_orcamento": {
+          "type": "boolean",
+          "default": true
+        },
+        "rastrear_entrega": {
+          "type": "boolean",
+          "default": true
+        },
+        "chat_com_vendedor": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "description": "A\u00e7\u00f5es que o cliente pode executar"
+    },
+    "aprovacao_orcamento": {
+      "type": "object",
+      "properties": {
+        "permite_aprovacao_digital": {
+          "type": "boolean",
+          "default": false
+        },
+        "exige_assinatura_eletronica": {
+          "type": "boolean",
+          "default": false
+        },
+        "valor_maximo_aprovacao_automatica": {
+          "type": "number",
+          "default": 0
+        }
+      }
+    },
+    "mensagem_boas_vindas": {
+      "type": "string",
+      "description": "Mensagem exibida ao fazer login"
+    },
+    "suporte_email": {
+      "type": "string",
+      "format": "email",
+      "description": "E-mail de suporte"
+    },
+    "suporte_telefone": {
+      "type": "string",
+      "description": "Telefone de suporte"
+    },
+    "suporte_whatsapp": {
+      "type": "string",
+      "description": "WhatsApp de suporte"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "empresa_id"
+  ]
+}

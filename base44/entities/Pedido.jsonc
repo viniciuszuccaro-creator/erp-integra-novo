@@ -1,0 +1,584 @@
+{
+  "name": "Pedido",
+  "type": "object",
+  "properties": {
+    "numero_pedido": {
+      "type": "string",
+      "description": "N\u00famero sequencial do pedido"
+    },
+    "codigo_interno": {
+      "type": "string",
+      "description": "C\u00f3digo interno opcional"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "Or\u00e7amento",
+        "Pedido"
+      ],
+      "default": "Pedido"
+    },
+    "tipo_pedido": {
+      "type": "string",
+      "enum": [
+        "Revenda",
+        "Produ\u00e7\u00e3o Sob Medida",
+        "Misto",
+        "Reposi\u00e7\u00e3o",
+        "Projeto",
+        "Consigna\u00e7\u00e3o",
+        "Amostra"
+      ],
+      "default": "Revenda"
+    },
+    "origem_pedido": {
+      "type": "string",
+      "enum": [
+        "Manual",
+        "E-commerce",
+        "API",
+        "Importado",
+        "Site",
+        "App",
+        "WhatsApp",
+        "Portal",
+        "Marketplace",
+        "Chatbot"
+      ],
+      "default": "Manual",
+      "description": "Origem do pedido"
+    },
+    "origem_externa_id": {
+      "type": "string",
+      "description": "ID do pedido no sistema externo (Marketplace, Site, etc.)"
+    },
+    "canal_preferencial": {
+      "type": "string",
+      "enum": [
+        "Portal",
+        "WhatsApp",
+        "E-mail"
+      ],
+      "description": "Canal preferencial de comunica\u00e7\u00e3o"
+    },
+    "pode_ver_no_portal": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o cliente pode ver no Portal"
+    },
+    "obra_destino_id": {
+      "type": "string",
+      "description": "V21.1: ID da obra/projeto destino do cliente (para rastreamento por obra)"
+    },
+    "obra_destino_nome": {
+      "type": "string",
+      "description": "V21.1: Nome da obra/projeto (snapshot)"
+    },
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa que est\u00e1 criando o pedido"
+    },
+    "empresa_dona_id": {
+      "type": "string",
+      "description": "Empresa dona do pedido (multiempresa)"
+    },
+    "data_pedido": {
+      "type": "string",
+      "format": "date",
+      "description": "Data do pedido"
+    },
+    "data_validade": {
+      "type": "string",
+      "format": "date",
+      "description": "Validade do or\u00e7amento"
+    },
+    "cliente_id": {
+      "type": "string",
+      "description": "ID do cliente"
+    },
+    "cliente_nome": {
+      "type": "string",
+      "description": "Nome do cliente"
+    },
+    "cliente_cpf_cnpj": {
+      "type": "string",
+      "description": "CPF/CNPJ do cliente"
+    },
+    "vendedor": {
+      "type": "string",
+      "description": "Nome do vendedor"
+    },
+    "vendedor_id": {
+      "type": "string",
+      "description": "ID do vendedor"
+    },
+    "indicador_nome": {
+      "type": "string",
+      "description": "Nome de quem indicou o cliente"
+    },
+    "indicador_id": {
+      "type": "string",
+      "description": "ID do indicador"
+    },
+    "contatos_cliente": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "Telefone",
+              "WhatsApp",
+              "Email",
+              "Celular"
+            ]
+          },
+          "valor": {
+            "type": "string"
+          },
+          "principal": {
+            "type": "boolean"
+          }
+        }
+      },
+      "description": "Contatos do cliente no pedido"
+    },
+    "endereco_entrega_id": {
+      "type": "string",
+      "description": "ID do endere\u00e7o de entrega selecionado do cadastro do cliente"
+    },
+    "endereco_entrega_principal": {
+      "type": "object",
+      "properties": {
+        "cep": {
+          "type": "string"
+        },
+        "logradouro": {
+          "type": "string"
+        },
+        "numero": {
+          "type": "string"
+        },
+        "complemento": {
+          "type": "string"
+        },
+        "bairro": {
+          "type": "string"
+        },
+        "cidade": {
+          "type": "string"
+        },
+        "estado": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        },
+        "mapa_url": {
+          "type": "string",
+          "description": "Link do Google Maps para roteiriza\u00e7\u00e3o precisa"
+        },
+        "contato_nome": {
+          "type": "string"
+        },
+        "contato_telefone": {
+          "type": "string"
+        },
+        "contato_whatsapp": {
+          "type": "string"
+        },
+        "contato_email": {
+          "type": "string"
+        },
+        "instrucoes_entrega": {
+          "type": "string"
+        },
+        "horario_inicio": {
+          "type": "string"
+        },
+        "horario_fim": {
+          "type": "string"
+        }
+      },
+      "description": "Endere\u00e7o principal de entrega"
+    },
+    "itens_revenda": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "produto_id": {
+            "type": "string"
+          },
+          "produto_descricao": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "quantidade": {
+            "type": "number"
+          },
+          "unidade": {
+            "type": "string"
+          },
+          "preco_unitario": {
+            "type": "number"
+          },
+          "valor_unitario": {
+            "type": "number"
+          },
+          "custo_unitario": {
+            "type": "number"
+          },
+          "custo_medio": {
+            "type": "number"
+          },
+          "desconto_percentual": {
+            "type": "number",
+            "default": 0,
+            "description": "V21.4 ETAPA 4: Desconto percentual individual do item"
+          },
+          "desconto_valor": {
+            "type": "number",
+            "default": 0,
+            "description": "V21.4 ETAPA 4: Desconto em valor (R$) individual do item"
+          },
+          "valor_total": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Itens de revenda"
+    },
+    "itens_armado_padrao": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "produto_id": {
+            "type": "string"
+          },
+          "produto_descricao": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "quantidade": {
+            "type": "number"
+          },
+          "unidade": {
+            "type": "string"
+          },
+          "preco_unitario": {
+            "type": "number"
+          },
+          "valor_unitario": {
+            "type": "number"
+          },
+          "custo_unitario": {
+            "type": "number"
+          },
+          "custo_medio": {
+            "type": "number"
+          },
+          "desconto_percentual": {
+            "type": "number",
+            "default": 0,
+            "description": "V21.4 ETAPA 4: Desconto percentual individual do item"
+          },
+          "desconto_valor": {
+            "type": "number",
+            "default": 0,
+            "description": "V21.4 ETAPA 4: Desconto em valor (R$) individual do item"
+          },
+          "valor_total": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Itens de arma\u00e7\u00e3o padr\u00e3o"
+    },
+    "itens_corte_dobra": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "produto_id": {
+            "type": "string"
+          },
+          "produto_descricao": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "quantidade": {
+            "type": "number"
+          },
+          "unidade": {
+            "type": "string"
+          },
+          "preco_unitario": {
+            "type": "number"
+          },
+          "valor_unitario": {
+            "type": "number"
+          },
+          "custo_unitario": {
+            "type": "number"
+          },
+          "custo_medio": {
+            "type": "number"
+          },
+          "desconto_percentual": {
+            "type": "number",
+            "default": 0,
+            "description": "V21.4 ETAPA 4: Desconto percentual individual do item"
+          },
+          "desconto_valor": {
+            "type": "number",
+            "default": 0,
+            "description": "V21.4 ETAPA 4: Desconto em valor (R$) individual do item"
+          },
+          "valor_total": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Itens de corte e dobra"
+    },
+    "etapas_entrega": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "itens_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "quantidade_itens": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "faturada": {
+            "type": "boolean"
+          },
+          "nfe_id": {
+            "type": "string"
+          },
+          "data_criacao": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Etapas de entrega/faturamento parcial"
+    },
+    "observacoes_nfe": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es que ser\u00e3o inclu\u00eddas na NF-e (campo infCpl)"
+    },
+    "cfop_pedido": {
+      "type": "string",
+      "description": "CFOP principal do pedido"
+    },
+    "natureza_operacao": {
+      "type": "string",
+      "description": "Natureza da opera\u00e7\u00e3o"
+    },
+    "valor_produtos": {
+      "type": "number",
+      "default": 0
+    },
+    "desconto_geral_pedido_percentual": {
+      "type": "number",
+      "default": 0,
+      "description": "V21.4 ETAPA 4: Desconto geral em percentual aplicado ao pedido"
+    },
+    "desconto_geral_pedido_valor": {
+      "type": "number",
+      "default": 0,
+      "description": "V21.4 ETAPA 4: Desconto geral em valor (R$) aplicado ao pedido"
+    },
+    "valor_frete": {
+      "type": "number",
+      "default": 0
+    },
+    "tipo_frete": {
+      "type": "string",
+      "enum": [
+        "CIF",
+        "FOB",
+        "Retirada"
+      ],
+      "default": "CIF"
+    },
+    "data_prevista_entrega": {
+      "type": "string",
+      "format": "date"
+    },
+    "valor_total": {
+      "type": "number",
+      "default": 0
+    },
+    "peso_total_kg": {
+      "type": "number",
+      "default": 0
+    },
+    "forma_pagamento": {
+      "type": "string",
+      "enum": [
+        "\u00c0 Vista",
+        "Cart\u00e3o de Cr\u00e9dito",
+        "Cart\u00e3o de D\u00e9bito",
+        "Boleto",
+        "Parcelado",
+        "PIX",
+        "Transfer\u00eancia",
+        "Dinheiro"
+      ]
+    },
+    "numero_parcelas": {
+      "type": "number"
+    },
+    "intervalo_parcelas": {
+      "type": "number"
+    },
+    "justificativa_desconto": {
+      "type": "string"
+    },
+    "margem_minima_produto": {
+      "type": "number",
+      "description": "ETAPA 4: Margem m\u00ednima configurada para os produtos"
+    },
+    "margem_aplicada_vendedor": {
+      "type": "number",
+      "description": "ETAPA 4: Margem resultante ap\u00f3s desconto aplicado pelo vendedor"
+    },
+    "desconto_solicitado_percentual": {
+      "type": "number",
+      "default": 0,
+      "description": "ETAPA 4: Percentual de desconto solicitado pelo vendedor"
+    },
+    "desconto_aprovado_percentual": {
+      "type": "number",
+      "default": 0,
+      "description": "ETAPA 4: Percentual de desconto aprovado pelo gerente"
+    },
+    "status_aprovacao": {
+      "type": "string",
+      "enum": [
+        "n\u00e3o exigida",
+        "pendente",
+        "aprovado",
+        "negado"
+      ],
+      "default": "n\u00e3o exigida",
+      "description": "ETAPA 4: Status da aprova\u00e7\u00e3o de desconto hierarquizado"
+    },
+    "usuario_solicitante_id": {
+      "type": "string",
+      "description": "ETAPA 4: ID do vendedor que solicitou desconto especial"
+    },
+    "usuario_aprovador_id": {
+      "type": "string",
+      "description": "ETAPA 4: ID do gestor que aprovou/negou"
+    },
+    "data_aprovacao": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ETAPA 4: Data/hora da decis\u00e3o de aprova\u00e7\u00e3o"
+    },
+    "comentarios_aprovacao": {
+      "type": "string",
+      "description": "ETAPA 4: Coment\u00e1rios do aprovador"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Rascunho",
+        "Aguardando Aprova\u00e7\u00e3o",
+        "Aprovado",
+        "Em Produ\u00e7\u00e3o",
+        "Pronto para Faturar",
+        "Faturado",
+        "Em Expedi\u00e7\u00e3o",
+        "Em Tr\u00e2nsito",
+        "Entregue",
+        "Cancelado"
+      ],
+      "default": "Rascunho"
+    },
+    "prioridade": {
+      "type": "string",
+      "enum": [
+        "Baixa",
+        "Normal",
+        "Alta",
+        "Urgente"
+      ],
+      "default": "Normal"
+    },
+    "observacoes_publicas": {
+      "type": "string"
+    },
+    "observacoes_internas": {
+      "type": "string"
+    },
+    "ultimo_acesso_portal_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltima vez que cliente visualizou no portal (V16.1)"
+    },
+    "visualizacoes_portal": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantidade de vezes que foi visualizado no portal (V16.1)"
+    },
+    "anexos": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "projetos_ia": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "percentual_conclusao_wizard": {
+      "type": "number",
+      "default": 0
+    },
+    "etapa_atual_wizard": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "numero_pedido",
+    "cliente_nome",
+    "data_pedido",
+    "valor_total"
+  ]
+}

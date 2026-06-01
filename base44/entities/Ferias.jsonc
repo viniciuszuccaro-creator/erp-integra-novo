@@ -1,0 +1,103 @@
+{
+  "name": "Ferias",
+  "type": "object",
+  "properties": {
+    "colaborador_id": {
+      "type": "string"
+    },
+    "colaborador_nome": {
+      "type": "string"
+    },
+    "periodo_aquisitivo_inicio": {
+      "type": "string",
+      "format": "date",
+      "description": "In\u00edcio do per\u00edodo aquisitivo"
+    },
+    "periodo_aquisitivo_fim": {
+      "type": "string",
+      "format": "date",
+      "description": "Fim do per\u00edodo aquisitivo"
+    },
+    "data_inicio": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de in\u00edcio das f\u00e9rias"
+    },
+    "data_fim": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de fim das f\u00e9rias"
+    },
+    "data_retorno": {
+      "type": "string",
+      "format": "date",
+      "description": "Data prevista de retorno"
+    },
+    "dias_solicitados": {
+      "type": "number",
+      "description": "Quantidade de dias"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "Integral",
+        "Fracionada 1\u00aa Parcela",
+        "Fracionada 2\u00aa Parcela",
+        "Fracionada 3\u00aa Parcela"
+      ],
+      "default": "Integral"
+    },
+    "venda_ferias": {
+      "type": "number",
+      "description": "Quantidade de dias vendidos (m\u00e1x 10)",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "abono_pecuniario": {
+      "type": "boolean",
+      "description": "Venda de 1/3 das f\u00e9rias"
+    },
+    "adiantamento_13": {
+      "type": "boolean",
+      "description": "Solicitar adiantamento 13\u00ba sal\u00e1rio"
+    },
+    "solicitante": {
+      "type": "string"
+    },
+    "data_solicitacao": {
+      "type": "string",
+      "format": "date"
+    },
+    "aprovador": {
+      "type": "string"
+    },
+    "data_aprovacao": {
+      "type": "string",
+      "format": "date"
+    },
+    "motivo_recusa": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Solicitado",
+        "Aprovado",
+        "Recusado",
+        "Em Gozo",
+        "Conclu\u00eddo",
+        "Cancelado"
+      ],
+      "default": "Solicitado"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "colaborador_nome",
+    "data_inicio",
+    "data_fim",
+    "dias_solicitados"
+  ]
+}

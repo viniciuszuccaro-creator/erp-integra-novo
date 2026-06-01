@@ -1,0 +1,193 @@
+{
+  "name": "Motorista",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa"
+    },
+    "colaborador_vinculado_id": {
+      "type": "string",
+      "description": "ID do colaborador vinculado (se for funcion\u00e1rio)"
+    },
+    "nome_completo": {
+      "type": "string",
+      "description": "Nome completo do motorista"
+    },
+    "cpf": {
+      "type": "string"
+    },
+    "rg": {
+      "type": "string"
+    },
+    "data_nascimento": {
+      "type": "string",
+      "format": "date"
+    },
+    "telefone": {
+      "type": "string"
+    },
+    "whatsapp": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "cnh_numero": {
+      "type": "string",
+      "description": "N\u00famero da CNH"
+    },
+    "cnh_categoria": {
+      "type": "string",
+      "description": "Categoria da CNH (A, B, C, D, E)"
+    },
+    "cnh_validade": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de validade da CNH"
+    },
+    "cnh_primeira_habilitacao": {
+      "type": "string",
+      "format": "date"
+    },
+    "tipo_vinculo": {
+      "type": "string",
+      "enum": [
+        "CLT",
+        "Agregado",
+        "Terceirizado",
+        "Aut\u00f4nomo"
+      ],
+      "default": "CLT"
+    },
+    "data_admissao": {
+      "type": "string",
+      "format": "date"
+    },
+    "endereco": {
+      "type": "object",
+      "properties": {
+        "cep": {
+          "type": "string"
+        },
+        "logradouro": {
+          "type": "string"
+        },
+        "numero": {
+          "type": "string"
+        },
+        "bairro": {
+          "type": "string"
+        },
+        "cidade": {
+          "type": "string"
+        },
+        "estado": {
+          "type": "string"
+        }
+      }
+    },
+    "usuario_app_entrega_id": {
+      "type": "string",
+      "description": "ID do usu\u00e1rio no app de entrega"
+    },
+    "veiculos_habilitados": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos ve\u00edculos que pode dirigir"
+    },
+    "rotas_habilitadas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs das rotas que pode fazer"
+    },
+    "pode_dirigir_pesado": {
+      "type": "boolean",
+      "default": false
+    },
+    "certificacoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "orgao_emissor": {
+            "type": "string"
+          },
+          "validade": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "description": "Certifica\u00e7\u00f5es e treinamentos"
+    },
+    "avaliacoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nota": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "comentario": {
+            "type": "string"
+          },
+          "avaliador": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Avalia\u00e7\u00f5es de desempenho"
+    },
+    "nota_media": {
+      "type": "number",
+      "default": 5,
+      "description": "Nota m\u00e9dia (1-5)"
+    },
+    "total_entregas": {
+      "type": "number",
+      "default": 0
+    },
+    "total_km_rodados": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Ativo",
+        "F\u00e9rias",
+        "Afastado",
+        "Inativo"
+      ],
+      "default": "Ativo"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "nome_completo",
+    "cnh_numero",
+    "cnh_categoria",
+    "cnh_validade"
+  ]
+}

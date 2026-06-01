@@ -1,0 +1,211 @@
+{
+  "name": "AuditoriaGlobal",
+  "type": "object",
+  "properties": {
+    "grupo_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa onde ocorreu a a\u00e7\u00e3o"
+    },
+    "usuario_id": {
+      "type": "string",
+      "description": "ID do usu\u00e1rio que executou"
+    },
+    "usuario_nome": {
+      "type": "string",
+      "description": "Nome do usu\u00e1rio"
+    },
+    "usuario_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio"
+    },
+    "usuario_perfil": {
+      "type": "string",
+      "description": "Perfil de acesso do usu\u00e1rio"
+    },
+    "data_hora": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora da a\u00e7\u00e3o"
+    },
+    "acao": {
+      "type": "string",
+      "enum": [
+        "Login",
+        "Logout",
+        "Criar",
+        "Editar",
+        "Excluir",
+        "Visualizar",
+        "Aprovar",
+        "Rejeitar",
+        "Exportar",
+        "Importar",
+        "Troca Empresa",
+        "Troca Contexto",
+        "API Call",
+        "IA Execution",
+        "Integra\u00e7\u00e3o",
+        "Backup",
+        "Restore",
+        "Config Change"
+      ],
+      "description": "Tipo de a\u00e7\u00e3o executada"
+    },
+    "modulo": {
+      "type": "string",
+      "description": "M\u00f3dulo do sistema"
+    },
+    "entidade_afetada": {
+      "type": "string",
+      "description": "Nome da entidade (Cliente, Pedido, etc.)"
+    },
+    "registro_id": {
+      "type": "string",
+      "description": "ID do registro afetado"
+    },
+    "registro_chave": {
+      "type": "string",
+      "description": "Chave/n\u00famero do registro (PEDXYZ, NF123)"
+    },
+    "campos_alterados": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "campo": {
+            "type": "string"
+          },
+          "valor_anterior": {
+            "type": "string"
+          },
+          "valor_novo": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Lista de campos alterados"
+    },
+    "dados_antes": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Snapshot dos dados antes da altera\u00e7\u00e3o"
+    },
+    "dados_depois": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Snapshot dos dados ap\u00f3s a altera\u00e7\u00e3o"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "Endere\u00e7o IP de origem"
+    },
+    "ip_localizacao": {
+      "type": "string",
+      "description": "Geolocaliza\u00e7\u00e3o do IP"
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "Navegador e dispositivo"
+    },
+    "dispositivo_tipo": {
+      "type": "string",
+      "enum": [
+        "Desktop",
+        "Mobile",
+        "Tablet",
+        "API",
+        "Bot"
+      ],
+      "description": "Tipo de dispositivo"
+    },
+    "contexto_sessao": {
+      "type": "object",
+      "properties": {
+        "empresa_contexto": {
+          "type": "string"
+        },
+        "grupo_contexto": {
+          "type": "string"
+        },
+        "nivel_acesso": {
+          "type": "string"
+        }
+      },
+      "description": "Contexto da sess\u00e3o"
+    },
+    "sucesso": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se a a\u00e7\u00e3o foi bem-sucedida"
+    },
+    "mensagem_erro": {
+      "type": "string",
+      "description": "Mensagem de erro (se houver)"
+    },
+    "duracao_ms": {
+      "type": "number",
+      "description": "Dura\u00e7\u00e3o da opera\u00e7\u00e3o em ms"
+    },
+    "nivel_risco": {
+      "type": "string",
+      "enum": [
+        "Baixo",
+        "M\u00e9dio",
+        "Alto",
+        "Cr\u00edtico"
+      ],
+      "default": "Baixo",
+      "description": "N\u00edvel de risco da a\u00e7\u00e3o (calculado por IA)"
+    },
+    "alerta_ia_gerado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a IA detectou comportamento an\u00f4malo"
+    },
+    "tipo_alerta": {
+      "type": "string",
+      "enum": [
+        "Nenhum",
+        "Login Suspeito",
+        "Hor\u00e1rio Incomum",
+        "IP Novo",
+        "A\u00e7\u00e3o Repetitiva",
+        "Volume Alto",
+        "Acesso Negado M\u00faltiplo"
+      ],
+      "description": "Tipo de alerta gerado"
+    },
+    "requer_investigacao": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se requer investiga\u00e7\u00e3o manual"
+    },
+    "investigado": {
+      "type": "boolean",
+      "default": false
+    },
+    "investigado_por": {
+      "type": "string"
+    },
+    "investigacao_resultado": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags para categoriza\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "usuario_id",
+    "data_hora",
+    "acao",
+    "modulo"
+  ]
+}

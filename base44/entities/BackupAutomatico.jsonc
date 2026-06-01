@@ -1,0 +1,361 @@
+{
+  "name": "BackupAutomatico",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa (se backup individual)"
+    },
+    "tipo_backup": {
+      "type": "string",
+      "enum": [
+        "Completo",
+        "Incremental",
+        "Diferencial"
+      ],
+      "default": "Completo",
+      "description": "Tipo de backup realizado"
+    },
+    "escopo": {
+      "type": "string",
+      "enum": [
+        "grupo",
+        "empresa",
+        "modulo_especifico"
+      ],
+      "default": "empresa",
+      "description": "Escopo do backup"
+    },
+    "numero_backup": {
+      "type": "string",
+      "description": "N\u00famero sequencial do backup"
+    },
+    "data_hora_inicio": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora de in\u00edcio do backup"
+    },
+    "data_hora_fim": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora de conclus\u00e3o"
+    },
+    "duracao_segundos": {
+      "type": "number",
+      "description": "Tempo total do backup em segundos"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Agendado",
+        "Em Progresso",
+        "Conclu\u00eddo",
+        "Erro",
+        "Cancelado",
+        "Expirado"
+      ],
+      "default": "Agendado",
+      "description": "Status do backup"
+    },
+    "trigger": {
+      "type": "string",
+      "enum": [
+        "Autom\u00e1tico",
+        "Manual",
+        "Sob Demanda",
+        "Pr\u00e9-Migra\u00e7\u00e3o"
+      ],
+      "default": "Autom\u00e1tico",
+      "description": "O que disparou o backup"
+    },
+    "modulos_incluidos": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Clientes",
+          "Pedidos",
+          "Financeiro",
+          "Estoque",
+          "Produ\u00e7\u00e3o",
+          "Fiscal",
+          "RH",
+          "Todos"
+        ]
+      },
+      "description": "M\u00f3dulos inclu\u00eddos no backup"
+    },
+    "entidades_backup": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entidade": {
+            "type": "string"
+          },
+          "quantidade_registros": {
+            "type": "number"
+          },
+          "tamanho_mb": {
+            "type": "number"
+          },
+          "hash_md5": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Detalhamento por entidade"
+    },
+    "quantidade_total_registros": {
+      "type": "number",
+      "description": "Total de registros no backup"
+    },
+    "tamanho_backup_mb": {
+      "type": "number",
+      "description": "Tamanho total em MB"
+    },
+    "tamanho_comprimido_mb": {
+      "type": "number",
+      "description": "Tamanho ap\u00f3s compress\u00e3o"
+    },
+    "taxa_compressao": {
+      "type": "number",
+      "description": "% de compress\u00e3o"
+    },
+    "formato_arquivo": {
+      "type": "string",
+      "enum": [
+        "JSON.gz",
+        "SQL.gz",
+        "Bin\u00e1rio",
+        "Outro"
+      ],
+      "default": "JSON.gz",
+      "description": "Formato do arquivo de backup"
+    },
+    "provider_storage": {
+      "type": "string",
+      "enum": [
+        "AWS S3",
+        "Google Cloud Storage",
+        "Azure Blob",
+        "Local",
+        "Base44 Cloud"
+      ],
+      "default": "Base44 Cloud",
+      "description": "Provedor de armazenamento"
+    },
+    "bucket_nome": {
+      "type": "string",
+      "description": "Nome do bucket/container"
+    },
+    "arquivo_path": {
+      "type": "string",
+      "description": "Caminho completo do arquivo no storage"
+    },
+    "arquivo_url": {
+      "type": "string",
+      "description": "URL de acesso ao backup (signed URL tempor\u00e1ria)"
+    },
+    "arquivo_url_expira_em": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Expira\u00e7\u00e3o da URL de download"
+    },
+    "criptografado": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o backup foi criptografado"
+    },
+    "algoritmo_criptografia": {
+      "type": "string",
+      "default": "AES-256",
+      "description": "Algoritmo de criptografia usado"
+    },
+    "hash_integridade": {
+      "type": "string",
+      "description": "Hash SHA-256 para verifica\u00e7\u00e3o de integridade"
+    },
+    "versao_sistema": {
+      "type": "string",
+      "description": "Vers\u00e3o do sistema no momento do backup"
+    },
+    "versao_schema": {
+      "type": "string",
+      "description": "Vers\u00e3o do schema do banco"
+    },
+    "retencao_dias": {
+      "type": "number",
+      "default": 30,
+      "description": "Dias de reten\u00e7\u00e3o deste backup"
+    },
+    "data_expiracao": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de expira\u00e7\u00e3o do backup"
+    },
+    "backup_anterior_id": {
+      "type": "string",
+      "description": "ID do backup anterior (para incrementais)"
+    },
+    "backup_base_id": {
+      "type": "string",
+      "description": "ID do backup completo base (para diferenciais)"
+    },
+    "restauracoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data_hora": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "usuario": {
+            "type": "string"
+          },
+          "usuario_id": {
+            "type": "string"
+          },
+          "tipo_restauracao": {
+            "type": "string",
+            "enum": [
+              "Completa",
+              "Parcial",
+              "Verifica\u00e7\u00e3o"
+            ]
+          },
+          "sucesso": {
+            "type": "boolean"
+          },
+          "observacoes": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Hist\u00f3rico de restaura\u00e7\u00f5es"
+    },
+    "validacao_integridade": {
+      "type": "object",
+      "properties": {
+        "validado": {
+          "type": "boolean",
+          "default": false
+        },
+        "data_validacao": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "hash_valido": {
+          "type": "boolean"
+        },
+        "arquivo_integro": {
+          "type": "boolean"
+        },
+        "pode_restaurar": {
+          "type": "boolean"
+        }
+      },
+      "description": "Valida\u00e7\u00e3o de integridade do backup"
+    },
+    "metricas": {
+      "type": "object",
+      "properties": {
+        "velocidade_upload_mbps": {
+          "type": "number"
+        },
+        "registros_por_segundo": {
+          "type": "number"
+        },
+        "erros_encontrados": {
+          "type": "number"
+        },
+        "avisos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "M\u00e9tricas de performance do backup"
+    },
+    "log_backup": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "etapa": {
+            "type": "string"
+          },
+          "mensagem": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "info",
+              "warning",
+              "error"
+            ]
+          }
+        }
+      },
+      "description": "Log detalhado do processo"
+    },
+    "erro_mensagem": {
+      "type": "string",
+      "description": "Mensagem de erro (se status=Erro)"
+    },
+    "erro_stack": {
+      "type": "string",
+      "description": "Stack trace do erro"
+    },
+    "notificacao_enviada": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se notifica\u00e7\u00e3o foi enviada"
+    },
+    "notificacao_destinatarios": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "E-mails notificados sobre o backup"
+    },
+    "automatico": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se foi disparado automaticamente"
+    },
+    "agendamento_id": {
+      "type": "string",
+      "description": "ID do agendamento que disparou"
+    },
+    "executado_por": {
+      "type": "string",
+      "description": "Usu\u00e1rio que disparou (se manual)"
+    },
+    "executado_por_id": {
+      "type": "string"
+    },
+    "observacoes": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es sobre o backup"
+    }
+  },
+  "required": [
+    "tipo_backup",
+    "escopo",
+    "numero_backup",
+    "data_hora_inicio",
+    "status"
+  ]
+}

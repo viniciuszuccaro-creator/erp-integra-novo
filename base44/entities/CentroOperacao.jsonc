@@ -1,0 +1,150 @@
+{
+  "name": "CentroOperacao",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa respons\u00e1vel"
+    },
+    "nome_centro": {
+      "type": "string",
+      "description": "Nome do centro (Ex: CD Guarulhos, Obra Cliente X)"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "CD",
+        "Obra",
+        "Loja",
+        "Dep\u00f3sito",
+        "F\u00e1brica"
+      ],
+      "description": "Tipo de centro operacional"
+    },
+    "endereco": {
+      "type": "object",
+      "properties": {
+        "cep": {
+          "type": "string"
+        },
+        "logradouro": {
+          "type": "string"
+        },
+        "numero": {
+          "type": "string"
+        },
+        "complemento": {
+          "type": "string"
+        },
+        "bairro": {
+          "type": "string"
+        },
+        "cidade": {
+          "type": "string"
+        },
+        "estado": {
+          "type": "string"
+        },
+        "pais": {
+          "type": "string",
+          "default": "Brasil"
+        }
+      },
+      "description": "Endere\u00e7o completo do centro"
+    },
+    "geolocalizacao": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        },
+        "google_maps_url": {
+          "type": "string"
+        }
+      },
+      "description": "Geolocaliza\u00e7\u00e3o autom\u00e1tica (V16.1)"
+    },
+    "responsavel_id": {
+      "type": "string",
+      "description": "ID do colaborador respons\u00e1vel"
+    },
+    "responsavel_nome": {
+      "type": "string",
+      "description": "Nome do respons\u00e1vel"
+    },
+    "permite_estoque": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se permite controle de estoque"
+    },
+    "capacidade_m3": {
+      "type": "number",
+      "description": "Capacidade volum\u00e9trica em m\u00b3"
+    },
+    "area_m2": {
+      "type": "number",
+      "description": "\u00c1rea total em m\u00b2"
+    },
+    "custo_mensal_aluguel": {
+      "type": "number",
+      "description": "Custo mensal de aluguel/opera\u00e7\u00e3o"
+    },
+    "custo_por_m2": {
+      "type": "number",
+      "description": "Custo por m\u00b2 calculado por IA"
+    },
+    "horario_funcionamento": {
+      "type": "object",
+      "properties": {
+        "segunda_sexta_inicio": {
+          "type": "string"
+        },
+        "segunda_sexta_fim": {
+          "type": "string"
+        },
+        "sabado_inicio": {
+          "type": "string"
+        },
+        "sabado_fim": {
+          "type": "string"
+        },
+        "domingo": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "description": "Hor\u00e1rio de funcionamento"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o centro est\u00e1 ativo"
+    },
+    "data_abertura": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de abertura"
+    },
+    "data_encerramento": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de encerramento (se aplic\u00e1vel)"
+    },
+    "observacoes": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es sobre o centro"
+    }
+  },
+  "required": [
+    "nome_centro",
+    "tipo",
+    "empresa_id"
+  ]
+}

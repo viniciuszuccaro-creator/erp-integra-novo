@@ -1,0 +1,60 @@
+{
+  "name": "Marca",
+  "type": "object",
+  "properties": {
+    "nome_marca": {
+      "type": "string",
+      "description": "Nome da marca/fabricante"
+    },
+    "descricao": {
+      "type": "string"
+    },
+    "cnpj": {
+      "type": "string",
+      "description": "CNPJ do fabricante"
+    },
+    "pais_origem": {
+      "type": "string",
+      "default": "Brasil",
+      "description": "Pa\u00eds de origem"
+    },
+    "site": {
+      "type": "string",
+      "description": "Website do fabricante"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "URL da logo"
+    },
+    "categoria": {
+      "type": "string",
+      "enum": [
+        "A\u00e7o",
+        "Ferramentas",
+        "EPIs",
+        "El\u00e9tricos",
+        "Hidr\u00e1ulica",
+        "Outro"
+      ],
+      "description": "Categoria principal"
+    },
+    "fornecedor_id": {
+      "type": "string",
+      "description": "Fornecedor principal vinculado"
+    },
+    "certificacoes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Certifica\u00e7\u00f5es (ISO, INMETRO, etc)"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "nome_marca"
+  ]
+}

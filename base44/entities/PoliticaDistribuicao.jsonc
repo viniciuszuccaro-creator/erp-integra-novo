@@ -1,0 +1,131 @@
+{
+  "name": "PoliticaDistribuicao",
+  "type": "object",
+  "properties": {
+    "grupo_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "nome": {
+      "type": "string",
+      "description": "Nome da pol\u00edtica (ex: Distribui\u00e7\u00e3o Financeiro Padr\u00e3o)"
+    },
+    "tipo_documento": {
+      "type": "string",
+      "enum": [
+        "financeiro_pagar",
+        "financeiro_receber",
+        "pedido_compra",
+        "pedido_venda_interno",
+        "centro_custo",
+        "rateio_despesa",
+        "folha_pagamento",
+        "estoque",
+        "producao",
+        "geral"
+      ],
+      "description": "Tipo de documento que esta pol\u00edtica se aplica"
+    },
+    "criterio": {
+      "type": "string",
+      "enum": [
+        "percentual",
+        "por_faturamento",
+        "fixo_por_empresa",
+        "manual"
+      ],
+      "default": "percentual",
+      "description": "Crit\u00e9rio de distribui\u00e7\u00e3o"
+    },
+    "definicoes": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "JSON com defini\u00e7\u00f5es por empresa",
+      "examples": [
+        {
+          "CPA": 50,
+          "3Z": 50
+        },
+        {
+          "CPA": 7000,
+          "3Z": 3000
+        }
+      ]
+    },
+    "empresas_participantes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "empresa_id": {
+            "type": "string"
+          },
+          "empresa_nome": {
+            "type": "string"
+          },
+          "percentual": {
+            "type": "number",
+            "description": "% se crit\u00e9rio for percentual"
+          },
+          "valor_fixo": {
+            "type": "number",
+            "description": "Valor fixo se crit\u00e9rio for fixo"
+          },
+          "ativo": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "description": "Lista de empresas participantes da distribui\u00e7\u00e3o"
+    },
+    "ativa": {
+      "type": "boolean",
+      "default": true
+    },
+    "padrao_para_tipo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se \u00e9 a pol\u00edtica padr\u00e3o para este tipo de documento"
+    },
+    "permite_ajuste_manual": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se permite ajuste manual dos valores na hora da distribui\u00e7\u00e3o"
+    },
+    "historico_uso": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "documento_tipo": {
+            "type": "string"
+          },
+          "documento_id": {
+            "type": "string"
+          },
+          "valor_total": {
+            "type": "number"
+          },
+          "distribuicao_realizada": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "Hist\u00f3rico de documentos que usaram esta pol\u00edtica"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "grupo_id",
+    "nome",
+    "tipo_documento",
+    "criterio"
+  ]
+}

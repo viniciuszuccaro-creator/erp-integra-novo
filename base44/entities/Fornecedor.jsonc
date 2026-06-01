@@ -1,0 +1,474 @@
+{
+  "name": "Fornecedor",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_dona_id": {
+      "type": "string",
+      "description": "Empresa que cadastrou o fornecedor"
+    },
+    "empresas_compartilhadas_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Empresas que podem comprar deste fornecedor"
+    },
+    "nome": {
+      "type": "string"
+    },
+    "razao_social": {
+      "type": "string"
+    },
+    "nome_fantasia": {
+      "type": "string"
+    },
+    "cnpj": {
+      "type": "string"
+    },
+    "cpf": {
+      "type": "string",
+      "description": "CPF (se PF)"
+    },
+    "inscricao_estadual": {
+      "type": "string"
+    },
+    "inscricao_municipal": {
+      "type": "string"
+    },
+    "cnae_principal": {
+      "type": "string",
+      "description": "CNAE principal (consultado via IA)"
+    },
+    "ramo_atividade": {
+      "type": "string",
+      "description": "Ramo de atividade (sugerido por IA)"
+    },
+    "status_fiscal_receita": {
+      "type": "string",
+      "enum": [
+        "Ativa",
+        "Inapta",
+        "Suspensa",
+        "Baixada",
+        "N\u00e3o Verificado"
+      ],
+      "default": "N\u00e3o Verificado",
+      "description": "Status na Receita Federal consultado por IA"
+    },
+    "status_validacao_kyb": {
+      "type": "string",
+      "enum": [
+        "Pendente",
+        "Em An\u00e1lise",
+        "Aprovado",
+        "Reprovado"
+      ],
+      "default": "Pendente",
+      "description": "Status de valida\u00e7\u00e3o KYB"
+    },
+    "risco_cadastro_ia": {
+      "type": "string",
+      "enum": [
+        "Baixo",
+        "M\u00e9dio",
+        "Alto"
+      ],
+      "default": "Baixo",
+      "description": "Risco de cadastro calculado por IA"
+    },
+    "score_confiabilidade": {
+      "type": "number",
+      "default": 50,
+      "description": "Score de confiabilidade (0-100)"
+    },
+    "emails": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "Principal",
+              "Financeiro",
+              "Compras",
+              "NF-e"
+            ]
+          },
+          "principal": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "description": "Lista de e-mails"
+    },
+    "telefones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "numero": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "Comercial",
+              "Celular",
+              "WhatsApp",
+              "Fixo"
+            ]
+          },
+          "principal": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "description": "Lista de telefones"
+    },
+    "whatsapp": {
+      "type": "string"
+    },
+    "contato_responsavel": {
+      "type": "string"
+    },
+    "contatos_b2b_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos contatos B2B vinculados"
+    },
+    "endereco_principal": {
+      "type": "object",
+      "properties": {
+        "tipo": {
+          "type": "string",
+          "enum": [
+            "Sede",
+            "Faturamento",
+            "Expedi\u00e7\u00e3o",
+            "Outro"
+          ],
+          "default": "Sede"
+        },
+        "cep": {
+          "type": "string"
+        },
+        "logradouro": {
+          "type": "string"
+        },
+        "numero": {
+          "type": "string"
+        },
+        "complemento": {
+          "type": "string"
+        },
+        "bairro": {
+          "type": "string"
+        },
+        "cidade": {
+          "type": "string"
+        },
+        "estado": {
+          "type": "string"
+        },
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        }
+      }
+    },
+    "enderecos_secundarios": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "Sede",
+              "Faturamento",
+              "Expedi\u00e7\u00e3o",
+              "Outro"
+            ]
+          },
+          "cep": {
+            "type": "string"
+          },
+          "logradouro": {
+            "type": "string"
+          },
+          "numero": {
+            "type": "string"
+          },
+          "cidade": {
+            "type": "string"
+          },
+          "estado": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Endere\u00e7os adicionais"
+    },
+    "tipo_fornecedor": {
+      "type": "string",
+      "enum": [
+        "Mat\u00e9ria-Prima",
+        "Servi\u00e7o",
+        "Log\u00edstico",
+        "Equipamento",
+        "Tecnologia",
+        "Outro"
+      ],
+      "description": "Tipo principal de fornecimento"
+    },
+    "categoria": {
+      "type": "string",
+      "enum": [
+        "Mat\u00e9ria Prima",
+        "Equipamentos",
+        "Servi\u00e7os",
+        "Transporte",
+        "Tecnologia",
+        "Outros"
+      ]
+    },
+    "status_fornecedor": {
+      "type": "string",
+      "enum": [
+        "Em An\u00e1lise",
+        "Ativo",
+        "Bloqueado",
+        "Inativo"
+      ],
+      "default": "Em An\u00e1lise",
+      "description": "Status com fluxo de aprova\u00e7\u00e3o"
+    },
+    "aprovado_por": {
+      "type": "string"
+    },
+    "aprovado_em": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "motivo_bloqueio": {
+      "type": "string"
+    },
+    "condicoes_compra": {
+      "type": "object",
+      "properties": {
+        "prazo_entrega_padrao_dias": {
+          "type": "number"
+        },
+        "prazo_pagamento_padrao": {
+          "type": "string"
+        },
+        "forma_pagamento_padrao": {
+          "type": "string"
+        },
+        "tipo_frete_habitual": {
+          "type": "string",
+          "enum": [
+            "CIF",
+            "FOB"
+          ]
+        },
+        "desconto_negociado_percentual": {
+          "type": "number",
+          "default": 0
+        }
+      },
+      "description": "Condi\u00e7\u00f5es de compra padr\u00e3o"
+    },
+    "dados_bancarios": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "banco": {
+            "type": "string"
+          },
+          "agencia": {
+            "type": "string"
+          },
+          "conta": {
+            "type": "string"
+          },
+          "tipo_conta": {
+            "type": "string",
+            "enum": [
+              "Corrente",
+              "Poupan\u00e7a"
+            ]
+          },
+          "pix_chave": {
+            "type": "string"
+          },
+          "tipo_pix": {
+            "type": "string",
+            "enum": [
+              "CPF",
+              "CNPJ",
+              "E-mail",
+              "Telefone",
+              "Aleat\u00f3ria"
+            ]
+          },
+          "favorecido": {
+            "type": "string"
+          },
+          "principal": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "description": "Dados banc\u00e1rios para pagamentos"
+    },
+    "prazo_entrega_padrao": {
+      "type": "number",
+      "description": "Prazo em dias"
+    },
+    "prazo_pagamento_padrao": {
+      "type": "string"
+    },
+    "conta_bancaria_preferencial": {
+      "type": "object",
+      "properties": {
+        "banco": {
+          "type": "string"
+        },
+        "agencia": {
+          "type": "string"
+        },
+        "conta": {
+          "type": "string"
+        },
+        "tipo": {
+          "type": "string"
+        },
+        "pix_chave": {
+          "type": "string"
+        }
+      }
+    },
+    "integra_com_marketplace": {
+      "type": "boolean",
+      "default": false
+    },
+    "lead_time_medio": {
+      "type": "number",
+      "default": 0
+    },
+    "quantidade_compras": {
+      "type": "number",
+      "default": 0
+    },
+    "valor_total_compras": {
+      "type": "number",
+      "default": 0
+    },
+    "ultima_compra": {
+      "type": "string",
+      "format": "date"
+    },
+    "avaliacoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nota": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "criterios": {
+            "type": "object",
+            "properties": {
+              "qualidade": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "prazo": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "preco": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "atendimento": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 5
+              }
+            }
+          },
+          "ordem_compra_id": {
+            "type": "string"
+          },
+          "avaliador": {
+            "type": "string"
+          },
+          "comentario": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Hist\u00f3rico de avalia\u00e7\u00f5es"
+    },
+    "nota_media": {
+      "type": "number",
+      "default": 0
+    },
+    "percentual_entregas_prazo": {
+      "type": "number",
+      "default": 0
+    },
+    "dias_atraso_medio": {
+      "type": "number",
+      "default": 0
+    },
+    "indice_avarias": {
+      "type": "number",
+      "default": 0,
+      "description": "% de avarias detectadas"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Ativo",
+        "Inativo"
+      ],
+      "default": "Ativo"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "nome",
+    "categoria"
+  ]
+}

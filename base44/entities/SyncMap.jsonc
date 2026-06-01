@@ -1,0 +1,41 @@
+{
+  "name": "SyncMap",
+  "type": "object",
+  "properties": {
+    "entity_name": {
+      "type": "string"
+    },
+    "group_id": {
+      "type": "string"
+    },
+    "empresa_id": {
+      "type": "string"
+    },
+    "source_id": {
+      "type": "string",
+      "description": "ID do registro de origem"
+    },
+    "target_id": {
+      "type": "string",
+      "description": "ID do registro espelhado"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "up",
+        "down"
+      ],
+      "description": "up=empresa->grupo, down=grupo->empresa"
+    },
+    "last_sync_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "entity_name",
+    "source_id",
+    "target_id",
+    "direction"
+  ]
+}

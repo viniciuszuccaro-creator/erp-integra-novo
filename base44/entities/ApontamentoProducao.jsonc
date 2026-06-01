@@ -1,0 +1,107 @@
+{
+  "name": "ApontamentoProducao",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string"
+    },
+    "empresa_id": {
+      "type": "string"
+    },
+    "op_id": {
+      "type": "string",
+      "description": "ID da Ordem de Produ\u00e7\u00e3o"
+    },
+    "numero_op": {
+      "type": "string"
+    },
+    "operador_id": {
+      "type": "string"
+    },
+    "operador_nome": {
+      "type": "string"
+    },
+    "data_hora_inicio": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_hora_fim": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tempo_total_minutos": {
+      "type": "number"
+    },
+    "maquina_id": {
+      "type": "string"
+    },
+    "maquina_nome": {
+      "type": "string"
+    },
+    "peca_id": {
+      "type": "string"
+    },
+    "peca_descricao": {
+      "type": "string"
+    },
+    "quantidade_produzida": {
+      "type": "number"
+    },
+    "peso_produzido_kg": {
+      "type": "number"
+    },
+    "quantidade_refugo": {
+      "type": "number",
+      "default": 0
+    },
+    "peso_refugo_kg": {
+      "type": "number",
+      "default": 0
+    },
+    "motivo_refugo": {
+      "type": "string"
+    },
+    "tipo_apontamento": {
+      "type": "string",
+      "enum": [
+        "Produ\u00e7\u00e3o",
+        "Setup",
+        "Manuten\u00e7\u00e3o",
+        "Parada",
+        "Retrabalho"
+      ],
+      "default": "Produ\u00e7\u00e3o"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Em Andamento",
+        "Finalizado",
+        "Cancelado"
+      ],
+      "default": "Em Andamento"
+    },
+    "observacoes": {
+      "type": "string"
+    },
+    "localizacao_gps": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        }
+      }
+    },
+    "foto_comprovacao_url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "op_id",
+    "operador_id",
+    "data_hora_inicio"
+  ]
+}

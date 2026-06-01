@@ -1,0 +1,173 @@
+{
+  "name": "PedidoEtapa",
+  "type": "object",
+  "properties": {
+    "pedido_id": {
+      "type": "string",
+      "description": "ID do pedido vinculado"
+    },
+    "numero_pedido": {
+      "type": "string",
+      "description": "N\u00famero do pedido (snapshot)"
+    },
+    "nome_etapa": {
+      "type": "string",
+      "description": "Nome da etapa (Ex: Etapa 1 - Funda\u00e7\u00e3o, Etapa 2 - Estrutura)"
+    },
+    "etapa_obra_id": {
+      "type": "string",
+      "description": "ID da fase da obra (se vinculado a etapa_obra_id dos itens)"
+    },
+    "descricao_etapa": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o detalhada da etapa"
+    },
+    "itens_etapa": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_pedido_id": {
+            "type": "string",
+            "description": "ID do item no pedido (revenda/armado/corte)"
+          },
+          "origem_item": {
+            "type": "string",
+            "enum": [
+              "revenda",
+              "armado_padrao",
+              "corte_dobra"
+            ],
+            "description": "Origem do item"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "quantidade": {
+            "type": "number"
+          },
+          "peso_kg": {
+            "type": "number"
+          },
+          "valor_item": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Lista de itens inclu\u00eddos nesta etapa"
+    },
+    "quantidade_total_itens": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de itens nesta etapa"
+    },
+    "peso_total_etapa_kg": {
+      "type": "number",
+      "default": 0,
+      "description": "Peso total da etapa em KG"
+    },
+    "valor_total_etapa": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor total da etapa"
+    },
+    "data_prevista_entrega": {
+      "type": "string",
+      "format": "date",
+      "description": "Previs\u00e3o de entrega desta etapa"
+    },
+    "sequencia": {
+      "type": "number",
+      "default": 1,
+      "description": "Ordem de execu\u00e7\u00e3o/entrega"
+    },
+    "status_etapa": {
+      "type": "string",
+      "enum": [
+        "Pendente",
+        "Em Produ\u00e7\u00e3o",
+        "Pronta",
+        "Em Expedi\u00e7\u00e3o",
+        "Faturada",
+        "Entregue",
+        "Cancelada"
+      ],
+      "default": "Pendente",
+      "description": "Status da etapa"
+    },
+    "faturada": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se j\u00e1 foi faturada"
+    },
+    "nfe_id": {
+      "type": "string",
+      "description": "ID da NF-e emitida para esta etapa"
+    },
+    "numero_nfe": {
+      "type": "string",
+      "description": "N\u00famero da NF-e"
+    },
+    "chave_nfe": {
+      "type": "string",
+      "description": "Chave de acesso da NF-e"
+    },
+    "data_faturamento": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de faturamento da etapa"
+    },
+    "conta_receber_id": {
+      "type": "string",
+      "description": "ID da conta a receber gerada"
+    },
+    "entrega_id": {
+      "type": "string",
+      "description": "ID da entrega vinculada (quando programada)"
+    },
+    "romaneio_id": {
+      "type": "string",
+      "description": "ID do romaneio (quando expedida)"
+    },
+    "op_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs das OPs vinculadas aos itens desta etapa"
+    },
+    "data_conclusao_producao": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de conclus\u00e3o da produ\u00e7\u00e3o"
+    },
+    "data_expedicao": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de sa\u00edda para entrega"
+    },
+    "data_entrega_real": {
+      "type": "string",
+      "format": "date",
+      "description": "Data efetiva de entrega"
+    },
+    "percentual_conclusao": {
+      "type": "number",
+      "default": 0,
+      "description": "% de conclus\u00e3o desta etapa (produ\u00e7\u00e3o + entrega)"
+    },
+    "observacoes": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es da etapa"
+    },
+    "visivel_portal": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se aparece no Portal do Cliente"
+    }
+  },
+  "required": [
+    "pedido_id",
+    "nome_etapa"
+  ]
+}

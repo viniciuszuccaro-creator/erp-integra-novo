@@ -1,0 +1,139 @@
+{
+  "name": "MovimentoCartao",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string"
+    },
+    "empresa_id": {
+      "type": "string"
+    },
+    "caixa_movimento_id": {
+      "type": "string",
+      "description": "ID do movimento de caixa vinculado"
+    },
+    "conta_receber_id": {
+      "type": "string",
+      "description": "ID da conta a receber vinculada"
+    },
+    "pedido_id": {
+      "type": "string"
+    },
+    "cliente_id": {
+      "type": "string"
+    },
+    "cliente_nome": {
+      "type": "string"
+    },
+    "data_transacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "valor_bruto": {
+      "type": "number",
+      "description": "Valor total da transa\u00e7\u00e3o"
+    },
+    "bandeira": {
+      "type": "string",
+      "enum": [
+        "Visa",
+        "Mastercard",
+        "Elo",
+        "American Express",
+        "Hipercard",
+        "Outros"
+      ],
+      "description": "Bandeira do cart\u00e3o"
+    },
+    "adquirente": {
+      "type": "string",
+      "enum": [
+        "Cielo",
+        "Rede",
+        "Stone",
+        "PagSeguro",
+        "Mercado Pago",
+        "GetNet",
+        "SafraPay",
+        "Outros"
+      ],
+      "description": "Adquirente/operadora"
+    },
+    "nsu": {
+      "type": "string",
+      "description": "N\u00famero Sequencial \u00danico da transa\u00e7\u00e3o"
+    },
+    "codigo_autorizacao": {
+      "type": "string"
+    },
+    "numero_parcelas": {
+      "type": "number",
+      "default": 1
+    },
+    "taxa_mdr_percentual": {
+      "type": "number",
+      "description": "Taxa MDR (Merchant Discount Rate)"
+    },
+    "valor_taxa": {
+      "type": "number",
+      "description": "Valor da taxa cobrada"
+    },
+    "valor_liquido": {
+      "type": "number",
+      "description": "Valor que ser\u00e1 recebido ap\u00f3s taxas"
+    },
+    "previsao_recebimento": {
+      "type": "string",
+      "format": "date",
+      "description": "Data prevista de recebimento"
+    },
+    "data_recebimento_efetivo": {
+      "type": "string",
+      "format": "date"
+    },
+    "status_compensacao": {
+      "type": "string",
+      "enum": [
+        "Em Tr\u00e2nsito",
+        "A Compensar",
+        "Compensado",
+        "Cancelado",
+        "Divergente"
+      ],
+      "default": "Em Tr\u00e2nsito"
+    },
+    "conciliacao_bancaria_id": {
+      "type": "string",
+      "description": "ID da concilia\u00e7\u00e3o banc\u00e1ria quando compensado"
+    },
+    "extrato_bancario_id": {
+      "type": "string",
+      "description": "ID do extrato banc\u00e1rio correspondente"
+    },
+    "divergencia_valor": {
+      "type": "number",
+      "default": 0,
+      "description": "Diferen\u00e7a entre previsto e recebido"
+    },
+    "motivo_divergencia": {
+      "type": "string"
+    },
+    "tipo_operacao": {
+      "type": "string",
+      "enum": [
+        "Cr\u00e9dito",
+        "D\u00e9bito"
+      ],
+      "default": "Cr\u00e9dito"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "data_transacao",
+    "valor_bruto",
+    "bandeira",
+    "adquirente"
+  ]
+}

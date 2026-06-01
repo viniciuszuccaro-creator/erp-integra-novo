@@ -1,0 +1,157 @@
+{
+  "name": "ConfiguracaoProducao",
+  "type": "object",
+  "properties": {
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa (configura\u00e7\u00e3o por empresa)"
+    },
+    "chave": {
+      "type": "string",
+      "description": "Identificador \u00fanico da configura\u00e7\u00e3o"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "Configura\u00e7\u00e3o Geral",
+        "Perda A\u00e7o",
+        "Perda Arame",
+        "Pre\u00e7o por KG",
+        "Tempo Produ\u00e7\u00e3o",
+        "Outro"
+      ],
+      "description": "Tipo de configura\u00e7\u00e3o"
+    },
+    "perda_aco_percentual": {
+      "type": "number",
+      "default": 5,
+      "description": "Percentual de perda de a\u00e7o (%)"
+    },
+    "perda_arame_percentual": {
+      "type": "number",
+      "default": 10,
+      "description": "Percentual de perda de arame recozido (%)"
+    },
+    "preco_aco_kg": {
+      "type": "number",
+      "description": "Pre\u00e7o do a\u00e7o por KG"
+    },
+    "preco_arame_kg": {
+      "type": "number",
+      "description": "Pre\u00e7o do arame por KG"
+    },
+    "tempo_corte_por_barra": {
+      "type": "number",
+      "description": "Tempo m\u00e9dio de corte por barra (minutos)"
+    },
+    "tempo_dobra_por_barra": {
+      "type": "number",
+      "description": "Tempo m\u00e9dio de dobra por barra (minutos)"
+    },
+    "tempo_armacao_por_peca": {
+      "type": "number",
+      "description": "Tempo m\u00e9dio de arma\u00e7\u00e3o por pe\u00e7a (minutos)"
+    },
+    "bloqueado_edicao": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se true, apenas admin pode editar"
+    },
+    "bloqueado_por": {
+      "type": "string",
+      "description": "Usu\u00e1rio que bloqueou"
+    },
+    "bloqueado_em": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora do bloqueio"
+    },
+    "gerar_op_ao_aprovar": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se deve gerar OP automaticamente ao aprovar pedido"
+    },
+    "gerar_op_ao_faturar": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se deve gerar OP automaticamente ao faturar pedido"
+    },
+    "permitir_op_sem_pedido": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se permite criar OP manualmente sem pedido"
+    },
+    "modo_integracao_estoque": {
+      "type": "string",
+      "enum": [
+        "reserva",
+        "reserva_baixa",
+        "manual"
+      ],
+      "default": "reserva",
+      "description": "Modo de integra\u00e7\u00e3o com estoque"
+    },
+    "permitir_baixa_maior_teorico": {
+      "type": "boolean",
+      "default": false,
+      "description": "Permite consumo real maior que o planejado"
+    },
+    "produto_arame_recozido_id": {
+      "type": "string",
+      "description": "ID do produto padr\u00e3o de arame recozido"
+    },
+    "produto_sucata_id": {
+      "type": "string",
+      "description": "ID do produto padr\u00e3o de sucata/retalho"
+    },
+    "exigir_bitola_cadastrada": {
+      "type": "boolean",
+      "default": true,
+      "description": "Exige que bitola exista no cadastro de produtos"
+    },
+    "bloquear_op_sem_estoque": {
+      "type": "boolean",
+      "default": false,
+      "description": "Bloqueia libera\u00e7\u00e3o se n\u00e3o tiver material em estoque"
+    },
+    "gerar_etiqueta_automatica": {
+      "type": "boolean",
+      "default": false,
+      "description": "Gera etiquetas com QR Code ao criar OP"
+    },
+    "prazo_padrao_op_dias": {
+      "type": "number",
+      "default": 7,
+      "description": "Prazo padr\u00e3o em dias para conclus\u00e3o"
+    },
+    "historico_alteracoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "usuario": {
+            "type": "string"
+          },
+          "campo": {
+            "type": "string"
+          },
+          "valor_anterior": {},
+          "valor_novo": {}
+        }
+      },
+      "description": "Hist\u00f3rico de todas as altera\u00e7\u00f5es"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "empresa_id",
+    "chave",
+    "tipo"
+  ]
+}

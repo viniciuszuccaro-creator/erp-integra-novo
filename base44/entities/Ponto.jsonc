@@ -1,0 +1,64 @@
+{
+  "name": "Ponto",
+  "type": "object",
+  "properties": {
+    "colaborador_id": {
+      "type": "string"
+    },
+    "colaborador_nome": {
+      "type": "string"
+    },
+    "data": {
+      "type": "string",
+      "format": "date"
+    },
+    "entrada_manha": {
+      "type": "string",
+      "description": "Hor\u00e1rio formato HH:MM"
+    },
+    "saida_almoco": {
+      "type": "string"
+    },
+    "retorno_almoco": {
+      "type": "string"
+    },
+    "saida_tarde": {
+      "type": "string"
+    },
+    "horas_trabalhadas": {
+      "type": "number"
+    },
+    "horas_extras": {
+      "type": "number"
+    },
+    "tipo_dia": {
+      "type": "string",
+      "enum": [
+        "Normal",
+        "Feriado",
+        "Fim de Semana",
+        "Folga"
+      ],
+      "default": "Normal"
+    },
+    "observacoes": {
+      "type": "string"
+    },
+    "aprovado_por": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Pendente",
+        "Aprovado",
+        "Rejeitado"
+      ],
+      "default": "Pendente"
+    }
+  },
+  "required": [
+    "colaborador_nome",
+    "data"
+  ]
+}

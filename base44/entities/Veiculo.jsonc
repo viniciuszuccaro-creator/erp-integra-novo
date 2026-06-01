@@ -1,0 +1,163 @@
+{
+  "name": "Veiculo",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa propriet\u00e1ria"
+    },
+    "placa": {
+      "type": "string",
+      "description": "Placa do ve\u00edculo"
+    },
+    "tipo_veiculo": {
+      "type": "string",
+      "enum": [
+        "Caminh\u00e3o",
+        "Caminhonete",
+        "Van",
+        "Carro",
+        "Moto",
+        "Carreta",
+        "Outro"
+      ],
+      "default": "Caminh\u00e3o"
+    },
+    "modelo": {
+      "type": "string",
+      "description": "Modelo do ve\u00edculo"
+    },
+    "marca": {
+      "type": "string",
+      "description": "Marca do ve\u00edculo"
+    },
+    "ano_fabricacao": {
+      "type": "number"
+    },
+    "cor": {
+      "type": "string"
+    },
+    "capacidade_peso_kg": {
+      "type": "number",
+      "description": "Capacidade de carga em kg"
+    },
+    "capacidade_volume_m3": {
+      "type": "number",
+      "description": "Capacidade de volume em m\u00b3"
+    },
+    "proprietario": {
+      "type": "string",
+      "enum": [
+        "Pr\u00f3prio",
+        "Agregado",
+        "Terceirizado",
+        "Alugado"
+      ],
+      "default": "Pr\u00f3prio"
+    },
+    "motorista_padrao_id": {
+      "type": "string",
+      "description": "ID do motorista padr\u00e3o"
+    },
+    "km_atual": {
+      "type": "number",
+      "default": 0,
+      "description": "Quilometragem atual"
+    },
+    "km_proxima_revisao": {
+      "type": "number",
+      "description": "KM para pr\u00f3xima revis\u00e3o"
+    },
+    "data_ultima_revisao": {
+      "type": "string",
+      "format": "date"
+    },
+    "data_proxima_revisao": {
+      "type": "string",
+      "format": "date"
+    },
+    "checklist_manutencao": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item": {
+            "type": "string"
+          },
+          "periodicidade_km": {
+            "type": "number"
+          },
+          "ultimo_km": {
+            "type": "number"
+          },
+          "proximo_km": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OK",
+              "Aten\u00e7\u00e3o",
+              "Vencido"
+            ]
+          }
+        }
+      },
+      "description": "Checklist de manuten\u00e7\u00e3o preventiva"
+    },
+    "alerta_manutencao_ativo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se h\u00e1 alerta de manuten\u00e7\u00e3o pendente"
+    },
+    "bloqueado_uso": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se est\u00e1 bloqueado para uso por manuten\u00e7\u00e3o vencida"
+    },
+    "seguro_vencimento": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de vencimento do seguro"
+    },
+    "licenciamento_vencimento": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de vencimento do licenciamento"
+    },
+    "ipva_vencimento": {
+      "type": "string",
+      "format": "date"
+    },
+    "rastreador_instalado": {
+      "type": "boolean",
+      "default": false
+    },
+    "rastreador_codigo": {
+      "type": "string",
+      "description": "C\u00f3digo do rastreador"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Ativo",
+        "Manuten\u00e7\u00e3o",
+        "Inativo",
+        "Vendido"
+      ],
+      "default": "Ativo"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "placa",
+    "tipo_veiculo",
+    "empresa_id"
+  ]
+}

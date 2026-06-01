@@ -1,0 +1,280 @@
+{
+  "name": "ConfigFiscalEmpresa",
+  "type": "object",
+  "properties": {
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa"
+    },
+    "empresa_nome": {
+      "type": "string"
+    },
+    "razao_social": {
+      "type": "string",
+      "description": "Raz\u00e3o Social"
+    },
+    "nome_fantasia": {
+      "type": "string"
+    },
+    "cnpj": {
+      "type": "string"
+    },
+    "inscricao_estadual": {
+      "type": "string"
+    },
+    "inscricao_municipal": {
+      "type": "string"
+    },
+    "regime_tributario": {
+      "type": "string",
+      "enum": [
+        "Simples Nacional",
+        "Lucro Presumido",
+        "Lucro Real",
+        "MEI"
+      ],
+      "description": "Regime tribut\u00e1rio"
+    },
+    "tipo_certificado": {
+      "type": "string",
+      "enum": [
+        "A1",
+        "A3"
+      ],
+      "default": "A1",
+      "description": "Tipo de certificado digital"
+    },
+    "arquivo_certificado": {
+      "type": "string",
+      "description": "URL do arquivo .pfx (A1)"
+    },
+    "senha_certificado": {
+      "type": "string",
+      "description": "Senha do certificado"
+    },
+    "data_validade_certificado": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de validade do certificado"
+    },
+    "titular_certificado": {
+      "type": "string"
+    },
+    "emissor_certificado": {
+      "type": "string"
+    },
+    "serie_nfe": {
+      "type": "string",
+      "default": "1",
+      "description": "S\u00e9rie da NF-e"
+    },
+    "proximo_numero_nfe": {
+      "type": "number",
+      "default": 1,
+      "description": "Pr\u00f3ximo n\u00famero de NF-e"
+    },
+    "serie_nfce": {
+      "type": "string",
+      "default": "1",
+      "description": "S\u00e9rie da NFC-e"
+    },
+    "proximo_numero_nfce": {
+      "type": "number",
+      "default": 1
+    },
+    "serie_nfse": {
+      "type": "string",
+      "default": "1",
+      "description": "S\u00e9rie da NFS-e"
+    },
+    "proximo_numero_nfse": {
+      "type": "number",
+      "default": 1
+    },
+    "cfop_padrao_dentro_estado": {
+      "type": "string",
+      "default": "5102",
+      "description": "CFOP padr\u00e3o para opera\u00e7\u00f5es dentro do estado"
+    },
+    "cfop_padrao_fora_estado": {
+      "type": "string",
+      "default": "6102",
+      "description": "CFOP padr\u00e3o para opera\u00e7\u00f5es fora do estado"
+    },
+    "csc_nfce": {
+      "type": "string",
+      "description": "C\u00f3digo de Seguran\u00e7a do Contribuinte (NFC-e)"
+    },
+    "id_csc_nfce": {
+      "type": "string"
+    },
+    "ambiente": {
+      "type": "string",
+      "enum": [
+        "Produ\u00e7\u00e3o",
+        "Homologa\u00e7\u00e3o"
+      ],
+      "default": "Homologa\u00e7\u00e3o",
+      "description": "Ambiente de emiss\u00e3o"
+    },
+    "cnpj_emitente": {
+      "type": "string",
+      "description": "CNPJ da empresa emitente"
+    },
+    "uf_emitente": {
+      "type": "string",
+      "description": "UF do emitente"
+    },
+    "aliquota_padrao_icms": {
+      "type": "number",
+      "default": 18,
+      "description": "Al\u00edquota padr\u00e3o de ICMS (%)"
+    },
+    "aliquota_padrao_pis": {
+      "type": "number",
+      "default": 1.65,
+      "description": "Al\u00edquota padr\u00e3o de PIS (%)"
+    },
+    "aliquota_padrao_cofins": {
+      "type": "number",
+      "default": 7.6,
+      "description": "Al\u00edquota padr\u00e3o de COFINS (%)"
+    },
+    "aliquota_padrao_ipi": {
+      "type": "number",
+      "default": 0,
+      "description": "Al\u00edquota padr\u00e3o de IPI (%)"
+    },
+    "aliquota_padrao_iss": {
+      "type": "number",
+      "default": 5,
+      "description": "Al\u00edquota padr\u00e3o de ISS (%)"
+    },
+    "observacoes_padrao_nfe": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es padr\u00e3o para NF-e"
+    },
+    "informacoes_complementares_padrao": {
+      "type": "string"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se a configura\u00e7\u00e3o est\u00e1 ativa"
+    },
+    "emite_nfe": {
+      "type": "boolean",
+      "default": true
+    },
+    "emite_nfce": {
+      "type": "boolean",
+      "default": false
+    },
+    "emite_nfse": {
+      "type": "boolean",
+      "default": false
+    },
+    "permite_emissao_sem_estoque": {
+      "type": "boolean",
+      "default": false
+    },
+    "integracao_nfe": {
+      "type": "object",
+      "properties": {
+        "ativa": {
+          "type": "boolean",
+          "default": false
+        },
+        "provedor": {
+          "type": "string",
+          "enum": [
+            "eNotas",
+            "NFe.io",
+            "Bling",
+            "Focus NFe",
+            "WebMania",
+            "Outro"
+          ]
+        },
+        "api_url": {
+          "type": "string"
+        },
+        "api_key": {
+          "type": "string"
+        },
+        "empresa_id_provedor": {
+          "type": "string"
+        },
+        "emitir_automaticamente": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "description": "Configura\u00e7\u00e3o de integra\u00e7\u00e3o com provedor de NF-e"
+    },
+    "historico_alteracoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "usuario": {
+            "type": "string"
+          },
+          "campo_alterado": {
+            "type": "string"
+          },
+          "valor_anterior": {
+            "type": "string"
+          },
+          "valor_novo": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Hist\u00f3rico de altera\u00e7\u00f5es da configura\u00e7\u00e3o"
+    },
+    "data_ultima_verificacao_certificado": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "certificado_expira_em_dias": {
+      "type": "number",
+      "description": "Dias restantes at\u00e9 expira\u00e7\u00e3o do certificado"
+    },
+    "alertas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "certificado_vencendo",
+              "certificado_vencido",
+              "serie_esgotando",
+              "configuracao_incompleta"
+            ]
+          },
+          "mensagem": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Alertas sobre a configura\u00e7\u00e3o fiscal"
+    }
+  },
+  "required": [
+    "empresa_id",
+    "cnpj_emitente",
+    "uf_emitente",
+    "regime_tributario"
+  ]
+}

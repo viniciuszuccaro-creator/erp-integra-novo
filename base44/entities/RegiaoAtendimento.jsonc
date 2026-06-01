@@ -1,0 +1,283 @@
+{
+  "name": "RegiaoAtendimento",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa propriet\u00e1ria"
+    },
+    "empresas_compartilhadas_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs das empresas que podem usar esta regi\u00e3o"
+    },
+    "nome_regiao": {
+      "type": "string",
+      "description": "Nome da regi\u00e3o (ex: Sudeste, Grande S\u00e3o Paulo, Zona Norte)"
+    },
+    "codigo_regiao": {
+      "type": "string",
+      "description": "C\u00f3digo \u00fanico da regi\u00e3o para refer\u00eancias r\u00e1pidas"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o detalhada da regi\u00e3o"
+    },
+    "tipo_regiao": {
+      "type": "string",
+      "enum": [
+        "Macro Regi\u00e3o",
+        "Estado",
+        "Regi\u00e3o Metropolitana",
+        "Microrregi\u00e3o",
+        "Personalizada"
+      ],
+      "default": "Personalizada",
+      "description": "Tipo de agrupamento da regi\u00e3o"
+    },
+    "estados_abrangidos": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "AC",
+          "AL",
+          "AP",
+          "AM",
+          "BA",
+          "CE",
+          "DF",
+          "ES",
+          "GO",
+          "MA",
+          "MT",
+          "MS",
+          "MG",
+          "PA",
+          "PB",
+          "PR",
+          "PE",
+          "PI",
+          "RJ",
+          "RN",
+          "RS",
+          "RO",
+          "RR",
+          "SC",
+          "SP",
+          "SE",
+          "TO"
+        ]
+      },
+      "description": "Estados que comp\u00f5em a regi\u00e3o"
+    },
+    "cidades_abrangidas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cidade": {
+            "type": "string"
+          },
+          "estado": {
+            "type": "string"
+          },
+          "cep_inicial": {
+            "type": "string"
+          },
+          "cep_final": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Lista de cidades ou ranges de CEPs da regi\u00e3o"
+    },
+    "cor_identificacao": {
+      "type": "string",
+      "description": "Cor para identifica\u00e7\u00e3o visual em mapas e relat\u00f3rios (hex)"
+    },
+    "vendedores_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos vendedores respons\u00e1veis por esta regi\u00e3o"
+    },
+    "transportadoras_preferenciais_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Transportadoras que atendem esta regi\u00e3o"
+    },
+    "logistica": {
+      "type": "object",
+      "properties": {
+        "prazo_entrega_padrao_dias": {
+          "type": "number",
+          "default": 0
+        },
+        "custo_frete_base": {
+          "type": "number",
+          "default": 0
+        },
+        "permite_entrega_expressa": {
+          "type": "boolean",
+          "default": false
+        },
+        "prazo_entrega_expressa_dias": {
+          "type": "number"
+        },
+        "acrescimo_frete_expresso_percentual": {
+          "type": "number"
+        },
+        "distancia_centro_distribuicao_km": {
+          "type": "number"
+        },
+        "dificuldade_acesso": {
+          "type": "string",
+          "enum": [
+            "F\u00e1cil",
+            "Moderado",
+            "Dif\u00edcil"
+          ],
+          "default": "F\u00e1cil"
+        }
+      },
+      "description": "Configura\u00e7\u00f5es log\u00edsticas da regi\u00e3o"
+    },
+    "comercial": {
+      "type": "object",
+      "properties": {
+        "meta_vendas_mensal": {
+          "type": "number",
+          "default": 0
+        },
+        "comissao_extra_percentual": {
+          "type": "number",
+          "default": 0,
+          "description": "Comiss\u00e3o extra para vendas nesta regi\u00e3o"
+        },
+        "desconto_maximo_permitido_percentual": {
+          "type": "number",
+          "default": 0
+        },
+        "exige_aprovacao_acima_valor": {
+          "type": "number",
+          "default": 0
+        },
+        "prioridade_atendimento": {
+          "type": "string",
+          "enum": [
+            "Baixa",
+            "Normal",
+            "Alta",
+            "Urgente"
+          ],
+          "default": "Normal"
+        }
+      },
+      "description": "Regras comerciais espec\u00edficas da regi\u00e3o"
+    },
+    "metricas": {
+      "type": "object",
+      "properties": {
+        "total_clientes": {
+          "type": "number",
+          "default": 0
+        },
+        "total_pedidos_mes": {
+          "type": "number",
+          "default": 0
+        },
+        "valor_vendido_mes": {
+          "type": "number",
+          "default": 0
+        },
+        "ticket_medio": {
+          "type": "number",
+          "default": 0
+        },
+        "tempo_medio_entrega_dias": {
+          "type": "number",
+          "default": 0
+        },
+        "taxa_sucesso_entregas_percentual": {
+          "type": "number",
+          "default": 100
+        },
+        "ultima_atualizacao_metricas": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "M\u00e9tricas calculadas automaticamente pela IA"
+    },
+    "ia_insights": {
+      "type": "object",
+      "properties": {
+        "potencial_crescimento": {
+          "type": "string",
+          "enum": [
+            "Baixo",
+            "M\u00e9dio",
+            "Alto",
+            "Muito Alto"
+          ]
+        },
+        "saturacao_mercado": {
+          "type": "string",
+          "enum": [
+            "Baixa",
+            "M\u00e9dia",
+            "Alta"
+          ]
+        },
+        "recomendacoes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "produtos_mais_vendidos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "produto_id": {
+                "type": "string"
+              },
+              "descricao": {
+                "type": "string"
+              },
+              "quantidade_vendida": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "ultima_analise_ia": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "Insights e an\u00e1lises preditivas da IA"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "nome_regiao"
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "name": "ParametroOrigemPedido",
+  "type": "object",
+  "properties": {
+    "nome": {
+      "type": "string",
+      "description": "Nome do canal (ex: ERP Manual, Site Autom\u00e1tico, Chatbot)"
+    },
+    "canal": {
+      "type": "string",
+      "enum": [
+        "ERP",
+        "Site",
+        "Chatbot",
+        "WhatsApp",
+        "API",
+        "Marketplace",
+        "E-commerce",
+        "Portal Cliente",
+        "App Mobile"
+      ],
+      "description": "Canal de onde o pedido se origina"
+    },
+    "tipo_criacao": {
+      "type": "string",
+      "enum": [
+        "Manual",
+        "Autom\u00e1tico",
+        "Misto"
+      ],
+      "default": "Manual",
+      "description": "Se a cria\u00e7\u00e3o \u00e9 manual, autom\u00e1tica ou ambas"
+    },
+    "origem_pedido_manual": {
+      "type": "string",
+      "enum": [
+        "Manual",
+        "E-commerce",
+        "API",
+        "Importado",
+        "Site",
+        "App",
+        "WhatsApp",
+        "Portal",
+        "Marketplace",
+        "Chatbot"
+      ],
+      "description": "Valor quando criado manualmente neste canal"
+    },
+    "origem_pedido_automatico": {
+      "type": "string",
+      "enum": [
+        "Manual",
+        "E-commerce",
+        "API",
+        "Importado",
+        "Site",
+        "App",
+        "WhatsApp",
+        "Portal",
+        "Marketplace",
+        "Chatbot"
+      ],
+      "description": "Valor quando criado automaticamente neste canal"
+    },
+    "bloquear_edicao_automatico": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se deve bloquear edi\u00e7\u00e3o da origem quando autom\u00e1tico"
+    },
+    "url_webhook": {
+      "type": "string",
+      "description": "URL do webhook para receber pedidos autom\u00e1ticos (se aplic\u00e1vel)"
+    },
+    "api_token": {
+      "type": "string",
+      "description": "Token de autentica\u00e7\u00e3o da API (se aplic\u00e1vel)"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se este canal est\u00e1 ativo"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do canal e como funciona"
+    },
+    "cor_badge": {
+      "type": "string",
+      "enum": [
+        "blue",
+        "green",
+        "purple",
+        "orange",
+        "red",
+        "yellow",
+        "pink",
+        "cyan"
+      ],
+      "default": "blue",
+      "description": "Cor do badge visual para este canal"
+    }
+  },
+  "required": [
+    "nome",
+    "canal",
+    "tipo_criacao"
+  ]
+}

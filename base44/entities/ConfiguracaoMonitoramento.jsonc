@@ -1,0 +1,283 @@
+{
+  "name": "ConfiguracaoMonitoramento",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa (null se configura\u00e7\u00e3o do grupo)"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o monitoramento est\u00e1 ativo"
+    },
+    "nivel_monitoramento": {
+      "type": "string",
+      "enum": [
+        "B\u00e1sico",
+        "Intermedi\u00e1rio",
+        "Avan\u00e7ado",
+        "Completo"
+      ],
+      "default": "Intermedi\u00e1rio",
+      "description": "N\u00edvel de detalhamento do monitoramento"
+    },
+    "coleta_automatica": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se coleta m\u00e9tricas automaticamente"
+    },
+    "intervalo_coleta_segundos": {
+      "type": "number",
+      "default": 60,
+      "description": "Intervalo de coleta de m\u00e9tricas"
+    },
+    "retencao_logs_dias": {
+      "type": "number",
+      "default": 30,
+      "description": "Dias de reten\u00e7\u00e3o dos logs"
+    },
+    "retencao_logs_criticos_dias": {
+      "type": "number",
+      "default": 365,
+      "description": "Dias de reten\u00e7\u00e3o de logs cr\u00edticos"
+    },
+    "thresholds": {
+      "type": "object",
+      "properties": {
+        "query_lenta_ms": {
+          "type": "number",
+          "default": 1000
+        },
+        "api_lenta_ms": {
+          "type": "number",
+          "default": 2000
+        },
+        "page_load_lenta_ms": {
+          "type": "number",
+          "default": 3000
+        },
+        "export_lento_ms": {
+          "type": "number",
+          "default": 10000
+        },
+        "cpu_alta_percent": {
+          "type": "number",
+          "default": 80
+        },
+        "memoria_alta_percent": {
+          "type": "number",
+          "default": 85
+        },
+        "taxa_erro_percent": {
+          "type": "number",
+          "default": 5
+        },
+        "disponibilidade_minima_percent": {
+          "type": "number",
+          "default": 99
+        }
+      },
+      "description": "Limites para gerar alertas"
+    },
+    "monitorar_queries": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se monitora queries do banco"
+    },
+    "monitorar_apis": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se monitora chamadas de API"
+    },
+    "monitorar_integracao": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se monitora integra\u00e7\u00f5es externas"
+    },
+    "monitorar_exports": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se monitora exporta\u00e7\u00f5es (PDF/Excel)"
+    },
+    "detectar_anomalias_ia": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se usa IA para detectar anomalias"
+    },
+    "ia_confianca_minima": {
+      "type": "number",
+      "default": 75,
+      "description": "% m\u00ednimo de confian\u00e7a da IA"
+    },
+    "gerar_alertas_automaticos": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se gera alertas automaticamente"
+    },
+    "alertar_apenas_criticos": {
+      "type": "boolean",
+      "default": false,
+      "description": "Alertar apenas severidade Critical"
+    },
+    "notificar_email": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se envia e-mail em alertas"
+    },
+    "emails_notificacao": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "E-mails para receber alertas",
+      "default": []
+    },
+    "notificar_slack": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se envia para Slack"
+    },
+    "slack_webhook_url": {
+      "type": "string",
+      "description": "URL do webhook do Slack"
+    },
+    "agrupar_alertas_similares": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se agrupa alertas similares"
+    },
+    "janela_agrupamento_minutos": {
+      "type": "number",
+      "default": 15,
+      "description": "Janela de tempo para agrupar alertas"
+    },
+    "modulos_monitorados": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "M\u00f3dulos a monitorar (vazio = todos)",
+      "default": []
+    },
+    "modulos_ignorados": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "M\u00f3dulos a ignorar",
+      "default": []
+    },
+    "samplear_requisicoes": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se amostra apenas % das requisi\u00e7\u00f5es"
+    },
+    "taxa_amostragem_percent": {
+      "type": "number",
+      "default": 100,
+      "description": "% de requisi\u00e7\u00f5es a monitorar (1-100)"
+    },
+    "profiling_ativo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se profiling detalhado est\u00e1 ativo"
+    },
+    "profiling_funcoes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Fun\u00e7\u00f5es espec\u00edficas para profiling"
+    },
+    "integracao_apm_externa": {
+      "type": "object",
+      "properties": {
+        "ativa": {
+          "type": "boolean",
+          "default": false
+        },
+        "provedor": {
+          "type": "string",
+          "enum": [
+            "New Relic",
+            "DataDog",
+            "Dynatrace",
+            "AppDynamics",
+            "Custom"
+          ]
+        },
+        "api_key": {
+          "type": "string"
+        },
+        "endpoint_url": {
+          "type": "string"
+        },
+        "enviar_logs": {
+          "type": "boolean",
+          "default": true
+        },
+        "enviar_metricas": {
+          "type": "boolean",
+          "default": true
+        },
+        "enviar_traces": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "description": "Integra\u00e7\u00e3o com APM externo"
+    },
+    "dashboard_publico": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o dashboard de status \u00e9 p\u00fablico"
+    },
+    "dashboard_url": {
+      "type": "string",
+      "description": "URL do dashboard p\u00fablico"
+    },
+    "ultimo_alerta_id": {
+      "type": "string",
+      "description": "ID do \u00faltimo alerta gerado"
+    },
+    "ultimo_alerta_data": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data do \u00faltimo alerta"
+    },
+    "total_alertas_gerados": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de alertas gerados"
+    },
+    "total_alertas_resolvidos": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de alertas resolvidos"
+    },
+    "mttr_horas": {
+      "type": "number",
+      "description": "Mean Time To Resolution em horas"
+    },
+    "configurado_por": {
+      "type": "string",
+      "description": "Usu\u00e1rio que configurou"
+    },
+    "configurado_por_id": {
+      "type": "string"
+    },
+    "observacoes": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es sobre a configura\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "ativo",
+    "nivel_monitoramento"
+  ]
+}

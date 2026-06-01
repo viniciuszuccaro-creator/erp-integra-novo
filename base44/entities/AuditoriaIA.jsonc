@@ -1,0 +1,105 @@
+{
+  "name": "AuditoriaIA",
+  "type": "object",
+  "properties": {
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa"
+    },
+    "modulo": {
+      "type": "string",
+      "description": "M\u00f3dulo que executou a IA"
+    },
+    "funcionalidade": {
+      "type": "string",
+      "description": "Funcionalidade espec\u00edfica (leitura_projeto, upsell, etc.)"
+    },
+    "usuario_id": {
+      "type": "string",
+      "description": "ID do usu\u00e1rio que disparou"
+    },
+    "usuario_nome": {
+      "type": "string",
+      "description": "Nome do usu\u00e1rio"
+    },
+    "data_hora": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora da execu\u00e7\u00e3o"
+    },
+    "input_prompt": {
+      "type": "string",
+      "description": "Prompt enviado para a IA"
+    },
+    "input_dados": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Dados de entrada"
+    },
+    "arquivo_entrada_url": {
+      "type": "string",
+      "description": "URL do arquivo processado (se aplic\u00e1vel)"
+    },
+    "output_resultado": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Resultado retornado pela IA"
+    },
+    "confianca_percentual": {
+      "type": "number",
+      "description": "% de confian\u00e7a do resultado (0-100)"
+    },
+    "tokens_usados": {
+      "type": "number",
+      "description": "Total de tokens consumidos"
+    },
+    "tempo_resposta_ms": {
+      "type": "number",
+      "description": "Tempo de resposta em milissegundos"
+    },
+    "custo_estimado": {
+      "type": "number",
+      "description": "Custo estimado da execu\u00e7\u00e3o"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Sucesso",
+        "Erro",
+        "Timeout",
+        "Confian\u00e7a Baixa"
+      ],
+      "description": "Status da execu\u00e7\u00e3o"
+    },
+    "mensagem_erro": {
+      "type": "string",
+      "description": "Mensagem de erro (se houver)"
+    },
+    "modelo_usado": {
+      "type": "string",
+      "description": "Nome do modelo IA utilizado"
+    },
+    "aceito_usuario": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o usu\u00e1rio aceitou/aprovou o resultado"
+    },
+    "rejeitado_motivo": {
+      "type": "string",
+      "description": "Motivo da rejei\u00e7\u00e3o (se aplic\u00e1vel)"
+    },
+    "documentos_gerados": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs de documentos gerados a partir desta execu\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "modulo",
+    "funcionalidade",
+    "data_hora",
+    "status"
+  ]
+}

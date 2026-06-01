@@ -1,0 +1,159 @@
+{
+  "name": "PagamentoOmnichannel",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa"
+    },
+    "origem_pagamento": {
+      "type": "string",
+      "enum": [
+        "Site",
+        "App Mobile",
+        "Marketplace",
+        "Chatbot",
+        "Link Pagamento",
+        "Portal Cliente",
+        "E-commerce"
+      ],
+      "description": "Canal de origem do pagamento"
+    },
+    "id_pedido_vinculado": {
+      "type": "string",
+      "description": "ID do pedido vinculado"
+    },
+    "id_cliente": {
+      "type": "string",
+      "description": "ID do cliente"
+    },
+    "cliente_nome": {
+      "type": "string",
+      "description": "Nome do cliente (snapshot)"
+    },
+    "cliente_cpf_cnpj": {
+      "type": "string",
+      "description": "CPF/CNPJ do cliente"
+    },
+    "valor_bruto": {
+      "type": "number",
+      "description": "Valor bruto da transa\u00e7\u00e3o"
+    },
+    "valor_liquido": {
+      "type": "number",
+      "description": "Valor l\u00edquido ap\u00f3s taxas"
+    },
+    "taxas_gateway": {
+      "type": "number",
+      "default": 0,
+      "description": "Taxas cobradas pelo gateway"
+    },
+    "forma_pagamento": {
+      "type": "string",
+      "enum": [
+        "Cart\u00e3o Cr\u00e9dito",
+        "Cart\u00e3o D\u00e9bito",
+        "PIX",
+        "Boleto",
+        "Carteira Digital",
+        "Transfer\u00eancia"
+      ],
+      "description": "Forma de pagamento utilizada"
+    },
+    "bandeira_cartao": {
+      "type": "string",
+      "description": "Bandeira do cart\u00e3o (se aplic\u00e1vel)"
+    },
+    "parcelas": {
+      "type": "number",
+      "default": 1,
+      "description": "N\u00famero de parcelas"
+    },
+    "data_transacao": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora da transa\u00e7\u00e3o"
+    },
+    "id_transacao_gateway": {
+      "type": "string",
+      "description": "ID da transa\u00e7\u00e3o no gateway"
+    },
+    "gateway_utilizado": {
+      "type": "string",
+      "description": "Nome do gateway (MercadoPago, PagSeguro, Asaas, etc)"
+    },
+    "status_transacao": {
+      "type": "string",
+      "enum": [
+        "Pendente",
+        "Autorizado",
+        "Capturado",
+        "Cancelado",
+        "Estornado",
+        "Recusado"
+      ],
+      "default": "Pendente",
+      "description": "Status da transa\u00e7\u00e3o no gateway"
+    },
+    "status_conferencia": {
+      "type": "string",
+      "enum": [
+        "Pendente",
+        "Conciliado",
+        "Divergente",
+        "Em An\u00e1lise"
+      ],
+      "default": "Pendente",
+      "description": "Status da confer\u00eancia interna"
+    },
+    "data_credito_prevista": {
+      "type": "string",
+      "format": "date",
+      "description": "Data prevista de cr\u00e9dito na conta"
+    },
+    "data_credito_efetiva": {
+      "type": "string",
+      "format": "date",
+      "description": "Data efetiva do cr\u00e9dito (ap\u00f3s concilia\u00e7\u00e3o)"
+    },
+    "conta_receber_id": {
+      "type": "string",
+      "description": "ID do t\u00edtulo a receber vinculado"
+    },
+    "caixa_ordem_liquidacao_id": {
+      "type": "string",
+      "description": "ID da ordem de liquida\u00e7\u00e3o gerada"
+    },
+    "link_pagamento": {
+      "type": "string",
+      "description": "Link de pagamento gerado (se aplic\u00e1vel)"
+    },
+    "link_expiracao": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data de expira\u00e7\u00e3o do link"
+    },
+    "ip_cliente": {
+      "type": "string",
+      "description": "IP do cliente na transa\u00e7\u00e3o"
+    },
+    "dados_adicionais_gateway": {
+      "type": "object",
+      "description": "Dados extras retornados pelo gateway (JSON livre)"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "empresa_id",
+    "origem_pagamento",
+    "valor_bruto",
+    "forma_pagamento",
+    "status_transacao"
+  ]
+}

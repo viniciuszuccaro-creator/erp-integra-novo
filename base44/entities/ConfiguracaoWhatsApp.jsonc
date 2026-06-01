@@ -1,0 +1,112 @@
+{
+  "name": "ConfiguracaoWhatsApp",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa"
+    },
+    "provedor": {
+      "type": "string",
+      "enum": [
+        "Evolution API",
+        "Baileys",
+        "WPPCONNECT",
+        "Twilio",
+        "Outro"
+      ],
+      "default": "Evolution API",
+      "description": "Provedor de WhatsApp"
+    },
+    "api_url": {
+      "type": "string",
+      "description": "URL da API WhatsApp"
+    },
+    "api_key": {
+      "type": "string",
+      "description": "Token de autentica\u00e7\u00e3o"
+    },
+    "instance_id": {
+      "type": "string",
+      "description": "ID da inst\u00e2ncia WhatsApp"
+    },
+    "numero_whatsapp": {
+      "type": "string",
+      "description": "N\u00famero WhatsApp da empresa"
+    },
+    "qrcode_conexao": {
+      "type": "string",
+      "description": "QR Code para conex\u00e3o"
+    },
+    "status_conexao": {
+      "type": "string",
+      "enum": [
+        "Conectado",
+        "Desconectado",
+        "Aguardando QR",
+        "Erro"
+      ],
+      "default": "Desconectado"
+    },
+    "ultima_conexao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "enviar_pedido_aprovado": {
+      "type": "boolean",
+      "default": true
+    },
+    "enviar_saida_entrega": {
+      "type": "boolean",
+      "default": true
+    },
+    "enviar_entrega_concluida": {
+      "type": "boolean",
+      "default": true
+    },
+    "enviar_cobranca": {
+      "type": "boolean",
+      "default": true
+    },
+    "enviar_cobranca_dias_antes": {
+      "type": "number",
+      "default": 3
+    },
+    "template_pedido_aprovado": {
+      "type": "string",
+      "description": "Template da mensagem"
+    },
+    "template_saida_entrega": {
+      "type": "string"
+    },
+    "template_entrega_concluida": {
+      "type": "string"
+    },
+    "template_cobranca": {
+      "type": "string"
+    },
+    "total_mensagens_enviadas": {
+      "type": "number",
+      "default": 0
+    },
+    "total_mensagens_erro": {
+      "type": "number",
+      "default": 0
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "empresa_id",
+    "provedor"
+  ]
+}

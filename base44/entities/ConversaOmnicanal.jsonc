@@ -1,0 +1,443 @@
+{
+  "name": "ConversaOmnicanal",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa atendente"
+    },
+    "canal": {
+      "type": "string",
+      "enum": [
+        "WhatsApp",
+        "Instagram",
+        "Facebook",
+        "Telegram",
+        "Email",
+        "WebChat",
+        "Portal",
+        "Site",
+        "App",
+        "SMS",
+        "VoIP"
+      ],
+      "description": "Canal de origem da conversa"
+    },
+    "canal_id_externo": {
+      "type": "string",
+      "description": "ID do usu\u00e1rio no canal externo"
+    },
+    "cliente_id": {
+      "type": "string",
+      "description": "ID do cliente vinculado"
+    },
+    "cliente_nome": {
+      "type": "string"
+    },
+    "cliente_email": {
+      "type": "string"
+    },
+    "cliente_telefone": {
+      "type": "string"
+    },
+    "cliente_cpf_cnpj": {
+      "type": "string",
+      "description": "V21.6: CPF/CNPJ para identifica\u00e7\u00e3o autom\u00e1tica"
+    },
+    "sessao_id": {
+      "type": "string",
+      "description": "ID \u00fanico da sess\u00e3o"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Em Progresso",
+        "Aguardando",
+        "N\u00e3o Atribu\u00edda",
+        "Resolvida",
+        "Arquivada",
+        "Spam",
+        "Pausada"
+      ],
+      "default": "N\u00e3o Atribu\u00edda"
+    },
+    "prioridade": {
+      "type": "string",
+      "enum": [
+        "Baixa",
+        "Normal",
+        "Alta",
+        "Urgente",
+        "Cr\u00edtica"
+      ],
+      "default": "Normal"
+    },
+    "tipo_atendimento": {
+      "type": "string",
+      "enum": [
+        "Bot",
+        "H\u00edbrido",
+        "Humano",
+        "IA Avan\u00e7ada"
+      ],
+      "default": "Bot"
+    },
+    "atendente_id": {
+      "type": "string"
+    },
+    "atendente_nome": {
+      "type": "string"
+    },
+    "equipe_id": {
+      "type": "string",
+      "description": "V21.6: ID da equipe respons\u00e1vel"
+    },
+    "departamento": {
+      "type": "string",
+      "enum": [
+        "Comercial",
+        "Financeiro",
+        "Suporte",
+        "Log\u00edstica",
+        "T\u00e9cnico",
+        "Geral"
+      ],
+      "description": "V21.6: Departamento de destino"
+    },
+    "transferido_em": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "transferido_por": {
+      "type": "string",
+      "description": "V21.6: Quem transferiu (bot/user_id)"
+    },
+    "motivo_transferencia": {
+      "type": "string",
+      "description": "V21.6: Motivo do transbordo"
+    },
+    "data_inicio": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_ultima_mensagem": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_finalizacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tempo_primeira_resposta_minutos": {
+      "type": "number"
+    },
+    "tempo_resolucao_minutos": {
+      "type": "number"
+    },
+    "tempo_espera_fila_minutos": {
+      "type": "number",
+      "description": "V21.6: Tempo na fila de espera"
+    },
+    "total_mensagens": {
+      "type": "number",
+      "default": 0
+    },
+    "mensagens_bot": {
+      "type": "number",
+      "default": 0
+    },
+    "mensagens_humano": {
+      "type": "number",
+      "default": 0
+    },
+    "mensagens_cliente": {
+      "type": "number",
+      "default": 0
+    },
+    "sentimento_geral": {
+      "type": "string",
+      "enum": [
+        "Positivo",
+        "Neutro",
+        "Negativo",
+        "Frustrado",
+        "Urgente",
+        "Satisfeito"
+      ],
+      "default": "Neutro"
+    },
+    "score_sentimento_ia": {
+      "type": "number",
+      "minimum": -100,
+      "maximum": 100,
+      "description": "V21.6: Score de sentimento calculado pela IA"
+    },
+    "score_satisfacao": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "feedback_cliente": {
+      "type": "string"
+    },
+    "nps_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "V21.6: NPS se coletado"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "categorias_ia": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "V21.6: Categorias detectadas pela IA"
+    },
+    "intent_principal": {
+      "type": "string"
+    },
+    "intents_detectados": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "intent": {
+            "type": "string"
+          },
+          "confianca": {
+            "type": "number"
+          },
+          "data": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "V21.6: Hist\u00f3rico de intents detectados"
+    },
+    "assuntos_detectados": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "palavras_chave_ia": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "V21.6: Palavras-chave extra\u00eddas pela IA"
+    },
+    "acoes_automaticas_executadas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "acao": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resultado": {
+            "type": "string"
+          },
+          "sucesso": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "pedido_gerado_id": {
+      "type": "string"
+    },
+    "orcamento_gerado_id": {
+      "type": "string"
+    },
+    "chamado_gerado_id": {
+      "type": "string"
+    },
+    "conta_receber_gerada_id": {
+      "type": "string",
+      "description": "V21.6: Boleto/cobran\u00e7a gerada via chat"
+    },
+    "entrega_consultada_id": {
+      "type": "string",
+      "description": "V21.6: Entrega rastreada via chat"
+    },
+    "arquivos_anexos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "tamanho_kb": {
+            "type": "number"
+          },
+          "data_upload": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "transcricao_completa": {
+      "type": "string"
+    },
+    "resumo_ia": {
+      "type": "string"
+    },
+    "analise_ia": {
+      "type": "object",
+      "properties": {
+        "resumo_executivo": {
+          "type": "string"
+        },
+        "pontos_principais": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "acoes_recomendadas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "risco_churn": {
+          "type": "string",
+          "enum": [
+            "Baixo",
+            "M\u00e9dio",
+            "Alto"
+          ]
+        },
+        "potencial_venda": {
+          "type": "number"
+        },
+        "data_analise": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "V21.6: An\u00e1lise avan\u00e7ada da conversa pela IA"
+    },
+    "resolvido": {
+      "type": "boolean",
+      "default": false
+    },
+    "resolvido_por": {
+      "type": "string",
+      "enum": [
+        "Bot",
+        "Humano",
+        "Sistema",
+        "Cliente"
+      ],
+      "description": "V21.6: Quem resolveu"
+    },
+    "motivo_nao_resolvido": {
+      "type": "string"
+    },
+    "observacoes_internas": {
+      "type": "string"
+    },
+    "sla_status": {
+      "type": "string",
+      "enum": [
+        "Dentro",
+        "Alerta",
+        "Excedido"
+      ],
+      "default": "Dentro",
+      "description": "V21.6: Status do SLA em tempo real"
+    },
+    "sla_tempo_restante_minutos": {
+      "type": "number",
+      "description": "V21.6: Tempo restante para SLA"
+    },
+    "webhook_config": {
+      "type": "object",
+      "properties": {
+        "provider": {
+          "type": "string"
+        },
+        "webhook_id": {
+          "type": "string"
+        },
+        "ultima_sincronizacao": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "metricas_atendimento": {
+      "type": "object",
+      "properties": {
+        "tempo_medio_resposta_segundos": {
+          "type": "number"
+        },
+        "mensagens_por_minuto": {
+          "type": "number"
+        },
+        "taxa_resolucao_primeira_resposta": {
+          "type": "boolean"
+        },
+        "quantidade_transferencias": {
+          "type": "number"
+        }
+      },
+      "description": "V21.6: M\u00e9tricas detalhadas do atendimento"
+    },
+    "contexto_cliente": {
+      "type": "object",
+      "properties": {
+        "ultima_compra": {
+          "type": "string",
+          "format": "date"
+        },
+        "valor_total_compras": {
+          "type": "number"
+        },
+        "quantidade_pedidos": {
+          "type": "number"
+        },
+        "classificacao_abc": {
+          "type": "string"
+        },
+        "titulos_em_aberto": {
+          "type": "number"
+        },
+        "dias_sem_comprar": {
+          "type": "number"
+        }
+      },
+      "description": "V21.6: Contexto do cliente para atendimento"
+    }
+  },
+  "required": [
+    "canal",
+    "sessao_id",
+    "data_inicio"
+  ]
+}

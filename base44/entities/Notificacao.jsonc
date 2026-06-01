@@ -1,0 +1,110 @@
+{
+  "name": "Notificacao",
+  "type": "object",
+  "properties": {
+    "titulo": {
+      "type": "string",
+      "description": "T\u00edtulo da notifica\u00e7\u00e3o"
+    },
+    "mensagem": {
+      "type": "string",
+      "description": "Mensagem completa"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "info",
+        "sucesso",
+        "aviso",
+        "erro",
+        "urgente"
+      ],
+      "default": "info",
+      "description": "Tipo de notifica\u00e7\u00e3o"
+    },
+    "categoria": {
+      "type": "string",
+      "enum": [
+        "Sistema",
+        "Comercial",
+        "Financeiro",
+        "Estoque",
+        "RH",
+        "Fiscal",
+        "Geral"
+      ],
+      "default": "Geral",
+      "description": "Categoria da notifica\u00e7\u00e3o"
+    },
+    "prioridade": {
+      "type": "string",
+      "enum": [
+        "Baixa",
+        "Normal",
+        "Alta",
+        "Urgente"
+      ],
+      "default": "Normal",
+      "description": "N\u00edvel de prioridade"
+    },
+    "destinatario_id": {
+      "type": "string",
+      "description": "ID do usu\u00e1rio destinat\u00e1rio"
+    },
+    "destinatario_email": {
+      "type": "string",
+      "description": "E-mail do destinat\u00e1rio"
+    },
+    "remetente": {
+      "type": "string",
+      "description": "Nome do remetente ou sistema"
+    },
+    "link_acao": {
+      "type": "string",
+      "description": "URL para a\u00e7\u00e3o relacionada"
+    },
+    "entidade_relacionada": {
+      "type": "string",
+      "description": "Tipo de entidade (Pedido, Cliente, etc)"
+    },
+    "registro_id": {
+      "type": "string",
+      "description": "ID do registro relacionado"
+    },
+    "lida": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a notifica\u00e7\u00e3o foi lida"
+    },
+    "data_leitura": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora em que foi lida"
+    },
+    "arquivada": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se foi arquivada"
+    },
+    "acao_tomada": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se alguma a\u00e7\u00e3o foi tomada"
+    },
+    "expira_em": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora de expira\u00e7\u00e3o"
+    },
+    "dados_adicionais": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Dados extras em JSON"
+    }
+  },
+  "required": [
+    "titulo",
+    "mensagem",
+    "tipo"
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "name": "Servico",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_dona_id": {
+      "type": "string",
+      "description": "Empresa que cadastrou o servi\u00e7o"
+    },
+    "empresas_compartilhadas_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Empresas que podem usar este servi\u00e7o"
+    },
+    "codigo_servico": {
+      "type": "string",
+      "description": "C\u00f3digo interno do servi\u00e7o"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do servi\u00e7o"
+    },
+    "descricao_detalhada": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o detalhada do servi\u00e7o"
+    },
+    "tipo_servico": {
+      "type": "string",
+      "enum": [
+        "Corte",
+        "Dobra",
+        "Montagem",
+        "Instala\u00e7\u00e3o",
+        "Manuten\u00e7\u00e3o",
+        "Consultoria",
+        "Projeto",
+        "Outro"
+      ],
+      "default": "Outro"
+    },
+    "unidade_cobranca": {
+      "type": "string",
+      "enum": [
+        "Hora",
+        "Pe\u00e7a",
+        "KG",
+        "MT",
+        "M2",
+        "Job",
+        "Unit\u00e1rio"
+      ],
+      "default": "Unit\u00e1rio"
+    },
+    "valor_unitario": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor unit\u00e1rio do servi\u00e7o"
+    },
+    "tempo_medio_execucao": {
+      "type": "number",
+      "description": "Tempo m\u00e9dio de execu\u00e7\u00e3o em horas"
+    },
+    "codigo_servico_municipal": {
+      "type": "string",
+      "description": "C\u00f3digo do servi\u00e7o municipal (para ISS)"
+    },
+    "aliquota_iss": {
+      "type": "number",
+      "default": 0,
+      "description": "Al\u00edquota de ISS (%)"
+    },
+    "retencao_iss": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se h\u00e1 reten\u00e7\u00e3o de ISS"
+    },
+    "ncm_material_aplicado": {
+      "type": "string",
+      "description": "NCM do material aplicado (se houver)"
+    },
+    "exige_projeto": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se exige projeto t\u00e9cnico"
+    },
+    "colaborador_responsavel_padrao_id": {
+      "type": "string",
+      "description": "ID do colaborador respons\u00e1vel padr\u00e3o"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "descricao"
+  ]
+}

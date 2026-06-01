@@ -1,0 +1,114 @@
+{
+  "name": "LogCobranca",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa"
+    },
+    "conta_receber_id": {
+      "type": "string",
+      "description": "ID da conta a receber vinculada"
+    },
+    "tipo_operacao": {
+      "type": "string",
+      "enum": [
+        "gerar_boleto",
+        "gerar_pix",
+        "gerar_cartao",
+        "cancelar",
+        "consultar_status",
+        "webhook_recebido",
+        "enviar_email",
+        "enviar_whatsapp"
+      ],
+      "description": "Tipo de opera\u00e7\u00e3o realizada"
+    },
+    "provedor": {
+      "type": "string",
+      "description": "Provedor usado (Asaas, Juno, etc)"
+    },
+    "data_hora": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora da opera\u00e7\u00e3o"
+    },
+    "payload_enviado": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Dados enviados para a API"
+    },
+    "retorno_recebido": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Resposta da API"
+    },
+    "status_operacao": {
+      "type": "string",
+      "enum": [
+        "sucesso",
+        "erro",
+        "simulado",
+        "timeout",
+        "pendente"
+      ],
+      "description": "Status da opera\u00e7\u00e3o"
+    },
+    "codigo_status": {
+      "type": "string",
+      "description": "C\u00f3digo de status HTTP"
+    },
+    "mensagem": {
+      "type": "string",
+      "description": "Mensagem de retorno"
+    },
+    "tempo_resposta_ms": {
+      "type": "number",
+      "description": "Tempo de resposta em milissegundos"
+    },
+    "id_cobranca_externa": {
+      "type": "string",
+      "description": "ID da cobran\u00e7a no provedor"
+    },
+    "linha_digitavel": {
+      "type": "string",
+      "description": "Linha digit\u00e1vel do boleto (se gerado)"
+    },
+    "pix_copia_cola": {
+      "type": "string",
+      "description": "C\u00f3digo PIX copia e cola (se gerado)"
+    },
+    "pix_qrcode_base64": {
+      "type": "string",
+      "description": "QR Code em base64"
+    },
+    "url_boleto": {
+      "type": "string",
+      "description": "URL do boleto PDF"
+    },
+    "usuario_id": {
+      "type": "string",
+      "description": "ID do usu\u00e1rio que executou"
+    },
+    "usuario_nome": {
+      "type": "string"
+    },
+    "ip_address": {
+      "type": "string"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "empresa_id",
+    "conta_receber_id",
+    "tipo_operacao",
+    "data_hora",
+    "status_operacao"
+  ]
+}

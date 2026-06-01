@@ -1,0 +1,140 @@
+{
+  "name": "AuditLog",
+  "type": "object",
+  "properties": {
+    "usuario": {
+      "type": "string",
+      "description": "Usu\u00e1rio que realizou a a\u00e7\u00e3o"
+    },
+    "usuario_id": {
+      "type": "string"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa onde a a\u00e7\u00e3o foi realizada"
+    },
+    "empresa_nome": {
+      "type": "string",
+      "description": "Nome da empresa"
+    },
+    "acao": {
+      "type": "string",
+      "enum": [
+        "Login",
+        "Logout",
+        "Cria\u00e7\u00e3o",
+        "Edi\u00e7\u00e3o",
+        "Exclus\u00e3o",
+        "Visualiza\u00e7\u00e3o",
+        "Aprova\u00e7\u00e3o",
+        "Rejei\u00e7\u00e3o",
+        "Exporta\u00e7\u00e3o",
+        "Importa\u00e7\u00e3o",
+        "Troca de Empresa",
+        "Emiss\u00e3o NF-e",
+        "Cancelamento NF-e",
+        "Carta de Corre\u00e7\u00e3o",
+        "Inutiliza\u00e7\u00e3o",
+        "Bloqueio"
+      ],
+      "description": "Tipo de a\u00e7\u00e3o realizada"
+    },
+    "modulo": {
+      "type": "string",
+      "enum": [
+        "Dashboard",
+        "Comercial",
+        "Financeiro",
+        "Estoque",
+        "Compras",
+        "Expedi\u00e7\u00e3o",
+        "RH",
+        "Cadastros",
+        "Fiscal",
+        "CRM",
+        "Agenda",
+        "Relat\u00f3rios",
+        "Contratos",
+        "Produ\u00e7\u00e3o",
+        "Empresas",
+        "Controle de Acesso",
+        "Integra\u00e7\u00f5es",
+        "Configura\u00e7\u00f5es",
+        "Sistema"
+      ],
+      "description": "M\u00f3dulo do sistema"
+    },
+    "tipo_auditoria": {
+      "type": "string",
+      "enum": [
+        "ui",
+        "entidade",
+        "seguranca",
+        "acesso",
+        "gps",
+        "ia",
+        "integracao",
+        "sistema",
+        "global"
+      ],
+      "description": "Categoria da auditoria (ex.: ui, entidade, integracao, seguranca)"
+    },
+    "entidade": {
+      "type": "string",
+      "description": "Entidade afetada (Cliente, Pedido, etc)"
+    },
+    "registro_id": {
+      "type": "string",
+      "description": "ID do registro afetado"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o detalhada da a\u00e7\u00e3o"
+    },
+    "dados_anteriores": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Dados antes da altera\u00e7\u00e3o"
+    },
+    "dados_novos": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Dados ap\u00f3s a altera\u00e7\u00e3o"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "IP do usu\u00e1rio"
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "Navegador/dispositivo"
+    },
+    "geolocation": {
+      "type": "string",
+      "description": "Localiza\u00e7\u00e3o geogr\u00e1fica (cidade/estado)"
+    },
+    "data_hora": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora da a\u00e7\u00e3o"
+    },
+    "sucesso": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se a a\u00e7\u00e3o foi bem-sucedida"
+    },
+    "mensagem_erro": {
+      "type": "string",
+      "description": "Mensagem de erro (se houver)"
+    },
+    "duracao_ms": {
+      "type": "number",
+      "description": "Dura\u00e7\u00e3o da opera\u00e7\u00e3o em milissegundos"
+    }
+  },
+  "required": [
+    "usuario",
+    "acao",
+    "modulo"
+  ]
+}

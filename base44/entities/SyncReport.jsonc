@@ -1,0 +1,177 @@
+{
+  "name": "SyncReport",
+  "type": "object",
+  "properties": {
+    "tipo_sync": {
+      "type": "string",
+      "enum": [
+        "Hub Cadastros",
+        "Integra\u00e7\u00f5es API",
+        "Fluxo Golden Thread",
+        "Sincroniza\u00e7\u00e3o Marketplace",
+        "Job Agendado"
+      ],
+      "description": "Tipo de sincroniza\u00e7\u00e3o testada"
+    },
+    "data_teste": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora do teste"
+    },
+    "status_geral": {
+      "type": "string",
+      "enum": [
+        "OK",
+        "Aviso",
+        "Erro",
+        "Cr\u00edtico"
+      ],
+      "default": "OK",
+      "description": "Status geral da sincroniza\u00e7\u00e3o"
+    },
+    "total_verificacoes": {
+      "type": "number",
+      "description": "Total de verifica\u00e7\u00f5es realizadas"
+    },
+    "verificacoes_ok": {
+      "type": "number",
+      "default": 0
+    },
+    "verificacoes_erro": {
+      "type": "number",
+      "default": 0
+    },
+    "detalhes_verificacoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "modulo": {
+            "type": "string"
+          },
+          "componente": {
+            "type": "string"
+          },
+          "acao_testada": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OK",
+              "Erro"
+            ]
+          },
+          "mensagem": {
+            "type": "string"
+          },
+          "campos_validados": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "campos_faltando": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "description": "Detalhamento de cada verifica\u00e7\u00e3o"
+    },
+    "botoes_testados": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "grupo": {
+            "type": "string"
+          },
+          "botao_label": {
+            "type": "string"
+          },
+          "tem_acao": {
+            "type": "boolean"
+          },
+          "abre_modal": {
+            "type": "boolean"
+          },
+          "formulario_completo": {
+            "type": "boolean"
+          }
+        }
+      },
+      "description": "Lista de bot\u00f5es testados"
+    },
+    "entidades_conectadas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Entidades que est\u00e3o corretamente conectadas"
+    },
+    "entidades_desconectadas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Entidades sem conex\u00e3o"
+    },
+    "ias_ativas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nome_ia": {
+            "type": "string"
+          },
+          "modulo": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Ativa",
+              "Inativa",
+              "Erro"
+            ]
+          }
+        }
+      },
+      "description": "IAs testadas e seus status"
+    },
+    "recomendacoes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Recomenda\u00e7\u00f5es de melhoria"
+    },
+    "executado_por": {
+      "type": "string"
+    },
+    "executado_por_id": {
+      "type": "string"
+    },
+    "automatico": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se foi executado automaticamente"
+    },
+    "notificacao_enviada": {
+      "type": "boolean",
+      "default": false
+    },
+    "notificacao_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "tipo_sync",
+    "data_teste",
+    "status_geral",
+    "total_verificacoes"
+  ]
+}

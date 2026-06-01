@@ -1,0 +1,80 @@
+{
+  "name": "Interacao",
+  "type": "object",
+  "properties": {
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "Liga\u00e7\u00e3o",
+        "E-mail",
+        "Reuni\u00e3o",
+        "Visita",
+        "WhatsApp",
+        "Chat",
+        "Outros"
+      ],
+      "description": "Tipo de intera\u00e7\u00e3o"
+    },
+    "titulo": {
+      "type": "string"
+    },
+    "descricao": {
+      "type": "string"
+    },
+    "data_interacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "duracao": {
+      "type": "number",
+      "description": "Dura\u00e7\u00e3o em minutos"
+    },
+    "cliente_id": {
+      "type": "string"
+    },
+    "cliente_nome": {
+      "type": "string"
+    },
+    "oportunidade_id": {
+      "type": "string"
+    },
+    "responsavel": {
+      "type": "string"
+    },
+    "responsavel_id": {
+      "type": "string"
+    },
+    "resultado": {
+      "type": "string",
+      "enum": [
+        "Positivo",
+        "Neutro",
+        "Negativo",
+        "Sem Resposta"
+      ]
+    },
+    "proxima_acao": {
+      "type": "string"
+    },
+    "data_proxima_acao": {
+      "type": "string",
+      "format": "date"
+    },
+    "anexos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "tipo",
+    "titulo",
+    "data_interacao",
+    "cliente_nome",
+    "responsavel"
+  ]
+}

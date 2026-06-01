@@ -1,0 +1,420 @@
+{
+  "name": "OrdemProducao",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa respons\u00e1vel pela produ\u00e7\u00e3o"
+    },
+    "empresa_atendimento_id": {
+      "type": "string",
+      "description": "Empresa que gerou o pedido original"
+    },
+    "numero_op": {
+      "type": "string",
+      "description": "N\u00famero sequencial da OP"
+    },
+    "pedido_id": {
+      "type": "string",
+      "description": "ID do pedido origem"
+    },
+    "numero_pedido": {
+      "type": "string"
+    },
+    "etapa_entrega_id": {
+      "type": "string",
+      "description": "ID da etapa de faturamento que originou"
+    },
+    "cliente_id": {
+      "type": "string"
+    },
+    "cliente_nome": {
+      "type": "string"
+    },
+    "obra_destino_id": {
+      "type": "string",
+      "description": "ID da obra/projeto destino"
+    },
+    "obra_destino_nome": {
+      "type": "string"
+    },
+    "tipo_producao": {
+      "type": "string",
+      "enum": [
+        "Armado Padr\u00e3o",
+        "Corte e Dobra",
+        "Produ\u00e7\u00e3o Sob Medida",
+        "Misto"
+      ],
+      "description": "Tipo de produ\u00e7\u00e3o"
+    },
+    "itens_vinculados": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pedido_id": {
+            "type": "string"
+          },
+          "item_id": {
+            "type": "string"
+          },
+          "tipo_item": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "quantidade": {
+            "type": "number"
+          },
+          "unidade": {
+            "type": "string"
+          },
+          "peso_kg": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Itens do pedido vinculados a esta OP"
+    },
+    "detalhes_engenharia": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id_peca": {
+            "type": "string"
+          },
+          "descricao_peca": {
+            "type": "string"
+          },
+          "bitola": {
+            "type": "string"
+          },
+          "comprimento_m": {
+            "type": "number"
+          },
+          "peso_kg": {
+            "type": "number"
+          },
+          "quantidade": {
+            "type": "number"
+          },
+          "mapa_corte_url": {
+            "type": "string"
+          },
+          "sequenciamento_dobra": {
+            "type": "string"
+          },
+          "otimizacao_material": {
+            "type": "object",
+            "properties": {
+              "aproveitamento_percentual": {
+                "type": "number"
+              },
+              "sobras_kg": {
+                "type": "number"
+              },
+              "sugestao_ia": {
+                "type": "string"
+              }
+            }
+          },
+          "historico_peca": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "data_hora": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "usuario": {
+                  "type": "string"
+                },
+                "acao": {
+                  "type": "string"
+                },
+                "maquina_id": {
+                  "type": "string"
+                },
+                "operador_id": {
+                  "type": "string"
+                },
+                "lote_aco": {
+                  "type": "string"
+                },
+                "certificado_aco": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "description": "Detalhamento de engenharia de cada pe\u00e7a"
+    },
+    "peso_total_kg": {
+      "type": "number",
+      "default": 0
+    },
+    "materia_prima_prevista": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "produto_id": {
+            "type": "string"
+          },
+          "produto_descricao": {
+            "type": "string"
+          },
+          "quantidade_prevista": {
+            "type": "number"
+          },
+          "quantidade_consumida": {
+            "type": "number",
+            "default": 0
+          },
+          "unidade": {
+            "type": "string"
+          },
+          "lote": {
+            "type": "string"
+          },
+          "fornecedor_id": {
+            "type": "string"
+          },
+          "certificado_url": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Mat\u00e9ria-prima prevista e consumida"
+    },
+    "custo_previsto": {
+      "type": "number",
+      "default": 0
+    },
+    "custo_real": {
+      "type": "number",
+      "default": 0
+    },
+    "data_criacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_previsao_inicio": {
+      "type": "string",
+      "format": "date"
+    },
+    "data_previsao_conclusao": {
+      "type": "string",
+      "format": "date"
+    },
+    "data_inicio_real": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_conclusao_real": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "prioridade": {
+      "type": "string",
+      "enum": [
+        "Baixa",
+        "Normal",
+        "Alta",
+        "Urgente"
+      ],
+      "default": "Normal"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Planejada",
+        "Aguardando Mat\u00e9ria-Prima",
+        "Em Corte",
+        "Em Dobra",
+        "Em Montagem",
+        "Inspe\u00e7\u00e3o",
+        "Pronto para Expedi\u00e7\u00e3o",
+        "Conclu\u00edda",
+        "Cancelada"
+      ],
+      "default": "Planejada"
+    },
+    "progresso_fisico_percentual": {
+      "type": "number",
+      "default": 0,
+      "description": "% de KG produzidos vs previsto"
+    },
+    "progresso_fisico_kg": {
+      "type": "number",
+      "default": 0
+    },
+    "risco_atraso": {
+      "type": "string",
+      "enum": [
+        "Baixo",
+        "M\u00e9dio",
+        "Alto",
+        "Cr\u00edtico"
+      ],
+      "description": "Calculado por IA"
+    },
+    "gargalos_detectados": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "impacto": {
+            "type": "string"
+          },
+          "sugestao_ia": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Gargalos identificados pela IA"
+    },
+    "impacto_financeiro": {
+      "type": "object",
+      "properties": {
+        "valor_producao": {
+          "type": "number"
+        },
+        "margem_prevista": {
+          "type": "number"
+        },
+        "margem_real": {
+          "type": "number"
+        },
+        "desvio_custo": {
+          "type": "number"
+        }
+      }
+    },
+    "refugo_registrado": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data_hora": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "peca_id": {
+            "type": "string"
+          },
+          "quantidade_kg": {
+            "type": "number"
+          },
+          "motivo": {
+            "type": "string"
+          },
+          "responsavel": {
+            "type": "string"
+          },
+          "analise_ia": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Refugo detectado durante produ\u00e7\u00e3o"
+    },
+    "apontamentos_producao": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data_hora": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "operador_id": {
+            "type": "string"
+          },
+          "operador_nome": {
+            "type": "string"
+          },
+          "maquina_id": {
+            "type": "string"
+          },
+          "peca_id": {
+            "type": "string"
+          },
+          "quantidade_produzida": {
+            "type": "number"
+          },
+          "peso_kg": {
+            "type": "number"
+          },
+          "tempo_minutos": {
+            "type": "number"
+          },
+          "observacoes": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Apontamentos de produ\u00e7\u00e3o dos operadores"
+    },
+    "responsavel_planejamento": {
+      "type": "string"
+    },
+    "responsavel_planejamento_id": {
+      "type": "string"
+    },
+    "responsavel_producao": {
+      "type": "string"
+    },
+    "responsavel_producao_id": {
+      "type": "string"
+    },
+    "observacoes": {
+      "type": "string"
+    },
+    "historico_mudancas_status": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data_hora": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status_anterior": {
+            "type": "string"
+          },
+          "status_novo": {
+            "type": "string"
+          },
+          "usuario": {
+            "type": "string"
+          },
+          "motivo": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "numero_op",
+    "tipo_producao",
+    "empresa_id"
+  ]
+}

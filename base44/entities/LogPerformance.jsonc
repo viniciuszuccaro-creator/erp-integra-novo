@@ -1,0 +1,262 @@
+{
+  "name": "LogPerformance",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora da medi\u00e7\u00e3o"
+    },
+    "tipo_operacao": {
+      "type": "string",
+      "enum": [
+        "query",
+        "api_call",
+        "page_load",
+        "integration",
+        "export",
+        "import",
+        "calculation",
+        "other"
+      ],
+      "description": "Tipo de opera\u00e7\u00e3o medida"
+    },
+    "modulo": {
+      "type": "string",
+      "enum": [
+        "Dashboard",
+        "Comercial",
+        "Financeiro",
+        "Estoque",
+        "Compras",
+        "Expedicao",
+        "Producao",
+        "RH",
+        "Fiscal",
+        "CRM",
+        "Relatorios",
+        "Sistema",
+        "Outro"
+      ],
+      "description": "M\u00f3dulo do sistema"
+    },
+    "funcionalidade": {
+      "type": "string",
+      "description": "Funcionalidade espec\u00edfica (ex: listar_pedidos, criar_nfe)"
+    },
+    "duracao_ms": {
+      "type": "number",
+      "description": "Dura\u00e7\u00e3o em milissegundos"
+    },
+    "duracao_segundos": {
+      "type": "number",
+      "description": "Dura\u00e7\u00e3o em segundos (para facilitar queries)"
+    },
+    "query_sql": {
+      "type": "string",
+      "description": "Query SQL executada (se aplic\u00e1vel)"
+    },
+    "query_tipo": {
+      "type": "string",
+      "enum": [
+        "SELECT",
+        "INSERT",
+        "UPDATE",
+        "DELETE",
+        "AGGREGATE",
+        "JOIN"
+      ],
+      "description": "Tipo de query"
+    },
+    "entidade": {
+      "type": "string",
+      "description": "Entidade principal acessada"
+    },
+    "registros_afetados": {
+      "type": "number",
+      "description": "Quantidade de registros retornados/afetados"
+    },
+    "tamanho_resultado_kb": {
+      "type": "number",
+      "description": "Tamanho do resultado em KB"
+    },
+    "endpoint": {
+      "type": "string",
+      "description": "Endpoint da API (se for API call)"
+    },
+    "metodo_http": {
+      "type": "string",
+      "enum": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "PATCH"
+      ],
+      "description": "M\u00e9todo HTTP"
+    },
+    "status_code": {
+      "type": "number",
+      "description": "C\u00f3digo de status HTTP"
+    },
+    "usuario_id": {
+      "type": "string",
+      "description": "ID do usu\u00e1rio que executou"
+    },
+    "usuario_nome": {
+      "type": "string",
+      "description": "Nome do usu\u00e1rio"
+    },
+    "sessao_id": {
+      "type": "string",
+      "description": "ID da sess\u00e3o"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "IP do usu\u00e1rio"
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "Navegador/dispositivo"
+    },
+    "memoria_usada_mb": {
+      "type": "number",
+      "description": "Mem\u00f3ria usada na opera\u00e7\u00e3o"
+    },
+    "cpu_percent": {
+      "type": "number",
+      "description": "% de CPU usado"
+    },
+    "cache_hit": {
+      "type": "boolean",
+      "description": "Se usou cache"
+    },
+    "cache_tipo": {
+      "type": "string",
+      "enum": [
+        "memory",
+        "redis",
+        "database",
+        "none"
+      ],
+      "description": "Tipo de cache usado"
+    },
+    "lento": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se foi considerado lento (> threshold)"
+    },
+    "threshold_ms": {
+      "type": "number",
+      "description": "Limite de tempo considerado normal"
+    },
+    "percentual_acima_threshold": {
+      "type": "number",
+      "description": "% acima do threshold"
+    },
+    "erro": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se houve erro"
+    },
+    "erro_mensagem": {
+      "type": "string",
+      "description": "Mensagem de erro"
+    },
+    "erro_stack": {
+      "type": "string",
+      "description": "Stack trace do erro"
+    },
+    "erro_tipo": {
+      "type": "string",
+      "enum": [
+        "timeout",
+        "database_error",
+        "api_error",
+        "validation_error",
+        "business_logic",
+        "network",
+        "other"
+      ],
+      "description": "Tipo de erro"
+    },
+    "correlacao_id": {
+      "type": "string",
+      "description": "ID para correlacionar opera\u00e7\u00f5es relacionadas"
+    },
+    "parent_operacao_id": {
+      "type": "string",
+      "description": "ID da opera\u00e7\u00e3o pai (para tracing distribu\u00eddo)"
+    },
+    "parametros": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Par\u00e2metros da opera\u00e7\u00e3o (filtros, IDs, etc.)"
+    },
+    "metricas_adicionais": {
+      "type": "object",
+      "properties": {
+        "tempo_db_ms": {
+          "type": "number"
+        },
+        "tempo_network_ms": {
+          "type": "number"
+        },
+        "tempo_processamento_ms": {
+          "type": "number"
+        },
+        "queries_executadas": {
+          "type": "number"
+        },
+        "cache_misses": {
+          "type": "number"
+        }
+      },
+      "description": "M\u00e9tricas detalhadas"
+    },
+    "alerta_gerado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se gerou alerta de performance"
+    },
+    "alerta_id": {
+      "type": "string",
+      "description": "ID do alerta gerado"
+    },
+    "ambiente": {
+      "type": "string",
+      "enum": [
+        "producao",
+        "homologacao",
+        "desenvolvimento"
+      ],
+      "default": "producao",
+      "description": "Ambiente onde ocorreu"
+    },
+    "versao_sistema": {
+      "type": "string",
+      "description": "Vers\u00e3o do sistema"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags para categoriza\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "timestamp",
+    "tipo_operacao",
+    "modulo",
+    "duracao_ms"
+  ]
+}

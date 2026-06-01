@@ -1,0 +1,201 @@
+{
+  "name": "OrdemCompra",
+  "type": "object",
+  "properties": {
+    "numero_oc": {
+      "type": "string"
+    },
+    "fornecedor_id": {
+      "type": "string"
+    },
+    "fornecedor_nome": {
+      "type": "string"
+    },
+    "solicitacao_compra_id": {
+      "type": "string",
+      "description": "ID da solicita\u00e7\u00e3o que originou esta OC"
+    },
+    "data_solicitacao": {
+      "type": "string",
+      "format": "date"
+    },
+    "data_aprovacao": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de aprova\u00e7\u00e3o da OC"
+    },
+    "data_envio_fornecedor": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de envio ao fornecedor"
+    },
+    "data_entrega_prevista": {
+      "type": "string",
+      "format": "date"
+    },
+    "data_entrega_real": {
+      "type": "string",
+      "format": "date",
+      "description": "Data real de entrega/recebimento"
+    },
+    "lead_time_real": {
+      "type": "number",
+      "description": "Lead time real em dias (envio \u2192 recebimento)"
+    },
+    "valor_total": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Solicitada",
+        "Aprovada",
+        "Enviada ao Fornecedor",
+        "Em Processo",
+        "Parcialmente Recebida",
+        "Recebida",
+        "Cancelada"
+      ],
+      "default": "Solicitada"
+    },
+    "itens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "produto_id": {
+            "type": "string"
+          },
+          "codigo_sku": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "quantidade_solicitada": {
+            "type": "number"
+          },
+          "quantidade_recebida": {
+            "type": "number",
+            "default": 0
+          },
+          "unidade": {
+            "type": "string"
+          },
+          "valor_unitario": {
+            "type": "number"
+          },
+          "valor_total": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Itens da ordem de compra"
+    },
+    "condicao_pagamento": {
+      "type": "string",
+      "description": "Condi\u00e7\u00e3o de pagamento acordada"
+    },
+    "forma_pagamento": {
+      "type": "string",
+      "enum": [
+        "\u00c0 Vista",
+        "Boleto",
+        "Transfer\u00eancia",
+        "Cart\u00e3o",
+        "30 dias",
+        "60 dias"
+      ]
+    },
+    "prazo_entrega_acordado": {
+      "type": "number",
+      "description": "Prazo de entrega acordado (dias)"
+    },
+    "solicitante": {
+      "type": "string"
+    },
+    "aprovador": {
+      "type": "string"
+    },
+    "centro_custo": {
+      "type": "string"
+    },
+    "centro_custo_id": {
+      "type": "string"
+    },
+    "nota_fiscal_entrada": {
+      "type": "string",
+      "description": "N\u00famero da NF de entrada"
+    },
+    "observacoes": {
+      "type": "string"
+    },
+    "historico": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status_anterior": {
+            "type": "string"
+          },
+          "status_novo": {
+            "type": "string"
+          },
+          "usuario": {
+            "type": "string"
+          },
+          "observacao": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Hist\u00f3rico de mudan\u00e7as de status"
+    },
+    "avaliacao_fornecedor": {
+      "type": "object",
+      "properties": {
+        "realizada": {
+          "type": "boolean",
+          "default": false
+        },
+        "data": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "nota": {
+          "type": "number"
+        },
+        "criterios": {
+          "type": "object",
+          "properties": {
+            "qualidade": {
+              "type": "number"
+            },
+            "prazo": {
+              "type": "number"
+            },
+            "preco": {
+              "type": "number"
+            },
+            "atendimento": {
+              "type": "number"
+            }
+          }
+        },
+        "comentario": {
+          "type": "string"
+        }
+      },
+      "description": "Avalia\u00e7\u00e3o do fornecedor ap\u00f3s recebimento"
+    }
+  },
+  "required": [
+    "fornecedor_nome",
+    "data_solicitacao",
+    "valor_total"
+  ]
+}

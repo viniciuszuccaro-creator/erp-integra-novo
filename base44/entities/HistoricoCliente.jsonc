@@ -1,0 +1,231 @@
+{
+  "name": "HistoricoCliente",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa onde o evento ocorreu"
+    },
+    "cliente_id": {
+      "type": "string",
+      "description": "ID do cliente"
+    },
+    "cliente_nome": {
+      "type": "string",
+      "description": "Nome do cliente (snapshot)"
+    },
+    "modulo_origem": {
+      "type": "string",
+      "enum": [
+        "Cadastro",
+        "Comercial",
+        "Pedido",
+        "Producao",
+        "Expedicao",
+        "Financeiro",
+        "Fiscal",
+        "CRM",
+        "Comunicacao",
+        "Manual",
+        "Sistema"
+      ],
+      "description": "M\u00f3dulo que gerou o evento"
+    },
+    "referencia_id": {
+      "type": "string",
+      "description": "ID da entidade relacionada (pedido, OP, NF, etc.)"
+    },
+    "referencia_tipo": {
+      "type": "string",
+      "enum": [
+        "Pedido",
+        "OrdemProducao",
+        "Entrega",
+        "ContaReceber",
+        "NotaFiscal",
+        "Oportunidade",
+        "Interacao",
+        "Contrato",
+        "Outro"
+      ],
+      "description": "Tipo da entidade referenciada"
+    },
+    "referencia_numero": {
+      "type": "string",
+      "description": "N\u00famero do documento (pedido, NF, OP)"
+    },
+    "tipo_evento": {
+      "type": "string",
+      "enum": [
+        "Criacao",
+        "Alteracao",
+        "Aprovacao",
+        "Cancelamento",
+        "Finalizacao",
+        "Envio",
+        "Recebimento",
+        "Pagamento",
+        "Atraso",
+        "Entrega",
+        "Devolucao",
+        "Comunicacao",
+        "Observacao",
+        "Alerta",
+        "Outro"
+      ],
+      "description": "Tipo do evento"
+    },
+    "titulo_evento": {
+      "type": "string",
+      "description": "T\u00edtulo curto do evento"
+    },
+    "descricao_detalhada": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o completa do que aconteceu"
+    },
+    "usuario_responsavel": {
+      "type": "string",
+      "description": "Nome do usu\u00e1rio que gerou o evento"
+    },
+    "usuario_responsavel_id": {
+      "type": "string",
+      "description": "ID do usu\u00e1rio"
+    },
+    "data_evento": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora do evento"
+    },
+    "anexo_url": {
+      "type": "string",
+      "description": "URL de anexo (PDF, imagem, XML, etc.)"
+    },
+    "anexo_tipo": {
+      "type": "string",
+      "enum": [
+        "PDF",
+        "XML",
+        "Imagem",
+        "Documento",
+        "Planilha",
+        "Outro"
+      ],
+      "description": "Tipo de arquivo anexado"
+    },
+    "whatsapp_envio": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se gerou envio de WhatsApp"
+    },
+    "whatsapp_mensagem": {
+      "type": "string",
+      "description": "Mensagem enviada via WhatsApp"
+    },
+    "whatsapp_status": {
+      "type": "string",
+      "enum": [
+        "Enviado",
+        "Entregue",
+        "Lido",
+        "Falhou"
+      ],
+      "description": "Status do envio WhatsApp"
+    },
+    "email_envio": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se gerou envio de e-mail"
+    },
+    "email_assunto": {
+      "type": "string",
+      "description": "Assunto do e-mail enviado"
+    },
+    "email_status": {
+      "type": "string",
+      "enum": [
+        "Enviado",
+        "Aberto",
+        "Clicado",
+        "Falhou"
+      ],
+      "description": "Status do envio de e-mail"
+    },
+    "visivel_cliente": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se \u00e9 vis\u00edvel no portal do cliente"
+    },
+    "latitude": {
+      "type": "number",
+      "description": "Latitude (para eventos de entrega/visita)"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Longitude (para eventos de entrega/visita)"
+    },
+    "status_relacionado": {
+      "type": "string",
+      "description": "Status do pedido/entrega/t\u00edtulo no momento do evento"
+    },
+    "valor_relacionado": {
+      "type": "number",
+      "description": "Valor financeiro relacionado (se aplic\u00e1vel)"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags para categoriza\u00e7\u00e3o (urgente, importante, problema, etc.)"
+    },
+    "prioridade": {
+      "type": "string",
+      "enum": [
+        "Baixa",
+        "Normal",
+        "Alta",
+        "Urgente"
+      ],
+      "default": "Normal"
+    },
+    "dados_adicionais": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "JSON com dados extras espec\u00edficos do m\u00f3dulo"
+    },
+    "acao_necessaria": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se requer a\u00e7\u00e3o do usu\u00e1rio"
+    },
+    "acao_descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o da a\u00e7\u00e3o necess\u00e1ria"
+    },
+    "resolvido": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o evento foi resolvido/conclu\u00eddo"
+    },
+    "resolvido_por": {
+      "type": "string",
+      "description": "Quem resolveu a pend\u00eancia"
+    },
+    "resolvido_em": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data de resolu\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "cliente_id",
+    "modulo_origem",
+    "tipo_evento",
+    "titulo_evento",
+    "data_evento"
+  ]
+}

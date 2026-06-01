@@ -1,0 +1,177 @@
+{
+  "name": "ContatoB2B",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_vinculada_id": {
+      "type": "string",
+      "description": "ID da empresa (cliente/fornecedor) a qual este contato pertence"
+    },
+    "tipo_vinculo": {
+      "type": "string",
+      "enum": [
+        "Cliente",
+        "Fornecedor",
+        "Transportadora",
+        "Representante",
+        "Parceiro"
+      ],
+      "description": "Tipo de v\u00ednculo do contato"
+    },
+    "nome_completo": {
+      "type": "string",
+      "description": "Nome completo do contato"
+    },
+    "cargo": {
+      "type": "string",
+      "description": "Cargo do contato"
+    },
+    "departamento": {
+      "type": "string",
+      "description": "Departamento do contato"
+    },
+    "emails": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "Pessoal",
+              "Corporativo",
+              "Alternativo"
+            ]
+          },
+          "principal": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "description": "Lista de e-mails"
+    },
+    "telefones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "numero": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "Celular",
+              "Fixo",
+              "WhatsApp",
+              "Comercial"
+            ]
+          },
+          "principal": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "description": "Lista de telefones"
+    },
+    "whatsapp": {
+      "type": "string",
+      "description": "WhatsApp principal"
+    },
+    "canal_preferencial": {
+      "type": "string",
+      "enum": [
+        "WhatsApp",
+        "E-mail",
+        "Telefone",
+        "Portal",
+        "Presencial"
+      ],
+      "default": "E-mail",
+      "description": "Canal de comunica\u00e7\u00e3o preferencial"
+    },
+    "idioma": {
+      "type": "string",
+      "enum": [
+        "pt-BR",
+        "en-US",
+        "es-ES"
+      ],
+      "default": "pt-BR",
+      "description": "Idioma preferencial"
+    },
+    "tipo_contato": {
+      "type": "string",
+      "enum": [
+        "T\u00e9cnico",
+        "Compras",
+        "Financeiro",
+        "Diretoria",
+        "Obra",
+        "Expedi\u00e7\u00e3o",
+        "Recebimento",
+        "Comercial"
+      ],
+      "description": "Tipo de contato (\u00e1rea de atua\u00e7\u00e3o)"
+    },
+    "preferencias_comunicacao": {
+      "type": "object",
+      "properties": {
+        "receber_cobranca": {
+          "type": "boolean",
+          "default": false
+        },
+        "receber_avisos_expedicao": {
+          "type": "boolean",
+          "default": false
+        },
+        "receber_orcamentos": {
+          "type": "boolean",
+          "default": false
+        },
+        "receber_nfe": {
+          "type": "boolean",
+          "default": false
+        },
+        "receber_marketing": {
+          "type": "boolean",
+          "default": false
+        },
+        "receber_notificacoes_pedido": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "description": "Prefer\u00eancias de comunica\u00e7\u00e3o"
+    },
+    "empresa_interna_responsavel_id": {
+      "type": "string",
+      "description": "ID da empresa do grupo respons\u00e1vel por este contato"
+    },
+    "data_nascimento": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de nascimento (para envio de felicita\u00e7\u00f5es)"
+    },
+    "observacoes": {
+      "type": "string"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "nome_completo",
+    "tipo_vinculo"
+  ]
+}

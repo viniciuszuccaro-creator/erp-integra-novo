@@ -1,0 +1,98 @@
+{
+  "name": "ConfiguracaoIntegracaoMarketplace",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa"
+    },
+    "marketplace": {
+      "type": "string",
+      "description": "Nome do marketplace (Mercado Livre, Amazon, Magalu, etc)"
+    },
+    "nome_integracao": {
+      "type": "string",
+      "description": "Nome descritivo da integra\u00e7\u00e3o"
+    },
+    "tipo_integracao": {
+      "type": "string",
+      "enum": [
+        "API REST",
+        "SOAP",
+        "GraphQL",
+        "Webhook",
+        "FTP",
+        "Outro"
+      ],
+      "default": "API REST"
+    },
+    "url_base": {
+      "type": "string",
+      "description": "URL base da API"
+    },
+    "api_key": {
+      "type": "string",
+      "description": "Chave de API"
+    },
+    "api_secret": {
+      "type": "string",
+      "description": "Secret da API"
+    },
+    "token_acesso": {
+      "type": "string",
+      "description": "Token de acesso OAuth"
+    },
+    "headers_customizados": {
+      "type": "object",
+      "description": "Headers HTTP customizados"
+    },
+    "timeout_segundos": {
+      "type": "number",
+      "default": 30
+    },
+    "max_tentativas_retry": {
+      "type": "number",
+      "default": 3
+    },
+    "sincronizacao_automatica": {
+      "type": "boolean",
+      "default": false
+    },
+    "intervalo_sincronizacao_minutos": {
+      "type": "number",
+      "default": 60
+    },
+    "ultima_sincronizacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status_conexao": {
+      "type": "string",
+      "enum": [
+        "Conectado",
+        "Desconectado",
+        "Erro",
+        "N\u00e3o Testado"
+      ],
+      "default": "N\u00e3o Testado"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    },
+    "descricao": {
+      "type": "string"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "marketplace",
+    "tipo_integracao"
+  ]
+}

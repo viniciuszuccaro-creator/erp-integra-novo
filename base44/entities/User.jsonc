@@ -1,0 +1,216 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "perfil_acesso_id": {
+      "type": "string",
+      "description": "ID do perfil de acesso atribu\u00eddo"
+    },
+    "perfil_acesso_nome": {
+      "type": "string",
+      "description": "Nome do perfil (snapshot)"
+    },
+    "empresas_vinculadas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "empresa_id": {
+            "type": "string"
+          },
+          "ativo": {
+            "type": "boolean",
+            "default": true
+          },
+          "nivel_acesso": {
+            "type": "string",
+            "enum": [
+              "Operacional",
+              "Gerencial",
+              "Administrador"
+            ],
+            "default": "Operacional"
+          },
+          "data_vinculo": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "V21.7: Empresas vinculadas ao usu\u00e1rio com n\u00edvel de acesso"
+    },
+    "grupos_vinculados": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "grupo_id": {
+            "type": "string"
+          },
+          "ativo": {
+            "type": "boolean",
+            "default": true
+          },
+          "data_vinculo": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "V21.7: Grupos vinculados ao usu\u00e1rio"
+    },
+    "pode_operar_em_grupo": {
+      "type": "boolean",
+      "default": false,
+      "description": "V21.7: Se pode operar em vis\u00e3o de grupo (tem grupos_vinculados)"
+    },
+    "contexto_atual": {
+      "type": "string",
+      "enum": [
+        "grupo",
+        "empresa"
+      ],
+      "default": "empresa",
+      "description": "V21.7: Contexto atual selecionado"
+    },
+    "grupo_atual_id": {
+      "type": "string",
+      "description": "V21.7: ID do grupo atualmente selecionado"
+    },
+    "empresa_atual_id": {
+      "type": "string",
+      "description": "V21.7: ID da empresa atualmente selecionada"
+    },
+    "grupo_padrao_id": {
+      "type": "string",
+      "description": "V21.7: Grupo padr\u00e3o ao fazer login"
+    },
+    "empresa_padrao_id": {
+      "type": "string",
+      "description": "V21.7: Empresa padr\u00e3o ao fazer login"
+    },
+    "restricoes_adicionais": {
+      "type": "object",
+      "properties": {
+        "pode_ver_apenas_proprios_registros": {
+          "type": "boolean",
+          "default": false
+        },
+        "limite_aprovacao_valor": {
+          "type": "number",
+          "default": 0
+        },
+        "departamentos_permitidos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "centros_custo_permitidos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "ultimo_acesso": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltimo acesso ao sistema"
+    },
+    "ip_ultimo_acesso": {
+      "type": "string"
+    },
+    "sessoes_ativas": {
+      "type": "number",
+      "default": 0
+    },
+    "bloqueado": {
+      "type": "boolean",
+      "default": false
+    },
+    "motivo_bloqueio": {
+      "type": "string"
+    },
+    "bloqueado_por": {
+      "type": "string"
+    },
+    "data_bloqueio": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tentativas_login_falhas": {
+      "type": "number",
+      "default": 0
+    },
+    "data_ultima_tentativa_falha": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "autenticacao_dois_fatores": {
+      "type": "boolean",
+      "default": false
+    },
+    "telefone": {
+      "type": "string"
+    },
+    "cargo": {
+      "type": "string"
+    },
+    "departamento": {
+      "type": "string"
+    },
+    "foto_url": {
+      "type": "string"
+    },
+    "preferencias": {
+      "type": "object",
+      "properties": {
+        "tema": {
+          "type": "string",
+          "enum": [
+            "claro",
+            "escuro",
+            "auto"
+          ],
+          "default": "claro"
+        },
+        "idioma": {
+          "type": "string",
+          "default": "pt-BR"
+        },
+        "notificacoes_email": {
+          "type": "boolean",
+          "default": true
+        },
+        "notificacoes_sistema": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    }
+  },
+  "required": [
+    "perfil_acesso_id",
+    "perfil_acesso_nome",
+    "empresas_vinculadas",
+    "grupos_vinculados",
+    "grupo_atual_id",
+    "empresa_atual_id",
+    "grupo_padrao_id",
+    "empresa_padrao_id",
+    "restricoes_adicionais",
+    "ultimo_acesso",
+    "ip_ultimo_acesso",
+    "motivo_bloqueio",
+    "bloqueado_por",
+    "data_bloqueio",
+    "data_ultima_tentativa_falha",
+    "telefone",
+    "cargo",
+    "departamento",
+    "foto_url",
+    "preferencias"
+  ]
+}

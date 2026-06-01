@@ -1,0 +1,260 @@
+{
+  "name": "Empresa",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "razao_social": {
+      "type": "string",
+      "description": "Raz\u00e3o social da empresa"
+    },
+    "nome_fantasia": {
+      "type": "string",
+      "description": "Nome fantasia"
+    },
+    "cnpj": {
+      "type": "string",
+      "description": "CNPJ da empresa"
+    },
+    "inscricao_estadual": {
+      "type": "string",
+      "description": "Inscri\u00e7\u00e3o estadual"
+    },
+    "inscricao_municipal": {
+      "type": "string",
+      "description": "Inscri\u00e7\u00e3o municipal"
+    },
+    "regime_tributario": {
+      "type": "string",
+      "enum": [
+        "Simples Nacional",
+        "Lucro Presumido",
+        "Lucro Real",
+        "MEI"
+      ],
+      "default": "Simples Nacional",
+      "description": "Regime tribut\u00e1rio da empresa"
+    },
+    "regime_apuracao_impostos": {
+      "type": "string",
+      "enum": [
+        "Mensal",
+        "Trimestral",
+        "Anual"
+      ],
+      "default": "Mensal",
+      "description": "Regime de apura\u00e7\u00e3o de impostos"
+    },
+    "certificado_digital": {
+      "type": "object",
+      "properties": {
+        "certificado_url": {
+          "type": "string",
+          "description": "URL do certificado digital (.pfx)"
+        },
+        "senha_certificado": {
+          "type": "string",
+          "description": "Senha do certificado (armazenada como segredo)"
+        },
+        "data_validade": {
+          "type": "string",
+          "format": "date",
+          "description": "Data de validade do certificado"
+        },
+        "emissor": {
+          "type": "string"
+        }
+      },
+      "description": "Dados do certificado digital para NF-e"
+    },
+    "tipo_ambiente_fiscal": {
+      "type": "string",
+      "enum": [
+        "Produ\u00e7\u00e3o",
+        "Homologa\u00e7\u00e3o"
+      ],
+      "default": "Homologa\u00e7\u00e3o",
+      "description": "Ambiente fiscal (produ\u00e7\u00e3o ou homologa\u00e7\u00e3o)"
+    },
+    "endereco_fiscal_principal": {
+      "type": "object",
+      "properties": {
+        "cep": {
+          "type": "string"
+        },
+        "logradouro": {
+          "type": "string"
+        },
+        "numero": {
+          "type": "string"
+        },
+        "complemento": {
+          "type": "string"
+        },
+        "bairro": {
+          "type": "string"
+        },
+        "cidade": {
+          "type": "string"
+        },
+        "estado": {
+          "type": "string"
+        },
+        "pais": {
+          "type": "string",
+          "default": "Brasil"
+        },
+        "codigo_municipio_ibge": {
+          "type": "string"
+        }
+      },
+      "description": "Endere\u00e7o fiscal principal"
+    },
+    "dados_contador": {
+      "type": "object",
+      "properties": {
+        "nome": {
+          "type": "string"
+        },
+        "crc": {
+          "type": "string",
+          "description": "CRC do contador"
+        },
+        "cpf_cnpj": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "telefone": {
+          "type": "string"
+        },
+        "observacoes": {
+          "type": "string"
+        }
+      },
+      "description": "Dados do contador respons\u00e1vel"
+    },
+    "parametros_fiscais_proprios": {
+      "type": "object",
+      "properties": {
+        "is_contribuinte_icms": {
+          "type": "boolean",
+          "default": true,
+          "description": "Se \u00e9 contribuinte de ICMS"
+        },
+        "is_simples_nacional": {
+          "type": "boolean",
+          "default": false,
+          "description": "Se est\u00e1 no Simples Nacional"
+        },
+        "tem_substituicao_tributaria": {
+          "type": "boolean",
+          "default": false,
+          "description": "Se opera com substitui\u00e7\u00e3o tribut\u00e1ria"
+        },
+        "estados_st": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Estados onde aplica ST"
+        },
+        "percentual_credito_simples": {
+          "type": "number",
+          "default": 0,
+          "description": "% de cr\u00e9dito de ICMS no Simples"
+        },
+        "aliquota_interna_icms": {
+          "type": "number",
+          "description": "Al\u00edquota interna de ICMS do estado"
+        }
+      },
+      "description": "Par\u00e2metros fiscais espec\u00edficos da empresa"
+    },
+    "parametros_financeiros_proprios": {
+      "type": "object",
+      "properties": {
+        "banco_principal_id": {
+          "type": "string",
+          "description": "ID do banco principal"
+        },
+        "conta_bancaria_principal_id": {
+          "type": "string",
+          "description": "ID da conta banc\u00e1ria principal"
+        },
+        "forma_recebimento_padrao_id": {
+          "type": "string",
+          "description": "ID da forma de recebimento padr\u00e3o"
+        },
+        "tipo_cobranca_principal": {
+          "type": "string",
+          "enum": [
+            "Boleto",
+            "PIX",
+            "Cart\u00e3o",
+            "Dinheiro",
+            "Dep\u00f3sito"
+          ],
+          "default": "Boleto"
+        },
+        "prazo_pagamento_padrao_dias": {
+          "type": "number",
+          "default": 30
+        }
+      },
+      "description": "Par\u00e2metros financeiros espec\u00edficos da empresa"
+    },
+    "locais_estoque_vinculados": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos locais de estoque vinculados a esta empresa"
+    },
+    "usa_multiempresa": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se esta empresa opera em modo multiempresa"
+    },
+    "empresas_compartilhamento": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs de outras empresas com as quais compartilha dados"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "URL da logo da empresa"
+    },
+    "cor_primaria": {
+      "type": "string",
+      "description": "Cor prim\u00e1ria da empresa (hex)"
+    },
+    "cor_secundaria": {
+      "type": "string",
+      "description": "Cor secund\u00e1ria da empresa (hex)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Ativa",
+        "Inativa",
+        "Suspensa"
+      ],
+      "default": "Ativa"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "razao_social",
+    "cnpj",
+    "regime_tributario"
+  ]
+}

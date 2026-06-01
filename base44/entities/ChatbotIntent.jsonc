@@ -1,0 +1,153 @@
+{
+  "name": "ChatbotIntent",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa (multiempresa)"
+    },
+    "nome_intent": {
+      "type": "string",
+      "description": "Nome da inten\u00e7\u00e3o (ex: 2_via_boleto, status_pedido)"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o da inten\u00e7\u00e3o"
+    },
+    "frases_treinamento": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Frases de exemplo para treinar a IA"
+    },
+    "palavras_chave": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Palavras\u2011chave equivalentes (de ChatbotIntents)"
+    },
+    "tipo_intent": {
+      "type": "string",
+      "enum": [
+        "consulta",
+        "transacao",
+        "suporte",
+        "comercial",
+        "outro"
+      ],
+      "description": "Classifica\u00e7\u00e3o do intent"
+    },
+    "acao_automatica": {
+      "type": "string",
+      "enum": [
+        "consultar_boleto",
+        "consultar_pedido",
+        "criar_orcamento",
+        "falar_vendedor",
+        "consultar_estoque",
+        "nenhuma",
+        "custom"
+      ],
+      "description": "A\u00e7\u00e3o padr\u00e3o quando o intent \u00e9 acionado"
+    },
+    "entidade_vinculada": {
+      "type": "string",
+      "description": "Entidade relacionada (ContaReceber, Pedido, Entrega, etc)"
+    },
+    "escalar_vendedor": {
+      "type": "boolean",
+      "default": false
+    },
+    "origem_dados": {
+      "type": "string",
+      "description": "Entidade fonte dos dados (ex: ContaReceber, Pedido, Cliente)"
+    },
+    "exige_autenticacao": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se exige autentica\u00e7\u00e3o do usu\u00e1rio"
+    },
+    "canais_permitidos": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Site",
+          "WhatsApp",
+          "Portal",
+          "App",
+          "Chatbot Widget"
+        ]
+      },
+      "description": "Canais onde esta intent \u00e9 permitida"
+    },
+    "resposta_template": {
+      "type": "string",
+      "description": "Template/Resposta padr\u00e3o"
+    },
+    "acoes_automaticas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo_acao": {
+            "type": "string"
+          },
+          "parametros": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "description": "A\u00e7\u00f5es autom\u00e1ticas ao processar esta intent"
+    },
+    "fluxo_fallback": {
+      "type": "string",
+      "enum": [
+        "Chamar Humano",
+        "Registrar Chamado",
+        "Redirecionar FAQ",
+        "Finalizar"
+      ],
+      "default": "Chamar Humano",
+      "description": "Fluxo quando n\u00e3o consegue processar"
+    },
+    "prioridade": {
+      "type": "number",
+      "default": 100,
+      "description": "Prioridade de matching (maior = mais priorit\u00e1rio)"
+    },
+    "taxa_confianca_minima": {
+      "type": "number",
+      "default": 0.7,
+      "description": "Taxa m\u00ednima de confian\u00e7a para processar (0-1)"
+    },
+    "total_acionamentos": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de vezes que foi acionada"
+    },
+    "taxa_sucesso": {
+      "type": "number",
+      "default": 0,
+      "description": "Taxa de sucesso (%)"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "nome_intent",
+    "descricao"
+  ]
+}

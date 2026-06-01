@@ -1,0 +1,87 @@
+{
+  "name": "TabelaPreco",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "Empresa que criou a tabela"
+    },
+    "compartilhar_grupo": {
+      "type": "boolean",
+      "default": false,
+      "description": "V21.0: Se todas empresas do grupo podem usar"
+    },
+    "nome": {
+      "type": "string",
+      "description": "Nome da tabela de pre\u00e7o"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o da tabela"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "Padr\u00e3o",
+        "Atacado",
+        "Varejo",
+        "Obra",
+        "Marketplace",
+        "Promocional",
+        "VIP"
+      ],
+      "default": "Padr\u00e3o",
+      "description": "Tipo da tabela"
+    },
+    "data_inicio": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de in\u00edcio da vig\u00eancia"
+    },
+    "data_fim": {
+      "type": "string",
+      "format": "date",
+      "description": "Data fim (opcional)"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se est\u00e1 ativa"
+    },
+    "criado_por": {
+      "type": "string",
+      "description": "V21.0: Email do usu\u00e1rio que criou"
+    },
+    "historico_alteracoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "usuario": {
+            "type": "string"
+          },
+          "acao": {
+            "type": "string"
+          },
+          "detalhes": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "V21.0: Hist\u00f3rico de altera\u00e7\u00f5es"
+    }
+  },
+  "required": [
+    "nome",
+    "tipo",
+    "data_inicio"
+  ]
+}

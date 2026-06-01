@@ -1,0 +1,337 @@
+{
+  "name": "ConciliacaoPedido",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa respons\u00e1vel"
+    },
+    "pedido_id": {
+      "type": "string",
+      "description": "ID do pedido vinculado"
+    },
+    "numero_pedido": {
+      "type": "string",
+      "description": "N\u00famero do pedido"
+    },
+    "cliente_id": {
+      "type": "string",
+      "description": "ID do cliente"
+    },
+    "cliente_nome": {
+      "type": "string",
+      "description": "Nome do cliente"
+    },
+    "data_pedido": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de cria\u00e7\u00e3o do pedido"
+    },
+    "data_aprovacao_pedido": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de aprova\u00e7\u00e3o do pedido"
+    },
+    "data_entrega": {
+      "type": "string",
+      "format": "date",
+      "description": "Data real da entrega"
+    },
+    "data_faturamento": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da emiss\u00e3o da NF-e"
+    },
+    "data_recebimento": {
+      "type": "string",
+      "format": "date",
+      "description": "Data do pagamento/recebimento"
+    },
+    "valor_pedido": {
+      "type": "number",
+      "description": "Valor total do pedido"
+    },
+    "valor_faturado": {
+      "type": "number",
+      "description": "Valor total da NF-e"
+    },
+    "valor_recebido": {
+      "type": "number",
+      "description": "Valor efetivamente recebido"
+    },
+    "diferenca_faturamento": {
+      "type": "number",
+      "description": "Diferen\u00e7a entre pedido e NF (pedido - faturado)"
+    },
+    "diferenca_pagamento": {
+      "type": "number",
+      "description": "Diferen\u00e7a entre NF e pagamento (faturado - recebido)"
+    },
+    "entrega_id": {
+      "type": "string",
+      "description": "ID da entrega vinculada"
+    },
+    "entrega_status": {
+      "type": "string",
+      "description": "Status da entrega"
+    },
+    "nfe_id": {
+      "type": "string",
+      "description": "ID da nota fiscal"
+    },
+    "nfe_numero": {
+      "type": "string",
+      "description": "N\u00famero da NF-e"
+    },
+    "nfe_chave_acesso": {
+      "type": "string",
+      "description": "Chave de acesso da NF-e"
+    },
+    "conta_receber_id": {
+      "type": "string",
+      "description": "ID da conta a receber"
+    },
+    "titulos_vinculados": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs de todos os t\u00edtulos a receber vinculados"
+    },
+    "status_conciliacao": {
+      "type": "string",
+      "enum": [
+        "Conciliado",
+        "Divergente",
+        "Pendente",
+        "Parcial",
+        "Em An\u00e1lise"
+      ],
+      "default": "Pendente",
+      "description": "Status geral da concilia\u00e7\u00e3o"
+    },
+    "status_fluxo": {
+      "type": "string",
+      "enum": [
+        "Pedido Criado",
+        "Em Produ\u00e7\u00e3o",
+        "Pronto para Expedir",
+        "Entregue",
+        "Faturado",
+        "Recebido",
+        "Finalizado"
+      ],
+      "default": "Pedido Criado",
+      "description": "Etapa atual do fluxo"
+    },
+    "divergencias_detectadas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "Entrega sem NF",
+              "NF sem entrega",
+              "Pagamento sem NF",
+              "NF sem pagamento",
+              "Valor divergente pedido-NF",
+              "Valor divergente NF-pagamento",
+              "Pedido sem produ\u00e7\u00e3o",
+              "Prazo vencido",
+              "Outro"
+            ]
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "valor_divergente": {
+            "type": "number"
+          },
+          "data_deteccao": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "criticidade": {
+            "type": "string",
+            "enum": [
+              "Baixa",
+              "M\u00e9dia",
+              "Alta",
+              "Cr\u00edtica"
+            ],
+            "default": "M\u00e9dia"
+          },
+          "resolvido": {
+            "type": "boolean",
+            "default": false
+          },
+          "resolucao": {
+            "type": "string"
+          },
+          "resolvido_por": {
+            "type": "string"
+          },
+          "data_resolucao": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Lista de diverg\u00eancias encontradas"
+    },
+    "tempo_pedido_entrega_dias": {
+      "type": "number",
+      "description": "Dias entre pedido e entrega"
+    },
+    "tempo_entrega_faturamento_dias": {
+      "type": "number",
+      "description": "Dias entre entrega e emiss\u00e3o NF"
+    },
+    "tempo_faturamento_recebimento_dias": {
+      "type": "number",
+      "description": "Dias entre NF e recebimento"
+    },
+    "tempo_total_ciclo_dias": {
+      "type": "number",
+      "description": "Tempo total do ciclo (pedido \u2192 recebimento)"
+    },
+    "producao_concluida": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a produ\u00e7\u00e3o foi conclu\u00edda"
+    },
+    "op_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs das OPs vinculadas"
+    },
+    "rentabilidade": {
+      "type": "object",
+      "properties": {
+        "custo_total": {
+          "type": "number"
+        },
+        "receita_total": {
+          "type": "number"
+        },
+        "margem_valor": {
+          "type": "number"
+        },
+        "margem_percentual": {
+          "type": "number"
+        }
+      },
+      "description": "An\u00e1lise de rentabilidade do pedido"
+    },
+    "conciliado_manualmente": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se foi conciliado manualmente (override)"
+    },
+    "justificativa_manual": {
+      "type": "string",
+      "description": "Justificativa para concilia\u00e7\u00e3o manual"
+    },
+    "conciliado_por": {
+      "type": "string",
+      "description": "Usu\u00e1rio que conciliou"
+    },
+    "conciliado_por_id": {
+      "type": "string"
+    },
+    "data_conciliacao": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora da concilia\u00e7\u00e3o"
+    },
+    "documentos_anexos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "NF-e XML",
+              "NF-e PDF",
+              "Comprovante Entrega",
+              "Comprovante Pagamento",
+              "Foto",
+              "Outro"
+            ]
+          },
+          "url": {
+            "type": "string"
+          },
+          "data_upload": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Documentos anexados"
+    },
+    "alertas_enviados": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string"
+          },
+          "data_envio": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "destinatario": {
+            "type": "string"
+          },
+          "canal": {
+            "type": "string",
+            "enum": [
+              "Email",
+              "WhatsApp",
+              "Sistema"
+            ]
+          },
+          "enviado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "description": "Alertas enviados sobre diverg\u00eancias"
+    },
+    "observacoes": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es gerais"
+    },
+    "score_qualidade": {
+      "type": "number",
+      "default": 100,
+      "description": "Score de qualidade do processo (0-100)"
+    },
+    "requer_atencao": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se requer aten\u00e7\u00e3o imediata"
+    },
+    "ultima_verificacao": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltima vez que foi verificado automaticamente"
+    }
+  },
+  "required": [
+    "pedido_id",
+    "cliente_id",
+    "empresa_id"
+  ]
+}

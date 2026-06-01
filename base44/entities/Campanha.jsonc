@@ -1,0 +1,114 @@
+{
+  "name": "Campanha",
+  "type": "object",
+  "properties": {
+    "nome": {
+      "type": "string",
+      "description": "Nome da campanha"
+    },
+    "descricao": {
+      "type": "string"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "E-mail Marketing",
+        "WhatsApp",
+        "SMS",
+        "Liga\u00e7\u00e3o",
+        "Evento",
+        "Promo\u00e7\u00e3o",
+        "Pesquisa",
+        "Outros"
+      ],
+      "default": "E-mail Marketing"
+    },
+    "data_inicio": {
+      "type": "string",
+      "format": "date"
+    },
+    "data_fim": {
+      "type": "string",
+      "format": "date"
+    },
+    "publico_alvo": {
+      "type": "string",
+      "enum": [
+        "Todos os Clientes",
+        "Clientes Ativos",
+        "Prospects",
+        "Inativos",
+        "Segmento Espec\u00edfico"
+      ],
+      "default": "Todos os Clientes"
+    },
+    "segmento": {
+      "type": "string"
+    },
+    "responsavel": {
+      "type": "string"
+    },
+    "responsavel_id": {
+      "type": "string"
+    },
+    "objetivo": {
+      "type": "string"
+    },
+    "orcamento": {
+      "type": "number"
+    },
+    "investimento_realizado": {
+      "type": "number"
+    },
+    "meta_leads": {
+      "type": "number"
+    },
+    "leads_gerados": {
+      "type": "number"
+    },
+    "meta_conversao": {
+      "type": "number"
+    },
+    "conversoes": {
+      "type": "number"
+    },
+    "taxa_abertura": {
+      "type": "number",
+      "description": "% de abertura de e-mails"
+    },
+    "taxa_cliques": {
+      "type": "number",
+      "description": "% de cliques"
+    },
+    "taxa_conversao": {
+      "type": "number",
+      "description": "% de convers\u00e3o"
+    },
+    "receita_gerada": {
+      "type": "number"
+    },
+    "roi": {
+      "type": "number",
+      "description": "Retorno sobre investimento"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Planejamento",
+        "Ativa",
+        "Pausada",
+        "Conclu\u00edda",
+        "Cancelada"
+      ],
+      "default": "Planejamento"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "nome",
+    "tipo",
+    "data_inicio"
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "name": "LogsIA",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa"
+    },
+    "tipo_ia": {
+      "type": "string",
+      "enum": [
+        "IA_Fiscal",
+        "IA_PriceBrain",
+        "IA_Churn",
+        "IA_KYC",
+        "IA_Governanca",
+        "IA_Logistica",
+        "IA_Producao",
+        "IA_Chatbot",
+        "IA_SEO",
+        "IA_Recomendacao",
+        "IA_LeadScoring",
+        "IA_MonitoramentoAPI",
+        "Outro"
+      ],
+      "description": "Tipo de IA executada"
+    },
+    "contexto_execucao": {
+      "type": "string",
+      "enum": [
+        "Cadastro",
+        "Financeiro",
+        "Log\u00edstica",
+        "Comercial",
+        "Estoque",
+        "Produ\u00e7\u00e3o",
+        "Fiscal",
+        "RH",
+        "Sistema"
+      ],
+      "description": "Contexto da execu\u00e7\u00e3o"
+    },
+    "entidade_relacionada": {
+      "type": "string",
+      "description": "Nome da entidade relacionada (ex: Cliente, Produto, Pedido)"
+    },
+    "entidade_id": {
+      "type": "string",
+      "description": "ID do registro relacionado"
+    },
+    "acao_sugerida": {
+      "type": "string",
+      "description": "A\u00e7\u00e3o ou sugest\u00e3o da IA"
+    },
+    "resultado": {
+      "type": "string",
+      "enum": [
+        "Aceito",
+        "Rejeitado",
+        "Autom\u00e1tico",
+        "Parcial",
+        "Pendente"
+      ],
+      "default": "Pendente",
+      "description": "Resultado da execu\u00e7\u00e3o"
+    },
+    "confianca_ia": {
+      "type": "number",
+      "default": 0,
+      "description": "N\u00edvel de confian\u00e7a da IA (0-100)"
+    },
+    "dados_entrada": {
+      "type": "object",
+      "description": "Dados de entrada fornecidos \u00e0 IA"
+    },
+    "dados_saida": {
+      "type": "object",
+      "description": "Dados de sa\u00edda gerados pela IA"
+    },
+    "tempo_execucao_ms": {
+      "type": "number",
+      "description": "Tempo de execu\u00e7\u00e3o em milissegundos"
+    },
+    "usuario_responsavel": {
+      "type": "string",
+      "description": "Usu\u00e1rio que disparou ou aprovou"
+    },
+    "usuario_id": {
+      "type": "string"
+    },
+    "data_execucao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "tipo_ia",
+    "contexto_execucao",
+    "acao_sugerida"
+  ]
+}

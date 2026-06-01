@@ -1,0 +1,136 @@
+{
+  "name": "Evento",
+  "type": "object",
+  "properties": {
+    "titulo": {
+      "type": "string",
+      "description": "T\u00edtulo do evento"
+    },
+    "descricao": {
+      "type": "string"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "Reuni\u00e3o",
+        "Liga\u00e7\u00e3o",
+        "Visita",
+        "Tarefa",
+        "Follow-up",
+        "Evento",
+        "Lembrete"
+      ],
+      "default": "Reuni\u00e3o"
+    },
+    "data_inicio": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora de in\u00edcio"
+    },
+    "data_fim": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora de fim"
+    },
+    "dia_inteiro": {
+      "type": "boolean",
+      "default": false
+    },
+    "local": {
+      "type": "string"
+    },
+    "participantes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Lista de participantes"
+    },
+    "responsavel": {
+      "type": "string"
+    },
+    "responsavel_id": {
+      "type": "string"
+    },
+    "cliente_id": {
+      "type": "string"
+    },
+    "cliente_nome": {
+      "type": "string"
+    },
+    "fornecedor_id": {
+      "type": "string"
+    },
+    "fornecedor_nome": {
+      "type": "string"
+    },
+    "oportunidade_id": {
+      "type": "string"
+    },
+    "pedido_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Agendado",
+        "Confirmado",
+        "Em Andamento",
+        "Conclu\u00eddo",
+        "Cancelado",
+        "Adiado"
+      ],
+      "default": "Agendado"
+    },
+    "prioridade": {
+      "type": "string",
+      "enum": [
+        "Baixa",
+        "Normal",
+        "Alta",
+        "Urgente"
+      ],
+      "default": "Normal"
+    },
+    "lembrete": {
+      "type": "boolean",
+      "default": true
+    },
+    "tempo_lembrete": {
+      "type": "number",
+      "description": "Minutos antes do evento",
+      "default": 30
+    },
+    "recorrente": {
+      "type": "boolean",
+      "default": false
+    },
+    "frequencia_recorrencia": {
+      "type": "string",
+      "enum": [
+        "Di\u00e1ria",
+        "Semanal",
+        "Quinzenal",
+        "Mensal",
+        "Anual"
+      ]
+    },
+    "link_reuniao": {
+      "type": "string",
+      "description": "Link para reuni\u00e3o online"
+    },
+    "observacoes": {
+      "type": "string"
+    },
+    "cor": {
+      "type": "string",
+      "description": "Cor do evento no calend\u00e1rio",
+      "default": "#3b82f6"
+    }
+  },
+  "required": [
+    "titulo",
+    "data_inicio",
+    "data_fim"
+  ]
+}

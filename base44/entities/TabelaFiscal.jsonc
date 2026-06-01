@@ -1,0 +1,191 @@
+{
+  "name": "TabelaFiscal",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "Empresa para a qual esta regra fiscal se aplica - OBRIGAT\u00d3RIO"
+    },
+    "nome_regra": {
+      "type": "string",
+      "description": "Nome descritivo da regra fiscal"
+    },
+    "regime_tributario": {
+      "type": "string",
+      "enum": [
+        "Simples Nacional",
+        "Lucro Presumido",
+        "Lucro Real"
+      ],
+      "description": "Regime tribut\u00e1rio da empresa"
+    },
+    "cenario_operacao": {
+      "type": "string",
+      "enum": [
+        "Venda Consumidor Final",
+        "Venda para Revenda",
+        "Venda Industrializa\u00e7\u00e3o",
+        "Devolu\u00e7\u00e3o",
+        "Remessa",
+        "Transfer\u00eancia",
+        "Compra Nacional",
+        "Importa\u00e7\u00e3o"
+      ],
+      "description": "Cen\u00e1rio de opera\u00e7\u00e3o"
+    },
+    "ncm": {
+      "type": "string",
+      "description": "NCM do produto"
+    },
+    "cfop": {
+      "type": "string",
+      "description": "CFOP aplic\u00e1vel (Ex: 5102, 6102)"
+    },
+    "destino_operacao": {
+      "type": "string",
+      "enum": [
+        "Dentro do Estado",
+        "Fora do Estado",
+        "Exterior"
+      ],
+      "default": "Dentro do Estado"
+    },
+    "tipo_cliente": {
+      "type": "string",
+      "enum": [
+        "Pessoa F\u00edsica",
+        "Pessoa Jur\u00eddica",
+        "Contribuinte ICMS",
+        "N\u00e3o Contribuinte"
+      ],
+      "description": "Tipo de cliente/fornecedor"
+    },
+    "icms_cst_csosn": {
+      "type": "string",
+      "description": "CST (regime normal) ou CSOSN (Simples Nacional)"
+    },
+    "icms_aliquota": {
+      "type": "number",
+      "default": 0
+    },
+    "icms_reducao_base": {
+      "type": "number",
+      "default": 0,
+      "description": "% de redu\u00e7\u00e3o da base de c\u00e1lculo"
+    },
+    "icms_st_aliquota": {
+      "type": "number",
+      "default": 0
+    },
+    "icms_st_mva": {
+      "type": "number",
+      "default": 0,
+      "description": "MVA - Margem de Valor Agregado para ST"
+    },
+    "pis_cst": {
+      "type": "string",
+      "description": "CST do PIS"
+    },
+    "pis_aliquota": {
+      "type": "number",
+      "default": 0
+    },
+    "cofins_cst": {
+      "type": "string",
+      "description": "CST do COFINS"
+    },
+    "cofins_aliquota": {
+      "type": "number",
+      "default": 0
+    },
+    "ipi_cst": {
+      "type": "string",
+      "description": "CST do IPI"
+    },
+    "ipi_aliquota": {
+      "type": "number",
+      "default": 0
+    },
+    "fcp_aliquota": {
+      "type": "number",
+      "default": 0,
+      "description": "Al\u00edquota do FCP - Fundo de Combate \u00e0 Pobreza"
+    },
+    "diferencial_aliquota": {
+      "type": "number",
+      "default": 0,
+      "description": "DIFAL - Diferencial de Al\u00edquota"
+    },
+    "origem_mercadoria": {
+      "type": "string",
+      "enum": [
+        "0 - Nacional",
+        "1 - Estrangeira Importa\u00e7\u00e3o Direta",
+        "2 - Estrangeira Mercado Interno"
+      ],
+      "default": "0 - Nacional"
+    },
+    "modalidade_base_calculo": {
+      "type": "string",
+      "enum": [
+        "Margem Valor Agregado",
+        "Pauta",
+        "Pre\u00e7o Tabelado",
+        "Valor da Opera\u00e7\u00e3o"
+      ],
+      "default": "Valor da Opera\u00e7\u00e3o"
+    },
+    "regra_ativa": {
+      "type": "boolean",
+      "default": true
+    },
+    "prioridade": {
+      "type": "number",
+      "default": 100,
+      "description": "Prioridade de aplica\u00e7\u00e3o (quanto maior, mais priorit\u00e1ria)"
+    },
+    "validado_ia": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a IA validou esta configura\u00e7\u00e3o"
+    },
+    "confianca_ia": {
+      "type": "number",
+      "default": 0,
+      "description": "% de confian\u00e7a da IA (0-100)"
+    },
+    "ultima_validacao_ia": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sugerida_por_ia": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se foi sugerida automaticamente pela IA"
+    },
+    "aprovada_por": {
+      "type": "string"
+    },
+    "data_aprovacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "observacoes": {
+      "type": "string"
+    },
+    "legislacao_base": {
+      "type": "string",
+      "description": "Refer\u00eancia \u00e0 legisla\u00e7\u00e3o que embasa esta configura\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "empresa_id",
+    "nome_regra",
+    "regime_tributario",
+    "cfop"
+  ]
+}

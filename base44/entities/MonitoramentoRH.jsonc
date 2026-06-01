@@ -1,0 +1,148 @@
+{
+  "name": "MonitoramentoRH",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string"
+    },
+    "empresa_id": {
+      "type": "string"
+    },
+    "colaborador_id": {
+      "type": "string"
+    },
+    "colaborador_nome": {
+      "type": "string"
+    },
+    "periodo_referencia": {
+      "type": "string",
+      "format": "date"
+    },
+    "metricas_produtividade": {
+      "type": "object",
+      "properties": {
+        "horas_trabalhadas": {
+          "type": "number"
+        },
+        "horas_extras": {
+          "type": "number"
+        },
+        "apontamentos_producao": {
+          "type": "number"
+        },
+        "kg_produzidos": {
+          "type": "number"
+        },
+        "ops_concluidas": {
+          "type": "number"
+        },
+        "taxa_refugo_percentual": {
+          "type": "number"
+        },
+        "produtividade_vs_meta": {
+          "type": "number"
+        }
+      }
+    },
+    "analise_comportamental_ia": {
+      "type": "object",
+      "properties": {
+        "tendencia_produtividade": {
+          "type": "string",
+          "enum": [
+            "Crescente",
+            "Est\u00e1vel",
+            "Decrescente"
+          ]
+        },
+        "risco_turnover": {
+          "type": "string",
+          "enum": [
+            "Baixo",
+            "M\u00e9dio",
+            "Alto",
+            "Cr\u00edtico"
+          ]
+        },
+        "indicadores_desmotivacao": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sugestoes_retencao": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "padroes_ausencia": {
+          "type": "string"
+        }
+      }
+    },
+    "acessos_sistema": {
+      "type": "object",
+      "properties": {
+        "total_logins": {
+          "type": "number"
+        },
+        "modulos_acessados": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "acessos_indevidos_detectados": {
+          "type": "number"
+        },
+        "tentativas_acesso_negado": {
+          "type": "number"
+        }
+      }
+    },
+    "alertas_gerados": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data_hora": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tipo_alerta": {
+            "type": "string",
+            "enum": [
+              "Queda de Produtividade",
+              "Risco de Turnover",
+              "Acesso Indevido",
+              "Padr\u00e3o Anormal",
+              "Meta N\u00e3o Atingida"
+            ]
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "severidade": {
+            "type": "string",
+            "enum": [
+              "Baixa",
+              "M\u00e9dia",
+              "Alta"
+            ]
+          },
+          "acao_recomendada": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "observacoes_gestor": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "colaborador_id",
+    "periodo_referencia"
+  ]
+}

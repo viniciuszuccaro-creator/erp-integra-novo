@@ -1,0 +1,258 @@
+{
+  "name": "TransferenciaFilial",
+  "type": "object",
+  "properties": {
+    "numero_transferencia": {
+      "type": "string",
+      "description": "N\u00famero \u00fanico da transfer\u00eancia"
+    },
+    "empresa_origem_id": {
+      "type": "string",
+      "description": "ID da empresa origem"
+    },
+    "empresa_origem_nome": {
+      "type": "string"
+    },
+    "empresa_destino_id": {
+      "type": "string",
+      "description": "ID da empresa destino"
+    },
+    "empresa_destino_nome": {
+      "type": "string"
+    },
+    "data_solicitacao": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da solicita\u00e7\u00e3o"
+    },
+    "data_envio": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de envio"
+    },
+    "data_recebimento": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de recebimento"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Planejada",
+        "Aprovada",
+        "Em Tr\u00e2nsito",
+        "Recebida",
+        "Cancelada"
+      ],
+      "default": "Planejada"
+    },
+    "itens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "produto_id": {
+            "type": "string"
+          },
+          "codigo_sku": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "quantidade": {
+            "type": "number"
+          },
+          "unidade": {
+            "type": "string"
+          },
+          "custo_unitario": {
+            "type": "number"
+          },
+          "custo_total": {
+            "type": "number"
+          },
+          "lote": {
+            "type": "string"
+          },
+          "data_validade": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "description": "Itens transferidos"
+    },
+    "valor_total": {
+      "type": "number",
+      "description": "Valor total da transfer\u00eancia"
+    },
+    "motivo": {
+      "type": "string",
+      "description": "Motivo da transfer\u00eancia"
+    },
+    "tipo_transporte": {
+      "type": "string",
+      "enum": [
+        "Pr\u00f3prio",
+        "Transportadora",
+        "Courier",
+        "Outro"
+      ],
+      "default": "Pr\u00f3prio"
+    },
+    "transportadora": {
+      "type": "string"
+    },
+    "veiculo_placa": {
+      "type": "string"
+    },
+    "motorista": {
+      "type": "string"
+    },
+    "codigo_rastreamento": {
+      "type": "string"
+    },
+    "solicitante": {
+      "type": "string",
+      "description": "Usu\u00e1rio que solicitou"
+    },
+    "solicitante_id": {
+      "type": "string"
+    },
+    "aprovador": {
+      "type": "string"
+    },
+    "aprovador_id": {
+      "type": "string"
+    },
+    "data_aprovacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "recebedor": {
+      "type": "string",
+      "description": "Quem recebeu na filial destino"
+    },
+    "recebedor_id": {
+      "type": "string"
+    },
+    "movimentacao_origem_id": {
+      "type": "string",
+      "description": "ID da movimenta\u00e7\u00e3o de sa\u00edda no estoque origem"
+    },
+    "movimentacao_destino_id": {
+      "type": "string",
+      "description": "ID da movimenta\u00e7\u00e3o de entrada no estoque destino"
+    },
+    "documento_fiscal": {
+      "type": "object",
+      "properties": {
+        "emitir_nota": {
+          "type": "boolean",
+          "default": false
+        },
+        "nota_fiscal_id": {
+          "type": "string"
+        },
+        "numero_nf": {
+          "type": "string"
+        },
+        "chave_acesso": {
+          "type": "string"
+        }
+      },
+      "description": "Dados da nota fiscal (se aplic\u00e1vel)"
+    },
+    "comprovantes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "Foto",
+              "PDF",
+              "Assinatura",
+              "Romaneio"
+            ]
+          },
+          "url": {
+            "type": "string"
+          },
+          "data_upload": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Comprovantes de envio/recebimento"
+    },
+    "observacoes": {
+      "type": "string"
+    },
+    "historico": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data_hora": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status_anterior": {
+            "type": "string"
+          },
+          "status_novo": {
+            "type": "string"
+          },
+          "usuario": {
+            "type": "string"
+          },
+          "observacao": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Hist\u00f3rico de mudan\u00e7as de status"
+    },
+    "notificacoes_enviadas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string"
+          },
+          "destinatario": {
+            "type": "string"
+          },
+          "canal": {
+            "type": "string",
+            "enum": [
+              "E-mail",
+              "WhatsApp",
+              "SMS",
+              "Sistema"
+            ]
+          },
+          "data_envio": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Notifica\u00e7\u00f5es enviadas"
+    }
+  },
+  "required": [
+    "numero_transferencia",
+    "empresa_origem_id",
+    "empresa_destino_id",
+    "data_solicitacao"
+  ]
+}

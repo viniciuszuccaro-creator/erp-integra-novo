@@ -1,0 +1,90 @@
+{
+  "name": "TipoDespesa",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo (se aplic\u00e1vel)"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "Empresa propriet\u00e1ria (se espec\u00edfico)"
+    },
+    "origem_escopo": {
+      "type": "string",
+      "enum": [
+        "grupo",
+        "empresa"
+      ],
+      "default": "empresa",
+      "description": "Se o Tipo Despesa \u00e9 do grupo ou da empresa"
+    },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo do tipo de despesa"
+    },
+    "nome": {
+      "type": "string",
+      "description": "Nome do tipo de despesa"
+    },
+    "categoria": {
+      "type": "string",
+      "enum": [
+        "Fixa",
+        "Vari\u00e1vel",
+        "Operacional",
+        "Administrativa",
+        "Comercial",
+        "Pessoal",
+        "Marketing",
+        "Fiscal",
+        "Investimento",
+        "Utilidades",
+        "Outros"
+      ]
+    },
+    "conta_contabil_padrao_id": {
+      "type": "string",
+      "description": "ID da conta cont\u00e1bil padr\u00e3o para este tipo"
+    },
+    "conta_contabil_padrao_nome": {
+      "type": "string",
+      "description": "Nome da conta cont\u00e1bil padr\u00e3o (snapshot)"
+    },
+    "centro_resultado_padrao_id": {
+      "type": "string",
+      "description": "ID do centro de resultado padr\u00e3o para este tipo"
+    },
+    "centro_resultado_padrao_nome": {
+      "type": "string",
+      "description": "Nome do centro de resultado padr\u00e3o (snapshot)"
+    },
+    "exige_aprovacao": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se despesas deste tipo exigem aprova\u00e7\u00e3o"
+    },
+    "limite_aprovacao_automatica": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor limite para aprova\u00e7\u00e3o autom\u00e1tica (se exige_aprovacao true)"
+    },
+    "pode_ser_recorrente": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se este tipo de despesa pode ser configurado como recorrente"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o tipo de despesa est\u00e1 ativo"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "nome",
+    "categoria"
+  ]
+}

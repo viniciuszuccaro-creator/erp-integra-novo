@@ -1,0 +1,146 @@
+{
+  "name": "TokenRefresh",
+  "type": "object",
+  "properties": {
+    "usuario_id": {
+      "type": "string",
+      "description": "ID do usu\u00e1rio"
+    },
+    "sessao_id": {
+      "type": "string",
+      "description": "ID da sess\u00e3o vinculada"
+    },
+    "token_hash": {
+      "type": "string",
+      "description": "Hash do refresh token (n\u00e3o armazena o token real)"
+    },
+    "token_familia": {
+      "type": "string",
+      "description": "Fam\u00edlia do token (para rota\u00e7\u00e3o)"
+    },
+    "data_criacao": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora de cria\u00e7\u00e3o"
+    },
+    "data_expiracao": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora de expira\u00e7\u00e3o"
+    },
+    "validade_dias": {
+      "type": "number",
+      "default": 30,
+      "description": "Validade em dias"
+    },
+    "usado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se j\u00e1 foi usado (rota\u00e7\u00e3o)"
+    },
+    "data_uso": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora em que foi usado"
+    },
+    "ip_address_uso": {
+      "type": "string",
+      "description": "IP que usou o token"
+    },
+    "novo_token_gerado_id": {
+      "type": "string",
+      "description": "ID do novo token gerado ap\u00f3s rota\u00e7\u00e3o"
+    },
+    "revogado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o token foi revogado"
+    },
+    "data_revogacao": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora de revoga\u00e7\u00e3o"
+    },
+    "motivo_revogacao": {
+      "type": "string",
+      "enum": [
+        "Logout",
+        "Troca de Senha",
+        "Suspeita de Fraude",
+        "Admin Revogou",
+        "Expirado",
+        "Rota\u00e7\u00e3o Comprometida",
+        "Outro"
+      ],
+      "description": "Motivo da revoga\u00e7\u00e3o"
+    },
+    "revogado_por": {
+      "type": "string",
+      "description": "Usu\u00e1rio que revogou"
+    },
+    "dispositivo_id": {
+      "type": "string",
+      "description": "ID do dispositivo"
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "User agent"
+    },
+    "ip_address_criacao": {
+      "type": "string",
+      "description": "IP na cria\u00e7\u00e3o"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "Normal",
+        "Keep Alive",
+        "API",
+        "Mobile"
+      ],
+      "default": "Normal",
+      "description": "Tipo de refresh token"
+    },
+    "quantidade_usos": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantas vezes foi usado (para detec\u00e7\u00e3o de roubo)"
+    },
+    "tokens_filhos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos tokens gerados a partir deste"
+    },
+    "token_pai_id": {
+      "type": "string",
+      "description": "ID do token que gerou este"
+    },
+    "cadeia_rotacao": {
+      "type": "number",
+      "default": 1,
+      "description": "N\u00famero na cadeia de rota\u00e7\u00e3o"
+    },
+    "suspeita_roubo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se h\u00e1 suspeita de token roubado"
+    },
+    "alerta_seguranca_gerado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se gerou alerta de seguran\u00e7a"
+    },
+    "alerta_id": {
+      "type": "string",
+      "description": "ID do alerta gerado"
+    }
+  },
+  "required": [
+    "usuario_id",
+    "token_hash",
+    "data_criacao",
+    "data_expiracao"
+  ]
+}

@@ -1,0 +1,260 @@
+{
+  "name": "AlertaPerformance",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa"
+    },
+    "numero_alerta": {
+      "type": "string",
+      "description": "N\u00famero sequencial do alerta"
+    },
+    "data_hora": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora da detec\u00e7\u00e3o"
+    },
+    "tipo_alerta": {
+      "type": "string",
+      "enum": [
+        "Query Lenta",
+        "API Lenta",
+        "Erro Cr\u00edtico",
+        "CPU Alta",
+        "Mem\u00f3ria Alta",
+        "Downtime",
+        "Timeout",
+        "Threshold Excedido",
+        "Anomalia"
+      ],
+      "description": "Tipo do alerta"
+    },
+    "severidade": {
+      "type": "string",
+      "enum": [
+        "Info",
+        "Warning",
+        "Error",
+        "Critical"
+      ],
+      "default": "Warning",
+      "description": "Severidade do alerta"
+    },
+    "modulo": {
+      "type": "string",
+      "description": "M\u00f3dulo afetado"
+    },
+    "funcionalidade": {
+      "type": "string",
+      "description": "Funcionalidade afetada"
+    },
+    "metrica_tipo": {
+      "type": "string",
+      "enum": [
+        "duracao",
+        "cpu",
+        "memoria",
+        "taxa_erro",
+        "disponibilidade",
+        "throughput",
+        "latencia"
+      ],
+      "description": "Tipo de m\u00e9trica que disparou"
+    },
+    "valor_medido": {
+      "type": "number",
+      "description": "Valor medido da m\u00e9trica"
+    },
+    "threshold_configurado": {
+      "type": "number",
+      "description": "Limite configurado"
+    },
+    "percentual_excedido": {
+      "type": "number",
+      "description": "% acima do threshold"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do alerta"
+    },
+    "impacto_estimado": {
+      "type": "string",
+      "enum": [
+        "Baixo",
+        "M\u00e9dio",
+        "Alto",
+        "Cr\u00edtico"
+      ],
+      "description": "Impacto estimado no neg\u00f3cio"
+    },
+    "usuarios_afetados": {
+      "type": "number",
+      "description": "N\u00famero de usu\u00e1rios afetados"
+    },
+    "ocorrencias_relacionadas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs de logs de performance relacionados"
+    },
+    "quantidade_ocorrencias": {
+      "type": "number",
+      "default": 1,
+      "description": "N\u00famero de vezes que ocorreu"
+    },
+    "primeira_ocorrencia": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Primeira vez que foi detectado"
+    },
+    "ultima_ocorrencia": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltima vez que foi detectado"
+    },
+    "frequencia": {
+      "type": "string",
+      "enum": [
+        "\u00danica",
+        "Recorrente",
+        "Constante"
+      ],
+      "description": "Frequ\u00eancia do problema"
+    },
+    "tendencia": {
+      "type": "string",
+      "enum": [
+        "Melhorando",
+        "Est\u00e1vel",
+        "Piorando"
+      ],
+      "description": "Tend\u00eancia do problema"
+    },
+    "acao_recomendada": {
+      "type": "string",
+      "description": "A\u00e7\u00e3o recomendada para resolver"
+    },
+    "diagnostico_ia": {
+      "type": "object",
+      "properties": {
+        "ativo": {
+          "type": "boolean",
+          "default": false
+        },
+        "causa_provavel": {
+          "type": "string"
+        },
+        "solucao_sugerida": {
+          "type": "string"
+        },
+        "confianca_percent": {
+          "type": "number"
+        },
+        "referencias": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Diagn\u00f3stico automatizado por IA"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Novo",
+        "Investigando",
+        "Em Corre\u00e7\u00e3o",
+        "Resolvido",
+        "Ignorado",
+        "Falso Positivo"
+      ],
+      "default": "Novo",
+      "description": "Status do alerta"
+    },
+    "responsavel_id": {
+      "type": "string",
+      "description": "ID do respons\u00e1vel pela investiga\u00e7\u00e3o"
+    },
+    "responsavel_nome": {
+      "type": "string",
+      "description": "Nome do respons\u00e1vel"
+    },
+    "data_atribuicao": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Quando foi atribu\u00eddo"
+    },
+    "resolucao": {
+      "type": "object",
+      "properties": {
+        "resolvido": {
+          "type": "boolean",
+          "default": false
+        },
+        "data_resolucao": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "resolvido_por": {
+          "type": "string"
+        },
+        "resolvido_por_id": {
+          "type": "string"
+        },
+        "acao_tomada": {
+          "type": "string"
+        },
+        "tempo_resolucao_horas": {
+          "type": "number"
+        },
+        "observacoes": {
+          "type": "string"
+        }
+      },
+      "description": "Dados da resolu\u00e7\u00e3o"
+    },
+    "notificacao_enviada": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se notifica\u00e7\u00e3o foi enviada"
+    },
+    "notificacao_destinatarios": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "E-mails notificados"
+    },
+    "prioridade": {
+      "type": "number",
+      "default": 0,
+      "description": "Prioridade calculada (0-100)"
+    },
+    "automaticamente_criado": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se foi criado automaticamente"
+    },
+    "regra_id": {
+      "type": "string",
+      "description": "ID da regra que disparou o alerta"
+    },
+    "observacoes": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es sobre o alerta"
+    }
+  },
+  "required": [
+    "timestamp",
+    "tipo_alerta",
+    "severidade",
+    "modulo"
+  ]
+}

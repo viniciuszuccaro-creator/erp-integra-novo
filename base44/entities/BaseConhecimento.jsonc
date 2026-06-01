@@ -1,0 +1,161 @@
+{
+  "name": "BaseConhecimento",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa propriet\u00e1ria"
+    },
+    "titulo": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL amig\u00e1vel"
+    },
+    "resumo": {
+      "type": "string"
+    },
+    "conteudo_markdown": {
+      "type": "string",
+      "description": "Conte\u00fado em Markdown"
+    },
+    "categorias": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "idioma": {
+      "type": "string",
+      "enum": [
+        "pt-BR",
+        "en",
+        "es"
+      ],
+      "default": "pt-BR"
+    },
+    "visibilidade": {
+      "type": "string",
+      "enum": [
+        "interno",
+        "publico",
+        "restrito"
+      ],
+      "default": "interno"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "rascunho",
+        "publicado",
+        "arquivado"
+      ],
+      "default": "rascunho"
+    },
+    "fontes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string"
+          },
+          "referencia_url": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "anexos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nome_arquivo": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "relacionados_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "revisao": {
+      "type": "object",
+      "properties": {
+        "versao": {
+          "type": "number",
+          "default": 1
+        },
+        "publicado_por": {
+          "type": "string"
+        },
+        "publicado_em": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "revisado_por": {
+          "type": "string"
+        },
+        "revisado_em": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "changelog": {
+          "type": "string"
+        }
+      }
+    },
+    "owner_user_id": {
+      "type": "string"
+    },
+    "aprovacao": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "pendente",
+            "aprovado",
+            "reprovado"
+          ],
+          "default": "pendente"
+        },
+        "por": {
+          "type": "string"
+        },
+        "data": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "comentario": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "titulo",
+    "conteudo_markdown"
+  ]
+}

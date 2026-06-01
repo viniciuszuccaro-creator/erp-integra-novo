@@ -1,0 +1,79 @@
+{
+  "name": "SolicitacaoCompra",
+  "type": "object",
+  "properties": {
+    "numero_solicitacao": {
+      "type": "string"
+    },
+    "data_solicitacao": {
+      "type": "string",
+      "format": "date"
+    },
+    "solicitante": {
+      "type": "string"
+    },
+    "setor": {
+      "type": "string"
+    },
+    "produto_id": {
+      "type": "string"
+    },
+    "produto_descricao": {
+      "type": "string"
+    },
+    "quantidade_solicitada": {
+      "type": "number"
+    },
+    "unidade_medida": {
+      "type": "string"
+    },
+    "justificativa": {
+      "type": "string"
+    },
+    "prioridade": {
+      "type": "string",
+      "enum": [
+        "Baixa",
+        "M\u00e9dia",
+        "Alta",
+        "Urgente"
+      ],
+      "default": "M\u00e9dia"
+    },
+    "data_necessidade": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Pendente",
+        "Em An\u00e1lise",
+        "Aprovada",
+        "Rejeitada",
+        "Compra Gerada",
+        "Finalizada"
+      ],
+      "default": "Pendente"
+    },
+    "aprovador": {
+      "type": "string"
+    },
+    "data_aprovacao": {
+      "type": "string",
+      "format": "date"
+    },
+    "ordem_compra_id": {
+      "type": "string"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "data_solicitacao",
+    "solicitante",
+    "produto_descricao",
+    "quantidade_solicitada"
+  ]
+}

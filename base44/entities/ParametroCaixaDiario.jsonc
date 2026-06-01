@@ -1,0 +1,117 @@
+{
+  "name": "ParametroCaixaDiario",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa"
+    },
+    "tipo_caixa": {
+      "type": "string",
+      "enum": [
+        "Caixa F\u00edsico",
+        "Caixa Loja",
+        "Caixa Obra",
+        "Caixa Virtual"
+      ],
+      "default": "Caixa F\u00edsico"
+    },
+    "conta_contabil_caixa_id": {
+      "type": "string",
+      "description": "ID da conta cont\u00e1bil de caixa"
+    },
+    "conta_contabil_suprimento_id": {
+      "type": "string",
+      "description": "ID da conta cont\u00e1bil para suprimentos"
+    },
+    "conta_contabil_sangria_id": {
+      "type": "string",
+      "description": "ID da conta cont\u00e1bil para sangrias"
+    },
+    "conta_contabil_desconto_id": {
+      "type": "string",
+      "description": "ID da conta cont\u00e1bil para descontos"
+    },
+    "conta_contabil_acrescimo_id": {
+      "type": "string",
+      "description": "ID da conta cont\u00e1bil para acr\u00e9scimos"
+    },
+    "politica_arredondamento": {
+      "type": "string",
+      "enum": [
+        "Nenhum",
+        "Centavos",
+        "Real Inteiro"
+      ],
+      "default": "Nenhum"
+    },
+    "permite_desconto": {
+      "type": "boolean",
+      "default": true
+    },
+    "permite_acrescimo": {
+      "type": "boolean",
+      "default": true
+    },
+    "desconto_maximo_percentual": {
+      "type": "number",
+      "default": 10,
+      "description": "% m\u00e1ximo de desconto permitido"
+    },
+    "acrescimo_maximo_percentual": {
+      "type": "number",
+      "default": 10
+    },
+    "tipos_movimento_permitidos": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Suprimento",
+          "Sangria",
+          "Recebimento Cliente",
+          "Pagamento Avulso",
+          "Troco",
+          "Outros"
+        ]
+      },
+      "description": "Tipos de movimento permitidos neste caixa"
+    },
+    "formas_pagamento_disponiveis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs das formas de pagamento dispon\u00edveis"
+    },
+    "exige_autorizacao_sangria_acima": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor acima do qual exige autoriza\u00e7\u00e3o para sangria"
+    },
+    "exige_autorizacao_suprimento_acima": {
+      "type": "number",
+      "default": 0
+    },
+    "permite_baixa_lote": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se permite baixa em lote de t\u00edtulos"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "empresa_id",
+    "tipo_caixa"
+  ]
+}

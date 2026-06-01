@@ -1,0 +1,90 @@
+{
+  "name": "Turno",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial (se criado no grupo)"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa (se criado na empresa)"
+    },
+    "origem_escopo": {
+      "type": "string",
+      "enum": [
+        "grupo",
+        "empresa"
+      ],
+      "default": "empresa",
+      "description": "Indica se foi criado no grupo ou na empresa"
+    },
+    "nome_turno": {
+      "type": "string",
+      "description": "Nome do turno"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do turno"
+    },
+    "horario_inicio": {
+      "type": "string",
+      "description": "Hor\u00e1rio de in\u00edcio (HH:MM)"
+    },
+    "horario_fim": {
+      "type": "string",
+      "description": "Hor\u00e1rio de t\u00e9rmino (HH:MM)"
+    },
+    "intervalo_inicio": {
+      "type": "string",
+      "description": "Hor\u00e1rio de in\u00edcio do intervalo (HH:MM)"
+    },
+    "intervalo_fim": {
+      "type": "string",
+      "description": "Hor\u00e1rio de t\u00e9rmino do intervalo (HH:MM)"
+    },
+    "carga_horaria_diaria": {
+      "type": "number",
+      "description": "Carga hor\u00e1ria di\u00e1ria em horas"
+    },
+    "dias_semana": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Segunda",
+          "Ter\u00e7a",
+          "Quarta",
+          "Quinta",
+          "Sexta",
+          "S\u00e1bado",
+          "Domingo"
+        ]
+      },
+      "description": "Dias da semana que este turno opera"
+    },
+    "tipo_turno": {
+      "type": "string",
+      "enum": [
+        "Administrativo",
+        "Produ\u00e7\u00e3o",
+        "Comercial",
+        "Log\u00edstica",
+        "Outro"
+      ],
+      "default": "Administrativo"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "nome_turno",
+    "horario_inicio",
+    "horario_fim"
+  ]
+}

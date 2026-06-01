@@ -1,0 +1,164 @@
+{
+  "name": "AuditoriaAcesso",
+  "type": "object",
+  "properties": {
+    "usuario_id": {
+      "type": "string",
+      "description": "ID do usu\u00e1rio"
+    },
+    "usuario_nome": {
+      "type": "string",
+      "description": "Nome do usu\u00e1rio"
+    },
+    "usuario_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio"
+    },
+    "tipo_acao": {
+      "type": "string",
+      "enum": [
+        "Login",
+        "Logout",
+        "Troca Empresa",
+        "Troca Contexto",
+        "Acesso Negado",
+        "Tentativa Falha",
+        "MFA Enviado",
+        "MFA Validado",
+        "Sess\u00e3o Expirada"
+      ],
+      "description": "Tipo de a\u00e7\u00e3o de acesso"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa acessada"
+    },
+    "empresa_nome": {
+      "type": "string",
+      "description": "Nome da empresa"
+    },
+    "grupo_id": {
+      "type": "string",
+      "description": "ID do grupo (se contexto grupo)"
+    },
+    "contexto": {
+      "type": "string",
+      "enum": [
+        "empresa",
+        "grupo"
+      ],
+      "description": "Contexto selecionado"
+    },
+    "data_hora": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora do acesso"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "Endere\u00e7o IP"
+    },
+    "ip_localizacao": {
+      "type": "string",
+      "description": "Localiza\u00e7\u00e3o geogr\u00e1fica do IP (cidade/estado/pa\u00eds)"
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "Navegador e dispositivo"
+    },
+    "dispositivo_tipo": {
+      "type": "string",
+      "enum": [
+        "Desktop",
+        "Mobile",
+        "Tablet",
+        "Desconhecido"
+      ],
+      "description": "Tipo de dispositivo"
+    },
+    "sistema_operacional": {
+      "type": "string",
+      "description": "Sistema operacional detectado"
+    },
+    "navegador": {
+      "type": "string",
+      "description": "Navegador utilizado"
+    },
+    "latitude": {
+      "type": "number",
+      "description": "Latitude (se permitido pelo usu\u00e1rio)"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Longitude (se permitido pelo usu\u00e1rio)"
+    },
+    "sucesso": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se a a\u00e7\u00e3o foi bem-sucedida"
+    },
+    "motivo_falha": {
+      "type": "string",
+      "description": "Motivo da falha (senha incorreta, sem permiss\u00e3o, etc.)"
+    },
+    "tentativas_falhas_consecutivas": {
+      "type": "number",
+      "default": 0,
+      "description": "N\u00famero de tentativas falhas consecutivas"
+    },
+    "bloqueado_temporariamente": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o usu\u00e1rio foi bloqueado por tentativas excessivas"
+    },
+    "duracao_sessao_segundos": {
+      "type": "number",
+      "description": "Dura\u00e7\u00e3o da sess\u00e3o em segundos (para logout)"
+    },
+    "mfa_utilizado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se utilizou autentica\u00e7\u00e3o de dois fatores"
+    },
+    "mfa_metodo": {
+      "type": "string",
+      "enum": [
+        "Email",
+        "WhatsApp",
+        "SMS",
+        "Authenticator"
+      ],
+      "description": "M\u00e9todo de MFA utilizado"
+    },
+    "url_destino": {
+      "type": "string",
+      "description": "URL acessada ap\u00f3s login/troca"
+    },
+    "contexto_anterior": {
+      "type": "object",
+      "properties": {
+        "empresa_id": {
+          "type": "string"
+        },
+        "empresa_nome": {
+          "type": "string"
+        },
+        "contexto": {
+          "type": "string"
+        }
+      },
+      "description": "Contexto anterior (em trocas de empresa)"
+    },
+    "dados_extras": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Dados adicionais de contexto"
+    }
+  },
+  "required": [
+    "usuario_id",
+    "tipo_acao",
+    "data_hora",
+    "ip_address"
+  ]
+}

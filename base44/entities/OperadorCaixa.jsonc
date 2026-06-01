@@ -1,0 +1,142 @@
+{
+  "name": "OperadorCaixa",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa"
+    },
+    "usuario_id": {
+      "type": "string",
+      "description": "ID do usu\u00e1rio do sistema"
+    },
+    "usuario_nome": {
+      "type": "string",
+      "description": "Nome do usu\u00e1rio"
+    },
+    "colaborador_id": {
+      "type": "string",
+      "description": "ID do colaborador vinculado"
+    },
+    "codigo_operador": {
+      "type": "string",
+      "description": "C\u00f3digo \u00fanico do operador"
+    },
+    "nome_caixa": {
+      "type": "string",
+      "description": "Nome/identifica\u00e7\u00e3o do caixa (ex: Caixa 1, Caixa Principal)"
+    },
+    "turno_id": {
+      "type": "string",
+      "description": "ID do turno do operador"
+    },
+    "status_caixa": {
+      "type": "string",
+      "enum": [
+        "Fechado",
+        "Aberto",
+        "Em Pausa",
+        "Bloqueado"
+      ],
+      "default": "Fechado",
+      "description": "Status atual do caixa"
+    },
+    "data_abertura": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora de abertura do caixa"
+    },
+    "data_fechamento": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora de fechamento do caixa"
+    },
+    "saldo_inicial": {
+      "type": "number",
+      "default": 0,
+      "description": "Saldo inicial do caixa"
+    },
+    "saldo_atual": {
+      "type": "number",
+      "default": 0,
+      "description": "Saldo atual calculado"
+    },
+    "total_entradas": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de entradas no per\u00edodo"
+    },
+    "total_saidas": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de sa\u00eddas no per\u00edodo"
+    },
+    "quantidade_vendas": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantidade de vendas realizadas"
+    },
+    "ticket_medio": {
+      "type": "number",
+      "default": 0,
+      "description": "Ticket m\u00e9dio das vendas"
+    },
+    "permissoes_especiais": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Cancelar Venda",
+          "Desconto Acima Limite",
+          "Abrir Gaveta",
+          "Sangria",
+          "Refor\u00e7o",
+          "Alterar Pre\u00e7o",
+          "Venda sem Estoque",
+          "Fechamento Caixa"
+        ]
+      },
+      "description": "Permiss\u00f5es especiais do operador"
+    },
+    "pode_emitir_nfe": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se pode emitir NF-e"
+    },
+    "pode_gerar_boleto": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se pode gerar boletos"
+    },
+    "pode_fazer_sangria": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se pode fazer sangria"
+    },
+    "limite_desconto_percentual": {
+      "type": "number",
+      "default": 5,
+      "description": "Limite de desconto sem aprova\u00e7\u00e3o (%)"
+    },
+    "limite_valor_venda": {
+      "type": "number",
+      "description": "Limite de valor por venda"
+    },
+    "observacoes": {
+      "type": "string"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o operador est\u00e1 ativo"
+    }
+  },
+  "required": [
+    "usuario_nome",
+    "empresa_id"
+  ]
+}

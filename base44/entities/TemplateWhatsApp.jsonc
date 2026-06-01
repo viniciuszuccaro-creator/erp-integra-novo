@@ -1,0 +1,122 @@
+{
+  "name": "TemplateWhatsApp",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa propriet\u00e1ria"
+    },
+    "nome": {
+      "type": "string"
+    },
+    "categoria": {
+      "type": "string",
+      "enum": [
+        "marketing",
+        "transacional",
+        "suporte"
+      ],
+      "default": "suporte"
+    },
+    "idioma": {
+      "type": "string",
+      "enum": [
+        "pt_BR",
+        "en_US",
+        "es_ES"
+      ],
+      "default": "pt_BR"
+    },
+    "canal": {
+      "type": "string",
+      "enum": [
+        "whatsapp"
+      ],
+      "default": "whatsapp"
+    },
+    "corpo": {
+      "type": "string",
+      "description": "Corpo do template com placeholders {{variavel}}"
+    },
+    "header": {
+      "type": "string"
+    },
+    "footer": {
+      "type": "string"
+    },
+    "variaveis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "botoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "quick_reply",
+              "url",
+              "call",
+              "copy_code"
+            ]
+          },
+          "texto": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "codigo": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "rascunho",
+        "submetido",
+        "aprovado",
+        "rejeitado"
+      ],
+      "default": "rascunho"
+    },
+    "id_provedor": {
+      "type": "string"
+    },
+    "namespace": {
+      "type": "string"
+    },
+    "politica_optin": {
+      "type": "string",
+      "enum": [
+        "estrito",
+        "flexivel"
+      ],
+      "default": "estrito"
+    },
+    "ultima_validacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "teste_numero": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "nome",
+    "corpo"
+  ]
+}

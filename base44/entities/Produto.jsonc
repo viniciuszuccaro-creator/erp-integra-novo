@@ -1,0 +1,618 @@
+{
+  "name": "Produto",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa propriet\u00e1ria do estoque"
+    },
+    "empresa_dona_id": {
+      "type": "string",
+      "description": "Empresa que cadastrou o produto (multiempresa)"
+    },
+    "empresas_compartilhadas_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Empresas que podem usar este produto"
+    },
+    "almoxarifado_id": {
+      "type": "string",
+      "description": "ID do almoxarifado (se controlar por localiza\u00e7\u00e3o)"
+    },
+    "compartilhado_grupo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o produto \u00e9 vis\u00edvel para todas empresas do grupo"
+    },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo interno do produto"
+    },
+    "codigo_barras": {
+      "type": "string",
+      "description": "C\u00f3digo de barras"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do produto"
+    },
+    "descricao_seo": {
+      "type": "string",
+      "description": "V21.0: Descri\u00e7\u00e3o SEO para e-commerce gerada por IA"
+    },
+    "foto_produto_url": {
+      "type": "string",
+      "description": "URL da foto do produto"
+    },
+    "tipo_item": {
+      "type": "string",
+      "enum": [
+        "Revenda",
+        "Mat\u00e9ria-Prima Produ\u00e7\u00e3o",
+        "Produto Acabado",
+        "Consumo Interno",
+        "Servi\u00e7o"
+      ],
+      "default": "Revenda",
+      "description": "Tipo de item para controle"
+    },
+    "setor_atividade_id": {
+      "type": "string",
+      "description": "V21.0: ID do Setor de Atividade (Revenda, Almoxarifado, F\u00e1brica, etc) - OBRIGAT\u00d3RIO"
+    },
+    "setor_atividade_nome": {
+      "type": "string",
+      "description": "V21.0: Nome do setor (snapshot)"
+    },
+    "grupo": {
+      "type": "string",
+      "enum": [
+        "Mat\u00e9ria Prima",
+        "Produto Acabado",
+        "Insumo",
+        "Material de Escrit\u00f3rio",
+        "Ferramentas",
+        "EPIs",
+        "Bitola",
+        "Outros"
+      ]
+    },
+    "grupo_produto_id": {
+      "type": "string",
+      "description": "V21.0: ID do Grupo/Linha/Classe de Produto - OBRIGAT\u00d3RIO"
+    },
+    "grupo_produto_nome": {
+      "type": "string",
+      "description": "V21.0: Nome do grupo (snapshot)"
+    },
+    "marca_id": {
+      "type": "string",
+      "description": "V21.0: ID da Marca - OBRIGAT\u00d3RIO"
+    },
+    "marca_nome": {
+      "type": "string",
+      "description": "V21.0: Nome da marca (snapshot)"
+    },
+    "subgrupo": {
+      "type": "string"
+    },
+    "eh_bitola": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flag para identificar se o produto \u00e9 uma bitola de a\u00e7o/ferro"
+    },
+    "peso_teorico_kg_m": {
+      "type": "number",
+      "description": "Peso te\u00f3rico em KG por metro linear (apenas para bitolas)"
+    },
+    "bitola_diametro_mm": {
+      "type": "number",
+      "description": "Di\u00e2metro da bitola em mm (6.3, 8.0, 10.0, 12.5, 16.0, 20.0, 25.0, 32.0)"
+    },
+    "tipo_aco": {
+      "type": "string",
+      "enum": [
+        "CA-25",
+        "CA-50",
+        "CA-60"
+      ],
+      "description": "Tipo de a\u00e7o (apenas para bitolas)"
+    },
+    "peso_liquido_kg": {
+      "type": "number",
+      "default": 0,
+      "description": "V21.0: Peso l\u00edquido em kg (sem embalagem) - para frete e e-commerce"
+    },
+    "peso_bruto_kg": {
+      "type": "number",
+      "default": 0,
+      "description": "V21.0: Peso bruto em kg (com embalagem) - para frete e e-commerce"
+    },
+    "altura_cm": {
+      "type": "number",
+      "default": 0,
+      "description": "V21.0: Altura em cent\u00edmetros - para cubagem de frete"
+    },
+    "largura_cm": {
+      "type": "number",
+      "default": 0,
+      "description": "V21.0: Largura em cent\u00edmetros - para cubagem de frete"
+    },
+    "comprimento_cm": {
+      "type": "number",
+      "default": 0,
+      "description": "V21.0: Comprimento em cent\u00edmetros - para cubagem de frete"
+    },
+    "volume_m3": {
+      "type": "number",
+      "description": "V21.0: Volume em m\u00b3 (calculado: altura \u00d7 largura \u00d7 comprimento \u00f7 1.000.000)"
+    },
+    "unidade_principal": {
+      "type": "string",
+      "enum": [
+        "UN",
+        "P\u00c7",
+        "KG",
+        "MT",
+        "TON",
+        "LT",
+        "CX",
+        "M2",
+        "M3"
+      ],
+      "default": "UN",
+      "description": "V21.0: Unidade principal do produto (usada em relat\u00f3rios)"
+    },
+    "unidades_secundarias": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "UN",
+          "P\u00c7",
+          "KG",
+          "MT",
+          "TON",
+          "BARRA",
+          "LT",
+          "CX",
+          "M2",
+          "M3"
+        ]
+      },
+      "description": "V21.0: Unidades habilitadas para venda/compra (ex: [P\u00c7, KG, MT]) - MULTI-SELECT"
+    },
+    "fatores_conversao": {
+      "type": "object",
+      "properties": {
+        "kg_por_peca": {
+          "type": "number",
+          "description": "Quantos KG tem 1 pe\u00e7a"
+        },
+        "kg_por_metro": {
+          "type": "number",
+          "description": "Quantos KG tem 1 metro (igual peso_teorico_kg_m)"
+        },
+        "metros_por_peca": {
+          "type": "number",
+          "description": "Quantos metros tem 1 pe\u00e7a"
+        },
+        "peca_por_ton": {
+          "type": "number",
+          "description": "Quantas pe\u00e7as tem 1 tonelada"
+        },
+        "kg_por_ton": {
+          "type": "number",
+          "default": 1000,
+          "description": "1 TON = 1000 KG (fixo)"
+        }
+      },
+      "description": "V21.0: Fatores de convers\u00e3o bidirecionais calculados automaticamente"
+    },
+    "unidade_medida": {
+      "type": "string",
+      "enum": [
+        "UN",
+        "KG",
+        "LT",
+        "MT",
+        "CX",
+        "PC",
+        "M2",
+        "M3"
+      ]
+    },
+    "unidade_compra": {
+      "type": "string",
+      "enum": [
+        "TON",
+        "KG",
+        "MT",
+        "BARRA",
+        "FARDO",
+        "UN"
+      ],
+      "description": "Unidade usada na compra"
+    },
+    "unidade_estoque": {
+      "type": "string",
+      "enum": [
+        "KG",
+        "MT",
+        "UN",
+        "PC"
+      ],
+      "default": "KG",
+      "description": "V21.0: SEMPRE KG para bitolas (rastreamento financeiro)"
+    },
+    "unidade_venda": {
+      "type": "string",
+      "enum": [
+        "KG",
+        "MT",
+        "PE\u00c7A",
+        "UN"
+      ],
+      "default": "KG",
+      "description": "Unidade usada na venda"
+    },
+    "fator_conversao_compra_estoque": {
+      "type": "number",
+      "default": 1,
+      "description": "1 unidade compra = X unidades estoque (ex: 1 TON = 1000 KG)"
+    },
+    "fator_conversao_estoque_venda": {
+      "type": "number",
+      "default": 1,
+      "description": "1 unidade estoque = X unidades venda"
+    },
+    "unidade_alternativa": {
+      "type": "string",
+      "enum": [
+        "UN",
+        "KG",
+        "LT",
+        "MT",
+        "BARRA",
+        "CX",
+        "PC",
+        "M2",
+        "M3"
+      ],
+      "description": "Unidade alternativa para convers\u00e3o"
+    },
+    "fator_conversao": {
+      "type": "number",
+      "description": "Fator de convers\u00e3o entre unidades (ex: 1 BARRA = 12 MT)"
+    },
+    "comprimento_barra_padrao_m": {
+      "type": "number",
+      "description": "Comprimento padr\u00e3o da barra em metros (ex: 12m)"
+    },
+    "custo_aquisicao": {
+      "type": "number"
+    },
+    "custo_medio": {
+      "type": "number",
+      "description": "Custo m\u00e9dio calculado automaticamente"
+    },
+    "preco_venda": {
+      "type": "number"
+    },
+    "margem_minima_percentual": {
+      "type": "number",
+      "default": 10,
+      "description": "Margem m\u00ednima de lucro permitida (%)"
+    },
+    "tags_busca_ia": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags geradas por IA para busca sem\u00e2ntica"
+    },
+    "fornecedor_principal": {
+      "type": "string"
+    },
+    "fornecedor_id": {
+      "type": "string"
+    },
+    "estoque_atual": {
+      "type": "number",
+      "default": 0,
+      "description": "V21.0: SEMPRE em KG (unidade_estoque) - saldo no dep\u00f3sito"
+    },
+    "estoque_reservado": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantidade reservada em pedidos/OPs"
+    },
+    "estoque_disponivel": {
+      "type": "number",
+      "description": "Estoque atual - reservado (calculado)"
+    },
+    "estoque_minimo": {
+      "type": "number",
+      "default": 0
+    },
+    "estoque_maximo": {
+      "type": "number",
+      "default": 0
+    },
+    "ponto_reposicao": {
+      "type": "number",
+      "description": "Ponto de reposi\u00e7\u00e3o autom\u00e1tica"
+    },
+    "localizacao": {
+      "type": "string",
+      "description": "Localiza\u00e7\u00e3o no almoxarifado"
+    },
+    "localizacao_fisica": {
+      "type": "object",
+      "properties": {
+        "corredor": {
+          "type": "string"
+        },
+        "rua": {
+          "type": "string"
+        },
+        "prateleira": {
+          "type": "string"
+        },
+        "posicao": {
+          "type": "string"
+        },
+        "andar": {
+          "type": "string"
+        }
+      },
+      "description": "Localiza\u00e7\u00e3o detalhada para picking"
+    },
+    "controla_lote": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o produto tem controle de lote"
+    },
+    "controla_validade": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o produto tem controle de validade"
+    },
+    "prazo_validade_dias": {
+      "type": "number",
+      "description": "Prazo de validade padr\u00e3o em dias"
+    },
+    "lotes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "numero_lote": {
+            "type": "string"
+          },
+          "data_fabricacao": {
+            "type": "string",
+            "format": "date"
+          },
+          "data_validade": {
+            "type": "string",
+            "format": "date"
+          },
+          "quantidade": {
+            "type": "number"
+          },
+          "quantidade_disponivel": {
+            "type": "number"
+          },
+          "quantidade_reservada": {
+            "type": "number",
+            "default": 0
+          },
+          "fornecedor": {
+            "type": "string"
+          },
+          "nota_fiscal": {
+            "type": "string"
+          },
+          "localizacao": {
+            "type": "string"
+          },
+          "observacoes": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Lista de lotes do produto"
+    },
+    "produtos_complementares": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs de produtos que s\u00e3o frequentemente comprados juntos"
+    },
+    "produtos_substitutos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs de produtos alternativos equivalentes"
+    },
+    "quantidade_vendida_30dias": {
+      "type": "number",
+      "default": 0,
+      "description": "Total vendido nos \u00faltimos 30 dias"
+    },
+    "quantidade_vendida_12meses": {
+      "type": "number",
+      "default": 0,
+      "description": "Total vendido nos \u00faltimos 12 meses"
+    },
+    "giro_estoque_dias": {
+      "type": "number",
+      "description": "M\u00e9dia de dias de giro do estoque"
+    },
+    "classificacao_abc": {
+      "type": "string",
+      "enum": [
+        "A",
+        "B",
+        "C",
+        "Sem Movimento"
+      ],
+      "description": "Classifica\u00e7\u00e3o ABC autom\u00e1tica"
+    },
+    "dias_sem_movimento": {
+      "type": "number",
+      "default": 0,
+      "description": "Dias desde \u00faltima movimenta\u00e7\u00e3o"
+    },
+    "ncm": {
+      "type": "string",
+      "description": "Nomenclatura Comum do Mercosul"
+    },
+    "cest": {
+      "type": "string",
+      "description": "C\u00f3digo Especificador da Substitui\u00e7\u00e3o Tribut\u00e1ria"
+    },
+    "cfop_padrao_compra": {
+      "type": "string",
+      "description": "V21.0: CFOP padr\u00e3o para compras (ex: 1102, 2102)"
+    },
+    "cfop_padrao_venda": {
+      "type": "string",
+      "description": "V21.0: CFOP padr\u00e3o para vendas (ex: 5102, 6102)"
+    },
+    "origem_mercadoria": {
+      "type": "string",
+      "enum": [
+        "0 - Nacional",
+        "1 - Estrangeira Importa\u00e7\u00e3o Direta",
+        "2 - Estrangeira Mercado Interno",
+        "3 - Nacional com Conte\u00fado Importado >40%",
+        "4 - Nacional por Proc. Prod. B\u00e1sico",
+        "5 - Nacional com Conte\u00fado Importado <=40%",
+        "6 - Estrangeira Importa\u00e7\u00e3o Direta sem Similar",
+        "7 - Estrangeira Mercado Interno sem Similar",
+        "8 - Nacional por Importa\u00e7\u00e3o Direta"
+      ],
+      "default": "0 - Nacional",
+      "description": "Origem da mercadoria (NF-e)"
+    },
+    "regime_tributario_produto": {
+      "type": "string",
+      "enum": [
+        "Simples Nacional",
+        "Lucro Presumido",
+        "Lucro Real"
+      ],
+      "description": "V21.0: Regime tribut\u00e1rio aplic\u00e1vel ao produto"
+    },
+    "tributacao": {
+      "type": "object",
+      "properties": {
+        "icms_cst": {
+          "type": "string",
+          "description": "CST do ICMS"
+        },
+        "icms_aliquota": {
+          "type": "number"
+        },
+        "pis_cst": {
+          "type": "string"
+        },
+        "pis_aliquota": {
+          "type": "number"
+        },
+        "cofins_cst": {
+          "type": "string"
+        },
+        "cofins_aliquota": {
+          "type": "number"
+        },
+        "ipi_cst": {
+          "type": "string"
+        },
+        "ipi_aliquota": {
+          "type": "number"
+        }
+      },
+      "description": "V21.0: Configura\u00e7\u00e3o tribut\u00e1ria do produto"
+    },
+    "conta_contabil_id": {
+      "type": "string",
+      "description": "ID da conta cont\u00e1bil vinculada"
+    },
+    "exibir_no_site": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se exibe no site/e-commerce"
+    },
+    "exibir_no_marketplace": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se sincroniza com marketplaces"
+    },
+    "slug_site": {
+      "type": "string",
+      "description": "URL amig\u00e1vel para SEO"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Ativo",
+        "Inativo",
+        "Descontinuado"
+      ],
+      "default": "Ativo"
+    },
+    "alerta_estoque_baixo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enviar alerta quando abaixo do m\u00ednimo"
+    },
+    "ultima_compra": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da \u00faltima compra"
+    },
+    "ultimo_preco_compra": {
+      "type": "number",
+      "description": "\u00daltimo pre\u00e7o de compra"
+    },
+    "modo_cadastro": {
+      "type": "string",
+      "enum": [
+        "Manual",
+        "Assistido IA",
+        "Autom\u00e1tico NF-e",
+        "Lote/Importa\u00e7\u00e3o"
+      ],
+      "default": "Manual",
+      "description": "V21.0: Como o produto foi cadastrado"
+    },
+    "cadastrado_via_nfe_id": {
+      "type": "string",
+      "description": "V21.0: ID da NF-e que originou o cadastro (se via XML)"
+    },
+    "confianca_ia_percentual": {
+      "type": "number",
+      "default": 0,
+      "description": "V21.0: Confian\u00e7a da IA na classifica\u00e7\u00e3o (0-100)"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "descricao",
+    "unidade_medida",
+    "empresa_id"
+  ]
+}

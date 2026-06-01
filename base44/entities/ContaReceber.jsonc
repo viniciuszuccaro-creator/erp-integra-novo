@@ -1,0 +1,498 @@
+{
+  "name": "ContaReceber",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo (se lan\u00e7ado no grupo)"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa (se lan\u00e7ado na empresa)"
+    },
+    "origem": {
+      "type": "string",
+      "enum": [
+        "grupo",
+        "empresa"
+      ],
+      "default": "empresa",
+      "description": "Se foi lan\u00e7ado no grupo ou na empresa"
+    },
+    "origem_tipo": {
+      "type": "string",
+      "enum": [
+        "pedido",
+        "financeiro",
+        "contrato",
+        "manual",
+        "outro"
+      ],
+      "default": "manual",
+      "description": "Origem da conta a receber"
+    },
+    "canal_origem": {
+      "type": "string",
+      "enum": [
+        "Portal do Cliente",
+        "Site",
+        "E-commerce",
+        "Chatbot",
+        "WhatsApp",
+        "Marketplace",
+        "API",
+        "Manual",
+        "PDV Presencial",
+        "Telefone",
+        "Email",
+        "App Mobile",
+        "ERP",
+        "Outro"
+      ],
+      "default": "Manual",
+      "description": "Canal de origem do recebimento"
+    },
+    "marketplace_origem": {
+      "type": "string",
+      "enum": [
+        "Nenhum",
+        "Mercado Livre",
+        "Shopee",
+        "Amazon",
+        "Magalu",
+        "B2W",
+        "Outro"
+      ],
+      "description": "Marketplace espec\u00edfico se canal_origem=Marketplace"
+    },
+    "documento_grupo_id": {
+      "type": "string",
+      "description": "ID do documento de grupo que originou este (se vier de rateio)"
+    },
+    "e_replicado": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se \u00e9 uma c\u00f3pia de um t\u00edtulo do grupo"
+    },
+    "replicado_para_empresas": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se foi replicado para empresas (quando origem=grupo)"
+    },
+    "empresas_replicadas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs das empresas para as quais foi replicado"
+    },
+    "descricao": {
+      "type": "string"
+    },
+    "cliente": {
+      "type": "string"
+    },
+    "cliente_id": {
+      "type": "string"
+    },
+    "pedido_id": {
+      "type": "string"
+    },
+    "nota_fiscal_id": {
+      "type": "string"
+    },
+    "centro_custo": {
+      "type": "string"
+    },
+    "centro_custo_id": {
+      "type": "string"
+    },
+    "plano_contas_id": {
+      "type": "string",
+      "description": "ID do plano de contas vinculado"
+    },
+    "projeto_obra": {
+      "type": "string",
+      "description": "Projeto ou obra relacionada"
+    },
+    "valor": {
+      "type": "number"
+    },
+    "valor_original_grupo": {
+      "type": "number",
+      "description": "Valor original no grupo (se vier de rateio)"
+    },
+    "percentual_rateio": {
+      "type": "number",
+      "description": "% deste t\u00edtulo em rela\u00e7\u00e3o ao grupo"
+    },
+    "data_emissao": {
+      "type": "string",
+      "format": "date"
+    },
+    "data_vencimento": {
+      "type": "string",
+      "format": "date"
+    },
+    "data_recebimento": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Pendente",
+        "Recebido",
+        "Atrasado",
+        "Cancelado",
+        "Parcial"
+      ],
+      "default": "Pendente"
+    },
+    "forma_recebimento": {
+      "type": "string",
+      "enum": [
+        "Dinheiro",
+        "Transfer\u00eancia",
+        "Boleto",
+        "Cart\u00e3o Cr\u00e9dito",
+        "Cart\u00e3o D\u00e9bito",
+        "PIX",
+        "Cheque"
+      ]
+    },
+    "detalhes_pagamento": {
+      "type": "object",
+      "properties": {
+        "forma_pagamento": {
+          "type": "string",
+          "description": "V22.0 ETAPA 4: Forma de pagamento detalhada"
+        },
+        "bandeira_cartao": {
+          "type": "string",
+          "enum": [
+            "Visa",
+            "Mastercard",
+            "Elo",
+            "American Express",
+            "Hipercard",
+            "Outro"
+          ],
+          "description": "V22.0 ETAPA 4: Bandeira do cart\u00e3o utilizado"
+        },
+        "numero_autorizacao": {
+          "type": "string",
+          "description": "V22.0 ETAPA 4: N\u00famero de autoriza\u00e7\u00e3o da transa\u00e7\u00e3o"
+        },
+        "taxa_operadora": {
+          "type": "number",
+          "default": 0,
+          "description": "V22.0 ETAPA 4: % de taxa cobrada pela operadora"
+        },
+        "valor_bruto": {
+          "type": "number",
+          "description": "V22.0 ETAPA 4: Valor antes das taxas"
+        },
+        "valor_liquido": {
+          "type": "number",
+          "description": "V22.0 ETAPA 4: Valor ap\u00f3s descontar taxas"
+        },
+        "data_recebido_caixa": {
+          "type": "string",
+          "format": "date",
+          "description": "V22.0 ETAPA 4: EST\u00c1GIO 1 - Quando foi recebido no caixa"
+        },
+        "data_compensado_banco": {
+          "type": "string",
+          "format": "date",
+          "description": "V22.0 ETAPA 4: EST\u00c1GIO 2 - Quando compensou no banco"
+        },
+        "status_compensacao": {
+          "type": "string",
+          "enum": [
+            "Aguardando",
+            "Compensado",
+            "Conciliado"
+          ],
+          "default": "Aguardando",
+          "description": "V22.0 ETAPA 4: Status da compensa\u00e7\u00e3o banc\u00e1ria"
+        },
+        "observacoes": {
+          "type": "string",
+          "description": "V22.0 ETAPA 4: Observa\u00e7\u00f5es sobre a liquida\u00e7\u00e3o"
+        }
+      },
+      "description": "V22.0 ETAPA 4: Detalhes completos do pagamento/recebimento"
+    },
+    "numero_documento": {
+      "type": "string"
+    },
+    "numero_parcela": {
+      "type": "string",
+      "description": "Ex: 1/3"
+    },
+    "juros": {
+      "type": "number"
+    },
+    "multa": {
+      "type": "number"
+    },
+    "desconto": {
+      "type": "number"
+    },
+    "valor_recebido": {
+      "type": "number"
+    },
+    "forma_cobranca": {
+      "type": "string",
+      "enum": [
+        "Boleto",
+        "PIX",
+        "Cart\u00e3o",
+        "Link de Pagamento",
+        "Outro",
+        "N\u00e3o Definida"
+      ],
+      "default": "N\u00e3o Definida",
+      "description": "Forma de cobran\u00e7a gerada"
+    },
+    "id_cobranca_externa": {
+      "type": "string",
+      "description": "ID da cobran\u00e7a no gateway (Asaas, Juno, etc.)"
+    },
+    "gateway_usado_id": {
+      "type": "string",
+      "description": "ID do gateway de pagamento usado"
+    },
+    "gateway_usado_nome": {
+      "type": "string",
+      "description": "Nome do gateway (snapshot)"
+    },
+    "linha_digitavel": {
+      "type": "string",
+      "description": "Linha digit\u00e1vel do boleto"
+    },
+    "codigo_barras": {
+      "type": "string",
+      "description": "C\u00f3digo de barras do boleto"
+    },
+    "pix_qrcode": {
+      "type": "string",
+      "description": "QR Code PIX (base64 ou URL)"
+    },
+    "pix_copia_cola": {
+      "type": "string",
+      "description": "C\u00f3digo PIX copia e cola"
+    },
+    "url_boleto_pdf": {
+      "type": "string",
+      "description": "URL do PDF do boleto"
+    },
+    "url_fatura": {
+      "type": "string",
+      "description": "URL da fatura/p\u00e1gina de pagamento"
+    },
+    "status_cobranca": {
+      "type": "string",
+      "enum": [
+        "nao_gerada",
+        "gerada",
+        "gerada_simulada",
+        "enviada",
+        "visualizada",
+        "paga",
+        "cancelada",
+        "erro",
+        "expirada"
+      ],
+      "default": "nao_gerada",
+      "description": "Status da cobran\u00e7a no gateway"
+    },
+    "data_envio_cobranca": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Quando a cobran\u00e7a foi enviada ao cliente"
+    },
+    "data_retorno_pagamento": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Quando o pagamento foi confirmado"
+    },
+    "retorno_pagamento_raw": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "JSON completo do retorno do gateway"
+    },
+    "provedor_pagamento": {
+      "type": "string",
+      "description": "Provedor usado para gerar cobran\u00e7a"
+    },
+    "webhook_status": {
+      "type": "string",
+      "enum": [
+        "aguardando",
+        "pago",
+        "expirado",
+        "cancelado",
+        "erro"
+      ],
+      "description": "Status recebido via webhook"
+    },
+    "webhook_data": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Dados completos do webhook"
+    },
+    "boleto_id_integracao": {
+      "type": "string",
+      "description": "ID do boleto no gateway (Asaas, Juno, etc.)"
+    },
+    "boleto_url": {
+      "type": "string"
+    },
+    "boleto_linha_digitavel": {
+      "type": "string"
+    },
+    "pix_id_integracao": {
+      "type": "string",
+      "description": "ID da cobran\u00e7a PIX no gateway"
+    },
+    "status_integracao": {
+      "type": "string",
+      "enum": [
+        "pendente_configuracao",
+        "gerado",
+        "enviado",
+        "pago",
+        "erro"
+      ],
+      "description": "Status da integra\u00e7\u00e3o com gateway"
+    },
+    "dias_atraso": {
+      "type": "number",
+      "default": 0,
+      "description": "Dias de atraso calculados (data_vencimento - hoje)"
+    },
+    "arquivo_remessa_id": {
+      "type": "string",
+      "description": "ID do arquivo CNAB de remessa que cont\u00e9m este t\u00edtulo"
+    },
+    "nosso_numero": {
+      "type": "string",
+      "description": "Nosso n\u00famero do banco"
+    },
+    "sequencial_remessa": {
+      "type": "number",
+      "description": "N\u00famero sequencial no arquivo de remessa"
+    },
+    "data_registro_banco": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Quando foi registrado no banco via remessa"
+    },
+    "arquivo_retorno_id": {
+      "type": "string",
+      "description": "ID do arquivo CNAB de retorno com info deste t\u00edtulo"
+    },
+    "codigo_ocorrencia_retorno": {
+      "type": "string",
+      "description": "C\u00f3digo da ocorr\u00eancia no retorno (02=Entrada Confirmada, 06=Liquida\u00e7\u00e3o, etc)"
+    },
+    "data_ocorrencia_retorno": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data da \u00faltima ocorr\u00eancia retorno"
+    },
+    "regua_cobranca": {
+      "type": "object",
+      "properties": {
+        "acao_1_enviada": {
+          "type": "boolean",
+          "default": false
+        },
+        "acao_1_data": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "acao_1_canal": {
+          "type": "string"
+        },
+        "acao_2_enviada": {
+          "type": "boolean",
+          "default": false
+        },
+        "acao_2_data": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "acao_2_interacao_id": {
+          "type": "string"
+        },
+        "acao_3_enviada": {
+          "type": "boolean",
+          "default": false
+        },
+        "acao_3_data": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "acao_3_alerta_id": {
+          "type": "string"
+        }
+      },
+      "description": "Controle da r\u00e9gua de cobran\u00e7a automatizada"
+    },
+    "indice_previsao_pagamento": {
+      "type": "number",
+      "default": 50,
+      "description": "% de probabilidade de pagamento no prazo calculado pela IA"
+    },
+    "visivel_no_portal": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o cliente pode ver no portal"
+    },
+    "observacoes": {
+      "type": "string"
+    },
+    "sincronizar_baixa_com_grupo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se baixa aqui deve baixar no grupo"
+    },
+    "distribuicao_realizada": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "empresa_id": {
+            "type": "string"
+          },
+          "empresa_nome": {
+            "type": "string"
+          },
+          "titulo_id": {
+            "type": "string"
+          },
+          "valor": {
+            "type": "number"
+          },
+          "percentual": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Distribui\u00e7\u00e3o realizada para empresas (se origem=grupo)"
+    }
+  },
+  "required": [
+    "descricao",
+    "valor",
+    "data_vencimento",
+    "centro_custo_id",
+    "plano_contas_id"
+  ]
+}

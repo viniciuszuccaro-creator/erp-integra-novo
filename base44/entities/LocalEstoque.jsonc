@@ -1,0 +1,124 @@
+{
+  "name": "LocalEstoque",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_dona_id": {
+      "type": "string",
+      "description": "Empresa que cadastrou o local"
+    },
+    "empresas_compartilhadas_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Empresas que podem usar este local"
+    },
+    "nome": {
+      "type": "string",
+      "description": "Nome do local (Ex: Almoxarifado Central, Dep\u00f3sito A)"
+    },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo do local"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "Almoxarifado",
+        "Dep\u00f3sito",
+        "Loja",
+        "Produ\u00e7\u00e3o",
+        "Expedi\u00e7\u00e3o",
+        "Quarentena",
+        "Outro"
+      ],
+      "default": "Almoxarifado"
+    },
+    "endereco_completo": {
+      "type": "object",
+      "properties": {
+        "cep": {
+          "type": "string"
+        },
+        "logradouro": {
+          "type": "string"
+        },
+        "numero": {
+          "type": "string"
+        },
+        "bairro": {
+          "type": "string"
+        },
+        "cidade": {
+          "type": "string"
+        },
+        "estado": {
+          "type": "string"
+        }
+      }
+    },
+    "estrutura_fisica": {
+      "type": "object",
+      "properties": {
+        "tem_corredores": {
+          "type": "boolean",
+          "default": false
+        },
+        "tem_prateleiras": {
+          "type": "boolean",
+          "default": false
+        },
+        "tem_andares": {
+          "type": "boolean",
+          "default": false
+        },
+        "quantidade_corredores": {
+          "type": "number"
+        },
+        "quantidade_ruas": {
+          "type": "number"
+        }
+      },
+      "description": "Estrutura f\u00edsica para picking"
+    },
+    "capacidade_m3": {
+      "type": "number",
+      "description": "Capacidade em m\u00b3"
+    },
+    "ocupacao_atual_m3": {
+      "type": "number",
+      "default": 0
+    },
+    "responsavel_nome": {
+      "type": "string"
+    },
+    "responsavel_id": {
+      "type": "string"
+    },
+    "controla_temperatura": {
+      "type": "boolean",
+      "default": false
+    },
+    "temperatura_min": {
+      "type": "number"
+    },
+    "temperatura_max": {
+      "type": "number"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": true
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "nome",
+    "tipo"
+  ]
+}

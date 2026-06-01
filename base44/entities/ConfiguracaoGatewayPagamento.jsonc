@@ -1,0 +1,158 @@
+{
+  "name": "ConfiguracaoGatewayPagamento",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "Empresa dona da configura\u00e7\u00e3o"
+    },
+    "provedor": {
+      "type": "string",
+      "enum": [
+        "Asaas",
+        "Juno",
+        "Mercado Pago",
+        "Pagar.me",
+        "Banco do Brasil",
+        "Sicoob",
+        "Outro"
+      ],
+      "description": "Gateway de pagamento"
+    },
+    "ativo": {
+      "type": "boolean",
+      "default": false
+    },
+    "ambiente": {
+      "type": "string",
+      "enum": [
+        "Producao",
+        "Sandbox"
+      ],
+      "default": "Sandbox"
+    },
+    "api_url": {
+      "type": "string",
+      "description": "URL base da API"
+    },
+    "api_key": {
+      "type": "string",
+      "description": "Chave de API"
+    },
+    "api_token": {
+      "type": "string"
+    },
+    "client_id": {
+      "type": "string"
+    },
+    "client_secret": {
+      "type": "string"
+    },
+    "conta_id": {
+      "type": "string",
+      "description": "ID da conta no provedor"
+    },
+    "gerar_boleto": {
+      "type": "boolean",
+      "default": true
+    },
+    "gerar_pix": {
+      "type": "boolean",
+      "default": true
+    },
+    "gerar_cartao": {
+      "type": "boolean",
+      "default": false
+    },
+    "dias_vencimento_padrao": {
+      "type": "number",
+      "default": 3,
+      "description": "Dias ap\u00f3s emiss\u00e3o para vencimento"
+    },
+    "multa_apos_vencimento": {
+      "type": "number",
+      "default": 2,
+      "description": "% de multa ap\u00f3s vencimento"
+    },
+    "juros_por_dia": {
+      "type": "number",
+      "default": 0.033,
+      "description": "% de juros por dia de atraso"
+    },
+    "desconto_antecipacao": {
+      "type": "number",
+      "default": 0,
+      "description": "% de desconto para pagamento antecipado"
+    },
+    "instrucoes_boleto": {
+      "type": "string",
+      "description": "Instru\u00e7\u00f5es que aparecem no boleto"
+    },
+    "enviar_email_automatico": {
+      "type": "boolean",
+      "default": true
+    },
+    "webhook_url": {
+      "type": "string",
+      "description": "URL para receber notifica\u00e7\u00f5es de pagamento"
+    },
+    "webhook_token": {
+      "type": "string",
+      "description": "Token de seguran\u00e7a do webhook"
+    },
+    "pix_chave": {
+      "type": "string",
+      "description": "Chave PIX da empresa"
+    },
+    "pix_tipo": {
+      "type": "string",
+      "enum": [
+        "CPF",
+        "CNPJ",
+        "Email",
+        "Telefone",
+        "Aleatoria"
+      ],
+      "description": "Tipo da chave PIX"
+    },
+    "split_ativo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se usa split de pagamento (marketplace)"
+    },
+    "split_config": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Configura\u00e7\u00e3o de split entre empresas"
+    },
+    "ultima_sincronizacao": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u00daltima vez que sincronizou com a API"
+    },
+    "status_conexao": {
+      "type": "string",
+      "enum": [
+        "nao_configurado",
+        "configurado",
+        "ativo",
+        "erro",
+        "desativado"
+      ],
+      "default": "nao_configurado"
+    },
+    "mensagem_erro": {
+      "type": "string"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "empresa_id",
+    "provedor"
+  ]
+}

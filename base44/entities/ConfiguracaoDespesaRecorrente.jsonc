@@ -1,0 +1,238 @@
+{
+  "name": "ConfiguracaoDespesaRecorrente",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo (se aplic\u00e1vel)"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "Empresa que ter\u00e1 a despesa"
+    },
+    "origem": {
+      "type": "string",
+      "enum": [
+        "grupo",
+        "empresa"
+      ],
+      "default": "empresa"
+    },
+    "tipo_despesa_id": {
+      "type": "string",
+      "description": "ID do TipoDespesa vinculado"
+    },
+    "tipo_despesa_nome": {
+      "type": "string",
+      "description": "Nome do TipoDespesa (snapshot)"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o da despesa recorrente"
+    },
+    "categoria": {
+      "type": "string",
+      "description": "Categoria da despesa (snapshot do TipoDespesa)"
+    },
+    "fornecedor_id": {
+      "type": "string",
+      "description": "ID do fornecedor (se aplic\u00e1vel)"
+    },
+    "fornecedor_nome": {
+      "type": "string",
+      "description": "Nome do fornecedor (snapshot)"
+    },
+    "valor_base": {
+      "type": "number",
+      "description": "Valor base da despesa"
+    },
+    "ajuste_inflacao": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o valor deve ser ajustado pela infla\u00e7\u00e3o (IPCA)"
+    },
+    "indice_ajuste": {
+      "type": "string",
+      "enum": [
+        "IPCA",
+        "IGP-M",
+        "INPC",
+        "CDI",
+        "Nenhum"
+      ],
+      "default": "Nenhum"
+    },
+    "percentual_ajuste_anual": {
+      "type": "number",
+      "default": 0,
+      "description": "% de ajuste anual previsto"
+    },
+    "periodicidade": {
+      "type": "string",
+      "enum": [
+        "Mensal",
+        "Bimestral",
+        "Trimestral",
+        "Semestral",
+        "Anual",
+        "Semanal",
+        "Quinzenal"
+      ],
+      "default": "Mensal"
+    },
+    "dia_vencimento": {
+      "type": "number",
+      "description": "Dia do m\u00eas para vencimento (1-31)"
+    },
+    "dia_semana_vencimento": {
+      "type": "string",
+      "enum": [
+        "Segunda",
+        "Ter\u00e7a",
+        "Quarta",
+        "Quinta",
+        "Sexta",
+        "S\u00e1bado",
+        "Domingo"
+      ],
+      "description": "Dia da semana (para periodicidade semanal)"
+    },
+    "meses_aplicacao": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": 1,
+        "maximum": 12
+      },
+      "description": "Meses do ano que a despesa se aplica (1-12)"
+    },
+    "data_inicio": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de in\u00edcio da recorr\u00eancia"
+    },
+    "data_fim": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de fim da recorr\u00eancia (se houver)"
+    },
+    "forma_pagamento_id": {
+      "type": "string",
+      "description": "Forma de pagamento padr\u00e3o"
+    },
+    "forma_pagamento_nome": {
+      "type": "string"
+    },
+    "centro_custo_id": {
+      "type": "string"
+    },
+    "centro_custo_nome": {
+      "type": "string"
+    },
+    "conta_contabil_id": {
+      "type": "string",
+      "description": "ID da conta cont\u00e1bil (herda de TipoDespesa ou espec\u00edfica)"
+    },
+    "conta_contabil_nome": {
+      "type": "string",
+      "description": "Nome da conta cont\u00e1bil (snapshot)"
+    },
+    "centro_resultado_id": {
+      "type": "string",
+      "description": "ID do centro de resultado (herda de TipoDespesa ou espec\u00edfica)"
+    },
+    "centro_resultado_nome": {
+      "type": "string",
+      "description": "Nome do centro de resultado (snapshot)"
+    },
+    "projeto_obra": {
+      "type": "string",
+      "description": "Projeto ou obra relacionada"
+    },
+    "gerar_automaticamente": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se deve gerar automaticamente as contas a pagar"
+    },
+    "antecedencia_dias": {
+      "type": "number",
+      "default": 5,
+      "description": "Quantos dias antes do vencimento deve gerar o t\u00edtulo"
+    },
+    "notificar_criacao": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se deve notificar ao criar o t\u00edtulo automaticamente"
+    },
+    "usuarios_notificacao": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos usu\u00e1rios a serem notificados"
+    },
+    "rateio_automatico": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se deve ratear automaticamente entre empresas"
+    },
+    "empresas_rateio": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "empresa_id": {
+            "type": "string"
+          },
+          "empresa_nome": {
+            "type": "string"
+          },
+          "percentual": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Configura\u00e7\u00e3o de rateio entre empresas"
+    },
+    "historico_geracao": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data_geracao": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "conta_pagar_id": {
+            "type": "string"
+          },
+          "valor_gerado": {
+            "type": "number"
+          },
+          "mes_referencia": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Hist\u00f3rico de t\u00edtulos gerados automaticamente"
+    },
+    "ativa": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se a configura\u00e7\u00e3o est\u00e1 ativa"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "tipo_despesa_id",
+    "descricao",
+    "valor_base",
+    "periodicidade",
+    "empresa_id"
+  ]
+}

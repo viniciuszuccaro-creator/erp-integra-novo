@@ -1,0 +1,202 @@
+{
+  "name": "SPEDFiscal",
+  "type": "object",
+  "properties": {
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa emissora do SPED"
+    },
+    "tipo_sped": {
+      "type": "string",
+      "enum": [
+        "Fiscal (EFD ICMS/IPI)",
+        "Contribui\u00e7\u00f5es (EFD PIS/COFINS)"
+      ],
+      "default": "Fiscal (EFD ICMS/IPI)",
+      "description": "Tipo de SPED"
+    },
+    "periodo_inicial": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de in\u00edcio do per\u00edodo"
+    },
+    "periodo_final": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de fim do per\u00edodo"
+    },
+    "periodo_apuracao": {
+      "type": "string",
+      "description": "Per\u00edodo (YYYY-MM)"
+    },
+    "ambiente": {
+      "type": "string",
+      "enum": [
+        "Produ\u00e7\u00e3o",
+        "Homologa\u00e7\u00e3o"
+      ],
+      "default": "Homologa\u00e7\u00e3o"
+    },
+    "versao_layout": {
+      "type": "string",
+      "default": "018",
+      "description": "Vers\u00e3o do layout SPED"
+    },
+    "finalidade": {
+      "type": "string",
+      "enum": [
+        "Original",
+        "Substituto"
+      ],
+      "default": "Original"
+    },
+    "arquivo_gerado_url": {
+      "type": "string",
+      "description": "URL do arquivo .txt gerado"
+    },
+    "arquivo_nome": {
+      "type": "string",
+      "description": "Nome do arquivo gerado"
+    },
+    "tamanho_arquivo_bytes": {
+      "type": "number"
+    },
+    "hash_arquivo": {
+      "type": "string",
+      "description": "Hash MD5 do arquivo"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Rascunho",
+        "Gerando",
+        "Gerado",
+        "Validado",
+        "Transmitido",
+        "Erro"
+      ],
+      "default": "Rascunho"
+    },
+    "data_geracao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_transmissao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "protocolo_receita": {
+      "type": "string",
+      "description": "Protocolo de recebimento da Receita Federal"
+    },
+    "recibo_transmissao": {
+      "type": "string"
+    },
+    "blocos_incluidos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Blocos inclu\u00eddos (0, C, D, E, K, M, etc.)"
+    },
+    "quantidade_registros": {
+      "type": "number",
+      "description": "Total de registros no arquivo"
+    },
+    "quantidade_notas_fiscal": {
+      "type": "number",
+      "description": "Quantidade de NF-e inclu\u00eddas"
+    },
+    "valor_total_operacoes": {
+      "type": "number",
+      "description": "Valor total das opera\u00e7\u00f5es"
+    },
+    "icms_apurado": {
+      "type": "number",
+      "description": "ICMS apurado no per\u00edodo"
+    },
+    "pis_apurado": {
+      "type": "number"
+    },
+    "cofins_apurado": {
+      "type": "number"
+    },
+    "geracao_automatica": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se foi gerado automaticamente (job dia 1) (V16.1)"
+    },
+    "job_id": {
+      "type": "string",
+      "description": "ID do job que gerou automaticamente (V16.1)"
+    },
+    "validacao_pva": {
+      "type": "object",
+      "properties": {
+        "validado": {
+          "type": "boolean",
+          "default": false
+        },
+        "data_validacao": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "erros": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "avisos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Valida\u00e7\u00e3o no PVA (Programa Validador)"
+    },
+    "log_geracao": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data_hora": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "etapa": {
+            "type": "string"
+          },
+          "mensagem": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "info",
+              "aviso",
+              "erro"
+            ]
+          }
+        }
+      },
+      "description": "Log completo de gera\u00e7\u00e3o"
+    },
+    "usuario_geracao": {
+      "type": "string"
+    },
+    "usuario_geracao_id": {
+      "type": "string"
+    },
+    "observacoes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "empresa_id",
+    "tipo_sped",
+    "periodo_inicial",
+    "periodo_final"
+  ]
+}

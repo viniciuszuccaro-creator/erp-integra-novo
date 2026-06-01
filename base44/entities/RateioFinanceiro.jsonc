@@ -1,0 +1,132 @@
+{
+  "name": "RateioFinanceiro",
+  "type": "object",
+  "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "tipo_documento": {
+      "type": "string",
+      "enum": [
+        "ContaPagar",
+        "ContaReceber",
+        "Despesa",
+        "Receita"
+      ],
+      "description": "Tipo de documento rateado"
+    },
+    "documento_origem_id": {
+      "type": "string",
+      "description": "ID do t\u00edtulo/documento original no grupo"
+    },
+    "descricao": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do rateio"
+    },
+    "valor_total": {
+      "type": "number",
+      "description": "Valor total sendo rateado"
+    },
+    "criterio_rateio": {
+      "type": "string",
+      "enum": [
+        "percentual",
+        "valor_fixo",
+        "faturamento",
+        "proporcional",
+        "manual"
+      ],
+      "default": "percentual",
+      "description": "Crit\u00e9rio usado para ratear"
+    },
+    "data_rateio": {
+      "type": "string",
+      "format": "date",
+      "description": "Data em que o rateio foi realizado"
+    },
+    "distribuicao": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "empresa_id": {
+            "type": "string"
+          },
+          "empresa_nome": {
+            "type": "string"
+          },
+          "percentual": {
+            "type": "number"
+          },
+          "valor": {
+            "type": "number"
+          },
+          "titulo_gerado_id": {
+            "type": "string"
+          },
+          "status_titulo": {
+            "type": "string",
+            "enum": [
+              "Pendente",
+              "Pago",
+              "Cancelado"
+            ]
+          },
+          "observacao": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Distribui\u00e7\u00e3o por empresa"
+    },
+    "categoria": {
+      "type": "string",
+      "description": "Categoria da despesa/receita"
+    },
+    "centro_custo_id": {
+      "type": "string"
+    },
+    "responsavel": {
+      "type": "string",
+      "description": "Usu\u00e1rio que realizou o rateio"
+    },
+    "responsavel_id": {
+      "type": "string"
+    },
+    "aprovado": {
+      "type": "boolean",
+      "default": false
+    },
+    "aprovador": {
+      "type": "string"
+    },
+    "data_aprovacao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "observacoes": {
+      "type": "string"
+    },
+    "status_consolidacao": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "parcial",
+        "completo"
+      ],
+      "default": "pendente",
+      "description": "Status do pagamento consolidado"
+    },
+    "politica_distribuicao_id": {
+      "type": "string",
+      "description": "ID da pol\u00edtica de distribui\u00e7\u00e3o usada (se houver)"
+    }
+  },
+  "required": [
+    "group_id",
+    "tipo_documento",
+    "valor_total",
+    "distribuicao"
+  ]
+}

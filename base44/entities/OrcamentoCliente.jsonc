@@ -1,0 +1,117 @@
+{
+  "name": "OrcamentoCliente",
+  "type": "object",
+  "properties": {
+    "numero_orcamento": {
+      "type": "string",
+      "description": "N\u00famero do or\u00e7amento"
+    },
+    "cliente_id": {
+      "type": "string"
+    },
+    "cliente_nome": {
+      "type": "string"
+    },
+    "cliente_email": {
+      "type": "string"
+    },
+    "vendedor_responsavel": {
+      "type": "string"
+    },
+    "vendedor_responsavel_id": {
+      "type": "string"
+    },
+    "data_criacao": {
+      "type": "string",
+      "format": "date"
+    },
+    "data_validade": {
+      "type": "string",
+      "format": "date"
+    },
+    "itens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "produto_id": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "quantidade": {
+            "type": "number"
+          },
+          "unidade": {
+            "type": "string"
+          },
+          "valor_unitario": {
+            "type": "number"
+          },
+          "valor_total": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "valor_total": {
+      "type": "number"
+    },
+    "condicoes_pagamento": {
+      "type": "string",
+      "default": "\u00c0 Vista"
+    },
+    "prazo_entrega": {
+      "type": "string",
+      "default": "7 dias \u00fateis"
+    },
+    "observacoes": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Pendente",
+        "Aprovado",
+        "Rejeitado",
+        "Convertido",
+        "Expirado"
+      ],
+      "default": "Pendente"
+    },
+    "aprovado_por": {
+      "type": "string",
+      "description": "V21.1.2-R2: Nome do aprovador"
+    },
+    "data_aprovacao": {
+      "type": "string",
+      "format": "date-time",
+      "description": "V21.1.2-R2: Data/hora da aprova\u00e7\u00e3o"
+    },
+    "assinatura_url": {
+      "type": "string",
+      "description": "V21.1.2-R2: URL da assinatura eletr\u00f4nica"
+    },
+    "assinatura_ip": {
+      "type": "string",
+      "description": "V21.1.2-R2: IP de onde foi assinado"
+    },
+    "assinatura_hash": {
+      "type": "string",
+      "description": "V21.1.2-R2: Hash MD5 da assinatura"
+    },
+    "motivo_rejeicao": {
+      "type": "string"
+    },
+    "pedido_gerado_id": {
+      "type": "string",
+      "description": "ID do pedido gerado ap\u00f3s aprova\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "numero_orcamento",
+    "cliente_nome",
+    "valor_total"
+  ]
+}

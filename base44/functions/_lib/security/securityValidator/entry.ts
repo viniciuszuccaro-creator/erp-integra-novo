@@ -5,124 +5,77 @@ export function detectSodConflicts(permissoes = {}) {
   const perms = permissoes || {};
   const conflitos = [];
 
+  // Extrai ações de qualquer nó (array ou objeto aninhado)
+  const extractActions = (node) => {
+    if (!node) return [];
+    if (Array.isArray(node)) return node.map(a => String(a).toLowerCase());
+    if (typeof node === 'object') return Object.values(node).flatMap(v => extractActions(v));
+    return [];
+  };
+  const hasAny = (node, ...actions) => {
+    const acts = extractActions(node);
+    return actions.some(a => acts.includes(a));
+  };
+
+  const fin = perms['Financeiro'] || {};
+  const com = perms['Comercial'] || {};
+  const sys = perms['Sistema'] || perms['Administração'] || {};
+  const fis = perms['Fiscal'] || {};
+  const aud = perms['AuditLog'] || {};
+  const est = perms['Estoque'] || {};
+  const cmp = perms['Compras'] || {};
+  const rh  = perms['RH'] || {};
+  const adm = perms['Administração'] || perms['Sistema'] || {};
+  const prod = perms['Produção'] || perms['Producao'] || {};
+
   // FIN-PAG-001: Aprovação e Liquidação de Pagamentos
-  const finAncer = perms['Financeiro'] || [];
-  if (Array.isArray(finAncer)) {
-    const temAprovar = finAncer.includes('aprovar');
-    const temLiquidar = finAncer.includes('liquidar') || finAncer.includes('pago');
-    if (temAprovar && temLiquidar) {
-      conflitos.push({
-        regra: 'FIN-PAG-001',
-        severidade: 'Alta',
-        descricao: 'Mesmo perfil pode aprovar e liquidar pagamentos.'
-      });
-    }
+  if (hasAny(fin, 'aprovar') && hasAny(fin, 'liquidar', 'pago')) {
+    conflitos.push({ regra: 'FIN-PAG-001', severidade: 'Alta', descricao: 'Mesmo perfil pode aprovar e liquidar pagamentos.' });
   }
 
   // COM-DESC-001: Edição e Aprovação de Descontos
-  const comercial = perms['Comercial'] || [];
-  if (Array.isArray(comercial)) {
-    const temDesconto = comercial.includes('desconto');
-    const temAprovar = comercial.includes('aprovar');
-    const temEditar = comercial.includes('editar');
-    if (temDesconto && temAprovar && temEditar) {
-      conflitos.push({
-        regra: 'COM-DESC-001',
-        severidade: 'Média',
-        descricao: 'Mesmo perfil pode editar e aprovar desconto.'
-      });
-    }
+  if (hasAny(com, 'desconto', 'editar') && hasAny(com, 'aprovar')) {
+    conflitos.push({ regra: 'COM-DESC-001', severidade: 'Média', descricao: 'Mesmo perfil pode editar e aprovar descontos.' });
   }
 
   // SYS-RBAC-001: Admin de Acessos + Leitura de Auditoria
-  const sistema = perms['Sistema'] || [];
-  if (Array.isArray(sistema)) {
-    const temAdminAcesso = sistema.includes('editar');
-    const temAuditoria = sistema.includes('ver');
-    if (temAdminAcesso && temAuditoria && sistema.length >= 2) {
-      conflitos.push({
-        regra: 'SYS-RBAC-001',
-        severidade: 'Crítica',
-        descricao: 'Perfil administra acessos e visualiza trilhas sensíveis.'
-      });
-    }
+  if (hasAny(sys, 'editar', 'criar') && hasAny(sys, 'ver', 'visualizar') && extractActions(sys).length >= 2) {
+    conflitos.push({ regra: 'SYS-RBAC-001', severidade: 'Crítica', descricao: 'Perfil administra acessos e visualiza trilhas sensíveis.' });
   }
 
-  // FIS-NFE-001: Emissão e Cancelamento de NFe
-  const fiscal = perms['Fiscal'] || [];
-  if (Array.isArray(fiscal)) {
-    const temEmitir = fiscal.includes('criar') || fiscal.includes('emitir');
-    const temCancelar = fiscal.includes('excluir') || fiscal.includes('cancelar');
-    if (temEmitir && temCancelar) {
-      conflitos.push({
-        regra: 'FIS-NFE-001',
-        severidade: 'Alta',
-        descricao: 'Mesmo perfil pode emitir e cancelar documentos fiscais.'
-      });
-    }
+  // FIS-NFE-001: Emissão e Cancelamento de NF-e
+  if (hasAny(fis, 'criar', 'emitir') && hasAny(fis, 'excluir', 'cancelar')) {
+    conflitos.push({ regra: 'FIS-NFE-001', severidade: 'Alta', descricao: 'Mesmo perfil pode emitir e cancelar documentos fiscais.' });
   }
 
   // LOG-SEC-001: Deletar Logs de Auditoria
-  const auditLog = perms['AuditLog'] || [];
-  if (Array.isArray(auditLog) && auditLog.includes('excluir')) {
-    conflitos.push({
-      regra: 'LOG-SEC-001',
-      severidade: 'Crítica',
-      descricao: 'Perfil pode deletar registros de auditoria (não permitido).'
-    });
+  if (hasAny(aud, 'excluir', 'deletar')) {
+    conflitos.push({ regra: 'LOG-SEC-001', severidade: 'Crítica', descricao: 'Perfil pode deletar registros de auditoria (não permitido).' });
   }
 
   // EST-MOV-001: Criar e Aprovar Movimentações de Estoque
-  const estoque = perms['Estoque'] || [];
-  if (Array.isArray(estoque)) {
-    if (estoque.includes('criar') && estoque.includes('aprovar')) {
-      conflitos.push({
-        regra: 'EST-MOV-001',
-        severidade: 'Alta',
-        descricao: 'Mesmo perfil pode criar e aprovar movimentações de estoque.'
-      });
-    }
+  if (hasAny(est, 'criar') && hasAny(est, 'aprovar')) {
+    conflitos.push({ regra: 'EST-MOV-001', severidade: 'Alta', descricao: 'Mesmo perfil pode criar e aprovar movimentações de estoque.' });
   }
 
-  // CMP-OC-001: Criar Ordem de Compra e Aprovar Pagamento
-  const compras = perms['Compras'] || [];
-  const finAncer2 = perms['Financeiro'] || [];
-  if (Array.isArray(compras) && Array.isArray(finAncer2)) {
-    const temCriarOC = compras.includes('criar');
-    const temPagarFin = finAncer2.includes('liquidar') || finAncer2.includes('pago');
-    if (temCriarOC && temPagarFin) {
-      conflitos.push({
-        regra: 'CMP-OC-001',
-        severidade: 'Alta',
-        descricao: 'Mesmo perfil pode criar Ordem de Compra e liquidar pagamentos.'
-      });
-    }
+  // CMP-OC-001: Criar OC e Liquidar Pagamento
+  if (hasAny(cmp, 'criar') && hasAny(fin, 'liquidar', 'pago')) {
+    conflitos.push({ regra: 'CMP-OC-001', severidade: 'Alta', descricao: 'Mesmo perfil pode criar Ordem de Compra e liquidar pagamentos.' });
   }
 
   // RH-SAL-001: Editar Salário e Aprovar Folha
-  const rh = perms['RH'] || [];
-  if (Array.isArray(rh)) {
-    if (rh.includes('editar') && rh.includes('aprovar')) {
-      conflitos.push({
-        regra: 'RH-SAL-001',
-        severidade: 'Média',
-        descricao: 'Mesmo perfil pode editar dados salariais e aprovar folha de pagamento.'
-      });
-    }
+  if (hasAny(rh, 'editar') && hasAny(rh, 'aprovar')) {
+    conflitos.push({ regra: 'RH-SAL-001', severidade: 'Média', descricao: 'Mesmo perfil pode editar dados salariais e aprovar folha de pagamento.' });
   }
 
-  // ADM-USR-001: Criar usuários E editar perfis de acesso
-  const adm = perms['Administração'] || perms['Sistema'] || [];
-  if (Array.isArray(adm)) {
-    const temCriarUser = adm.includes('criar');
-    const temEditarPerfil = adm.includes('editar');
-    if (temCriarUser && temEditarPerfil) {
-      conflitos.push({
-        regra: 'ADM-USR-001',
-        severidade: 'Crítica',
-        descricao: 'Mesmo perfil pode criar usuários e editar perfis de acesso (escalada de privilégio).'
-      });
-    }
+  // ADM-USR-001: Criar Usuários + Editar Perfis (escalada de privilégio)
+  if (hasAny(adm, 'criar') && hasAny(adm, 'editar')) {
+    conflitos.push({ regra: 'ADM-USR-001', severidade: 'Crítica', descricao: 'Mesmo perfil pode criar usuários e editar perfis de acesso (escalada de privilégio).' });
+  }
+
+  // PRD-OC-001: Aprovar Produção + Criar Requisição de Compra
+  if (hasAny(prod, 'aprovar') && hasAny(cmp, 'criar')) {
+    conflitos.push({ regra: 'PRD-OC-001', severidade: 'Média', descricao: 'Mesmo perfil pode aprovar ordens de produção e criar requisições de compra.' });
   }
 
   const order = { Baixa: 1, Média: 2, Alta: 3, Crítica: 4 };

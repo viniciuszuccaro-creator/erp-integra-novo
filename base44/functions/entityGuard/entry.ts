@@ -126,11 +126,31 @@ Deno.serve(async (req) => {
 
     // Proteção de entidades críticas
     const targetEntity = body?.entity_name;
-    if (targetEntity && targetEntity === 'AuditLog') {
+    if (targetEntity === 'AuditLog') {
       if (['criar', 'editar', 'excluir'].includes(desired)) {
         __DECISION_CACHE.set(decisionKey, { allowed: false, ts: Date.now() });
-        return Response.json({ allowed: false }, { status: 403 });
+        return Response.json({ allowed: false, reason: 'AuditLog é imutável' }, { status: 403 });
       }
+    }
+    // Entidades de controle de acesso: só admin pode criar/editar/excluir
+    const ADMIN_ONLY_WRITE = new Set(['PerfilAcesso', 'User', 'ConfiguracaoSeguranca', 'ConfiguracaoSistema']);
+    if (ADMIN_ONLY_WRITE.has(targetEntity) && ['criar', 'editar', 'excluir'].includes(desired) && user?.role !== 'admin') {
+      __DECISION_CACHE.set(decisionKey, { allowed: false, ts: Date.now() });
+      try {
+        await base44.asServiceRole.entities.AuditLog.create({
+          usuario: user.full_name || user.email || 'Usuário',
+          usuario_id: user.id,
+          acao: 'Bloqueio',
+          modulo: moduleName,
+          tipo_auditoria: 'seguranca',
+          entidade: targetEntity,
+          descricao: `RBAC: não-admin tentou ${desired} em entidade protegida ${targetEntity}`,
+          empresa_id: body?.empresa_id || null,
+          group_id: body?.group_id || null,
+          data_hora: new Date().toISOString(),
+        });
+      } catch {}
+      return Response.json({ allowed: false, reason: `${targetEntity} requer perfil admin` }, { status: 403 });
     }
 
     // Verifica perfil de acesso (sem chamada extra se não tiver perfil)

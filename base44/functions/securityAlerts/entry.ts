@@ -129,6 +129,40 @@ Deno.serve(async (req) => {
       suspicious.push({ tipo: 'Acesso em massa a dados PII', severidade: 'Alta', detalhes: `${piiOps.length} operações PII encrypt/decrypt em ${WINDOW_MIN} min` });
     }
 
+    // 10) Perfis com SoD Crítico detectado (varredura rápida)
+    try {
+      const scope = {};
+      if (filtros?.group_id) scope.group_id = filtros.group_id;
+      if (filtros?.empresa_id) scope.empresa_id = filtros.empresa_id;
+      const perfisComConflito = await base44.asServiceRole.entities.PerfilAcesso.filter({
+        ...scope,
+        requer_aprovacao_especial: true
+      }, '-updated_date', 50);
+      const criticos = (perfisComConflito || []).filter(p =>
+        (p.conflitos_sod_detectados || []).some(c => c.severidade === 'Crítica')
+      );
+      if (criticos.length > 0) {
+        suspicious.push({
+          tipo: 'Perfis com SoD Crítico',
+          severidade: 'Alta',
+          detalhes: `${criticos.length} perfil(is) com conflito de Segregação de Funções crítico: ${criticos.map(p => p.nome_perfil || p.id).slice(0,3).join(', ')}`
+        });
+      }
+    } catch {}
+
+    // 11) Tentativas de escrita em entidades admin-only por não-admin
+    const adminOnlyBlocks = recent.filter((l) =>
+      l.acao === 'Bloqueio' && l.tipo_auditoria === 'seguranca' &&
+      /(PerfilAcesso|ConfiguracaoSeguranca|ConfiguracaoSistema).*requer perfil admin/i.test(l.descricao || '')
+    );
+    if (adminOnlyBlocks.length >= 2) {
+      suspicious.push({
+        tipo: 'Tentativas de acesso admin-only',
+        severidade: 'Alta',
+        detalhes: `${adminOnlyBlocks.length} tentativas de escrita em entidades protegidas por não-admins`
+      });
+    }
+
     // Se nada suspeito, retorna rápido
     if (suspicious.length === 0) {
       return Response.json({ ok: true, message: 'Sem alertas', analyzed: recent.length });

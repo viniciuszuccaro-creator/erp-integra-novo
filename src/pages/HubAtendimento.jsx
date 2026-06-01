@@ -9,42 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  MessageCircle,
-  User,
-  Bot,
-  Send,
-  Phone,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Filter,
-  Search,
-  Paperclip,
-  MoreVertical,
-  Archive,
-  UserPlus,
-  TrendingUp,
-  Activity,
-  BarChart3,
-  Settings,
-  FileText,
-  Timer,
-  Tag,
-  ArrowRightLeft,
-  RefreshCw,
-  Download,
-  Brain,
-  Smile,
-  Star,
-  ThumbsUp,
-  ThumbsDown,
-  Copy,
-  Maximize2,
-  Minimize2,
-  Users,
-  Building,
-  Mic,
-  Image as ImageIcon
+  MessageCircle, User, Bot, Send, Clock, CheckCircle, AlertCircle,
+  Search, Paperclip, MoreVertical, UserPlus, TrendingUp, Activity,
+  BarChart3, Settings, FileText, Timer, Tag, ArrowRightLeft, RefreshCw,
+  Brain, Maximize2, Minimize2, Users,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -107,7 +75,7 @@ export default function HubAtendimento() {
   const fileInputRef = useRef(null);
   
   const queryClient = useQueryClient();
-  const { hasPermission, user, isAdmin } = usePermissions();
+  const { hasPermission, isAdmin } = usePermissions();
   const { empresaAtual, filterInContext } = useContextoVisual();
 
   // Auto-scroll para última mensagem
@@ -122,8 +90,9 @@ export default function HubAtendimento() {
     }
   }, []);
 
+  const { user } = usePermissions();
   // Verificar permissão
-  const podeAtenderTransbordo = isAdmin() || hasPermission('chatbot', null, 'ver') || hasPermission('CRM', null, 'ver');
+  const podeAtenderTransbordo = isAdmin() || hasPermission('chatbot', null, 'visualizar') || hasPermission('CRM', null, 'visualizar');
 
   // Buscar conversas
   const { data: conversas = [], isLoading } = useQuery({

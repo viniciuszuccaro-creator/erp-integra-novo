@@ -40,7 +40,7 @@ const ColaboradoresWindow = () => (
 
 export default function RH() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
-  const canSeeRH = hasPermission('RH', null, 'ver');
+  const canSeeRH = hasPermission('RH', null, 'visualizar');
   const { empresaAtual } = useContextoVisual();
   const { openWindow } = useWindow();
   const { user } = useUser();
@@ -150,7 +150,7 @@ export default function RH() {
     },
   ];
 
-  const allowedModules = modules.filter(m => hasPermission('RH', (m.sectionKey || m.title), 'ver'));
+  const allowedModules = modules.filter(m => hasPermission('RH', (m.sectionKey || m.title), 'visualizar'));
 
   const handleModuleClick = (module) => {
     startTransition(() => {

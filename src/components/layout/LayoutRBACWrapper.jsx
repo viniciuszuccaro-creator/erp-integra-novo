@@ -1,13 +1,25 @@
 /**
- * LayoutRBACWrapper — extrai a lógica de RBAC entity wrapping do layout principal.
- * Envolve as entidades do base44 com checkRBAC + stamping + sanitize.
+ * LayoutRBACWrapper — RBAC entity wrapping, HMR-safe.
+ * Usa um único flag de versão para detectar re-execuções e sempre restaurar
+ * os métodos originais antes de re-envolver. Nunca empilha wraps.
  */
 import { useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { sanitizeOnWrite } from "@/components/lib/sanitizeOnWrite";
 
+// Chave global para armazenar os originais fora do componente (sobrevive HMR)
+const ORIG_KEY = "__rbac_orig_methods__";
+
+function restoreEntity(api) {
+  if (!api || !api[ORIG_KEY]) return;
+  const o = api[ORIG_KEY];
+  Object.keys(o).forEach((k) => { if (o[k]) api[k] = o[k]; });
+  delete api[ORIG_KEY];
+  delete api.__wrappedContext;
+  delete api.__origGet;
+}
+
 export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, contexto, contextRef }) {
-  const wrappedRef = useRef(false);
 
   useEffect(() => {
     if (!base44?.entities) return;
@@ -68,37 +80,21 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
         if (!allowed) throw new Error("RBAC backend: ação negada");
       } catch (err) {
         if (err?.message === "RBAC backend: ação negada" || err?.response?.status === 403) throw err;
-        // fail-open em erros de rede
       }
     };
 
     const wrapEntity = (api, name) => {
       if (!api || name === "AuditLog") return;
-      // Desempilha wrap anterior antes de re-aplicar (evita duplo wrap no HMR)
-      if (api.__origMethods) {
-        const o = api.__origMethods;
-        if (o.create) api.create = o.create;
-        if (o.bulkCreate) api.bulkCreate = o.bulkCreate;
-        if (o.update) api.update = o.update;
-        if (o.delete) api.delete = o.delete;
-        if (o.filter) api.filter = o.filter;
-        if (o.list) api.list = o.list;
-        if (o.get && api.__origGet) { api.get = o.get; delete api.__origGet; }
-        delete api.__origMethods;
-        delete api.__wrappedContext;
-      }
-      if (api.__wrappedContext === true) return;
-      const orig = {
-        create: typeof api.create === "function" ? api.create.bind(api) : null,
-        bulkCreate: typeof api.bulkCreate === "function" ? api.bulkCreate.bind(api) : null,
-        update: typeof api.update === "function" ? api.update.bind(api) : null,
-        delete: typeof api.delete === "function" ? api.delete.bind(api) : null,
-        filter: typeof api.filter === "function" ? api.filter.bind(api) : null,
-        list: typeof api.list === "function" ? api.list.bind(api) : null,
-        get: typeof api.get === "function" ? api.get.bind(api) : null,
-      };
-      // Guarda originais para poder desfazer no próximo ciclo (HMR-safe)
-      api.__origMethods = orig;
+
+      // Sempre restaura antes de re-envolver (HMR-safe, sem empilhamento)
+      restoreEntity(api);
+
+      // Salva os métodos originais ANTES de qualquer wrap
+      const orig = {};
+      ["create", "bulkCreate", "update", "delete", "filter", "list", "get"].forEach((k) => {
+        if (typeof api[k] === "function") orig[k] = api[k].bind(api);
+      });
+      api[ORIG_KEY] = orig;
 
       const PII_ENTITIES = new Set(["Cliente", "Colaborador", "Fornecedor"]);
 
@@ -106,7 +102,6 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
         api.create = async (data) => {
           await checkRBAC(name, "criar");
           const result = await orig.create(stamp(sanitizeOnWrite(data)));
-          // Auto-encrypt PII após criação
           if (PII_ENTITIES.has(name) && result?.id) {
             try { base44.functions.invoke("piiEncryptor", { entity_name: name, id: result.id, action: "encrypt" }); } catch {}
           }
@@ -123,7 +118,6 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
         api.update = async (id, data) => {
           await checkRBAC(name, "editar");
           const result = await orig.update(id, stamp(sanitizeOnWrite(data)));
-          // Auto-encrypt PII após edição em entidades sensíveis
           if (PII_ENTITIES.has(name) && id) {
             try { base44.functions.invoke("piiEncryptor", { entity_name: name, id, action: "encrypt" }); } catch {}
           }
@@ -150,47 +144,38 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
           return await orig.list(order, limit, skip);
         };
       }
-      // RLS em get() — valida escopo após busca para evitar acesso cruzado horizontal
-      if (typeof api.get === 'function' && !api.__origGet) {
-        const origGet = api.get.bind(api);
-        api.__origGet = origGet;
+      if (orig.get) {
         api.get = async (id) => {
-          const rec = await origGet(id);
+          const rec = await orig.get(id);
           if (!rec) return rec;
           const scope = getScope();
           if (scope.__blocked) return null;
-          // Só valida quando o registro tem escopo explícito
           const recEmpresa = rec?.empresa_id || rec?.empresa_dona_id || null;
           const recGroup = rec?.group_id || null;
           const ctx = contextRef.current;
           if (recEmpresa && ctx.empresaAtual?.id && recEmpresa !== ctx.empresaAtual.id) {
-            // Verifica se pertence ao mesmo grupo
-            if (!recGroup || recGroup !== ctx.grupoAtual?.id) {
-              // Acesso cruzado detectado — log silencioso + retorna null
-              try {
-                base44.entities.AuditLog.create({
-                  usuario: ctx.user?.full_name || 'Usuário',
-                  usuario_id: ctx.user?.id,
-                  empresa_id: ctx.empresaAtual?.id,
-                  acao: 'Bloqueio',
-                  modulo: 'Sistema',
-                  tipo_auditoria: 'seguranca',
-                  entidade: name,
-                  registro_id: id,
-                  descricao: `RLS: tentativa de get() em registro de empresa ${recEmpresa} por empresa ${ctx.empresaAtual?.id}`,
-                  data_hora: new Date().toISOString(),
-                });
-              } catch {}
-              return null;
-            }
+            if (!recGroup || recGroup !== ctx.grupoAtual?.id) return null;
           }
           return rec;
         };
       }
+
       api.__wrappedContext = true;
     };
 
-    try { Object.keys(base44.entities).forEach((name) => wrapEntity(base44.entities[name], name)); } catch {}
+    try {
+      Object.keys(base44.entities).forEach((name) => wrapEntity(base44.entities[name], name));
+    } catch {}
+
+    // Cleanup: restaura todos os métodos originais ao desmontar/re-executar
+    return () => {
+      try {
+        Object.keys(base44.entities).forEach((name) => {
+          const api = base44.entities[name];
+          if (api) restoreEntity(api);
+        });
+      } catch {}
+    };
 
   }, [user?.id, empresaAtual?.id, grupoAtual?.id, contexto]);
 

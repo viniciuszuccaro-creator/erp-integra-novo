@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 // AdminTabs v3 — 5 abas enxutas (IA absorvida em Segurança & Gov)
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Settings, Users, Shield, FileText, Plug, ArrowDownUp, Heart } from "lucide-react";
+import { Settings, Users, Shield, FileText, Plug, ArrowDownUp } from "lucide-react";
 import usePermissions from "@/components/lib/usePermissions";
 import ProtectedSection from "@/components/security/ProtectedSection";
 
@@ -15,14 +15,10 @@ import GestaoAcessosIndex from "@/components/administracao-sistema/gestao-acesso
 import PropagacaoIndex from "@/components/administracao-sistema/propagacao/PropagacaoIndex";
 import CheckupRelatorio from "@/components/sistema/CheckupRelatorio";
 import DashboardPropagacaoMonitor from "@/components/administracao-sistema/DashboardPropagacaoMonitor";
-import TestTogglePainel from "@/components/sistema/TestTogglePainel";
-import TestValidacaoRBAC from "@/components/administracao-sistema/TestValidacaoRBAC";
 import Monitor429RateLimit from "@/components/administracao-sistema/Monitor429RateLimit";
-import SystemHealthDashboard from "@/components/administracao-sistema/critical/SystemHealthDashboard";
 
 
 const TAB_DEFS = [
-  { value: "saude",       label: "🏥 Saúde do Sistema",    icon: Heart,       perm: "Configurações",     color: "blue" },
   { value: "checkup",     label: "Status Sistema",        icon: Settings,    perm: "Configurações",     color: "blue" },
   { value: "gerais",      label: "Parâmetros Gerais",     icon: Settings,    perm: "Configurações",     color: "blue" },
   { value: "propagacao",  label: "Propagação Grupo↔Emp",  icon: ArrowDownUp, perm: "Configurações",     color: "blue" },
@@ -31,7 +27,6 @@ const TAB_DEFS = [
   { value: "acessos",     label: "Gestão de Acessos",     icon: Users,       perm: "Controle de Acesso", color: "blue" },
   { value: "seguranca",   label: "Segurança, IA & Gov.",  icon: Shield,      perm: "Segurança",         color: "blue" },
   { value: "auditoria",   label: "Auditoria e Logs",      icon: FileText,    perm: "Auditoria",         color: "blue" },
-  { value: "testes",      label: "🧪 Testes",             icon: Settings,    perm: "Configurações",     color: "blue" },
 ];
 
 export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtual }) {
@@ -86,16 +81,6 @@ export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtua
         ))}
 
       </TabsList>
-
-      {/* ── SAÚDE DO SISTEMA ── */}
-      <TabsContent value="saude" className="mt-4 flex-1 overflow-hidden">
-        <ProtectedSection
-          module="Sistema" section={["Configurações"]} action="visualizar"
-          fallback={<p className="p-4 text-sm text-slate-500">Acesso restrito.</p>}
-        >
-          <SystemHealthDashboard />
-        </ProtectedSection>
-      </TabsContent>
 
       {/* ── STATUS SISTEMA ── */}
       <TabsContent value="checkup" className="mt-4">
@@ -188,19 +173,6 @@ export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtua
           fallback={<p className="p-4 text-sm text-slate-500">Acesso restrito ao Monitoramento.</p>}
         >
           <Monitor429RateLimit />
-        </ProtectedSection>
-      </TabsContent>
-
-      {/* ── TESTES ── */}
-      <TabsContent value="testes" className="mt-4">
-        <ProtectedSection
-          module="Sistema" section={["Configurações"]} action="visualizar"
-          fallback={<p className="p-4 text-sm text-slate-500">Acesso restrito aos Testes.</p>}
-        >
-          <div className="w-full h-full grid grid-cols-1 lg:grid-cols-2 gap-4 overflow-auto">
-            <TestTogglePainel />
-            <TestValidacaoRBAC />
-          </div>
         </ProtectedSection>
       </TabsContent>
 

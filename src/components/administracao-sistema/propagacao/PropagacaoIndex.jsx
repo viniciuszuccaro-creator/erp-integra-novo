@@ -177,16 +177,15 @@ export default function PropagacaoIndex() {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button onClick={() => runAll("down")} disabled={globalLoading} size="sm" className="gap-2 bg-blue-600 hover:bg-blue-700">
-            {globalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowDown className="w-4 h-4" />}
-            Grupo → Empresas
+          <Button onClick={() => runAll("both")} disabled={globalLoading} size="sm" className="gap-2 bg-purple-600 hover:bg-purple-700">
+            {globalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+            🚀 Inicializar Histórico (Tudo)
           </Button>
-          <Button onClick={() => runAll("up")} disabled={globalLoading} variant="outline" size="sm" className="gap-2 border-blue-300 text-blue-700 hover:bg-blue-50">
+          <Button onClick={() => runAll("down")} disabled={globalLoading} variant="outline" size="sm" className="gap-2 border-blue-300 text-blue-700 hover:bg-blue-50">
+            <ArrowDown className="w-4 h-4" /> Grupo → Empresas
+          </Button>
+          <Button onClick={() => runAll("up")} disabled={globalLoading} variant="outline" size="sm" className="gap-2 border-indigo-300 text-indigo-700 hover:bg-indigo-50">
             <ArrowUp className="w-4 h-4" /> Empresas → Grupo
-          </Button>
-          <Button onClick={() => runAll("both")} disabled={globalLoading} variant="outline" size="sm" className="gap-1 border-purple-300 text-purple-700 hover:bg-purple-50">
-            <RefreshCw className="w-4 h-4" />
-            {filtroGrupo !== "Todos" ? `Bidirecional (${filtroGrupo})` : "Bidirecional"}
           </Button>
           <Button onClick={resetAll} disabled={globalLoading} variant="ghost" size="sm" className="text-slate-500">
             Resetar

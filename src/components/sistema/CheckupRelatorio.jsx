@@ -343,8 +343,10 @@ export default function CheckupRelatorio() {
         </CardContent>
       </Card>
 
-      <div className="py-2 text-center text-xs text-slate-500">
-        5 Etapas concluídas · 2026-06-03 · ERP Zuccaro v21.9 · Regra-Mãe implementada ✓
+      <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl text-center space-y-2">
+        <p className="text-sm font-semibold text-blue-900">▶ Execute o Checkup ao vivo</p>
+        <p className="text-xs text-blue-700">Acesse <strong>Parâmetros Gerais</strong> → painel lateral <strong>"Checkup — 5 Etapas"</strong> e clique em <strong>"Verificar Tudo"</strong> para rodar os checks em tempo real contra o banco de dados.</p>
+        <p className="text-[10px] text-slate-500 pt-1">5 Etapas implementadas · 2026-06-03 · ERP Zuccaro v21.9 · Regra-Mãe ✓</p>
       </div>
     </div>
   );

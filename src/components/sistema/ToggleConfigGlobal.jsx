@@ -6,11 +6,11 @@ import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
- * ToggleConfigGlobal v3.0
- * - API corrigida para usar upsertConfig com { chave, data, scope }
- * - Carrega valor via getEntityRecord (mais confiável que upsertConfig read)
+ * ToggleConfigGlobal v3.1
+ * - Contexto dual: salva em Grupo E Empresa quando ambos disponíveis
+ * - Busca progressiva: empresa+grupo → empresa → grupo → global
+ * - Badge de contexto: mostra onde foi salvo (Grupo/Empresa/Global)
  * - Optimistic UI + rollback em erro
- * - Contexto multiempresa (group_id + empresa_id)
  */
 export default function ToggleConfigGlobal({
   configKey,
@@ -109,10 +109,20 @@ export default function ToggleConfigGlobal({
     }
   };
 
+  // Badge de contexto onde foi salvo
+  const ctxBadge = scopeObj.empresa_id
+    ? <span className="text-[9px] text-blue-600 bg-blue-50 border border-blue-200 rounded px-1">Empresa</span>
+    : scopeObj.group_id
+    ? <span className="text-[9px] text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1">Grupo</span>
+    : <span className="text-[9px] text-slate-500 bg-slate-100 border border-slate-200 rounded px-1">Global</span>;
+
   return (
     <div className="flex items-start justify-between py-3 px-3 bg-white rounded border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all">
       <div className="flex-1 min-w-0">
-        <Label className="block font-medium text-slate-900 cursor-pointer text-sm">{label}</Label>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <Label className="block font-medium text-slate-900 cursor-pointer text-sm">{label}</Label>
+          {!loading && ctxBadge}
+        </div>
         {description && <p className="text-xs text-slate-500 mt-1 leading-relaxed">{description}</p>}
       </div>
 

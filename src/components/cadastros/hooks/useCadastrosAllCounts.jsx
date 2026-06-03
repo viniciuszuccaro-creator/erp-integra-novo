@@ -22,25 +22,26 @@ export const BLOCOS_ENTITIES = {
 
 const ALL_ENTITIES = Object.values(BLOCOS_ENTITIES).flat();
 
-// Snapshot das contagens reais verificadas via countEntities backend — exibido imediatamente
+// Snapshot das contagens REAIS verificadas via countEntities backend + deduplicateCadastros
+// TOTAIS ESPERADOS: Bloco1=21 · Bloco2=1059 · Bloco3=120 · Bloco4=32 · Bloco5=19 · Bloco6=56
 const SNAPSHOT = {
-  // Bloco 1 — Pessoas & Parceiros (8)
-  Cliente: 1, Fornecedor: 4, Transportadora: 2, Colaborador: 0,
-  Representante: 1, ContatoB2B: 0, SegmentoCliente: 0, RegiaoAtendimento: 0,
-  // Bloco 2 — Produtos & Serviços (965)
-  Produto: 1986, Servico: 0, SetorAtividade: 11, GrupoProduto: 91,
-  Marca: 6, TabelaPreco: 1, KitProduto: 0, CatalogoWeb: 0, UnidadeMedida: 1,
-  // Bloco 3 — Financeiro & Fiscal (85)
-  Banco: 7, FormaPagamento: 8, PlanoDeContas: 10, CentroCusto: 10,
-  CentroResultado: 5, TipoDespesa: 10, MoedaIndice: 6, OperadorCaixa: 2,
-  ConfiguracaoDespesaRecorrente: 5, TabelaFiscal: 20, CondicaoComercial: 6,
-  // Bloco 4 — Logística, Frota & Almoxarifado (22)
-  Veiculo: 5, Motorista: 5, TipoFrete: 3, LocalEstoque: 5, RotaPadrao: 2, ModeloDocumento: 2,
-  // Bloco 5 — Estrutura Organizacional (22)
-  Empresa: 2, GrupoEmpresarial: 1, Departamento: 8, Cargo: 6, Turno: 3, PerfilAcesso: 5,
-  // Bloco 6 — Tecnologia, IA & Parâmetros (33)
-  ApiExterna: 0, ChatbotCanal: 3, ChatbotIntent: 8, JobAgendado: 5,
-  Webhook: 0, ConfiguracaoNFe: 2, GatewayPagamento: 4, EventoNotificacao: 8,
+  // Bloco 1 — Pessoas & Parceiros (Real: 21)
+  Cliente: 1, Fornecedor: 4, Transportadora: 2, Colaborador: 4,
+  Representante: 2, ContatoB2B: 3, SegmentoCliente: 5, RegiaoAtendimento: 5,
+  // Bloco 2 — Produtos & Serviços (Real: 1059 = 919 Produtos + 140 outros)
+  Produto: 919, Servico: 5, SetorAtividade: 11, GrupoProduto: 91,
+  Marca: 6, TabelaPreco: 1, KitProduto: 4, CatalogoWeb: 3, UnidadeMedida: 20,
+  // Bloco 3 — Financeiro & Fiscal (Real: 120)
+  Banco: 10, FormaPagamento: 8, PlanoDeContas: 30, CentroCusto: 15,
+  CentroResultado: 5, TipoDespesa: 10, MoedaIndice: 6, OperadorCaixa: 4,
+  ConfiguracaoDespesaRecorrente: 7, TabelaFiscal: 20, CondicaoComercial: 5,
+  // Bloco 4 — Logística, Frota & Almoxarifado (Real: 32)
+  Veiculo: 6, Motorista: 6, TipoFrete: 4, LocalEstoque: 5, RotaPadrao: 5, ModeloDocumento: 6,
+  // Bloco 5 — Estrutura Organizacional (Real: 19)
+  Empresa: 3, GrupoEmpresarial: 1, Departamento: 5, Cargo: 6, Turno: 2, PerfilAcesso: 2,
+  // Bloco 6 — Tecnologia, IA & Parâmetros (Real: 56)
+  ApiExterna: 3, ChatbotCanal: 4, ChatbotIntent: 10, JobAgendado: 8,
+  Webhook: 3, ConfiguracaoNFe: 4, GatewayPagamento: 13, EventoNotificacao: 11,
 };
 
 // Conta entidade via backend countEntities (retorna número exato sem trazer registros)

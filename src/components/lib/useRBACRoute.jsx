@@ -7,10 +7,10 @@ import usePermissions from '@/components/lib/usePermissions';
 export function useRBACRoute(moduleName, requiredAction = 'ver') {
   const navigate = useNavigate();
   const { user, isLoadingAuth } = useAuth();
-  const { hasPermission } = usePermissions();
+  const { hasPermission, isLoading: loadingPermissions } = usePermissions();
 
   useEffect(() => {
-    if (isLoadingAuth) return; // Esperando autenticação
+    if (isLoadingAuth || loadingPermissions) return; // Esperando auth + perfil carregar
 
     // Se não autenticado, redireciona ao login
     if (!user) {
@@ -19,22 +19,19 @@ export function useRBACRoute(moduleName, requiredAction = 'ver') {
     }
 
     // Admin sempre tem acesso
-    if (user.role === 'admin') {
-      return;
-    }
+    if (user.role === 'admin') return;
 
-    // Verifica permissão específica
+    // Verifica permissão específica — só redireciona se tiver certeza que não tem acesso
     const allowed = hasPermission(moduleName, null, requiredAction);
     if (!allowed) {
-      console.warn(`[RBAC] Acesso negado: ${user.full_name} tentou acessar ${moduleName}/${requiredAction}`);
-      navigate('/'); // Redireciona ao dashboard
-      return;
+      console.warn(`[RBAC] Acesso negado: ${user?.full_name} tentou acessar ${moduleName}/${requiredAction}`);
+      navigate('/');
     }
-  }, [user, isLoadingAuth, moduleName, requiredAction, navigate, hasPermission]);
+  }, [user, isLoadingAuth, loadingPermissions, moduleName, requiredAction, navigate, hasPermission]);
 
   return {
     isAuthorized: user?.role === 'admin' || hasPermission(moduleName, null, requiredAction),
-    isLoading: isLoadingAuth,
+    isLoading: isLoadingAuth || loadingPermissions,
     user
   };
 }

@@ -16,12 +16,23 @@ export default function usePermissions() {
     queryKey: ['perfil-acesso', user?.perfil_acesso_id],
     queryFn: async () => {
       if (!user?.perfil_acesso_id) return null;
-      return await base44.entities.PerfilAcesso.get(user.perfil_acesso_id);
+      try {
+        return await base44.entities.PerfilAcesso.get(user.perfil_acesso_id);
+      } catch (err) {
+        const status = err?.response?.status || err?.status;
+        // Perfil órfão (404): limpa referência e para loop
+        if (status === 404 || /not found/i.test(err?.message || '')) {
+          try { await base44.auth.updateMe({ perfil_acesso_id: null }); } catch (_) {}
+          return null;
+        }
+        // Qualquer outro erro: retorna null sem bloquear (fail-open)
+        return null;
+      }
     },
     enabled: !!(user?.perfil_acesso_id && user.perfil_acesso_id !== ""),
-    staleTime: 300000,  // 5 min — evita re-fetches que causam flicker no RBAC
+    staleTime: 300000,
     gcTime: 600000,
-    retry: 1,
+    retry: 0, // CRÍTICO: sem retry para evitar loop infinito de 404
     });
 
     // Normalização e aliases (HÍBRIDO: melhor opção sem quebrar legado)
@@ -139,7 +150,8 @@ export default function usePermissions() {
     if (!user) return false;
     if (user.role === "admin") return true;
     const perms = perfilAcesso?.permissoes;
-    if (!perms) return false;
+    // Se perfil não carregado ainda (loading) ou usuário sem perfil definido: fail-open (permite acesso)
+    if (!perms) return true;
     if (!section && typeof module === "string" && module.includes(".")) {
       const parsed = parsePermissionKey(module, action);
       module = parsed.module;

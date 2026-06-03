@@ -1087,6 +1087,8 @@ function LayoutContent({ children, currentPageName }) {
       'Compras e Suprimentos': 'Compras',
       'Expedição e Logística': 'Expedicao',
       'Produção e Manufatura': 'Producao',
+      'Expedição': 'Expedicao',
+      'Produção': 'Producao',
       'Financeiro e Contábil': 'Financeiro',
       'Recursos Humanos': 'RH',
       'Fiscal e Tributário': 'Fiscal',

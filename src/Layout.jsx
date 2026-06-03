@@ -135,7 +135,7 @@ function LayoutContent({ children, currentPageName }) {
           'ContatoB2B', 'SegmentoCliente', 'RegiaoAtendimento',
         ], { enabled: true });
 
-        // Fase 3: Rastreamento de histórico + prefetch preditivo
+        // Fase 3: Rastreamento de histórico + prefetch preditivo (com debounce de rate limit)
         useNavHistory();
         usePredictivePrefetch();
 

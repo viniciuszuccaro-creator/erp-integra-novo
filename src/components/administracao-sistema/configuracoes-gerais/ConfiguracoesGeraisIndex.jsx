@@ -66,9 +66,12 @@ function AcoesRapidasEtapas() {
     {
       key: 'configs',
       label: 'E2: Init Configs',
-      title: 'E2: Inicializar ConfiguracaoSistema padrão em ambos contextos (Grupo + Empresa)',
+      title: 'E2: Inicializar ConfiguracaoSistema padrão em dual-context real (Grupo + todas Empresas)',
       color: 'border-amber-300 text-amber-700 hover:bg-amber-50',
-      fn: () => base44.functions.invoke('initDefaultConfigs', { group_id: grupoAtual?.id }),
+      fn: () => base44.functions.invoke('initDefaultConfigs', {
+        group_id: grupoAtual?.id,
+        empresa_id: empresaAtual?.id || null,
+      }),
     },
     {
       key: 'rbac',

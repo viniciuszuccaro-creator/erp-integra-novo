@@ -75,17 +75,32 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const force = body?.force === true;
-    // Etapa 2: salva em ambos os contextos (Grupo + Empresa)
+    // Etapa 2: salva em ambos os contextos (Grupo + Todas Empresas do Grupo)
     const group_id = body?.group_id || null;
     const empresa_id = body?.empresa_id || null;
 
     const api = base44.asServiceRole.entities.ConfiguracaoSistema;
     const results = { created: [], skipped: [], errors: [] };
 
-    // Contextos para salvar: global sempre + grupo (se informado) + empresa (se informada)
+    // Buscar todas as empresas do grupo para preencher em dual-context real
+    let empresasDoGrupo = [];
+    if (group_id) {
+      try {
+        empresasDoGrupo = await base44.asServiceRole.entities.Empresa.filter({ group_id }, null, 50);
+      } catch (_) {}
+    }
+
+    // Contextos para salvar: global sempre + grupo (se informado) + todas empresas do grupo
     const contextos = [{}]; // global (sem group_id nem empresa_id)
     if (group_id) contextos.push({ group_id });
+    // Empresa explícita passada no body
     if (empresa_id) contextos.push({ empresa_id, group_id: group_id || undefined });
+    // Todas as empresas do grupo (exceto a já adicionada)
+    for (const emp of empresasDoGrupo) {
+      if (emp.id && emp.id !== empresa_id) {
+        contextos.push({ empresa_id: emp.id, group_id });
+      }
+    }
 
     for (const ctx of contextos) {
       for (const cfg of DEFAULT_CONFIGS) {
@@ -105,18 +120,27 @@ Deno.serve(async (req) => {
             ...ctx,
           });
           results.created.push(`${cfg.chave}@${JSON.stringify(ctx)}`);
-          // Anti-429: delay entre criações
-          await new Promise(r => setTimeout(r, 60));
+          // Anti-429: delay entre criações (aumentado para evitar burst)
+          await new Promise(r => setTimeout(r, 150));
         } catch (e) {
-          // Se 429, aguarda mais antes de prosseguir
-          if (String(e.message).includes('429') || String(e.message).toLowerCase().includes('rate limit')) {
-            await new Promise(r => setTimeout(r, 500));
+          const msg = String(e?.message || e);
+          // Se 429, aguarda muito mais antes de prosseguir
+          if (msg.includes('429') || msg.toLowerCase().includes('rate limit')) {
+            await new Promise(r => setTimeout(r, 2000));
+            // Tenta de novo uma vez após o backoff
+            try {
+              await api.create({ chave: cfg.chave, ativa: cfg.ativa, categoria: cfg.categoria, ...ctx });
+              results.created.push(`${cfg.chave}@${JSON.stringify(ctx)}_retry`);
+            } catch (_) {
+              results.errors.push({ chave: cfg.chave, ctx, error: 'rate_limit_after_retry' });
+            }
+          } else {
+            results.errors.push({ chave: cfg.chave, ctx, error: msg.slice(0, 80) });
           }
-          results.errors.push({ chave: cfg.chave, ctx, error: e.message });
         }
       }
-      // Delay entre contextos
-      await new Promise(r => setTimeout(r, 200));
+      // Delay maior entre contextos para respeitar rate limit
+      await new Promise(r => setTimeout(r, 500));
     }
 
     // Auditoria

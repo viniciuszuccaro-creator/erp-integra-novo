@@ -15,12 +15,13 @@ import {
 import { toast } from "sonner";
 
 // ─── Mapa das 5 etapas ──────────────────────────────────────────────────────
+// Labels alinhados com as ações do AcoesRapidasEtapas
 const ETAPAS_META = [
-  { id: 1, fn: 'fase1Check', label: "Segurança & RBAC",       color: "bg-blue-100 text-blue-800",   dot: "bg-blue-500" },
-  { id: 2, fn: 'fase2Check', label: "Multi-empresa",           color: "bg-amber-100 text-amber-800", dot: "bg-amber-500" },
-  { id: 3, fn: 'fase3Check', label: "Orquestração de Módulos", color: "bg-purple-100 text-purple-800", dot: "bg-purple-500" },
-  { id: 4, fn: 'fase4Check', label: "Atendimento & Canais",    color: "bg-red-100 text-red-800",     dot: "bg-red-500" },
-  { id: 5, fn: 'fase5Check', label: "Integrações & Rate Limit",color: "bg-green-100 text-green-800", dot: "bg-green-500" },
+  { id: 1, fn: 'fase1Check', label: "E1 · Propagação — Segurança & RBAC",        color: "bg-blue-100 text-blue-800"   },
+  { id: 2, fn: 'fase2Check', label: "E2 · Toggles — Multi-empresa Dual-context", color: "bg-amber-100 text-amber-800" },
+  { id: 3, fn: 'fase3Check', label: "E3 · RBAC — Orquestração de Módulos",       color: "bg-purple-100 text-purple-800" },
+  { id: 4, fn: 'fase4Check', label: "E4 · Rate Limit — Atendimento & Canais",    color: "bg-red-100 text-red-800"     },
+  { id: 5, fn: 'fase5Check', label: "E5 · Herança — Integrações & Circuit Breaker", color: "bg-green-100 text-green-800" },
 ];
 
 // ─── Helpers de UI ──────────────────────────────────────────────────────────
@@ -49,9 +50,6 @@ function EtapaRow({ meta, result, loading, onRun, expanded, onToggle }) {
           ? <StatusIcon ok={score === 100 ? true : score >= 70 ? "warn" : false} />
           : <div className="w-3.5 h-3.5 rounded-full border-2 border-slate-300 shrink-0" />
         }
-        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${meta.color}`}>
-          E{meta.id}
-        </span>
         <span className="text-xs font-medium text-slate-700 flex-1">{meta.label}</span>
         {score !== null && (
           <Badge className={`text-[10px] px-1.5 ${score === 100 ? 'bg-green-100 text-green-700' : score >= 70 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
@@ -105,14 +103,18 @@ export default function SistemaIntegridadeCheck() {
     setLoading(prev => ({ ...prev, [etapa.id]: true }));
     try {
       const res = await base44.functions.invoke(etapa.fn, {});
-      setResults(prev => ({ ...prev, [etapa.id]: res?.data || res }));
+      // base44.functions.invoke retorna { data: ... } — extrair corretamente
+      const data = res?.data ?? res;
+      setResults(prev => ({ ...prev, [etapa.id]: data }));
       // Auto-expandir se houver falhas
-      const data = res?.data || res;
       if (data?.score < 100) setExpanded(prev => ({ ...prev, [etapa.id]: true }));
     } catch (err) {
-      const msg = err?.message?.slice(0, 60) || 'Erro';
-      setResults(prev => ({ ...prev, [etapa.id]: { score: 0, passed: 0, total: 10, items: [{ id: 'erro', ok: false, detail: msg }] } }));
-      toast.error(`E${etapa.id}: ${msg}`);
+      const msg = String(err?.message || err).slice(0, 80);
+      setResults(prev => ({
+        ...prev,
+        [etapa.id]: { score: 0, passed: 0, total: 10, items: [{ id: 'erro', ok: false, detail: msg }] }
+      }));
+      toast.error(`E${etapa.id} erro: ${msg}`);
     } finally {
       setLoading(prev => ({ ...prev, [etapa.id]: false }));
     }
@@ -121,8 +123,10 @@ export default function SistemaIntegridadeCheck() {
   const runAll = useCallback(async () => {
     setResults({});
     setExpanded({});
-    // Executa todas em paralelo para ser mais rápido
-    await Promise.all(ETAPAS_META.map(e => runEtapa(e)));
+    // Executa sequencialmente para evitar rate limit — cada etapa já mostra resultado parcial
+    for (const etapa of ETAPAS_META) {
+      await runEtapa(etapa);
+    }
     toast.success("Checkup completo — 5 etapas verificadas!");
   }, [runEtapa]);
 

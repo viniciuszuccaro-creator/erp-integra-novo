@@ -43,7 +43,13 @@ const CHECK_ITEMS = [
     label: "Propagação bidirecional configurada",
     etapa: 1,
     icon: ArrowDownUp,
-    run: async (api) => {
+    run: async (api, grupoAtual, faseData) => {
+      // Usa resultado do fase1Check se disponível
+      if (faseData?.propagacao !== undefined) {
+        return faseData.propagacao
+          ? { ok: true, msg: `fase1Check: propagação OK — ${faseData.entidades_ok || 0} entidade(s)` }
+          : { ok: "warn", msg: `fase1Check: ${faseData.msg || "propagação com pendências"}` };
+      }
       const cfgs = await api.entities.ConfiguracaoSistema.filter(
         { chave: "propagacao_grupo_empresas_ativa" }, null, 1
       ).catch(() => []);
@@ -107,7 +113,13 @@ const CHECK_ITEMS = [
     label: "Perfis de acesso cadastrados",
     etapa: 3,
     icon: Lock,
-    run: async (api) => {
+    run: async (api, grupoAtual, faseData) => {
+      // Aproveita resultado do fase3Check
+      if (faseData?.perfis !== undefined) {
+        return faseData.perfis > 0
+          ? { ok: true, msg: `fase3Check: ${faseData.perfis} perfil(is) — módulos cobertos: ${faseData.modulos_ok || '?'}` }
+          : { ok: "warn", msg: "fase3Check: sem perfis de acesso — execute initializeRBACProfiles" };
+      }
       const perfis = await api.entities.PerfilAcesso.filter({ ativo: true }, null, 10).catch(() => []);
       return perfis.length > 0
         ? { ok: true, msg: `${perfis.length} perfil(is) ativo(s) — RBAC coberto` }
@@ -224,6 +236,17 @@ export default function SistemaIntegridadeCheck() {
   const [loading, setLoading] = useState(false);
   const [filterEtapa, setFilterEtapa] = useState(null);
 
+  // Chama as funções fase1Check..fase5Check do backend para validação real
+  const runFaseCheck = async (etapa) => {
+    const fnMap = { 1: 'fase1Check', 2: 'fase2Check', 3: 'fase3Check', 4: 'fase4Check', 5: 'fase5Check' };
+    const fn = fnMap[etapa];
+    if (!fn) return null;
+    try {
+      const res = await base44.functions.invoke(fn, { group_id: grupoAtual?.id || null });
+      return res?.data || null;
+    } catch (_) { return null; }
+  };
+
   const runChecks = async (etapaFilter = null) => {
     setLoading(true);
     if (!etapaFilter) setResults({});
@@ -232,16 +255,23 @@ export default function SistemaIntegridadeCheck() {
       ? CHECK_ITEMS.filter(c => c.etapa === etapaFilter)
       : CHECK_ITEMS;
 
+    // Para cada etapa distinta, chama o faseXCheck do backend em paralelo
+    const etapasDistintas = [...new Set(items.map(c => c.etapa))];
+    const faseResults = {};
+    await Promise.all(etapasDistintas.map(async (e) => {
+      faseResults[e] = await runFaseCheck(e);
+    }));
+
     for (const check of items) {
       try {
-        const res = await check.run(api, grupoAtual);
+        const res = await check.run(api, grupoAtual, faseResults[check.etapa]);
         setResults(prev => ({ ...prev, [check.id]: res }));
       } catch (e) {
         setResults(prev => ({ ...prev, [check.id]: { ok: false, msg: e.message } }));
       }
     }
     setLoading(false);
-    toast.success(etapaFilter ? `Etapa ${etapaFilter} verificada!` : "Checkup completo!");
+    toast.success(etapaFilter ? `Etapa ${etapaFilter} verificada!` : "Checkup completo — 5 etapas!");
   };
 
   const resetCircuitBreaker = () => {

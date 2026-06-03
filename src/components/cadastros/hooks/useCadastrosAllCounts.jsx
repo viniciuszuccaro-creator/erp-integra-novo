@@ -61,21 +61,32 @@ export default function useCadastrosAllCounts() {
   const groupId   = grupoAtual?.id   || null;
   const queryClient = useQueryClient();
 
-  // Contagem precisa: sempre valida TODAS as entidades via backend para garantir sincronização
+  // Contagem precisa: valida TODAS as entidades respeitando contexto + força refetch se contexto muda
   const { data } = useQuery({
     queryKey: ["cadastros-all-counts-v7", groupId, empresaId],
     queryFn: async () => {
+      // Se sem contexto ativo, retorna snapshot sem contar
+      if (!groupId && !empresaId) return SNAPSHOT;
+
       const result = { ...SNAPSHOT };
       await Promise.allSettled(
         ALL_ENTITIES.map(async (entityName) => {
           try {
             let filter = {};
-            if (entityName === "Produto") {
-              filter = groupId ? { group_id: groupId } : { empresa_id: empresaId };
-            } else if (["Fornecedor","Transportadora"].includes(entityName)) {
-              filter = groupId ? { group_id: groupId } : { empresa_dona_id: empresaId };
-            } else {
-              filter = groupId ? { group_id: groupId } : { empresa_id: empresaId };
+            // Determina field e valor baseado no contexto
+            if (groupId) {
+              filter.group_id = groupId;
+            } else if (empresaId) {
+              // Algumas entidades têm campo diferente
+              if (["Fornecedor","Transportadora"].includes(entityName)) {
+                filter.empresa_dona_id = empresaId;
+              } else if (["Cliente"].includes(entityName)) {
+                filter.empresa_id = empresaId;
+              } else if (["Colaborador"].includes(entityName)) {
+                filter.empresa_alocada_id = empresaId;
+              } else {
+                filter.empresa_id = empresaId;
+              }
             }
             const n = await countEntity(entityName, filter);
             result[entityName] = Math.max(0, n);
@@ -84,8 +95,8 @@ export default function useCadastrosAllCounts() {
       );
       return result;
     },
-    staleTime: 10 * 60_000,
-    gcTime: 60 * 60_000,
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
     placeholderData: SNAPSHOT,
     refetchOnWindowFocus: false,
     refetchOnMount: false,

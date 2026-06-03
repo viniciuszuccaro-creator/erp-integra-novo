@@ -34,18 +34,18 @@ export default function usePermissions() {
     };
 
     const MODULE_ALIASES = {
-      // principais variações de nomes de módulos (sempre SEM acentos)
+      // principais variações de nomes de módulos
       'financeiro': 'Financeiro', 'financeiroecontabil': 'Financeiro',
       'compras': 'Compras', 'comprasesuprimentos': 'Compras',
       'comercial': 'Comercial', 'comercialevendas': 'Comercial',
       'estoque': 'Estoque', 'estoqueealmoxarifado': 'Estoque',
-      'expedicao': 'Expedicao', 'expedicaologistica': 'Expedicao',
-      'producao': 'Producao',
+      'expedicao': 'Expedição', 'expedicaologistica': 'Expedição',
+      'producao': 'Produção',
       'crm': 'CRM', 'crmrelacionamento': 'CRM',
       'fiscal': 'Fiscal',
       'rh': 'RH', 'recursoshumanos': 'RH',
       'dashboard': 'Dashboard', 'dashboardcorporativo': 'Dashboard',
-      'relatorios': 'Relatorios', 'relatorioseanalises': 'Relatorios',
+      'relatorios': 'Relatórios', 'relatorioseanalises': 'Relatórios',
       'agenda': 'Agenda',
       'cadastros': 'Cadastros', 'cadastrosgerais': 'Cadastros',
       'contratos': 'Contratos',

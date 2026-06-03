@@ -32,32 +32,15 @@ export default function ProtectedSection({
   const loggedRef = useRef(false);
   const [requestingAccess, setRequestingAccess] = useState(false);
   const [requestedAccess, setRequestedAccess] = useState(false);
-  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   // Sempre manter a mesma ordem de hooks entre renders
-  const allowed = hasPermission(modulo, section, action);
-  const [allowedFinal, setAllowedFinal] = useState(true); // Default otimista
+  const allowed = !isLoading && hasPermission(modulo, section, action);
+  const [allowedFinal, setAllowedFinal] = useState(null);
   const [showDenied, setShowDenied] = useState(false);
 
-  // Marca quando o loading terminou pela primeira vez
   useEffect(() => {
-    if (!isLoading && !hasLoadedOnce) {
-      setHasLoadedOnce(true);
-      setAllowedFinal(allowed);
-    }
-  }, [isLoading, hasLoadedOnce, allowed]);
-
-  useEffect(() => {
-    if (!modulo) { setAllowedFinal(true); return; }
-    
-    // Após primeira carga, sempre usa o valor real de hasPermission
-    if (hasLoadedOnce) {
-      setAllowedFinal(allowed);
-    }
-  }, [hasLoadedOnce, allowed, modulo]);
-
-  useEffect(() => {
-    if (!modulo || isLoading) return;
+    if (isLoading) return;
+    if (!modulo) { setAllowedFinal(allowed); return; }
 
     const __guardCache = getGuardCache();
     const __guardInflight = getGuardInflight();
@@ -65,12 +48,12 @@ export default function ProtectedSection({
     const now = Date.now();
     const cached = __guardCache.get(key);
     if (cached && (now - cached.ts < GUARD_TTL_MS)) {
-      setAllowedFinal(Boolean(cached.allowed));
+      setAllowedFinal(Boolean(cached.allowed) && allowed);
       return;
     }
 
     // Valor otimista para não bloquear UI
-    setAllowedFinal(true);
+    setAllowedFinal(allowed);
 
     if (__guardInflight.has(key)) {
       __guardInflight.get(key)
@@ -134,8 +117,8 @@ export default function ProtectedSection({
   // removeChild/insertBefore errors when Suspense boundaries are involved.
   // Instead, use CSS visibility and an overlay to show/hide access denied state.
 
-  const denied = hasLoadedOnce && allowedFinal === false && showDenied;
-  const loading = false; // Nunca bloqueia renderização após primeira carga
+  const denied = !isLoading && allowedFinal === false && showDenied;
+  const loading = isLoading || allowedFinal === null;
 
   // hideInstead: just hide children via CSS, never unmount
   if (hideInstead && denied) {

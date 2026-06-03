@@ -101,12 +101,12 @@ function LayoutContent({ children, currentPageName }) {
     Financeiro: 'Financeiro',
     Fiscal: 'Fiscal',
     RH: 'RH',
-    Expedicao: 'Expedicao',
-    Producao: 'Producao',
-    ProducaoMobile: 'Producao',
+    Expedicao: 'Expedição',
+    Producao: 'Produção',
+    ProducaoMobile: 'Produção',
     Dashboard: 'Dashboard',
     DashboardCorporativo: 'Dashboard',
-    Relatorios: 'Relatorios',
+    Relatorios: 'Relatórios',
     Agenda: 'Agenda',
     Cadastros: 'Cadastros',
     Contratos: 'Contratos',
@@ -1079,8 +1079,9 @@ function LayoutContent({ children, currentPageName }) {
 
   const itemsFiltrados = navigationItems.filter(item => {
     if (item.adminOnly && user?.role !== 'admin') return false;
-    // Renderizar todos os itens — verificação de permissão fica para dentro do componente
-    return true;
+    const mod = titleToModule[item.title];
+    if (!mod) return true; // itens públicos ou informativos continuam visíveis
+    return hasPermission(mod, null, 'ver');
   });
 
   // Auditoria de bloqueio de módulo delegada ao LayoutEffects

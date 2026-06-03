@@ -93,7 +93,8 @@ Deno.serve(async (req) => {
         globalThis.__countEntitiesOptimizedLastCallAt = lastBackendCallAt;
 
         const api = base44.asServiceRole.entities[entity];
-        const rows = await api.filter(countFilter, "-id", 1000, 0);
+        // Limite 2000 para capturar entidades com muitos registros (ex: Produto com 2000+ duplicados)
+        const rows = await api.filter(countFilter, "-id", 2000, 0);
         const count = Array.isArray(rows) ? rows.length : 0;
 
         result[entity] = count;

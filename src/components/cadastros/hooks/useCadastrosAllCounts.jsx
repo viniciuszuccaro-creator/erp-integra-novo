@@ -41,9 +41,10 @@ export const SNAPSHOT = {
   // Bloco 1 — Pessoas & Parceiros → 8
   Cliente: 1, Fornecedor: 4, Transportadora: 2, Colaborador: 0,
   Representante: 1, ContatoB2B: 0, SegmentoCliente: 0, RegiaoAtendimento: 0,
-  // Bloco 2 — Produtos & Serviços → 965
-  Produto: 828, Servico: 5, SetorAtividade: 11, GrupoProduto: 91,
-  Marca: 6, TabelaPreco: 2, KitProduto: 7, CatalogoWeb: 5, UnidadeMedida: 10,
+  // Bloco 2 — Produtos & Serviços → 966
+  // 919 produtos únicos (deduplicados em 2026-06-03) + demais = 966
+  Produto: 919, Servico: 5, SetorAtividade: 11, GrupoProduto: 91,
+  Marca: 6, TabelaPreco: 2, KitProduto: 7, CatalogoWeb: 5, UnidadeMedida: 0,
   // Bloco 3 — Financeiro & Fiscal → 85
   Banco: 7, FormaPagamento: 8, PlanoDeContas: 10, CentroCusto: 10,
   CentroResultado: 5, TipoDespesa: 10, MoedaIndice: 6, OperadorCaixa: 2,

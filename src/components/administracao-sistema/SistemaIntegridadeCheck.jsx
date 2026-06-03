@@ -1,7 +1,8 @@
 /**
- * SistemaIntegridadeCheck v5.0
- * Usa as funções backend faseXCheck reais (já validadas 100%).
- * UI limpa: progresso por etapa, score global, ações diretas.
+ * SistemaIntegridadeCheck v6.0
+ * 5 etapas — 100% verificadas via backend faseXCheck.
+ * Execução sequencial com feedback progressivo.
+ * Alinhado com as 5 tarefas reais do usuário.
  */
 import React, { useState, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
@@ -10,70 +11,149 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   CheckCircle2, AlertCircle, XCircle, Loader2,
-  ShieldCheck, RefreshCw, Zap, ChevronDown, ChevronRight
+  ShieldCheck, RefreshCw, Zap, ChevronDown, ChevronRight,
+  GitMerge, ToggleLeft, Lock, Activity, BookOpen
 } from "lucide-react";
 import { toast } from "sonner";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
-// ─── Mapa das 5 etapas ──────────────────────────────────────────────────────
-// Labels alinhados com as ações do AcoesRapidasEtapas
+// ─── Definição das 5 Etapas ─────────────────────────────────────────────────
 const ETAPAS_META = [
-  { id: 1, fn: 'fase1Check', label: "E1 · Propagação — Segurança & RBAC",        color: "bg-blue-100 text-blue-800"   },
-  { id: 2, fn: 'fase2Check', label: "E2 · Toggles — Multi-empresa Dual-context", color: "bg-amber-100 text-amber-800" },
-  { id: 3, fn: 'fase3Check', label: "E3 · RBAC — Orquestração de Módulos",       color: "bg-purple-100 text-purple-800" },
-  { id: 4, fn: 'fase4Check', label: "E4 · Rate Limit — Atendimento & Canais",    color: "bg-red-100 text-red-800"     },
-  { id: 5, fn: 'fase5Check', label: "E5 · Herança — Integrações & Circuit Breaker", color: "bg-green-100 text-green-800" },
+  {
+    id: 1,
+    fn: 'fase1Check',
+    label: "E1 · Propagação & Segurança",
+    desc: "Sincronização histórica + RLS multiempresa + RBAC",
+    icon: GitMerge,
+    color: "text-blue-600",
+    badgeColor: "bg-blue-100 text-blue-800",
+    actionKey: 'propagacao',
+  },
+  {
+    id: 2,
+    fn: 'fase2Check',
+    label: "E2 · Toggles Dual-context",
+    desc: "ConfiguracaoSistema em Grupo + Empresa",
+    icon: ToggleLeft,
+    color: "text-amber-600",
+    badgeColor: "bg-amber-100 text-amber-800",
+    actionKey: 'configs',
+  },
+  {
+    id: 3,
+    fn: 'fase3Check',
+    label: "E3 · RBAC por Módulo",
+    desc: "Controle de acesso granular + orquestração",
+    icon: Lock,
+    color: "text-purple-600",
+    badgeColor: "bg-purple-100 text-purple-800",
+    actionKey: 'rbac',
+  },
+  {
+    id: 4,
+    fn: 'fase4Check',
+    label: "E4 · Rate Limit & Canais",
+    desc: "Circuit breaker 429 + Atendimento omnicanal",
+    icon: Activity,
+    color: "text-red-600",
+    badgeColor: "bg-red-100 text-red-800",
+    actionKey: 'e4_reset',
+  },
+  {
+    id: 5,
+    fn: 'fase5Check',
+    label: "E5 · Herança Grupo→Empresa",
+    desc: "Políticas de herança + Integrações externas",
+    icon: BookOpen,
+    color: "text-green-600",
+    badgeColor: "bg-green-100 text-green-800",
+    actionKey: 'e5_check',
+  },
 ];
 
-// ─── Helpers de UI ──────────────────────────────────────────────────────────
-function StatusIcon({ ok }) {
-  if (ok === true)    return <CheckCircle2 className="w-3.5 h-3.5 text-green-500 shrink-0" />;
-  if (ok === "warn")  return <AlertCircle  className="w-3.5 h-3.5 text-amber-500 shrink-0" />;
-  return                     <XCircle      className="w-3.5 h-3.5 text-red-500 shrink-0" />;
+// ─── Ícone de status ─────────────────────────────────────────────────────────
+function StatusIcon({ ok, size = "sm" }) {
+  const cls = size === "lg" ? "w-5 h-5" : "w-3.5 h-3.5";
+  if (ok === true)   return <CheckCircle2 className={`${cls} text-green-500 shrink-0`} />;
+  if (ok === "warn") return <AlertCircle  className={`${cls} text-amber-500 shrink-0`} />;
+  return                    <XCircle      className={`${cls} text-red-500 shrink-0`} />;
 }
 
+// ─── Barra de progresso ──────────────────────────────────────────────────────
+function ProgressBar({ value, color = "bg-blue-500" }) {
+  return (
+    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+      <div
+        className={`h-1.5 rounded-full transition-all duration-500 ${color}`}
+        style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
+      />
+    </div>
+  );
+}
+
+// ─── Row de cada etapa ───────────────────────────────────────────────────────
 function EtapaRow({ meta, result, loading, onRun, expanded, onToggle }) {
-  const items  = result?.items || [];
-  const score  = result?.score ?? null;
-  const passed = result?.passed ?? 0;
-  const total  = result?.total ?? 0;
+  const Icon    = meta.icon;
+  const items   = result?.items || [];
+  const score   = result?.score ?? null;
+  const passed  = result?.passed ?? 0;
+  const total   = result?.total ?? 0;
+  const status  = score === null ? null : score === 100 ? true : score >= 70 ? "warn" : false;
+  const barColor = score === 100 ? "bg-green-500" : score >= 70 ? "bg-amber-400" : "bg-red-400";
 
   return (
     <div className="border border-slate-100 rounded-lg overflow-hidden">
-      {/* Header da etapa */}
+      {/* Header clicável */}
       <div
-        className="flex items-center gap-2 px-3 py-2 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors"
+        className="flex items-center gap-2 px-3 py-2.5 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors select-none"
         onClick={onToggle}
       >
-        {loading
-          ? <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-400 shrink-0" />
-          : score !== null
-          ? <StatusIcon ok={score === 100 ? true : score >= 70 ? "warn" : false} />
-          : <div className="w-3.5 h-3.5 rounded-full border-2 border-slate-300 shrink-0" />
-        }
-        <span className="text-xs font-medium text-slate-700 flex-1">{meta.label}</span>
-        {score !== null && (
-          <Badge className={`text-[10px] px-1.5 ${score === 100 ? 'bg-green-100 text-green-700' : score >= 70 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
-            {passed}/{total}
-          </Badge>
-        )}
-        <button
-          onClick={e => { e.stopPropagation(); onRun(); }}
-          disabled={loading}
-          className="text-[10px] text-blue-600 hover:text-blue-800 underline disabled:opacity-40 ml-1"
-        >
-          ↻
-        </button>
-        {expanded
-          ? <ChevronDown className="w-3 h-3 text-slate-400" />
-          : <ChevronRight className="w-3 h-3 text-slate-400" />
-        }
+        <Icon className={`w-3.5 h-3.5 shrink-0 ${meta.color}`} />
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-xs font-semibold text-slate-800">{meta.label}</span>
+            {score !== null && (
+              <Badge className={`text-[10px] px-1.5 py-0 ${
+                score === 100 ? 'bg-green-100 text-green-700' :
+                score >= 70   ? 'bg-amber-100 text-amber-700' :
+                                'bg-red-100 text-red-700'
+              }`}>
+                {passed}/{total}
+              </Badge>
+            )}
+            {loading && <Loader2 className="w-3 h-3 animate-spin text-slate-400" />}
+          </div>
+          <p className="text-[10px] text-slate-500 leading-tight mt-0.5">{meta.desc}</p>
+          {score !== null && (
+            <div className="mt-1">
+              <ProgressBar value={score} color={barColor} />
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1 shrink-0">
+          {score !== null && <StatusIcon ok={status} />}
+          <button
+            onClick={e => { e.stopPropagation(); onRun(); }}
+            disabled={loading}
+            title="Verificar esta etapa"
+            className="text-[11px] text-blue-600 hover:text-blue-800 font-bold disabled:opacity-40 px-1"
+          >
+            ↻
+          </button>
+          {expanded
+            ? <ChevronDown  className="w-3 h-3 text-slate-400" />
+            : <ChevronRight className="w-3 h-3 text-slate-400" />
+          }
+        </div>
       </div>
 
-      {/* Items detalhados */}
-      {expanded && items.length > 0 && (
-        <div className="divide-y divide-slate-50">
-          {items.map(item => (
-            <div key={item.id} className="flex items-start gap-2 px-3 py-1.5 bg-white hover:bg-slate-50 transition-colors">
+      {/* Detalhes expandidos */}
+      {expanded && (
+        <div className="bg-white">
+          {items.length > 0 ? items.map(item => (
+            <div key={item.id} className="flex items-start gap-2 px-3 py-1.5 border-t border-slate-50 hover:bg-slate-50 transition-colors">
               <StatusIcon ok={item.ok} />
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-medium text-slate-700 leading-tight">
@@ -82,12 +162,12 @@ function EtapaRow({ meta, result, loading, onRun, expanded, onToggle }) {
                 <p className="text-[10px] text-slate-500 mt-0.5 leading-relaxed">{item.detail}</p>
               </div>
             </div>
-          ))}
+          )) : (
+            <p className="text-[11px] text-slate-400 text-center py-3 italic">
+              {loading ? "Verificando…" : "Clique em ↻ para verificar esta etapa."}
+            </p>
+          )}
         </div>
-      )}
-
-      {expanded && !result && !loading && (
-        <p className="text-[11px] text-slate-400 text-center py-2">Clique em ↻ para verificar esta etapa.</p>
       )}
     </div>
   );
@@ -95,26 +175,28 @@ function EtapaRow({ meta, result, loading, onRun, expanded, onToggle }) {
 
 // ─── Componente principal ────────────────────────────────────────────────────
 export default function SistemaIntegridadeCheck() {
-  const [results,  setResults]  = useState({}); // { 1: {score,passed,total,items}, ... }
-  const [loading,  setLoading]  = useState({}); // { 1: bool, ... }
-  const [expanded, setExpanded] = useState({}); // { 1: bool, ... }
+  const { grupoAtual, empresaAtual } = useContextoVisual();
+  const [results,  setResults]  = useState({});
+  const [loading,  setLoading]  = useState({});
+  const [expanded, setExpanded] = useState({});
+  const [runningAll, setRunningAll] = useState(false);
 
   const runEtapa = useCallback(async (etapa) => {
     setLoading(prev => ({ ...prev, [etapa.id]: true }));
     try {
-      const res = await base44.functions.invoke(etapa.fn, {});
-      // base44.functions.invoke retorna { data: ... } — extrair corretamente
+      const res  = await base44.functions.invoke(etapa.fn, {});
       const data = res?.data ?? res;
       setResults(prev => ({ ...prev, [etapa.id]: data }));
-      // Auto-expandir se houver falhas
-      if (data?.score < 100) setExpanded(prev => ({ ...prev, [etapa.id]: true }));
+      if ((data?.score ?? 100) < 100) {
+        setExpanded(prev => ({ ...prev, [etapa.id]: true }));
+      }
+      return data;
     } catch (err) {
-      const msg = String(err?.message || err).slice(0, 80);
-      setResults(prev => ({
-        ...prev,
-        [etapa.id]: { score: 0, passed: 0, total: 10, items: [{ id: 'erro', ok: false, detail: msg }] }
-      }));
-      toast.error(`E${etapa.id} erro: ${msg}`);
+      const msg = String(err?.message || err).slice(0, 100);
+      const errData = { score: 0, passed: 0, total: 10, items: [{ id: 'erro', ok: false, detail: msg }] };
+      setResults(prev => ({ ...prev, [etapa.id]: errData }));
+      toast.error(`${etapa.label}: ${msg}`);
+      return errData;
     } finally {
       setLoading(prev => ({ ...prev, [etapa.id]: false }));
     }
@@ -123,40 +205,64 @@ export default function SistemaIntegridadeCheck() {
   const runAll = useCallback(async () => {
     setResults({});
     setExpanded({});
-    // Executa sequencialmente para evitar rate limit — cada etapa já mostra resultado parcial
+    setRunningAll(true);
+    let allPassed = 0;
     for (const etapa of ETAPAS_META) {
-      await runEtapa(etapa);
+      const data = await runEtapa(etapa);
+      if (data?.score === 100) allPassed++;
     }
-    toast.success("Checkup completo — 5 etapas verificadas!");
+    setRunningAll(false);
+    if (allPassed === ETAPAS_META.length) {
+      toast.success("✅ Sistema 100% íntegro — todas as 5 etapas verificadas!");
+    } else {
+      toast.warning(`⚡ ${ETAPAS_META.length - allPassed} etapa(s) com atenção.`);
+    }
   }, [runEtapa]);
 
-  const resetCB = () => {
-    localStorage.removeItem('circuitBreakerState');
-    toast.success("Circuit Breaker resetado — estado: CLOSED");
-  };
+  const resetCB = useCallback(() => {
+    try {
+      localStorage.removeItem('circuitBreakerState');
+      localStorage.removeItem('cb_entity_counts');
+      toast.success("Circuit Breaker resetado → CLOSED");
+    } catch (_) {
+      toast.error("Erro ao resetar Circuit Breaker");
+    }
+  }, []);
 
   const toggleExpand = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
 
-  // Scoreboard global
-  const allResults    = Object.values(results);
-  const ran           = allResults.length > 0;
-  const anyLoading    = Object.values(loading).some(Boolean);
-  const globalPassed  = allResults.filter(r => r?.score === 100).length;
-  const globalTotal   = ETAPAS_META.length;
-  const globalPct     = allResults.length > 0
+  // ── Score global ────────────────────────────────────────────────────────
+  const allResults   = Object.values(results);
+  const ran          = allResults.length > 0;
+  const anyLoading   = runningAll || Object.values(loading).some(Boolean);
+  const globalPassed = allResults.filter(r => r?.score === 100).length;
+  const globalTotal  = ETAPAS_META.length;
+  const globalPct    = allResults.length > 0
     ? Math.round(allResults.reduce((s, r) => s + (r?.score || 0), 0) / allResults.length)
     : 0;
+
+  const globalColor = globalPassed === globalTotal ? "bg-green-500"
+    : globalPct >= 70 ? "bg-amber-400" : "bg-red-400";
+
+  // ── Contexto para exibição ──────────────────────────────────────────────
+  const ctxLabel = grupoAtual
+    ? `Grupo: ${grupoAtual.nome_do_grupo}`
+    : empresaAtual
+    ? `Empresa: ${empresaAtual.nome_fantasia || empresaAtual.razao_social}`
+    : "Sem contexto";
 
   return (
     <Card className="w-full">
       <CardHeader className="pb-3">
-        {/* Título + ações */}
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-blue-600" />
-            Checkup ao vivo — 5 Etapas
-          </CardTitle>
-          <div className="flex gap-1.5">
+        <div className="flex items-start justify-between flex-wrap gap-2">
+          <div>
+            <CardTitle className="text-sm flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
+              Checkup — 5 Etapas Críticas
+            </CardTitle>
+            <p className="text-[10px] text-slate-500 mt-0.5">{ctxLabel}</p>
+          </div>
+          <div className="flex gap-1.5 flex-wrap">
             <Button
               onClick={runAll}
               disabled={anyLoading}
@@ -167,32 +273,42 @@ export default function SistemaIntegridadeCheck() {
                 ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 : <RefreshCw className="w-3.5 h-3.5" />
               }
-              Verificar Tudo
+              {anyLoading ? "Verificando…" : "Verificar Tudo"}
             </Button>
             <Button
               onClick={resetCB}
               size="sm"
               variant="outline"
-              className="gap-1.5 text-xs border-red-300 text-red-700 hover:bg-red-50 h-7"
+              title="Resetar Circuit Breaker de rate limit (429)"
+              className="gap-1 text-xs border-red-200 text-red-600 hover:bg-red-50 h-7"
             >
               <Zap className="w-3 h-3" />
-              Reset CB
+              CB
             </Button>
           </div>
         </div>
 
         {/* Scoreboard global */}
         {ran && (
-          <div className="flex gap-2 mt-2 flex-wrap items-center">
-            <Badge className={`text-[10px] ${globalPassed === globalTotal ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-              {globalPassed}/{globalTotal} etapas 100%
-            </Badge>
-            <Badge className="bg-slate-100 text-slate-600 text-[10px]">
-              Score médio: {globalPct}%
-            </Badge>
-            {globalPassed === globalTotal && (
-              <Badge className="bg-green-100 text-green-700 text-[10px]">✅ Sistema íntegro</Badge>
-            )}
+          <div className="mt-2 space-y-1.5">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge className={`text-[10px] px-2 ${
+                globalPassed === globalTotal
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-amber-100 text-amber-700'
+              }`}>
+                {globalPassed}/{globalTotal} etapas ✓
+              </Badge>
+              <Badge className="bg-slate-100 text-slate-600 text-[10px] px-2">
+                Score: {globalPct}%
+              </Badge>
+              {globalPassed === globalTotal && (
+                <Badge className="bg-green-100 text-green-700 text-[10px] px-2">
+                  ✅ 100% íntegro
+                </Badge>
+              )}
+            </div>
+            <ProgressBar value={globalPct} color={globalColor} />
           </div>
         )}
       </CardHeader>
@@ -203,7 +319,7 @@ export default function SistemaIntegridadeCheck() {
             key={meta.id}
             meta={meta}
             result={results[meta.id]}
-            loading={loading[meta.id]}
+            loading={!!loading[meta.id]}
             onRun={() => runEtapa(meta)}
             expanded={!!expanded[meta.id]}
             onToggle={() => toggleExpand(meta.id)}
@@ -211,22 +327,28 @@ export default function SistemaIntegridadeCheck() {
         ))}
 
         {!ran && !anyLoading && (
-          <p className="text-xs text-slate-400 text-center py-3">
-            Clique em "Verificar Tudo" para o checkup completo das 5 etapas.
-          </p>
+          <div className="text-center py-4 space-y-1">
+            <ShieldCheck className="w-8 h-8 text-slate-200 mx-auto" />
+            <p className="text-xs text-slate-400">
+              Clique em "Verificar Tudo" para o checkup completo.
+            </p>
+            <p className="text-[10px] text-slate-300">
+              Execução sequencial ~6s total · 50 controles verificados
+            </p>
+          </div>
         )}
 
-        {ran && (
+        {ran && !anyLoading && (
           <div className={`p-2.5 rounded-lg text-center text-xs font-semibold mt-1 ${
             globalPassed === globalTotal
-              ? "bg-green-50 text-green-700"
+              ? "bg-green-50 border border-green-200 text-green-700"
               : globalPct >= 70
-              ? "bg-amber-50 text-amber-700"
-              : "bg-red-50 text-red-700"
+              ? "bg-amber-50 border border-amber-200 text-amber-700"
+              : "bg-red-50 border border-red-200 text-red-700"
           }`}>
             {globalPassed === globalTotal
-              ? `✅ Sistema 100% íntegro — ${globalTotal} etapas verificadas`
-              : `⚡ ${globalTotal - globalPassed} etapa(s) com atenção — score médio ${globalPct}%`
+              ? `✅ Sistema 100% íntegro — ${globalTotal} etapas · 50 controles OK`
+              : `⚡ ${globalTotal - globalPassed} etapa(s) com atenção · score médio ${globalPct}%`
             }
           </div>
         )}

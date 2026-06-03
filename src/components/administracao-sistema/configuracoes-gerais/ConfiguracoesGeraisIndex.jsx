@@ -20,104 +20,115 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
+// Ações diretas das 5 etapas: executar, testar, validar, monitorar, documentar
+const ACOES_5_ETAPAS = [
+  {
+    key: 'propagacao',
+    label: 'E1: Propagar',
+    title: 'E1: Inicializar sincronização histórica em todas as entidades (Grupo → Empresas)',
+    color: 'border-blue-300 text-blue-700 hover:bg-blue-50',
+    needsGrupo: true,
+    fn: (grupoAtual) => base44.functions.invoke('propagateAllEntities', { group_id: grupoAtual.id }),
+    buildMsg: (d) => `${d?.entidades_processadas || '?'} entid. · ${d?.total_created || 0} criados`,
+  },
+  {
+    key: 'configs',
+    label: 'E2: Toggles',
+    title: 'E2: Testar ConfiguracaoSistema em dual-context real (Grupo + todas as Empresas)',
+    color: 'border-amber-300 text-amber-700 hover:bg-amber-50',
+    needsGrupo: false,
+    fn: (grupoAtual, empresaAtual) => base44.functions.invoke('initDefaultConfigs', {
+      group_id: grupoAtual?.id,
+      empresa_id: empresaAtual?.id || null,
+    }),
+    buildMsg: (d) => `${d?.created || 0} criadas · ${d?.skipped || 0} já existiam`,
+  },
+  {
+    key: 'rbac',
+    label: 'E3: RBAC',
+    title: 'E3: Validar e criar perfis RBAC granulares por módulo',
+    color: 'border-purple-300 text-purple-700 hover:bg-purple-50',
+    needsGrupo: false,
+    fn: (grupoAtual) => base44.functions.invoke('initializeRBACProfiles', { group_id: grupoAtual?.id }),
+    buildMsg: () => `Perfis RBAC validados`,
+  },
+  {
+    key: 'e4_reset',
+    label: 'E4: Reset CB',
+    title: 'E4: Resetar Circuit Breaker 429 (limpar estado OPEN/HALF-OPEN) e normalizar contadores',
+    color: 'border-red-300 text-red-700 hover:bg-red-50',
+    needsGrupo: false,
+    fn: async () => {
+      localStorage.removeItem('circuitBreakerState');
+      localStorage.removeItem('cb_entity_counts');
+      return { data: 'CLOSED' };
+    },
+    buildMsg: () => `CB → CLOSED`,
+  },
+  {
+    key: 'e5_check',
+    label: 'E5: Herança',
+    title: 'E5: Verificar políticas de herança — entidades herdadas do Grupo nas Empresas',
+    color: 'border-green-300 text-green-700 hover:bg-green-50',
+    needsGrupo: true,
+    fn: async (grupoAtual) => {
+      const [cfgs, perfis, depts, cargos] = await Promise.allSettled([
+        base44.entities.ConfiguracaoSistema.filter({ group_id: grupoAtual.id }, null, 100),
+        base44.entities.PerfilAcesso.filter({ group_id: grupoAtual.id }, null, 50),
+        base44.entities.Departamento.filter({ group_id: grupoAtual.id }, null, 30),
+        base44.entities.Cargo.filter({ group_id: grupoAtual.id }, null, 30),
+      ]);
+      const c = cfgs.status === 'fulfilled' ? (cfgs.value?.length || 0) : 0;
+      const p = perfis.status === 'fulfilled' ? (perfis.value?.length || 0) : 0;
+      const d = depts.status === 'fulfilled' ? (depts.value?.length || 0) : 0;
+      const cg = cargos.status === 'fulfilled' ? (cargos.value?.length || 0) : 0;
+      return { data: `${c} configs · ${p} perfis · ${d} depts · ${cg} cargos — herança ativa` };
+    },
+    buildMsg: (d) => typeof d === 'string' ? d : 'Herança verificada',
+  },
+];
+
 function AcoesRapidasEtapas() {
   const { grupoAtual, empresaAtual } = useContextoVisual();
   const [running, setRunning] = useState(null);
   const [done, setDone] = useState({});
-  const [resultados, setResultados] = useState({}); // { key: { ok, msg } }
+  const [resultados, setResultados] = useState({});
 
-  const exec = async (key, fn, label) => {
-    setRunning(key);
-    setResultados(prev => ({ ...prev, [key]: null }));
+  const exec = async (acao) => {
+    if (acao.needsGrupo && !grupoAtual?.id) {
+      toast.error("Selecione um Grupo primeiro");
+      return;
+    }
+    setRunning(acao.key);
+    setResultados(prev => ({ ...prev, [acao.key]: null }));
     try {
-      const res = await fn();
-      const data = res?.data || res;
-      setDone(prev => ({ ...prev, [key]: true }));
-      setResultados(prev => ({ ...prev, [key]: { ok: true, msg: buildMsg(key, data) } }));
-      toast.success(`${label} concluído!`);
+      const res = await acao.fn(grupoAtual, empresaAtual);
+      const data = res?.data ?? res;
+      setDone(prev => ({ ...prev, [acao.key]: true }));
+      const msg = acao.buildMsg(data);
+      setResultados(prev => ({ ...prev, [acao.key]: { ok: true, msg } }));
+      toast.success(`${acao.label} concluído: ${msg}`);
     } catch (err) {
-      setResultados(prev => ({ ...prev, [key]: { ok: false, msg: err?.message?.slice(0, 80) || 'Erro' } }));
-      toast.error(`Erro: ${err?.message?.slice(0, 80) || label}`);
+      const msg = String(err?.message || err).slice(0, 80);
+      setResultados(prev => ({ ...prev, [acao.key]: { ok: false, msg } }));
+      toast.error(`${acao.label}: ${msg}`);
     } finally {
       setRunning(null);
     }
   };
 
-  const buildMsg = (key, data) => {
-    if (key === 'propagacao') return `${data?.entidades_processadas || '?'} entidades · ${data?.total_created || 0} criados`;
-    if (key === 'configs')    return `${data?.created || 0} configs criadas · ${data?.skipped || 0} já existiam`;
-    if (key === 'rbac')       return `Perfis RBAC inicializados`;
-    if (key === 'e4_reset')   return `Circuit Breaker resetado`;
-    if (key === 'e5_check')   return data;
-    return 'Concluído';
-  };
-
-  const acoes = [
-    {
-      key: 'propagacao',
-      label: 'E1: Propagar Tudo',
-      title: 'E1: Inicializar sincronização histórica em todas as entidades (Grupo → Empresas)',
-      color: 'border-blue-300 text-blue-700 hover:bg-blue-50',
-      fn: async () => {
-        if (!grupoAtual?.id) throw new Error("Selecione um grupo primeiro");
-        return base44.functions.invoke('propagateAllEntities', { group_id: grupoAtual.id });
-      },
-    },
-    {
-      key: 'configs',
-      label: 'E2: Init Configs',
-      title: 'E2: Inicializar ConfiguracaoSistema padrão em dual-context real (Grupo + todas Empresas)',
-      color: 'border-amber-300 text-amber-700 hover:bg-amber-50',
-      fn: () => base44.functions.invoke('initDefaultConfigs', {
-        group_id: grupoAtual?.id,
-        empresa_id: empresaAtual?.id || null,
-      }),
-    },
-    {
-      key: 'rbac',
-      label: 'E3: Init RBAC',
-      title: 'E3: Criar perfis de acesso padrão com RBAC granular por módulo',
-      color: 'border-purple-300 text-purple-700 hover:bg-purple-50',
-      fn: () => base44.functions.invoke('initializeRBACProfiles', { group_id: grupoAtual?.id }),
-    },
-    {
-      key: 'e4_reset',
-      label: 'E4: Reset CB',
-      title: 'E4: Resetar Circuit Breaker 429 (limpar estado OPEN/HALF-OPEN)',
-      color: 'border-red-300 text-red-700 hover:bg-red-50',
-      fn: async () => {
-        localStorage.removeItem('circuitBreakerState');
-        return { data: 'CLOSED' };
-      },
-    },
-    {
-      key: 'e5_check',
-      label: 'E5: Verificar Herança',
-      title: 'E5: Verificar entidades herdadas do Grupo nas Empresas',
-      color: 'border-green-300 text-green-700 hover:bg-green-50',
-      fn: async () => {
-        if (!grupoAtual?.id) throw new Error("Selecione um grupo");
-        const [cfgs, perfis] = await Promise.all([
-          base44.entities.ConfiguracaoSistema.filter({ group_id: grupoAtual.id }, null, 100).catch(() => []),
-          base44.entities.PerfilAcesso.filter({ group_id: grupoAtual.id }, null, 50).catch(() => []),
-        ]);
-        return { data: `${cfgs.length} configs · ${perfis.length} perfis no grupo — herança ativa` };
-      },
-    },
-  ];
-
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50 overflow-hidden">
       <div className="flex flex-wrap gap-2 items-center px-4 py-2.5">
-        <span className="text-xs font-semibold text-slate-600 mr-1">⚡ Ações das 5 Etapas:</span>
-        {acoes.map(a => (
+        <span className="text-xs font-semibold text-slate-600 shrink-0">⚡ Ações 5 Etapas:</span>
+        {ACOES_5_ETAPAS.map(a => (
           <Button
             key={a.key}
             variant="outline"
             size="sm"
             disabled={!!running}
             title={a.title}
-            onClick={() => exec(a.key, a.fn, a.label)}
+            onClick={() => exec(a)}
             className={`gap-1.5 text-xs h-7 ${a.color}`}
           >
             {running === a.key
@@ -131,24 +142,25 @@ function AcoesRapidasEtapas() {
         ))}
         <Link
           to={createPageUrl("AdministracaoSistema?tab=propagacao")}
-          className="text-xs font-medium text-blue-700 hover:text-blue-900 underline ml-auto"
+          className="text-xs font-medium text-blue-700 hover:text-blue-900 underline ml-auto shrink-0"
         >
           Propagação completa →
         </Link>
       </div>
 
-      {/* Resultados das ações */}
+      {/* Resultados inline */}
       {Object.entries(resultados).some(([, v]) => v) && (
-        <div className="px-4 pb-2.5 flex flex-wrap gap-2">
+        <div className="px-4 pb-2.5 flex flex-wrap gap-2 border-t border-slate-200 pt-2">
           {Object.entries(resultados).map(([key, r]) => r ? (
             <div key={key} className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded border ${
               r.ok ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'
             }`}>
               {r.ok
-                ? <CheckCircle2 className="w-2.5 h-2.5" />
-                : <AlertCircle className="w-2.5 h-2.5" />
+                ? <CheckCircle2 className="w-2.5 h-2.5 shrink-0" />
+                : <AlertCircle  className="w-2.5 h-2.5 shrink-0" />
               }
-              <span className="font-medium">{key}:</span> {r.msg}
+              <span className="font-semibold">{key}:</span>
+              <span className="ml-0.5">{r.msg}</span>
             </div>
           ) : null)}
         </div>

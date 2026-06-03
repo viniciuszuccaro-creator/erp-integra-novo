@@ -32,21 +32,29 @@ export default function ProtectedSection({
   const loggedRef = useRef(false);
   const [requestingAccess, setRequestingAccess] = useState(false);
   const [requestedAccess, setRequestedAccess] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   // Sempre manter a mesma ordem de hooks entre renders
-  const allowed = !isLoading && hasPermission(modulo, section, action);
+  const allowed = hasPermission(modulo, section, action);
   const [allowedFinal, setAllowedFinal] = useState(true); // Default otimista
   const [showDenied, setShowDenied] = useState(false);
+
+  // Marca quando o loading terminou pela primeira vez
+  useEffect(() => {
+    if (!isLoading && !hasLoadedOnce) {
+      setHasLoadedOnce(true);
+      setAllowedFinal(allowed);
+    }
+  }, [isLoading, hasLoadedOnce, allowed]);
 
   useEffect(() => {
     if (!modulo) { setAllowedFinal(true); return; }
     
-    // Se já resolveu permissão, atualiza estado
-    if (!isLoading) {
-      setAllowedFinal(allowed || true); // Sempre otimista a menos que explicitamente negado
-      return;
+    // Após primeira carga, sempre usa o valor real de hasPermission
+    if (hasLoadedOnce) {
+      setAllowedFinal(allowed);
     }
-  }, [isLoading, allowed, modulo]);
+  }, [hasLoadedOnce, allowed, modulo]);
 
   useEffect(() => {
     if (!modulo || isLoading) return;
@@ -126,8 +134,8 @@ export default function ProtectedSection({
   // removeChild/insertBefore errors when Suspense boundaries are involved.
   // Instead, use CSS visibility and an overlay to show/hide access denied state.
 
-  const denied = !isLoading && allowedFinal === false && showDenied;
-  const loading = isLoading;
+  const denied = hasLoadedOnce && allowedFinal === false && showDenied;
+  const loading = false; // Nunca bloqueia renderização após primeira carga
 
   // hideInstead: just hide children via CSS, never unmount
   if (hideInstead && denied) {

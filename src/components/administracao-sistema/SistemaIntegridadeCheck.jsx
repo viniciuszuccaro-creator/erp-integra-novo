@@ -173,10 +173,26 @@ function EtapaRow({ meta, result, loading, onRun, expanded, onToggle }) {
   );
 }
 
+// ─── Resultado pré-verificado (cache para exibição imediata) ─────────────────
+const RESULT_CACHE_KEY = 'sic_results_v1';
+function loadCachedResults() {
+  try {
+    const raw = localStorage.getItem(RESULT_CACHE_KEY);
+    if (!raw) return {};
+    const { ts, data } = JSON.parse(raw);
+    // Cache válido por 30 min
+    if (Date.now() - ts < 30 * 60_000) return data;
+  } catch (_) {}
+  return {};
+}
+function saveCachedResults(data) {
+  try { localStorage.setItem(RESULT_CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch (_) {}
+}
+
 // ─── Componente principal ────────────────────────────────────────────────────
 export default function SistemaIntegridadeCheck() {
   const { grupoAtual, empresaAtual } = useContextoVisual();
-  const [results,  setResults]  = useState({});
+  const [results,  setResults]  = useState(() => loadCachedResults());
   const [loading,  setLoading]  = useState({});
   const [expanded, setExpanded] = useState({});
   const [runningAll, setRunningAll] = useState(false);
@@ -186,7 +202,11 @@ export default function SistemaIntegridadeCheck() {
     try {
       const res  = await base44.functions.invoke(etapa.fn, {});
       const data = res?.data ?? res;
-      setResults(prev => ({ ...prev, [etapa.id]: data }));
+      setResults(prev => {
+        const updated = { ...prev, [etapa.id]: data };
+        saveCachedResults(updated);
+        return updated;
+      });
       if ((data?.score ?? 100) < 100) {
         setExpanded(prev => ({ ...prev, [etapa.id]: true }));
       }
@@ -205,6 +225,7 @@ export default function SistemaIntegridadeCheck() {
   const runAll = useCallback(async () => {
     setResults({});
     setExpanded({});
+    saveCachedResults({});
     setRunningAll(true);
     let allPassed = 0;
     for (const etapa of ETAPAS_META) {

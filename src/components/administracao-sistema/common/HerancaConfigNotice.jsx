@@ -12,27 +12,41 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 const POLITICAS = [
-  { entidade: "ConfiguracaoSistema", heranca: "Grupo → Empresa", override: true,  tipo: "toggle" },
-  { entidade: "PerfilAcesso",        heranca: "Grupo → Empresa", override: true,  tipo: "rbac" },
-  { entidade: "PlanoDeContas",       heranca: "Grupo → Empresa", override: true,  tipo: "financeiro" },
-  { entidade: "CentroCusto",         heranca: "Grupo → Empresa", override: true,  tipo: "financeiro" },
-  { entidade: "Departamento",        heranca: "Grupo → Empresa", override: true,  tipo: "rh" },
-  { entidade: "Cargo",               heranca: "Grupo → Empresa", override: true,  tipo: "rh" },
-  { entidade: "Turno",               heranca: "Grupo → Empresa", override: true,  tipo: "rh" },
-  { entidade: "FormaPagamento",      heranca: "Grupo → Empresa", override: true,  tipo: "financeiro" },
-  { entidade: "TipoDespesa",         heranca: "Grupo → Empresa", override: true,  tipo: "financeiro" },
-  { entidade: "GrupoProduto",        heranca: "Grupo → Empresa", override: false, tipo: "catalogo" },
-  { entidade: "Marca",               heranca: "Grupo → Empresa", override: false, tipo: "catalogo" },
-  { entidade: "UnidadeMedida",       heranca: "Grupo → Empresa", override: false, tipo: "catalogo" },
-  { entidade: "SetorAtividade",      heranca: "Grupo → Empresa", override: false, tipo: "catalogo" },
+  // Configuração & Acesso
+  { entidade: "ConfiguracaoSistema", heranca: "Grupo → Empresa", override: true,  tipo: "toggle",     desc: "Toggles globais propagados para todas as empresas" },
+  { entidade: "PerfilAcesso",        heranca: "Grupo → Empresa", override: true,  tipo: "rbac",       desc: "Perfis RBAC com SoD — empresa pode criar perfis próprios" },
+  // Financeiro
+  { entidade: "PlanoDeContas",       heranca: "Grupo → Empresa", override: true,  tipo: "financeiro", desc: "Plano de contas padrão do grupo herdado por todas as empresas" },
+  { entidade: "CentroCusto",         heranca: "Grupo → Empresa", override: true,  tipo: "financeiro", desc: "Centros de custo do grupo — empresa pode adicionar específicos" },
+  { entidade: "CentroResultado",     heranca: "Grupo → Empresa", override: true,  tipo: "financeiro", desc: "Centros de resultado compartilhados" },
+  { entidade: "FormaPagamento",      heranca: "Grupo → Empresa", override: true,  tipo: "financeiro", desc: "Formas de pagamento globais — empresa pode desativar" },
+  { entidade: "TipoDespesa",         heranca: "Grupo → Empresa", override: true,  tipo: "financeiro", desc: "Tipos de despesa padronizados no grupo" },
+  { entidade: "CondicaoComercial",   heranca: "Grupo → Empresa", override: true,  tipo: "financeiro", desc: "Condições comerciais herdadas — empresa pode customizar" },
+  { entidade: "Banco",               heranca: "Grupo → Empresa", override: false, tipo: "financeiro", desc: "Bancos cadastrados no grupo — shared, sem override" },
+  { entidade: "TabelaFiscal",        heranca: "Grupo → Empresa", override: false, tipo: "fiscal",     desc: "Tabelas fiscais (NCM/CEST/alíquotas) compartilhadas" },
+  // RH
+  { entidade: "Departamento",        heranca: "Grupo → Empresa", override: true,  tipo: "rh",         desc: "Estrutura organizacional herdada — empresa pode customizar" },
+  { entidade: "Cargo",               heranca: "Grupo → Empresa", override: true,  tipo: "rh",         desc: "Cargos padrão do grupo" },
+  { entidade: "Turno",               heranca: "Grupo → Empresa", override: true,  tipo: "rh",         desc: "Turnos de trabalho compartilhados" },
+  // Catálogo
+  { entidade: "GrupoProduto",        heranca: "Grupo → Empresa", override: false, tipo: "catalogo",   desc: "Grupos de produto definidos no grupo — sem override" },
+  { entidade: "Marca",               heranca: "Grupo → Empresa", override: false, tipo: "catalogo",   desc: "Marcas centralizadas no grupo" },
+  { entidade: "UnidadeMedida",       heranca: "Grupo → Empresa", override: false, tipo: "catalogo",   desc: "Unidades de medida padronizadas" },
+  { entidade: "SetorAtividade",      heranca: "Grupo → Empresa", override: false, tipo: "catalogo",   desc: "Setores de atividade do grupo" },
+  // Logística
+  { entidade: "TipoFrete",           heranca: "Grupo → Empresa", override: true,  tipo: "logistica",  desc: "Tipos de frete compartilhados — empresa pode adicionar" },
+  { entidade: "TabelaPreco",         heranca: "Grupo → Empresa", override: true,  tipo: "comercial",  desc: "Tabelas de preço do grupo propagadas para empresas" },
 ];
 
 const TIPO_COLOR = {
   toggle:     "bg-amber-100 text-amber-800",
   rbac:       "bg-purple-100 text-purple-800",
   financeiro: "bg-blue-100 text-blue-800",
+  fiscal:     "bg-orange-100 text-orange-800",
   rh:         "bg-teal-100 text-teal-800",
   catalogo:   "bg-slate-100 text-slate-700",
+  logistica:  "bg-cyan-100 text-cyan-800",
+  comercial:  "bg-green-100 text-green-800",
 };
 
 export default function HerancaConfigNotice({ entidade = null }) {
@@ -47,24 +61,23 @@ export default function HerancaConfigNotice({ entidade = null }) {
     ? POLITICAS.filter(p => p.entidade.includes(entidade))
     : POLITICAS;
 
-  // Verifica quantos registros cada entidade tem no grupo
+  // Verifica contagem via countEntities (não traz registros — mais rápido, evita 429)
   const handleVerificarLive = async () => {
     setVerificando(true);
     const novo = {};
-    for (const p of politicasFiltradas.slice(0, 6)) { // limita a 6 para evitar 429
+    const lista = politicasFiltradas.slice(0, 8); // máx 8 para não sobrecarregar
+    for (const p of lista) {
       try {
-        const res = await base44.functions.invoke('getEntityRecord', {
+        const res = await base44.functions.invoke('countEntities', {
           entityName: p.entidade,
           filter: { group_id: grupoAtual.id },
-          limit: 1,
         });
-        const items = Array.isArray(res?.data) ? res.data : [];
-        novo[p.entidade] = { ok: items.length > 0, count: items.length };
+        const count = res?.data?.count ?? 0;
+        novo[p.entidade] = { ok: count > 0, count };
       } catch (_) {
         novo[p.entidade] = { ok: null, count: 0 };
       }
-      // pequena pausa entre chamadas para evitar 429
-      await new Promise(r => setTimeout(r, 200));
+      await new Promise(r => setTimeout(r, 150));
     }
     setLiveStatus(novo);
     setVerificando(false);
@@ -98,7 +111,7 @@ export default function HerancaConfigNotice({ entidade = null }) {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <p className="text-xs text-indigo-700 flex items-center gap-1">
               <Info className="w-3 h-3 shrink-0" />
-              Config criada no Grupo → propagada automaticamente para todas as Empresas. Empresas podem sobrescrever (quando permitido).
+              Config criada no Grupo → propagada automaticamente para todas as Empresas via <strong>syncBidirectional</strong>. Override permitido quando indicado.
             </p>
             <Button
               size="sm" variant="outline"
@@ -107,7 +120,7 @@ export default function HerancaConfigNotice({ entidade = null }) {
               className="gap-1.5 text-[10px] h-6 border-indigo-300 text-indigo-700 hover:bg-indigo-100"
             >
               {verificando ? <RefreshCw className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
-              Verificar Live (top 6)
+              Verificar Live (top 8)
             </Button>
           </div>
 
@@ -118,9 +131,9 @@ export default function HerancaConfigNotice({ entidade = null }) {
                 <tr>
                   <th className="text-left px-3 py-2 font-semibold text-indigo-800">Entidade</th>
                   <th className="text-left px-3 py-2 font-semibold text-indigo-800">Tipo</th>
-                  <th className="text-left px-3 py-2 font-semibold text-indigo-800">Herança</th>
+                  <th className="text-left px-3 py-2 font-semibold text-indigo-800 hidden md:table-cell">Política</th>
                   <th className="text-left px-3 py-2 font-semibold text-indigo-800">Override</th>
-                  <th className="text-left px-3 py-2 font-semibold text-indigo-800">Status</th>
+                  <th className="text-left px-3 py-2 font-semibold text-indigo-800">Live</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -128,34 +141,36 @@ export default function HerancaConfigNotice({ entidade = null }) {
                   const live = liveStatus[p.entidade];
                   return (
                     <tr key={p.entidade} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-3 py-1.5 font-mono font-medium text-slate-800">{p.entidade}</td>
+                      <td className="px-3 py-1.5 font-mono font-medium text-slate-800 whitespace-nowrap">{p.entidade}</td>
                       <td className="px-3 py-1.5">
                         <Badge className={`text-[9px] px-1.5 py-0 ${TIPO_COLOR[p.tipo] || 'bg-slate-100 text-slate-700'}`}>
                           {p.tipo}
                         </Badge>
                       </td>
-                      <td className="px-3 py-1.5 text-blue-700">{p.heranca}</td>
+                      <td className="px-3 py-1.5 text-slate-500 hidden md:table-cell max-w-xs truncate" title={p.desc}>
+                        {p.desc}
+                      </td>
                       <td className="px-3 py-1.5">
                         {p.override
-                          ? <span className="text-green-700">✓ Sim</span>
-                          : <span className="text-slate-500">— Não</span>
+                          ? <span className="text-green-700 font-medium">✓ Sim</span>
+                          : <span className="text-slate-400">— Não</span>
                         }
                       </td>
                       <td className="px-3 py-1.5">
                         {live === undefined ? (
                           <span className="text-slate-400 italic">—</span>
                         ) : live.ok === true ? (
-                          <span className="flex items-center gap-1 text-green-700">
+                          <span className="flex items-center gap-1 text-green-700 font-medium">
                             <CheckCircle2 className="w-3 h-3" />
-                            {live.count > 0 ? `${live.count} reg.` : 'OK'}
+                            {live.count}
                           </span>
                         ) : live.ok === false ? (
                           <span className="flex items-center gap-1 text-amber-600">
                             <AlertCircle className="w-3 h-3" />
-                            Vazio
+                            0
                           </span>
                         ) : (
-                          <span className="text-slate-400">Erro</span>
+                          <span className="text-slate-400">—</span>
                         )}
                       </td>
                     </tr>

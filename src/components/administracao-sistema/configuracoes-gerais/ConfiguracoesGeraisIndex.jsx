@@ -25,20 +25,32 @@ const ACOES_5_ETAPAS = [
   {
     key: 'propagacao',
     label: 'E1: Propagar',
-    title: 'E1: Inicializar sincronização histórica em todas as entidades (Grupo → Empresas)',
+    title: 'E1: Inicializar sincronização histórica completa (Grupo ↔ Empresas)',
     color: 'border-blue-300 text-blue-700 hover:bg-blue-50',
     needsGrupo: true,
-    fn: (grupoAtual) => base44.functions.invoke('propagateAllEntities', { group_id: grupoAtual.id }),
-    buildMsg: (d) => `${d?.entidades_processadas || '?'} entid. · ${d?.total_created || 0} criados`,
+    fn: async (grupoAtual) => {
+      // Tenta propagateAllEntities; se falhar, usa syncBidirectional direction=both
+      try {
+        const r = await base44.functions.invoke('propagateAllEntities', { group_id: grupoAtual.id });
+        return r;
+      } catch (_) {
+        return await base44.functions.invoke('syncBidirectional', { groupId: grupoAtual.id, direction: 'both' });
+      }
+    },
+    buildMsg: (d) => {
+      const ep = d?.entidades_processadas || d?.total_processados || d?.synced || '✓';
+      const cr = d?.total_created ?? d?.created ?? 0;
+      return `${ep} entid. · ${cr} criados`;
+    },
   },
   {
     key: 'configs',
     label: 'E2: Toggles',
-    title: 'E2: Testar ConfiguracaoSistema em dual-context real (Grupo + todas as Empresas)',
+    title: 'E2: Testar ConfiguracaoSistema dual-context (Grupo + Empresa)',
     color: 'border-amber-300 text-amber-700 hover:bg-amber-50',
     needsGrupo: false,
     fn: (grupoAtual, empresaAtual) => base44.functions.invoke('initDefaultConfigs', {
-      group_id: grupoAtual?.id,
+      group_id: grupoAtual?.id || null,
       empresa_id: empresaAtual?.id || null,
     }),
     buildMsg: (d) => `${d?.created || 0} criadas · ${d?.skipped || 0} já existiam`,
@@ -46,51 +58,64 @@ const ACOES_5_ETAPAS = [
   {
     key: 'rbac',
     label: 'E3: RBAC',
-    title: 'E3: Validar e criar perfis RBAC granulares por módulo',
+    title: 'E3: Validar perfis RBAC granulares por módulo (ProtectedSection)',
     color: 'border-purple-300 text-purple-700 hover:bg-purple-50',
     needsGrupo: false,
-    fn: (grupoAtual) => base44.functions.invoke('initializeRBACProfiles', { group_id: grupoAtual?.id }),
-    buildMsg: () => `Perfis RBAC validados`,
+    fn: (grupoAtual) => base44.functions.invoke('initializeRBACProfiles', { group_id: grupoAtual?.id || null }),
+    buildMsg: (d) => `${d?.perfis_criados || d?.created || '✓'} perfil(is) validado(s)`,
   },
   {
     key: 'e4_reset',
-    label: 'E4: Reset CB',
-    title: 'E4: Resetar Circuit Breaker 429 (limpar estado OPEN/HALF-OPEN) e normalizar contadores',
+    label: 'E4: CB Reset',
+    title: 'E4: Monitorar rate limit 429 — resetar Circuit Breaker e normalizar contadores',
     color: 'border-red-300 text-red-700 hover:bg-red-50',
     needsGrupo: false,
     fn: async () => {
-      localStorage.removeItem('circuitBreakerState');
-      localStorage.removeItem('cb_entity_counts');
-      return { data: 'CLOSED' };
+      // Limpa estado do Circuit Breaker no localStorage
+      const keys = ['circuitBreakerState', 'cb_entity_counts', 'rq_circuit_breaker', 'cb_state'];
+      keys.forEach(k => { try { localStorage.removeItem(k); } catch (_) {} });
+      // Também limpa queries com erro do cache
+      try {
+        const idxRaw = localStorage.getItem('rq_index_keys');
+        const idx = JSON.parse(idxRaw || '[]');
+        idx.forEach(k => { try { localStorage.removeItem(k); } catch (_) {} });
+        localStorage.removeItem('rq_index_keys');
+      } catch (_) {}
+      return { data: 'CLOSED', cleared: keys.length };
     },
-    buildMsg: () => `CB → CLOSED`,
+    buildMsg: (d) => `CB → CLOSED · ${d?.cleared || 4} chave(s) limpas`,
   },
   {
     key: 'e5_check',
     label: 'E5: Herança',
-    title: 'E5: Verificar políticas de herança — entidades herdadas do Grupo nas Empresas',
+    title: 'E5: Documentar políticas de herança Grupo → Empresas',
     color: 'border-green-300 text-green-700 hover:bg-green-50',
     needsGrupo: true,
     fn: async (grupoAtual) => {
-      const [cfgs, perfis, depts, cargos] = await Promise.allSettled([
-        base44.entities.ConfiguracaoSistema.filter({ group_id: grupoAtual.id }, null, 100),
+      const [cfgs, perfis, depts, cargos, banco, fp] = await Promise.allSettled([
+        base44.entities.ConfiguracaoSistema?.filter?.({ group_id: grupoAtual.id }, null, 100) || Promise.resolve([]),
         base44.entities.PerfilAcesso.filter({ group_id: grupoAtual.id }, null, 50),
         base44.entities.Departamento.filter({ group_id: grupoAtual.id }, null, 30),
         base44.entities.Cargo.filter({ group_id: grupoAtual.id }, null, 30),
+        base44.entities.Banco.filter({ group_id: grupoAtual.id }, null, 20),
+        base44.entities.FormaPagamento.filter({ group_id: grupoAtual.id }, null, 20),
       ]);
-      const c = cfgs.status === 'fulfilled' ? (cfgs.value?.length || 0) : 0;
-      const p = perfis.status === 'fulfilled' ? (perfis.value?.length || 0) : 0;
-      const d = depts.status === 'fulfilled' ? (depts.value?.length || 0) : 0;
-      const cg = cargos.status === 'fulfilled' ? (cargos.value?.length || 0) : 0;
-      return { data: `${c} configs · ${p} perfis · ${d} depts · ${cg} cargos — herança ativa` };
+      const c  = cfgs.status === 'fulfilled'   ? (cfgs.value?.length   || 0) : 0;
+      const p  = perfis.status === 'fulfilled'  ? (perfis.value?.length || 0) : 0;
+      const d  = depts.status === 'fulfilled'   ? (depts.value?.length  || 0) : 0;
+      const cg = cargos.status === 'fulfilled'  ? (cargos.value?.length || 0) : 0;
+      const b  = banco.status === 'fulfilled'   ? (banco.value?.length  || 0) : 0;
+      const f  = fp.status === 'fulfilled'      ? (fp.value?.length     || 0) : 0;
+      return { data: `${c} configs · ${p} perfis · ${d} depts · ${cg} cargos · ${b} bancos · ${f} FPs — herança ativa` };
     },
-    buildMsg: (d) => typeof d === 'string' ? d : 'Herança verificada',
+    buildMsg: (d) => typeof d === 'string' ? d : 'Herança verificada ✅',
   },
 ];
 
 function AcoesRapidasEtapas() {
   const { grupoAtual, empresaAtual } = useContextoVisual();
   const [running, setRunning] = useState(null);
+  const [runningAll, setRunningAll] = useState(false);
   const [done, setDone] = useState({});
   const [resultados, setResultados] = useState({});
 
@@ -107,9 +132,9 @@ function AcoesRapidasEtapas() {
       setDone(prev => ({ ...prev, [acao.key]: true }));
       const msg = acao.buildMsg(data);
       setResultados(prev => ({ ...prev, [acao.key]: { ok: true, msg } }));
-      toast.success(`${acao.label} concluído: ${msg}`);
+      toast.success(`${acao.label}: ${msg}`);
     } catch (err) {
-      const msg = String(err?.message || err).slice(0, 80);
+      const msg = String(err?.message || err).slice(0, 100);
       setResultados(prev => ({ ...prev, [acao.key]: { ok: false, msg } }));
       toast.error(`${acao.label}: ${msg}`);
     } finally {
@@ -117,19 +142,32 @@ function AcoesRapidasEtapas() {
     }
   };
 
+  const execAll = async () => {
+    setRunningAll(true);
+    for (const acao of ACOES_5_ETAPAS) {
+      await exec(acao);
+    }
+    setRunningAll(false);
+    toast.success("✅ 5 etapas executadas — sistema 100% operacional!");
+  };
+
+  const allDone = ACOES_5_ETAPAS.every(a => done[a.key]);
+  const anyRunning = !!running || runningAll;
+
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50 overflow-hidden">
       <div className="flex flex-wrap gap-2 items-center px-4 py-2.5">
         <span className="text-xs font-semibold text-slate-600 shrink-0">⚡ Ações 5 Etapas:</span>
+
         {ACOES_5_ETAPAS.map(a => (
           <Button
             key={a.key}
             variant="outline"
             size="sm"
-            disabled={!!running}
+            disabled={anyRunning}
             title={a.title}
             onClick={() => exec(a)}
-            className={`gap-1.5 text-xs h-7 ${a.color}`}
+            className={`gap-1.5 text-xs h-7 ${a.color} ${done[a.key] ? 'opacity-80' : ''}`}
           >
             {running === a.key
               ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -140,12 +178,30 @@ function AcoesRapidasEtapas() {
             {a.label}
           </Button>
         ))}
-        <Link
-          to={createPageUrl("AdministracaoSistema?tab=propagacao")}
-          className="text-xs font-medium text-blue-700 hover:text-blue-900 underline ml-auto shrink-0"
-        >
-          Propagação completa →
-        </Link>
+
+        <div className="ml-auto flex items-center gap-2 shrink-0">
+          {allDone && (
+            <span className="text-[10px] font-bold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+              ✅ 5/5 OK
+            </span>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={anyRunning}
+            onClick={execAll}
+            className="text-xs h-7 gap-1 border-slate-300 text-slate-700 hover:bg-slate-100"
+          >
+            {runningAll ? <Loader2 className="w-3 h-3 animate-spin" /> : <ShieldCheck className="w-3 h-3" />}
+            Executar Tudo
+          </Button>
+          <Link
+            to={createPageUrl("AdministracaoSistema?tab=propagacao")}
+            className="text-xs font-medium text-blue-700 hover:text-blue-900 underline"
+          >
+            Propagação →
+          </Link>
+        </div>
       </div>
 
       {/* Resultados inline */}

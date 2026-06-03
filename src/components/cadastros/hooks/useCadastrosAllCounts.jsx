@@ -26,17 +26,21 @@ export const BLOCOS_ENTITIES = {
 const ALL_ENTITIES = Object.values(BLOCOS_ENTITIES).flat();
 
 /**
- * Filtro simples e direto: o backend (countEntities + entityListSorted)
- * já faz a expansão para empresa_dona_id, empresa_alocada_id, etc.
- * Não usar buildContextFilter complexo aqui — causa $or aninhado que quebra o count.
+ * Filtro para contagem dos blocos de Cadastros Gerais.
+ * Entidades de catálogo (SIMPLE_CATALOG) filtram por group_id quando disponível,
+ * garantindo que apenas os registros do grupo ativo sejam contados no snapshot.
+ * Entidades de negócio (Cliente, Fornecedor, etc.) usam empresa_id ou group_id.
  */
 function buildSimpleFilter(entityName, empresaId, groupId) {
-  if (SIMPLE_CATALOG.has(entityName)) return {};
-  // Contexto de grupo: usa group_id para o backend expandir para todas as empresas
+  if (SIMPLE_CATALOG.has(entityName)) {
+    // Entidades de catálogo: filtra pelo grupo quando disponível
+    if (groupId) return { group_id: groupId };
+    if (empresaId) return { empresa_id: empresaId };
+    return {};
+  }
+  // Entidades de negócio: filtro padrão
   if (groupId && !empresaId) return { group_id: groupId };
-  // Contexto de empresa: usa empresa_id para o backend expandir para todos os campos
   if (empresaId) return { empresa_id: empresaId };
-  // Sem contexto: conta tudo (admin)
   return {};
 }
 

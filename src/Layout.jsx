@@ -1079,32 +1079,8 @@ function LayoutContent({ children, currentPageName }) {
 
   const itemsFiltrados = navigationItems.filter(item => {
     if (item.adminOnly && user?.role !== 'admin') return false;
-    // Mapeamento expandido que inclui todos os grupos
-    const allModules = {
-      ...titleToModule,
-      'Comercial e Vendas': 'Comercial',
-      'Estoque e Almoxarifado': 'Estoque',
-      'Compras e Suprimentos': 'Compras',
-      'Expedição e Logística': 'Expedicao',
-      'Produção e Manufatura': 'Producao',
-      'Expedição': 'Expedicao',
-      'Produção': 'Producao',
-      'Financeiro e Contábil': 'Financeiro',
-      'Recursos Humanos': 'RH',
-      'Fiscal e Tributário': 'Fiscal',
-      'Gestão de Contratos': 'Contratos',
-      'Administração do Sistema': 'Sistema',
-      'Hub de Atendimento': 'HubAtendimento',
-      'Dashboard': 'Dashboard',
-      'Dashboard Corporativo': 'Dashboard',
-      'Relatórios e Análises': 'Relatorios',
-      'Agenda e Calendário': 'Agenda',
-      'Cadastros Gerais': 'Cadastros',
-      'CRM - Relacionamento': 'CRM',
-    };
-    const mod = allModules[item.title];
-    if (!mod) return true; // itens públicos ou informativos continuam visíveis
-    return hasPermission(mod, null, 'ver');
+    // Renderizar todos os itens — verificação de permissão fica para dentro do componente
+    return true;
   });
 
   // Auditoria de bloqueio de módulo delegada ao LayoutEffects

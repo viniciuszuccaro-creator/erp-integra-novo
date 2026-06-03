@@ -101,12 +101,12 @@ function LayoutContent({ children, currentPageName }) {
     Financeiro: 'Financeiro',
     Fiscal: 'Fiscal',
     RH: 'RH',
-    Expedicao: 'Expedição',
-    Producao: 'Produção',
-    ProducaoMobile: 'Produção',
+    Expedicao: 'Expedicao',
+    Producao: 'Producao',
+    ProducaoMobile: 'Producao',
     Dashboard: 'Dashboard',
     DashboardCorporativo: 'Dashboard',
-    Relatorios: 'Relatórios',
+    Relatorios: 'Relatorios',
     Agenda: 'Agenda',
     Cadastros: 'Cadastros',
     Contratos: 'Contratos',
@@ -1098,6 +1098,7 @@ function LayoutContent({ children, currentPageName }) {
       'Relatórios e Análises': 'Relatorios',
       'Agenda e Calendário': 'Agenda',
       'Cadastros Gerais': 'Cadastros',
+      'CRM - Relacionamento': 'CRM',
     };
     const mod = allModules[item.title];
     if (!mod) return true; // itens públicos ou informativos continuam visíveis

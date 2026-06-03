@@ -95,26 +95,24 @@ const AuthenticatedApp = () => {
           const moduleName = pageModuleMap[path];
           const requiredAction = moduleName ? 'ver' : undefined;
 
+          const PageContent = moduleName ? (
+            <RBACRoute module={moduleName} action={requiredAction}>
+              <Page />
+            </RBACRoute>
+          ) : (
+            <Page />
+          );
+
           return (
             <Route
               key={path}
               path={`/${path}`}
               element={
-                moduleName ? (
-                  <RBACRoute module={moduleName} action={requiredAction}>
-                    <EmpresaSelectorGuard>
-                      <LayoutWrapper currentPageName={path}>
-                        <Page />
-                      </LayoutWrapper>
-                    </EmpresaSelectorGuard>
-                  </RBACRoute>
-                ) : (
-                  <EmpresaSelectorGuard>
-                    <LayoutWrapper currentPageName={path}>
-                      <Page />
-                    </LayoutWrapper>
-                  </EmpresaSelectorGuard>
-                )
+                <EmpresaSelectorGuard>
+                  <LayoutWrapper currentPageName={path}>
+                    {PageContent}
+                  </LayoutWrapper>
+                </EmpresaSelectorGuard>
               }
             />
           );

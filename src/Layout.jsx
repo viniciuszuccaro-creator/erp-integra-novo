@@ -212,40 +212,47 @@ function LayoutContent({ children, currentPageName }) {
         }, [user?.id, empresaAtual?.id, grupoAtual?.id, moduleName, currentPageName]);
 
         const prefetchForItem = (title) => {
+                        // Defer prefetch via requestIdleCallback to avoid synchronous load on mount
                         try {
-                          switch (title) {
-                            case 'Dashboard':
-                              queryClient.prefetchQuery({ queryKey: ['dash', 'kpis'], queryFn: () => base44.entities.AuditLog.filter({}, '-data_hora', 5) });
-                              queryClient.prefetchQuery({
-                                queryKey: ['dash', 'groupConsolidation', empresaAtual?.id, grupoAtual?.id, contexto],
-                                queryFn: async () => {
-                                  const res = await base44.functions.invoke('groupConsolidation', { filtros: {} });
-                                  return res?.data;
+                          if ('requestIdleCallback' in window) {
+                            window.requestIdleCallback(() => {
+                              try {
+                                switch (title) {
+                                  case 'Dashboard':
+                                    queryClient.prefetchQuery({ queryKey: ['dash', 'kpis'], queryFn: () => base44.entities.AuditLog.filter({}, '-data_hora', 5) });
+                                    queryClient.prefetchQuery({
+                                      queryKey: ['dash', 'groupConsolidation', empresaAtual?.id, grupoAtual?.id, contexto],
+                                      queryFn: async () => {
+                                        const res = await base44.functions.invoke('groupConsolidation', { filtros: {} });
+                                        return res?.data;
+                                      }
+                                    });
+                                    break;
+                                  case 'CRM - Relacionamento':
+                                    queryClient.prefetchQuery({ queryKey: ['crm', 'clientes'], queryFn: () => filterInContext('Cliente', {}, '-updated_date', 10) });
+                                    queryClient.prefetchQuery({ queryKey: ['crm', 'oportunidades'], queryFn: () => filterInContext('Oportunidade', {}, '-updated_date', 10) });
+                                    break;
+                                  case 'Comercial e Vendas':
+                                    queryClient.prefetchQuery({ queryKey: ['comercial', 'pedidos'], queryFn: () => filterInContext('Pedido', {}, '-updated_date', 10) });
+                                    break;
+                                  case 'Estoque e Almoxarifado':
+                                    queryClient.prefetchQuery({ queryKey: ['estoque', 'produtos'], queryFn: () => filterInContext('Produto', {}, '-updated_date', 10) });
+                                    break;
+                                  case 'Compras e Suprimentos':
+                                    queryClient.prefetchQuery({ queryKey: ['compras', 'ocs'], queryFn: () => filterInContext('OrdemCompra', {}, '-updated_date', 10) });
+                                    break;
+                                  case 'Financeiro e Contábil':
+                                    queryClient.prefetchQuery({ queryKey: ['fin', 'pagar'], queryFn: () => filterInContext('ContaPagar', {}, '-updated_date', 10) });
+                                    queryClient.prefetchQuery({ queryKey: ['fin', 'receber'], queryFn: () => filterInContext('ContaReceber', {}, '-updated_date', 10) });
+                                    break;
+                                  case 'Expedição e Logística':
+                                    queryClient.prefetchQuery({ queryKey: ['log', 'entregas'], queryFn: () => filterInContext('Entrega', {}, '-updated_date', 10) });
+                                    break;
+                                  default:
+                                    break;
                                 }
-                              });
-                              break;
-                            case 'CRM - Relacionamento':
-                              queryClient.prefetchQuery({ queryKey: ['crm', 'clientes'], queryFn: () => filterInContext('Cliente', {}, '-updated_date', 10) });
-                              queryClient.prefetchQuery({ queryKey: ['crm', 'oportunidades'], queryFn: () => filterInContext('Oportunidade', {}, '-updated_date', 10) });
-                              break;
-                            case 'Comercial e Vendas':
-                              queryClient.prefetchQuery({ queryKey: ['comercial', 'pedidos'], queryFn: () => filterInContext('Pedido', {}, '-updated_date', 10) });
-                              break;
-                            case 'Estoque e Almoxarifado':
-                              queryClient.prefetchQuery({ queryKey: ['estoque', 'produtos'], queryFn: () => filterInContext('Produto', {}, '-updated_date', 10) });
-                              break;
-                            case 'Compras e Suprimentos':
-                              queryClient.prefetchQuery({ queryKey: ['compras', 'ocs'], queryFn: () => filterInContext('OrdemCompra', {}, '-updated_date', 10) });
-                              break;
-                            case 'Financeiro e Contábil':
-                              queryClient.prefetchQuery({ queryKey: ['fin', 'pagar'], queryFn: () => filterInContext('ContaPagar', {}, '-updated_date', 10) });
-                              queryClient.prefetchQuery({ queryKey: ['fin', 'receber'], queryFn: () => filterInContext('ContaReceber', {}, '-updated_date', 10) });
-                              break;
-                            case 'Expedição e Logística':
-                              queryClient.prefetchQuery({ queryKey: ['log', 'entregas'], queryFn: () => filterInContext('Entrega', {}, '-updated_date', 10) });
-                              break;
-                            default:
-                              break;
+                              } catch (_) {}
+                            }, { timeout: 3000 });
                           }
                         } catch (_) {}
                         };

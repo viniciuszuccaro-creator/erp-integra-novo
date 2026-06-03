@@ -9,6 +9,9 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { UserContext } from './UserContext';
 
+// PerfilAcesso IDs conhecidos como órfãos/deletados — evita refetch desnecessário
+const ORPHANED_PERFIL_IDS = new Set(['692316b82206c99d5778f10c']);
+
 export default function useRBACGranular() {
   const userCtx = useContext(UserContext);
   const { user: authUser } = useAuth();
@@ -18,9 +21,11 @@ export default function useRBACGranular() {
     queryKey: ['perfil-acesso', user?.perfil_acesso_id],
     queryFn: async () => {
       if (!user?.perfil_acesso_id) return null;
-      return await base44.entities.PerfilAcesso.get(user.perfil_acesso_id);
+      // Skip se é conhecido como órfão (evita 404 repetido)
+      if (ORPHANED_PERFIL_IDS.has(user.perfil_acesso_id)) return null;
+      return await base44.entities.PerfilAcesso.get(user.perfil_acesso_id).catch(() => null);
     },
-    enabled: !!user?.perfil_acesso_id,
+    enabled: !!user?.perfil_acesso_id && !ORPHANED_PERFIL_IDS.has(user?.perfil_acesso_id),
     staleTime: 300000,
   });
 

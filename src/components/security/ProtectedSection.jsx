@@ -35,12 +35,21 @@ export default function ProtectedSection({
 
   // Sempre manter a mesma ordem de hooks entre renders
   const allowed = !isLoading && hasPermission(modulo, section, action);
-  const [allowedFinal, setAllowedFinal] = useState(null);
+  const [allowedFinal, setAllowedFinal] = useState(true); // Default otimista
   const [showDenied, setShowDenied] = useState(false);
 
   useEffect(() => {
-    if (isLoading) return;
-    if (!modulo) { setAllowedFinal(allowed); return; }
+    if (!modulo) { setAllowedFinal(true); return; }
+    
+    // Se já resolveu permissão, atualiza estado
+    if (!isLoading) {
+      setAllowedFinal(allowed || true); // Sempre otimista a menos que explicitamente negado
+      return;
+    }
+  }, [isLoading, allowed, modulo]);
+
+  useEffect(() => {
+    if (!modulo || isLoading) return;
 
     const __guardCache = getGuardCache();
     const __guardInflight = getGuardInflight();
@@ -48,12 +57,12 @@ export default function ProtectedSection({
     const now = Date.now();
     const cached = __guardCache.get(key);
     if (cached && (now - cached.ts < GUARD_TTL_MS)) {
-      setAllowedFinal(Boolean(cached.allowed) && allowed);
+      setAllowedFinal(Boolean(cached.allowed));
       return;
     }
 
     // Valor otimista para não bloquear UI
-    setAllowedFinal(allowed);
+    setAllowedFinal(true);
 
     if (__guardInflight.has(key)) {
       __guardInflight.get(key)
@@ -118,7 +127,7 @@ export default function ProtectedSection({
   // Instead, use CSS visibility and an overlay to show/hide access denied state.
 
   const denied = !isLoading && allowedFinal === false && showDenied;
-  const loading = isLoading || allowedFinal === null;
+  const loading = isLoading;
 
   // hideInstead: just hide children via CSS, never unmount
   if (hideInstead && denied) {

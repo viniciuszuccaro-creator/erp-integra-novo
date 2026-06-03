@@ -22,8 +22,8 @@ export const BLOCOS_ENTITIES = {
 
 const ALL_ENTITIES = Object.values(BLOCOS_ENTITIES).flat();
 
-// Snapshot das contagens REAIS verificadas via countEntities backend + deduplicateCadastros
-// TOTAIS ESPERADOS: Bloco1=21 · Bloco2=1059 · Bloco3=120 · Bloco4=32 · Bloco5=19 · Bloco6=56
+// Snapshot das contagens REAIS verificadas via countEntities backend
+// TOTAIS ESPERADOS: Bloco1=21 · Bloco2=1059 · Bloco3=120 · Bloco4=32 · Bloco5=24 · Bloco6=56
 const SNAPSHOT = {
   // Bloco 1 — Pessoas & Parceiros (Real: 21)
   Cliente: 1, Fornecedor: 4, Transportadora: 2, Colaborador: 4,
@@ -37,8 +37,8 @@ const SNAPSHOT = {
   ConfiguracaoDespesaRecorrente: 7, TabelaFiscal: 20, CondicaoComercial: 5,
   // Bloco 4 — Logística, Frota & Almoxarifado (Real: 32)
   Veiculo: 6, Motorista: 6, TipoFrete: 4, LocalEstoque: 5, RotaPadrao: 5, ModeloDocumento: 6,
-  // Bloco 5 — Estrutura Organizacional (Real: 19)
-  Empresa: 3, GrupoEmpresarial: 1, Departamento: 5, Cargo: 6, Turno: 2, PerfilAcesso: 2,
+  // Bloco 5 — Estrutura Organizacional (Real: 24 = +5 perfis restaurados)
+  Empresa: 3, GrupoEmpresarial: 1, Departamento: 5, Cargo: 6, Turno: 2, PerfilAcesso: 7,
   // Bloco 6 — Tecnologia, IA & Parâmetros (Real: 56)
   ApiExterna: 3, ChatbotCanal: 4, ChatbotIntent: 10, JobAgendado: 8,
   Webhook: 3, ConfiguracaoNFe: 4, GatewayPagamento: 13, EventoNotificacao: 11,
@@ -61,15 +61,13 @@ export default function useCadastrosAllCounts() {
   const groupId   = grupoAtual?.id   || null;
   const queryClient = useQueryClient();
 
-  // Mapa incremental: delta sobre o snapshot (só atualiza entidades que sofreram mudança)
+  // Contagem precisa: sempre valida TODAS as entidades via backend para garantir sincronização
   const { data } = useQuery({
     queryKey: ["cadastros-all-counts-v7", groupId, empresaId],
     queryFn: async () => {
-      // Retorna snapshot base — refinado por countEntity apenas nas entidades-chave
       const result = { ...SNAPSHOT };
-      const KEY_ENTITIES = ["Produto","Cliente","Fornecedor","Transportadora","Representante","FormaPagamento","Banco","GrupoProduto","SetorAtividade","Marca"];
       await Promise.allSettled(
-        KEY_ENTITIES.map(async (entityName) => {
+        ALL_ENTITIES.map(async (entityName) => {
           try {
             let filter = {};
             if (entityName === "Produto") {
@@ -80,15 +78,15 @@ export default function useCadastrosAllCounts() {
               filter = groupId ? { group_id: groupId } : { empresa_id: empresaId };
             }
             const n = await countEntity(entityName, filter);
-            if (n > 0) result[entityName] = n;
+            result[entityName] = Math.max(0, n);
           } catch (_) { /* mantém snapshot */ }
         })
       );
       return result;
     },
-    staleTime: 15 * 60_000,
+    staleTime: 10 * 60_000,
     gcTime: 60 * 60_000,
-    placeholderData: SNAPSHOT,   // exibe IMEDIATAMENTE sem loading
+    placeholderData: SNAPSHOT,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     retry: 0,

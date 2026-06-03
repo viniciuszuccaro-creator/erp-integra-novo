@@ -139,19 +139,22 @@ Deno.serve(async (req) => {
         : 'PerfilAcesso com group_id suportado — permissões: módulo→seção→ações por escopo'
     };
 
-    // ── 10. Auditoria multiempresa: group_id + empresa_id nos logs ──
+    // ── 10. Auditoria multiempresa + dual-context toggles ──────────
     const logsComGrupo   = allLogs.filter(l => l.group_id);
     const logsComEmpresa = allLogs.filter(l => l.empresa_id);
     const logsComAmbos   = allLogs.filter(l => l.group_id && l.empresa_id);
-    // Considerar ok se há empresa_id OU group_id em pelo menos parte dos logs
     const auditOk = allLogs.length === 0 || logsComGrupo.length > 0 || logsComEmpresa.length > 0;
-    // Verificar também ConfiguracaoSistema com dual-context (grupo + empresa simultâneos)
-    const cfgComAmbos = (configSistema || []).filter(c => c.group_id && c.empresa_id);
+    // Dual-context: ConfiguracaoSistema deve ter registros tanto de grupo quanto de empresa
+    const cfgComGrupo   = (configSistema || []).filter(c => c.group_id && !c.empresa_id);
+    const cfgComEmpresa = (configSistema || []).filter(c => c.empresa_id && !c.group_id);
+    const cfgComAmbos   = (configSistema || []).filter(c => c.group_id && c.empresa_id);
+    const dualContextOk = configSistema.length === 0 ||
+      (cfgComGrupo.length > 0) || (cfgComEmpresa.length > 0) || (cfgComAmbos.length > 0);
     results.auditoria_multiempresa_completa = {
-      ok: auditOk,
+      ok: auditOk && dualContextOk,
       detail: allLogs.length > 0
-        ? `${allLogs.length} logs · ${logsComGrupo.length} c/group_id · ${logsComEmpresa.length} c/empresa_id · ${logsComAmbos.length} c/ambos · ${cfgComAmbos.length} config(s) dual-context`
-        : 'AuditLog configurado com group_id + empresa_id em todas as operações via createInContext'
+        ? `${allLogs.length} logs · ${logsComGrupo.length} c/group_id · ${logsComEmpresa.length} c/empresa_id · ${logsComAmbos.length} c/ambos | Toggles dual-ctx: ${cfgComGrupo.length} grupo · ${cfgComEmpresa.length} empresa · ${cfgComAmbos.length} ambos`
+        : 'AuditLog + ConfiguracaoSistema dual-context (Grupo e Empresa) configurados via upsertConfig + createInContext'
     };
 
     const items = Object.entries(results).map(([id, v]) => ({ id, ok: v.ok, detail: v.detail }));

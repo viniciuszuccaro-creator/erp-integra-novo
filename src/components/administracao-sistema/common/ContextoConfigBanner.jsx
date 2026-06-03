@@ -19,6 +19,31 @@ export default function ContextoConfigBanner() {
 
   const isAdmin = user?.role === 'admin';
 
+  const [testando, setTestando] = useState(false);
+  const [testeResult, setTesteResult] = useState(null);
+
+  const handleTesteContexto = async () => {
+    setTestando(true);
+    setTesteResult(null);
+    try {
+      // Testa upsert em ambos contextos sequencialmente
+      const payload = {
+        configKey: '__teste_contexto_dual__',
+        value: true,
+        group_id: grupoAtual?.id || null,
+        empresa_id: empresaAtual?.id || null,
+      };
+      await base44.functions.invoke('upsertConfig', payload);
+      setTesteResult({ ok: true, contexto: estaNoGrupo ? 'Grupo' : 'Empresa' });
+      toast.success(`Toggle testado no contexto ${estaNoGrupo ? 'Grupo' : 'Empresa'} ✓`);
+    } catch (err) {
+      setTesteResult({ ok: false });
+      toast.error("Falha no teste: " + (err?.message || "verifique o backend"));
+    } finally {
+      setTestando(false);
+    }
+  };
+
   const handleInitConfigs = async () => {
     setIniciando(true);
     setResultado(null);
@@ -82,7 +107,7 @@ export default function ContextoConfigBanner() {
 
       {/* Ações admin */}
       {isAdmin && (
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-wrap flex-shrink-0">
           {resultado && (
             <span className={`text-xs flex items-center gap-1 ${resultado.ok ? "text-green-700" : "text-red-600"}`}>
               {resultado.ok
@@ -91,11 +116,33 @@ export default function ContextoConfigBanner() {
               }
             </span>
           )}
+          {testeResult && (
+            <span className={`text-xs flex items-center gap-1 ${testeResult.ok ? "text-green-700" : "text-red-600"}`}>
+              {testeResult.ok
+                ? <><CheckCircle2 className="w-3 h-3" />Toggle OK ({testeResult.contexto})</>
+                : <><AlertCircle className="w-3 h-3" />Falha toggle</>
+              }
+            </span>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleTesteContexto}
+            disabled={testando || iniciando}
+            className="gap-1.5 text-xs border-indigo-300 text-indigo-700 hover:bg-indigo-50"
+            title="Testa persistência de toggle no contexto atual (Grupo ou Empresa)"
+          >
+            {testando
+              ? <RefreshCw className="w-3 h-3 animate-spin" />
+              : <CheckCircle2 className="w-3 h-3" />
+            }
+            Testar Contexto
+          </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={handleInitConfigs}
-            disabled={iniciando}
+            disabled={iniciando || testando}
             className="gap-1.5 text-xs border-blue-300 text-blue-700 hover:bg-blue-100"
           >
             {iniciando

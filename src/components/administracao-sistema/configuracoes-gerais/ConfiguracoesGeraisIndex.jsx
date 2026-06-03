@@ -10,6 +10,7 @@ import ProtectedSection from "@/components/security/ProtectedSection";
 import ContextoConfigBanner from "@/components/administracao-sistema/common/ContextoConfigBanner";
 import ParametrosGeraisPanel from "@/components/administracao-sistema/configuracoes-gerais/ParametrosGeraisPanel";
 import SistemaIntegridadeCheck from "@/components/administracao-sistema/SistemaIntegridadeCheck";
+import HerancaConfigNotice from "@/components/administracao-sistema/common/HerancaConfigNotice";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ArrowDownUp, ShieldCheck } from "lucide-react";
@@ -33,6 +34,9 @@ export default function ConfiguracoesGeraisIndex() {
           </Link>
         </div>
       </div>
+
+      {/* Políticas de herança documentadas */}
+      <HerancaConfigNotice />
 
       {/* Layout: parâmetros + checkup */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 w-full">

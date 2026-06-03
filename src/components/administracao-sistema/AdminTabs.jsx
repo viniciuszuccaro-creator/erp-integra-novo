@@ -19,7 +19,7 @@ import DashboardPropagacaoMonitor from "@/components/administracao-sistema/Dashb
 
 
 const TAB_DEFS = [
-  { value: "checkup",     label: "Status Sistema",        icon: Settings,    perm: "Configurações",     color: "blue" },
+  { value: "checkup",     label: "Checkup / 5 Etapas",    icon: Settings,    perm: "Configurações",     color: "blue" },
   { value: "gerais",      label: "Parâmetros Gerais",     icon: Settings,    perm: "Configurações",     color: "blue" },
   { value: "propagacao",  label: "Propagação Grupo↔Emp",  icon: ArrowDownUp, perm: "Configurações",     color: "blue" },
   { value: "integracoes", label: "Integrações",            icon: Plug,        perm: "Integrações",       color: "blue" },

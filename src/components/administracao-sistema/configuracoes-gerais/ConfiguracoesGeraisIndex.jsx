@@ -39,25 +39,28 @@ function AcoesRapidasEtapas() {
 
   const acoes = [
     {
+      key: 'propagacao',
+      label: 'E1: Propagar Tudo',
+      title: 'Inicializar sincronização histórica em todas as entidades (Grupo → Empresas)',
+      color: 'border-blue-300 text-blue-700 hover:bg-blue-50',
+      fn: async () => {
+        if (!grupoAtual?.id) throw new Error("Selecione um grupo primeiro");
+        return base44.functions.invoke('propagateAllEntities', { group_id: grupoAtual.id });
+      },
+    },
+    {
       key: 'configs',
-      label: 'Inicializar Configs',
-      title: 'E2: Init configs padrão',
+      label: 'E2: Init Configs',
+      title: 'Inicializar ConfiguracaoSistema padrão em ambos contextos (Grupo + Empresa)',
       color: 'border-amber-300 text-amber-700 hover:bg-amber-50',
-      fn: () => base44.functions.invoke('initDefaultConfigs', {}),
+      fn: () => base44.functions.invoke('initDefaultConfigs', { group_id: grupoAtual?.id }),
     },
     {
       key: 'rbac',
-      label: 'Inicializar RBAC',
-      title: 'E3: Criar perfis de acesso padrão',
+      label: 'E3: Init RBAC',
+      title: 'Criar perfis de acesso padrão com RBAC granular por módulo',
       color: 'border-purple-300 text-purple-700 hover:bg-purple-50',
       fn: () => base44.functions.invoke('initializeRBACProfiles', { group_id: grupoAtual?.id }),
-    },
-    {
-      key: 'propagacao',
-      label: 'Sincronizar Histórico',
-      title: 'E1: syncBidirectional em todas entidades',
-      color: 'border-blue-300 text-blue-700 hover:bg-blue-50',
-      fn: () => base44.functions.invoke('syncBidirectional', { groupId: grupoAtual?.id, direction: 'both' }),
     },
   ];
 

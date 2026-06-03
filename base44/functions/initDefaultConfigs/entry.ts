@@ -74,30 +74,71 @@ Deno.serve(async (req) => {
     if (user.role !== 'admin') return Response.json({ error: 'Forbidden: Admin only' }, { status: 403 });
 
     const body = await req.json().catch(() => ({}));
-    const force = body?.force === true; // força recriação de todos
+    const force = body?.force === true;
+    // Etapa 2: salva em ambos os contextos (Grupo + Empresa)
+    const group_id = body?.group_id || null;
+    const empresa_id = body?.empresa_id || null;
 
     const api = base44.asServiceRole.entities.ConfiguracaoSistema;
     const results = { created: [], skipped: [], errors: [] };
 
-    for (const cfg of DEFAULT_CONFIGS) {
-      try {
-        if (!force) {
-          const existing = await api.filter({ chave: cfg.chave }, '-updated_date', 1);
-          if (Array.isArray(existing) && existing.length > 0) {
-            results.skipped.push(cfg.chave);
-            continue;
+    // Contextos para salvar: global sempre + grupo (se informado) + empresa (se informada)
+    const contextos = [{}]; // global (sem group_id nem empresa_id)
+    if (group_id) contextos.push({ group_id });
+    if (empresa_id) contextos.push({ empresa_id, group_id: group_id || undefined });
+
+    for (const ctx of contextos) {
+      for (const cfg of DEFAULT_CONFIGS) {
+        try {
+          const filterBase = { chave: cfg.chave, ...ctx };
+          if (!force) {
+            const existing = await api.filter(filterBase, '-updated_date', 1);
+            if (Array.isArray(existing) && existing.length > 0) {
+              results.skipped.push(`${cfg.chave}@${JSON.stringify(ctx)}`);
+              continue;
+            }
           }
+          await api.create({
+            chave: cfg.chave,
+            ativa: cfg.ativa,
+            categoria: cfg.categoria,
+            ...ctx,
+          });
+          results.created.push(`${cfg.chave}@${JSON.stringify(ctx)}`);
+          // Anti-429: delay entre criações
+          await new Promise(r => setTimeout(r, 60));
+        } catch (e) {
+          // Se 429, aguarda mais antes de prosseguir
+          if (String(e.message).includes('429') || String(e.message).toLowerCase().includes('rate limit')) {
+            await new Promise(r => setTimeout(r, 500));
+          }
+          results.errors.push({ chave: cfg.chave, ctx, error: e.message });
         }
-        await api.create({ chave: cfg.chave, ativa: cfg.ativa, categoria: cfg.categoria });
-        results.created.push(cfg.chave);
-      } catch (e) {
-        results.errors.push({ chave: cfg.chave, error: e.message });
       }
+      // Delay entre contextos
+      await new Promise(r => setTimeout(r, 200));
     }
+
+    // Auditoria
+    try {
+      await base44.asServiceRole.entities.AuditLog.create({
+        usuario: user.full_name || user.email,
+        usuario_id: user.id,
+        acao: 'Execução',
+        modulo: 'Sistema',
+        tipo_auditoria: 'sistema',
+        entidade: 'ConfiguracaoSistema',
+        descricao: `initDefaultConfigs: ${results.created.length} criados, ${results.skipped.length} pulados em ${contextos.length} contexto(s)`,
+        group_id: group_id || null,
+        empresa_id: empresa_id || null,
+        data_hora: new Date().toISOString(),
+      });
+    } catch (_) {}
 
     return Response.json({
       ok: true,
-      total: DEFAULT_CONFIGS.length,
+      contextos: contextos.length,
+      total_por_contexto: DEFAULT_CONFIGS.length,
       created: results.created.length,
       skipped: results.skipped.length,
       errors: results.errors.length,

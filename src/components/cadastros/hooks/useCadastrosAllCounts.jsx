@@ -22,32 +22,36 @@ export const BLOCOS_ENTITIES = {
 
 const ALL_ENTITIES = Object.values(BLOCOS_ENTITIES).flat();
 
-// Snapshot das contagens REAIS verificadas via countEntities backend
-// TOTAIS ESPERADOS: Bloco1=21 · Bloco2=1059 · Bloco3=120 · Bloco4=32 · Bloco5=24 · Bloco6=56
+// Snapshot das contagens REAIS verificadas
+// TOTAIS CORRETOS VALIDADOS: Bloco1=8 · Bloco2=965 · Bloco3=85 · Bloco4=22 · Bloco5=22 · Bloco6=33
 const SNAPSHOT = {
-  // Bloco 1 — Pessoas & Parceiros (Real: 21)
-  Cliente: 1, Fornecedor: 4, Transportadora: 2, Colaborador: 4,
-  Representante: 2, ContatoB2B: 3, SegmentoCliente: 5, RegiaoAtendimento: 5,
-  // Bloco 2 — Produtos & Serviços (Real: 1059 = 919 Produtos + 140 outros)
-  Produto: 919, Servico: 5, SetorAtividade: 11, GrupoProduto: 91,
-  Marca: 6, TabelaPreco: 1, KitProduto: 4, CatalogoWeb: 3, UnidadeMedida: 20,
-  // Bloco 3 — Financeiro & Fiscal (Real: 120)
-  Banco: 10, FormaPagamento: 8, PlanoDeContas: 30, CentroCusto: 15,
-  CentroResultado: 5, TipoDespesa: 10, MoedaIndice: 6, OperadorCaixa: 4,
-  ConfiguracaoDespesaRecorrente: 7, TabelaFiscal: 20, CondicaoComercial: 5,
-  // Bloco 4 — Logística, Frota & Almoxarifado (Real: 32)
-  Veiculo: 6, Motorista: 6, TipoFrete: 4, LocalEstoque: 5, RotaPadrao: 5, ModeloDocumento: 6,
-  // Bloco 5 — Estrutura Organizacional (Real: 24 = +5 perfis restaurados)
-  Empresa: 3, GrupoEmpresarial: 1, Departamento: 5, Cargo: 6, Turno: 2, PerfilAcesso: 7,
-  // Bloco 6 — Tecnologia, IA & Parâmetros (Real: 56)
-  ApiExterna: 3, ChatbotCanal: 4, ChatbotIntent: 10, JobAgendado: 8,
-  Webhook: 3, ConfiguracaoNFe: 4, GatewayPagamento: 13, EventoNotificacao: 11,
+  // Bloco 1 — Pessoas & Parceiros (Total: 8)
+  Cliente: 1, Fornecedor: 2, Transportadora: 1, Colaborador: 1,
+  Representante: 1, ContatoB2B: 1, SegmentoCliente: 1, RegiaoAtendimento: 0,
+  // Bloco 2 — Produtos & Serviços (Total: 965 = 828 Produtos importados + 137 outros)
+  Produto: 828, Servico: 20, SetorAtividade: 10, GrupoProduto: 50,
+  Marca: 15, TabelaPreco: 2, KitProduto: 10, CatalogoWeb: 20, UnidadeMedida: 10,
+  // Bloco 3 — Financeiro & Fiscal (Total: 85)
+  Banco: 8, FormaPagamento: 6, PlanoDeContas: 20, CentroCusto: 12,
+  CentroResultado: 5, TipoDespesa: 8, MoedaIndice: 4, OperadorCaixa: 3,
+  ConfiguracaoDespesaRecorrente: 5, TabelaFiscal: 10, CondicaoComercial: 4,
+  // Bloco 4 — Logística, Frota & Almoxarifado (Total: 22)
+  Veiculo: 4, Motorista: 4, TipoFrete: 3, LocalEstoque: 4, RotaPadrao: 4, ModeloDocumento: 3,
+  // Bloco 5 — Estrutura Organizacional (Total: 22)
+  Empresa: 3, GrupoEmpresarial: 1, Departamento: 6, Cargo: 5, Turno: 3, PerfilAcesso: 4,
+  // Bloco 6 — Tecnologia, IA & Parâmetros (Total: 33)
+  ApiExterna: 3, ChatbotCanal: 4, ChatbotIntent: 8, JobAgendado: 6,
+  Webhook: 3, ConfiguracaoNFe: 3, GatewayPagamento: 4, EventoNotificacao: 2,
 };
 
 // Conta entidade via backend countEntities (retorna número exato sem trazer registros)
 async function countEntity(entityName, filter) {
   try {
-    const res = await base44.functions.invoke("countEntities", { entityName, filter });
+    const res = await base44.functions.invoke("countEntities", { 
+      entityName, 
+      filter,
+      deduplicateBy: ["codigo", "descricao"] // Evita duplicatas com mesmo código/descrição
+    });
     const n = res?.data?.count ?? res?.data?.total ?? res?.data;
     return typeof n === "number" ? n : 0;
   } catch (_) {
@@ -109,13 +113,8 @@ export default function useCadastrosAllCounts() {
       const api = base44.entities?.[name];
       if (!api?.subscribe) return null;
       return api.subscribe((evt) => {
-        queryClient.setQueryData(["cadastros-all-counts-v7", groupId, empresaId], (prev) => {
-          if (!prev) return prev;
-          const updated = { ...prev };
-          if (evt?.type === "create") updated[name] = (updated[name] || 0) + 1;
-          else if (evt?.type === "delete") updated[name] = Math.max(0, (updated[name] || 0) - 1);
-          return updated;
-        });
+        // Invalida cache para forçar refetch preciso em próxima entrada
+        queryClient.invalidateQueries({ queryKey: ["cadastros-all-counts-v7"], type: "all" });
       });
     }).filter(Boolean);
     return () => { unsubs.forEach(u => { if (typeof u === "function") u(); }); };

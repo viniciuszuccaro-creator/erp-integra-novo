@@ -315,6 +315,8 @@ export default function Dashboard() {
 
   // NOVOS KPIs OPERACIONAIS (Cards)
   const opsConcluidasCount = (ordensProducao || []).filter(op => ["Concluída","Concluido","Concluida","Concluído","Finalizada","Finalizado","Encerrada","Encerrado","Pronto"].includes(op?.status)).length;
+  // P4: Simplficado 42 → 18 cards. Mantém apenas essenciais (6 críticos + 6 operacional + 4 inteligência + 2 sistema)
+  // Cartões redundantes removidos (NF autorizadas, Cobranças Pagas duplicam Contas Receber)
   const kpisOperacionais = [
     {
       title: "OTD (On-Time)",
@@ -335,41 +337,12 @@ export default function Dashboard() {
       drillDown: () => handleDrillDown("/producao")
     },
     {
-      title: "Aproveitamento",
-      value: `${aproveitamentoBarra}%`,
-      subtitle: "aproveitamento de barra",
-      icon: Percent,
-      color: aproveitamentoBarra >= 90 ? "text-green-600" : aproveitamentoBarra >= 80 ? "text-orange-600" : "text-red-600",
-      bgColor: aproveitamentoBarra >= 90 ? "bg-green-50" : aproveitamentoBarra >= 80 ? "bg-orange-50" : "bg-red-50",
-      drillDown: () => handleDrillDown("/producao")
-    },
-    {
-      title: "Inadimplência",
-      value: `${taxaInadimplencia}%`,
-      subtitle: `R$ ${valorVencido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} vencido`,
-      icon: AlertCircle,
-      color: taxaInadimplencia < 5 ? "text-green-600" : taxaInadimplencia < 10 ? "text-orange-600" : "text-red-600",
-      bgColor: taxaInadimplencia < 5 ? "bg-green-50" : taxaInadimplencia < 10 ? "bg-orange-50" : "bg-red-50",
-      drillDown: () => handleDrillDown("/financeiro")
-    }
-  ];
-
-  const kpiCards = [
-    {
       title: "Clientes Ativos",
       value: clientesAtivos,
       icon: Users,
       color: "text-blue-600",
       bgColor: "bg-blue-50",
       drillDown: () => handleDrillDown("/comercial")
-    },
-    {
-      title: "Produtos Cadastrados",
-      value: totalProdutos,
-      icon: Package,
-      color: "text-indigo-600",
-      bgColor: "bg-indigo-50",
-      drillDown: () => handleDrillDown("/estoque")
     },
     {
       title: "Colaboradores",
@@ -388,39 +361,16 @@ export default function Dashboard() {
       drillDown: () => handleDrillDown("/expedicao")
     },
     {
-      title: "Estoque Baixo",
-      value: produtosBaixoEstoque,
-      icon: AlertCircle,
-      color: "text-red-600",
-      bgColor: "bg-red-50",
-      alert: produtosBaixoEstoque > 0,
-      drillDown: () => handleDrillDown("/estoque")
-    },
-    {
       title: "Total Pedidos",
       value: pedidos.length,
       icon: ShoppingCart,
       color: "text-cyan-600",
       bgColor: "bg-cyan-50",
       drillDown: () => handleDrillDown("/comercial")
-    },
-    {
-      title: "NF-e Autorizadas",
-      value: nfAutorizadas,
-      icon: FileText,
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-50",
-      drillDown: () => handleDrillDown("/fiscal")
-    },
-    {
-      title: "Cobranças Pagas",
-      value: cobrancasPagas,
-      icon: DollarSign,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
-      drillDown: () => handleDrillDown("/financeiro")
     }
   ];
+
+  const kpiCards = [];
 
   const quickAccessBase = [
     {

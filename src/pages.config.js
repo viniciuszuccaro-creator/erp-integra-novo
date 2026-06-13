@@ -57,7 +57,7 @@ import Compras from './pages/Compras';
 import ConfiguracoesUsuario from './pages/ConfiguracoesUsuario';
 import Contratos from './pages/Contratos';
 import Dashboard from './pages/Dashboard';
-import DashboardCorporativo from './pages/DashboardCorporativo';
+
 import Documentacao from './pages/Documentacao';
 import EntregasMobile from './pages/EntregasMobile';
 import Estoque from './pages/Estoque';
@@ -86,7 +86,7 @@ export const PAGES = {
     "ConfiguracoesUsuario": ConfiguracoesUsuario,
     "Contratos": Contratos,
     "Dashboard": Dashboard,
-    "DashboardCorporativo": DashboardCorporativo,
+
     "Documentacao": Documentacao,
     "EntregasMobile": EntregasMobile,
     "Estoque": Estoque,

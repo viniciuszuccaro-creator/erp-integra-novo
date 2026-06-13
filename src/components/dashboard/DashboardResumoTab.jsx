@@ -19,7 +19,6 @@ const FinancialSummary          = React.lazy(() => import("@/components/dashboar
 const QuickAccessModulesGrid    = React.lazy(() => import("@/components/dashboard/QuickAccessModulesGrid"));
 const WidgetEstoqueCritico      = React.lazy(() => import("@/components/estoque/WidgetEstoqueCritico"));
 const DashboardAcoesRapidas     = React.lazy(() => import("@/components/dashboard/DashboardAcoesRapidas"));
-const DashboardTopProdutos      = React.lazy(() => import("@/components/dashboard/DashboardTopProdutos"));
 const DashboardIAInsightsStrip  = React.lazy(() => import("@/components/dashboard/DashboardIAInsightsStrip"));
 const DashboardMetasProgress    = React.lazy(() => import("@/components/dashboard/DashboardMetasProgress"));
 
@@ -109,10 +108,8 @@ export default function DashboardResumoTab({
       {/* KPIs operacionais */}
       <Slot Component={KPIsOperacionaisSection} fallbackH={20} componentProps={{ kpis: kpisOperacionais }} />
 
-      {/* KPIs secundários — renderiza apenas se houver dados */}
-      {kpiCards && kpiCards.length > 0 && (
-        <Slot Component={SecondaryKPIsSection} fallbackH={16} componentProps={{ kpis: kpiCards }} />
-      )}
+      {/* KPIs secundários */}
+      <Slot Component={SecondaryKPIsSection} fallbackH={16} componentProps={{ kpis: kpiCards }} />
 
       {/* Ações rápidas contextuais */}
       <Slot Component={DashboardAcoesRapidas} fallbackH={20} componentProps={{
@@ -145,8 +142,8 @@ export default function DashboardResumoTab({
         }} />
       </div>
 
-      {/* Top Produtos + Estoque crítico + Metas (grid 3 colunas) */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      {/* Apenas Estoque crítico + Metas (removido TopProdutos — info redundante em Estoque) */}
+      <div className="grid lg:grid-cols-2 gap-6">
         {canSeeEstoque && (
           <Slot Component={WidgetEstoqueCritico} fallbackH={20} componentProps={{
             preds14Count: preds14,
@@ -154,10 +151,6 @@ export default function DashboardResumoTab({
             onNavigate: () => onDrillDown(createPageUrl("Estoque")),
           }} />
         )}
-        <Slot Component={DashboardTopProdutos} fallbackH={20} componentProps={{
-          topProdutos,
-          onNavigate: () => onDrillDown(createPageUrl("Estoque")),
-        }} />
         <Slot Component={DashboardMetasProgress} fallbackH={20} componentProps={{
           totalVendas: totalVendasNum,
           entregasConcluidas: entregasConc,
@@ -165,36 +158,25 @@ export default function DashboardResumoTab({
         }} />
       </div>
 
-      {/* Anomalias Financeiras */}
-      {canSeeFinanceiro && anomList.length > 0 && (
-        <Card className="bg-white/80 backdrop-blur-sm">
+      {/* Anomalias críticas apenas (P4: simplificação) */}
+      {canSeeFinanceiro && anomResumo.alto > 0 && (
+        <Card className="bg-red-50 border-red-200">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-600" />
-              Anomalias Financeiras Detectadas
+              <AlertCircle className="w-4 h-4 text-red-600" />
+              ⚠️ {anomResumo.alto} anomalias críticas detectadas
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2 text-sm">
-              {anomResumo.alto > 0 && <Badge className="bg-red-100 text-red-700">Alta: {anomResumo.alto}</Badge>}
-              {anomResumo.medio > 0 && <Badge className="bg-amber-100 text-amber-700">Média: {anomResumo.medio}</Badge>}
-              {anomResumo.baixo > 0 && <Badge variant="outline">Baixa: {anomResumo.baixo}</Badge>}
-            </div>
-          </CardContent>
         </Card>
       )}
 
-      {/* Gráficos de vendas (30d) e fluxo (7d) */}
-      <Slot Component={ChartsSection} fallbackH={48} componentProps={{
-        vendasUltimos30Dias,
-        fluxo7Dias,
-      }} />
-
-      {/* Acesso rápido aos módulos */}
-      <Slot Component={QuickAccessModulesGrid} fallbackH={24} componentProps={{
-        modules: quickAccess,
-        onClick: onDrillDown,
-      }} />
+      {/* Apenas gráfico de fluxo (vendas removida — redundante em Comercial) */}
+      {fluxo7Dias && fluxo7Dias.length > 0 && (
+        <Slot Component={ChartsSection} fallbackH={32} componentProps={{
+          vendasUltimos30Dias: [],
+          fluxo7Dias,
+        }} />
+      )}
 
     </div>
   );

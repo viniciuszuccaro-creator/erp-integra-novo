@@ -186,11 +186,11 @@ export const roadmap2026 = [
   {
     trimestre: 'Q4 2027 🔄', cor: 'rose', status: 'em_execucao',
     itens: [
-      '📅 Validação automática group_id/empresa_id em todos os forms — Ciclo 25',
-      '📅 Validação de estoque antes de confirmar Pedido — Ciclo 25',
-      '📅 Deduplicação ContaReceber/ContaPagar por pedido_id — Ciclo 25',
-      '📅 Índice de criticidade de estoque + alertas de ruptura — Ciclo 25',
-      '📅 Auditoria detalhada de ações sensíveis (aprovações, exclusões) — Ciclo 25',
+      '📅 Garantir group_id + empresa_id em todos os forms de criação — Ciclo 25',
+      '📅 Sanitização unificada via sanitizeOnWrite em todos os módulos — Ciclo 25',
+      '📅 Propagar FormaPagamento, TabelaPreco, CondicaoComercial no propagateGroupConfigs — Ciclo 25',
+      '📅 Refatorar VisualizadorUniversalEntidadeV24 → VisualizadorBody.jsx — Ciclo 25',
+      '📅 AuditLog para exclusões em massa nos Cadastros e Compras — Ciclo 25',
       '🔒 IA generativa avançada — desbloqueio após 07/07/2026',
       '🔒 API headless multi-tenant completa — pós desbloqueio créditos',
     ]

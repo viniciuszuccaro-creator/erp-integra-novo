@@ -20,6 +20,7 @@ export { ciclo19Items } from './ciclos/ciclo19';
 export { ciclo20Items } from './ciclos/ciclo20';
 export { ciclo21Items } from './ciclos/ciclo21';
 export { ciclo22Items } from './ciclos/ciclo22';
+export { ciclo23Items } from './ciclos/ciclo23';
 
 // ── Pilares estruturais ───────────────────────────────────────────────────────
 export const melhoriaPlanPhases = [
@@ -145,7 +146,7 @@ export const roadmap2026 = [
     ]
   },
   {
-    trimestre: 'Q1 2027 🔄', cor: 'amber', status: 'em_execucao',
+    trimestre: 'Q1 2027 ✅', cor: 'amber', status: 'concluido',
     itens: [
       '🔒 IA generativa avançada — bloqueado até 07/07/2026 (créditos esgotados)',
       '🔒 Chatbot omnicanal GPT-4 — bloqueado até 07/07/2026',
@@ -155,6 +156,19 @@ export const roadmap2026 = [
       '✅ Backfill `codigo` em 20 entidades — Ciclo 22',
       '✅ Refatoração VisualizadorUniversalEntidadeV24 — Ciclo 22',
       '✅ Refatoração melhoriaPlanData.js — Ciclo 22',
+    ]
+  },
+  {
+    trimestre: 'Q2 2027 🔄', cor: 'teal', status: 'em_execucao',
+    itens: [
+      '✅ Recriação hooks useVisualizadorState/Query/CRUD — Ciclo 23',
+      '✅ Correção imports absolutos VisualizadorUniversalEntidadeV24 — Ciclo 23',
+      '✅ Correção imports CicloExecucaoPanel — Ciclo 23',
+      '🔒 IA generativa avançada — desbloqueio após 07/07/2026',
+      '🔒 Chatbot omnicanal GPT-4 — desbloqueio após 07/07/2026',
+      '🔒 Dashboard IA Gerador — desbloqueio após 07/07/2026',
+      '📅 Expansão internacional (en/es)',
+      '📅 API headless multi-tenant completa',
     ]
   },
 ];

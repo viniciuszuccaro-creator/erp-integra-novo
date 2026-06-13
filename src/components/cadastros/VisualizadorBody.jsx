@@ -109,7 +109,7 @@ export default function VisualizadorBody({
       </div>
 
       {/* Modal */}
-      {FormComponent && onClose && (
+      {FormComponent && onClose && formProps?.isOpen && (
         <VisualizadorModal
           ENTITY={ENTITY} TITULO={TITULO} FormComponent={FormComponent}
           formProps={formProps} formKey={formKey}

@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { ENTITY_CODE_FIELD } from "@/components/cadastros/config/entityCodeFields";
+import { sanitizeOnWrite } from "@/components/lib/sanitizeOnWrite";
 
 // Re-exporta para compatibilidade com importadores existentes
 export { ENTITY_CODE_FIELD };
@@ -77,9 +78,17 @@ export default function useVisualizadorCRUD({
     }
     if (editItem?.id && !canEditCadastro) throw new Error("Sem permissão para editar.");
     if (!editItem?.id && !canCreateCadastro) throw new Error("Sem permissão para criar.");
+
+    // c25-01: validar contexto multiempresa antes de salvar
+    if (!isSimple && !empresaId && !groupId) {
+      alert("⚠️ Selecione uma empresa ou grupo antes de salvar.");
+      return;
+    }
+
     setIsSaving(true);
     try {
-      const clean = { ...formData };
+      // c25-02: sanitização centralizada via sanitizeOnWrite
+      let clean = sanitizeOnWrite({ ...formData });
       delete clean._action;
       if (!isSimple) {
         if (!clean.empresa_id && empresaId) clean.empresa_id = empresaId;

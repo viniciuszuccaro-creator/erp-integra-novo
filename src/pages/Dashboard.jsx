@@ -250,6 +250,7 @@ export default function Dashboard() {
     });
   };
 
+  // Zona 1: KPIs Críticos (6 cards essenciais)
   const statsCards = [
     {
       title: "Vendas do Período",
@@ -259,16 +260,6 @@ export default function Dashboard() {
       color: "from-green-500 to-green-600",
       bgColor: "bg-green-50",
       textColor: "text-green-600",
-      drillDown: () => handleDrillDown("/comercial")
-    },
-    {
-      title: "Ticket Médio",
-      value: `R$ ${ticketMedio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-      subtitle: "por pedido",
-      icon: TrendingUp,
-      color: "from-blue-500 to-blue-600",
-      bgColor: "bg-blue-50",
-      textColor: "text-blue-600",
       drillDown: () => handleDrillDown("/comercial")
     },
     {
@@ -282,14 +273,43 @@ export default function Dashboard() {
       drillDown: () => handleDrillDown("/financeiro")
     },
     {
-      title: "Taxa de Conversão",
-      value: `${taxaConversao}%`,
-      subtitle: "vendas/clientes",
-      icon: TrendingUp,
-      color: "from-purple-500 to-purple-600",
-      bgColor: "bg-purple-50",
-      textColor: "text-purple-600",
-      drillDown: () => handleDrillDown("/comercial")
+      title: "Contas Receber Vencidas",
+      value: receitasPendentes,
+      subtitle: `R$ ${(contasReceber || []).filter(c => c?.status === 'Vencido').reduce((s, c) => s + (Number(c?.valor) || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      icon: AlertCircle,
+      color: receitasPendentes > 0 ? "from-red-500 to-red-600" : "from-green-500 to-green-600",
+      bgColor: receitasPendentes > 0 ? "bg-red-50" : "bg-green-50",
+      textColor: receitasPendentes > 0 ? "text-red-600" : "text-green-600",
+      drillDown: () => handleDrillDown("/financeiro")
+    },
+    {
+      title: "Contas Pagar Vencidas",
+      value: despesasPendentes,
+      subtitle: `R$ ${(contasPagar || []).filter(c => c?.status === 'Vencido').reduce((s, c) => s + (Number(c?.valor) || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      icon: AlertCircle,
+      color: despesasPendentes > 0 ? "from-red-500 to-red-600" : "from-green-500 to-green-600",
+      bgColor: despesasPendentes > 0 ? "bg-red-50" : "bg-green-50",
+      textColor: despesasPendentes > 0 ? "text-red-600" : "text-green-600",
+      drillDown: () => handleDrillDown("/financeiro")
+    },
+    {
+      title: "Estoque Crítico",
+      value: produtosBaixoEstoque,
+      subtitle: "produtos com baixo estoque",
+      icon: AlertCircle,
+      color: produtosBaixoEstoque > 0 ? "text-red-600" : "text-green-600",
+      bgColor: produtosBaixoEstoque > 0 ? "bg-red-50" : "bg-green-50",
+      drillDown: () => handleDrillDown("/estoque")
+    },
+    {
+      title: "Saldo Caixa",
+      value: `R$ ${Math.abs(fluxoCaixa).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      subtitle: fluxoCaixa >= 0 ? "em caixa" : "déficit",
+      icon: DollarSign,
+      color: "from-blue-500 to-blue-600",
+      bgColor: "bg-blue-50",
+      textColor: "text-blue-600",
+      drillDown: () => handleDrillDown("/financeiro")
     }
   ];
 

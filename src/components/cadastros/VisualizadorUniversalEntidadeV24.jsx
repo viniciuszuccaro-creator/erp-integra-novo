@@ -290,28 +290,6 @@ export default function VisualizadorUniversalEntidadeV24({
   const [page,     setPage]     = useState(1);
   const [pageSize, setPageSize] = useState(_pageSizeProp);
 
-  // Próximo código sequencial para novos cadastros
-  const [nextCode, setNextCode] = useState(null);
-  const fetchNextCode = useCallback(async function() {
-    const codeField = ENTITY_CODE_FIELD[ENTITY];
-    if (!codeField) return;
-    try {
-      const res = await base44.functions.invoke("entityListSorted", {
-        entityName: ENTITY,
-        filter: readFilter,
-        sortField: codeField,
-        sortDirection: "desc",
-        limit: 1,
-        skip: 0,
-      });
-      const last = Array.isArray(res?.data) && res.data[0];
-      const lastVal = last ? last[codeField] : null;
-      const n = lastVal ? parseInt(String(lastVal).replace(/\D/g, ''), 10) : 0;
-      const next = isNaN(n) ? 1 : n + 1;
-      setNextCode(String(next).padStart(3, '0'));
-    } catch { setNextCode(null); }
-  }, [ENTITY, readFilter]);
-
   const [showForm,      setShowForm]      = useState(Boolean(startWithForm && FormComponent));
   const [editItem,      setEditItem]      = useState(null);
   const [formKey,       setFormKey]       = useState(0);
@@ -372,6 +350,28 @@ export default function VisualizadorUniversalEntidadeV24({
     }
     return orConds.length ? { $or: orConds } : {};
   }, [ENTITY, isSimple, empresaId, groupId, empresasDoGrupo]);
+
+  // Próximo código sequencial para novos cadastros — declarado APÓS readFilter
+  const [nextCode, setNextCode] = useState(null);
+  const fetchNextCode = useCallback(async function() {
+    const codeField = ENTITY_CODE_FIELD[ENTITY];
+    if (!codeField) return;
+    try {
+      const res = await base44.functions.invoke("entityListSorted", {
+        entityName: ENTITY,
+        filter: readFilter,
+        sortField: codeField,
+        sortDirection: "desc",
+        limit: 1,
+        skip: 0,
+      });
+      const last = Array.isArray(res?.data) && res.data[0];
+      const lastVal = last ? last[codeField] : null;
+      const n = lastVal ? parseInt(String(lastVal).replace(/\D/g, ''), 10) : 0;
+      const next = isNaN(n) ? 1 : n + 1;
+      setNextCode(String(next).padStart(3, '0'));
+    } catch { setNextCode(null); }
+  }, [ENTITY, readFilter]);
 
   const backendSortField = UNSORTABLE_BACKEND.has(sortField) ? "updated_date" : sortField;
   const backendSortDir   = sortDir;

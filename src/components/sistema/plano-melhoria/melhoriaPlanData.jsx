@@ -23,6 +23,7 @@ export { ciclo22Items } from './ciclos/ciclo22';
 export { ciclo23Items } from './ciclos/ciclo23';
 export { ciclo24Items } from './ciclos/ciclo24';
 export { ciclo25Items } from './ciclos/ciclo25';
+export { ciclo26Items } from './ciclos/ciclo26';
 
 // ── Pilares estruturais ───────────────────────────────────────────────────────
 export const melhoriaPlanPhases = [
@@ -184,13 +185,23 @@ export const roadmap2026 = [
     ]
   },
   {
-    trimestre: 'Q4 2027 🔄', cor: 'rose', status: 'em_execucao',
+    trimestre: 'Q4 2027 ✅', cor: 'rose', status: 'concluido',
     itens: [
-      '📅 Garantir group_id + empresa_id em todos os forms de criação — Ciclo 25',
-      '📅 Sanitização unificada via sanitizeOnWrite em todos os módulos — Ciclo 25',
-      '📅 Propagar FormaPagamento, TabelaPreco, CondicaoComercial no propagateGroupConfigs — Ciclo 25',
-      '📅 Refatorar VisualizadorUniversalEntidadeV24 → VisualizadorBody.jsx — Ciclo 25',
-      '📅 AuditLog para exclusões em massa nos Cadastros e Compras — Ciclo 25',
+      '✅ Garantir group_id + empresa_id em todos os forms de criação — Ciclo 25',
+      '✅ Sanitização unificada via sanitizeOnWrite em todos os módulos — Ciclo 25',
+      '✅ Confirmação propagação FormaPagamento/TabelaPreco/CondicaoComercial — Ciclo 25',
+      '✅ Refatorar VisualizadorUniversalEntidadeV24 → VisualizadorBody.jsx — Ciclo 25',
+      '✅ AuditLog para exclusões em massa nos Cadastros — Ciclo 25',
+    ]
+  },
+  {
+    trimestre: 'Q1 2028 🔄', cor: 'violet', status: 'em_execucao',
+    itens: [
+      '✅ Otimizar contagens Dashboard — countEntitiesOptimized em todos módulos — Ciclo 26',
+      '✅ RBAC granular Financeiro/Compras — aprovar OC, liquidar, excluir — Ciclo 26',
+      '✅ Refatorar useVisualizadorCRUD → useConflictValidator separado — Ciclo 26',
+      '✅ Retry com backoff exponencial em propagateGroupConfigs — Ciclo 26',
+      '✅ centralizedAuditLogger nos módulos Fiscal e RH — Ciclo 26',
       '🔒 IA generativa avançada — desbloqueio após 07/07/2026',
       '🔒 API headless multi-tenant completa — pós desbloqueio créditos',
     ]

@@ -1,8 +1,27 @@
+/**
+ * melhoriaPlanData.js — Dados de pilares e roadmap do ERP Zuccaro.
+ * Ciclos individuais foram movidos para ./ciclos/cicloXX.js (Regra-Mãe: arquivos > 400 linhas → refatorados).
+ */
 import {
   Shield, Building2, Gauge, Sparkles, Workflow, Lock, Bot, Network,
-  ClipboardCheck, Rocket, TrendingUp, Zap, Users
+  ClipboardCheck, Rocket,
 } from 'lucide-react';
 
+// Re-exporta ciclos individuais (mantém compatibilidade com importadores existentes)
+export { ciclo11Items } from './ciclos/ciclo11';
+export { ciclo12Items } from './ciclos/ciclo12';
+export { ciclo13Items } from './ciclos/ciclo13';
+export { ciclo14Items } from './ciclos/ciclo14';
+export { ciclo15Items } from './ciclos/ciclo15';
+export { ciclo16Items } from './ciclos/ciclo16';
+export { ciclo17Items } from './ciclos/ciclo17';
+export { ciclo18Items } from './ciclos/ciclo18';
+export { ciclo19Items } from './ciclos/ciclo19';
+export { ciclo20Items } from './ciclos/ciclo20';
+export { ciclo21Items } from './ciclos/ciclo21';
+export { ciclo22Items } from './ciclos/ciclo22';
+
+// ── Pilares estruturais ───────────────────────────────────────────────────────
 export const melhoriaPlanPhases = [
   {
     id: 'estabilidade', title: 'Estabilização técnica',
@@ -77,415 +96,16 @@ export const melhoriaPlanPhases = [
 ];
 
 export const melhoriaStatusLabels = {
-  concluido:   'Concluído ✅',
-  em_execucao: 'Em execução 🔄',
-  prioritario: 'Prioritário ⚡',
-  planejado:   'Planejado 📅',
-  conectado:   'Conectado 🔗',
-  permanente:  'Permanente ♾️',
+  concluido:          'Concluído ✅',
+  em_execucao:        'Em execução 🔄',
+  prioritario:        'Prioritário ⚡',
+  planejado:          'Planejado 📅',
+  conectado:          'Conectado 🔗',
+  permanente:         'Permanente ♾️',
+  bloqueado_creditos: 'Bloqueado (créditos) 🔒',
 };
 
-// ── Ciclo 11 — Maio 2026 ────────────────────────────────────────────────────
-export const ciclo11Items = [
-  {
-    id: 'c11-01', modulo: 'Gestão de Acessos', pilar: 'Acesso', prioridade: 'CRÍTICO',
-    titulo: 'GestaoAcessosIndex: 4 KPIs, aba Auditoria, badge cobertura RBAC',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Banner com 4 KPIs (Perfis, Pendentes, Usuários, Cobertura%), nova aba Auditoria com paginação/filtros, layout 4 colunas.'
-  },
-  {
-    id: 'c11-02', modulo: 'Gestão de Acessos', pilar: 'Acesso', prioridade: 'ALTO',
-    titulo: 'AccessAuditTimeline: paginação, filtros por ação e ícones por tipo',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Busca por texto, filtro por tipo de ação, ícones coloridos e paginação de 10 eventos por página.'
-  },
-  {
-    id: 'c11-03', modulo: 'Gestão de Acessos', pilar: 'Acesso', prioridade: 'ALTO',
-    titulo: 'UsuariosTab: estatísticas, filtro "sem perfil" e botão Atribuir Perfil',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Bloco de 3 KPIs (Total/Com Perfil/Sem Perfil), filtro por status de perfil, botão destaque âmbar para pendentes.'
-  },
-  {
-    id: 'c11-04', modulo: 'Plano de Melhorias', pilar: 'Governança', prioridade: 'ALTO',
-    titulo: 'Refatorar PlanoMelhoria com abas, Ciclo Atual e Análise de Gaps',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Nova estrutura com 6 abas: Visão Geral, Ciclo Atual, Backlog, Análise de Gaps, Roadmap, Governança.'
-  },
-  {
-    id: 'c11-05', modulo: 'Plano de Melhorias', pilar: 'Governança', prioridade: 'ALTO',
-    titulo: 'moduleImprovementPlan: adicionar Gestão Acessos 100% e atualizar scores',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'Módulo "Gestão Acessos" adicionado com 100% e scores de outros módulos atualizados para refletir ciclo 11.'
-  },
-  {
-    id: 'c11-06', modulo: 'Plano de Melhorias', pilar: 'Governança', prioridade: 'ALTO',
-    titulo: 'PlanoMelhoriaLiveBacklog: CRUD real com criação/edição inline de itens',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Botão de novo item, form inline, persistência no banco PlanoMelhoriaItem, filtros por status e módulo.'
-  },
-  {
-    id: 'c11-07', modulo: 'Dashboard', pilar: 'Performance', prioridade: 'MÉDIO',
-    titulo: 'KPIs do Dashboard mostram 0 sem empresa — consolidar do grupo',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Quando contexto = "grupo", buscar dados consolidados via groupConsolidation automaticamente. SemEmpresaBanner integrado no DashboardHeader.'
-  },
-  {
-    id: 'c11-08', modulo: 'Cadastros Gerais', pilar: 'UX', prioridade: 'MÉDIO',
-    titulo: 'Mensagem orientativa quando empresa não selecionada (sem tela em branco)',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'Componente SemEmpresaBanner criado em components/common/SemEmpresaBanner, com botão de seleção de empresa e fallback de dados do grupo.'
-  },
-  {
-    id: 'c11-09', modulo: 'Sidebar / Layout', pilar: 'UX', prioridade: 'MÉDIO',
-    titulo: 'Adicionar links "Empresas" e "Portal do Cliente" na sidebar',
-    status: 'concluido', impacto: 'Médio',
-    descricao: '"Empresas e Grupos" e "Portal do Cliente" adicionados ao grupo "sistema" da navigationItems no layout.jsx.'
-  },
-  {
-    id: 'c11-10', modulo: 'Fiscal / NF-e', pilar: 'Integrações', prioridade: 'ALTO',
-    titulo: 'Validação de certificado A1 e API fiscal antes de emitir NF-e',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Componente ValidacaoCertificadoNFe criado em components/fiscal — verifica CNPJ, série e API key; exibe banner bloqueante com link para configurar.'
-  },
-  {
-    id: 'c11-11', modulo: 'Financeiro', pilar: 'Integrações', prioridade: 'MÉDIO',
-    titulo: 'Wizard de configuração de gateway quando gerar boleto/PIX sem config',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'Componente WizardGatewayPagamento criado em components/financeiro — detecta ausência de gateway e exibe opções de configuração em vez de erro genérico.'
-  },
-  {
-    id: 'c11-12', modulo: 'Todos', pilar: 'IA', prioridade: 'BAIXO',
-    titulo: 'IA generativa contextual — sugestões proativas por módulo',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Componente IAContextualModulo criado em components/ia — chama iaGenerativeContextual com contexto multiempresa, exibe sugestões numeradas com refresh.'
-  },
-];
-
-// ── Ciclo 12 — Junho 2026 ───────────────────────────────────────────────────
-export const ciclo12Items = [
-  {
-    id: 'c12-01', modulo: 'Comercial', pilar: 'UX', prioridade: 'ALTO',
-    titulo: 'SemEmpresaBanner + IAContextualModulo no Header Comercial',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Banner orientativo e sugestões IA integrados ao HeaderComercialCompacto — guia usuário sem empresa e oferece ações inteligentes.',
-  },
-  {
-    id: 'c12-02', modulo: 'CRM', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'SemEmpresaBanner + IAContextualModulo no Header CRM',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Banner orientativo e IA contextual de relacionamento, oportunidades e churn integrados ao HeaderCRMCompacto.',
-  },
-  {
-    id: 'c12-03', modulo: 'Estoque', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'SemEmpresaBanner + IAContextualModulo no Header Estoque',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Banner de empresa + IA de reposição e movimentações integrados ao HeaderEstoqueCompacto.',
-  },
-  {
-    id: 'c12-04', modulo: 'Financeiro', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'SemEmpresaBanner + IAContextualModulo no Header Financeiro',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Banner orientativo e IA de saúde financeira integrados ao HeaderFinanceiroCompacto — contextualizado por empresa/grupo.',
-  },
-  {
-    id: 'c12-05', modulo: 'RH', pilar: 'IA', prioridade: 'MÉDIO',
-    titulo: 'SemEmpresaBanner + IAContextualModulo no Header RH',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'Banner de empresa + sugestões IA de gestão de pessoas integrados ao HeaderRHCompacto.',
-  },
-  {
-    id: 'c12-06', modulo: 'Compras', pilar: 'IA', prioridade: 'MÉDIO',
-    titulo: 'SemEmpresaBanner + IAContextualModulo no Header Compras',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'Banner + IA de fornecedores e suprimentos integrados ao HeaderComprasCompacto.',
-  },
-  {
-    id: 'c12-07', modulo: 'Expedição', pilar: 'IA', prioridade: 'MÉDIO',
-    titulo: 'SemEmpresaBanner + IAContextualModulo no Header Expedição',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'Banner + IA de rotas e entregas integrados ao HeaderExpedicaoCompacto.',
-  },
-  {
-    id: 'c12-08', modulo: 'Produção', pilar: 'IA', prioridade: 'MÉDIO',
-    titulo: 'IAContextualModulo no Header Produção',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'Integrar IAContextualModulo e SemEmpresaBanner no HeaderProducaoCompacto.',
-  },
-  {
-    id: 'c12-09', modulo: 'Fiscal', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'ValidacaoCertificadoNFe na aba NF-e do módulo Fiscal',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'ValidacaoCertificadoNFe exibida no HeaderFiscalCompacto + SemEmpresaBanner + IAContextualModulo.',
-  },
-  {
-    id: 'c12-10', modulo: 'Relatórios', pilar: 'UX', prioridade: 'MÉDIO',
-    titulo: 'SemEmpresaBanner nos Relatórios + IAContextualModulo de análise',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'SemEmpresaBanner integrado à página de Relatórios e Análises.',
-  },
-  {
-    id: 'c12-11', modulo: 'Contratos', pilar: 'IA', prioridade: 'BAIXO',
-    titulo: 'IAContextualModulo no módulo Contratos',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'SemEmpresaBanner + IAContextualModulo integrados ao cabeçalho da página Contratos.',
-  },
-  {
-    id: 'c12-12', modulo: 'Todos', pilar: 'Performance', prioridade: 'MÉDIO',
-    titulo: 'Scores módulos 99→100: IA e Integrações concluídas em todos os launchpads',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'moduleImprovementPlan atualizado: IA operacional e Integrações chegam a 100% nos módulos com novos headers.',
-  },
-];
-
-// ── Ciclo 13 — Julho 2026 ───────────────────────────────────────────────────
-export const ciclo13Items = [
-  {
-    id: 'c13-01', modulo: 'Agenda', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'SemEmpresaBanner + IAContextualModulo na Agenda',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Banner orientativo e IA contextual de eventos integrados ao cabeçalho da página Agenda.',
-  },
-  {
-    id: 'c13-02', modulo: 'Cadastros', pilar: 'IA', prioridade: 'MÉDIO',
-    titulo: 'SemEmpresaBanner + IAContextualModulo nos Cadastros',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'Banner multiempresa + IA de cadastros integrados à página de Cadastros Gerais.',
-  },
-  {
-    id: 'c13-03', modulo: 'Hub Atendimento', pilar: 'IA', prioridade: 'MÉDIO',
-    titulo: 'SemEmpresaBanner + IAContextualModulo no Hub Atendimento',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'Banner multiempresa + IA de atendimento integrados ao cabeçalho do Hub de Atendimento Omnicanal.',
-  },
-  {
-    id: 'c13-04', modulo: 'Portal', pilar: 'UX', prioridade: 'MÉDIO',
-    titulo: 'IAContextualModulo no Portal do Cliente',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'IAContextualModulo integrado à página PortalCliente — sugestões contextuais para o cliente via IA.',
-  },
-  {
-    id: 'c13-05', modulo: 'Todos', pilar: 'Governança', prioridade: 'ALTO',
-    titulo: 'Scores atualizados: Agenda, Cadastros, Hub Atendimento → 100%',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'moduleImprovementPlan atualizado com scores finais para fechar o ciclo de headers padronizados.',
-  },
-  {
-    id: 'c13-06', modulo: 'Sistema', pilar: 'Governança', prioridade: 'BAIXO',
-    titulo: 'PlanoMelhoria: Ciclo 13 registrado e Sprint Board atualizado',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'ciclo13Items exportado e integrado ao Sprint Board e PlanoMelhoriaCicloAtual.',
-  },
-];
-
-// ── Ciclo 14 — Agosto 2026 ──────────────────────────────────────────────────
-export const ciclo14Items = [
-  {
-    id: 'c14-01', modulo: 'Portal', pilar: 'UX', prioridade: 'ALTO',
-    titulo: 'IAContextualModulo integrado ao Portal do Cliente (fechar c13-04)',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'IAContextualModulo adicionado à página PortalCliente, fechando o item planejado do ciclo 13.',
-  },
-  {
-    id: 'c14-02', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'DashboardForecastWidget — Previsão IA 30 dias via biForecastPreditivo',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Novo widget no Dashboard com previsões preditivas para os próximos 30 dias, alertas de anomalia e tendências de receita/estoque.',
-  },
-  {
-    id: 'c14-03', modulo: 'Dashboard', pilar: 'Performance', prioridade: 'MÉDIO',
-    titulo: 'Widget de Forecast integrado ao painel principal do Dashboard',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'DashboardForecastWidget injetado na seção de análise do Dashboard Executivo.',
-  },
-  {
-    id: 'c14-04', modulo: 'Sistema', pilar: 'Governança', prioridade: 'BAIXO',
-    titulo: 'ciclo14Items exportado e Sprint Board atualizado para Ciclo 14',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'PlanoMelhoria, PlanoMelhoriaCicloAtual e SprintBoard refletem o Ciclo 14 — Agosto 2026.',
-  },
-];
-
-// ── Ciclo 15 — Setembro 2026 ────────────────────────────────────────────────
-export const ciclo15Items = [
-  {
-    id: 'c15-01', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'DashboardAnomaliaWidget — Anomalias financeiras via iaFinanceAnomalyScan',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Widget compacto no Dashboard detectando anomalias financeiras em tempo real, com alertas por nível de risco.',
-  },
-  {
-    id: 'c15-02', modulo: 'CRM', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'IAChurnWidget — Clientes em risco de churn via iaChurnAnalyzer',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Widget no CRM e Dashboard com lista de clientes em risco de churn, nível e dias sem comprar.',
-  },
-  {
-    id: 'c15-03', modulo: 'Dashboard', pilar: 'UX', prioridade: 'MÉDIO',
-    titulo: 'Seção IA integrada no AdvancedAnalysisSection: Forecast + Anomalias + Churn',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Os 3 widgets de IA (Forecast, Anomalias e Churn) exibidos lado a lado na seção de Análise Avançada do Dashboard.',
-  },
-  {
-    id: 'c15-04', modulo: 'Roadmap', pilar: 'Governança', prioridade: 'MÉDIO',
-    titulo: 'Roadmap: Q2 2026 concluído, Q3 2026 em execução',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'roadmap2026 atualizado com status Q2→concluído e Q3→em execução com novos itens realizados.',
-  },
-  {
-    id: 'c15-05', modulo: 'Sistema', pilar: 'Governança', prioridade: 'BAIXO',
-    titulo: 'PlanoMelhoria: Ciclo 15 registrado, pilares todos em 100%',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'ciclo15Items exportado, PlanoMelhoria atualizado com header Ciclo 15 e scores de pilares zerados em 100%.',
-  },
-];
-
-// ── Ciclo 16 — Outubro 2026 ────────────────────────────────────────────────
-export const ciclo16Items = [
-  {
-    id: 'c16-01', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'DashboardSaudeWidget — Score de saúde por módulo em tempo real',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Widget com barra de progresso por módulo (Financeiro, Estoque, Expedição, Comercial) + score global + alerta de anomalias.',
-  },
-  {
-    id: 'c16-02', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'DashboardVendasPrevisaoWidget — Gráfico de área com previsão 30 dias',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Widget com gráfico AreaChart de previsão de vendas via biForecastPreditivo + badge de crescimento estimado + total previsto.',
-  },
-  {
-    id: 'c16-03', modulo: 'Dashboard', pilar: 'UX', prioridade: 'ALTO',
-    titulo: 'Grid IA 4 colunas: Saúde + Forecast + Vendas + Insights',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Dashboard reorganizado com grid responsivo de 4 widgets IA lado a lado substituindo o layout anterior de 2 colunas.',
-  },
-  {
-    id: 'c16-04', modulo: 'Dashboard', pilar: 'UX', prioridade: 'MÉDIO',
-    titulo: 'DashboardIAInsightsPanel: score de confiança, prioridade e categorias visuais',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'Painel de insights com barra de progresso de confiança, ícone por tipo (alerta/tendência/insight/ação) e badge de prioridade.',
-  },
-  {
-    id: 'c16-05', modulo: 'Portal', pilar: 'UX', prioridade: 'ALTO',
-    titulo: 'PortalSelfServiceB2B — Portal B2B completo com atalhos e pedidos',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Componente self-service com KPIs rápidos (em andamento/trânsito/entregues), 6 atalhos de ação rápida e listagem de pedidos com busca.',
-  },
-  {
-    id: 'c16-06', modulo: 'Sistema', pilar: 'Governança', prioridade: 'BAIXO',
-    titulo: 'Ciclo 16 registrado no PlanoMelhoria e Roadmap Q3 atualizado',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'ciclo16Items exportado, melhoriaPlanData atualizado com roadmap Q3 refletindo entregas de Outubro 2026.',
-  },
-];
-
-// ── Ciclo 20 — Fevereiro 2027 ────────────────────────────────────────────────
-export const ciclo20Items = [
-  {
-    id: 'c20-01', modulo: 'Sistema', pilar: 'Governança', prioridade: 'ALTO',
-    titulo: 'ComplianceISO27001Widget — Certificação de Segurança da Informação',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Widget com dashboard de compliance ISO 27001 mostrando controles de segurança, auditorias e conformidade legal com 6 áreas principais.',
-  },
-  {
-    id: 'c20-02', modulo: 'Contratos', pilar: 'Governança', prioridade: 'ALTO',
-    titulo: 'ContratosEletronicosWidget — Gestão de contratos com assinatura digital',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Widget para gestão de contratos eletrônicos com assinatura digital, verificação blockchain e rastreamento de status (assinado/pendente/em revisão).',
-  },
-  {
-    id: 'c20-03', modulo: 'Sistema', pilar: 'Governança', prioridade: 'MÉDIO',
-    titulo: 'Ciclo 20 registrado — Q1 2027 concluído',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'ciclo20Items exportado, ISO 27001 + Contratos Eletrônicos no Dashboard, roadmap Q1 2027 finalizado com 100% de implementação.',
-  },
-];
-
-// ── Ciclo 19 — Janeiro 2027 ────────────────────────────────────────────────
-export const ciclo19Items = [
-  {
-    id: 'c19-01', modulo: 'Logística', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'RastreamentoGPSWidget — GPS em tempo real para entregas',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Widget com rastreamento de entregas em tempo real via GPS/SMS, distância, ETA, e status de entrega com mapa integrado.',
-  },
-  {
-    id: 'c19-02', modulo: 'Produção', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'ApontamentoProdutoMobileWidget — App mobile para apontamentos',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'App mobile iOS/Android com QR scan, apontamento de produção por operário, sincronização offline e banco de dados local.',
-  },
-  {
-    id: 'c19-03', modulo: 'Sistema', pilar: 'Governança', prioridade: 'MÉDIO',
-    titulo: 'Ciclo 19 registrado — Q1 2027 iniciado',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'ciclo19Items exportado, Rastreamento GPS + Mobile Apontamentos no Dashboard, Q1 2027 em execução.',
-  },
-];
-
-// ── Ciclo 18 — Dezembro 2026 ────────────────────────────────────────────────
-export const ciclo18Items = [
-  {
-    id: 'c18-01', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'DashboardBI3DWidget — Gráficos 3D para previsões de vendas',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Widget com renderização 3D (Three.js) para visualização de tendências e forecasts em tempo real.',
-  },
-  {
-    id: 'c18-02', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'DashboardAutomacaoFluxosWidget — Automações visuais de fluxos',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Widget mostrando automações ativas (triggers visuais) para Pedido→Produção, NF→Cobrança, Entrega→Feedback, Churn Detection.',
-  },
-  {
-    id: 'c18-03', modulo: 'Sistema', pilar: 'Governança', prioridade: 'MÉDIO',
-    titulo: 'Ciclo 18 registrado — Q4 2026 em execução',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'ciclo18Items exportado, Dashboard Executivo com BI 3D e Automações, roadmap Q4 atualizado.',
-  },
-];
-
-// ── Ciclo 17 — Novembro 2026 ────────────────────────────────────────────────
-export const ciclo17Items = [
-  {
-    id: 'c17-01', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'DashboardKPIsComparativosWidget — KPIs mês atual vs mês anterior',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Widget com 3 KPIs comparativos (Vendas, Receita, Qtd Pedidos) mostrando variação percentual via groupConsolidation.',
-  },
-  {
-    id: 'c17-02', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'DashboardMarketplaceWidget — Sync de canais marketplace no Dashboard',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Widget mostrando pedidos e receita por canal de marketplace (ML, Shopee, Amazon) — fecha item 🔄 do Q3 2026.',
-  },
-  {
-    id: 'c17-03', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'CRMScoreDashboard — Score de clientes integrado ao Dashboard Executivo',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Widget compacto de CRM com score médio de saúde dos clientes, lista de risco de churn e indicador de base saudável.',
-  },
-  {
-    id: 'c17-04', modulo: 'Dashboard', pilar: 'IA', prioridade: 'ALTO',
-    titulo: 'ConciliacaoIAWidget — Conciliação bancária IA no Dashboard',
-    status: 'concluido', impacto: 'Alto',
-    descricao: 'Widget com taxa de conciliação, contas vencidas e anomalias detectadas pela IA via iaFinanceAnomalyScan — avanço Q3 Open Finance.',
-  },
-  {
-    id: 'c17-05', modulo: 'CRM', pilar: 'UX', prioridade: 'MÉDIO',
-    titulo: 'CRMScoreClienteWidget integrado ao painel CRM (compact mode)',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'CRMScoreClienteWidget em modo compact adicionado ao ModuleKPIs do CRM para visibilidade de saúde de clientes.',
-  },
-  {
-    id: 'c17-06', modulo: 'Sistema', pilar: 'Governança', prioridade: 'BAIXO',
-    titulo: 'Ciclo 17 registrado — Roadmap Q3 fechado, Q4 2026 atualizado',
-    status: 'concluido', impacto: 'Médio',
-    descricao: 'ciclo17Items exportado, Roadmap Q3 2026 com marketplace e conciliação marcados como concluídos, Q4 atualizado.',
-  },
-];
-
-// ── Roadmap 2026–2027 ────────────────────────────────────────────────────────
+// ── Roadmap 2026–2027 ─────────────────────────────────────────────────────────
 export const roadmap2026 = [
   {
     trimestre: 'Q2 2026 ✅', cor: 'blue', status: 'concluido',
@@ -500,28 +120,21 @@ export const roadmap2026 = [
     ]
   },
   {
-    trimestre: 'Q3 2026 🔄', cor: 'purple', status: 'em_execucao',
+    trimestre: 'Q3 2026 ✅', cor: 'purple', status: 'concluido',
     itens: [
       '✅ DashboardAnomaliaWidget (iaFinanceAnomalyScan)',
       '✅ IAChurnWidget avançado (iaChurnAnalyzer)',
       '✅ DashboardSaudeWidget — score global por módulo',
       '✅ DashboardVendasPrevisaoWidget — gráfico de área 30d',
       '✅ PortalSelfServiceB2B — self-service completo',
-      '✅ IAInsights: score de confiança + prioridade visual',
-      '✅ Marketplace sync automático (ML, Shopee) — DashboardMarketplaceWidget',
+      '✅ Marketplace sync automático — DashboardMarketplaceWidget',
       '✅ Open Finance / conciliação bancária — ConciliacaoIAWidget',
       '✅ KPIs comparativos mês atual vs anterior',
       '✅ CRM Score integrado ao Dashboard e módulo CRM',
-      '✅ BI avançado com gráficos 3D — DashboardBI3DWidget',
-      '✅ Automação de fluxos com triggers visuais — DashboardAutomacaoFluxosWidget',
-      '✅ Integração GPS real para rastreamento — RastreamentoGPSWidget',
-      '✅ App mobile produção com apontamentos — ApontamentoProdutoMobileWidget',
-      '✅ Certificação compliance ISO 27001 — ComplianceISO27001Widget',
-      '✅ Módulo de contratos eletrônicos avançado — ContratosEletronicosWidget',
     ]
   },
   {
-    trimestre: 'Q4 2026 ✅', cor: 'emerald', status: 'em_execucao',
+    trimestre: 'Q4 2026 ✅', cor: 'emerald', status: 'concluido',
     itens: [
       '✅ BI avançado com gráficos 3D e forecasts — Ciclo 18',
       '✅ Automação de fluxos com triggers visuais — Ciclo 18',
@@ -532,53 +145,16 @@ export const roadmap2026 = [
     ]
   },
   {
-    trimestre: 'Q1 2027 🚀', cor: 'amber', status: 'em_execucao',
+    trimestre: 'Q1 2027 🔄', cor: 'amber', status: 'em_execucao',
     itens: [
-      '✅ IA generativa avançada em todos os módulos',
-      '✅ Chatbot omnicanal com GPT-4 nativo',
-      '✅ Blockchain de auditoria imutável',
-      '✅ API headless multi-tenant',
-      '✅ Expansão internacional (en/es)',
+      '🔒 IA generativa avançada — bloqueado até 07/07/2026 (créditos esgotados)',
+      '🔒 Chatbot omnicanal GPT-4 — bloqueado até 07/07/2026',
+      '🔄 Blockchain de auditoria imutável',
+      '🔄 API headless multi-tenant',
+      '📅 Expansão internacional (en/es)',
+      '✅ Backfill `codigo` em 20 entidades — Ciclo 22',
+      '✅ Refatoração VisualizadorUniversalEntidadeV24 — Ciclo 22',
+      '✅ Refatoração melhoriaPlanData.js — Ciclo 22',
     ]
   },
-  ];
-
-  // ── Ciclo 21 — Q1 2027 ──────────────────────────────────────────────────────
-  export const ciclo21Items = [
-  {
-   id: 'c21-01', modulo: 'Todos', pilar: 'IA', prioridade: 'CRÍTICO',
-   titulo: 'IAGenerativaAvancadaPanel — Geração de conteúdo contextual por módulo',
-   status: 'em_execucao', impacto: 'Alto',
-   descricao: 'Sistema de IA generativa que cria sugestões, análises e conteúdo automático contextualizado para cada módulo (relatórios, estratégias, recomendações).'
-  },
-  {
-   id: 'c21-02', modulo: 'Hub Atendimento', pilar: 'IA', prioridade: 'CRÍTICO',
-   titulo: 'ChatbotOmnicanal — Unificação WhatsApp, Telegram, Web, Email',
-   status: 'em_execucao', impacto: 'Alto',
-   descricao: 'Chatbot com GPT-4 nativo, suporte a múltiplos canais, histórico unificado, rotas inteligentes e context memory por cliente.'
-  },
-  {
-   id: 'c21-03', modulo: 'Sistema', pilar: 'Governança', prioridade: 'ALTO',
-   titulo: 'BlockchainAuditoriaPanel — Rastreabilidade imutável com blockchain',
-   status: 'em_execucao', impacto: 'Alto',
-   descricao: 'Sistema de auditoria imutável usando blockchain para registros críticos (NF-e, contratos, transações financeiras), hash SHA-256 por evento.'
-  },
-  {
-   id: 'c21-04', modulo: 'Integrações', pilar: 'Integrações', prioridade: 'ALTO',
-   titulo: 'APIHeadlessMultiTenant — Exposição de recursos via GraphQL/REST',
-   status: 'em_execucao', impacto: 'Alto',
-   descricao: 'API headless RESTful e GraphQL com autenticação por tenant, rate limiting, webhooks bidirecionais e versionamento automático.'
-  },
-  {
-   id: 'c21-05', modulo: 'Sistema', pilar: 'UX', prioridade: 'MÉDIO',
-   titulo: 'ExpansaoInternacional — Suporte a en/es com i18n completo',
-   status: 'em_execucao', impacto: 'Médio',
-   descricao: 'i18n framework com fallback automático, tradução de UI, datas, moedas e documentos para português, inglês e espanhol.'
-  },
-  {
-   id: 'c21-06', modulo: 'Dashboard', pilar: 'IA', prioridade: 'MÉDIO',
-   titulo: 'DashboardIAGerador — Gerar relatórios via IA generativa',
-   status: 'em_execucao', impacto: 'Médio',
-   descricao: 'Interface para criar relatórios customizados usando comandos de IA, exportação automática em PDF/Excel e agendamento de envios.'
-  },
-  ];
+];

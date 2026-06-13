@@ -1,24 +1,20 @@
 /**
- * VisualizadorUniversalEntidadeV24 — V34 ESTAVEL
- * - Lista NUNCA desaparece durante sort/paginação/exclusão (placeholderData + lastGoodData guard)
- * - Novos registros aparecem no topo imediatamente após salvar (staleTime: 0)
- * - 1ª coluna sempre mostra o melhor campo de nome disponível (getDisplayValue fallback)
- * - Erros mantêm cache visível com banner discreto
+ * VisualizadorUniversalEntidadeV24 — V35 REFATORADO (Ciclo 22)
+ * Regra-Mãe: arquivo > 600 linhas → refatorado em hooks + sub-componentes.
+ * - useVisualizadorState    → estado e paginação
+ * - useVisualizadorQuery    → query principal com placeholderData
+ * - useVisualizadorCRUD     → create/update/delete + anti-duplicata + fetchNextCode
+ * - VisualizadorToolbar     → barra de ferramentas
+ * - VisualizadorTableBody   → tabela com ordenação e seleção
+ * - VisualizadorModal       → modal de formulário
  */
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useCallback, useEffect, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
 import useEntityCounts, { SIMPLE_CATALOG } from "@/components/lib/useEntityCounts";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  ChevronUp, ChevronDown, ChevronsUpDown,
-  Search, Edit, Trash2, Plus, RefreshCw, AlertCircle, X
-} from "lucide-react";
+import { RefreshCw, AlertCircle } from "lucide-react";
 import CadastroClienteCompleto from "@/components/cadastros/CadastroClienteCompleto";
 import CadastroFornecedorCompleto from "@/components/cadastros/CadastroFornecedorCompleto";
 import TransportadoraForm from "@/components/cadastros/TransportadoraForm";
@@ -28,69 +24,16 @@ import ContatoB2BForm from "@/components/cadastros/ContatoB2BForm";
 import SegmentoClienteForm from "@/components/cadastros/SegmentoClienteForm";
 import RegiaoAtendimentoForm from "@/components/cadastros/RegiaoAtendimentoForm";
 
-// ─── constantes visuais ───────────────────────────────────────────────────────
-const STATUS_COLORS = {
-  Ativo:"bg-green-100 text-green-700 border-green-200",
-  Ativa:"bg-green-100 text-green-700 border-green-200",
-  Aprovado:"bg-green-100 text-green-700 border-green-200",
-  OK:"bg-green-100 text-green-700 border-green-200",
-  Pago:"bg-green-100 text-green-700 border-green-200",
-  Recebido:"bg-green-100 text-green-700 border-green-200",
-  "Em Análise":"bg-blue-100 text-blue-700 border-blue-200",
-  Pendente:"bg-yellow-100 text-yellow-700 border-yellow-200",
-  Prospect:"bg-yellow-100 text-yellow-700 border-yellow-200",
-  Alerta:"bg-yellow-100 text-yellow-700 border-yellow-200",
-  Inativo:"bg-slate-100 text-slate-500 border-slate-200",
-  Inativa:"bg-slate-100 text-slate-500 border-slate-200",
-  Bloqueado:"bg-red-100 text-red-700 border-red-200",
-  Cancelado:"bg-red-100 text-red-700 border-red-200",
-  Atrasado:"bg-red-100 text-red-700 border-red-200",
-  Descontinuado:"bg-orange-100 text-orange-700 border-orange-200",
-};
-const STATUS_FIELDS = new Set(["status","status_fornecedor","status_cliente","situacao","situacao_credito","status_fiscal_receita"]);
-const BOOL_FIELDS   = new Set(["ativo","ativa","habilitado","compartilhado_grupo","ativo_sistema","principal","ativado"]);
-const DATE_FIELDS   = new Set(["created_date","updated_date","data_admissao","data_nascimento","data_vencimento","data_validade","ultima_compra","data_emissao","data_pedido","cnh_validade","data_aprovacao","data_inicio","data_fim"]);
-const MONEY_FIELDS  = new Set(["salario","preco_venda","custo_aquisicao","custo_medio","valor_frete","orcamento_mensal","limite_credito","valor_total","valor","valor_minimo","valor_maximo","percentual_comissao"]);
-const PAGE_SIZES = [10, 20, 50, 100];
-const UNSORTABLE_BACKEND = new Set(["contatos","documentos","locais_entrega","lotes","itens"]);
+import useVisualizadorState from "./hooks/useVisualizadorState";
+import useVisualizadorQuery from "./hooks/useVisualizadorQuery";
+import useVisualizadorCRUD, { ENTITY_CODE_FIELD } from "./hooks/useVisualizadorCRUD";
+import VisualizadorToolbar from "./VisualizadorToolbar.jsx";
+import VisualizadorTableBody from "./VisualizadorTableBody.jsx";
+import VisualizadorModal from "./VisualizadorModal.jsx";
+
 const ENTITY_CONTEXT_FIELD = { Fornecedor: "empresa_dona_id", Transportadora: "empresa_dona_id", Colaborador: "empresa_alocada_id" };
-// Campo "código" por entidade — usado para auto-sugerir próximo código sequencial
-const ENTITY_CODE_FIELD = {
-  Cliente: 'codigo', Fornecedor: 'codigo', Transportadora: 'codigo',
-  Colaborador: 'matricula', Representante: 'codigo', ContatoB2B: 'codigo',
-  SegmentoCliente: 'codigo', RegiaoAtendimento: 'codigo_regiao',
-  Produto: 'codigo', Servico: 'codigo_servico', SetorAtividade: 'codigo',
-  GrupoProduto: 'codigo', Marca: 'codigo', TabelaPreco: 'codigo',
-  KitProduto: 'codigo_kit', CatalogoWeb: 'codigo',
-  FormaPagamento: 'codigo', PlanoDeContas: 'codigo', CentroCusto: 'codigo',
-  CentroResultado: 'codigo', TipoDespesa: 'codigo', MoedaIndice: 'codigo',
-  OperadorCaixa: 'codigo', ConfiguracaoDespesaRecorrente: 'codigo',
-  TabelaFiscal: 'codigo', CondicaoComercial: 'codigo',
-  TipoFrete: 'codigo', LocalEstoque: 'codigo', RotaPadrao: 'codigo',
-  ModeloDocumento: 'codigo', GrupoEmpresarial: 'codigo',
-  Departamento: 'codigo', Cargo: 'codigo', Turno: 'codigo',
-  PerfilAcesso: 'codigo', ApiExterna: 'codigo', ChatbotCanal: 'codigo',
-  ChatbotIntent: 'codigo', JobAgendado: 'codigo', Webhook: 'codigo',
-  ConfiguracaoNFe: 'codigo', GatewayPagamento: 'codigo', EventoNotificacao: 'codigo',
-};
 const SHARED_ENTITIES = new Set(["Cliente", "Fornecedor", "Transportadora"]);
-
-const DEFAULT_FORM_COMPONENTS = {
-  Cliente: CadastroClienteCompleto,
-  Fornecedor: CadastroFornecedorCompleto,
-  Transportadora: TransportadoraForm,
-  Colaborador: ColaboradorForm,
-  Representante: RepresentanteFormCompleto,
-  ContatoB2B: ContatoB2BForm,
-  SegmentoCliente: SegmentoClienteForm,
-  RegiaoAtendimento: RegiaoAtendimentoForm,
-};
-
-const SELF_MANAGED_NAMES = new Set([
-  "CadastroClienteCompleto","CadastroFornecedorCompleto","RepresentanteFormCompleto",
-  "ProdutoFormV22_Completo","ProdutoFormCompleto","ProdutoForm",
-]);
-
+const SELF_MANAGED_NAMES = new Set(["CadastroClienteCompleto","CadastroFornecedorCompleto","RepresentanteFormCompleto","ProdutoFormV22_Completo","ProdutoFormCompleto","ProdutoForm"]);
 const FORM_ALIASES = [
   "item","data","initialData","defaultValues","record","entity","value",
   "cliente","fornecedor","colaborador","transportadora","representante",
@@ -105,957 +48,258 @@ const FORM_ALIASES = [
   "gateway","gatewayPagamento","configuracaoDespesaRecorrente","despesaRecorrente",
   "perfilAcesso","perfil","modeloDocumento","apiExterna",
   "webhook","chatbotIntent","chatbotCanal","jobAgendado","eventoNotificacao",
-  // aliases extras para forms que usam nomes específicos (não camelCase da entidade)
-  "evento",       // EventoNotificacaoForm usa { evento }
-  "tabela",       // TabelaFiscalForm usa { tabela }
-  "condicao",     // CondicaoComercialForm usa { condicao }
-  "apiExternaForm", // cobertura extra
-  "webhookForm",    // cobertura extra
+  "evento","tabela","condicao","apiExternaForm","webhookForm",
 ];
-
-// ─── getDisplayValue: mostra melhor valor disponível para cada célula ───────
-// Para 1ª coluna: tenta todos os campos de nome se o campo configurado estiver vazio.
-// Para demais colunas: tenta variantes comuns do nome do campo (snake_case, sem prefixo, etc.)
-const LABEL_FALLBACKS = [
-  // Campos de nome direto (prioridade máxima)
-  'nome','nome_completo','razao_social','nome_fantasia',
-  // Legado: campos não-padronizados (forms que não usam 'nome')
-  'nome_do_grupo','nome_banco','nome_cargo','nome_turno','nome_grupo',
-  'nome_marca','nome_rota','nome_modelo','nome_caixa','nome_segmento',
-  'nome_regiao','nome_perfil','nome_kit','nome_setor','nome_departamento',
-  'nome_tipo','nome_canal','nome_intent','nome_job','nome_webhook','nome_api',
-  'nome_gateway','nome_forma','nome_centro','nome_plano','nome_local',
-  // Campos descritivos (Serviço e TipoFrete usam 'descricao' como nome)
-  'descricao','titulo','apelido','label','tag',
-  // Identificadores (Banco usa codigo_banco, Unidade usa sigla)
-  'sigla','codigo','codigo_banco','matricula','placa','cpf','cnpj',
-  // Campos de moeda/índice
-  'moeda','indice','simbolo','abreviacao',
-  // Outros
-  'tipo','categoria','modalidade','funcao','url','email','telefone',
-];
-
-function buildFieldVariants(field) {
-  var variants = [field];
-  // tira prefixos comuns: nome_banco → banco, tipo_regiao → regiao
-  var parts = field.split('_');
-  if (parts.length > 1) {
-    variants.push(parts.slice(1).join('_'));
-    variants.push(parts[0]);
-  }
-  // adiciona variante sem sufixo _id
-  if (field.endsWith('_id')) variants.push(field.slice(0, -3));
-  // fallback genérico de nome
-  variants = variants.concat(['nome', 'descricao', 'titulo', 'sigla', 'codigo']);
-  return variants;
-}
-
-function getDisplayValue(item, col, isFirstCol) {
-  var v = item[col.field];
-  if (v !== null && v !== undefined && v !== '') return v;
-  // Para primeira coluna usa todos os LABEL_FALLBACKS
-  if (isFirstCol) {
-    for (var i = 0; i < LABEL_FALLBACKS.length; i++) {
-      var f = LABEL_FALLBACKS[i];
-      if (f !== col.field && item[f] != null && item[f] !== '') return item[f];
-    }
-    return v;
-  }
-  // Para demais colunas tenta variantes do nome do campo
-  var variants = buildFieldVariants(col.field);
-  for (var j = 0; j < variants.length; j++) {
-    var vf = variants[j];
-    if (vf !== col.field && item[vf] != null && item[vf] !== '') return item[vf];
-  }
-  return v;
-}
-
-// ─── helpers ──────────────────────────────────────────────────────────────────
-function fmtValue(value, col, extraColors) {
-  if (value === null || value === undefined || value === "") {
-    return <span className="text-slate-300 text-xs">—</span>;
-  }
-  const allColors = Object.assign({}, STATUS_COLORS, extraColors);
-  if (BOOL_FIELDS.has(col.field)) {
-    return value
-      ? <Badge variant="outline" className="text-xs rounded-sm bg-green-100 text-green-700 border-green-200">Sim</Badge>
-      : <Badge variant="outline" className="text-xs rounded-sm bg-slate-100 text-slate-500 border-slate-200">Não</Badge>;
-  }
-  if (STATUS_FIELDS.has(col.field) && typeof value === "string") {
-    const cls = allColors[value] || "bg-slate-100 text-slate-600 border-slate-200";
-    return <Badge variant="outline" className={"text-xs rounded-sm " + cls}>{value}</Badge>;
-  }
-  if (DATE_FIELDS.has(col.field) || col.type === "date") {
-    try {
-      const d = new Date(value);
-      if (!isNaN(d.getTime())) return d.toLocaleDateString("pt-BR");
-    } catch (_) {}
-  }
-  if (MONEY_FIELDS.has(col.field) || col.type === "currency") {
-    const n = Number(value);
-    if (!isNaN(n)) return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  }
-  if (col.type === "number") {
-    const n = Number(value);
-    return isNaN(n) ? String(value) : n.toLocaleString("pt-BR");
-  }
-  if (typeof value === "boolean") return value ? "✓" : "—";
-  if (typeof value === "object") return Array.isArray(value) ? "[" + value.length + "]" : "–";
-  return String(value).substring(0, 130);
-}
-
-function buildFormProps(editItem, onClose, onSubmit, nextCode, codeField) {
-  const base = {
-    onClose, onSave: onClose, onSuccess: onClose,
-    onOpenChange: function(v) { if (!v) onClose(); },
-    isOpen: true, open: true, windowMode: true, onSubmit,
-  };
-  // Para novo registro: injeta próximo código como valor inicial
-  const defaultValues = (!editItem && nextCode && codeField)
-    ? { [codeField]: nextCode, codigo: nextCode } // cobre 'codigo' genérico e campo específico
-    : {};
-  if (!editItem) return Object.assign({}, base, defaultValues, { defaultValues });
-  const aliases = {};
-  FORM_ALIASES.forEach(function(a) { aliases[a] = editItem; });
-  return Object.assign({}, base, aliases, { id: editItem.id });
-}
+const DEFAULT_FORM_COMPONENTS = {
+  Cliente: CadastroClienteCompleto, Fornecedor: CadastroFornecedorCompleto,
+  Transportadora: TransportadoraForm, Colaborador: ColaboradorForm,
+  Representante: RepresentanteFormCompleto, ContatoB2B: ContatoB2BForm,
+  SegmentoCliente: SegmentoClienteForm, RegiaoAtendimento: RegiaoAtendimentoForm,
+};
 
 function invalidateAll(qc, entity) {
-  // refetchType: 'all' garante que queries inativas (ex.: troca de aba) também revalidam
   qc.invalidateQueries({ queryKey: ["viz-v33", entity] });
   qc.invalidateQueries({ queryKey: ["entityCounts_v5"] });
   qc.invalidateQueries({ queryKey: ["cadastros-all-counts-v5"] });
 }
 
-// ─── COMPONENTE PRINCIPAL ────────────────────────────────────────────────────
 export default function VisualizadorUniversalEntidadeV24({
   nomeEntidade, tituloDisplay, icone: IconeProp,
   camposPrincipais, componenteEdicao: FormComponentProp,
   windowMode, entityName, columns,
-  pageSize: pageSizeProp,
-  statusColors: extraColors,
+  pageSize: pageSizeProp, statusColors: extraColors,
   startWithForm = false,
 }) {
-  const ENTITY   = nomeEntidade || entityName || "";
-  const TITULO   = tituloDisplay || ENTITY;
+  const ENTITY = nomeEntidade || entityName || "";
+  const TITULO = tituloDisplay || ENTITY;
   const FormComponent = FormComponentProp || DEFAULT_FORM_COMPONENTS[ENTITY] || null;
   const isSimple = SIMPLE_CATALOG.has(ENTITY);
-  const _camposPrincipais = camposPrincipais || [];
-  const _extraColors      = extraColors || {};
-  const _pageSizeProp     = pageSizeProp || 20;
+  const _extraColors = extraColors || {};
 
-  const isSelfManaged = useMemo(function() {
+  const isSelfManaged = useMemo(() => {
     if (!FormComponent) return false;
-    const name = FormComponent.displayName || FormComponent.name || "";
-    return SELF_MANAGED_NAMES.has(name);
+    return SELF_MANAGED_NAMES.has(FormComponent.displayName || FormComponent.name || "");
   }, [FormComponent]);
 
   const queryClient = useQueryClient();
-  const {
-    empresaAtual,
-    grupoAtual,
-    empresasDoGrupo,
-    createInContext,
-    updateInContext,
-    deleteInContext
-  } = useContextoVisual();
+  const { empresaAtual, grupoAtual, empresasDoGrupo, createInContext, updateInContext, deleteInContext } = useContextoVisual();
   const { canCreate, canEdit, canDelete, hasPermission } = usePermissions();
-  const empresaId = (empresaAtual && empresaAtual.id) || null;
-  const groupId   = (grupoAtual   && grupoAtual.id)   || null;
+  const empresaId = empresaAtual?.id || null;
+  const groupId   = grupoAtual?.id   || null;
   const contextoValido = !!(empresaId || groupId || isSimple);
-  const canViewCadastro = hasPermission("Cadastros", ENTITY, "visualizar") || hasPermission("Cadastros", null, "visualizar");
+  const canViewCadastro   = hasPermission("Cadastros", ENTITY, "visualizar") || hasPermission("Cadastros", null, "visualizar");
   const canCreateCadastro = canCreate("Cadastros", ENTITY) || canCreate("Cadastros", null);
-  const canEditCadastro = canEdit("Cadastros", ENTITY) || canEdit("Cadastros", null);
+  const canEditCadastro   = canEdit("Cadastros", ENTITY) || canEdit("Cadastros", null);
   const canDeleteCadastro = canDelete("Cadastros", ENTITY) || canDelete("Cadastros", null);
 
-  const COLUMNS = useMemo(function() {
-    if (columns && columns.length > 0) return columns;
-    if (_camposPrincipais.length > 0) {
-      return _camposPrincipais.map(function(c) {
-        return {
-          field: c,
-          label: c.replace(/_/g, " ").replace(/\b\w/g, function(x) { return x.toUpperCase(); }),
-          sortable: true,
-        };
-      });
-    }
+  const COLUMNS = useMemo(() => {
+    if (columns?.length > 0) return columns;
+    if (camposPrincipais?.length > 0)
+      return camposPrincipais.map(c => ({
+        field: c,
+        label: c.replace(/_/g, " ").replace(/\b\w/g, x => x.toUpperCase()),
+        sortable: true,
+      }));
     return [{ field: "nome", label: "Nome", sortable: true }, { field: "status", label: "Status", sortable: false }];
-  }, [JSON.stringify(columns), JSON.stringify(_camposPrincipais)]); // eslint-disable-line
+  }, [JSON.stringify(columns), JSON.stringify(camposPrincipais)]); // eslint-disable-line
 
-  // ── estado ──────────────────────────────────────────────────────────────────
-  const [sortField, setSortField] = useState("updated_date");
-  const [sortDir,   setSortDir]   = useState("desc");
-  const [search,    setSearch]    = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [page,     setPage]     = useState(1);
-  const [pageSize, setPageSize] = useState(_pageSizeProp);
+  // ── Estado ────────────────────────────────────────────────────────────────────
+  const state = useVisualizadorState({ ENTITY, pageSizeProp: pageSizeProp || 20, startWithForm, FormComponent });
+  const {
+    sortField, sortDir, search, setSearch, debouncedSearch, page, setPage, pageSize, setPageSize,
+    showForm, setShowForm, editItem, setEditItem, formKey, setFormKey,
+    isLoadingEdit, editError, setEditError, isSaving, setIsSaving, nextCode, setNextCode,
+    selectedIds, setSelectedIds, crossPageAll, setCrossPageAll, deselectedIds, setDeselectedIds,
+    lastGoodData, everLoadedRef, resetCache, handleSort, handleSortDropdown,
+    isItemSelected, handleItemCheck, handleActivateCrossPage, handleCancelSelection,
+  } = state;
 
-  const [showForm,      setShowForm]      = useState(Boolean(startWithForm && FormComponent));
-  const [editItem,      setEditItem]      = useState(null);
-  const [formKey,       setFormKey]       = useState(0);
-  const [isLoadingEdit, setIsLoadingEdit] = useState(false);
-  const [editError,     setEditError]     = useState(null);
-  const [isSaving,      setIsSaving]      = useState(false);
-
-  const [selectedIds,   setSelectedIds]   = useState(function() { return new Set(); });
-  const [crossPageAll,  setCrossPageAll]  = useState(false);
-  const [deselectedIds, setDeselectedIds] = useState(function() { return new Set(); });
-
-  const lastGoodData  = useRef([]);
-  const everLoadedRef = useRef(false);
-
-  // Debounce busca
-  const debRef = useRef(null);
-  useEffect(function() {
-    clearTimeout(debRef.current);
-    debRef.current = setTimeout(function() { setDebouncedSearch(search); setPage(1); }, 350);
-    return function() { clearTimeout(debRef.current); };
-  }, [search]);
-
-  // Contagem
-  const { counts, isLoading: countsLoading } = useEntityCounts(ENTITY ? [ENTITY] : []);
-  const totalCount = Number((counts && counts[ENTITY]) || 0);
-
-  const skip = (page - 1) * pageSize;
-
-  // Filtro limpo: backend expande empresa_id ou group_id para todos os campos
-  const readFilter = useMemo(function() {
+  // ── Filtro multiempresa ────────────────────────────────────────────────────────
+  const readFilter = useMemo(() => {
     if (isSimple && !groupId && !empresaId) return {};
     const ctxCampo = ENTITY_CONTEXT_FIELD[ENTITY] || "empresa_id";
     const orConds = [];
     if (empresaId) {
       orConds.push({ [ctxCampo]: empresaId });
-      if (ENTITY === "Cliente") {
-        orConds.push({ empresa_dona_id: empresaId }, { empresas_compartilhadas_ids: { $in: [empresaId] } });
-      } else if (SHARED_ENTITIES.has(ENTITY)) {
-        orConds.push({ empresas_compartilhadas_ids: { $in: [empresaId] } });
-      }
+      if (ENTITY === "Cliente") orConds.push({ empresa_dona_id: empresaId }, { empresas_compartilhadas_ids: { $in: [empresaId] } });
+      else if (SHARED_ENTITIES.has(ENTITY)) orConds.push({ empresas_compartilhadas_ids: { $in: [empresaId] } });
     }
     if (groupId) {
       orConds.push({ group_id: groupId });
       if (!empresaId && Array.isArray(empresasDoGrupo) && empresasDoGrupo.length) {
-        const ids = empresasDoGrupo.map(function(e) { return e.id; }).filter(Boolean);
+        const ids = empresasDoGrupo.map(e => e.id).filter(Boolean);
         if (ids.length) {
-          if (ENTITY === "Cliente") {
-            orConds.push({ empresa_id: { $in: ids } }, { empresa_dona_id: { $in: ids } }, { empresas_compartilhadas_ids: { $in: ids } });
-          } else if (ENTITY === "Fornecedor" || ENTITY === "Transportadora") {
-            orConds.push({ empresa_dona_id: { $in: ids } }, { empresas_compartilhadas_ids: { $in: ids } });
-          } else if (ENTITY === "Colaborador") {
-            orConds.push({ empresa_alocada_id: { $in: ids } });
-          } else {
-            orConds.push({ [ctxCampo]: { $in: ids } });
-          }
+          if (ENTITY === "Cliente") orConds.push({ empresa_id: { $in: ids } }, { empresa_dona_id: { $in: ids } }, { empresas_compartilhadas_ids: { $in: ids } });
+          else if (ENTITY === "Fornecedor" || ENTITY === "Transportadora") orConds.push({ empresa_dona_id: { $in: ids } }, { empresas_compartilhadas_ids: { $in: ids } });
+          else if (ENTITY === "Colaborador") orConds.push({ empresa_alocada_id: { $in: ids } });
+          else orConds.push({ [ctxCampo]: { $in: ids } });
         }
       }
     }
     return orConds.length ? { $or: orConds } : {};
   }, [ENTITY, isSimple, empresaId, groupId, empresasDoGrupo]);
 
-  // Próximo código sequencial para novos cadastros — declarado APÓS readFilter
-  const [nextCode, setNextCode] = useState(null);
-  const fetchNextCode = useCallback(async function() {
-    const codeField = ENTITY_CODE_FIELD[ENTITY];
-    if (!codeField) return;
-    try {
-      const res = await base44.functions.invoke("entityListSorted", {
-        entityName: ENTITY,
-        filter: readFilter,
-        sortField: codeField,
-        sortDirection: "desc",
-        limit: 1,
-        skip: 0,
-      });
-      const last = Array.isArray(res?.data) && res.data[0];
-      const lastVal = last ? last[codeField] : null;
-      const n = lastVal ? parseInt(String(lastVal).replace(/\D/g, ''), 10) : 0;
-      const next = isNaN(n) ? 1 : n + 1;
-      setNextCode(String(next).padStart(3, '0'));
-    } catch { setNextCode(null); }
-  }, [ENTITY, readFilter]);
-
-  const backendSortField = UNSORTABLE_BACKEND.has(sortField) ? "updated_date" : sortField;
-  const backendSortDir   = sortDir;
-
-  const queryKey = useMemo(
-    function() { return ["viz-v33", ENTITY, sortField, sortDir, page, pageSize, debouncedSearch, empresaId, groupId]; },
-    [ENTITY, sortField, sortDir, page, pageSize, debouncedSearch, empresaId, groupId]
-  );
-
-  // ── query principal ──────────────────────────────────────────────────────────
-  // placeholderData garante que a lista NÃO desaparece durante sort/paginação/exclusão
-  const { data: rawItems, isFetching, isError, status } = useQuery({
-    queryKey: queryKey,
-    queryFn: async function() {
-      if (!ENTITY) return [];
-      const res = await base44.functions.invoke("entityListSorted", {
-        entityName: ENTITY,
-        filter: readFilter,
-        search: debouncedSearch && debouncedSearch.trim() ? debouncedSearch.trim() : undefined,
-        sortField: backendSortField,
-        sortDirection: backendSortDir,
-        limit: pageSize,
-        skip: skip,
-      });
-      return Array.isArray(res && res.data) ? res.data : [];
-    },
-    staleTime: 0,
-    gcTime: 300000,
-    retry: 2,
-    retryDelay: function(attempt) { return Math.min(500 * (attempt + 1), 2000); },
-    refetchOnWindowFocus: false,
-    refetchOnMount: 'always',
-    placeholderData: function(prev) { return prev !== undefined ? prev : []; },
-    enabled: !!ENTITY && contextoValido && canViewCadastro,
+  // ── Query principal ───────────────────────────────────────────────────────────
+  const { items, isFetching, isError } = useVisualizadorQuery({
+    ENTITY, readFilter, sortField, sortDir, page, pageSize,
+    debouncedSearch, empresaId, groupId, contextoValido, canViewCadastro,
+    lastGoodData, everLoadedRef,
   });
 
-  // items: estabilidade total — nunca desaparece durante sort/paginação/exclusão
-  const items = useMemo(function() {
-    const arr = Array.isArray(rawItems) ? rawItems : [];
-    if (arr.length > 0) {
-      lastGoodData.current = arr;
-      everLoadedRef.current = true;
-      return arr;
-    }
-    // CORREÇÃO: cobre janela entre queryKey-change e isFetching=true (status='pending')
-    // Mostra lastGoodData em QUALQUER estado de transição para evitar lista sumir
-    if (lastGoodData.current.length > 0) {
-      // Ainda carregando (fetch em progresso ou em fila)
-      if (isFetching || status === 'pending') return lastGoodData.current;
-      // Erro temporário: mantém cache
-      if (isError) return lastGoodData.current;
-      // status='success' + arr=[] → genuinamente vazio (ex: filtro sem resultados)
-      // Não retorna lastGoodData para mostrar estado vazio real
-    }
-    if (isError && lastGoodData.current.length === 0) return [];
-    // Fetch completo e retornou [] genuíno
-    everLoadedRef.current = true;
-    lastGoodData.current = [];
-    return [];
-  }, [rawItems, isFetching, isError, status]);
+  // ── CRUD ─────────────────────────────────────────────────────────────────────
+  const { fetchNextCode, handlePersistSubmit } = useVisualizadorCRUD({
+    ENTITY, editItem, empresaId, groupId, isSimple,
+    canCreateCadastro, canEditCadastro, canDeleteCadastro,
+    createInContext, updateInContext, deleteInContext,
+    handleCloseForm: useCallback((wasSaved) => {
+      setShowForm(false); setEditItem(null); setEditError(null);
+      if (wasSaved) { state.setSortField?.("updated_date"); state.setSortDir?.("desc"); setPage(1); }
+      setTimeout(() => invalidateAll(queryClient, ENTITY), 50);
+    }, [ENTITY, queryClient]),
+    setIsSaving, readFilter, setNextCode,
+  });
 
-  // Reset do cache quando muda de entidade, empresa, grupo ou busca
-  // NÃO reseta ao mudar sort/page para manter estabilidade visual
-  useEffect(function() {
-    lastGoodData.current = [];
-    everLoadedRef.current = false;
-    setPage(1);
-  }, [ENTITY, empresaId, groupId, debouncedSearch]);
+  // ── Contagem ──────────────────────────────────────────────────────────────────
+  const { counts, isLoading: countsLoading } = useEntityCounts(ENTITY ? [ENTITY] : []);
+  const totalCount = Number(counts?.[ENTITY] || 0);
+  const skip = (page - 1) * pageSize;
 
-  // Subscribe para invalidar quando houver mudanças na entidade
-  useEffect(function() {
+  // Efeitos
+  useEffect(() => { resetCache(); }, [ENTITY, empresaId, groupId, debouncedSearch]);
+  useEffect(() => {
     if (!ENTITY) return;
-    const api = base44.entities && base44.entities[ENTITY];
-    if (!api || !api.subscribe) return;
-    const unsub = api.subscribe(function() { invalidateAll(queryClient, ENTITY); });
-    return function() { if (typeof unsub === "function") unsub(); };
+    const api = base44.entities?.[ENTITY];
+    if (!api?.subscribe) return;
+    const unsub = api.subscribe(() => invalidateAll(queryClient, ENTITY));
+    return () => typeof unsub === "function" && unsub();
   }, [ENTITY, queryClient]);
 
-  // ── ordenação ────────────────────────────────────────────────────────────────
-  const handleSort = useCallback(function(field) {
-    setSortDir(function(prev) { return sortField === field ? (prev === "desc" ? "asc" : "desc") : "asc"; });
-    setSortField(field);
-    setPage(1);
-  }, [sortField]);
-
-  const handleSortDropdown = useCallback(function(value) {
-    const idx = value.lastIndexOf("|");
-    if (idx < 0) return;
-    setSortField(value.slice(0, idx));
-    setSortDir(value.slice(idx + 1));
-    setPage(1);
-  }, []);
-
-  // ── formulário ───────────────────────────────────────────────────────────────
-  const handleCloseForm = useCallback(function(wasSaved) {
-    setShowForm(false);
-    setEditItem(null);
-    setEditError(null);
-    if (wasSaved) {
-      // Novos cadastros no topo: sort por updated_date desc, mantém lastGoodData
-      setSortField("updated_date");
-      setSortDir("desc");
-      setPage(1);
-    }
-    // Invalida DEPOIS de ajustar o estado para garantir query correta no refetch
-    setTimeout(function() { invalidateAll(queryClient, ENTITY); }, 50);
+  const handleCloseForm = useCallback((wasSaved) => {
+    setShowForm(false); setEditItem(null); setEditError(null);
+    if (wasSaved) { setPage(1); }
+    setTimeout(() => invalidateAll(queryClient, ENTITY), 50);
   }, [ENTITY, queryClient]);
 
-  // Verifica duplicidade de código, nome, CNPJ ou CPF antes de salvar.
-  // Retorna objeto { message, conflictType } ou null se não houver conflito.
-  const checkDuplicate = useCallback(async function(formData, isEdit, currentId) {
-    const codeField = ENTITY_CODE_FIELD[ENTITY] || 'codigo';
-    const codeValue = formData[codeField] || formData.codigo || formData.sigla || formData.codigo_banco || null;
-
-    // Verificação 1: código duplicado (mais prioritário — importação de outro sistema)
-    if (codeValue && String(codeValue).trim()) {
-      const codeFilter = {};
-      codeFilter[codeField] = String(codeValue).trim();
-      // também verificar campo genérico 'codigo' se for diferente
-      const codeOr = [codeFilter];
-      if (codeField !== 'codigo' && formData.codigo) codeOr.push({ codigo: formData.codigo });
-      if (formData.sigla) codeOr.push({ sigla: formData.sigla });
-      if (formData.codigo_banco) codeOr.push({ codigo_banco: formData.codigo_banco });
-
-      try {
-        const res = await base44.functions.invoke("entityListSorted", {
-          entityName: ENTITY,
-          filter: codeOr.length > 1 ? { $or: codeOr } : codeFilter,
-          sortField: "created_date", sortDirection: "asc",
-          limit: 5, skip: 0,
-        });
-        const existentes = Array.isArray(res?.data) ? res.data : [];
-        const conflito = existentes.find(function(r) { return r.id !== currentId; });
-        if (conflito) {
-          const labelConflito = conflito.nome || conflito.razao_social || conflito.descricao || conflito.sigla || conflito.id;
-          return `⚠️ Código "${codeValue}" já está em uso pelo registro "${labelConflito}".\n\nSe está importando de outro sistema, altere o código do novo registro antes de salvar, ou edite o registro existente.`;
-        }
-      } catch { /* não bloqueia */ }
-    }
-
-    // Verificação 2: CNPJ/CPF duplicado
-    const cnpjClean = formData.cnpj ? String(formData.cnpj).replace(/\D/g,'') : '';
-    const cpfClean  = formData.cpf  ? String(formData.cpf).replace(/\D/g,'')  : '';
-    const fiscalOr  = [];
-    if (cnpjClean.length >= 14) fiscalOr.push({ cnpj: formData.cnpj });
-    if (cpfClean.length  >= 11) fiscalOr.push({ cpf: formData.cpf });
-
-    if (fiscalOr.length) {
-      try {
-        const res = await base44.functions.invoke("entityListSorted", {
-          entityName: ENTITY,
-          filter: fiscalOr.length > 1 ? { $or: fiscalOr } : fiscalOr[0],
-          sortField: "created_date", sortDirection: "asc",
-          limit: 5, skip: 0,
-        });
-        const existentes = Array.isArray(res?.data) ? res.data : [];
-        const conflito = existentes.find(function(r) { return r.id !== currentId; });
-        if (conflito) {
-          const labelConflito = conflito.nome || conflito.razao_social || conflito.descricao || conflito.cnpj || conflito.id;
-          const docType = cnpjClean.length >= 14 ? 'CNPJ' : 'CPF';
-          return `⚠️ ${docType} já cadastrado no registro "${labelConflito}".\n\nNão é permitido duplicar registros com o mesmo ${docType}.`;
-        }
-      } catch { /* não bloqueia */ }
-    }
-
-    // Verificação 3: nome/descrição duplicado
-    const nameOr = [];
-    ['nome','razao_social','nome_completo','nome_fantasia','descricao',
-     'nome_marca','nome_segmento','nome_perfil','nome_banco','nome_grupo',
-     'nome_canal','nome_setor','titulo','nome_rota','nome_kit'].forEach(function(f) {
-      if (formData[f] && String(formData[f]).trim().length > 2)
-        nameOr.push({ [f]: formData[f] });
-    });
-
-    if (nameOr.length) {
-      try {
-        const res = await base44.functions.invoke("entityListSorted", {
-          entityName: ENTITY,
-          filter: { $or: nameOr },
-          sortField: "created_date", sortDirection: "asc",
-          limit: 5, skip: 0,
-        });
-        const existentes = Array.isArray(res?.data) ? res.data : [];
-        const conflito = existentes.find(function(r) { return r.id !== currentId; });
-        if (conflito) {
-          const labelConflito = conflito.nome || conflito.razao_social || conflito.descricao || conflito.codigo || conflito.id;
-          return `⚠️ Já existe um registro com o mesmo nome/descrição: "${labelConflito}".\n\nVerifique se não está cadastrando duplicado.`;
-        }
-      } catch { /* não bloqueia */ }
-    }
-
-    return null;
-  }, [ENTITY]);
-
-  const handlePersistSubmit = useCallback(async function(formData) {
-    if (!formData || !ENTITY) return;
-    if (formData._action === "delete") {
-      if (!canDeleteCadastro) throw new Error("Sem permissão para excluir.");
-      if (formData.id) { try { await deleteInContext(ENTITY, formData.id); } catch (_) {} }
-      handleCloseForm(true);
-      return;
-    }
-    if (editItem && editItem.id && !canEditCadastro) throw new Error("Sem permissão para editar.");
-    if ((!editItem || !editItem.id) && !canCreateCadastro) throw new Error("Sem permissão para criar.");
-
-    setIsSaving(true);
-    try {
-      const clean = Object.assign({}, formData);
-      delete clean._action;
-      if (!isSimple) {
-        if (!clean.empresa_id && empresaId) clean.empresa_id = empresaId;
-        if (!clean.group_id  && groupId)   clean.group_id   = groupId;
-      }
-
-      // Validação anti-duplicata
-      const erroDuplicata = await checkDuplicate(clean, !!(editItem && editItem.id), editItem?.id);
-      if (erroDuplicata) {
-        alert(erroDuplicata);
-        setIsSaving(false);
-        return;
-      }
-
-      if (editItem && editItem.id) {
-        await updateInContext(ENTITY, editItem.id, clean, ENTITY_CONTEXT_FIELD[ENTITY] || "empresa_id");
-      } else {
-        await createInContext(ENTITY, clean, ENTITY_CONTEXT_FIELD[ENTITY] || "empresa_id");
-      }
-      handleCloseForm(true);
-    } catch (e) {
-      alert("Erro ao salvar: " + ((e && e.message) || String(e)));
-    } finally {
-      setIsSaving(false);
-    }
-  }, [ENTITY, editItem, empresaId, groupId, handleCloseForm, isSimple, canCreateCadastro, canEditCadastro, canDeleteCadastro, createInContext, updateInContext, deleteInContext, checkDuplicate]);
-
-  const handleNewItem = useCallback(function() {
-    if (!canCreateCadastro) {
-      alert("Sem permissao para criar.");
-      return;
-    }
-    setEditItem(null);
-    setEditError(null);
-    setFormKey(function(k) { return k + 1; });
-    fetchNextCode(); // busca próximo código antes de abrir o form
+  const handleNewItem = useCallback(() => {
+    if (!canCreateCadastro) { alert("Sem permissão para criar."); return; }
+    setEditItem(null); setEditError(null); setFormKey(k => k + 1);
+    fetchNextCode(readFilter);
     setShowForm(true);
-  }, [canCreateCadastro, fetchNextCode]);
+  }, [canCreateCadastro, fetchNextCode, readFilter]);
 
-  const handleEditItem = useCallback(function(item) {
-    if (!item || !item.id) return;
-    if (!canEditCadastro) {
-      alert("Sem permissao para editar.");
-      return;
-    }
-    setEditItem(JSON.parse(JSON.stringify(item)));
-    setEditError(null);
-    setIsLoadingEdit(false);
-    setFormKey(function(k) { return k + 1; });
-    setShowForm(true);
+  const handleEditItem = useCallback((item) => {
+    if (!item?.id) return;
+    if (!canEditCadastro) { alert("Sem permissão para editar."); return; }
+    setEditItem(JSON.parse(JSON.stringify(item))); setEditError(null); setFormKey(k => k + 1); setShowForm(true);
   }, [canEditCadastro]);
 
-  const formProps = useMemo(
-    function() {
-      return buildFormProps(
-        editItem, handleCloseForm,
-        isSelfManaged ? handleCloseForm : handlePersistSubmit,
-        editItem ? null : nextCode,
-        ENTITY_CODE_FIELD[ENTITY] || null
-      );
-    },
-    [editItem, handleCloseForm, isSelfManaged, handlePersistSubmit, nextCode, ENTITY]
-  );
-
-  // ── exclusão unitária ────────────────────────────────────────────────────────
-  const handleDelete = useCallback(async function(item) {
+  const handleDelete = useCallback(async (item) => {
     const label = item.nome || item.razao_social || item.nome_completo || item.descricao || item.id;
-    if (!window.confirm('Regra-Mae: confirma excluir "' + label + '" de ' + TITULO + '? Esta acao sensivel sera auditada.')) return;
-    if (!canDeleteCadastro) {
-      alert("Sem permissÃ£o para excluir.");
-      return;
-    }
+    if (!window.confirm(`Confirma excluir "${label}" de ${TITULO}? Esta ação será auditada.`)) return;
+    if (!canDeleteCadastro) { alert("Sem permissão para excluir."); return; }
     try { await deleteInContext(ENTITY, item.id); }
-    catch (e) { alert("Erro: " + ((e && e.message) || String(e))); return; }
-    // Atualiza lastGoodData imediatamente (remove item deletado da lista visível)
-    lastGoodData.current = lastGoodData.current.filter(function(i) { return i.id !== item.id; });
-    setSelectedIds(function(prev) { const n = new Set(prev); n.delete(item.id); return n; });
-    if (items.length <= 1 && page > 1) setPage(function(p) { return Math.max(1, p - 1); });
+    catch (e) { alert("Erro: " + (e?.message || String(e))); return; }
+    lastGoodData.current = lastGoodData.current.filter(i => i.id !== item.id);
+    setSelectedIds(prev => { const n = new Set(prev); n.delete(item.id); return n; });
+    if (items.length <= 1 && page > 1) setPage(p => Math.max(1, p - 1));
     invalidateAll(queryClient, ENTITY);
   }, [ENTITY, queryClient, items.length, page, canDeleteCadastro, deleteInContext]);
 
-  // ── exclusão em massa ────────────────────────────────────────────────────────
-  const handleDeleteSelected = useCallback(async function() {
-    if (!canDeleteCadastro) {
-      alert("Sem permissÃ£o para excluir.");
-      return;
-    }
-    const effCount = crossPageAll
-      ? Math.max(0, totalCount - deselectedIds.size)
-      : selectedIds.size;
+  const handleDeleteSelected = useCallback(async () => {
+    if (!canDeleteCadastro) { alert("Sem permissão para excluir."); return; }
+    const effCount = crossPageAll ? Math.max(0, totalCount - deselectedIds.size) : selectedIds.size;
     if (effCount === 0) return;
-
-    const msg = (crossPageAll && effCount > items.length)
-      ? "Regra-Mae: isso ira excluir " + effCount + " registro(s) de " + TITULO + " permanentemente em todas as paginas. Esta acao sera auditada.\nDeseja continuar?"
-      : "Regra-Mae: confirmar exclusao de " + effCount + " registro(s) de " + TITULO + "? Esta acao sera auditada.";
-    if (!window.confirm(msg)) return;
-
+    if (!window.confirm(`Confirmar exclusão de ${effCount} registro(s) de ${TITULO}? Esta ação será auditada.`)) return;
     try {
       let idsToDelete = [];
       if (crossPageAll) {
         let skipAcc = 0;
         while (true) {
-          const res = await base44.functions.invoke("entityListSorted", {
-            entityName: ENTITY,
-            filter: readFilter,
-            sortField: "id", sortDirection: "asc",
-            limit: 500, skip: skipAcc,
-          });
-          const arr = Array.isArray(res && res.data) ? res.data : [];
+          const res = await base44.functions.invoke("entityListSorted", { entityName: ENTITY, filter: readFilter, sortField: "id", sortDirection: "asc", limit: 500, skip: skipAcc });
+          const arr = Array.isArray(res?.data) ? res.data : [];
           if (!arr.length) break;
-          arr.forEach(function(i) { if (i.id && !deselectedIds.has(i.id)) idsToDelete.push(i.id); });
+          arr.forEach(i => { if (i.id && !deselectedIds.has(i.id)) idsToDelete.push(i.id); });
           if (arr.length < 500) break;
           skipAcc += 500;
         }
-      } else {
-        idsToDelete = Array.from(selectedIds);
-      }
-
-      if (!idsToDelete.length) { alert("Nenhum registro encontrado para excluir."); return; }
-
+      } else { idsToDelete = Array.from(selectedIds); }
+      if (!idsToDelete.length) { alert("Nenhum registro encontrado."); return; }
       for (let i = 0; i < idsToDelete.length; i += 20) {
-        await Promise.all(
-          idsToDelete.slice(i, i + 20).map(function(id) {
-            return deleteInContext(ENTITY, id).catch(function() {});
-          })
-        );
+        await Promise.all(idsToDelete.slice(i, i + 20).map(id => deleteInContext(ENTITY, id).catch(() => {})));
       }
-    } catch (e) { alert("Erro ao excluir: " + ((e && e.message) || String(e))); return; }
-
-    setSelectedIds(new Set());
-    setDeselectedIds(new Set());
-    setCrossPageAll(false);
-    setPage(1);
+    } catch (e) { alert("Erro: " + (e?.message || String(e))); return; }
+    setSelectedIds(new Set()); setDeselectedIds(new Set()); setCrossPageAll(false); setPage(1);
     invalidateAll(queryClient, ENTITY);
-  }, [ENTITY, crossPageAll, totalCount, selectedIds, deselectedIds, readFilter, queryClient, items.length, deleteInContext, canDeleteCadastro]);
+  }, [ENTITY, crossPageAll, totalCount, selectedIds, deselectedIds, readFilter, queryClient, deleteInContext, canDeleteCadastro]);
 
-  // ── seleção ──────────────────────────────────────────────────────────────────
-  const isItemSelected = useCallback(function(id) {
-    return crossPageAll ? !deselectedIds.has(id) : selectedIds.has(id);
-  }, [crossPageAll, deselectedIds, selectedIds]);
-
-  const handleItemCheck = useCallback(function(id, checked) {
-    if (crossPageAll) {
-      setDeselectedIds(function(prev) {
-        const n = new Set(prev);
-        if (checked) n.delete(id); else n.add(id);
-        return n;
-      });
-    } else {
-      setSelectedIds(function(prev) {
-        const n = new Set(prev);
-        if (checked) n.add(id); else n.delete(id);
-        return n;
-      });
-    }
-  }, [crossPageAll]);
-
-  const allPageSelected  = items.length > 0 && items.every(function(i) { return isItemSelected(i.id); });
-  const somePageSelected = items.some(function(i) { return isItemSelected(i.id); });
-
-  const handleToggleSelectPage = useCallback(function() {
-    if (crossPageAll) {
-      setDeselectedIds(function(prev) {
-        const n = new Set(prev);
-        if (allPageSelected) items.forEach(function(i) { n.add(i.id); });
-        else items.forEach(function(i) { n.delete(i.id); });
-        return n;
-      });
-    } else if (allPageSelected) {
-      setSelectedIds(function(prev) { const n = new Set(prev); items.forEach(function(i) { n.delete(i.id); }); return n; });
-    } else {
-      setSelectedIds(function(prev) { const n = new Set(prev); items.forEach(function(i) { n.add(i.id); }); return n; });
-    }
-  }, [crossPageAll, allPageSelected, items]);
-
-  const handleActivateCrossPage = useCallback(function() {
-    setCrossPageAll(true); setDeselectedIds(new Set()); setSelectedIds(new Set());
-  }, []);
-  const handleCancelSelection = useCallback(function() {
-    setCrossPageAll(false); setDeselectedIds(new Set()); setSelectedIds(new Set());
-  }, []);
-
-  function getSortIcon(field) {
-    if (sortField !== field) return <ChevronsUpDown className="w-3 h-3 text-slate-400" />;
-    if (sortDir === "desc") return <ChevronDown className="w-3.5 h-3.5 text-blue-500" />;
-    return <ChevronUp className="w-3.5 h-3.5 text-blue-500" />;
-  }
-
+  const allPageSelected  = items.length > 0 && items.every(i => isItemSelected(i.id));
+  const somePageSelected = items.some(i => isItemSelected(i.id));
   const effSelectedCount = crossPageAll ? Math.max(0, totalCount - deselectedIds.size) : selectedIds.size;
   const showCrossPageBanner = !crossPageAll && selectedIds.size > 0 && allPageSelected && totalCount > items.length;
 
-  // ─── RENDER ───────────────────────────────────────────────────────────────────
+  const handleToggleSelectPage = useCallback(() => {
+    if (crossPageAll) {
+      setDeselectedIds(prev => {
+        const n = new Set(prev);
+        if (allPageSelected) items.forEach(i => n.add(i.id)); else items.forEach(i => n.delete(i.id));
+        return n;
+      });
+    } else if (allPageSelected) {
+      setSelectedIds(prev => { const n = new Set(prev); items.forEach(i => n.delete(i.id)); return n; });
+    } else {
+      setSelectedIds(prev => { const n = new Set(prev); items.forEach(i => n.add(i.id)); return n; });
+    }
+  }, [crossPageAll, allPageSelected, items]);
+
+  const formProps = useMemo(() => {
+    const base = { onClose: handleCloseForm, onSave: handleCloseForm, onSuccess: handleCloseForm, onOpenChange: v => { if (!v) handleCloseForm(false); }, isOpen: true, open: true, windowMode: true, onSubmit: isSelfManaged ? handleCloseForm : handlePersistSubmit };
+    const defaultValues = (!editItem && nextCode && ENTITY_CODE_FIELD[ENTITY]) ? { [ENTITY_CODE_FIELD[ENTITY]]: nextCode, codigo: nextCode } : {};
+    if (!editItem) return { ...base, ...defaultValues, defaultValues };
+    const aliases = {};
+    FORM_ALIASES.forEach(a => { aliases[a] = editItem; });
+    return { ...base, ...aliases, id: editItem.id };
+  }, [editItem, handleCloseForm, isSelfManaged, handlePersistSubmit, nextCode, ENTITY]);
+
   if (!canViewCadastro) {
     return (
       <div className="w-full h-full flex items-center justify-center p-6">
         <div className="rounded-sm border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          Seu perfil nao tem permissao para visualizar {TITULO}.
+          Seu perfil não tem permissão para visualizar {TITULO}.
         </div>
       </div>
     );
   }
 
-  const renderTableBody = function() {
-    // Skeleton apenas na carga inicial absoluta (nunca durante sort/paginação)
-  const isInitialLoad = isFetching && !everLoadedRef.current && lastGoodData.current.length === 0;
-    if (isInitialLoad) {
-      return (
-        <div className="space-y-1.5 p-3">
-          {[...Array(8)].map(function(_, i) {
-            return <Skeleton key={i} className={"h-8 rounded-sm " + (i % 3 === 0 ? "w-3/4" : "w-full")} />;
-          })}
-        </div>
-      );
-    }
-    if (isError && items.length === 0 && !isFetching) {
-      return (
-        <div className="flex flex-col items-center justify-center h-40 text-red-500 gap-2">
-          <AlertCircle className="w-7 h-7" />
-          <span className="text-sm">Erro ao carregar dados.</span>
-          <button
-            className="text-xs underline text-red-400"
-            onClick={function() { lastGoodData.current = []; everLoadedRef.current = false; invalidateAll(queryClient, ENTITY); }}
-          >
-            Tentar novamente
-          </button>
-        </div>
-      );
-    }
-    if (items.length === 0 && !isFetching) {
-      return (
-        <div className="flex flex-col items-center justify-center h-40 text-slate-400 gap-2">
-          <Search className="w-7 h-7 opacity-30" />
-          <span className="text-sm">
-            {debouncedSearch
-              ? "Nenhum resultado para \"" + debouncedSearch + "\""
-              : "Nenhum registro de " + TITULO}
-          </span>
-        </div>
-      );
-    }
-    return (
-      <table className="w-full text-sm table-auto">
-        <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10">
-          <tr>
-            <th className="px-3 py-2.5 text-center w-8">
-              <input
-                type="checkbox"
-                ref={function(el) { if (el) el.indeterminate = somePageSelected && !allPageSelected; }}
-                checked={allPageSelected}
-                onChange={handleToggleSelectPage}
-                disabled={!canDeleteCadastro}
-                data-permission={`Cadastros.${ENTITY}.excluir`}
-                data-sensitive="true"
-                className="w-4 h-4 cursor-pointer accent-blue-600"
-              />
-            </th>
-            {COLUMNS.map(function(col) {
-              return (
-                <th
-                  key={col.field}
-                  className={"px-3 py-2.5 text-left font-semibold text-slate-600 whitespace-nowrap select-none" + (col.sortable !== false ? " cursor-pointer hover:bg-slate-100 transition-colors" : "")}
-                  onClick={function() { if (col.sortable !== false) handleSort(col.field); }}
-                >
-                  <div className="flex items-center gap-1">
-                    <span>{col.label}</span>
-                    {col.sortable !== false && getSortIcon(col.field)}
-                  </div>
-                </th>
-              );
-            })}
-            <th className="px-3 py-2.5 text-center w-20 font-semibold text-slate-600">Ações</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {items.map(function(item) {
-            const checked = isItemSelected(item.id);
-            return (
-              <tr
-                key={item.id}
-                className={"transition-colors hover:bg-blue-50/30" + (checked ? " bg-blue-50/40" : "")}
-              >
-                <td className="px-3 py-2 text-center">
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={function(e) { handleItemCheck(item.id, e.target.checked); }}
-                    disabled={!canDeleteCadastro}
-                    data-permission={`Cadastros.${ENTITY}.excluir`}
-                    data-sensitive="true"
-                    className="w-4 h-4 cursor-pointer accent-blue-600"
-                  />
-                </td>
-                {COLUMNS.map(function(col, colIdx) {
-                  return (
-                    <td key={col.field} className="px-3 py-2 text-slate-600 max-w-[240px] truncate">
-                      {fmtValue(getDisplayValue(item, col, colIdx === 0), col, _extraColors)}
-                    </td>
-                  );
-                })}
-                <td className="px-3 py-2">
-                  <div className="flex items-center justify-center gap-1">
-                    {FormComponent && (
-                      <button
-                        type="button"
-                        onClick={function(e) { e.stopPropagation(); handleEditItem(item); }}
-                        title="Editar"
-                        disabled={isLoadingEdit || !canEditCadastro}
-                        data-permission={`Cadastros.${ENTITY}.editar`}
-                        data-sensitive="true"
-                        className="h-7 w-7 flex items-center justify-center rounded-sm text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors disabled:opacity-40"
-                      >
-                        {isLoadingEdit
-                          ? <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                          : <Edit className="w-3.5 h-3.5" />}
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={function() { handleDelete(item); }}
-                      title="Excluir"
-                      disabled={!canDeleteCadastro}
-                      data-permission={`Cadastros.${ENTITY}.excluir`}
-                      data-sensitive="true"
-                      className="h-7 w-7 flex items-center justify-center rounded-sm text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    );
-  };
-
   const content = (
     <div className="flex flex-col h-full gap-2 min-h-0 w-full">
+      <VisualizadorToolbar
+        ENTITY={ENTITY} TITULO={TITULO} COLUMNS={COLUMNS}
+        totalCount={totalCount} countsLoading={countsLoading}
+        search={search} setSearch={setSearch}
+        pageSize={pageSize} setPageSize={setPageSize} setPage={setPage}
+        sortField={sortField} sortDir={sortDir} handleSortDropdown={handleSortDropdown}
+        isFetching={isFetching}
+        onRefresh={() => { lastGoodData.current = []; everLoadedRef.current = false; invalidateAll(queryClient, ENTITY); }}
+        FormComponent={FormComponent} onNew={handleNewItem}
+        contextoValido={contextoValido} canCreateCadastro={canCreateCadastro}
+        effSelectedCount={effSelectedCount} totalCountAll={totalCount}
+        onDeleteSelected={handleDeleteSelected} canDeleteCadastro={canDeleteCadastro}
+      />
 
-      {/* Toolbar */}
-      <div className="flex items-center gap-2 flex-wrap shrink-0">
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span className="text-sm font-semibold text-slate-700 truncate max-w-[160px]">{TITULO}:</span>
-          <Badge variant="outline" className="rounded-sm bg-blue-50 text-blue-700 border-blue-200 font-bold tabular-nums min-w-[32px] text-center">
-            {(countsLoading && totalCount === 0)
-              ? <span className="animate-pulse text-[10px]">···</span>
-              : totalCount.toLocaleString("pt-BR")}
-          </Badge>
-        </div>
-
-        <div className="relative flex-1 min-w-[120px]">
-          <Search className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
-          <Input
-            placeholder="Buscar..."
-            value={search}
-            onChange={function(e) { setSearch(e.target.value); }}
-            className="pl-8 h-9 rounded-sm text-sm bg-white border-slate-200"
-            data-permission={`Cadastros.${ENTITY}.visualizar`}
-            data-action={`Cadastros.${ENTITY}.buscar`}
-          />
-          {search && (
-            <button
-              onClick={function() { setSearch(""); }}
-              className="absolute right-2 top-2.5 text-slate-400 hover:text-slate-600"
-              data-permission={`Cadastros.${ENTITY}.visualizar`}
-              data-action={`Cadastros.${ENTITY}.limpar-busca`}
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
-
-        <select
-          value={pageSize}
-          onChange={function(e) { setPageSize(Number(e.target.value)); setPage(1); }}
-          className="border border-slate-200 rounded-sm h-9 px-2 text-sm text-slate-700 bg-white cursor-pointer shrink-0"
-          data-permission={`Cadastros.${ENTITY}.visualizar`}
-          data-action={`Cadastros.${ENTITY}.alterar-paginacao`}
-        >
-          {PAGE_SIZES.map(function(ps) { return <option key={ps} value={ps}>{ps}/pág</option>; })}
-        </select>
-
-        <select
-          value={sortField + "|" + sortDir}
-          onChange={function(e) { handleSortDropdown(e.target.value); }}
-          className="border border-slate-200 rounded-sm h-9 px-2 text-sm text-slate-700 bg-white cursor-pointer shrink-0"
-          data-permission={`Cadastros.${ENTITY}.visualizar`}
-          data-action={`Cadastros.${ENTITY}.ordenar`}
-        >
-          <option value="updated_date|desc">↓ Mais Recentes</option>
-          <option value="updated_date|asc">↑ Mais Antigos</option>
-          <option value="created_date|desc">↓ Criação (novo)</option>
-          <option value="created_date|asc">↑ Criação (antigo)</option>
-          {COLUMNS.filter(function(c) { return c.sortable !== false && c.field !== "updated_date" && c.field !== "created_date"; })
-            .flatMap(function(c) {
-              return [
-                <option key={c.field + "|asc"}  value={c.field + "|asc"}>{c.label} ↑</option>,
-                <option key={c.field + "|desc"} value={c.field + "|desc"}>{c.label} ↓</option>,
-              ];
-            })}
-        </select>
-
-        <button
-          type="button"
-          onClick={function() { lastGoodData.current = []; everLoadedRef.current = false; invalidateAll(queryClient, ENTITY); }}
-          className="h-9 w-9 flex items-center justify-center border border-slate-200 rounded-sm bg-white hover:bg-slate-50 shrink-0"
-          title="Recarregar"
-          data-permission={`Cadastros.${ENTITY}.visualizar`}
-          data-action={`Cadastros.${ENTITY}.recarregar`}
-        >
-          <RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin text-blue-500" : "text-slate-500")} />
-        </button>
-
-        {FormComponent && (
-          <Button
-            size="sm"
-            onClick={handleNewItem}
-            disabled={!contextoValido || !canCreateCadastro}
-            className="h-9 rounded-sm gap-1 shrink-0"
-            data-permission={`Cadastros.${ENTITY}.criar`}
-            data-action={`Cadastros.${ENTITY}.criar`}
-            data-sensitive="true"
-          >
-            <Plus className="w-4 h-4" /> Novo
-          </Button>
-        )}
-
-        {effSelectedCount > 0 && (
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={handleDeleteSelected}
-            disabled={!canDeleteCadastro}
-            className="h-9 rounded-sm gap-1 shrink-0"
-            data-permission={`Cadastros.${ENTITY}.excluir`}
-            data-action={`Cadastros.${ENTITY}.excluir-selecionados`}
-            data-sensitive="true"
-          >
-            <Trash2 className="w-4 h-4" />
-            Excluir {(effSelectedCount >= totalCount && totalCount > 0) ? "TODOS" : effSelectedCount}
-          </Button>
-        )}
-      </div>
-
-      {/* Banner cross-page */}
+      {/* Banners de seleção cross-page */}
       {showCrossPageBanner && (
         <div className="bg-amber-50 border border-amber-200 rounded-sm px-3 py-1.5 text-xs text-amber-800 flex items-center gap-2 flex-wrap shrink-0">
           <span className="font-medium">{selectedIds.size} selecionados nesta página.</span>
-          <button
-            onClick={handleActivateCrossPage}
-            className="text-blue-600 hover:text-blue-800 underline font-semibold"
-            data-permission={`Cadastros.${ENTITY}.visualizar`}
-            data-action={`Cadastros.${ENTITY}.selecionar-todos`}
-          >
+          <button onClick={handleActivateCrossPage} className="text-blue-600 hover:text-blue-800 underline font-semibold">
             Selecionar todos os {totalCount} registros
           </button>
-          <button
-            onClick={handleCancelSelection}
-            className="ml-auto text-slate-500 underline"
-            data-action={`Cadastros.${ENTITY}.cancelar-selecao`}
-          >Cancelar</button>
+          <button onClick={handleCancelSelection} className="ml-auto text-slate-500 underline">Cancelar</button>
         </div>
       )}
       {crossPageAll && (
         <div className="bg-blue-50 border border-blue-200 rounded-sm px-3 py-1.5 text-xs text-blue-700 flex items-center gap-2 flex-wrap shrink-0">
-          <span>
-            {deselectedIds.size > 0
-              ? "✓ " + effSelectedCount + " de " + totalCount + " selecionados (" + deselectedIds.size + " desmarcado" + (deselectedIds.size > 1 ? "s" : "") + ")"
-              : "✓ Todos os " + totalCount + " registros selecionados"}
-          </span>
-          <button
-            onClick={handleCancelSelection}
-            className="ml-auto text-blue-500 underline"
-            data-action={`Cadastros.${ENTITY}.cancelar-selecao`}
-          >Cancelar seleção</button>
+          <span>{deselectedIds.size > 0 ? `✓ ${effSelectedCount} de ${totalCount} selecionados (${deselectedIds.size} desmarcado${deselectedIds.size > 1 ? 's' : ''})` : `✓ Todos os ${totalCount} registros selecionados`}</span>
+          <button onClick={handleCancelSelection} className="ml-auto text-blue-500 underline">Cancelar seleção</button>
         </div>
       )}
 
@@ -1071,88 +315,39 @@ export default function VisualizadorUniversalEntidadeV24({
             <AlertCircle className="w-2.5 h-2.5" /> erro — exibindo cache
           </div>
         )}
-        {renderTableBody()}
+        <VisualizadorTableBody
+          ENTITY={ENTITY} TITULO={TITULO} COLUMNS={COLUMNS} items={items}
+          isFetching={isFetching} isError={isError} everLoadedRef={everLoadedRef} lastGoodData={lastGoodData}
+          debouncedSearch={debouncedSearch} sortField={sortField} sortDir={sortDir} onSort={handleSort}
+          isItemSelected={isItemSelected} handleItemCheck={handleItemCheck}
+          allPageSelected={allPageSelected} somePageSelected={somePageSelected}
+          handleToggleSelectPage={handleToggleSelectPage} canDeleteCadastro={canDeleteCadastro}
+          FormComponent={FormComponent} isLoadingEdit={false} canEditCadastro={canEditCadastro}
+          onEdit={handleEditItem} onDelete={handleDelete}
+          queryClient={queryClient} invalidateAll={invalidateAll}
+          extraColors={_extraColors}
+        />
       </div>
 
       {/* Paginação */}
       <div className="flex items-center justify-between text-xs text-slate-500 shrink-0 flex-wrap gap-1">
         <span>Pág. {page} · {items.length} exibidos · {totalCount} total</span>
         <div className="flex gap-1">
-          <button
-            type="button"
-            onClick={function() { setPage(1); }}
-            disabled={page === 1 || isFetching}
-            className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40"
-            data-action={`Cadastros.${ENTITY}.primeira-pagina`}
-          >«</button>
-          <button
-            type="button"
-            onClick={function() { setPage(function(p) { return Math.max(1, p - 1); }); }}
-            disabled={page === 1 || isFetching}
-            className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40"
-            data-action={`Cadastros.${ENTITY}.pagina-anterior`}
-          >← Ant.</button>
+          <button onClick={() => setPage(1)} disabled={page === 1 || isFetching} className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40">«</button>
+          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || isFetching} className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40">← Ant.</button>
           <span className="flex items-center justify-center h-7 px-2 border border-slate-200 rounded-sm bg-white font-semibold text-slate-700">{page}</span>
-          <button
-            type="button"
-            onClick={function() { setPage(function(p) { return p + 1; }); }}
-            disabled={items.length < pageSize || isFetching}
-            className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40"
-            data-action={`Cadastros.${ENTITY}.proxima-pagina`}
-          >Próx. →</button>
+          <button onClick={() => setPage(p => p + 1)} disabled={items.length < pageSize || isFetching} className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40">Próx. →</button>
         </div>
       </div>
 
-      {/* Modal formulário */}
+      {/* Modal */}
       {FormComponent && showForm && (
-        <React.Fragment>
-          <div className="fixed inset-0 z-[1099] bg-black/50" onClick={function() { handleCloseForm(false); }} />
-          <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 pointer-events-none">
-            <div
-              className="bg-white rounded-xl w-full max-w-4xl max-h-[92vh] overflow-auto shadow-2xl pointer-events-auto flex flex-col"
-              onClick={function(e) { e.stopPropagation(); }}
-            >
-              <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between rounded-t-xl shrink-0 z-10">
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-800">
-                    {(editItem && editItem.id) ? "Editar " + TITULO : "Novo " + TITULO}
-                  </h2>
-                  {editError && (
-                    <p className="text-xs text-amber-600 mt-0.5 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {editError}
-                    </p>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  {isSaving && (
-                    <span className="text-xs text-blue-600 flex items-center gap-1">
-                      <RefreshCw className="w-3 h-3 animate-spin" /> Salvando…
-                    </span>
-                  )}
-                  {isLoadingEdit && (
-                    <span className="text-xs text-slate-500 flex items-center gap-1">
-                      <RefreshCw className="w-3 h-3 animate-spin" /> Carregando dados…
-                    </span>
-                  )}
-                  <button
-                    type="button"
-                    onClick={function() { handleCloseForm(false); }}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
-                    data-action={`Cadastros.${ENTITY}.fechar-formulario`}
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-              <div className="p-6 flex-1 overflow-auto">
-                <FormComponent
-                  key={"form-" + ENTITY + "-" + ((editItem && editItem.id) || "new") + "-" + formKey}
-                  {...formProps}
-                />
-              </div>
-            </div>
-          </div>
-        </React.Fragment>
+        <VisualizadorModal
+          ENTITY={ENTITY} TITULO={TITULO} FormComponent={FormComponent}
+          formProps={formProps} formKey={formKey}
+          editItem={editItem} editError={editError} isSaving={isSaving} isLoadingEdit={false}
+          onClose={handleCloseForm}
+        />
       )}
     </div>
   );

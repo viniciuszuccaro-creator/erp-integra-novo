@@ -21,6 +21,10 @@
       },
       "description": "IDs das empresas que podem atender este cliente"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo \u00fanico do cliente"
+    },
     "tipo": {
       "type": "string",
       "enum": [

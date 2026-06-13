@@ -21,6 +21,7 @@ export { ciclo20Items } from './ciclos/ciclo20';
 export { ciclo21Items } from './ciclos/ciclo21';
 export { ciclo22Items } from './ciclos/ciclo22';
 export { ciclo23Items } from './ciclos/ciclo23';
+export { ciclo24Items } from './ciclos/ciclo24';
 
 // ── Pilares estruturais ───────────────────────────────────────────────────────
 export const melhoriaPlanPhases = [
@@ -159,7 +160,7 @@ export const roadmap2026 = [
     ]
   },
   {
-    trimestre: 'Q2 2027 🔄', cor: 'teal', status: 'em_execucao',
+    trimestre: 'Q2 2027 ✅', cor: 'teal', status: 'concluido',
     itens: [
       '✅ Recriação hooks useVisualizadorState/Query/CRUD — Ciclo 23',
       '✅ Correção imports absolutos VisualizadorUniversalEntidadeV24 — Ciclo 23',
@@ -167,8 +168,18 @@ export const roadmap2026 = [
       '🔒 IA generativa avançada — desbloqueio após 07/07/2026',
       '🔒 Chatbot omnicanal GPT-4 — desbloqueio após 07/07/2026',
       '🔒 Dashboard IA Gerador — desbloqueio após 07/07/2026',
-      '📅 Expansão internacional (en/es)',
-      '📅 API headless multi-tenant completa',
+    ]
+  },
+  {
+    trimestre: 'Q3 2027 🔄', cor: 'indigo', status: 'em_execucao',
+    itens: [
+      '📅 Extrair FORM_ALIASES + DEFAULT_FORM_COMPONENTS → visualizadorConfig.js — Ciclo 24',
+      '📅 Extrair ENTITY_CODE_FIELD → config/entityCodeFields.js — Ciclo 24',
+      '📅 Extrair fmtValue/getDisplayValue → utils/tableFormatters.js — Ciclo 24',
+      '📅 Export CSV nativo na VisualizadorToolbar — Ciclo 24',
+      '📅 Ajuste staleTime queries Cadastros para 60s — Ciclo 24',
+      '🔒 Expansão internacional (en/es) — pós desbloqueio créditos',
+      '🔒 API headless multi-tenant completa — pós desbloqueio créditos',
     ]
   },
 ];

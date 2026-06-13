@@ -29,12 +29,12 @@ export default function Bloco4Logistica({ allCounts, isLoading, searchTerm = "" 
 
   // Campos reais das entidades — getDisplayValue faz fallback automático se vazio
   const tiles = [
-    { k: 'Veiculo',         t: 'Veículos',                        i: Truck,    c: ['placa','modelo','tipo_veiculo','status'],     f: VeiculoForm },
-    { k: 'Motorista',       t: 'Motoristas',                      i: User,     c: ['nome','nome_completo','cpf','status'],         f: MotoristaForm },
-    { k: 'TipoFrete',       t: 'Tipos de Frete',                  i: Settings, c: ['nome','descricao','modalidade','cobra_frete'],f: TipoFreteForm },
-    { k: 'LocalEstoque',    t: 'Locais de Estoque',               i: Package,  c: ['nome','descricao','codigo'],                  f: LocalEstoqueForm },
-    { k: 'RotaPadrao',      t: 'Rotas Padrão',                    i: MapPin,   c: ['nome','nome_rota','origem','destino'],         f: RotaPadraoForm },
-    { k: 'ModeloDocumento', t: 'Modelos de Documento Logístico',  i: FileText, c: ['nome','nome_modelo','tipo_documento','ativo'], f: ModeloDocumentoForm },
+    { k: 'Veiculo',         t: 'Veículos',                        i: Truck,    c: ['placa','modelo','tipo_veiculo','status'],                 f: VeiculoForm },
+    { k: 'Motorista',       t: 'Motoristas',                      i: User,     c: ['cnh_numero','nome','nome_completo','cpf','status'],        f: MotoristaForm },
+    { k: 'TipoFrete',       t: 'Tipos de Frete',                  i: Settings, c: ['codigo','nome','descricao','tipo'],                       f: TipoFreteForm },
+    { k: 'LocalEstoque',    t: 'Locais de Estoque',               i: Package,  c: ['codigo','nome','descricao','tipo'],                       f: LocalEstoqueForm },
+    { k: 'RotaPadrao',      t: 'Rotas Padrão',                    i: MapPin,   c: ['codigo','nome','nome_rota','origem','destino'],            f: RotaPadraoForm },
+    { k: 'ModeloDocumento', t: 'Modelos de Documento Logístico',  i: FileText, c: ['codigo','nome','nome_modelo','tipo_documento','ativo'],   f: ModeloDocumentoForm },
   ];
   const filteredTiles = filterTiles(tiles, searchTerm);
   const canViewEntity = (entidade) =>

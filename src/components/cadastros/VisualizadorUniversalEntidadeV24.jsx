@@ -480,48 +480,90 @@ export default function VisualizadorUniversalEntidadeV24({
     setTimeout(function() { invalidateAll(queryClient, ENTITY); }, 50);
   }, [ENTITY, queryClient]);
 
-  // Verifica duplicidade de código, nome, CNPJ ou CPF antes de salvar
+  // Verifica duplicidade de código, nome, CNPJ ou CPF antes de salvar.
+  // Retorna objeto { message, conflictType } ou null se não houver conflito.
   const checkDuplicate = useCallback(async function(formData, isEdit, currentId) {
-    const orConditions = [];
+    const codeField = ENTITY_CODE_FIELD[ENTITY] || 'codigo';
+    const codeValue = formData[codeField] || formData.codigo || formData.sigla || formData.codigo_banco || null;
 
-    // Código/sigla/codigo_banco
-    if (formData.codigo) orConditions.push({ codigo: formData.codigo });
-    if (formData.sigla)  orConditions.push({ sigla: formData.sigla });
-    if (formData.codigo_banco) orConditions.push({ codigo_banco: formData.codigo_banco });
+    // Verificação 1: código duplicado (mais prioritário — importação de outro sistema)
+    if (codeValue && String(codeValue).trim()) {
+      const codeFilter = {};
+      codeFilter[codeField] = String(codeValue).trim();
+      // também verificar campo genérico 'codigo' se for diferente
+      const codeOr = [codeFilter];
+      if (codeField !== 'codigo' && formData.codigo) codeOr.push({ codigo: formData.codigo });
+      if (formData.sigla) codeOr.push({ sigla: formData.sigla });
+      if (formData.codigo_banco) codeOr.push({ codigo_banco: formData.codigo_banco });
 
-    // Identificadores únicos fiscais — CNPJ e CPF impedem duplicata absoluta
-    if (formData.cnpj && String(formData.cnpj).replace(/\D/g,'').length >= 14)
-      orConditions.push({ cnpj: formData.cnpj });
-    if (formData.cpf && String(formData.cpf).replace(/\D/g,'').length >= 11)
-      orConditions.push({ cpf: formData.cpf });
+      try {
+        const res = await base44.functions.invoke("entityListSorted", {
+          entityName: ENTITY,
+          filter: codeOr.length > 1 ? { $or: codeOr } : codeFilter,
+          sortField: "created_date", sortDirection: "asc",
+          limit: 5, skip: 0,
+        });
+        const existentes = Array.isArray(res?.data) ? res.data : [];
+        const conflito = existentes.find(function(r) { return r.id !== currentId; });
+        if (conflito) {
+          const labelConflito = conflito.nome || conflito.razao_social || conflito.descricao || conflito.sigla || conflito.id;
+          return `⚠️ Código "${codeValue}" já está em uso pelo registro "${labelConflito}".\n\nSe está importando de outro sistema, altere o código do novo registro antes de salvar, ou edite o registro existente.`;
+        }
+      } catch { /* não bloqueia */ }
+    }
 
-    // Campos de nome/descrição
+    // Verificação 2: CNPJ/CPF duplicado
+    const cnpjClean = formData.cnpj ? String(formData.cnpj).replace(/\D/g,'') : '';
+    const cpfClean  = formData.cpf  ? String(formData.cpf).replace(/\D/g,'')  : '';
+    const fiscalOr  = [];
+    if (cnpjClean.length >= 14) fiscalOr.push({ cnpj: formData.cnpj });
+    if (cpfClean.length  >= 11) fiscalOr.push({ cpf: formData.cpf });
+
+    if (fiscalOr.length) {
+      try {
+        const res = await base44.functions.invoke("entityListSorted", {
+          entityName: ENTITY,
+          filter: fiscalOr.length > 1 ? { $or: fiscalOr } : fiscalOr[0],
+          sortField: "created_date", sortDirection: "asc",
+          limit: 5, skip: 0,
+        });
+        const existentes = Array.isArray(res?.data) ? res.data : [];
+        const conflito = existentes.find(function(r) { return r.id !== currentId; });
+        if (conflito) {
+          const labelConflito = conflito.nome || conflito.razao_social || conflito.descricao || conflito.cnpj || conflito.id;
+          const docType = cnpjClean.length >= 14 ? 'CNPJ' : 'CPF';
+          return `⚠️ ${docType} já cadastrado no registro "${labelConflito}".\n\nNão é permitido duplicar registros com o mesmo ${docType}.`;
+        }
+      } catch { /* não bloqueia */ }
+    }
+
+    // Verificação 3: nome/descrição duplicado
+    const nameOr = [];
     ['nome','razao_social','nome_completo','nome_fantasia','descricao',
      'nome_marca','nome_segmento','nome_perfil','nome_banco','nome_grupo',
      'nome_canal','nome_setor','titulo','nome_rota','nome_kit'].forEach(function(f) {
-      if (formData[f] && String(formData[f]).trim().length > 1)
-        orConditions.push({ [f]: formData[f] });
+      if (formData[f] && String(formData[f]).trim().length > 2)
+        nameOr.push({ [f]: formData[f] });
     });
 
-    if (!orConditions.length) return null;
-
-    try {
-      const res = await base44.functions.invoke("entityListSorted", {
-        entityName: ENTITY,
-        filter: { $or: orConditions },
-        sortField: "created_date", sortDirection: "asc",
-        limit: 10, skip: 0,
-      });
-      const existentes = Array.isArray(res?.data) ? res.data : [];
-      const conflito = existentes.find(function(r) { return r.id !== currentId; });
-      if (!conflito) return null;
-
-      const labelConflito = conflito.nome || conflito.razao_social || conflito.descricao ||
-        conflito.sigla || conflito.codigo || conflito.cnpj || conflito.id;
-      return `Já existe um registro com os mesmos dados: "${labelConflito}". Verifique CNPJ/CPF, código ou nome.`;
-    } catch {
-      return null;
+    if (nameOr.length) {
+      try {
+        const res = await base44.functions.invoke("entityListSorted", {
+          entityName: ENTITY,
+          filter: { $or: nameOr },
+          sortField: "created_date", sortDirection: "asc",
+          limit: 5, skip: 0,
+        });
+        const existentes = Array.isArray(res?.data) ? res.data : [];
+        const conflito = existentes.find(function(r) { return r.id !== currentId; });
+        if (conflito) {
+          const labelConflito = conflito.nome || conflito.razao_social || conflito.descricao || conflito.codigo || conflito.id;
+          return `⚠️ Já existe um registro com o mesmo nome/descrição: "${labelConflito}".\n\nVerifique se não está cadastrando duplicado.`;
+        }
+      } catch { /* não bloqueia */ }
     }
+
+    return null;
   }, [ENTITY]);
 
   const handlePersistSubmit = useCallback(async function(formData) {

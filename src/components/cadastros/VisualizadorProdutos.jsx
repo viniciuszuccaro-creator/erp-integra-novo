@@ -66,7 +66,6 @@ export default function VisualizadorProdutos(props) {
   };
 
   const visualizadorProps = {
-    ...props,
     nomeEntidade: 'Produto',
     tituloDisplay: 'Produtos',
     icone: Package,

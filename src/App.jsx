@@ -76,8 +76,8 @@ const AuthenticatedApp = () => {
           </EmpresaSelectorGuard>
         } />
         {Object.entries(Pages).map(([path, Page]) => {
-          // Skip deprecated pages & duplicates
-          if (['DemoMultitarefas', 'portal', 'portalcliente', 'ChatbotAtendimento', 'ProducaoMobile', 'EntregasMobile'].includes(path)) {
+          // Skip deprecated pages & duplicates (P1: removed ChatbotAtendimento, ProducaoMobile, EntregasMobile)
+          if (['DemoMultitarefas', 'portal', 'portalcliente'].includes(path)) {
            return null;
           }
           

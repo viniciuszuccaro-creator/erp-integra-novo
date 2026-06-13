@@ -80,7 +80,6 @@ export const PAGES = {
     "Agenda": Agenda,
     "CRM": CRM,
     "Cadastros": Cadastros,
-    // ChatbotAtendimento: removida — consolidada em HubAtendimento
     "Comercial": Comercial,
     "Compras": Compras,
     "ConfiguracoesUsuario": ConfiguracoesUsuario,

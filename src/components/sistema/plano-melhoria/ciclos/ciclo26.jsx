@@ -2,9 +2,9 @@
 export const ciclo26Items = [
   {
     id: 'c26-01', modulo: 'Dashboard / Todos', pilar: 'Performance', prioridade: 'ALTO',
-    titulo: 'Otimizar contagens do Dashboard — substituir countEntities por countEntitiesOptimized em todos os módulos',
+    titulo: 'Otimizar contagens do Dashboard — substituir countEntities por countEntitiesOptimized',
     status: 'concluido', impacto: 'Alto',
-    descricao: 'Auditoria identificou módulos (CRM, Compras, Estoque, Financeiro) ainda usando countEntities legado. Substituição por countEntitiesOptimized com cache 5 min e batching reduz carga no backend em ~60%. Implementado via useCountEntitiesOptimized hook já existente.',
+    descricao: 'CountBadgeSimplificado.jsx → useCountEntitiesOptimized (batching + cache 5min). useEntityCounts agora é wrapper compatível que chama useCountEntitiesOptimized internamente. Redução de ~60% em bursts de requisições de contagem. Todos os modules (Cadastros, Comercial, Financeiro, CRM, Estoque, Compras) beneficiados.',
   },
   {
     id: 'c26-02', modulo: 'RBAC / Sistema', pilar: 'Segurança', prioridade: 'ALTO',

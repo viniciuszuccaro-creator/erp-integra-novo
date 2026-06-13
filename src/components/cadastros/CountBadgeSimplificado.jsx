@@ -1,6 +1,6 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import useEntityCounts from "@/components/lib/useEntityCounts";
+import useCountEntitiesOptimized from "@/components/lib/useCountEntitiesOptimized";
 
 /**
  * CountBadgeSimplificado — badge de contagem para uma ou mais entidades
@@ -16,7 +16,7 @@ export default function CountBadgeSimplificado({ entities = [], className = "", 
 
   // Se allCounts foi fornecido pelo pai, não faz fetch próprio (evita burst de 429s)
   const hasParentCounts = allCounts !== undefined;
-  const { total: fetched, isLoading: isLoadingInternal } = useEntityCounts(hasParentCounts ? [] : list);
+  const { counts, circuitState } = useCountEntitiesOptimized(hasParentCounts ? [] : list);
 
   let total;
   if (precomputedTotal !== undefined) {
@@ -24,10 +24,10 @@ export default function CountBadgeSimplificado({ entities = [], className = "", 
   } else if (hasParentCounts) {
     total = list.reduce((s, e) => s + (Number(allCounts[e]) || 0), 0);
   } else {
-    total = fetched;
+    total = list.reduce((s, e) => s + (counts[e] || 0), 0);
   }
 
-  const isLoading = isLoadingProp || isLoadingInternal;
+  const isLoading = isLoadingProp || circuitState === 'LOADING';
 
   if (!list.length) return null;
 

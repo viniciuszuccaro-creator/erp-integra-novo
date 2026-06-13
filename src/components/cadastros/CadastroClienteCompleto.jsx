@@ -410,8 +410,29 @@ export default function CadastroClienteCompleto({ cliente: clienteProp, item, da
                                     type="button"
                                     variant="outline"
                                     data-permission="Cadastros.Cliente.alterarStatus"
-                                    data-sensitive
-                                    onClick={handleAlternarStatus}
+                                    data-sensitive="true"
+                                    onClick={async () => {
+                                      const statusAnterior = formData.status;
+                                      handleAlternarStatus();
+                                      // AUDITORIA: Alteração de Status
+                                      try {
+                                        await base44.entities.AuditLog.create({
+                                          usuario: usuarioLogado?.full_name || 'Usuário',
+                                          usuario_id: usuarioLogado?.id,
+                                          empresa_id: empresaAtual?.id,
+                                          group_id: grupoAtual?.id,
+                                          acao: 'Edição',
+                                          modulo: 'Cadastros',
+                                          tipo_auditoria: 'entidade_sensivel',
+                                          entidade: 'Cliente',
+                                          registro_id: cliente?.id,
+                                          descricao: `Status alterado: ${statusAnterior} → ${formData.status === 'Ativo' ? 'Inativo' : 'Ativo'}`,
+                                          dados_antes: { status: statusAnterior },
+                                          dados_depois: { status: formData.status === 'Ativo' ? 'Inativo' : 'Ativo' },
+                                          data_hora: new Date().toISOString()
+                                        });
+                                      } catch (_) {}
+                                    }}
                                     className={formData.status === 'Ativo' ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}
                   >
                     {formData.status === 'Ativo' ? (
@@ -430,8 +451,30 @@ export default function CadastroClienteCompleto({ cliente: clienteProp, item, da
                                     type="button"
                                     variant="destructive"
                                     data-permission="Cadastros.Cliente.excluir"
-                                    data-sensitive
-                                    onClick={handleExcluir}
+                                    data-sensitive="true"
+                                    onClick={async () => {
+                                      if (!window.confirm(`Tem certeza que deseja excluir o cliente "${formData.nome}"? Esta ação não pode ser desfeita.`)) {
+                                        return;
+                                      }
+                                      // AUDITORIA: Exclusão
+                                      try {
+                                        await base44.entities.AuditLog.create({
+                                          usuario: usuarioLogado?.full_name || 'Usuário',
+                                          usuario_id: usuarioLogado?.id,
+                                          empresa_id: empresaAtual?.id,
+                                          group_id: grupoAtual?.id,
+                                          acao: 'Exclusão',
+                                          modulo: 'Cadastros',
+                                          tipo_auditoria: 'entidade_sensivel',
+                                          entidade: 'Cliente',
+                                          registro_id: cliente?.id,
+                                          descricao: `Cliente "${formData.nome}" — Excluído`,
+                                          dados_antes: { status: formData.status, nome: formData.nome },
+                                          data_hora: new Date().toISOString()
+                                        });
+                                      } catch (_) {}
+                                      deleteMutation.mutate(cliente.id);
+                                    }}
                                     disabled={deleteMutation.isPending || !podeExcluir || !contextoValido}
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
@@ -440,9 +483,27 @@ export default function CadastroClienteCompleto({ cliente: clienteProp, item, da
                 </>
               )}
               <Button
-                onClick={handleSave}
+                onClick={async () => {
+                  // AUDITORIA: Salvar
+                  try {
+                    await base44.entities.AuditLog.create({
+                      usuario: usuarioLogado?.full_name || 'Usuário',
+                      usuario_id: usuarioLogado?.id,
+                      empresa_id: empresaAtual?.id,
+                      group_id: grupoAtual?.id,
+                      acao: cliente?.id ? 'Edição' : 'Criação',
+                      modulo: 'Cadastros',
+                      tipo_auditoria: 'entidade',
+                      entidade: 'Cliente',
+                      registro_id: cliente?.id,
+                      descricao: `Cliente "${formData.nome}" — ${cliente?.id ? 'Atualizado' : 'Criado'}`,
+                      data_hora: new Date().toISOString()
+                    });
+                  } catch (_) {}
+                  handleSave();
+                }}
                 data-permission="Cadastros.Cliente.salvar"
-                data-sensitive
+                data-sensitive="true"
                 disabled={saveMutation.isPending || !contextoValido || (cliente?.id ? !podeEditar : !podeCriar)}
                 className="bg-blue-600 hover:bg-blue-700"
               >

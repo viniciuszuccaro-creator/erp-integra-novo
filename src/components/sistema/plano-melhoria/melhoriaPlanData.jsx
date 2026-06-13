@@ -22,6 +22,7 @@ export { ciclo21Items } from './ciclos/ciclo21';
 export { ciclo22Items } from './ciclos/ciclo22';
 export { ciclo23Items } from './ciclos/ciclo23';
 export { ciclo24Items } from './ciclos/ciclo24';
+export { ciclo25Items } from './ciclos/ciclo25';
 
 // ── Pilares estruturais ───────────────────────────────────────────────────────
 export const melhoriaPlanPhases = [
@@ -171,14 +172,26 @@ export const roadmap2026 = [
     ]
   },
   {
-    trimestre: 'Q3 2027 🔄', cor: 'indigo', status: 'em_execucao',
+    trimestre: 'Q3 2027 ✅', cor: 'indigo', status: 'concluido',
     itens: [
-      '📅 Extrair FORM_ALIASES + DEFAULT_FORM_COMPONENTS → visualizadorConfig.js — Ciclo 24',
-      '📅 Extrair ENTITY_CODE_FIELD → config/entityCodeFields.js — Ciclo 24',
-      '📅 Extrair fmtValue/getDisplayValue → utils/tableFormatters.js — Ciclo 24',
-      '📅 Export CSV nativo na VisualizadorToolbar — Ciclo 24',
-      '📅 Ajuste staleTime queries Cadastros para 60s — Ciclo 24',
+      '✅ Extrair FORM_ALIASES + DEFAULT_FORM_COMPONENTS → visualizadorConfig.js — Ciclo 24',
+      '✅ Extrair ENTITY_CODE_FIELD → config/entityCodeFields.js — Ciclo 24',
+      '✅ Extrair fmtValue/getDisplayValue → utils/tableFormatters.js — Ciclo 24',
+      '✅ Export CSV nativo na VisualizadorToolbar — Ciclo 24',
+      '✅ Ajuste staleTime queries Cadastros para 60s — Ciclo 24',
       '🔒 Expansão internacional (en/es) — pós desbloqueio créditos',
+      '🔒 API headless multi-tenant completa — pós desbloqueio créditos',
+    ]
+  },
+  {
+    trimestre: 'Q4 2027 🔄', cor: 'rose', status: 'em_execucao',
+    itens: [
+      '📅 Validação automática group_id/empresa_id em todos os forms — Ciclo 25',
+      '📅 Validação de estoque antes de confirmar Pedido — Ciclo 25',
+      '📅 Deduplicação ContaReceber/ContaPagar por pedido_id — Ciclo 25',
+      '📅 Índice de criticidade de estoque + alertas de ruptura — Ciclo 25',
+      '📅 Auditoria detalhada de ações sensíveis (aprovações, exclusões) — Ciclo 25',
+      '🔒 IA generativa avançada — desbloqueio após 07/07/2026',
       '🔒 API headless multi-tenant completa — pós desbloqueio créditos',
     ]
   },

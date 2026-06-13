@@ -1,13 +1,13 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ciclo24Items } from "@/components/sistema/plano-melhoria/melhoriaPlanData";
+import { ciclo25Items } from "@/components/sistema/plano-melhoria/melhoriaPlanData";
 import { CheckCircle2, Clock, AlertCircle } from "lucide-react";
 
 export default function PlanoMelhoriaCicloAtual() {
-  const concluidos = ciclo24Items.filter((i) => i.status === "concluido").length;
-  const emAndamento = ciclo24Items.filter((i) => i.status === "em_andamento" || i.status === "em_execucao").length;
-  const planejado = ciclo24Items.filter((i) => i.status === "planejado" || i.status === "bloqueado_creditos").length;
+  const concluidos = ciclo25Items.filter((i) => i.status === "concluido").length;
+  const emAndamento = ciclo25Items.filter((i) => i.status === "em_andamento" || i.status === "em_execucao").length;
+  const planejado = ciclo25Items.filter((i) => i.status === "planejado" || i.status === "bloqueado_creditos").length;
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -33,9 +33,9 @@ export default function PlanoMelhoriaCicloAtual() {
     <Card className="w-full">
       <CardHeader className="border-b pb-3">
         <CardTitle className="text-sm font-bold flex items-center justify-between">
-          <span>Itens do Ciclo 24 — Julho 2026</span>
+          <span>Itens do Ciclo 25 — Agosto 2026</span>
           <span className="text-xs font-normal text-slate-500">
-            {concluidos} de {ciclo24Items.length}
+            {concluidos} de {ciclo25Items.length}
           </span>
         </CardTitle>
       </CardHeader>
@@ -56,7 +56,7 @@ export default function PlanoMelhoriaCicloAtual() {
         </div>
 
         <div className="space-y-2 max-h-96 overflow-y-auto">
-          {ciclo24Items.map((item) => (
+          {ciclo25Items.map((item) => (
             <div
               key={item.id}
               className="flex items-start gap-3 p-2 rounded-lg hover:bg-slate-50 transition"

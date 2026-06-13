@@ -1,5 +1,5 @@
 import React, { useState, Suspense, lazy } from 'react';
-import { Play, CheckCircle2, AlertCircle, Zap, Code2, Globe2, MessageSquare, Lock, Loader } from 'lucide-react';
+import { Play, CheckCircle2, Zap, Loader } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,7 +7,7 @@ import { base44 } from '@/api/base44Client';
 import { useUser } from '@/components/lib/UserContext';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
-// Carregamento dinâmico (lazy) dos componentes
+// Carregamento dinâmico (lazy) dos componentes referenciados pelo campo `componente`
 const componentMap = {
   IAGenerativaAvancadaPanel: lazy(() => import('@/components/ia/IAGenerativaAvancadaPanel')),
   ChatbotOmnicanal: lazy(() => import('@/components/chatbot/ChatbotOmnicanal')),
@@ -17,55 +17,14 @@ const componentMap = {
   DashboardIAGerador: lazy(() => import('@/components/dashboard/DashboardIAGerador')),
 };
 
+// Lista local do painel de execução (ids numéricos para compatibilidade com lógica de estado)
 const ciclo21Items = [
-  {
-    id: 1,
-    nome: 'IA Generativa Avançada',
-    descricao: 'Geração contextual de conteúdo com LLM integrado',
-    status: 'ativo',
-    componente: 'IAGenerativaAvancadaPanel',
-    impacto: 'Alto'
-  },
-  {
-    id: 2,
-    nome: 'Chatbot Omnicanal',
-    descricao: 'Comunicação multi-canal (WhatsApp, Email, SMS)',
-    status: 'ativo',
-    componente: 'ChatbotOmnicanal',
-    impacto: 'Alto'
-  },
-  {
-    id: 3,
-    nome: 'Blockchain Auditoria',
-    descricao: 'Trilha imutável de alterações com hash',
-    status: 'ativo',
-    componente: 'BlockchainAuditoriaPanel',
-    impacto: 'Crítico'
-  },
-  {
-    id: 4,
-    nome: 'API Headless Multi-Tenant',
-    descricao: 'REST + GraphQL + Webhooks por empresa',
-    status: 'ativo',
-    componente: 'APIHeadlessGuide',
-    impacto: 'Alto'
-  },
-  {
-    id: 5,
-    nome: 'Internacionalização (i18n)',
-    descricao: 'Suporte a múltiplos idiomas (PT, EN, ES)',
-    status: 'ativo',
-    componente: 'LanguageSwitcher',
-    impacto: 'Médio'
-  },
-  {
-    id: 6,
-    nome: 'Dashboard IA Gerador',
-    descricao: 'Relatórios automáticos com LLM',
-    status: 'ativo',
-    componente: 'DashboardIAGerador',
-    impacto: 'Médio'
-  }
+  { id: 1, nome: 'IA Generativa Avançada', descricao: 'Geração contextual de conteúdo com LLM integrado', status: 'ativo', componente: 'IAGenerativaAvancadaPanel', impacto: 'Alto' },
+  { id: 2, nome: 'Chatbot Omnicanal', descricao: 'Comunicação multi-canal (WhatsApp, Email, SMS)', status: 'ativo', componente: 'ChatbotOmnicanal', impacto: 'Alto' },
+  { id: 3, nome: 'Blockchain Auditoria', descricao: 'Trilha imutável de alterações com hash', status: 'ativo', componente: 'BlockchainAuditoriaPanel', impacto: 'Crítico' },
+  { id: 4, nome: 'API Headless Multi-Tenant', descricao: 'REST + GraphQL + Webhooks por empresa', status: 'ativo', componente: 'APIHeadlessGuide', impacto: 'Alto' },
+  { id: 5, nome: 'Internacionalização (i18n)', descricao: 'Suporte a múltiplos idiomas (PT, EN, ES)', status: 'ativo', componente: 'LanguageSwitcher', impacto: 'Médio' },
+  { id: 6, nome: 'Dashboard IA Gerador', descricao: 'Relatórios automáticos com LLM', status: 'ativo', componente: 'DashboardIAGerador', impacto: 'Médio' },
 ];
 
 export default function CicloExecucaoPanel() {

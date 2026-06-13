@@ -1,14 +1,14 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ciclo20Items } from "@/components/sistema/plano-melhoria/melhoriaPlanData";
+import { ciclo22Items } from "@/components/sistema/plano-melhoria/melhoriaPlanData";
 import { Kanban } from "lucide-react";
 
 export default function PlanoMelhoriaSprintBoard() {
   const groupedByStatus = {
-    planejado: ciclo20Items.filter((i) => i.status === "planejado"),
-    em_andamento: ciclo20Items.filter((i) => i.status === "em_andamento"),
-    concluido: ciclo20Items.filter((i) => i.status === "concluido"),
+    planejado: ciclo22Items.filter((i) => i.status === "planejado"),
+    em_andamento: ciclo22Items.filter((i) => i.status === "em_andamento" || i.status === "em_execucao"),
+    concluido: ciclo22Items.filter((i) => i.status === "concluido"),
   };
 
   const columnConfig = [
@@ -22,7 +22,7 @@ export default function PlanoMelhoriaSprintBoard() {
       <CardHeader className="border-b pb-3">
         <CardTitle className="text-sm font-bold flex items-center gap-2">
           <Kanban className="w-4 h-4 text-purple-600" />
-          Kanban — Ciclo 20
+          Kanban — Ciclo 22
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4">

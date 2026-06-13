@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { melhoriaPlanPhases, ciclo11Items, ciclo12Items, ciclo13Items, ciclo14Items, ciclo15Items, ciclo16Items, ciclo17Items, ciclo18Items, ciclo19Items, ciclo20Items } from '@/components/sistema/plano-melhoria/melhoriaPlanData';
+import { melhoriaPlanPhases, ciclo22Items } from '@/components/sistema/plano-melhoria/melhoriaPlanData';
 
 // Componentes focados
 import PlanoMelhoriaVisaoGeral from '@/components/sistema/plano-melhoria/PlanoMelhoriaVisaoGeral';
@@ -31,8 +31,8 @@ export default function PlanoMelhoria() {
   const totalProgress = Math.round(
     melhoriaPlanPhases.reduce((sum, phase) => sum + phase.progress, 0) / melhoriaPlanPhases.length
   );
-  // Ciclo atual = Ciclo 21 (nova aba de execução)
-  const cicloAtualItems = ciclo20Items;
+  // Ciclo atual = Ciclo 22 (Junho 2026)
+  const cicloAtualItems = ciclo22Items;
   const concluidos = cicloAtualItems.filter(i => i.status === 'concluido').length;
   const total = cicloAtualItems.length;
 
@@ -45,7 +45,7 @@ export default function PlanoMelhoria() {
         </div>
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-black">Plano de Melhorias</h1>
-          <p className="text-blue-200 text-sm">ERP Zuccaro V21.5 — Melhoria contínua · Ciclo 20 · Fevereiro 2027</p>
+          <p className="text-blue-200 text-sm">ERP Zuccaro V22 — Melhoria contínua · Ciclo 22 · Junho 2026</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Badge className="bg-emerald-500 text-white text-sm px-3 py-1">{totalProgress}% plano geral</Badge>

@@ -27,9 +27,9 @@ import RegiaoAtendimentoForm from "@/components/cadastros/RegiaoAtendimentoForm"
 import useVisualizadorState from "./hooks/useVisualizadorState";
 import useVisualizadorQuery from "./hooks/useVisualizadorQuery";
 import useVisualizadorCRUD, { ENTITY_CODE_FIELD } from "./hooks/useVisualizadorCRUD";
-import VisualizadorToolbar from "./VisualizadorToolbar.jsx";
-import VisualizadorTableBody from "./VisualizadorTableBody.jsx";
-import VisualizadorModal from "./VisualizadorModal.jsx";
+import VisualizadorToolbar from "@/components/cadastros/VisualizadorToolbar";
+import VisualizadorTableBody from "@/components/cadastros/VisualizadorTableBody";
+import VisualizadorModal from "@/components/cadastros/VisualizadorModal";
 
 const ENTITY_CONTEXT_FIELD = { Fornecedor: "empresa_dona_id", Transportadora: "empresa_dona_id", Colaborador: "empresa_alocada_id" };
 const SHARED_ENTITIES = new Set(["Cliente", "Fornecedor", "Transportadora"]);

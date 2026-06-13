@@ -37,13 +37,29 @@ function getNome(rec) {
   ).toString().toLowerCase().trim();
 }
 
-// Monta a chave de deduplicação: prioriza codigo+nome, se não houver codigo usa só nome
+// Monta a chave de deduplicação:
+// 1. CNPJ ou CPF (identificador fiscal único — máxima prioridade para PJ/PF)
+// 2. codigo + nome
+// 3. só nome (fallback)
 function buildKey(rec) {
+  // CNPJ — remove pontuação para normalizar (ex: "67.377.424/0001-40" == "67377424000140")
+  if (rec.cnpj) {
+    const cnpj = rec.cnpj.toString().replace(/\D/g, '').trim();
+    if (cnpj.length >= 11) return `cnpj::${cnpj}`;
+  }
+  // CPF
+  if (rec.cpf) {
+    const cpf = rec.cpf.toString().replace(/\D/g, '').trim();
+    if (cpf.length >= 11) return `cpf::${cpf}`;
+  }
+  // Placa (veículo)
+  if (rec.placa) return `placa::${rec.placa.toString().toUpperCase().trim()}`;
+
   const codigo = getCodigo(rec);
   const nome = getNome(rec);
-  if (!nome) return null; // sem nome = não deduplica (evitar falso positivo)
+  if (!nome) return null;
   if (codigo) return `${codigo}::${nome}`;
-  return `nome::${nome}`; // deduplica por nome quando não há código
+  return `nome::${nome}`;
 }
 
 async function deduplicateEntity(base44, entityName) {

@@ -72,7 +72,7 @@ export default function VisualizadorProdutos(props) {
     icone: Package,
     camposPrincipais: ['descricao', 'codigo', 'tipo_item', 'setor_atividade_nome', 'grupo_produto_nome', 'marca_nome', 'status', 'estoque_atual', 'preco_venda'],
     componenteEdicao: ProdutoFormV22_Completo,
-    windowMode: false,
+    windowMode: props?.windowMode || false,
   };
 
   return (

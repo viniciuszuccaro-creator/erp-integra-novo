@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
-export const PAGE_SIZES = [10, 20, 50, 100];
-
-export default function useVisualizadorState({ ENTITY, pageSizeProp = 20, startWithForm = false, FormComponent = null }) {
+export default function useVisualizadorState({ pageSizeProp = 20, startWithForm = false, FormComponent = null, ENTITY = "" }) {
   const [sortField, setSortField] = useState("updated_date");
   const [sortDir,   setSortDir]   = useState("desc");
   const [search,    setSearch]    = useState("");

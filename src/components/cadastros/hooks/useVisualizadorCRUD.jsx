@@ -42,7 +42,7 @@ export default function useVisualizadorCRUD({
         const conflito = (Array.isArray(res?.data) ? res.data : []).find(r => r.id !== currentId);
         if (conflito) {
           const label = conflito.nome || conflito.razao_social || conflito.descricao || conflito.sigla || conflito.id;
-          return `⚠️ Código "${codeValue}" já está em uso pelo registro "${label}".\n\nAltere o código antes de salvar.`;
+          return `⚠️ Código "${codeValue}" já está em uso pelo registro "${label}". Altere o código antes de salvar.`;
         }
       } catch { /* não bloqueia */ }
     }
@@ -54,9 +54,8 @@ export default function useVisualizadorCRUD({
     if (cpfClean.length  >= 11) fiscalOr.push({ cpf: formData.cpf });
     if (fiscalOr.length) {
       try {
-        const filter = fiscalOr.length > 1 ? { $or: fiscalOr } : fiscalOr[0];
         const res = await base44.functions.invoke("entityListSorted", {
-          entityName: ENTITY, filter,
+          entityName: ENTITY, filter: fiscalOr.length > 1 ? { $or: fiscalOr } : fiscalOr[0],
           sortField: "created_date", sortDirection: "asc", limit: 5, skip: 0,
         });
         const conflito = (Array.isArray(res?.data) ? res.data : []).find(r => r.id !== currentId);

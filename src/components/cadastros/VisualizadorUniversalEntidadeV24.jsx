@@ -24,9 +24,9 @@ import ContatoB2BForm from "@/components/cadastros/ContatoB2BForm";
 import SegmentoClienteForm from "@/components/cadastros/SegmentoClienteForm";
 import RegiaoAtendimentoForm from "@/components/cadastros/RegiaoAtendimentoForm";
 
-import useVisualizadorState from "./hooks/useVisualizadorState";
-import useVisualizadorQuery from "./hooks/useVisualizadorQuery";
-import useVisualizadorCRUD, { ENTITY_CODE_FIELD } from "./hooks/useVisualizadorCRUD";
+import useVisualizadorState from "@/components/cadastros/hooks/useVisualizadorState";
+import useVisualizadorQuery from "@/components/cadastros/hooks/useVisualizadorQuery";
+import useVisualizadorCRUD, { ENTITY_CODE_FIELD } from "@/components/cadastros/hooks/useVisualizadorCRUD";
 import VisualizadorToolbar from "@/components/cadastros/VisualizadorToolbar";
 import VisualizadorTableBody from "@/components/cadastros/VisualizadorTableBody";
 import VisualizadorModal from "@/components/cadastros/VisualizadorModal";

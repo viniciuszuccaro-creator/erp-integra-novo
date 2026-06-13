@@ -59,7 +59,6 @@ import LayoutMainContent from "@/components/layout/LayoutMainContent";
 
 const navigationItems = [
     { title: "Dashboard", url: "/Dashboard", icon: LayoutDashboard, group: "principal" },
-    { title: "Dashboard Corporativo", url: "/DashboardCorporativo", icon: BarChart3, group: "principal" },
     { title: "Relatórios e Análises", url: "/Relatorios", icon: BarChart3, group: "principal" },
     { title: "Agenda e Calendário", url: "/Agenda", icon: Calendar, group: "principal" },
     { title: "CRM - Relacionamento", url: "/CRM", icon: Users, group: "principal" },

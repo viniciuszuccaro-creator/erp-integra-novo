@@ -18,9 +18,8 @@ import RBACRoute from '@/components/lib/RBACRoute';
 import { RBAC_MODULES } from '@/lib/rbacModuleMap';
 import WorkforceOrchestratorHub from '@/components/workforce-orchestrator/WorkforceOrchestratorHub';
 import SupplyChainIntelligenceHub from '@/components/supply-chain-intelligence/SupplyChainIntelligenceHub';
-import FinancialIntelligenceHub from '@/components/financial-intelligence/FinancialIntelligenceHub';
-import AdvancedAnalyticsHub from '@/components/business-intelligence/AdvancedAnalyticsHub';
-import ExecutiveMonitoringHub from '@/components/executive-monitoring/ExecutiveMonitoringHub';
+// P5: FinancialIntelligenceHub removido (integrado ao Financeiro)
+// P5: AdvancedAnalyticsHub e ExecutiveMonitoringHub removidos (integrados ao Dashboard)
 import CustomerIntelligenceHub from '@/components/customer-intelligence/CustomerIntelligenceHub';
 import SmartOperationsHub from '@/components/smart-operations/SmartOperationsHub';
 import CollaborativeWorkspaceHub from '@/components/collaborative-workspace/CollaborativeWorkspaceHub';
@@ -75,7 +74,7 @@ const AuthenticatedApp = () => {
     Contratos: 'Contratos',
     AdministracaoSistema: 'Sistema',
     HubAtendimento: 'HubAtendimento',
-    DashboardCorporativo: 'Dashboard',
+    // DashboardCorporativo: removido da navegação (P5 — duplicata do Dashboard)
   };
 
   // Render the main app — always keep Routes mounted to avoid Suspense fiber tree destruction.
@@ -140,33 +139,8 @@ const AuthenticatedApp = () => {
             </EmpresaSelectorGuard>
           </RBACRoute>
         } />
-        <Route path="/FinancialIntelligence" element={
-          <RBACRoute module="Financeiro" action="ver">
-            <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="FinancialIntelligence">
-                <FinancialIntelligenceHub />
-              </LayoutWrapper>
-            </EmpresaSelectorGuard>
-          </RBACRoute>
-        } />
-        <Route path="/AdvancedAnalytics" element={
-          <RBACRoute module="Dashboard" action="ver">
-            <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="AdvancedAnalytics">
-                <AdvancedAnalyticsHub />
-              </LayoutWrapper>
-            </EmpresaSelectorGuard>
-          </RBACRoute>
-        } />
-        <Route path="/ExecutiveMonitoring" element={
-          <RBACRoute module="Dashboard" action="ver">
-            <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="ExecutiveMonitoring">
-                <ExecutiveMonitoringHub />
-              </LayoutWrapper>
-            </EmpresaSelectorGuard>
-          </RBACRoute>
-        } />
+        {/* P5: FinancialIntelligence removido — funcionalidade integrada em /Financeiro */}
+        {/* P5: AdvancedAnalytics e ExecutiveMonitoring removidos — funcionalidade integrada no Dashboard */}
         <Route path="/BlockchainAudit" element={
           <RBACRoute module="Sistema" action="ver">
             <EmpresaSelectorGuard>

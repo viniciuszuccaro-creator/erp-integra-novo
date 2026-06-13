@@ -54,6 +54,25 @@ const MONEY_FIELDS  = new Set(["salario","preco_venda","custo_aquisicao","custo_
 const PAGE_SIZES = [10, 20, 50, 100];
 const UNSORTABLE_BACKEND = new Set(["contatos","documentos","locais_entrega","lotes","itens"]);
 const ENTITY_CONTEXT_FIELD = { Fornecedor: "empresa_dona_id", Transportadora: "empresa_dona_id", Colaborador: "empresa_alocada_id" };
+// Campo "código" por entidade — usado para auto-sugerir próximo código sequencial
+const ENTITY_CODE_FIELD = {
+  Cliente: 'codigo', Fornecedor: 'codigo', Transportadora: 'codigo',
+  Colaborador: 'matricula', Representante: 'codigo', ContatoB2B: 'codigo',
+  SegmentoCliente: 'codigo', RegiaoAtendimento: 'codigo_regiao',
+  Produto: 'codigo', Servico: 'codigo_servico', SetorAtividade: 'codigo',
+  GrupoProduto: 'codigo', Marca: 'codigo', TabelaPreco: 'codigo',
+  KitProduto: 'codigo_kit', CatalogoWeb: 'codigo',
+  FormaPagamento: 'codigo', PlanoDeContas: 'codigo', CentroCusto: 'codigo',
+  CentroResultado: 'codigo', TipoDespesa: 'codigo', MoedaIndice: 'codigo',
+  OperadorCaixa: 'codigo', ConfiguracaoDespesaRecorrente: 'codigo',
+  TabelaFiscal: 'codigo', CondicaoComercial: 'codigo',
+  TipoFrete: 'codigo', LocalEstoque: 'codigo', RotaPadrao: 'codigo',
+  ModeloDocumento: 'codigo', GrupoEmpresarial: 'codigo',
+  Departamento: 'codigo', Cargo: 'codigo', Turno: 'codigo',
+  PerfilAcesso: 'codigo', ApiExterna: 'codigo', ChatbotCanal: 'codigo',
+  ChatbotIntent: 'codigo', JobAgendado: 'codigo', Webhook: 'codigo',
+  ConfiguracaoNFe: 'codigo', GatewayPagamento: 'codigo', EventoNotificacao: 'codigo',
+};
 const SHARED_ENTITIES = new Set(["Cliente", "Fornecedor", "Transportadora"]);
 
 const DEFAULT_FORM_COMPONENTS = {
@@ -185,13 +204,17 @@ function fmtValue(value, col, extraColors) {
   return String(value).substring(0, 130);
 }
 
-function buildFormProps(editItem, onClose, onSubmit) {
+function buildFormProps(editItem, onClose, onSubmit, nextCode, codeField) {
   const base = {
     onClose, onSave: onClose, onSuccess: onClose,
     onOpenChange: function(v) { if (!v) onClose(); },
     isOpen: true, open: true, windowMode: true, onSubmit,
   };
-  if (!editItem) return base;
+  // Para novo registro: injeta próximo código como valor inicial
+  const defaultValues = (!editItem && nextCode && codeField)
+    ? { [codeField]: nextCode, codigo: nextCode } // cobre 'codigo' genérico e campo específico
+    : {};
+  if (!editItem) return Object.assign({}, base, defaultValues, { defaultValues });
   const aliases = {};
   FORM_ALIASES.forEach(function(a) { aliases[a] = editItem; });
   return Object.assign({}, base, aliases, { id: editItem.id });
@@ -266,6 +289,28 @@ export default function VisualizadorUniversalEntidadeV24({
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page,     setPage]     = useState(1);
   const [pageSize, setPageSize] = useState(_pageSizeProp);
+
+  // Próximo código sequencial para novos cadastros
+  const [nextCode, setNextCode] = useState(null);
+  const fetchNextCode = useCallback(async function() {
+    const codeField = ENTITY_CODE_FIELD[ENTITY];
+    if (!codeField) return;
+    try {
+      const res = await base44.functions.invoke("entityListSorted", {
+        entityName: ENTITY,
+        filter: readFilter,
+        sortField: codeField,
+        sortDirection: "desc",
+        limit: 1,
+        skip: 0,
+      });
+      const last = Array.isArray(res?.data) && res.data[0];
+      const lastVal = last ? last[codeField] : null;
+      const n = lastVal ? parseInt(String(lastVal).replace(/\D/g, ''), 10) : 0;
+      const next = isNaN(n) ? 1 : n + 1;
+      setNextCode(String(next).padStart(3, '0'));
+    } catch { setNextCode(null); }
+  }, [ENTITY, readFilter]);
 
   const [showForm,      setShowForm]      = useState(Boolean(startWithForm && FormComponent));
   const [editItem,      setEditItem]      = useState(null);
@@ -525,8 +570,9 @@ export default function VisualizadorUniversalEntidadeV24({
     setEditItem(null);
     setEditError(null);
     setFormKey(function(k) { return k + 1; });
+    fetchNextCode(); // busca próximo código antes de abrir o form
     setShowForm(true);
-  }, [canCreateCadastro]);
+  }, [canCreateCadastro, fetchNextCode]);
 
   const handleEditItem = useCallback(function(item) {
     if (!item || !item.id) return;
@@ -542,8 +588,15 @@ export default function VisualizadorUniversalEntidadeV24({
   }, [canEditCadastro]);
 
   const formProps = useMemo(
-    function() { return buildFormProps(editItem, handleCloseForm, isSelfManaged ? handleCloseForm : handlePersistSubmit); },
-    [editItem, handleCloseForm, isSelfManaged, handlePersistSubmit]
+    function() {
+      return buildFormProps(
+        editItem, handleCloseForm,
+        isSelfManaged ? handleCloseForm : handlePersistSubmit,
+        editItem ? null : nextCode,
+        ENTITY_CODE_FIELD[ENTITY] || null
+      );
+    },
+    [editItem, handleCloseForm, isSelfManaged, handlePersistSubmit, nextCode, ENTITY]
   );
 
   // ── exclusão unitária ────────────────────────────────────────────────────────

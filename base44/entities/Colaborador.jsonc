@@ -10,6 +10,10 @@
       "type": "string",
       "description": "Empresa onde trabalha atualmente"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo \u00fanico do colaborador"
+    },
     "nome_completo": {
       "type": "string"
     },
@@ -45,8 +49,7 @@
       "type": "string"
     },
     "cargo_id": {
-      "type": "string",
-      "description": "ID do cargo (vinculado ao Cadastro Gerais)"
+      "type": "string"
     },
     "departamento": {
       "type": "string",
@@ -63,12 +66,10 @@
       ]
     },
     "departamento_id": {
-      "type": "string",
-      "description": "ID do departamento (vinculado ao Cadastro Gerais)"
+      "type": "string"
     },
     "turno_id": {
-      "type": "string",
-      "description": "ID do turno"
+      "type": "string"
     },
     "salario": {
       "type": "number"
@@ -121,8 +122,7 @@
       }
     },
     "centro_custo_id": {
-      "type": "string",
-      "description": "Centro de custo vinculado"
+      "type": "string"
     },
     "centro_custo_nome": {
       "type": "string"
@@ -139,8 +139,7 @@
       "type": "string"
     },
     "cnh_categoria": {
-      "type": "string",
-      "description": "Categoria da CNH (A, B, C, D, E)"
+      "type": "string"
     },
     "cnh_validade": {
       "type": "string",
@@ -148,19 +147,16 @@
     },
     "aso_validade": {
       "type": "string",
-      "format": "date",
-      "description": "Validade do ASO"
+      "format": "date"
     },
     "competencias": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Tags de compet\u00eancias"
+      }
     },
     "vincular_a_usuario_id": {
-      "type": "string",
-      "description": "ID do usu\u00e1rio do sistema vinculado"
+      "type": "string"
     },
     "dias_ferias_disponiveis": {
       "type": "number",
@@ -207,8 +203,7 @@
             "type": "string"
           }
         }
-      },
-      "description": "Documentos anexados"
+      }
     },
     "historico_salario": {
       "type": "array",

@@ -3,12 +3,10 @@
   "type": "object",
   "properties": {
     "group_id": {
-      "type": "string",
-      "description": "ID do grupo empresarial (se criado no grupo)"
+      "type": "string"
     },
     "empresa_id": {
-      "type": "string",
-      "description": "ID da empresa (se criado na empresa)"
+      "type": "string"
     },
     "origem_escopo": {
       "type": "string",
@@ -16,16 +14,17 @@
         "grupo",
         "empresa"
       ],
-      "default": "empresa",
-      "description": "Indica se foi criado no grupo ou na empresa"
+      "default": "empresa"
+    },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo \u00fanico do cargo"
     },
     "nome_cargo": {
-      "type": "string",
-      "description": "Nome do cargo"
+      "type": "string"
     },
     "descricao": {
-      "type": "string",
-      "description": "Descri\u00e7\u00e3o do cargo"
+      "type": "string"
     },
     "nivel_hierarquico": {
       "type": "string",
@@ -40,24 +39,19 @@
         "CEO",
         "Operacional"
       ],
-      "default": "Operacional",
-      "description": "N\u00edvel hier\u00e1rquico"
+      "default": "Operacional"
     },
     "departamento_padrao_id": {
-      "type": "string",
-      "description": "ID do departamento padr\u00e3o"
+      "type": "string"
     },
     "salario_base_referencia": {
-      "type": "number",
-      "description": "Sal\u00e1rio base de refer\u00eancia"
+      "type": "number"
     },
     "cbo": {
-      "type": "string",
-      "description": "C\u00f3digo Brasileiro de Ocupa\u00e7\u00f5es (CBO)"
+      "type": "string"
     },
     "requisitos": {
-      "type": "string",
-      "description": "Requisitos e qualifica\u00e7\u00f5es necess\u00e1rias"
+      "type": "string"
     },
     "ativo": {
       "type": "boolean",

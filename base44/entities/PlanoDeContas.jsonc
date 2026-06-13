@@ -3,12 +3,10 @@
   "type": "object",
   "properties": {
     "group_id": {
-      "type": "string",
-      "description": "ID do grupo empresarial"
+      "type": "string"
     },
     "empresa_id": {
-      "type": "string",
-      "description": "ID da empresa (se espec\u00edfico)"
+      "type": "string"
     },
     "origem_escopo": {
       "type": "string",
@@ -16,16 +14,18 @@
         "grupo",
         "empresa"
       ],
-      "default": "grupo",
-      "description": "Indica se foi criado no grupo ou na empresa"
+      "default": "grupo"
+    },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo sequencial \u00fanico do registro"
     },
     "codigo_conta": {
       "type": "string",
-      "description": "C\u00f3digo da conta (ex: 1.1.1.01)"
+      "description": "C\u00f3digo da conta cont\u00e1bil (ex: 1.1.1.01)"
     },
     "nome_conta": {
-      "type": "string",
-      "description": "Nome da conta"
+      "type": "string"
     },
     "descricao": {
       "type": "string"
@@ -38,53 +38,43 @@
         "Ativo",
         "Passivo",
         "Patrim\u00f4nio L\u00edquido"
-      ],
-      "description": "Tipo da conta"
+      ]
     },
     "natureza": {
       "type": "string",
       "enum": [
         "Devedora",
         "Credora"
-      ],
-      "description": "Natureza da conta"
+      ]
     },
     "conta_pai_id": {
-      "type": "string",
-      "description": "ID da conta pai (para hierarquia)"
+      "type": "string"
     },
     "nivel_hierarquico": {
-      "type": "number",
-      "description": "N\u00edvel na hierarquia (1, 2, 3, 4...)"
+      "type": "number"
     },
     "eh_analitica": {
       "type": "boolean",
-      "default": true,
-      "description": "Se aceita lan\u00e7amentos diretos"
+      "default": true
     },
     "eh_sintetica": {
       "type": "boolean",
-      "default": false,
-      "description": "Se \u00e9 conta sint\u00e9tica (apenas totalizadora)"
+      "default": false
     },
     "centro_resultado_padrao_id": {
-      "type": "string",
-      "description": "ID do centro de resultado padr\u00e3o"
+      "type": "string"
     },
     "aceita_lancamento_manual": {
       "type": "boolean",
-      "default": true,
-      "description": "Se aceita lan\u00e7amento manual"
+      "default": true
     },
     "usa_em_sped": {
       "type": "boolean",
-      "default": false,
-      "description": "Se \u00e9 usada em SPED"
+      "default": false
     },
     "usa_apenas_gerencial": {
       "type": "boolean",
-      "default": false,
-      "description": "Se \u00e9 apenas para controle gerencial"
+      "default": false
     },
     "ativo": {
       "type": "boolean",

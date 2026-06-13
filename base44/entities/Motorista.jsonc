@@ -3,20 +3,20 @@
   "type": "object",
   "properties": {
     "group_id": {
-      "type": "string",
-      "description": "ID do grupo empresarial"
+      "type": "string"
     },
     "empresa_id": {
-      "type": "string",
-      "description": "ID da empresa"
+      "type": "string"
     },
     "colaborador_vinculado_id": {
+      "type": "string"
+    },
+    "codigo": {
       "type": "string",
-      "description": "ID do colaborador vinculado (se for funcion\u00e1rio)"
+      "description": "C\u00f3digo \u00fanico do motorista"
     },
     "nome_completo": {
-      "type": "string",
-      "description": "Nome completo do motorista"
+      "type": "string"
     },
     "cpf": {
       "type": "string"
@@ -39,17 +39,14 @@
       "format": "email"
     },
     "cnh_numero": {
-      "type": "string",
-      "description": "N\u00famero da CNH"
+      "type": "string"
     },
     "cnh_categoria": {
-      "type": "string",
-      "description": "Categoria da CNH (A, B, C, D, E)"
+      "type": "string"
     },
     "cnh_validade": {
       "type": "string",
-      "format": "date",
-      "description": "Data de validade da CNH"
+      "format": "date"
     },
     "cnh_primeira_habilitacao": {
       "type": "string",
@@ -93,22 +90,19 @@
       }
     },
     "usuario_app_entrega_id": {
-      "type": "string",
-      "description": "ID do usu\u00e1rio no app de entrega"
+      "type": "string"
     },
     "veiculos_habilitados": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "IDs dos ve\u00edculos que pode dirigir"
+      }
     },
     "rotas_habilitadas": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "IDs das rotas que pode fazer"
+      }
     },
     "pode_dirigir_pesado": {
       "type": "boolean",
@@ -130,8 +124,7 @@
             "format": "date"
           }
         }
-      },
-      "description": "Certifica\u00e7\u00f5es e treinamentos"
+      }
     },
     "avaliacoes": {
       "type": "array",
@@ -154,13 +147,11 @@
             "type": "string"
           }
         }
-      },
-      "description": "Avalia\u00e7\u00f5es de desempenho"
+      }
     },
     "nota_media": {
       "type": "number",
-      "default": 5,
-      "description": "Nota m\u00e9dia (1-5)"
+      "default": 5
     },
     "total_entregas": {
       "type": "number",

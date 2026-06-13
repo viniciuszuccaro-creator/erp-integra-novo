@@ -17,6 +17,10 @@
       },
       "description": "Empresas que podem comprar deste fornecedor"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo \u00fanico do fornecedor"
+    },
     "nome": {
       "type": "string"
     },
@@ -40,12 +44,10 @@
       "type": "string"
     },
     "cnae_principal": {
-      "type": "string",
-      "description": "CNAE principal (consultado via IA)"
+      "type": "string"
     },
     "ramo_atividade": {
-      "type": "string",
-      "description": "Ramo de atividade (sugerido por IA)"
+      "type": "string"
     },
     "status_fiscal_receita": {
       "type": "string",
@@ -56,8 +58,7 @@
         "Baixada",
         "N\u00e3o Verificado"
       ],
-      "default": "N\u00e3o Verificado",
-      "description": "Status na Receita Federal consultado por IA"
+      "default": "N\u00e3o Verificado"
     },
     "status_validacao_kyb": {
       "type": "string",
@@ -67,8 +68,7 @@
         "Aprovado",
         "Reprovado"
       ],
-      "default": "Pendente",
-      "description": "Status de valida\u00e7\u00e3o KYB"
+      "default": "Pendente"
     },
     "risco_cadastro_ia": {
       "type": "string",
@@ -77,13 +77,11 @@
         "M\u00e9dio",
         "Alto"
       ],
-      "default": "Baixo",
-      "description": "Risco de cadastro calculado por IA"
+      "default": "Baixo"
     },
     "score_confiabilidade": {
       "type": "number",
-      "default": 50,
-      "description": "Score de confiabilidade (0-100)"
+      "default": 50
     },
     "emails": {
       "type": "array",
@@ -108,8 +106,7 @@
             "default": false
           }
         }
-      },
-      "description": "Lista de e-mails"
+      }
     },
     "telefones": {
       "type": "array",
@@ -133,8 +130,7 @@
             "default": false
           }
         }
-      },
-      "description": "Lista de telefones"
+      }
     },
     "whatsapp": {
       "type": "string"
@@ -146,8 +142,7 @@
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "IDs dos contatos B2B vinculados"
+      }
     },
     "endereco_principal": {
       "type": "object",
@@ -221,8 +216,7 @@
             "type": "string"
           }
         }
-      },
-      "description": "Endere\u00e7os adicionais"
+      }
     },
     "tipo_fornecedor": {
       "type": "string",
@@ -233,8 +227,7 @@
         "Equipamento",
         "Tecnologia",
         "Outro"
-      ],
-      "description": "Tipo principal de fornecimento"
+      ]
     },
     "categoria": {
       "type": "string",
@@ -255,8 +248,7 @@
         "Bloqueado",
         "Inativo"
       ],
-      "default": "Em An\u00e1lise",
-      "description": "Status com fluxo de aprova\u00e7\u00e3o"
+      "default": "Em An\u00e1lise"
     },
     "aprovado_por": {
       "type": "string"
@@ -291,8 +283,7 @@
           "type": "number",
           "default": 0
         }
-      },
-      "description": "Condi\u00e7\u00f5es de compra padr\u00e3o"
+      }
     },
     "dados_bancarios": {
       "type": "array",
@@ -336,12 +327,10 @@
             "default": false
           }
         }
-      },
-      "description": "Dados banc\u00e1rios para pagamentos"
+      }
     },
     "prazo_entrega_padrao": {
-      "type": "number",
-      "description": "Prazo em dias"
+      "type": "number"
     },
     "prazo_pagamento_padrao": {
       "type": "string"
@@ -404,24 +393,16 @@
             "type": "object",
             "properties": {
               "qualidade": {
-                "type": "number",
-                "minimum": 1,
-                "maximum": 5
+                "type": "number"
               },
               "prazo": {
-                "type": "number",
-                "minimum": 1,
-                "maximum": 5
+                "type": "number"
               },
               "preco": {
-                "type": "number",
-                "minimum": 1,
-                "maximum": 5
+                "type": "number"
               },
               "atendimento": {
-                "type": "number",
-                "minimum": 1,
-                "maximum": 5
+                "type": "number"
               }
             }
           },
@@ -435,8 +416,7 @@
             "type": "string"
           }
         }
-      },
-      "description": "Hist\u00f3rico de avalia\u00e7\u00f5es"
+      }
     },
     "nota_media": {
       "type": "number",
@@ -452,8 +432,7 @@
     },
     "indice_avarias": {
       "type": "number",
-      "default": 0,
-      "description": "% de avarias detectadas"
+      "default": 0
     },
     "status": {
       "type": "string",

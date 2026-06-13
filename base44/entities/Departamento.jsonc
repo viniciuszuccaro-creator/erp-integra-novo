@@ -3,12 +3,10 @@
   "type": "object",
   "properties": {
     "group_id": {
-      "type": "string",
-      "description": "ID do grupo empresarial (se criado no grupo)"
+      "type": "string"
     },
     "empresa_id": {
-      "type": "string",
-      "description": "ID da empresa (se criado na empresa)"
+      "type": "string"
     },
     "origem_escopo": {
       "type": "string",
@@ -16,16 +14,17 @@
         "grupo",
         "empresa"
       ],
-      "default": "empresa",
-      "description": "Indica se foi criado no grupo ou na empresa"
+      "default": "empresa"
+    },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo \u00fanico do departamento"
     },
     "nome_departamento": {
-      "type": "string",
-      "description": "Nome do departamento"
+      "type": "string"
     },
     "descricao": {
-      "type": "string",
-      "description": "Descri\u00e7\u00e3o do departamento"
+      "type": "string"
     },
     "tipo_departamento": {
       "type": "string",
@@ -41,20 +40,16 @@
         "Produ\u00e7\u00e3o",
         "Outro"
       ],
-      "default": "Operacional",
-      "description": "Tipo de departamento"
+      "default": "Operacional"
     },
     "departamento_pai_id": {
-      "type": "string",
-      "description": "ID do departamento pai (para hierarquia)"
+      "type": "string"
     },
     "responsavel_id": {
-      "type": "string",
-      "description": "ID do usu\u00e1rio respons\u00e1vel pelo departamento"
+      "type": "string"
     },
     "centro_custo_vinculado_id": {
-      "type": "string",
-      "description": "ID do centro de custo vinculado"
+      "type": "string"
     },
     "ativo": {
       "type": "boolean",

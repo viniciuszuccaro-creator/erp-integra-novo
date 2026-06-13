@@ -3,16 +3,17 @@
   "type": "object",
   "properties": {
     "group_id": {
-      "type": "string",
-      "description": "ID do grupo empresarial"
+      "type": "string"
     },
     "empresa_id": {
+      "type": "string"
+    },
+    "codigo": {
       "type": "string",
-      "description": "ID da empresa propriet\u00e1ria"
+      "description": "C\u00f3digo \u00fanico do ve\u00edculo"
     },
     "placa": {
-      "type": "string",
-      "description": "Placa do ve\u00edculo"
+      "type": "string"
     },
     "tipo_veiculo": {
       "type": "string",
@@ -28,12 +29,10 @@
       "default": "Caminh\u00e3o"
     },
     "modelo": {
-      "type": "string",
-      "description": "Modelo do ve\u00edculo"
+      "type": "string"
     },
     "marca": {
-      "type": "string",
-      "description": "Marca do ve\u00edculo"
+      "type": "string"
     },
     "ano_fabricacao": {
       "type": "number"
@@ -42,12 +41,10 @@
       "type": "string"
     },
     "capacidade_peso_kg": {
-      "type": "number",
-      "description": "Capacidade de carga em kg"
+      "type": "number"
     },
     "capacidade_volume_m3": {
-      "type": "number",
-      "description": "Capacidade de volume em m\u00b3"
+      "type": "number"
     },
     "proprietario": {
       "type": "string",
@@ -60,17 +57,14 @@
       "default": "Pr\u00f3prio"
     },
     "motorista_padrao_id": {
-      "type": "string",
-      "description": "ID do motorista padr\u00e3o"
+      "type": "string"
     },
     "km_atual": {
       "type": "number",
-      "default": 0,
-      "description": "Quilometragem atual"
+      "default": 0
     },
     "km_proxima_revisao": {
-      "type": "number",
-      "description": "KM para pr\u00f3xima revis\u00e3o"
+      "type": "number"
     },
     "data_ultima_revisao": {
       "type": "string",
@@ -106,28 +100,23 @@
             ]
           }
         }
-      },
-      "description": "Checklist de manuten\u00e7\u00e3o preventiva"
+      }
     },
     "alerta_manutencao_ativo": {
       "type": "boolean",
-      "default": false,
-      "description": "Se h\u00e1 alerta de manuten\u00e7\u00e3o pendente"
+      "default": false
     },
     "bloqueado_uso": {
       "type": "boolean",
-      "default": false,
-      "description": "Se est\u00e1 bloqueado para uso por manuten\u00e7\u00e3o vencida"
+      "default": false
     },
     "seguro_vencimento": {
       "type": "string",
-      "format": "date",
-      "description": "Data de vencimento do seguro"
+      "format": "date"
     },
     "licenciamento_vencimento": {
       "type": "string",
-      "format": "date",
-      "description": "Data de vencimento do licenciamento"
+      "format": "date"
     },
     "ipva_vencimento": {
       "type": "string",
@@ -138,8 +127,7 @@
       "default": false
     },
     "rastreador_codigo": {
-      "type": "string",
-      "description": "C\u00f3digo do rastreador"
+      "type": "string"
     },
     "status": {
       "type": "string",

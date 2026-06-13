@@ -3,16 +3,17 @@
   "type": "object",
   "properties": {
     "group_id": {
+      "type": "string"
+    },
+    "codigo": {
       "type": "string",
-      "description": "ID do grupo empresarial"
+      "description": "C\u00f3digo \u00fanico do perfil de acesso"
     },
     "nome_perfil": {
-      "type": "string",
-      "description": "Nome do perfil de acesso"
+      "type": "string"
     },
     "descricao": {
-      "type": "string",
-      "description": "Descri\u00e7\u00e3o do perfil"
+      "type": "string"
     },
     "nivel_perfil": {
       "type": "string",
@@ -23,8 +24,7 @@
         "Consulta",
         "Personalizado"
       ],
-      "default": "Operacional",
-      "description": "N\u00edvel hier\u00e1rquico do perfil"
+      "default": "Operacional"
     },
     "permissoes": {
       "type": "object",
@@ -37,14 +37,13 @@
           }
         }
       },
-      "description": "Estrutura flex\u00edvel: m\u00f3dulo \u2192 se\u00e7\u00e3o \u2192 [a\u00e7\u00f5es]. Aceita qualquer m\u00f3dulo/se\u00e7\u00e3o dinamicamente sem restri\u00e7\u00f5es de schema fixo."
+      "description": "Estrutura flex\u00edvel: m\u00f3dulo \u2192 se\u00e7\u00e3o \u2192 [a\u00e7\u00f5es]."
     },
     "permissoes_sensiveis": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Lista de permiss\u00f5es consideradas sens\u00edveis (para IA de SoD)"
+      }
     },
     "conflitos_sod_detectados": {
       "type": "array",
@@ -71,17 +70,14 @@
             "format": "date-time"
           }
         }
-      },
-      "description": "Conflitos de Segrega\u00e7\u00e3o de Fun\u00e7\u00f5es detectados pela IA"
+      }
     },
     "requer_aprovacao_especial": {
       "type": "boolean",
-      "default": false,
-      "description": "Se a atribui\u00e7\u00e3o deste perfil requer aprova\u00e7\u00e3o especial"
+      "default": false
     },
     "aprovado_por": {
-      "type": "string",
-      "description": "Usu\u00e1rio que aprovou este perfil"
+      "type": "string"
     },
     "data_aprovacao": {
       "type": "string",

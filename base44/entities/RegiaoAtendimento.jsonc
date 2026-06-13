@@ -3,31 +3,30 @@
   "type": "object",
   "properties": {
     "group_id": {
-      "type": "string",
-      "description": "ID do grupo empresarial"
+      "type": "string"
     },
     "empresa_id": {
-      "type": "string",
-      "description": "ID da empresa propriet\u00e1ria"
+      "type": "string"
     },
     "empresas_compartilhadas_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "IDs das empresas que podem usar esta regi\u00e3o"
+      }
+    },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo \u00fanico da regi\u00e3o"
     },
     "nome_regiao": {
-      "type": "string",
-      "description": "Nome da regi\u00e3o (ex: Sudeste, Grande S\u00e3o Paulo, Zona Norte)"
+      "type": "string"
     },
     "codigo_regiao": {
       "type": "string",
-      "description": "C\u00f3digo \u00fanico da regi\u00e3o para refer\u00eancias r\u00e1pidas"
+      "description": "C\u00f3digo curto da regi\u00e3o para refer\u00eancias r\u00e1pidas"
     },
     "descricao": {
-      "type": "string",
-      "description": "Descri\u00e7\u00e3o detalhada da regi\u00e3o"
+      "type": "string"
     },
     "tipo_regiao": {
       "type": "string",
@@ -38,8 +37,7 @@
         "Microrregi\u00e3o",
         "Personalizada"
       ],
-      "default": "Personalizada",
-      "description": "Tipo de agrupamento da regi\u00e3o"
+      "default": "Personalizada"
     },
     "estados_abrangidos": {
       "type": "array",
@@ -74,8 +72,7 @@
           "SE",
           "TO"
         ]
-      },
-      "description": "Estados que comp\u00f5em a regi\u00e3o"
+      }
     },
     "cidades_abrangidas": {
       "type": "array",
@@ -95,26 +92,22 @@
             "type": "string"
           }
         }
-      },
-      "description": "Lista de cidades ou ranges de CEPs da regi\u00e3o"
+      }
     },
     "cor_identificacao": {
-      "type": "string",
-      "description": "Cor para identifica\u00e7\u00e3o visual em mapas e relat\u00f3rios (hex)"
+      "type": "string"
     },
     "vendedores_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "IDs dos vendedores respons\u00e1veis por esta regi\u00e3o"
+      }
     },
     "transportadoras_preferenciais_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Transportadoras que atendem esta regi\u00e3o"
+      }
     },
     "logistica": {
       "type": "object",
@@ -149,8 +142,7 @@
           ],
           "default": "F\u00e1cil"
         }
-      },
-      "description": "Configura\u00e7\u00f5es log\u00edsticas da regi\u00e3o"
+      }
     },
     "comercial": {
       "type": "object",
@@ -161,8 +153,7 @@
         },
         "comissao_extra_percentual": {
           "type": "number",
-          "default": 0,
-          "description": "Comiss\u00e3o extra para vendas nesta regi\u00e3o"
+          "default": 0
         },
         "desconto_maximo_permitido_percentual": {
           "type": "number",
@@ -182,8 +173,7 @@
           ],
           "default": "Normal"
         }
-      },
-      "description": "Regras comerciais espec\u00edficas da regi\u00e3o"
+      }
     },
     "metricas": {
       "type": "object",
@@ -216,8 +206,7 @@
           "type": "string",
           "format": "date-time"
         }
-      },
-      "description": "M\u00e9tricas calculadas automaticamente pela IA"
+      }
     },
     "ia_insights": {
       "type": "object",
@@ -266,8 +255,7 @@
           "type": "string",
           "format": "date-time"
         }
-      },
-      "description": "Insights e an\u00e1lises preditivas da IA"
+      }
     },
     "ativo": {
       "type": "boolean",

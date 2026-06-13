@@ -14,8 +14,11 @@
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Empresas que podem usar"
+      }
+    },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo \u00fanico da transportadora"
     },
     "razao_social": {
       "type": "string"
@@ -30,8 +33,7 @@
       "type": "string"
     },
     "rntrc": {
-      "type": "string",
-      "description": "Registro Nacional de Transportadores de Carga"
+      "type": "string"
     },
     "status_fiscal_receita": {
       "type": "string",
@@ -42,8 +44,7 @@
         "Baixada",
         "N\u00e3o Verificado"
       ],
-      "default": "N\u00e3o Verificado",
-      "description": "Status na Receita Federal"
+      "default": "N\u00e3o Verificado"
     },
     "emails": {
       "type": "array",
@@ -102,8 +103,7 @@
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "IDs dos contatos B2B vinculados"
+      }
     },
     "endereco": {
       "type": "string"
@@ -121,23 +121,19 @@
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Tipos de ve\u00edculos suportados"
+      }
     },
     "capacidade_media_kg": {
-      "type": "number",
-      "description": "Capacidade m\u00e9dia em kg"
+      "type": "number"
     },
     "capacidade_media_m3": {
-      "type": "number",
-      "description": "Capacidade m\u00e9dia em m\u00b3"
+      "type": "number"
     },
     "regioes_atendimento": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Regi\u00f5es atendidas"
+      }
     },
     "tipos_carga_permitidos": {
       "type": "array",
@@ -151,31 +147,25 @@
           "Produtos Qu\u00edmicos",
           "Geral"
         ]
-      },
-      "description": "Tipos de carga permitidos"
+      }
     },
     "areas_atendimento": {
-      "type": "string",
-      "description": "Descri\u00e7\u00e3o das \u00e1reas atendidas"
+      "type": "string"
     },
     "prazo_entrega_padrao": {
-      "type": "number",
-      "description": "Prazo em dias"
+      "type": "number"
     },
     "tempo_medio_entrega_real": {
       "type": "number",
-      "default": 0,
-      "description": "Tempo m\u00e9dio real calculado por IA"
+      "default": 0
     },
     "indice_avarias": {
       "type": "number",
-      "default": 0,
-      "description": "% de avarias calculado por IA"
+      "default": 0
     },
     "percentual_entregas_prazo": {
       "type": "number",
-      "default": 0,
-      "description": "% de entregas no prazo"
+      "default": 0
     },
     "total_entregas": {
       "type": "number",
@@ -228,8 +218,7 @@
             }
           }
         }
-      },
-      "description": "Tabela de frete padr\u00e3o"
+      }
     },
     "integracao_rastreamento": {
       "type": "object",
@@ -257,8 +246,7 @@
           "type": "string",
           "format": "date-time"
         }
-      },
-      "description": "Integra\u00e7\u00e3o de rastreamento"
+      }
     },
     "avaliacoes": {
       "type": "array",
@@ -278,24 +266,16 @@
             "type": "object",
             "properties": {
               "pontualidade": {
-                "type": "number",
-                "minimum": 1,
-                "maximum": 5
+                "type": "number"
               },
               "cuidado_carga": {
-                "type": "number",
-                "minimum": 1,
-                "maximum": 5
+                "type": "number"
               },
               "comunicacao": {
-                "type": "number",
-                "minimum": 1,
-                "maximum": 5
+                "type": "number"
               },
               "custo_beneficio": {
-                "type": "number",
-                "minimum": 1,
-                "maximum": 5
+                "type": "number"
               }
             }
           },
@@ -309,13 +289,11 @@
             "type": "string"
           }
         }
-      },
-      "description": "Avalia\u00e7\u00f5es de desempenho"
+      }
     },
     "nota_media": {
       "type": "number",
-      "default": 0,
-      "description": "Nota m\u00e9dia (1-5)"
+      "default": 0
     },
     "status": {
       "type": "string",

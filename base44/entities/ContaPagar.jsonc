@@ -373,6 +373,42 @@
         }
       },
       "description": "Distribui\u00e7\u00e3o realizada para empresas (se origem=grupo)"
+    },
+    "auditoria_pagamento": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "usuario_id": {
+            "type": "string"
+          },
+          "usuario_email": {
+            "type": "string"
+          },
+          "acao": {
+            "type": "string",
+            "enum": [
+              "baixa",
+              "cancelamento",
+              "alteracao_valor"
+            ]
+          },
+          "data_hora": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "valor_anterior": {
+            "type": "number"
+          },
+          "valor_novo": {
+            "type": "number"
+          },
+          "motivo": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "P3: Auditoria completa de a\u00e7\u00f5es sens\u00edveis em RBAC"
     }
   },
   "required": [

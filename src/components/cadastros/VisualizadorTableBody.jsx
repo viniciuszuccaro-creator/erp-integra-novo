@@ -1,63 +1,7 @@
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import { Search, Edit, Trash2, RefreshCw, AlertCircle, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
-
-const STATUS_COLORS = {
-  Ativo:"bg-green-100 text-green-700 border-green-200",
-  Ativa:"bg-green-100 text-green-700 border-green-200",
-  Aprovado:"bg-green-100 text-green-700 border-green-200",
-  OK:"bg-green-100 text-green-700 border-green-200",
-  "Em Análise":"bg-blue-100 text-blue-700 border-blue-200",
-  Pendente:"bg-yellow-100 text-yellow-700 border-yellow-200",
-  Inativo:"bg-slate-100 text-slate-500 border-slate-200",
-  Bloqueado:"bg-red-100 text-red-700 border-red-200",
-  Cancelado:"bg-red-100 text-red-700 border-red-200",
-};
-const STATUS_FIELDS = new Set(["status","status_fornecedor","status_cliente","situacao","situacao_credito","status_fiscal_receita"]);
-const BOOL_FIELDS   = new Set(["ativo","ativa","habilitado","compartilhado_grupo","principal"]);
-const DATE_FIELDS   = new Set(["created_date","updated_date","data_admissao","data_nascimento","data_vencimento","data_validade","ultima_compra","cnh_validade"]);
-const MONEY_FIELDS  = new Set(["salario","preco_venda","custo_aquisicao","custo_medio","limite_credito","valor_total","valor"]);
-
-const LABEL_FALLBACKS = [
-  'nome','nome_completo','razao_social','nome_fantasia','nome_banco','nome_cargo','nome_turno',
-  'nome_grupo','nome_marca','nome_rota','nome_segmento','nome_regiao','nome_perfil',
-  'descricao','titulo','sigla','codigo','codigo_banco','matricula','placa','cpf','cnpj',
-];
-
-function getDisplayValue(item, col, isFirstCol) {
-  const v = item[col.field];
-  if (v !== null && v !== undefined && v !== '') return v;
-  if (isFirstCol) {
-    for (const f of LABEL_FALLBACKS) {
-      if (f !== col.field && item[f] != null && item[f] !== '') return item[f];
-    }
-  }
-  return v;
-}
-
-function fmtValue(value, col, extraColors = {}) {
-  if (value === null || value === undefined || value === "") return <span className="text-slate-300 text-xs">—</span>;
-  const allColors = { ...STATUS_COLORS, ...extraColors };
-  if (BOOL_FIELDS.has(col.field))
-    return value
-      ? <Badge variant="outline" className="text-xs rounded-sm bg-green-100 text-green-700 border-green-200">Sim</Badge>
-      : <Badge variant="outline" className="text-xs rounded-sm bg-slate-100 text-slate-500 border-slate-200">Não</Badge>;
-  if (STATUS_FIELDS.has(col.field) && typeof value === "string") {
-    const cls = allColors[value] || "bg-slate-100 text-slate-600 border-slate-200";
-    return <Badge variant="outline" className={"text-xs rounded-sm " + cls}>{value}</Badge>;
-  }
-  if (DATE_FIELDS.has(col.field) || col.type === "date") {
-    try { const d = new Date(value); if (!isNaN(d.getTime())) return d.toLocaleDateString("pt-BR"); } catch (_) {}
-  }
-  if (MONEY_FIELDS.has(col.field) || col.type === "currency") {
-    const n = Number(value); if (!isNaN(n)) return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  }
-  if (col.type === "number") { const n = Number(value); return isNaN(n) ? String(value) : n.toLocaleString("pt-BR"); }
-  if (typeof value === "boolean") return value ? "✓" : "—";
-  if (typeof value === "object") return Array.isArray(value) ? "[" + value.length + "]" : "–";
-  return String(value).substring(0, 130);
-}
+import { fmtValue, getDisplayValue } from "@/components/cadastros/utils/tableFormatters";
 
 export default function VisualizadorTableBody({
   ENTITY, TITULO, COLUMNS, items, isFetching, isError, everLoadedRef, lastGoodData,

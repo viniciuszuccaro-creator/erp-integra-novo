@@ -1,5 +1,5 @@
-import React from "react";
-import { Search, RefreshCw, Plus, Trash2, X } from "lucide-react";
+import React, { useCallback } from "react";
+import { Search, RefreshCw, Plus, Trash2, X, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,26 @@ export default function VisualizadorToolbar({
   isFetching, onRefresh,
   FormComponent, onNew, contextoValido, canCreateCadastro,
   effSelectedCount, totalCountAll, onDeleteSelected, canDeleteCadastro,
+  items,
 }) {
+  const handleExportCSV = useCallback(() => {
+    if (!items?.length || !COLUMNS?.length) return;
+    const header = COLUMNS.map(c => c.label).join(";");
+    const rows = items.map(item =>
+      COLUMNS.map(c => {
+        const v = item[c.field];
+        if (v === null || v === undefined) return "";
+        if (typeof v === "object") return Array.isArray(v) ? v.length : "";
+        return String(v).replace(/;/g, ",");
+      }).join(";")
+    );
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `${TITULO || ENTITY}_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+  }, [items, COLUMNS, TITULO, ENTITY]);
   return (
     <div className="flex items-center gap-2 flex-wrap shrink-0">
       <div className="flex items-center gap-1.5 shrink-0">
@@ -74,6 +93,17 @@ export default function VisualizadorToolbar({
       >
         <RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin text-blue-500" : "text-slate-500")} />
       </button>
+
+      {items?.length > 0 && (
+        <button
+          type="button"
+          onClick={handleExportCSV}
+          className="h-9 w-9 flex items-center justify-center border border-slate-200 rounded-sm bg-white hover:bg-slate-50 shrink-0"
+          title="Exportar CSV"
+        >
+          <Download className="w-4 h-4 text-slate-500" />
+        </button>
+      )}
 
       {FormComponent && (
         <Button

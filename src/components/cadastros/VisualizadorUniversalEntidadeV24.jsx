@@ -15,47 +15,17 @@ import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
 import useEntityCounts, { SIMPLE_CATALOG } from "@/components/lib/useEntityCounts";
 import { RefreshCw, AlertCircle } from "lucide-react";
-import CadastroClienteCompleto from "@/components/cadastros/CadastroClienteCompleto";
-import CadastroFornecedorCompleto from "@/components/cadastros/CadastroFornecedorCompleto";
-import TransportadoraForm from "@/components/cadastros/TransportadoraForm";
-import ColaboradorForm from "@/components/rh/ColaboradorForm";
-import RepresentanteFormCompleto from "@/components/cadastros/RepresentanteFormCompleto";
-import ContatoB2BForm from "@/components/cadastros/ContatoB2BForm";
-import SegmentoClienteForm from "@/components/cadastros/SegmentoClienteForm";
-import RegiaoAtendimentoForm from "@/components/cadastros/RegiaoAtendimentoForm";
-
 import useVisualizadorState from "@/components/cadastros/hooks/useVisualizadorState";
 import useVisualizadorQuery from "@/components/cadastros/hooks/useVisualizadorQuery";
-import useVisualizadorCRUD, { ENTITY_CODE_FIELD } from "@/components/cadastros/hooks/useVisualizadorCRUD";
+import useVisualizadorCRUD from "@/components/cadastros/hooks/useVisualizadorCRUD";
+import { ENTITY_CODE_FIELD } from "@/components/cadastros/config/entityCodeFields";
 import VisualizadorToolbar from "@/components/cadastros/VisualizadorToolbar";
 import VisualizadorTableBody from "@/components/cadastros/VisualizadorTableBody";
 import VisualizadorModal from "@/components/cadastros/VisualizadorModal";
-
-const ENTITY_CONTEXT_FIELD = { Fornecedor: "empresa_dona_id", Transportadora: "empresa_dona_id", Colaborador: "empresa_alocada_id" };
-const SHARED_ENTITIES = new Set(["Cliente", "Fornecedor", "Transportadora"]);
-const SELF_MANAGED_NAMES = new Set(["CadastroClienteCompleto","CadastroFornecedorCompleto","RepresentanteFormCompleto","ProdutoFormV22_Completo","ProdutoFormCompleto","ProdutoForm"]);
-const FORM_ALIASES = [
-  "item","data","initialData","defaultValues","record","entity","value",
-  "cliente","fornecedor","colaborador","transportadora","representante",
-  "contato","contatoB2B","segmento","segmentoCliente","regiao","regiaoAtendimento",
-  "produto","servico","banco","conta","formaPagamento","centroCusto","planoContas",
-  "planoDeContas","veiculo","motorista","departamento","cargo","turno",
-  "empresa","grupo","grupoEmpresarial","grupoProduto","marca","kitProduto",
-  "catalogoWeb","unidade","unidadeMedida","setor","setorAtividade","tabelaPreco",
-  "tipoDespesa","moedaIndice","moeda","operadorCaixa","operador",
-  "tabelaFiscal","condicaoComercial","centroResultado","centro",
-  "localEstoque","local","tipoFrete","rotaPadrao","rota",
-  "gateway","gatewayPagamento","configuracaoDespesaRecorrente","despesaRecorrente",
-  "perfilAcesso","perfil","modeloDocumento","apiExterna",
-  "webhook","chatbotIntent","chatbotCanal","jobAgendado","eventoNotificacao",
-  "evento","tabela","condicao","apiExternaForm","webhookForm",
-];
-const DEFAULT_FORM_COMPONENTS = {
-  Cliente: CadastroClienteCompleto, Fornecedor: CadastroFornecedorCompleto,
-  Transportadora: TransportadoraForm, Colaborador: ColaboradorForm,
-  Representante: RepresentanteFormCompleto, ContatoB2B: ContatoB2BForm,
-  SegmentoCliente: SegmentoClienteForm, RegiaoAtendimento: RegiaoAtendimentoForm,
-};
+import {
+  DEFAULT_FORM_COMPONENTS, SELF_MANAGED_NAMES, FORM_ALIASES,
+  ENTITY_CONTEXT_FIELD, SHARED_ENTITIES,
+} from "@/components/cadastros/config/visualizadorConfig";
 
 function invalidateAll(qc, entity) {
   qc.invalidateQueries({ queryKey: ["viz-v33", entity] });
@@ -278,7 +248,7 @@ export default function VisualizadorUniversalEntidadeV24({
         search={search} setSearch={setSearch}
         pageSize={pageSize} setPageSize={setPageSize} setPage={setPage}
         sortField={sortField} sortDir={sortDir} handleSortDropdown={handleSortDropdown}
-        isFetching={isFetching}
+        isFetching={isFetching} items={items}
         onRefresh={() => { lastGoodData.current = []; everLoadedRef.current = false; invalidateAll(queryClient, ENTITY); }}
         FormComponent={FormComponent} onNew={handleNewItem}
         contextoValido={contextoValido} canCreateCadastro={canCreateCadastro}

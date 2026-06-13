@@ -31,7 +31,7 @@ export default function useVisualizadorQuery({
       });
       return Array.isArray(res?.data) ? res.data : [];
     },
-    staleTime: 0,
+    staleTime: 60000,
     gcTime: 300000,
     retry: 2,
     retryDelay: (attempt) => Math.min(500 * (attempt + 1), 2000),

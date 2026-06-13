@@ -157,6 +157,9 @@ export default function RH() {
     startTransition(() => {
       void base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário',
+        usuario_id: user?.id || null,
+        empresa_id: empresaAtual?.id || null,
+        group_id: empresaAtual?.group_id || empresaAtual?.grupo_id || null,
         acao: 'Visualização',
         modulo: 'RH',
         tipo_auditoria: 'acesso',

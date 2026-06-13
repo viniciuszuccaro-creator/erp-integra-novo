@@ -15,23 +15,8 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ErrorBoundary from '@/components/lib/ErrorBoundary';
 import RBACRoute from '@/components/lib/RBACRoute';
-import { RBAC_MODULES } from '@/lib/rbacModuleMap';
-import WorkforceOrchestratorHub from '@/components/workforce-orchestrator/WorkforceOrchestratorHub';
-import SupplyChainIntelligenceHub from '@/components/supply-chain-intelligence/SupplyChainIntelligenceHub';
-// P5: FinancialIntelligenceHub removido (integrado ao Financeiro)
-// P5: AdvancedAnalyticsHub e ExecutiveMonitoringHub removidos (integrados ao Dashboard)
-import CustomerIntelligenceHub from '@/components/customer-intelligence/CustomerIntelligenceHub';
-import SmartOperationsHub from '@/components/smart-operations/SmartOperationsHub';
-import CollaborativeWorkspaceHub from '@/components/collaborative-workspace/CollaborativeWorkspaceHub';
-import BlockchainAuditHub from '@/components/blockchain-audit/BlockchainAuditHub';
-import ESGScorecardHub from '@/components/esg/ESGScorecardHub';
-import DigitalTwinHub from '@/components/digital-twin/DigitalTwinHub';
-import VoiceAIHub from '@/components/voice-ai/VoiceAIHub';
-import RiskManagementHub from '@/components/risk-compliance/RiskManagementHub';
-import KnowledgeManagementHub from '@/components/knowledge-hub/KnowledgeManagementHub';
-import AutonomousIntelligenceHub from '@/components/autonomous-intelligence/AutonomousIntelligenceHub';
-import RealtimeCollaborationHub from '@/components/realtime-collaboration/RealtimeCollaborationHub';
-import QualityManagementHub from '@/components/quality-management/QualityManagementHub';
+// P5: Todos os Hubs de IA removidos como rotas dedicadas — sem link de navegação, código morto
+// Funcionalidades mantidas dentro dos módulos principais (Producao, RH, Compras, CRM, etc.)
 
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -121,133 +106,7 @@ const AuthenticatedApp = () => {
             />
           );
         })}
-        <Route path="/WorkforceOrchestrator" element={
-          <RBACRoute module="RH" action="ver">
-            <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="WorkforceOrchestrator">
-                <WorkforceOrchestratorHub />
-              </LayoutWrapper>
-            </EmpresaSelectorGuard>
-          </RBACRoute>
-        } />
-        <Route path="/SupplyChainIntelligence" element={
-          <RBACRoute module="Compras" action="ver">
-            <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="SupplyChainIntelligence">
-                <SupplyChainIntelligenceHub />
-              </LayoutWrapper>
-            </EmpresaSelectorGuard>
-          </RBACRoute>
-        } />
-        {/* P5: FinancialIntelligence removido — funcionalidade integrada em /Financeiro */}
-        {/* P5: AdvancedAnalytics e ExecutiveMonitoring removidos — funcionalidade integrada no Dashboard */}
-        <Route path="/BlockchainAudit" element={
-          <RBACRoute module="Sistema" action="ver">
-            <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="BlockchainAudit">
-                <BlockchainAuditHub />
-              </LayoutWrapper>
-            </EmpresaSelectorGuard>
-          </RBACRoute>
-        } />
-        <Route path="/ESGScorecard" element={
-          <RBACRoute module="Dashboard" action="ver">
-            <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="ESGScorecard">
-                <ESGScorecardHub />
-              </LayoutWrapper>
-            </EmpresaSelectorGuard>
-          </RBACRoute>
-        } />
-        <Route path="/DigitalTwin" element={
-          <RBACRoute module="Producao" action="ver">
-            <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="DigitalTwin">
-                <DigitalTwinHub />
-              </LayoutWrapper>
-            </EmpresaSelectorGuard>
-          </RBACRoute>
-        } />
-        <Route path="/VoiceAI" element={
-          <RBACRoute module="HubAtendimento" action="ver">
-            <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="VoiceAI">
-                <VoiceAIHub />
-              </LayoutWrapper>
-            </EmpresaSelectorGuard>
-          </RBACRoute>
-        } />
-        <Route path="/KnowledgeHub" element={
-          <EmpresaSelectorGuard>
-            <LayoutWrapper currentPageName="KnowledgeHub">
-              <KnowledgeManagementHub />
-            </LayoutWrapper>
-          </EmpresaSelectorGuard>
-        } />
-        <Route path="/AutonomousIntelligence" element={
-          <RBACRoute module="Dashboard" action="ver">
-            <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="AutonomousIntelligence">
-                <AutonomousIntelligenceHub />
-              </LayoutWrapper>
-            </EmpresaSelectorGuard>
-          </RBACRoute>
-        } />
-        <Route path="/RealtimeCollaboration" element={
-          <RBACRoute module="Administrativo" action="ver">
-            <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="RealtimeCollaboration">
-                <RealtimeCollaborationHub />
-              </LayoutWrapper>
-            </EmpresaSelectorGuard>
-          </RBACRoute>
-        } />
-        <Route path="/QualityManagement" element={
-          <RBACRoute module="Producao" action="ver">
-            <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="QualityManagement">
-                <QualityManagementHub />
-              </LayoutWrapper>
-            </EmpresaSelectorGuard>
-          </RBACRoute>
-        } />
-
-        <Route path="/RiskManagement" element={
-          <RBACRoute module="Sistema" action="ver">
-            <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="RiskManagement">
-                <RiskManagementHub />
-              </LayoutWrapper>
-            </EmpresaSelectorGuard>
-          </RBACRoute>
-        } />
-        <Route path="/CollaborativeWorkspace" element={
-          <RBACRoute module="Administrativo" action="ver">
-            <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="CollaborativeWorkspace">
-                <CollaborativeWorkspaceHub />
-              </LayoutWrapper>
-            </EmpresaSelectorGuard>
-          </RBACRoute>
-        } />
-        <Route path="/SmartOperations" element={
-          <RBACRoute module="Producao" action="ver">
-            <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="SmartOperations">
-                <SmartOperationsHub />
-              </LayoutWrapper>
-            </EmpresaSelectorGuard>
-          </RBACRoute>
-        } />
-        <Route path="/CustomerIntelligence" element={
-          <RBACRoute module="CRM" action="ver">
-            <EmpresaSelectorGuard>
-              <LayoutWrapper currentPageName="CustomerIntelligence">
-                <CustomerIntelligenceHub />
-              </LayoutWrapper>
-            </EmpresaSelectorGuard>
-          </RBACRoute>
-        } />
+        {/* P5: Hubs de IA removidos como rotas dedicadas (sem link de navegação = código morto) */}
         <Route path="*" element={<PageNotFound />} />
       </Routes>
 

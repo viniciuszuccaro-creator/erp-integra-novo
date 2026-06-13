@@ -230,13 +230,13 @@ export default function VisualizadorUniversalEntidadeV24({
   }, [crossPageAll, allPageSelected, items]);
 
   const formProps = useMemo(() => {
-    const base = { onClose: handleCloseForm, onSave: handleCloseForm, onSuccess: handleCloseForm, onOpenChange: v => { if (!v) handleCloseForm(false); }, isOpen: true, open: true, windowMode: true, onSubmit: isSelfManaged ? handleCloseForm : handlePersistSubmit };
+    const base = { onClose: handleCloseForm, onSave: handleCloseForm, onSuccess: handleCloseForm, onOpenChange: v => { if (!v) handleCloseForm(false); }, isOpen: showForm, open: showForm, windowMode: true, onSubmit: isSelfManaged ? handleCloseForm : handlePersistSubmit };
     const defaultValues = (!editItem && nextCode && ENTITY_CODE_FIELD[ENTITY]) ? { [ENTITY_CODE_FIELD[ENTITY]]: nextCode, codigo: nextCode } : {};
     if (!editItem) return { ...base, ...defaultValues, defaultValues };
     const aliases = {};
     FORM_ALIASES.forEach(a => { aliases[a] = editItem; });
     return { ...base, ...aliases, id: editItem.id };
-  }, [editItem, handleCloseForm, isSelfManaged, handlePersistSubmit, nextCode, ENTITY]);
+  }, [editItem, handleCloseForm, isSelfManaged, handlePersistSubmit, nextCode, ENTITY, showForm]);
 
   if (!canViewCadastro) {
     return (

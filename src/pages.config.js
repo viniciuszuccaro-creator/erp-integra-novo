@@ -51,7 +51,7 @@ import AdministracaoSistema from './pages/AdministracaoSistema';
 import Agenda from './pages/Agenda';
 import CRM from './pages/CRM';
 import Cadastros from './pages/Cadastros';
-import ChatbotAtendimento from './pages/ChatbotAtendimento';
+// ChatbotAtendimento removida — funcionalidade consolidada em HubAtendimento (P5)
 import Comercial from './pages/Comercial';
 import Compras from './pages/Compras';
 import ConfiguracoesUsuario from './pages/ConfiguracoesUsuario';
@@ -80,7 +80,7 @@ export const PAGES = {
     "Agenda": Agenda,
     "CRM": CRM,
     "Cadastros": Cadastros,
-    "ChatbotAtendimento": ChatbotAtendimento,
+    // ChatbotAtendimento: removida — consolidada em HubAtendimento
     "Comercial": Comercial,
     "Compras": Compras,
     "ConfiguracoesUsuario": ConfiguracoesUsuario,

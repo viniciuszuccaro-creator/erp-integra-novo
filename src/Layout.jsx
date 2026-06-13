@@ -102,15 +102,14 @@ function LayoutContent({ children, currentPageName }) {
     RH: 'RH',
     Expedicao: 'Expedição',
     Producao: 'Produção',
-    ProducaoMobile: 'Produção',
     Dashboard: 'Dashboard',
-    DashboardCorporativo: 'Dashboard',
     Relatorios: 'Relatórios',
     Agenda: 'Agenda',
     Cadastros: 'Cadastros',
     Contratos: 'Contratos',
     AdministracaoSistema: 'Sistema',
     PlanoMelhoria: 'Sistema',
+    HubAtendimento: 'HubAtendimento',
   };
   const moduleName = pageToModule?.[currentPageName] || 'Sistema';
   const location = useLocation();
@@ -1043,7 +1042,7 @@ function LayoutContent({ children, currentPageName }) {
             await base44.functions.invoke('iaFinanceAnomalyScan', { filtros });
           } catch (_) {}
         };
-        const isMobilePage = currentPageName === "ProducaoMobile";
+        const isMobilePage = false; // ProducaoMobile consolidado em SPA responsivo (P1/P5)
 
 
 

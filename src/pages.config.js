@@ -58,7 +58,6 @@ import ConfiguracoesUsuario from './pages/ConfiguracoesUsuario';
 import Contratos from './pages/Contratos';
 import Dashboard from './pages/Dashboard';
 import DashboardCorporativo from './pages/DashboardCorporativo';
-import DemoMultitarefas from './pages/DemoMultitarefas';
 import Documentacao from './pages/Documentacao';
 import EntregasMobile from './pages/EntregasMobile';
 import Estoque from './pages/Estoque';
@@ -73,8 +72,6 @@ import Producao from './pages/Producao';
 import ProducaoMobile from './pages/ProducaoMobile';
 import RH from './pages/RH';
 import Relatorios from './pages/Relatorios';
-import portal from './pages/portal';
-import portalcliente from './pages/portalcliente';
 import __Layout from './Layout.jsx';
 
 
@@ -90,7 +87,6 @@ export const PAGES = {
     "Contratos": Contratos,
     "Dashboard": Dashboard,
     "DashboardCorporativo": DashboardCorporativo,
-    "DemoMultitarefas": DemoMultitarefas,
     "Documentacao": Documentacao,
     "EntregasMobile": EntregasMobile,
     "Estoque": Estoque,
@@ -105,8 +101,6 @@ export const PAGES = {
     "ProducaoMobile": ProducaoMobile,
     "RH": RH,
     "Relatorios": Relatorios,
-    "portal": portal,
-    "portalcliente": portalcliente,
 }
 
 export const pagesConfig = {

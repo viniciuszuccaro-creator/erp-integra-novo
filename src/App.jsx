@@ -92,6 +92,11 @@ const AuthenticatedApp = () => {
           </EmpresaSelectorGuard>
         } />
         {Object.entries(Pages).map(([path, Page]) => {
+          // Skip deprecated pages
+          if (['DemoMultitarefas', 'portal', 'portalcliente'].includes(path)) {
+            return null;
+          }
+          
           const moduleName = pageModuleMap[path];
           const requiredAction = moduleName ? 'ver' : undefined;
 

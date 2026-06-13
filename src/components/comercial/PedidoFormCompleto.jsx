@@ -67,7 +67,15 @@ function PedidoFormCompleto({ pedido, clientes = [], onSubmit, onCancel, windowM
   
   // V21.6 FINAL: Hook de detecção AUTOMÁTICA OBRIGATÓRIA
   const { origemPedido, bloquearEdicao } = useOrigemPedido();
-  const { carimbarContexto } = useContextoVisual();
+  const { carimbarContexto, grupoAtual, empresaAtual } = useContextoVisual();
+  
+  // ETAPA 1 — Validação Obrigatória de Multiempresa
+  useEffect(() => {
+    if (!grupoAtual?.id || (contexto !== 'grupo' && !empresaAtual?.id)) {
+      toast.error('Erro: Contexto de grupo/empresa não definido. Operação bloqueada.');
+      onCancel?.();
+    }
+  }, [grupoAtual, empresaAtual, contexto]);
   
   const defaultValues = { ...getDefaultPedidoValues(pedido), ...(pedido || {}) };
 

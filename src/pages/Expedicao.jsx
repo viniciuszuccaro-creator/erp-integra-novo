@@ -247,7 +247,7 @@ export default function Expedicao() {
   return (
     <ProtectedSection module="Expedição" action="visualizar">
     <ErrorBoundary>
-      <ModuleLayout title="Expedição e Logística" subtitle="Entregas, romaneios e rotas" actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'expedicao_primary_action' })}>Nova Entrega</Button></div>}>
+      <ModuleLayout title="Expedição e Logística" subtitle="Entregas, romaneios e rotas" actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'expedicao_primary_action' })} data-permission="Expedição.Entregas.criar">Nova Entrega</Button></div>}>
         <ModuleKPIs>
           <ExpedicaoIAPanel entregas={entregas} />
            <KPIsExpedicao statusCounts={statusCounts} />

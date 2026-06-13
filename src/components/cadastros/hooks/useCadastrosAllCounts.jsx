@@ -47,11 +47,7 @@ const SNAPSHOT = {
 // Conta entidade via backend countEntities (retorna número exato sem trazer registros)
 async function countEntity(entityName, filter) {
   try {
-    const res = await base44.functions.invoke("countEntities", { 
-      entityName, 
-      filter,
-      deduplicateBy: ["codigo", "descricao"] // Evita duplicatas com mesmo código/descrição
-    });
+    const res = await base44.functions.invoke("countEntities", { entityName, filter });
     const n = res?.data?.count ?? res?.data?.total ?? res?.data;
     return typeof n === "number" ? n : 0;
   } catch (_) {

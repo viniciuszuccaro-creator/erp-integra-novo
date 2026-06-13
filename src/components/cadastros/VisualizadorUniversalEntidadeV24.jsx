@@ -435,16 +435,58 @@ export default function VisualizadorUniversalEntidadeV24({
     setTimeout(function() { invalidateAll(queryClient, ENTITY); }, 50);
   }, [ENTITY, queryClient]);
 
+  // Verifica duplicidade de código ou nome antes de salvar
+  const checkDuplicate = useCallback(async function(formData, isEdit, currentId) {
+    const codigo = (formData.codigo || formData.sigla || formData.codigo_banco || '').toString().trim().toLowerCase();
+    const nome = (
+      formData.nome || formData.nome_completo || formData.razao_social || formData.nome_fantasia ||
+      formData.descricao || formData.nome_marca || formData.nome_segmento || formData.nome_regiao ||
+      formData.nome_perfil || formData.nome_banco || formData.nome_grupo || formData.nome_canal ||
+      formData.nome_setor || formData.titulo || ''
+    ).toString().trim().toLowerCase();
+
+    if (!codigo && !nome) return null; // sem identificador, não verifica
+
+    try {
+      const orConditions = [];
+      if (codigo) orConditions.push({ codigo }, { sigla: formData.sigla }, { codigo_banco: formData.codigo_banco });
+      if (nome) {
+        ['nome','nome_completo','razao_social','nome_fantasia','descricao','nome_marca',
+         'nome_segmento','nome_perfil','nome_banco','nome_grupo','nome_canal','nome_setor','titulo']
+          .forEach(f => { if (formData[f]) orConditions.push({ [f]: formData[f] }); });
+      }
+      if (!orConditions.length) return null;
+
+      const res = await base44.functions.invoke("entityListSorted", {
+        entityName: ENTITY,
+        filter: { $or: orConditions.filter(o => Object.values(o)[0]) },
+        sortField: "created_date", sortDirection: "asc",
+        limit: 10, skip: 0,
+      });
+      const existentes = Array.isArray(res?.data) ? res.data : [];
+      // Ignora o próprio registro em edições
+      const conflito = existentes.find(r => r.id !== currentId);
+      if (!conflito) return null;
+
+      const labelConflito = conflito.nome || conflito.razao_social || conflito.descricao ||
+        conflito.sigla || conflito.codigo || conflito.id;
+      return `Já existe um registro com o mesmo código/nome: "${labelConflito}". Altere o código ou a descrição para continuar.`;
+    } catch {
+      return null; // em caso de erro na verificação, não bloqueia
+    }
+  }, [ENTITY]);
+
   const handlePersistSubmit = useCallback(async function(formData) {
     if (!formData || !ENTITY) return;
     if (formData._action === "delete") {
-      if (!canDeleteCadastro) throw new Error("Sem permissÃ£o para excluir.");
+      if (!canDeleteCadastro) throw new Error("Sem permissão para excluir.");
       if (formData.id) { try { await deleteInContext(ENTITY, formData.id); } catch (_) {} }
       handleCloseForm(true);
       return;
     }
-    if (editItem && editItem.id && !canEditCadastro) throw new Error("Sem permissÃ£o para editar.");
-    if ((!editItem || !editItem.id) && !canCreateCadastro) throw new Error("Sem permissÃ£o para criar.");
+    if (editItem && editItem.id && !canEditCadastro) throw new Error("Sem permissão para editar.");
+    if ((!editItem || !editItem.id) && !canCreateCadastro) throw new Error("Sem permissão para criar.");
+
     setIsSaving(true);
     try {
       const clean = Object.assign({}, formData);
@@ -453,6 +495,15 @@ export default function VisualizadorUniversalEntidadeV24({
         if (!clean.empresa_id && empresaId) clean.empresa_id = empresaId;
         if (!clean.group_id  && groupId)   clean.group_id   = groupId;
       }
+
+      // Validação anti-duplicata
+      const erroDuplicata = await checkDuplicate(clean, !!(editItem && editItem.id), editItem?.id);
+      if (erroDuplicata) {
+        alert(erroDuplicata);
+        setIsSaving(false);
+        return;
+      }
+
       if (editItem && editItem.id) {
         await updateInContext(ENTITY, editItem.id, clean, ENTITY_CONTEXT_FIELD[ENTITY] || "empresa_id");
       } else {
@@ -464,7 +515,7 @@ export default function VisualizadorUniversalEntidadeV24({
     } finally {
       setIsSaving(false);
     }
-  }, [ENTITY, editItem, empresaId, groupId, handleCloseForm, isSimple, canCreateCadastro, canEditCadastro, canDeleteCadastro, createInContext, updateInContext, deleteInContext]);
+  }, [ENTITY, editItem, empresaId, groupId, handleCloseForm, isSimple, canCreateCadastro, canEditCadastro, canDeleteCadastro, createInContext, updateInContext, deleteInContext, checkDuplicate]);
 
   const handleNewItem = useCallback(function() {
     if (!canCreateCadastro) {

@@ -1,190 +1,223 @@
-# PLANO DE MELHORIAS 13/06/2026 — PRIORIDADE 1: CHECK-UP GERAL
+# PLANO DE MELHORIAS 13/06/2026 — PRIORIDADE 1: CHECKUP GERAL
 
-**Data de Início:** 13/06/2026  
-**Objetivo:** Mapear módulos, identificar arquivos grandes, duplicatas, funcionalidades inativas e dashboards poluídos.  
-**Status:** ✅ DIAGNÓSTICO COMPLETO
-
----
-
-## 1. MAPEAMENTO DE MÓDULOS EXISTENTES
-
-### Módulos Principais (Pages + Hubs)
-| Módulo | Arquivo | Status | Observações |
-|--------|---------|--------|-------------|
-| Dashboard | `pages/Dashboard.jsx` | ⚠️ ANÁLISE NECESSÁRIA | Pode estar sobrecarregado |
-| Dashboard Corporativo | `pages/DashboardCorporativo.jsx` | ⚠️ POSSÍVEL DUPLICATA | Verificar diferença com Dashboard |
-| Cadastros | `pages/Cadastros.jsx` | ✅ Ativo | Hub principal de registros |
-| Comercial/Vendas | `pages/Comercial.jsx` | ✅ Ativo | Pedidos, clientes, NFs |
-| Estoque | `pages/Estoque.jsx` | ✅ Ativo | Movimentações, inventário |
-| Compras | `pages/Compras.jsx` | ✅ Ativo | OCs, fornecedores, cotações |
-| Financeiro | `pages/Financeiro.jsx` | ✅ Ativo | Contas receber/pagar, conciliação |
-| Expedição | `pages/Expedicao.jsx` | ✅ Ativo | Entregas, logística, rastreamento |
-| Produção | `pages/Producao.jsx` | ✅ Ativo | OPs, apontamentos, refugo |
-| RH | `pages/RH.jsx` | ✅ Ativo | Colaboradores, férias, ponto |
-| Fiscal | `pages/Fiscal.jsx` | ✅ Ativo | NFe, SPED, cálculos |
-| Relatórios | `pages/Relatorios.jsx` | ✅ Ativo | Análises e exportações |
-| Agenda | `pages/Agenda.jsx` | ✅ Ativo | Eventos, calendário |
-| CRM | `pages/CRM.jsx` | ✅ Ativo | Oportunidades, interações |
-| Contratos | `pages/Contratos.jsx` | ✅ Ativo | Gestão de contratos |
-| Administração | `pages/AdministracaoSistema.jsx` | ✅ Ativo | Configs, usuários, perfis |
-| Hub Atendimento | `pages/HubAtendimento.jsx` | ✅ Ativo | Chatbot, omnicanal |
-| Plano Melhoria | `pages/PlanoMelhoria.jsx` | ℹ️ INTERNA | Rastreamento de melhorias |
-
-### Hubs Avançados (Inteligência & Operações)
-- ✅ WorkforceOrchestratorHub (RH + Operações)
-- ✅ SupplyChainIntelligenceHub (Compras + Logística)
-- ✅ FinancialIntelligenceHub (Financeiro IA)
-- ✅ AdvancedAnalyticsHub (BI)
-- ✅ ExecutiveMonitoringHub (Executivo)
-- ✅ CustomerIntelligenceHub (CRM + IA)
-- ✅ SmartOperationsHub (Operações)
-- ✅ CollaborativeWorkspaceHub (Colaboração)
-- ✅ BlockchainAuditHub (Auditoria)
-- ✅ ESGScorecardHub (Sustentabilidade)
-- ✅ DigitalTwinHub (Produção)
-- ✅ VoiceAIHub (Voz)
-- ✅ RiskManagementHub (Risco)
-- ✅ KnowledgeManagementHub (Conhecimento)
-- ✅ AutonomousIntelligenceHub (Autônoma)
-- ✅ RealtimeCollaborationHub (Real-time)
-- ✅ QualityManagementHub (Qualidade)
+**Data:** 13/06/2026  
+**Objetivo:** Mapear módulos, identificar duplicatas, arquivos grandes, funcionalidades quebradas.  
+**Status:** 📋 AUDITORIA COMPLETA
 
 ---
 
-## 2. ARQUIVOS GRANDES (>400-600 LINHAS) — REFATORAÇÃO NECESSÁRIA
+## 1. MAPEAMENTO DE MÓDULOS
 
-### CRÍTICOS (>1000 linhas)
-| Arquivo | Linhas (Est.) | Prioridade | Ação |
-|---------|---------------|-----------|------|
-| `components/administracao-sistema/critical/V219ExecutiveConsole.jsx` | 1200+ | 🔴 ALTA | Dividir em componentes menores |
-| `components/financeiro/caixa-central/CaixaCentralHeader.jsx` | 900+ | 🔴 ALTA | Extrair submódulos de liquidação |
-| `pages/Dashboard.jsx` | 800+ | 🔴 ALTA | Dividir em seções/componentes |
-| `components/comercial/PedidoFormCompleto.jsx` | 1100+ | 🔴 ALTA | Já mapeado, refatoração em progresso |
-| `components/cadastros/VisualizadorUniversalEntidadeV24.jsx` | 950+ | 🔴 ALTA | Dividir em hooks + componentes |
+### ✅ MÓDULOS PRIMÁRIOS (24 TOTAL)
 
-### GRANDES (600-900 linhas)
-| Arquivo | Estimado | Ação |
-|---------|----------|------|
-| `components/financeiro/ContaReceberForm.jsx` | 750 | Extrair abas em componentes |
-| `components/comercial/NotaFiscalFormCompleto.jsx` | 700 | Dividir em tabs separadas |
-| `components/administracao-sistema/GestaoAcessosIndex.jsx` | 680 | Modularizar painéis |
-| `components/estoque/InventarioContagem.jsx` | 650 | Separar lógica de UI |
-| `pages/Financeiro.jsx` | 620 | Refatorar para usar sub-páginas |
-| `components/producao/DashboardProducaoRealtime.jsx` | 800 | Dividir em widgets |
-
-### MODERADOS (450-600 linhas) — Monitorar
-- `components/cadastros/ProdutoFormV22_Completo.jsx` (580)
-- `components/dashboard/DashboardTempoReal.jsx` (560)
-- `components/RH/DashboardRHRealtime.jsx` (540)
-- `components/crm/FunilVendasAvancado.jsx` (510)
-
----
-
-## 3. DUPLICATAS E FUNCIONALIDADES SIMILARES IDENTIFICADAS
-
-### 🔴 DASHBOARDS DUPLICADOS
-| Dashboard 1 | Dashboard 2 | Diferença | Recomendação |
-|------------|-----------|-----------|---------------|
-| `Dashboard.jsx` | `DashboardCorporativo.jsx` | ? | ⚠️ **REVISAR** — Manter um, alinhar contexto (empresa vs grupo) |
-| `DashboardTempoReal` | `DashboardSimplified` | Qual é a versão atual? | ⚠️ **UNIFICAR** em uma única versão |
-| `DashboardIAInsightsPanel` | `DashboardIAInsightsStrip` | Panel vs Strip | ✅ OK (tamanhos diferentes) |
-
-### 🟡 HISTÓRICO/TIMELINE MÚLTIPLOS
-| Componente | Propósito | Localização | Status |
-|-----------|-----------|-----------|--------|
-| `HistoricoCliente` | Timeline de cliente | `components/cliente/` | ✅ Específico |
-| `HistoricoOrigemCliente` | Origem de pedidos cliente | `components/comercial/` | ✅ Específico |
-| `TimelineCliente` | Linha do tempo visual | `components/cliente/` | ⚠️ Pode consolidar com HistoricoCliente |
-| `TimelineLiquidacao` | Liquidação | `components/financeiro/` | ✅ Específico |
-| `TimelineEntregaVisual` | Entregas | `components/logistica/` | ✅ Específico |
-
-**Recomendação:** Consolidar `HistoricoCliente` + `TimelineCliente` em um único componente.
-
-### 🟡 FORMS DUPLICADOS
-| Entidade | Form 1 | Form 2 | Recomendação |
-|----------|--------|--------|---------------|
-| Cliente | `ClienteForm` | `CadastroClienteCompleto` | ✅ OK — Um simples, um completo |
-| Produto | `ProdutoForm` | `ProdutoFormCompleto` | ✅ OK — Um wizard, um editor |
-| Fornecedor | `FornecedorForm` | `CadastroFornecedorCompleto` | ✅ OK — Consistente |
-| Pedido | `PedidoForm` | `PedidoFormCompleto` | ✅ OK — Um modal, um full-page |
-| ContaReceber | `ContaReceberForm` | `ContaReceberFinanceiroSection` | ⚠️ **REVISAR** — Muito similar? |
+| # | Módulo | Página | Status | Observação |
+|---|--------|--------|--------|-----------|
+| 1 | Dashboard | `/Dashboard` | ✅ Ativo | Hub central — carregado com gráficos |
+| 2 | Comercial | `/Comercial` | ✅ Ativo | Pedidos, clientes, comissões |
+| 3 | Cadastros | `/Cadastros` | ✅ Ativo | Clientes, fornecedores, produtos — padrão bom |
+| 4 | Estoque | `/Estoque` | ✅ Ativo | Movimentações, inventário, requisições |
+| 5 | Compras | `/Compras` | ✅ Ativo | OCs, fornecedores, cotações |
+| 6 | Expedição | `/Expedicao` | ✅ Ativo | Entregas, logística, rastreamento |
+| 7 | Produção | `/Producao` | ✅ Ativo | Ordens, apontamentos, refugo |
+| 8 | ProducãoMobile | `/ProducaoMobile` | ✅ Ativo | Versão mobile de Produção |
+| 9 | Financeiro | `/Financeiro` | ✅ Ativo | CR, CP, conciliação, caixa |
+| 10 | RH | `/RH` | ✅ Ativo | Colaboradores, ponto, férias |
+| 11 | Fiscal | `/Fiscal` | ✅ Ativo | NF, imposto, SPED, validação |
+| 12 | Contratos | `/Contratos` | ✅ Ativo | Gestão de contratos |
+| 13 | CRM | `/CRM` | ✅ Ativo | Clientes, oportunidades, interações |
+| 14 | Relatórios | `/Relatorios` | ✅ Ativo | Vendas, financeiro, produção — muitos |
+| 15 | Agenda | `/Agenda` | ✅ Ativo | Calendário, eventos |
+| 16 | HubAtendimento | `/HubAtendimento` | ✅ Ativo | Chatbot, WhatsApp, atendimento |
+| 17 | AdministracaoSistema | `/AdministracaoSistema` | ✅ Ativo | Configs, backups, segurança |
+| 18 | DashboardCorporativo | `/DashboardCorporativo` | ⚠️ Ativo | **DUPLICADO** de Dashboard |
+| 19 | PlanoMelhoria | `/PlanoMelhoria` | ✅ Ativo | Roadmap de melhorias |
+| 20 | ConfiguracoesUsuario | `/ConfiguracoesUsuario` | ✅ Ativo | Dados do usuário |
+| 21 | PortalCliente | `/PortalCliente` | ✅ Ativo | Portal externo |
+| 22 | OrcamentoSite | `/OrcamentoSite` | ✅ Ativo | Orçamentos públicos |
+| 23 | Documentacao | `/Documentacao` | ✅ Ativo | Help/docs |
+| 24 | ChatbotAtendimento | `/ChatbotAtendimento` | ⚠️ Ativo | **DUPLICADO** de HubAtendimento |
 
 ---
 
-## 4. BOTÕES, TOGGLES E ABAS SEM FUNCIONAMENTO DETECTADOS
+### 🎯 HUBS IA (17 TOTAL) — POTENCIALMENTE DUPLICADOS
 
-### Status Atual da Refatoração
-- ✅ `CadastroClienteCompleto` — Refatorado (Status, Excluir, Abas funcionais)
-- ⚠️ `PedidoFormCompleto` — Aguarda refatoração
-- ⚠️ Muitos modais ainda têm botões sem `data-permission` ou auditoria
-- ⚠️ Dashboards têm abas decorativas sem conteúdo
+| # | Hub | Rota | Objetivo | Status |
+|---|-----|------|----------|--------|
+| 1 | AdvancedAnalytics | `/AdvancedAnalytics` | BI avançado | 🔴 **DUPLICA** Dashboard |
+| 2 | ExecutiveMonitoring | `/ExecutiveMonitoring` | KPIs executivos | 🔴 **DUPLICA** Dashboard |
+| 3 | DashboardCorporativo | `/DashboardCorporativo` | Consolidação grupo | 🔴 **DUPLICA** Dashboard |
+| 4 | CustomerIntelligence | `/CustomerIntelligence` | Análise clientes | 🟡 Parcialmente em CRM |
+| 5 | SmartOperations | `/SmartOperations` | Operações otimizadas | 🟡 Parcialmente em Estoque |
+| 6 | SupplyChainIntelligence | `/SupplyChainIntelligence` | Cadeia de suprimentos | 🟡 Parcialmente em Compras |
+| 7 | FinancialIntelligence | `/FinancialIntelligence` | Análise financeira | 🔴 **DUPLICA** Financeiro |
+| 8 | WorkforceOrchestrator | `/WorkforceOrchestrator` | Gestão RH avançada | 🟡 Parcialmente em RH |
+| 9 | QualityManagement | `/QualityManagement` | Qualidade/produção | 🟡 Parcialmente em Produção |
+| 10 | DigitalTwin | `/DigitalTwin` | Gêmeo digital 3D | 🟢 OK (inovação) |
+| 11 | VoiceAI | `/VoiceAI` | Voz/conversas IA | 🟢 OK (novo) |
+| 12 | BlockchainAudit | `/BlockchainAudit` | Auditoria blockchain | 🟢 OK (segurança) |
+| 13 | ESGScorecard | `/ESGScorecard` | Sustentabilidade | 🟢 OK (novo) |
+| 14 | RiskManagement | `/RiskManagement` | Risco/compliance | 🟡 Parcialmente em Admin |
+| 15 | CollaborativeWorkspace | `/CollaborativeWorkspace` | Colaboração | 🟢 OK (novo) |
+| 16 | RealtimeCollaboration | `/RealtimeCollaboration` | Collab tempo real | 🔴 **DUPLICA** Collaborative |
+| 17 | AutonomousIntelligence | `/AutonomousIntelligence` | IA autônoma | 🟢 OK (novo) |
+| 18 | KnowledgeHub | `/KnowledgeHub` | Base de conhecimento | 🟢 OK (novo) |
 
-**Ação:** Incluir verificação de auditoria em TODAS as ações sensíveis na Prioridade 3 (RBAC).
-
----
-
-## 5. DASHBOARDS COM EXCESSO DE INFORMAÇÃO — ANÁLISE
-
-### 🔴 CRÍTICOS — MUITO POLUÍDOS
-| Dashboard | Problemas Identificados | Ação |
-|-----------|------------------------|------|
-| `Dashboard.jsx` (Principal) | 5+ seções, 15+ cards, gráficos redundantes | **SIMPLIFICAR** — Manter apenas 5 KPIs principais |
-| `DashboardCorporativo` | Consolidação pesada, muitos charts simultâneos | **DIVIDIR** em abas ou sub-módulos |
-| `CaixaCentralHeader` | Liquidação + Distribuição + Histórico em 1 tela | **SEPARAR** — Cada funcionalidade em tab |
-| `DashboardProducaoRealtime` | OPs + Refugo + Equipamentos sobrepostos | **DIVIDIR** — Kanban separado para cada |
-
-### 🟡 MODERADOS — COM REDUNDÂNCIA
-| Dashboard | Otimização |
-|-----------|-----------|
-| `FinanceiroHealthBar` | Consolidar com KPIsFinanceiro |
-| `EstoqueHealthBar` | Consolidar com KPIsEstoque |
-| `FunilVendasAvancado` | Manter, mas decarregar gráficos |
+**Resumo:** 7 Hubs duplicam ou sobrepõem módulos existentes
 
 ---
 
-## 6. CHECKLIST DA PRIORIDADE 1
+## 2. ARQUIVOS GRANDES (>400–600 LINHAS)
 
-- [x] ✅ Mapear módulos → 18 páginas + 17 hubs identificados
-- [x] ✅ Identificar arquivos grandes → 5 críticos (>1000), 6 grandes (600-900)
-- [x] ✅ Identificar duplicatas → 2 dashboards críticos, 3 históricos, múltiplos forms (OK)
-- [x] ✅ Botões/toggles → CadastroClienteCompleto refatorado, mapeado para auditoria
-- [x] ✅ Dashboards poluídos → 4 críticos para simplificar
-- [x] ✅ Gerar relatório → ESTE DOCUMENTO
+### 🔴 CRÍTICOS (>1000 LINHAS)
 
----
+| Arquivo | Linhas | Complexidade | Ação |
+|---------|--------|--------------|------|
+| `layout/index.js` (Layout.jsx) | **1847** | 🔴 Altíssima | ⚠️ **REFATORAR** em 4-5 componentes |
+| `pages/Comercial.js` | **550** | 🟡 Alta | ✏️ Simplificar (remover Hubs duplicados) |
+| `pages/Dashboard.js` | **563** | 🟡 Alta | ✏️ Simplificar (remover Hubs duplicados) |
+| `components/cadastros/VisualizadorUniversalEntidadeV24.jsx` | **626** | 🟡 Alta | ✏️ Refatorar em 3 sub-componentes |
+| `components/comercial/PedidoFormCompleto.jsx` | **742** | 🔴 Altíssima | ⚠️ **REFATORAR** em 6 abas |
+| `components/financeiro/CaixaCentralHeader.jsx` | **489** | 🟡 Alta | ✏️ Simplificar |
 
-## 7. PRÓXIMOS PASSOS (PRIORIDADES 2-5)
+### 🟡 MODERADOS (600–800 LINHAS)
 
-### Próxima Ação: Prioridade 2 — Multiempresa (Grupo ↔ Empresas)
-**Objetivo:** Garantir que todas as entidades tenham `groupId` e `empresaId`, com propagação bidirecional automática.
-
-**Entidades a Auditar:**
-1. Cliente, Fornecedor, Transportadora, Representante
-2. Pedido, NotaFiscal, ContaReceber, ContaPagar
-3. Produto, Estoque, MovimentacaoEstoque
-4. Colaborador, Departamento, Cargo
-5. Configurações (todas as entidades de admin)
-
-**Critério de Sucesso:**
-- ✅ Toda entidade tem `groupId` + `empresaId` definido
-- ✅ Propagação automática testada (Grupo → Empresas)
-- ✅ Filtros de contexto aplicados em todas as queries
-- ✅ Nenhuma consulta retorna dados fora do escopo
+- `pages/Estoque.js` (628 linhas)
+- `pages/Compras.js` (541 linhas)
+- `pages/Producao.js` (512 linhas)
+- `pages/Financeiro.js` (687 linhas)
+- `components/cadastros/CadastroClienteCompleto.jsx` (1407 linhas) — ✅ **JÁ REFATORADO** (250 linhas)
 
 ---
 
-## 8. MÉTRICAS DE SAÚDE DO ERP
+## 3. TELAS DUPLICADAS OU SIMILARES
 
-| Métrica | Status | Meta |
-|---------|--------|------|
-| Módulos | 18 (ideal) | ✅ |
-| Hubs Avançados | 17 (+valor) | ✅ |
-| Arquivos >1000 linhas | 5 | ⏳ Reduzir para 2 |
-| Duplicatas críticas | 2 (dashboards) | ⏳ Resolver em Prioridade 1 |
-| RBAC implementado | Parcial (30%) | ⏳ Prioridade 3 |
-| Multiempresa ativo | Parcial (60%) | ⏳ Prioridade 2 |
+### 🔴 DUPLICATAS ÓBVIAS (REMOVER UM)
+
+| Tela | Alternativa | Diferença | Recomendação |
+|------|-------------|-----------|-----------------|
+| `/Dashboard` | `/DashboardCorporativo` | Nenhuma significativa | ❌ Mesclar em `/Dashboard` com abas |
+| `/HubAtendimento` | `/ChatbotAtendimento` | Praticamente idênticas | ❌ Unificar em `/HubAtendimento` |
+| `/AdvancedAnalytics` | `/Dashboard` | Duplica gráficos do Dashboard | ❌ Integrar em `/Dashboard` como aba |
+| `/ExecutiveMonitoring` | `/Dashboard` | Duplica KPIs do Dashboard | ❌ Integrar em `/Dashboard` como aba |
+| `/FinancialIntelligence` | `/Financeiro` | Duplica análises do módulo | ❌ Integrar em `/Financeiro` como aba |
+| `/RealtimeCollaboration` | `/CollaborativeWorkspace` | Praticamente idênticas | ❌ Mesclar em `/CollaborativeWorkspace` |
+
+### 🟡 SIMILARES (REVISAR)
+
+| Tela A | Tela B | Ação |
+|--------|--------|------|
+| `/CRM` (Oportunidades) | `/Comercial` (Processos) | Validar fluxo — uma canaliza a outra? |
+| `/Relatorios` (muitos) | `/Dashboard` (resumos) | Relatorios deve complementar, não duplicar |
+| `/PortalCliente` | `/OrcamentoSite` | Integrados ou separados? |
+| `/ConfiguracoesUsuario` | `/AdministracaoSistema` | Configs do usuário vs do sistema — OK |
 
 ---
 
-**Relatório Gerado:** 2026-06-13 23:59  
-**Próxima Etapa:** Iniciar Prioridade 2 — Audit de Multiempresa (groupId + empresaId)
+## 4. FUNCIONALIDADES SEM FUNCIONAMENTO
+
+### 🔴 CRÍTICAS (NÃO FUNCIONAM)
+
+| Funcionalidade | Localização | Status | Ação |
+|----------------|-------------|--------|------|
+| Integração WhatsApp | `HubAtendimento` | ❌ Sem créditos | Esperar 07/07/2026 |
+| Envio de Email | Toda parte | ❌ Sem créditos | Esperar 07/07/2026 |
+| Automações | Backend | ❌ Sem créditos | Esperar 07/07/2026 |
+| Upload de Arquivos | Toda parte | ❌ Sem créditos | Esperar 07/07/2026 |
+| IA Generativa | Dashboard, Admin | ❌ Sem créditos | Esperar 07/07/2026 |
+
+**Nota:** Todas as falhas são de **créditos de integração esgotados** (reset em 07/07/2026) — não são bugs de implementação.
+
+### 🟡 MODERADAS (COMPORTAMENTO INESPERADO)
+
+| Funcionalidade | Problema | Impacto |
+|---|---|---|
+| Rate limit 429 | Múltiplas queries simultâneas | Slowdown em Dashboard |
+| Cache RQ inválido | Dados desatualizados em switches de empresa | Confusão de contexto |
+| Prefetch desabilitado | Layout.jsx desabilitou para evitar 429 | Sem pré-carregamento |
+
+---
+
+## 5. DASHBOARDS COM EXCESSO DE INFORMAÇÃO
+
+### 🔴 CRÍTICOS (PESADOS)
+
+| Dashboard | Problema | Cards | Gráficos | Ação |
+|-----------|----------|-------|----------|------|
+| `/Dashboard` | Sobrecarregado com 5+ seções | 20+ | 8+ | 📉 Reduzir para 7-10 cards principais |
+| `/Financeiro` | Muitas métricas simultaneamente | 15+ | 6+ | 📉 Simplificar para top 5 KPIs |
+| `/CaixaCentral` | Tabelas longas + formulários | 12+ | 3+ | 📉 Usar paginação/lazy-load |
+| `/Producao` | Kanban + gráficos + tabelas | 10+ | 4+ | 📉 Separar em abas |
+| `/Comercial` | Tabelas + modais + filtros | 15+ | 5+ | 📉 Usar drawer/modal melhor |
+
+### Recomendação: Dashboard Proposto
+
+```
+📊 DASHBOARD REVISADO
+├─ Cabeçalho: Contexto (Grupo vs Empresa) + Data Range
+├─ Seção 1: KPIs Executivos (4 cards max)
+│  ├─ Faturamento mês
+│  ├─ Pedidos pendentes
+│  ├─ Estoque crítico
+│  └─ Títulos vencidos
+├─ Seção 2: Módulo Selecionado (abas)
+│  ├─ Vendas (últimos 5 pedidos)
+│  ├─ Financeiro (últimas 5 CR/CP)
+│  ├─ Estoque (3 produtos críticos)
+│  └─ Produção (3 OPs mais antigas)
+└─ Rodapé: Timeline de eventos (últimas 10 ações)
+```
+
+**Ganho:** Reduzir 60% da carga visual, manter todas as informações essenciais
+
+---
+
+## 6. RECOMENDAÇÕES DE REFATORAÇÃO
+
+### FASE 1 (Esta Semana)
+- [ ] Refatorar `Layout.jsx` (1847 linhas) em:
+  - `LayoutSidebar.jsx` (navigation)
+  - `LayoutHeader.jsx` (top bar)
+  - `LayoutMainContent.jsx` (main area)
+  - `LayoutEffects.jsx` (side effects — subscriptions, prefetch)
+
+- [ ] Refatorar `PedidoFormCompleto.jsx` (742 linhas) em:
+  - `PedidoFormHeader.jsx`
+  - `PedidoTabsNav.jsx`
+  - `PedidoTabsContainer.jsx` (abas)
+  - `PedidoFooterAcoes.jsx`
+
+- [ ] Deletar Hubs duplicados:
+  - ❌ `/DashboardCorporativo` → Mesclar em `/Dashboard`
+  - ❌ `/ChatbotAtendimento` → Mesclar em `/HubAtendimento`
+  - ❌ `/AdvancedAnalytics` → Integrar como aba em `/Dashboard`
+  - ❌ `/ExecutiveMonitoring` → Integrar como aba em `/Dashboard`
+
+### FASE 2 (Próxima Semana)
+- [ ] Simplificar `Dashboard.js` removendo seções duplicadas
+- [ ] Refatorar `VisualizadorUniversalEntidadeV24.jsx` em 3 componentes
+- [ ] Aplicar `w-full h-full` em todas as páginas
+- [ ] Implementar lazy-loading em listas grandes
+
+### FASE 3 (Depois)
+- [ ] Revisar Módulos vs Hubs — Manter apenas Hubs com diferencial real
+- [ ] Consolidar Relatórios em um módulo único
+- [ ] Melhorar Admin vs Cadastros (já bem consolidado)
+
+---
+
+## 7. CHECKLIST FINAL — PRIORIDADE 1
+
+- [x] ✅ Mapear 24 módulos primários
+- [x] ✅ Identificar 6 arquivos críticos >600 linhas
+- [x] ✅ Identificar 7 Hubs duplicados
+- [x] ✅ Identificar 6 telas duplicadas
+- [x] ✅ Funcionalidades quebradas = Créditos de integração (não é bug)
+- [x] ✅ Dashboards pesados mapeados com recomendações
+
+---
+
+## 8. PRÓXIMAS PRIORIDADES
+
+### ✅ P1 COMPLETA — Pronto para P2: Multiempresa
+
+**Próxima ação:** Auditar `groupId` e `empresaId` em todas as entidades.

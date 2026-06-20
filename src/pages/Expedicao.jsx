@@ -1,7 +1,7 @@
 import React, { Suspense, useState, startTransition } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQueryClient } from "@tanstack/react-query";
-import { Truck, Package, FileText, Route, Activity, BarChart3, Settings, Map, MessageCircle, Camera, Scan } from "lucide-react";
+import { Truck, Package, FileText, Route, Activity, BarChart3, Settings, Map } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
@@ -10,21 +10,15 @@ import { useUser } from "@/components/lib/UserContext";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import { useToast } from "@/components/ui/use-toast";
-import { Badge } from "@/components/ui/badge";
 import ModuleLayout from "@/components/layout/ModuleLayout";
 import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
 import { Button } from "@/components/ui/button";
 const ExpedicaoIAPanel = React.lazy(() => import("@/components/expedicao/ExpedicaoIAPanel"));
-import HeaderExpedicaoCompacto from "@/components/expedicao/expedicao-launchpad/HeaderExpedicaoCompacto";
 import KPIsExpedicao from "@/components/expedicao/expedicao-launchpad/KPIsExpedicao";
 import ModulosGridExpedicao from "@/components/expedicao/expedicao-launchpad/ModulosGridExpedicao";
 import { useRealtimeEntregas } from '@/components/lib/useRealtimeData';
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import NotificadorAutomaticoEntrega from "../components/logistica/NotificadorAutomaticoEntrega";
-import ComprovanteEntregaDigital from "../components/logistica/ComprovanteEntregaDigital";
-import RegistroOcorrenciaLogistica from "../components/logistica/RegistroOcorrenciaLogistica";
 import IntegracaoRomaneio from "../components/logistica/IntegracaoRomaneio";
 
 const EntregasListagem = React.lazy(() => import("../components/expedicao/EntregasListagem"));
@@ -53,11 +47,7 @@ export default function Expedicao() {
   // P2: contexto válido requer empresa OU grupo explícito
   const contextoValido = !!(empresaAtual?.id || groupId);
 
-  const [comprovanteModal, setComprovanteModal] = React.useState(null);
-  const [entregaSelecionada, setEntregaSelecionada] = React.useState(null);
-  const [notificadorOpen, setNotificadorOpen] = React.useState(false);
-  const [comprovanteOpen, setComprovanteOpen] = React.useState(false);
-  const [ocorrenciaOpen, setOcorrenciaOpen] = React.useState(false);
+  // Estados de modais removidos — gerenciados dentro de EntregasListagem via openWindow
 
   // P2: queries só executam com contexto válido de empresa/grupo
   const queryEnabled = canSeeExpedicao && contextoValido;
@@ -96,6 +86,20 @@ export default function Expedicao() {
 
   if (loadingPermissions) {
     return <div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
+  }
+
+  // P2: banner sem contexto — consistência com demais módulos
+  if (!contextoValido) {
+    return (
+      <ProtectedSection module="Expedição" action="visualizar">
+        <div className="w-full h-full flex items-center justify-center p-6">
+          <div className="max-w-xl w-full bg-white border rounded-xl p-6 text-center">
+            <p className="text-lg font-semibold">Selecione uma empresa para continuar</p>
+            <p className="text-slate-500 mt-1">Use o seletor de empresa no topo para habilitar os dados logísticos.</p>
+          </div>
+        </div>
+      </ProtectedSection>
+    );
   }
 
   const modules = [
@@ -275,51 +279,7 @@ export default function Expedicao() {
         </ModuleContent>
       </ModuleLayout>
 
-      <Dialog open={notificadorOpen} onOpenChange={setNotificadorOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
-          {entregaSelecionada && (
-            <NotificadorAutomaticoEntrega
-              pedido={pedidos.find(p => p.id === entregaSelecionada.pedido_id)}
-              entrega={entregaSelecionada}
-              onClose={() => setNotificadorOpen(false)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={comprovanteOpen} onOpenChange={setComprovanteOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
-          {entregaSelecionada && (
-            <ComprovanteEntregaDigital
-              pedido={pedidos.find(p => p.id === entregaSelecionada.pedido_id)}
-              entrega={entregaSelecionada}
-              onSuccess={() => setComprovanteOpen(false)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={ocorrenciaOpen} onOpenChange={setOcorrenciaOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
-          {entregaSelecionada && (
-            <RegistroOcorrenciaLogistica
-              pedido={pedidos.find(p => p.id === entregaSelecionada.pedido_id)}
-              entrega={entregaSelecionada}
-              onClose={() => setOcorrenciaOpen(false)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {comprovanteModal && (
-        <Suspense fallback={<div className="h-[400px] w-full bg-white/60 animate-pulse rounded" />}> 
-          <ComprovanteDigital
-            entrega={comprovanteModal}
-            isOpen={!!comprovanteModal}
-            onClose={() => setComprovanteModal(null)}
-          />
-        </Suspense>
-      )}
+          {/* P1/P4: Dialogs de entrega inline removidos — agora abertos via openWindow nas próprias EntregasListagem */}
     </ErrorBoundary>
     </ProtectedSection>
   );

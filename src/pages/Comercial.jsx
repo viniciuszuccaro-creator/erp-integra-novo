@@ -45,19 +45,23 @@ export default function Comercial() {
   const canSeeComercial = canViewComercial();
   const { openWindow, closeWindow } = useWindow();
   const { createInContext, updateInContext, empresaAtual, grupoAtual, estaNoGrupo } = useContextoVisual();
+  // groupId já declarado acima via contextoValido
   const { user } = useUser();
   const queryClient = useQueryClient();
 
-  const bloqueadoSemEmpresa = !estaNoGrupo && !empresaAtual;
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+  // P2: contexto válido inclui grupo explícito (não só empresa)
+  const contextoValido = !!(empresaAtual?.id || groupId);
+  const bloqueadoSemEmpresa = !contextoValido;
 
   const { data: clientes = [] } = useRLSQuery(
     'Cliente', {}, '-created_date', COMERCIAL_LIST_LIMIT,
-    { staleTime: 30000, enabled: !bloqueadoSemEmpresa && canSeeComercial }
+    { staleTime: 30000, enabled: contextoValido && canSeeComercial }
   );
 
   const { data: pedidos = [], refetch: refetchPedidos } = useRLSQuery(
     'Pedido', {}, '-created_date', COMERCIAL_LIST_LIMIT,
-    { staleTime: 30000, enabled: !bloqueadoSemEmpresa && canSeeComercial }
+    { staleTime: 30000, enabled: contextoValido && canSeeComercial }
   );
 
   useEffect(() => {
@@ -88,27 +92,27 @@ export default function Comercial() {
 
   const { data: comissoes = [] } = useRLSQuery(
     'Comissao', {}, '-created_date', COMERCIAL_SHORT_LIMIT,
-    { staleTime: 30000, enabled: !bloqueadoSemEmpresa && canSeeComercial }
+    { staleTime: 30000, enabled: contextoValido && canSeeComercial }
   );
 
   const { data: notasFiscais = [] } = useRLSQuery(
     'NotaFiscal', {}, '-created_date', COMERCIAL_SHORT_LIMIT,
-    { staleTime: 30000, enabled: !bloqueadoSemEmpresa && canSeeComercial }
+    { staleTime: 30000, enabled: contextoValido && canSeeComercial }
   );
 
   const { data: tabelasPreco = [] } = useRLSQuery(
     'TabelaPreco', {}, '-updated_date', COMERCIAL_SHORT_LIMIT,
-    { staleTime: 30000, enabled: !bloqueadoSemEmpresa && canSeeComercial }
+    { staleTime: 30000, enabled: contextoValido && canSeeComercial }
   );
 
   const { data: empresas = [] } = useRLSQuery(
     'Empresa', {}, '-created_date', COMERCIAL_COMPANY_LIMIT,
-    { staleTime: 30000, enabled: Boolean(canSeeComercial && (empresaAtual?.id || estaNoGrupo)) }
+    { staleTime: 30000, enabled: Boolean(canSeeComercial && contextoValido) }
   );
 
   const { data: pedidosExternos = [] } = useRLSQuery(
     'PedidoExterno', {}, '-created_date', COMERCIAL_EXTERNAL_LIMIT,
-    { staleTime: 30000, enabled: !bloqueadoSemEmpresa && canSeeComercial }
+    { staleTime: 30000, enabled: contextoValido && canSeeComercial }
   );
 
   const {

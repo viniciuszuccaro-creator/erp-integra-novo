@@ -69,6 +69,20 @@ export default function Compras() {
     );
   }
 
+  // P2: banner sem contexto — consistência com demais módulos
+  if (!contextoValido) {
+    return (
+      <ProtectedSection module="Compras" action="visualizar">
+        <div className="w-full h-full flex items-center justify-center p-6">
+          <div className="max-w-xl w-full bg-white border rounded-xl p-6 text-center">
+            <p className="text-lg font-semibold">Selecione uma empresa para continuar</p>
+            <p className="text-slate-500 mt-1">Use o seletor de empresa no topo para habilitar os dados de compras.</p>
+          </div>
+        </div>
+      </ProtectedSection>
+    );
+  }
+
   const modules = [
     {
       title: 'Fornecedores',

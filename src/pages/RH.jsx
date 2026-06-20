@@ -77,6 +77,20 @@ export default function RH() {
     );
   }
 
+  // P2: banner sem contexto (consistência com Comercial/Financeiro)
+  if (!contextoValido) {
+    return (
+      <ProtectedSection module="RH" action="visualizar">
+        <div className="w-full h-full flex items-center justify-center p-6">
+          <div className="max-w-xl w-full bg-white border rounded-xl p-6 text-center">
+            <p className="text-lg font-semibold">Selecione uma empresa para continuar</p>
+            <p className="text-slate-500 mt-1">Use o seletor de empresa no topo para habilitar os dados de RH.</p>
+          </div>
+        </div>
+      </ProtectedSection>
+    );
+  }
+
   const modules = [
     {
       title: 'Colaboradores',
@@ -168,7 +182,11 @@ export default function RH() {
     },
   ];
 
-  const allowedModules = modules.filter(m => hasPermission('RH', (m.sectionKey || m.title), 'visualizar'));
+  // P3: fallback para admin e permissão global do módulo
+  const allowedModules = modules.filter(m =>
+    hasPermission('RH', (m.sectionKey || m.title), 'visualizar') ||
+    hasPermission('RH', null, 'visualizar')
+  );
 
   const handleModuleClick = (module) => {
     startTransition(() => {

@@ -294,13 +294,13 @@ export default function Dashboard() {
       drillDown: () => handleDrillDown("/estoque")
     },
     {
-      title: "Saldo Caixa",
-      value: `R$ ${Math.abs(fluxoCaixa).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-      subtitle: fluxoCaixa >= 0 ? "em caixa" : "déficit",
-      icon: DollarSign,
-      color: "from-blue-500 to-blue-600",
-      bgColor: "bg-blue-50",
-      textColor: "text-blue-600",
+      title: "Taxa Inadimplência",
+      value: `${taxaInadimplencia}%`,
+      subtitle: `R$ ${valorVencido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} vencido`,
+      icon: AlertCircle,
+      color: taxaInadimplencia > 5 ? "from-red-500 to-red-600" : "from-green-500 to-green-600",
+      bgColor: taxaInadimplencia > 5 ? "bg-red-50" : "bg-green-50",
+      textColor: taxaInadimplencia > 5 ? "text-red-600" : "text-green-600",
       drillDown: () => handleDrillDown("/financeiro")
     }
   ];

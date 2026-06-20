@@ -37,22 +37,22 @@ export default function CRMPage() {
   const { openWindow } = useWindow();
   const { user } = useUser();
 
-  // Queries via useRLSQuery (escopo multi-empresa automático)
+  // P2: Queries via useRLSQuery — só executam com contextoValido
   const { data: oportunidades = [] } = useRLSQuery(
     'Oportunidade', {}, '-created_date', CRM_LIST_LIMIT,
-    { staleTime: 60000, enabled: !bloqueadoSemEmpresa }
+    { staleTime: 60000, enabled: contextoValido }
   );
   const { data: interacoes = [] } = useRLSQuery(
     'Interacao', {}, '-created_date', CRM_LIST_LIMIT,
-    { staleTime: 60000, enabled: !bloqueadoSemEmpresa }
+    { staleTime: 60000, enabled: contextoValido }
   );
   const { data: campanhas = [] } = useRLSQuery(
     'Campanha', {}, '-created_date', CRM_CAMPAIGN_LIMIT,
-    { staleTime: 60000, enabled: !bloqueadoSemEmpresa }
+    { staleTime: 60000, enabled: contextoValido }
   );
   const { data: clientes = [] } = useRLSQuery(
     'Cliente', {}, '-created_date', CRM_LIST_LIMIT,
-    { staleTime: 60000, enabled: !bloqueadoSemEmpresa }
+    { staleTime: 60000, enabled: contextoValido }
   );
 
   const { totalOportunidades, oportunidadesAbertas, valorPipeline, valorPonderado, taxaConversao } = useCRMDerivedData({ oportunidades });
@@ -68,7 +68,7 @@ export default function CRMPage() {
     );
   }
 
-  if (bloqueadoSemEmpresa) {
+  if (!contextoValido) {
     return (
       <ProtectedSection module="CRM" action="visualizar">
         <div className="w-full h-full flex items-center justify-center p-6">

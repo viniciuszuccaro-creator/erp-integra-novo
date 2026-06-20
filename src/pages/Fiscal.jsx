@@ -15,7 +15,7 @@ import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
 import { Button } from "@/components/ui/button";
-import FiscalIAPanel from "@/components/fiscal/FiscalIAPanel";
+const FiscalIAPanel = React.lazy(() => import("@/components/fiscal/FiscalIAPanel"));
 
 const ConfigFiscalAutomatica = React.lazy(() => import("../components/fiscal/ConfigFiscalAutomatica"));
 const PlanoDeContasTree = React.lazy(() => import("../components/fiscal/PlanoDeContasTree"));
@@ -29,10 +29,13 @@ export default function FiscalPage() {
   const { empresaAtual, grupoAtual } = useContextoVisual();
   const { openWindow } = useWindow();
   const { user } = useUser();
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+  // P2: contexto obrigatório antes de qualquer query
+  const contextoValido = !!(empresaAtual?.id || groupId);
 
   const { data: notasFiscais = [] } = useRLSQuery(
     'NotaFiscal', {}, '-created_date', 100,
-    { staleTime: 30000, retry: 2 }
+    { staleTime: 30000, retry: 2, enabled: contextoValido }
   );
 
   const statusCounts = {
@@ -48,6 +51,20 @@ export default function FiscalPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
+    );
+  }
+
+  // P2: banner sem contexto
+  if (!contextoValido) {
+    return (
+      <ProtectedSection module="Fiscal" action="visualizar">
+        <div className="w-full h-full flex items-center justify-center p-6">
+          <div className="max-w-xl w-full bg-white border rounded-xl p-6 text-center">
+            <p className="text-lg font-semibold">Selecione uma empresa para continuar</p>
+            <p className="text-slate-500 mt-1">Use o seletor de empresa no topo para habilitar os dados fiscais.</p>
+          </div>
+        </div>
+      </ProtectedSection>
     );
   }
 
@@ -128,9 +145,24 @@ export default function FiscalPage() {
       height: 700,
       props: { empresaId: empresaAtual?.id, windowMode: true }
     },
+    {
+      title: 'IA Fiscal',
+      description: 'Validação inteligente NF-e',
+      icon: Sparkles,
+      color: 'violet',
+      component: FiscalIAPanel,
+      windowTitle: '🤖 IA Fiscal Insights',
+      width: 1200,
+      height: 700,
+      props: { notas: notasFiscais, empresaAtual, windowMode: true }
+    },
   ];
 
-  const allowedModules = modules.filter(m => hasPermission('Fiscal', (m.sectionKey || m.title), 'visualizar'));
+  // P3: fallback para permissão global do módulo
+  const allowedModules = modules.filter(m =>
+    hasPermission('Fiscal', (m.sectionKey || m.title), 'visualizar') ||
+    hasPermission('Fiscal', null, 'visualizar')
+  );
 
   const handleModuleClick = (module) => {
     startTransition(() => {
@@ -167,7 +199,7 @@ export default function FiscalPage() {
     <ErrorBoundary>
       <ModuleLayout title="Fiscal e Tributário" subtitle="NF-e, tributos e relatórios" actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'fiscal_primary_action' })}>Nova NF-e</Button></div>}>
         <ModuleKPIs>
-          <FiscalIAPanel notas={notasFiscais} empresaAtual={empresaAtual} />
+          {/* P4: FiscalIAPanel movido para módulo no grid — header mais leve */}
           <KPIsFiscal
             total={statusCounts.total}
             autorizadas={statusCounts.autorizadas}

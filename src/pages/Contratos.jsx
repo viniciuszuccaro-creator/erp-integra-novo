@@ -3,14 +3,11 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AssinaturaEletronicaModal from "@/components/AssinaturaEletronicaModal";
 import { useToast } from "@/components/ui/use-toast";
@@ -44,9 +41,7 @@ import IAContextualModulo from "@/components/ia/IAContextualModulo";
 
 export default function ContratosPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewingContrato, setViewingContrato] = useState(null);
-  const [editingContrato, setEditingContrato] = useState(null);
   const [assinaturaModalOpen, setAssinaturaModalOpen] = useState(false);
   const [contratoParaAssinar, setContratoParaAssinar] = useState(null);
   const [historicoDialogOpen, setHistoricoDialogOpen] = useState(false);
@@ -73,58 +68,44 @@ export default function ContratosPage() {
   const { openWindow } = useWindow();
   const { empresaAtual, filterInContext } = useContextoVisual();
 
-  const [formData, setFormData] = useState({
-    numero_contrato: "",
-    tipo: "Cliente",
-    parte_contratante: "",
-    objeto: "",
-    descricao: "",
-    valor_mensal: 0,
-    valor_total: 0,
-    data_inicio: "",
-    data_fim: "",
-    data_assinatura: "",
-    vigencia_meses: 12,
-    renovacao_automatica: false,
-    prazo_aviso_renovacao: 30,
-    indice_reajuste: "IGPM",
-    percentual_reajuste: 0,
-    forma_pagamento: "Boleto",
-    dia_vencimento: 10,
-    responsavel_empresa: "",
-    status: "Rascunho",
-    observacoes: "",
-    gerar_cobranca_automatica: true
-  });
+  // P1: formData removido — criação/edição via ContratoForm no openWindow
+
+  const { grupoAtual } = useContextoVisual();
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+  // P2: contexto obrigatório antes de qualquer query
+  const contextoValido = !!(empresaAtual?.id || groupId);
 
   const { data: contratos = [] } = useQuery({
-    queryKey: ['contratos'],
-    queryFn: () => base44.entities.Contrato.list('-created_date'),
+    queryKey: ['contratos', empresaAtual?.id, groupId],
+    queryFn: () => filterInContext('Contrato', {}, '-created_date'),
     staleTime: 60000,
     gcTime: 300000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     retry: false,
+    enabled: contextoValido,
   });
 
   const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes'],
-    queryFn: () => base44.entities.Cliente.list(),
+    queryKey: ['clientes', empresaAtual?.id, groupId],
+    queryFn: () => filterInContext('Cliente', {}, '-created_date'),
     staleTime: 60000,
     gcTime: 300000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     retry: false,
+    enabled: contextoValido,
   });
 
   const { data: fornecedores = [] } = useQuery({
-    queryKey: ['fornecedores'],
-    queryFn: () => base44.entities.Fornecedor.list(),
+    queryKey: ['fornecedores', empresaAtual?.id, groupId],
+    queryFn: () => filterInContext('Fornecedor', {}, '-created_date'),
     staleTime: 60000,
     gcTime: 300000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     retry: false,
+    enabled: contextoValido,
   });
 
   // Multiempresa: usar dados diretos (queries já filtradas pelo contexto)
@@ -410,8 +391,9 @@ export default function ContratosPage() {
       const hoje = new Date();
       // Ensure data_fim is always after data_inicio for calculation
       const dataFimAtual = new Date(contrato.data_fim);
-      if (dataFimAtual > hoje && !window.confirm(`O contrato ${contrato.numero_contrato} ainda está vigente (até ${dataFimAtual.toLocaleDateString('pt-BR')}). Deseja renovar manualmente agora?`)) {
-        throw new Error('Renovação manual cancelada.');
+      // P1: window.confirm removido — ação direta com auditoria
+      if (dataFimAtual > hoje) {
+        // Contrato ainda vigente: renovação manual permitida sem confirmação de browser
       }
 
 
@@ -495,103 +477,29 @@ export default function ContratosPage() {
     }
   });
 
-  const createMutation = useMutation({
-    mutationFn: (data) => {
-      // Calculate data de próximo reajuste (1 ano após início)
-      const dataProximoReajuste = new Date(data.data_inicio);
-      dataProximoReajuste.setFullYear(dataProximoReajuste.getFullYear() + 1);
-
-      // Calculate próxima cobrança (one month after data_inicio, based on dia_vencimento)
-      const proximaCobranca = new Date(data.data_inicio);
-      proximaCobranca.setMonth(proximaCobranca.getMonth() + 1);
-      proximaCobranca.setDate(data.dia_vencimento || 1); // Set to day of vencimento
-
-      return base44.entities.Contrato.create({
-        ...data,
-        empresa_id: data.empresa_id || empresaAtual?.id,
-        group_id: data.group_id || null,
-        data_proximo_reajuste: dataProximoReajuste.toISOString().split('T')[0],
-        proxima_cobranca: proximaCobranca.toISOString().split('T')[0],
-        historico_renovacoes: [],
-        alertas_enviados: [],
-        contas_geradas_ids: []
-      });
-    },
-    onSuccess: async (created) => {
-      await base44.entities.AuditLog.create({
-        usuario: user?.full_name || user?.email || 'Usuário',
-        usuario_id: user?.id,
-        acao: 'Criação',
-        modulo: 'Contratos',
-        entidade: 'Contrato',
-        registro_id: created?.id,
-        descricao: `Contrato ${created?.numero_contrato || ''} criado`,
-      });
-      queryClient.invalidateQueries({ queryKey: ['contratos'] });
-      setIsDialogOpen(false);
-      resetForm();
-      toast({
-        title: "✅ Contrato Criado!",
-        description: "O contrato foi adicionado ao sistema"
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "❌ Erro ao Criar Contrato",
-        description: error.message || "Não foi possível criar o contrato.",
-        variant: "destructive",
-      });
-    }
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Contrato.update(id, data),
-    onSuccess: async (_res, { id, data }) => {
-      await base44.entities.AuditLog.create({
-        usuario: user?.full_name || user?.email || 'Usuário',
-        usuario_id: user?.id,
-        acao: 'Edição',
-        modulo: 'Contratos',
-        entidade: 'Contrato',
-        registro_id: id,
-        descricao: `Contrato ${data?.numero_contrato || ''} atualizado`,
-      });
-      queryClient.invalidateQueries({ queryKey: ['contratos'] });
-      setIsDialogOpen(false);
-      setEditingContrato(null);
-      resetForm();
-      toast({
-        title: "✅ Contrato Atualizado!",
-        description: "As alterações foram salvas"
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "❌ Erro ao Atualizar Contrato",
-        description: error.message || "Não foi possível atualizar o contrato.",
-        variant: "destructive",
-      });
-    }
-  });
+  // P1: createMutation/updateMutation removidos — criação/edição via openWindow callback
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Contrato.delete(id),
     onSuccess: async (_res, id) => {
-      await base44.entities.AuditLog.create({
-        usuario: user?.full_name || user?.email || 'Usuário',
-        usuario_id: user?.id,
-        acao: 'Exclusão',
-        modulo: 'Contratos',
-        entidade: 'Contrato',
-        registro_id: id,
-        descricao: `Contrato excluído`,
-      });
-      queryClient.invalidateQueries({ queryKey: ['contratos'] });
-      setViewingContrato(null);
-      toast({
-        title: "✅ Contrato Excluído",
-        description: "O contrato foi removido"
-      });
+    await base44.entities.AuditLog.create({
+      usuario: user?.full_name || user?.email || 'Usuário',
+      usuario_id: user?.id,
+      acao: 'Exclusão',
+      modulo: 'Contratos',
+      entidade: 'Contrato',
+      registro_id: id,
+      empresa_id: empresaAtual?.id || null,
+      group_id: groupId || null,
+      descricao: `Contrato excluído`,
+    });
+    queryClient.invalidateQueries({ queryKey: ['contratos'] });
+    setViewingContrato(null);
+    setContratoParaExcluir(null);
+    toast({
+      title: "✅ Contrato Excluído",
+      description: "O contrato foi removido"
+    });
     },
     onError: (error) => {
       toast({
@@ -602,50 +510,19 @@ export default function ContratosPage() {
     }
   });
 
-  const resetForm = () => {
-    setFormData({
-      numero_contrato: "",
-      tipo: "Cliente",
-      parte_contratante: "",
-      objeto: "",
-      descricao: "",
-      valor_mensal: 0,
-      valor_total: 0,
-      data_inicio: "",
-      data_fim: "",
-      data_assinatura: "",
-      vigencia_meses: 12,
-      renovacao_automatica: false,
-      prazo_aviso_renovacao: 30,
-      indice_reajuste: "IGPM",
-      percentual_reajuste: 0,
-      forma_pagamento: "Boleto",
-      dia_vencimento: 10,
-      responsavel_empresa: "",
-      status: "Rascunho",
-      observacoes: "",
-      gerar_cobranca_automatica: true
-    });
-  };
+  // P1: resetForm/handleSubmit/handleEdit removidos — edição via openWindow(ContratoForm)
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (editingContrato) {
-      updateMutation.mutate({ id: editingContrato.id, data: formData });
-    } else {
-      createMutation.mutate(formData);
-    }
-  };
-
-  const handleEdit = (contrato) => {
-    setEditingContrato(contrato);
-    setFormData(contrato); // Directly set contract data to form
-    setIsDialogOpen(true);
-  };
+  const [contratoParaExcluir, setContratoParaExcluir] = useState(null);
 
   const handleDelete = (contrato) => {
-    if (window.confirm(`Deseja realmente excluir o contrato ${contrato.numero_contrato}?`)) {
-      deleteMutation.mutate(contrato.id);
+    // P1/P3: inline confirm em vez de window.confirm
+    setContratoParaExcluir(contrato);
+  };
+
+  const confirmarExclusao = () => {
+    if (contratoParaExcluir) {
+      deleteMutation.mutate(contratoParaExcluir.id);
+      setContratoParaExcluir(null);
     }
   };
 
@@ -703,9 +580,7 @@ export default function ContratosPage() {
     })
   };
 
-  const valorTotalContratos = contratosContexto
-    .filter(c => c.status === 'Vigente')
-    .reduce((sum, c) => sum + (c.valor_mensal || 0), 0);
+  // valorTotalContratos usada internamente pelo ContratosKPIs via prop
 
   const statusColors = {
     'Rascunho': 'bg-gray-100 text-gray-700',
@@ -781,298 +656,7 @@ export default function ContratosPage() {
           Novo Contrato
         </Button>
 
-        <Dialog open={false}>
-          <DialogTrigger asChild>
-            <Button className="hidden">Removido</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editingContrato ? 'Editar Contrato' : 'Novo Contrato'}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="numero_contrato">Número do Contrato *</Label>
-                  <Input
-                    id="numero_contrato"
-                    value={formData.numero_contrato}
-                    onChange={(e) => setFormData({ ...formData, numero_contrato: e.target.value })}
-                    placeholder="CONT-2025-001"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="tipo">Tipo *</Label>
-                  <Select
-                    value={formData.tipo}
-                    onValueChange={(value) => setFormData({ ...formData, tipo: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Cliente">Cliente</SelectItem>
-                      <SelectItem value="Fornecedor">Fornecedor</SelectItem>
-                      <SelectItem value="Prestação de Serviço">Prestação de Serviço</SelectItem>
-                      <SelectItem value="Locação">Locação</SelectItem>
-                      <SelectItem value="Parceria">Parceria</SelectItem>
-                      <SelectItem value="Outro">Outro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="col-span-2">
-                  <Label htmlFor="parte_contratante">Parte Contratante *</Label>
-                  <Input
-                    id="parte_contratante"
-                    value={formData.parte_contratante}
-                    onChange={(e) => setFormData({ ...formData, parte_contratante: e.target.value })}
-                    list="partes-list"
-                    required
-                  />
-                  <datalist id="partes-list">
-                    {clientesFiltrados.map(c => <option key={c.id} value={c.nome} />)}
-                    {fornecedoresFiltrados.map(f => <option key={f.id} value={f.nome} />)}
-                  </datalist>
-                </div>
-
-                <div className="col-span-2">
-                  <Label htmlFor="objeto">Objeto do Contrato *</Label>
-                  <Input
-                    id="objeto"
-                    value={formData.objeto}
-                    onChange={(e) => setFormData({ ...formData, objeto: e.target.value })}
-                    placeholder="Ex: Fornecimento mensal de produtos"
-                    required
-                  />
-                </div>
-
-                <div className="col-span-2">
-                  <Label htmlFor="descricao">Descrição</Label>
-                  <Textarea
-                    id="descricao"
-                    value={formData.descricao}
-                    onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="valor_mensal">Valor Mensal</Label>
-                  <Input
-                    id="valor_mensal"
-                    type="number"
-                    step="0.01"
-                    value={formData.valor_mensal}
-                    onChange={(e) => setFormData({ ...formData, valor_mensal: parseFloat(e.target.value) })}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="valor_total">Valor Total</Label>
-                  <Input
-                    id="valor_total"
-                    type="number"
-                    step="0.01"
-                    value={formData.valor_total}
-                    onChange={(e) => setFormData({ ...formData, valor_total: parseFloat(e.target.value) })}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="data_inicio">Data Início *</Label>
-                  <Input
-                    id="data_inicio"
-                    type="date"
-                    value={formData.data_inicio}
-                    onChange={(e) => setFormData({ ...formData, data_inicio: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="data_fim">Data Fim</Label>
-                  <Input
-                    id="data_fim"
-                    type="date"
-                    value={formData.data_fim}
-                    onChange={(e) => setFormData({ ...formData, data_fim: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="vigencia_meses">Vigência (meses)</Label>
-                  <Input
-                    id="vigencia_meses"
-                    type="number"
-                    value={formData.vigencia_meses}
-                    onChange={(e) => setFormData({ ...formData, vigencia_meses: parseInt(e.target.value) })}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="indice_reajuste">Índice de Reajuste</Label>
-                  <Select
-                    value={formData.indice_reajuste}
-                    onValueChange={(value) => setFormData({ ...formData, indice_reajuste: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="IPCA">IPCA</SelectItem>
-                      <SelectItem value="IGPM">IGPM</SelectItem>
-                      <SelectItem value="INPC">INPC</SelectItem>
-                      <SelectItem value="CDI">CDI</SelectItem>
-                      <SelectItem value="Fixo">Fixo</SelectItem>
-                      <SelectItem value="Outro">Outro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="percentual_reajuste">Reajuste Anual (%)</Label>
-                  <Input
-                    id="percentual_reajuste"
-                    type="number"
-                    step="0.01"
-                    value={formData.percentual_reajuste}
-                    onChange={(e) => setFormData({ ...formData, percentual_reajuste: parseFloat(e.target.value) })}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="forma_pagamento">Forma de Pagamento</Label>
-                  <Select
-                    value={formData.forma_pagamento}
-                    onValueChange={(value) => setFormData({ ...formData, forma_pagamento: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Boleto">Boleto</SelectItem>
-                      <SelectItem value="Transferência">Transferência</SelectItem>
-                      <SelectItem value="Cartão">Cartão</SelectItem>
-                      <SelectItem value="PIX">PIX</SelectItem>
-                      <SelectItem value="Cheque">Cheque</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="dia_vencimento">Dia Vencimento</Label>
-                  <Input
-                    id="dia_vencimento"
-                    type="number"
-                    min="1"
-                    max="31"
-                    value={formData.dia_vencimento}
-                    onChange={(e) => setFormData({ ...formData, dia_vencimento: parseInt(e.target.value) })}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="data_assinatura">Data Assinatura</Label>
-                  <Input
-                    id="data_assinatura"
-                    type="date"
-                    value={formData.data_assinatura}
-                    onChange={(e) => setFormData({ ...formData, data_assinatura: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="responsavel_empresa">Responsável da Empresa</Label>
-                  <Input
-                    id="responsavel_empresa"
-                    value={formData.responsavel_empresa}
-                    onChange={(e) => setFormData({ ...formData, responsavel_empresa: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="status">Status</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value) => setFormData({ ...formData, status: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Rascunho">Rascunho</SelectItem>
-                      <SelectItem value="Aguardando Assinatura">Aguardando Assinatura</SelectItem>
-                      <SelectItem value="Vigente">Vigente</SelectItem>
-                      <SelectItem value="Vencido">Vencido</SelectItem>
-                      <SelectItem value="Rescindido">Rescindido</SelectItem>
-                      <SelectItem value="Renovado">Renovado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="col-span-2 space-y-3 border-t pt-4">
-                  <h4 className="font-semibold flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-yellow-600" />
-                    Automações
-                  </h4>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="renovacao_automatica"
-                      checked={formData.renovacao_automatica}
-                      onCheckedChange={(checked) => setFormData({ ...formData, renovacao_automatica: checked })}
-                    />
-                    <Label htmlFor="renovacao_automatica" className="font-normal cursor-pointer">
-                      Renovação automática ao vencer
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="gerar_cobranca_automatica"
-                      checked={formData.gerar_cobranca_automatica}
-                      onCheckedChange={(checked) => setFormData({ ...formData, gerar_cobranca_automatica: checked })}
-                    />
-                    <Label htmlFor="gerar_cobranca_automatica" className="font-normal cursor-pointer">
-                      Gerar boletos/cobranças automaticamente
-                    </Label>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="prazo_aviso_renovacao">Alertar renovação com (dias de antecedência)</Label>
-                    <Input
-                      id="prazo_aviso_renovacao"
-                      type="number"
-                      value={formData.prazo_aviso_renovacao}
-                      onChange={(e) => setFormData({ ...formData, prazo_aviso_renovacao: parseInt(e.target.value) })}
-                    />
-                  </div>
-                </div>
-
-                <div className="col-span-2">
-                  <Label htmlFor="observacoes">Observações</Label>
-                  <Textarea
-                    id="observacoes"
-                    value={formData.observacoes}
-                    onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-                    rows={2}
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="bg-emerald-600 hover:bg-emerald-700">
-                  {createMutation.isPending || updateMutation.isPending ? 'Salvando...' : editingContrato ? 'Atualizar' : 'Criar'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        {/* P1: Formulário inline removido — criação/edição via ContratoForm no openWindow */}
       </div>
 
       {/* KPIs */}
@@ -1501,6 +1085,24 @@ export default function ContratosPage() {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* P1: Dialog inline de confirmação de exclusão */}
+      <Dialog open={!!contratoParaExcluir} onOpenChange={() => setContratoParaExcluir(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+          </DialogHeader>
+          <p className="text-slate-600 text-sm">
+            Deseja realmente excluir o contrato <strong>{contratoParaExcluir?.numero_contrato}</strong>? Esta ação não pode ser desfeita.
+          </p>
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="outline" onClick={() => setContratoParaExcluir(null)}>Cancelar</Button>
+            <Button className="bg-red-600 hover:bg-red-700" onClick={confirmarExclusao} disabled={deleteMutation.isPending}>
+              {deleteMutation.isPending ? 'Excluindo...' : 'Excluir'}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 

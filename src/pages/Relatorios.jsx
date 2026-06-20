@@ -81,31 +81,39 @@ export default function Relatorios() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { empresaAtual, filterInContext } = useContextoVisual();
+  const { empresaAtual, grupoAtual, filterInContext } = useContextoVisual();
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+  // P2: queries só executam com contexto válido
+  const contextoValido = !!(empresaAtual?.id || groupId);
 
   const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes', empresaAtual?.id],
-    queryFn: () => filterInContext('Cliente', {}, '-created_date', 9999)
+    queryKey: ['clientes', empresaAtual?.id, groupId],
+    queryFn: () => filterInContext('Cliente', {}, '-created_date', 9999),
+    enabled: contextoValido,
   });
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos', empresaAtual?.id],
-    queryFn: () => filterInContext('Pedido', {}, '-data_pedido', 9999)
+    queryKey: ['pedidos', empresaAtual?.id, groupId],
+    queryFn: () => filterInContext('Pedido', {}, '-data_pedido', 9999),
+    enabled: contextoValido,
   });
 
   const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos', empresaAtual?.id],
-    queryFn: () => filterInContext('Produto', {}, '-created_date', 9999)
+    queryKey: ['produtos', empresaAtual?.id, groupId],
+    queryFn: () => filterInContext('Produto', {}, '-created_date', 9999),
+    enabled: contextoValido,
   });
 
   const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contasReceber', empresaAtual?.id],
-    queryFn: () => filterInContext('ContaReceber', {}, '-data_vencimento', 9999)
+    queryKey: ['contasReceber', empresaAtual?.id, groupId],
+    queryFn: () => filterInContext('ContaReceber', {}, '-data_vencimento', 9999),
+    enabled: contextoValido,
   });
 
   const { data: contasPagar = [] } = useQuery({
-    queryKey: ['contasPagar', empresaAtual?.id],
-    queryFn: () => filterInContext('ContaPagar', {}, '-data_vencimento', 9999)
+    queryKey: ['contasPagar', empresaAtual?.id, groupId],
+    queryFn: () => filterInContext('ContaPagar', {}, '-data_vencimento', 9999),
+    enabled: contextoValido,
   });
 
   const filtrarPorPeriodo = (data, campo = 'created_date') => {

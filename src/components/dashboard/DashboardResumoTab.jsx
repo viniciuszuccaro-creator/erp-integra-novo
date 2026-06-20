@@ -108,8 +108,10 @@ export default function DashboardResumoTab({
       {/* KPIs operacionais */}
       <Slot Component={KPIsOperacionaisSection} fallbackH={20} componentProps={{ kpis: kpisOperacionais }} />
 
-      {/* KPIs secundários */}
-      <Slot Component={SecondaryKPIsSection} fallbackH={16} componentProps={{ kpis: kpiCards }} />
+      {/* KPIs secundários — só renderiza se houver dados */}
+      {kpiCards && kpiCards.length > 0 && (
+        <Slot Component={SecondaryKPIsSection} fallbackH={16} componentProps={{ kpis: kpiCards }} />
+      )}
 
       {/* Ações rápidas contextuais */}
       <Slot Component={DashboardAcoesRapidas} fallbackH={20} componentProps={{

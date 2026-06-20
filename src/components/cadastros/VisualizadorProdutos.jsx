@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import VisualizadorUniversalEntidadeV24 from './VisualizadorUniversalEntidadeV24';
-import BotoesImportacaoProduto from './BotoesImportacaoProduto';
-import ProdutoFormV22_Completo from './ProdutoFormV22_Completo';
-import ImportadorProdutosPlanilha from '@/components/estoque/ImportadorProdutosPlanilha';
 import { useWindow } from '@/components/lib/useWindow';
-import { Package, Edit, Upload } from 'lucide-react';
+import VisualizadorUniversalEntidadeV24 from './VisualizadorUniversalEntidadeV24';
+import ProdutoFormV22_Completo from './ProdutoFormV22_Completo';
+import { Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -77,8 +75,6 @@ export default function VisualizadorProdutos(props) {
 
   return (
     <div className="flex flex-col h-full w-full bg-slate-50">
-      <div className="p-4 border-b bg-white flex items-center gap-4 shrink-0">
-      </div>
       <div className="flex-1 min-h-0 p-4 flex flex-col overflow-hidden">
         <VisualizadorUniversalEntidadeV24 {...visualizadorProps} />
       </div>

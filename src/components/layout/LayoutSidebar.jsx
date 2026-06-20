@@ -42,7 +42,7 @@ export default function LayoutSidebar({ navigationItems, groupedItems }) {
           </div>
           <div>
             <h2 className="font-bold text-xl text-slate-900">ERP Zuccaro</h2>
-            <p className="text-xs text-slate-500">V21.5 • Sistema Completo</p>
+            <p className="text-xs text-slate-500">V22 • Sistema Completo</p>
           </div>
         </div>
       </SidebarHeader>

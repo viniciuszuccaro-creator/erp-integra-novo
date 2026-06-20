@@ -5,9 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import {
-  DollarSign, TrendingUp, Users, ShoppingCart,
-  Package, Truck, UserCircle, AlertCircle, Percent,
-  CheckCircle, FileText,
+  DollarSign, Users, ShoppingCart,
+  Package, Truck, UserCircle, AlertCircle,
+  CheckCircle,
 } from "lucide-react";
 
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
@@ -105,14 +105,7 @@ export default function Dashboard() {
   );
 
   // Contagens derivadas direto das listas (evita chamadas extras ao backend)
-  const totalProdutos = produtos.length;
-  const totalClientes = clientes.length;
   const totalColaboradoresDash = colaboradores.length;
-
-  const nfAutorizadas = (notasFiscais || []).filter(n => n?.status === 'Autorizada').length;
-
-  // cobrancasPagas derivado do mesmo contasReceber (evita query duplicada)
-  const cobrancasPagas = (contasReceber || []).filter(c => (c?.status === 'Recebido') || (c?.status_cobranca === 'paga')).length;
 
   const {
      pedidosPeriodo,
@@ -185,34 +178,34 @@ export default function Dashboard() {
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
-  // Command Center metrics (24h window) from AuditLog
+  // Command Center metrics (24h) — filtrado por empresa/grupo (P2: multiempresa)
   const { data: ccMetrics = { errors: 0, funcs: 0, secAlerts: 0 } } = useQuery({
-    enabled: Boolean(hasContextoAtivo),
+    enabled: Boolean(hasContextoAtivo && autoRefresh),
     queryKey: ['command-center', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
     queryFn: async () => {
       const since = Date.now() - 24 * 60 * 60 * 1000;
-      const logs = await base44.entities.AuditLog.filter({}, '-data_hora', 500);
-      const within = (logs || []).filter(l => {
-        const t = new Date(l?.data_hora || l?.created_date || Date.now()).getTime();
-        return t >= since;
-      });
+      const filtro = empresaAtual?.id ? { empresa_id: empresaAtual.id } : grupoAtual?.id ? { group_id: grupoAtual.id } : {};
+      const logs = await base44.entities.AuditLog.filter(filtro, '-data_hora', 200);
+      const within = (logs || []).filter(l => new Date(l?.data_hora || l?.created_date || 0).getTime() >= since);
       const str = (l) => `${l?.descricao || ''} ${l?.mensagem_erro || ''} ${l?.acao || ''}`;
-      const errors = within.filter(l => /erro|error|failed|rejeit/i.test(str(l))).length;
-      const funcs = within.filter(l => l?.entidade === 'Function' && l?.acao === 'Execução').length;
-      const secAlerts = within.filter(l => (l?.tipo_auditoria || '').toLowerCase() === 'seguranca').length;
-      return { errors, funcs, secAlerts };
+      return {
+        errors: within.filter(l => /erro|error|failed|rejeit/i.test(str(l))).length,
+        funcs: within.filter(l => l?.entidade === 'Function' && l?.acao === 'Execução').length,
+        secAlerts: within.filter(l => (l?.tipo_auditoria || '').toLowerCase() === 'seguranca').length,
+      };
     },
-    staleTime: 180000,
+    staleTime: 300000,
   });
 
-  // KPIs Chatbot / SLA últimas 24h
+  // KPIs Chatbot (apenas quando autoRefresh ativo — evita chamadas desnecessárias)
   const { data: botMetrics = { chats: 0, sla_ok: 0, sla_total: 0 } } = useQuery({
-    enabled: Boolean(hasContextoAtivo),
-    queryKey: ['bot-metrics-24h', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
+    enabled: Boolean(hasContextoAtivo && autoRefresh),
+    queryKey: ['bot-metrics-24h', empresaAtual?.id, grupoAtual?.id],
     queryFn: async () => {
       const since = Date.now() - 24 * 60 * 60 * 1000;
-      const items = await base44.entities.ChatbotInteracao.filter({}, '-created_date', 500);
-      const within = (items || []).filter(i => new Date(i?.created_date || Date.now()).getTime() >= since);
+      const filtro = empresaAtual?.id ? { empresa_id: empresaAtual.id } : grupoAtual?.id ? { group_id: grupoAtual.id } : {};
+      const items = await base44.entities.ChatbotInteracao.filter(filtro, '-created_date', 200);
+      const within = (items || []).filter(i => new Date(i?.created_date || 0).getTime() >= since);
       const sla = within.reduce((acc, i) => {
         const ms = Number(i?.tempo_primeira_resposta_ms || 0);
         if (!isNaN(ms)) { acc.total++; if (ms <= 60000) acc.ok++; }
@@ -220,7 +213,7 @@ export default function Dashboard() {
       }, { ok: 0, total: 0 });
       return { chats: within.length, sla_ok: sla.ok, sla_total: sla.total };
     },
-    staleTime: 180000,
+    staleTime: 300000,
   });
 
   // Assinaturas realtime locais (reforço) para invalidar KPIs do Dashboard
@@ -416,8 +409,8 @@ export default function Dashboard() {
   ));
 
   return (
-    <div className="w-full h-full min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="flex-1 overflow-hidden p-6 space-y-6">
+    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="flex-1 overflow-auto p-6 space-y-6">
         {/* Each Suspense gets its own stable div container — prevents React fiber sibling DOM mismatch */}
         <div>
           <Suspense fallback={<div className="h-12 w-full bg-slate-100 rounded animate-pulse" />}>

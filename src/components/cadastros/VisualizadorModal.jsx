@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { AlertCircle, RefreshCw, X } from "lucide-react";
 
 export default function VisualizadorModal({
@@ -6,7 +6,16 @@ export default function VisualizadorModal({
   editItem, editError, isSaving, isLoadingEdit,
   onClose,
 }) {
+  // P3/P4: fechar com Escape (hook antes do early return)
+  useEffect(() => {
+    if (!FormComponent) return;
+    const handler = (e) => { if (e.key === 'Escape') onClose(false); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [FormComponent, onClose]);
+
   if (!FormComponent) return null;
+
   return (
     <>
       <div className="fixed inset-0 z-[1099] bg-black/50" onClick={() => onClose(false)} />

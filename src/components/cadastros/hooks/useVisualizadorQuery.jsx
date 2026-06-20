@@ -11,8 +11,9 @@ export default function useVisualizadorQuery({
 }) {
   const backendSortField = UNSORTABLE_BACKEND.has(sortField) ? "updated_date" : sortField;
 
+  // P2: empresaId e groupId já estão na key — readFilter é derivado deles, não precisa ser serializado separado
   const queryKey = useMemo(
-    () => ["viz-v33", ENTITY, sortField, sortDir, page, pageSize, debouncedSearch, empresaId, groupId],
+    () => ["viz-v33", ENTITY, sortField, sortDir, page, pageSize, debouncedSearch, empresaId ?? null, groupId ?? null],
     [ENTITY, sortField, sortDir, page, pageSize, debouncedSearch, empresaId, groupId]
   );
 
@@ -33,11 +34,12 @@ export default function useVisualizadorQuery({
     },
     staleTime: 60000,
     gcTime: 300000,
-    retry: 2,
-    retryDelay: (attempt) => Math.min(500 * (attempt + 1), 2000),
+    retry: 1,
+    retryDelay: (attempt) => Math.min(800 * (attempt + 1), 3000),
     refetchOnWindowFocus: false,
     refetchOnMount: 'always',
     placeholderData: (prev) => prev !== undefined ? prev : [],
+    // P2: só executa quando há contexto multiempresa válido E permissão
     enabled: !!ENTITY && contextoValido && canViewCadastro,
   });
 

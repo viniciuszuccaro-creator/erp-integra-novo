@@ -8,7 +8,7 @@
  * - VisualizadorTableBody   → tabela com ordenação e seleção
  * - VisualizadorModal       → modal de formulário
  */
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
@@ -158,23 +158,30 @@ export default function VisualizadorUniversalEntidadeV24({
     setEditItem(JSON.parse(JSON.stringify(item))); setEditError(null); setFormKey(k => k + 1); setShowForm(true);
   }, [canEditCadastro]);
 
-  const handleDelete = useCallback(async (item) => {
+  const [deleteTarget, setDeleteTarget] = React.useState(null);
+
+  const handleDelete = useCallback((item) => {
     if (!canDeleteCadastro) return;
-    const label = item.nome || item.razao_social || item.nome_completo || item.descricao || item.id;
-    if (!window.confirm(`Confirma excluir "${label}" de ${TITULO}? Esta ação será auditada.`)) return;
+    setDeleteTarget(item);
+  }, [canDeleteCadastro]);
+
+  const confirmDelete = useCallback(async () => {
+    const item = deleteTarget;
+    if (!item) return;
+    setDeleteTarget(null);
     try { await deleteInContext(ENTITY, item.id); }
     catch (e) { console.error("Erro ao excluir:", e); return; }
     lastGoodData.current = lastGoodData.current.filter(i => i.id !== item.id);
     setSelectedIds(prev => { const n = new Set(prev); n.delete(item.id); return n; });
     if (items.length <= 1 && page > 1) setPage(p => Math.max(1, p - 1));
     invalidateAll(queryClient, ENTITY);
-  }, [ENTITY, queryClient, items.length, page, canDeleteCadastro, deleteInContext]);
+  }, [deleteTarget, ENTITY, queryClient, items.length, page, deleteInContext]);
 
   const handleDeleteSelected = useCallback(async () => {
     if (!canDeleteCadastro) return;
     const effCount = crossPageAll ? Math.max(0, totalCount - deselectedIds.size) : selectedIds.size;
     if (effCount === 0) return;
-    if (!window.confirm(`Confirmar exclusão de ${effCount} registro(s) de ${TITULO}? Esta ação será auditada.`)) return;
+    // P3/P4: sem window.confirm — toolbar usa diálogo inline próprio que chama esta função após confirmação
     try {
       let idsToDelete = [];
       if (crossPageAll) {
@@ -247,33 +254,68 @@ export default function VisualizadorUniversalEntidadeV24({
     );
   }
 
+  const deleteLabel = deleteTarget ? (deleteTarget.nome || deleteTarget.razao_social || deleteTarget.nome_completo || deleteTarget.descricao || deleteTarget.id) : '';
+
   return (
-    <VisualizadorBody
-      ENTITY={ENTITY} TITULO={TITULO} COLUMNS={COLUMNS}
-      IconeProp={IconeProp} FormComponent={FormComponent} windowMode={windowMode}
-      items={items} isFetching={isFetching} isError={isError}
-      everLoadedRef={everLoadedRef} lastGoodData={lastGoodData}
-      totalCount={totalCount} countsLoading={countsLoading}
-      page={page} pageSize={pageSize} setPage={setPage} setPageSize={setPageSize}
-      search={search} setSearch={setSearch} debouncedSearch={debouncedSearch}
-      sortField={sortField} sortDir={sortDir}
-      handleSort={handleSort} handleSortDropdown={handleSortDropdown}
-      allPageSelected={allPageSelected} somePageSelected={somePageSelected}
-      effSelectedCount={effSelectedCount} showCrossPageBanner={showCrossPageBanner}
-      crossPageAll={crossPageAll} selectedIds={selectedIds} deselectedIds={deselectedIds}
-      isItemSelected={isItemSelected} handleItemCheck={handleItemCheck}
-      handleToggleSelectPage={handleToggleSelectPage}
-      handleActivateCrossPage={handleActivateCrossPage}
-      handleCancelSelection={handleCancelSelection}
-      canCreateCadastro={canCreateCadastro} canEditCadastro={canEditCadastro}
-      canDeleteCadastro={canDeleteCadastro} contextoValido={contextoValido}
-      onRefresh={() => { lastGoodData.current = []; everLoadedRef.current = false; invalidateAll(queryClient, ENTITY); }}
-      onNew={handleNewItem} onEdit={handleEditItem}
-      onDelete={handleDelete} onDeleteSelected={handleDeleteSelected}
-      showForm={showForm} formProps={formProps} formKey={formKey}
-      editItem={editItem} editError={editError} isSaving={isSaving}
-      onClose={handleCloseForm}
-      extraColors={_extraColors} queryClient={queryClient} invalidateAll={invalidateAll}
-    />
+    <>
+      <VisualizadorBody
+        ENTITY={ENTITY} TITULO={TITULO} COLUMNS={COLUMNS}
+        IconeProp={IconeProp} FormComponent={FormComponent} windowMode={windowMode}
+        items={items} isFetching={isFetching} isError={isError}
+        everLoadedRef={everLoadedRef} lastGoodData={lastGoodData}
+        totalCount={totalCount} countsLoading={countsLoading}
+        page={page} pageSize={pageSize} setPage={setPage} setPageSize={setPageSize}
+        search={search} setSearch={setSearch} debouncedSearch={debouncedSearch}
+        sortField={sortField} sortDir={sortDir}
+        handleSort={handleSort} handleSortDropdown={handleSortDropdown}
+        allPageSelected={allPageSelected} somePageSelected={somePageSelected}
+        effSelectedCount={effSelectedCount} showCrossPageBanner={showCrossPageBanner}
+        crossPageAll={crossPageAll} selectedIds={selectedIds} deselectedIds={deselectedIds}
+        isItemSelected={isItemSelected} handleItemCheck={handleItemCheck}
+        handleToggleSelectPage={handleToggleSelectPage}
+        handleActivateCrossPage={handleActivateCrossPage}
+        handleCancelSelection={handleCancelSelection}
+        canCreateCadastro={canCreateCadastro} canEditCadastro={canEditCadastro}
+        canDeleteCadastro={canDeleteCadastro} contextoValido={contextoValido}
+        onRefresh={() => { lastGoodData.current = []; everLoadedRef.current = false; invalidateAll(queryClient, ENTITY); }}
+        onNew={handleNewItem} onEdit={handleEditItem}
+        onDelete={handleDelete} onDeleteSelected={handleDeleteSelected}
+        showForm={showForm} formProps={formProps} formKey={formKey}
+        editItem={editItem} editError={editError} isSaving={isSaving}
+        onClose={handleCloseForm}
+        extraColors={_extraColors} queryClient={queryClient} invalidateAll={invalidateAll}
+      />
+
+      {/* Diálogo de confirmação de exclusão individual — sem window.confirm (P3/P4) */}
+      {deleteTarget && (
+        <>
+          <div className="fixed inset-0 z-[1199] bg-black/40" onClick={() => setDeleteTarget(null)} />
+          <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4 pointer-events-none">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm pointer-events-auto p-6 flex flex-col gap-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                  <AlertCircle className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-800 text-sm">Confirmar exclusão</h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Excluir <span className="font-medium text-slate-700">"{deleteLabel}"</span> de <span className="font-medium">{TITULO}</span>?
+                    Esta ação será auditada e não pode ser desfeita.
+                  </p>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button onClick={() => setDeleteTarget(null)} className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">
+                  Cancelar
+                </button>
+                <button onClick={confirmDelete} className="px-3 py-1.5 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium">
+                  Excluir
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 }

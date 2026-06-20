@@ -363,7 +363,7 @@ export default function Dashboard() {
     }
   ];
 
-  const kpiCards = [];
+  // P1/P4: kpiCards removido — era array vazio (código morto). DashboardResumoTab recebe [] diretamente.
 
   const quickAccessBase = [
     {
@@ -486,7 +486,7 @@ export default function Dashboard() {
               <DashboardResumoTab
                 statsCards={statsCards}
                 kpisOperacionais={kpisOperacionais}
-                kpiCards={kpiCards}
+                kpiCards={[]}
                 quickAccess={quickAccess}
                 pedidosRecentes={pedidosRecentes}
                 pedidosPendentes={pedidosPendentes}

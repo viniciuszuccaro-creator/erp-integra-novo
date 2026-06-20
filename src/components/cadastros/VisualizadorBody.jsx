@@ -31,11 +31,20 @@ export default function VisualizadorBody({
   queryClient, invalidateAll, extraColors,
   // paginação
   page,
-  // modal — editError agora exibido inline no modal via formProps
+  // modal
   formProps, formKey, editItem, editError, isSaving, onClose,
 }) {
+  // P2: aviso inline quando não há contexto multiempresa definido
+  const semContexto = !contextoValido;
   const content = (
     <div className="flex flex-col h-full gap-2 min-h-0 w-full">
+      {/* P2: aviso de contexto ausente */}
+      {semContexto && (
+        <div className="bg-amber-50 border border-amber-200 rounded-sm px-3 py-2 text-xs text-amber-800 flex items-center gap-2 shrink-0">
+          <AlertCircle className="w-3.5 h-3.5 shrink-0 text-amber-500" />
+          <span>Selecione uma empresa ou grupo para filtrar os registros por contexto multiempresa.</span>
+        </div>
+      )}
       <VisualizadorToolbar
         ENTITY={ENTITY} TITULO={TITULO} COLUMNS={COLUMNS}
         totalCount={totalCount} countsLoading={countsLoading}

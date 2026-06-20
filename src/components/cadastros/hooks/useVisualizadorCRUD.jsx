@@ -6,6 +6,28 @@ import { sanitizeOnWrite } from "@/components/lib/sanitizeOnWrite";
 // Re-exporta para compatibilidade com importadores existentes
 export { ENTITY_CODE_FIELD };
 
+// P3: auditoria silenciosa (não bloqueia)
+async function auditarAcao({ acao, ENTITY, registroId, empresaId, groupId, dadosAntes, dadosDepois, descricao }) {
+  try {
+    const user = await base44.auth.me().catch(() => null);
+    await base44.entities.AuditLog.create({
+      acao,
+      modulo: 'Cadastros',
+      tipo_auditoria: 'entidade',
+      entidade: ENTITY,
+      registro_id: registroId || null,
+      descricao: descricao || `${acao} em ${ENTITY}`,
+      usuario: user?.full_name || user?.email || 'Usuário',
+      usuario_id: user?.id || null,
+      empresa_id: empresaId || null,
+      group_id: groupId || null,
+      dados_anteriores: dadosAntes || null,
+      dados_novos: dadosDepois || null,
+      data_hora: new Date().toISOString(),
+    });
+  } catch { /* auditoria nunca bloqueia */ }
+}
+
 export default function useVisualizadorCRUD({
   ENTITY, editItem, empresaId, groupId, isSimple,
   canCreateCadastro, canEditCadastro, canDeleteCadastro,
@@ -72,7 +94,11 @@ export default function useVisualizadorCRUD({
     if (!formData || !ENTITY) return;
     if (formData._action === "delete") {
       if (!canDeleteCadastro) throw new Error("Sem permissão para excluir.");
-      if (formData.id) { try { await deleteInContext(ENTITY, formData.id); } catch (_) {} }
+      if (formData.id) {
+        const dadosAntes = { id: formData.id, ...formData };
+        try { await deleteInContext(ENTITY, formData.id); } catch (_) {}
+        auditarAcao({ acao: 'Exclusão', ENTITY, registroId: formData.id, empresaId, groupId, dadosAntes, descricao: `Exclusão via formulário: ${ENTITY}` });
+      }
       handleCloseForm(true);
       return;
     }
@@ -101,8 +127,10 @@ export default function useVisualizadorCRUD({
       }
       if (editItem?.id) {
         await updateInContext(ENTITY, editItem.id, clean, "empresa_id");
+        auditarAcao({ acao: 'Edição', ENTITY, registroId: editItem.id, empresaId, groupId, dadosAntes: editItem, dadosDepois: clean });
       } else {
-        await createInContext(ENTITY, clean, "empresa_id");
+        const criado = await createInContext(ENTITY, clean, "empresa_id");
+        auditarAcao({ acao: 'Criação', ENTITY, registroId: criado?.id, empresaId, groupId, dadosDepois: clean });
       }
       handleCloseForm(true);
     } catch (e) {

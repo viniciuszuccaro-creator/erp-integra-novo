@@ -11,6 +11,7 @@ export default function useVisualizadorState({ pageSizeProp = 20, startWithForm 
   const [showForm,      setShowForm]      = useState(Boolean(startWithForm && FormComponent));
   const [editItem,      setEditItem]      = useState(null);
   const [formKey,       setFormKey]       = useState(0);
+  // isLoadingEdit: reservado para futuro carregamento assíncrono de item — mantido na interface por compatibilidade
   const [isLoadingEdit, setIsLoadingEdit] = useState(false);
   const [editError,     setEditError]     = useState(null);
   const [isSaving,      setIsSaving]      = useState(false);

@@ -114,10 +114,17 @@ export default function LayoutEffects({
     } catch {} })();
   }, [location.pathname, user?.id, empresaAtual?.id, moduleName]);
 
-  // 6. Auditoria de bloqueio de módulo
+  // 6. Auditoria de bloqueio de módulo — limpa cache de sessão ao trocar empresa/grupo
+  useEffect(() => {
+    // P5: reseta auditorias de bloqueio ao mudar contexto multiempresa
+    try {
+      Object.keys(sessionStorage).filter(k => k.startsWith('audit_block_')).forEach(k => sessionStorage.removeItem(k));
+    } catch {}
+  }, [empresaAtual?.id, grupoAtual?.id]);
+
   useEffect(() => {
     if (!moduleName) return;
-    const key = `audit_block_${moduleName}`;
+    const key = `audit_block_${moduleName}_${empresaAtual?.id || 'none'}`;
     try {
       const allowed = hasPermission(moduleName, null, "ver");
       if (!allowed && !sessionStorage.getItem(key)) {
@@ -126,13 +133,15 @@ export default function LayoutEffects({
           usuario: user?.full_name || user?.email || "Usuário",
           usuario_id: user?.id,
           empresa_id: empresaAtual?.id || null,
+          group_id: grupoAtual?.id || null,
           acao: "Bloqueio", modulo: moduleName, tipo_auditoria: "seguranca",
           entidade: "Página",
           descricao: `Acesso negado ao módulo ${moduleName} (${currentPageName})`,
+          data_hora: new Date().toISOString(),
         });
       }
     } catch {}
-  }, [moduleName, currentPageName, user?.id, empresaAtual?.id]);
+  }, [moduleName, currentPageName, user?.id, empresaAtual?.id, grupoAtual?.id]);
 
   // 7. Entity subscriptions para auditoria + stamping
   useEffect(() => {

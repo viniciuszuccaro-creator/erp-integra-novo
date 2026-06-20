@@ -13,6 +13,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
+import { useUser } from "@/components/lib/UserContext";
 import useEntityCounts, { SIMPLE_CATALOG } from "@/components/lib/useEntityCounts";
 import { AlertCircle } from "lucide-react";
 import useVisualizadorState from "@/components/cadastros/hooks/useVisualizadorState";
@@ -52,6 +53,7 @@ export default function VisualizadorUniversalEntidadeV24({
   const queryClient = useQueryClient();
   const { empresaAtual, grupoAtual, empresasDoGrupo, createInContext, updateInContext, deleteInContext } = useContextoVisual();
   const { canCreate, canEdit, canDelete, hasPermission } = usePermissions();
+  const { user } = useUser();
   const empresaId = empresaAtual?.id || null;
   const groupId   = grupoAtual?.id   || null;
   const contextoValido = !!(empresaId || groupId || isSimple);
@@ -186,21 +188,23 @@ export default function VisualizadorUniversalEntidadeV24({
           skipAcc += 500;
         }
       } else { idsToDelete = Array.from(selectedIds); }
-      if (!idsToDelete.length) { alert("Nenhum registro encontrado."); return; }
+      if (!idsToDelete.length) { console.warn("Nenhum registro encontrado para exclusão."); return; }
       for (let i = 0; i < idsToDelete.length; i += 20) {
         await Promise.all(idsToDelete.slice(i, i + 20).map(id => deleteInContext(ENTITY, id).catch(() => {})));
       }
-      // c25-05: AuditLog para exclusões em massa
+      // P3/P5: AuditLog para exclusões em massa com usuario + multiempresa
       try {
         await base44.entities.AuditLog.create({
           acao: 'Exclusão', modulo: 'Cadastros', tipo_auditoria: 'entidade',
           entidade: ENTITY, descricao: `Exclusão em massa: ${idsToDelete.length} registro(s) de ${ENTITY}`,
+          usuario: user?.full_name || user?.email || 'Usuário',
+          usuario_id: user?.id || null,
           empresa_id: empresaId || null, group_id: groupId || null,
           data_hora: new Date().toISOString(),
-          dados_novos: { ids_excluidos: idsToDelete.slice(0, 50) },
+          dados_novos: { ids_excluidos: idsToDelete.slice(0, 50), total: idsToDelete.length },
         });
       } catch { /* auditoria não bloqueia */ }
-    } catch (e) { alert("Erro: " + (e?.message || String(e))); return; }
+    } catch (e) { console.error("Erro ao excluir em massa:", e?.message || e); return; }
     setSelectedIds(new Set()); setDeselectedIds(new Set()); setCrossPageAll(false); setPage(1);
     invalidateAll(queryClient, ENTITY);
   }, [ENTITY, crossPageAll, totalCount, selectedIds, deselectedIds, readFilter, queryClient, deleteInContext, canDeleteCadastro]);
@@ -249,7 +253,7 @@ export default function VisualizadorUniversalEntidadeV24({
       IconeProp={IconeProp} FormComponent={FormComponent} windowMode={windowMode}
       items={items} isFetching={isFetching} isError={isError}
       everLoadedRef={everLoadedRef} lastGoodData={lastGoodData}
-      totalCount={totalCount} countsLoading={countsLoading} skip={(page - 1) * pageSize}
+      totalCount={totalCount} countsLoading={countsLoading}
       page={page} pageSize={pageSize} setPage={setPage} setPageSize={setPageSize}
       search={search} setSearch={setSearch} debouncedSearch={debouncedSearch}
       sortField={sortField} sortDir={sortDir}

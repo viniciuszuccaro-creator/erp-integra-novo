@@ -79,10 +79,9 @@ export default function useVisualizadorCRUD({
     if (editItem?.id && !canEditCadastro) throw new Error("Sem permissão para editar.");
     if (!editItem?.id && !canCreateCadastro) throw new Error("Sem permissão para criar.");
 
-    // c25-01: validar contexto multiempresa antes de salvar
+    // P2: validar contexto multiempresa antes de salvar — lança para exibição inline no modal
     if (!isSimple && !empresaId && !groupId) {
-      alert("⚠️ Selecione uma empresa ou grupo antes de salvar.");
-      return;
+      throw new Error("⚠️ Selecione uma empresa ou grupo antes de salvar.");
     }
 
     setIsSaving(true);

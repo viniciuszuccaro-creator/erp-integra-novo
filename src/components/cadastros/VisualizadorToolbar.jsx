@@ -14,7 +14,7 @@ export default function VisualizadorToolbar({
   sortField, sortDir, handleSortDropdown,
   isFetching, onRefresh,
   FormComponent, onNew, contextoValido, canCreateCadastro,
-  effSelectedCount, totalCountAll, onDeleteSelected, canDeleteCadastro,
+  effSelectedCount, onDeleteSelected, canDeleteCadastro,
   items,
 }) {
   const handleExportCSV = useCallback(() => {
@@ -127,7 +127,7 @@ export default function VisualizadorToolbar({
           className="h-9 rounded-sm gap-1 shrink-0"
         >
           <Trash2 className="w-4 h-4" />
-          Excluir {(effSelectedCount >= totalCountAll && totalCountAll > 0) ? "TODOS" : effSelectedCount}
+          Excluir {(effSelectedCount >= totalCount && totalCount > 0) ? "TODOS" : effSelectedCount}
         </Button>
       )}
     </div>

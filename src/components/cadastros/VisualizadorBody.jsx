@@ -31,7 +31,7 @@ export default function VisualizadorBody({
   queryClient, invalidateAll, extraColors,
   // paginação
   page,
-  // modal
+  // modal — editError agora exibido inline no modal via formProps
   formProps, formKey, editItem, editError, isSaving, onClose,
 }) {
   const content = (
@@ -46,7 +46,7 @@ export default function VisualizadorBody({
         onRefresh={onRefresh}
         FormComponent={FormComponent} onNew={onNew}
         contextoValido={contextoValido} canCreateCadastro={canCreateCadastro}
-        effSelectedCount={effSelectedCount} totalCountAll={totalCount}
+        effSelectedCount={effSelectedCount}
         onDeleteSelected={onDeleteSelected} canDeleteCadastro={canDeleteCadastro}
       />
 
@@ -98,15 +98,27 @@ export default function VisualizadorBody({
       </div>
 
       {/* Paginação */}
-      <div className="flex items-center justify-between text-xs text-slate-500 shrink-0 flex-wrap gap-1">
-        <span>{items.length} de {totalCount} registros · pág. {page}{totalCount > 0 ? ` / ${Math.ceil(totalCount / pageSize)}` : ''}</span>
-        <div className="flex gap-1">
-          <button onClick={() => setPage(1)} disabled={page === 1 || isFetching} className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40">«</button>
-          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || isFetching} className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40">‹ Ant.</button>
-          <span className="flex items-center justify-center h-7 px-2 border border-slate-200 rounded-sm bg-blue-50 font-semibold text-blue-700">{page}</span>
-          <button onClick={() => setPage(p => p + 1)} disabled={items.length < pageSize || isFetching} className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40">Próx. ›</button>
-        </div>
-      </div>
+      {(() => {
+        const totalPages = totalCount > 0 ? Math.ceil(totalCount / pageSize) : 1;
+        const hasNext = items.length >= pageSize && page < totalPages;
+        return (
+          <div className="flex items-center justify-between text-xs text-slate-500 shrink-0 flex-wrap gap-1">
+            <span className="tabular-nums">
+              {items.length} de {totalCount.toLocaleString('pt-BR')} registros
+              {totalPages > 1 ? ` · pág. ${page} / ${totalPages}` : ''}
+            </span>
+            <div className="flex gap-1">
+              <button onClick={() => setPage(1)} disabled={page === 1 || isFetching} className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed" title="Primeira página">«</button>
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || isFetching} className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">‹ Ant.</button>
+              <span className="flex items-center justify-center h-7 px-2 border border-blue-300 rounded-sm bg-blue-50 font-semibold text-blue-700 tabular-nums">{page}</span>
+              <button onClick={() => setPage(p => p + 1)} disabled={!hasNext || isFetching} className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">Próx. ›</button>
+              {totalPages > 1 && (
+                <button onClick={() => setPage(totalPages)} disabled={page === totalPages || isFetching} className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed" title="Última página">»</button>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Modal */}
       {FormComponent && onClose && formProps?.isOpen && (
@@ -121,11 +133,12 @@ export default function VisualizadorBody({
   );
 
   if (windowMode) {
+    const IconComp = IconeProp;
     return (
       <div className="w-full h-full flex flex-col p-4 bg-white overflow-hidden">
-        {IconeProp && (
+        {IconComp && (
           <div className="flex items-center gap-2 mb-3 shrink-0">
-            <IconeProp className="w-5 h-5 text-slate-500" />
+            <IconComp className="w-5 h-5 text-slate-500" />
             <h2 className="text-base font-semibold text-slate-800">{TITULO}</h2>
           </div>
         )}

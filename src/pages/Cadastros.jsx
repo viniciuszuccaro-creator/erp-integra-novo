@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import useCadastrosAllCounts from "@/components/cadastros/hooks/useCadastrosAllCounts";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Accordion, AccordionContent, AccordionItem, AccordionTrigger
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
 import {
   Users, Building2, Truck, DollarSign, Package, Cpu
@@ -29,6 +29,7 @@ export default function Cadastros() {
   const [acordeonAberto, setAcordeonAberto] = useState(["bloco1"]);
   const [abaGerenciamento, setAbaGerenciamento] = useState("cadastros");
   const { counts: allCounts, totals, isLoading: countsLoading } = useCadastrosAllCounts();
+  // countsLoading passado para blocos filhos (exibe skeleton nas grades)
   const { isAdmin, hasPermission } = usePermissions();
   const { empresaAtual, grupoAtual } = useContextoVisual();
   const podeVerCadastros = isAdmin?.() || hasPermission("Cadastros", null, "visualizar") || hasPermission("Cadastros", "Cadastros Gerais", "visualizar");
@@ -102,68 +103,29 @@ export default function Cadastros() {
             </Card>
           )}
 
-          {/* DASHBOARD DE TOTAIS */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            <Card className="border-0 shadow-md hover:shadow-xl transition-all cursor-pointer bg-gradient-to-br from-blue-50 to-blue-100" onClick={() => handleCardClick('bloco1')}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <Users className="w-5 h-5 text-blue-600" />
-                  <GroupCountBadge precomputedTotal={totals.bloco1} badgeClassName="bg-blue-600 text-white text-xs px-1.5 border-blue-600" />
-                </div>
-                <div className="text-lg font-bold text-blue-900">Pessoas</div>
-                <p className="text-xs text-blue-700">& Parceiros</p>
-              </CardContent>
-            </Card>
-            <Card className="border-0 shadow-md hover:shadow-xl transition-all cursor-pointer bg-gradient-to-br from-purple-50 to-purple-100" onClick={() => handleCardClick('bloco2')}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <Package className="w-5 h-5 text-purple-600" />
-                  <GroupCountBadge precomputedTotal={totals.bloco2} badgeClassName="bg-purple-600 text-white text-xs px-1.5 border-purple-600" />
-                </div>
-                <div className="text-lg font-bold text-purple-900">Produtos</div>
-                <p className="text-xs text-purple-700">& Serviços</p>
-              </CardContent>
-            </Card>
-            <Card className="border-0 shadow-md hover:shadow-xl transition-all cursor-pointer bg-gradient-to-br from-green-50 to-green-100" onClick={() => handleCardClick('bloco3')}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <DollarSign className="w-5 h-5 text-green-600" />
-                  <GroupCountBadge precomputedTotal={totals.bloco3} badgeClassName="bg-green-600 text-white text-xs px-1.5 border-green-600" />
-                </div>
-                <div className="text-lg font-bold text-green-900">Financeiro</div>
-                <p className="text-xs text-green-700">& Fiscal</p>
-              </CardContent>
-            </Card>
-            <Card className="border-0 shadow-md hover:shadow-xl transition-all cursor-pointer bg-gradient-to-br from-orange-50 to-orange-100" onClick={() => handleCardClick('bloco4')}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <Truck className="w-5 h-5 text-orange-600" />
-                  <GroupCountBadge precomputedTotal={totals.bloco4} badgeClassName="bg-orange-600 text-white text-xs px-1.5 border-orange-600" />
-                </div>
-                <div className="text-lg font-bold text-orange-900">Logística</div>
-                <p className="text-xs text-orange-700">Frota & Almox.</p>
-              </CardContent>
-            </Card>
-            <Card className="border-0 shadow-md hover:shadow-xl transition-all cursor-pointer bg-gradient-to-br from-indigo-50 to-indigo-100" onClick={() => handleCardClick('bloco5')}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <Building2 className="w-5 h-5 text-indigo-600" />
-                  <GroupCountBadge precomputedTotal={totals.bloco5} badgeClassName="bg-indigo-600 text-white text-xs px-1.5 border-indigo-600" />
-                </div>
-                <div className="text-lg font-bold text-indigo-900">Organizacional</div>
-                <p className="text-xs text-indigo-700">Estrutura</p>
-              </CardContent>
-            </Card>
-            <Card className="border-0 shadow-md hover:shadow-xl transition-all cursor-pointer bg-gradient-to-br from-cyan-50 to-cyan-100" onClick={() => handleCardClick('bloco6')}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <Cpu className="w-5 h-5 text-cyan-600" />
-                  <GroupCountBadge precomputedTotal={totals.bloco6} badgeClassName="bg-cyan-600 text-white text-xs px-1.5 border-cyan-600" />
-                </div>
-                <div className="text-lg font-bold text-cyan-900">Tecnologia</div>
-                <p className="text-xs text-cyan-700">IA & Parâmetros</p>
-              </CardContent>
-            </Card>
+          {/* SUMÁRIO RÁPIDO — barra de totais compacta (P4: sem cards redundantes) */}
+          <div className="flex flex-wrap gap-2 items-center">
+            {[
+              { id: 'bloco1', label: 'Pessoas', total: totals.bloco1, color: 'bg-blue-100 text-blue-800 border-blue-200', icon: Users },
+              { id: 'bloco2', label: 'Produtos', total: totals.bloco2, color: 'bg-purple-100 text-purple-800 border-purple-200', icon: Package },
+              { id: 'bloco3', label: 'Financeiro', total: totals.bloco3, color: 'bg-green-100 text-green-800 border-green-200', icon: DollarSign },
+              { id: 'bloco4', label: 'Logística', total: totals.bloco4, color: 'bg-orange-100 text-orange-800 border-orange-200', icon: Truck },
+              { id: 'bloco5', label: 'Organizacional', total: totals.bloco5, color: 'bg-indigo-100 text-indigo-800 border-indigo-200', icon: Building2 },
+              { id: 'bloco6', label: 'Tecnologia', total: totals.bloco6, color: 'bg-cyan-100 text-cyan-800 border-cyan-200', icon: Cpu },
+            ].map(({ id, label, total, color, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => handleCardClick(id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all hover:shadow-sm ${color}`}
+                title={`Ir para ${label}`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{label}</span>
+                <span className="font-bold tabular-nums">
+                  {(total ?? 0).toLocaleString('pt-BR')}
+                </span>
+              </button>
+            ))}
           </div>
 
           {/* BUSCA UNIVERSAL */}

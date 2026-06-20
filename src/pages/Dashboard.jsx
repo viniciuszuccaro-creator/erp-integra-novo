@@ -18,7 +18,6 @@ import { DASHBOARD_LIST_LIMIT, DASHBOARD_REFETCH_INTERVAL_MS, dashboardQueryDefa
 
 // Lazy-loaded components — only those used directly in this page's JSX
 const DashboardHeader          = React.lazy(() => import("@/components/dashboard/DashboardHeader"));
-const DashboardEssentialKPIs   = React.lazy(() => import("@/components/dashboard/DashboardEssentialKPIs"));
 const DashboardKPIStrip        = React.lazy(() => import("@/components/dashboard/DashboardKPIStrip"));
 const DashboardResumoTab       = React.lazy(() => import("@/components/dashboard/DashboardResumoTab"));
 const ERPHealthBanner          = React.lazy(() => import("@/components/dashboard/ERPHealthBanner"));

@@ -23,6 +23,7 @@ const CotacoesTab = React.lazy(() => import("../components/compras/CotacoesTab")
 const ImportacaoNFeRecebimento = React.lazy(() => import("../components/compras/ImportacaoNFeRecebimento"));
 const OrdemCompraForm = React.lazy(() => import("../components/compras/OrdemCompraForm"));
 const ComprasIAInsights = React.lazy(() => import("../components/compras/ComprasIAInsights"));
+const AvaliacaoFornecedorForm = React.lazy(() => import('../components/compras/AvaliacaoFornecedorForm'));
 
 export default function Compras() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
@@ -30,8 +31,8 @@ export default function Compras() {
   const { user } = useUser();
   const { openWindow } = useWindow();
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
-  const contextKey = empresaAtual?.id || groupId || "sem-contexto";
-  const contextoValido = contextKey !== "sem-contexto";
+  // P2: contexto válido requer empresa OU grupo explícito — nunca busca sem escopo
+  const contextoValido = !!(empresaAtual?.id || groupId);
   const podeCriarOC = hasPermission("Compras", "Ordens de Compra", "criar") || hasPermission("Compras", "Ordens Compra", "criar");
 
   const { data: fornecedores = [] } = useRLSQuery(
@@ -139,7 +140,7 @@ export default function Compras() {
       description: 'Score e desempenho',
       icon: Star,
       color: 'amber',
-      component: React.lazy(() => import('../components/compras/AvaliacaoFornecedorForm')),
+      component: AvaliacaoFornecedorForm,
       windowTitle: '⭐ Avaliação de Fornecedor',
       width: 1200,
       height: 700,

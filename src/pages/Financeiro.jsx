@@ -43,9 +43,9 @@ export default function Financeiro() {
     empresaAtual,
     empresasDoGrupo,
   } = useContextoVisual();
-  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || empresasDoGrupo?.[0]?.group_id || null;
-  const contextKey = empresaAtual?.id || groupId || 'sem-contexto';
-  const contextoValido = contextKey !== 'sem-contexto';
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+  // P2: contexto válido requer empresa OU grupo explícito — nunca busca sem escopo
+  const contextoValido = !!(empresaAtual?.id || groupId);
 
   const { data: contasReceber = [] } = useRLSQuery(
     'ContaReceber', {}, 'data_vencimento', FINANCEIRO_LIST_LIMIT,
@@ -260,7 +260,7 @@ export default function Financeiro() {
 
   const allModules = [...modules, ...grupoModules];
 
-  const allowedAllModules = allModules.filter(m => hasPermission('Financeiro', (m.sectionKey || m.title), 'ver'));
+  const allowedAllModules = allModules.filter(m => hasPermission('Financeiro', (m.sectionKey || m.title), 'visualizar') || hasPermission('Financeiro', null, 'visualizar'));
 
   const handleModuleClick = (module) => {
     startTransition(() => {

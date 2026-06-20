@@ -39,8 +39,8 @@ export default function Estoque() {
   const { estaNoGrupo, empresaAtual, grupoAtual, empresasDoGrupo } = useContextoVisual();
 
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
-  const contextKey = empresaAtual?.id || groupId || 'sem-contexto';
-  const contextoValido = contextKey !== 'sem-contexto';
+  // P2: contexto válido requer empresa OU grupo explícito — nunca busca sem escopo
+  const contextoValido = !!(empresaAtual?.id || groupId);
 
   const { data: produtosParaKPIs = [], refetch: refetchContagens } = useRLSQuery(
     'Produto', {}, undefined, ESTOQUE_PRODUCTS_LIMIT,
@@ -213,7 +213,7 @@ export default function Estoque() {
     },
   ];
 
-  const allowedModules = modules.filter(m => hasPermission('Estoque', (m.sectionKey || m.title), 'ver'));
+  const allowedModules = modules.filter(m => hasPermission('Estoque', (m.sectionKey || m.title), 'visualizar') || hasPermission('Estoque', null, 'visualizar'));
 
   const handleModuleClick = (module) => {
     startTransition(() => {

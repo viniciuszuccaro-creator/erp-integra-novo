@@ -91,15 +91,20 @@ export default function LayoutEffects({
     } catch {}
   }, [user?.id, empresaAtual?.id, grupoAtual?.id, moduleName, currentPageName]);
 
-  // 5. Auditoria de navegação
+  // 5. Auditoria de navegação (throttle: 1 log por rota por sessão)
+  const navAuditedRef = useRef(new Set());
   useEffect(() => {
     if (!user) return;
+    const key = `${location.pathname}|${user?.id}`;
+    if (navAuditedRef.current.has(key)) return;
+    navAuditedRef.current.add(key);
     (async () => { try {
       if (await base44.auth.isAuthenticated()) {
         await base44.entities.AuditLog.create({
           usuario: user?.full_name || user?.email || "Usuário",
           usuario_id: user?.id,
           empresa_id: empresaAtual?.id || null,
+          group_id: grupoAtual?.id || null,
           acao: "Visualização", modulo: moduleName || "Sistema",
           tipo_auditoria: "ui", entidade: "Navegação",
           descricao: `Rota: ${location.pathname}`,
@@ -159,10 +164,12 @@ export default function LayoutEffects({
       if (!api?.subscribe) return null;
       return api.subscribe(async (evt) => {
         try {
+          // P2: inclui group_id no AuditLog para rastreabilidade multiempresa
           await base44.entities.AuditLog.create({
             usuario: user?.full_name || user?.email || "Usuário",
             usuario_id: user?.id,
-            empresa_id: empresaAtual?.id || null,
+            empresa_id: empresaAtual?.id || evt?.data?.empresa_id || null,
+            group_id: grupoAtual?.id || evt?.data?.group_id || null,
             acao: evt.type === "create" ? "Criação" : evt.type === "update" ? "Edição" : "Exclusão",
             modulo: entityToModule[name], tipo_auditoria: "entidade",
             entidade: name, registro_id: evt.id,
@@ -198,16 +205,19 @@ export default function LayoutEffects({
     else setTimeout(cleanup, 8000);
   }, []);
 
-  // 9. Performance / LCP observer
+  // 9. Deploy audit — apenas uma vez por sessão para evitar chamadas repetidas
+  const deployAuditDoneRef = useRef(false);
   useEffect(() => {
+    if (deployAuditDoneRef.current || !user?.id) return;
+    deployAuditDoneRef.current = true;
     try {
       setTimeout(() => { (async () => { try {
         if (await base44.auth.isAuthenticated()) {
           await base44.functions.invoke("deployAudit", { event: "app_loaded", module: moduleName || "Sistema", page: currentPageName });
         }
-      } catch {} })(); }, 0);
+      } catch {} })(); }, 2000); // atraso para não bloquear carregamento inicial
     } catch {}
-  }, [user?.id, moduleName]);
+  }, [user?.id]);
 
   // 10. Offline cache hydration
   useEffect(() => {

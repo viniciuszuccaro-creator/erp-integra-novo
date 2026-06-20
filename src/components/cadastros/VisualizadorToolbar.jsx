@@ -105,23 +105,25 @@ export default function VisualizadorToolbar({
         </button>
       )}
 
-      {FormComponent && (
+      {FormComponent && canCreateCadastro && (
         <Button
           size="sm"
           onClick={onNew}
-          disabled={!contextoValido || !canCreateCadastro}
+          disabled={!contextoValido}
+          data-permission="Cadastros.criar"
           className="h-9 rounded-sm gap-1 shrink-0"
+          title={!contextoValido ? "Selecione uma empresa ou grupo primeiro" : undefined}
         >
           <Plus className="w-4 h-4" /> Novo
         </Button>
       )}
 
-      {effSelectedCount > 0 && (
+      {effSelectedCount > 0 && canDeleteCadastro && (
         <Button
           size="sm"
           variant="destructive"
           onClick={onDeleteSelected}
-          disabled={!canDeleteCadastro}
+          data-permission="Cadastros.excluir"
           className="h-9 rounded-sm gap-1 shrink-0"
         >
           <Trash2 className="w-4 h-4" />

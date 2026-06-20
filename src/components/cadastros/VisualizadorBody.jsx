@@ -20,8 +20,8 @@ export default function VisualizadorBody({
   FormComponent, onNew, contextoValido, canCreateCadastro,
   effSelectedCount, onDeleteSelected, canDeleteCadastro,
   // banners
-  showCrossPageBanner, crossPageAll, selectedIds, totalCountAll,
-  deselectedIds, effSelectedCountBanner, handleActivateCrossPage, handleCancelSelection,
+  showCrossPageBanner, crossPageAll, selectedIds,
+  deselectedIds, handleActivateCrossPage, handleCancelSelection,
   // tabela
   isError, everLoadedRef, lastGoodData,
   debouncedSearch, handleSort,
@@ -46,7 +46,7 @@ export default function VisualizadorBody({
         onRefresh={onRefresh}
         FormComponent={FormComponent} onNew={onNew}
         contextoValido={contextoValido} canCreateCadastro={canCreateCadastro}
-        effSelectedCount={effSelectedCount} totalCountAll={totalCountAll}
+        effSelectedCount={effSelectedCount} totalCountAll={totalCount}
         onDeleteSelected={onDeleteSelected} canDeleteCadastro={canDeleteCadastro}
       />
 
@@ -64,7 +64,7 @@ export default function VisualizadorBody({
       {crossPageAll && (
         <div className="bg-blue-50 border border-blue-200 rounded-sm px-3 py-1.5 text-xs text-blue-700 flex items-center gap-2 flex-wrap shrink-0">
           <span>{deselectedIds.size > 0
-            ? `✓ ${effSelectedCountBanner} de ${totalCount} selecionados (${deselectedIds.size} desmarcado${deselectedIds.size > 1 ? 's' : ''})`
+            ? `✓ ${Math.max(0, totalCount - deselectedIds.size)} de ${totalCount} selecionados (${deselectedIds.size} desmarcado${deselectedIds.size > 1 ? 's' : ''})`
             : `✓ Todos os ${totalCount} registros selecionados`}
           </span>
           <button onClick={handleCancelSelection} className="ml-auto text-blue-500 underline">Cancelar seleção</button>
@@ -99,12 +99,12 @@ export default function VisualizadorBody({
 
       {/* Paginação */}
       <div className="flex items-center justify-between text-xs text-slate-500 shrink-0 flex-wrap gap-1">
-        <span>Pág. {page} · {items.length} exibidos · {totalCount} total</span>
+        <span>{items.length} de {totalCount} registros · pág. {page}{totalCount > 0 ? ` / ${Math.ceil(totalCount / pageSize)}` : ''}</span>
         <div className="flex gap-1">
           <button onClick={() => setPage(1)} disabled={page === 1 || isFetching} className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40">«</button>
-          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || isFetching} className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40">← Ant.</button>
-          <span className="flex items-center justify-center h-7 px-2 border border-slate-200 rounded-sm bg-white font-semibold text-slate-700">{page}</span>
-          <button onClick={() => setPage(p => p + 1)} disabled={items.length < pageSize || isFetching} className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40">Próx. →</button>
+          <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || isFetching} className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40">‹ Ant.</button>
+          <span className="flex items-center justify-center h-7 px-2 border border-slate-200 rounded-sm bg-blue-50 font-semibold text-blue-700">{page}</span>
+          <button onClick={() => setPage(p => p + 1)} disabled={items.length < pageSize || isFetching} className="h-7 px-2 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 disabled:opacity-40">Próx. ›</button>
         </div>
       </div>
 

@@ -114,23 +114,25 @@ export default function VisualizadorUniversalEntidadeV24({
     lastGoodData, everLoadedRef,
   });
 
+  // ── handleCloseForm centralizado ──────────────────────────────────────────────
+  const handleCloseForm = useCallback((wasSaved) => {
+    setShowForm(false); setEditItem(null); setEditError(null);
+    if (wasSaved) { setPage(1); }
+    setTimeout(() => invalidateAll(queryClient, ENTITY), 50);
+  }, [ENTITY, queryClient]);
+
   // ── CRUD ─────────────────────────────────────────────────────────────────────
   const { fetchNextCode, handlePersistSubmit } = useVisualizadorCRUD({
     ENTITY, editItem, empresaId, groupId, isSimple,
     canCreateCadastro, canEditCadastro, canDeleteCadastro,
     createInContext, updateInContext, deleteInContext,
-    handleCloseForm: useCallback((wasSaved) => {
-      setShowForm(false); setEditItem(null); setEditError(null);
-      if (wasSaved) { state.setSortField?.("updated_date"); state.setSortDir?.("desc"); setPage(1); }
-      setTimeout(() => invalidateAll(queryClient, ENTITY), 50);
-    }, [ENTITY, queryClient]),
+    handleCloseForm,
     setIsSaving, readFilter, setNextCode,
   });
 
   // ── Contagem ──────────────────────────────────────────────────────────────────
   const { counts, isLoading: countsLoading } = useEntityCounts(ENTITY ? [ENTITY] : []);
   const totalCount = Number(counts?.[ENTITY] || 0);
-  const skip = (page - 1) * pageSize;
 
   // Efeitos
   useEffect(() => { resetCache(); }, [ENTITY, empresaId, groupId, debouncedSearch]);
@@ -142,31 +144,24 @@ export default function VisualizadorUniversalEntidadeV24({
     return () => typeof unsub === "function" && unsub();
   }, [ENTITY, queryClient]);
 
-  const handleCloseForm = useCallback((wasSaved) => {
-    setShowForm(false); setEditItem(null); setEditError(null);
-    if (wasSaved) { setPage(1); }
-    setTimeout(() => invalidateAll(queryClient, ENTITY), 50);
-  }, [ENTITY, queryClient]);
-
   const handleNewItem = useCallback(() => {
-    if (!canCreateCadastro) { alert("Sem permissão para criar."); return; }
+    if (!canCreateCadastro) return; // botão já fica desabilitado sem permissão
     setEditItem(null); setEditError(null); setFormKey(k => k + 1);
     fetchNextCode(readFilter);
     setShowForm(true);
   }, [canCreateCadastro, fetchNextCode, readFilter]);
 
   const handleEditItem = useCallback((item) => {
-    if (!item?.id) return;
-    if (!canEditCadastro) { alert("Sem permissão para editar."); return; }
+    if (!item?.id || !canEditCadastro) return; // botão já fica desabilitado
     setEditItem(JSON.parse(JSON.stringify(item))); setEditError(null); setFormKey(k => k + 1); setShowForm(true);
   }, [canEditCadastro]);
 
   const handleDelete = useCallback(async (item) => {
+    if (!canDeleteCadastro) return;
     const label = item.nome || item.razao_social || item.nome_completo || item.descricao || item.id;
     if (!window.confirm(`Confirma excluir "${label}" de ${TITULO}? Esta ação será auditada.`)) return;
-    if (!canDeleteCadastro) { alert("Sem permissão para excluir."); return; }
     try { await deleteInContext(ENTITY, item.id); }
-    catch (e) { alert("Erro: " + (e?.message || String(e))); return; }
+    catch (e) { console.error("Erro ao excluir:", e); return; }
     lastGoodData.current = lastGoodData.current.filter(i => i.id !== item.id);
     setSelectedIds(prev => { const n = new Set(prev); n.delete(item.id); return n; });
     if (items.length <= 1 && page > 1) setPage(p => Math.max(1, p - 1));
@@ -174,7 +169,7 @@ export default function VisualizadorUniversalEntidadeV24({
   }, [ENTITY, queryClient, items.length, page, canDeleteCadastro, deleteInContext]);
 
   const handleDeleteSelected = useCallback(async () => {
-    if (!canDeleteCadastro) { alert("Sem permissão para excluir."); return; }
+    if (!canDeleteCadastro) return;
     const effCount = crossPageAll ? Math.max(0, totalCount - deselectedIds.size) : selectedIds.size;
     if (effCount === 0) return;
     if (!window.confirm(`Confirmar exclusão de ${effCount} registro(s) de ${TITULO}? Esta ação será auditada.`)) return;
@@ -254,7 +249,7 @@ export default function VisualizadorUniversalEntidadeV24({
       IconeProp={IconeProp} FormComponent={FormComponent} windowMode={windowMode}
       items={items} isFetching={isFetching} isError={isError}
       everLoadedRef={everLoadedRef} lastGoodData={lastGoodData}
-      totalCount={totalCount} countsLoading={countsLoading} skip={skip}
+      totalCount={totalCount} countsLoading={countsLoading} skip={(page - 1) * pageSize}
       page={page} pageSize={pageSize} setPage={setPage} setPageSize={setPageSize}
       search={search} setSearch={setSearch} debouncedSearch={debouncedSearch}
       sortField={sortField} sortDir={sortDir}

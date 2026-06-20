@@ -103,7 +103,8 @@ export default function VisualizadorTableBody({
                       onClick={e => { e.stopPropagation(); onEdit(item); }}
                       title="Editar"
                       disabled={isLoadingEdit || !canEditCadastro}
-                      className="h-7 w-7 flex items-center justify-center rounded-sm text-slate-400 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-40"
+                      data-permission="Cadastros.editar"
+                      className="h-7 w-7 flex items-center justify-center rounded-sm text-slate-400 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       {isLoadingEdit ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Edit className="w-3.5 h-3.5" />}
                     </button>
@@ -113,7 +114,8 @@ export default function VisualizadorTableBody({
                     onClick={() => onDelete(item)}
                     title="Excluir"
                     disabled={!canDeleteCadastro}
-                    className="h-7 w-7 flex items-center justify-center rounded-sm text-slate-400 hover:text-red-600 hover:bg-red-50"
+                    data-permission="Cadastros.excluir"
+                    className="h-7 w-7 flex items-center justify-center rounded-sm text-slate-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>

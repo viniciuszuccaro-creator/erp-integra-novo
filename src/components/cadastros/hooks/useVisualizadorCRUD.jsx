@@ -87,15 +87,19 @@ export default function useVisualizadorCRUD({
 
     setIsSaving(true);
     try {
-      // c25-02: sanitização centralizada via sanitizeOnWrite
+      // P2: sanitização + injeção de contexto multiempresa
       let clean = sanitizeOnWrite({ ...formData });
       delete clean._action;
       if (!isSimple) {
         if (!clean.empresa_id && empresaId) clean.empresa_id = empresaId;
         if (!clean.group_id  && groupId)   clean.group_id   = groupId;
       }
+      // P3: verificar duplicata antes de salvar
       const erroDuplicata = await checkDuplicate(clean, !!(editItem?.id), editItem?.id);
-      if (erroDuplicata) { alert(erroDuplicata); setIsSaving(false); return; }
+      if (erroDuplicata) {
+        setIsSaving(false);
+        throw new Error(erroDuplicata);
+      }
       if (editItem?.id) {
         await updateInContext(ENTITY, editItem.id, clean, "empresa_id");
       } else {
@@ -103,7 +107,8 @@ export default function useVisualizadorCRUD({
       }
       handleCloseForm(true);
     } catch (e) {
-      alert("Erro ao salvar: " + (e?.message || String(e)));
+      // Relança para que o formulário possa exibir o erro inline
+      throw e;
     } finally { setIsSaving(false); }
   }, [ENTITY, editItem, empresaId, groupId, handleCloseForm, isSimple, canCreateCadastro, canEditCadastro, canDeleteCadastro, createInContext, updateInContext, deleteInContext, checkDuplicate, setIsSaving]);
 

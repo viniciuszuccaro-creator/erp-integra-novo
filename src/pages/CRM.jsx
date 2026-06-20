@@ -16,8 +16,6 @@ import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
 import { Button } from "@/components/ui/button";
 import useCRMDerivedData from "@/components/crm/hooks/useCRMDerivedData";
-import CRMIAPanel from "@/components/crm/CRMIAPanel";
-import CRMScoreClienteWidget from "@/components/crm/CRMScoreClienteWidget";
 import { CRM_CAMPAIGN_LIMIT, CRM_LIST_LIMIT } from "@/components/crm/config/crmQueryConfig";
 
 const OportunidadesListagem = React.lazy(() => import("../components/crm/OportunidadesListagem"));
@@ -26,10 +24,15 @@ const FunilVisual = React.lazy(() => import("../components/crm/FunilVisual"));
 const IALeadsPriorizacao = React.lazy(() => import("../components/crm/IALeadsPriorizacao"));
 const IAChurnDetection = React.lazy(() => import("../components/crm/IAChurnDetection"));
 const OportunidadeForm = React.lazy(() => import("../components/crm/OportunidadeForm"));
+const CampanhaForm = React.lazy(() => import('../components/crm/CampanhaForm'));
+const CRMIAPanel = React.lazy(() => import('@/components/crm/CRMIAPanel'));
 
 export default function CRMPage() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
   const { empresaAtual, estaNoGrupo, grupoAtual } = useContextoVisual();
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+  // P2: contexto válido requer empresa OU grupo explícito
+  const contextoValido = !!(empresaAtual?.id || groupId);
   const bloqueadoSemEmpresa = !estaNoGrupo && !empresaAtual;
   const { openWindow } = useWindow();
   const { user } = useUser();
@@ -137,14 +140,29 @@ export default function CRMPage() {
       description: `${campanhasAtivas} ativas`,
       icon: Megaphone,
       color: 'pink',
-      component: React.lazy(() => import('../components/crm/CampanhaForm')),
+      component: CampanhaForm,
       windowTitle: '📣 Campanhas CRM',
       width: 1200,
       height: 750,
       props: { windowMode: true },
       badge: campanhasAtivas > 0 ? `${campanhasAtivas} ativas` : null,
     },
+    {
+      // P4: IA insights movido para cá — fora do header fixo
+      title: 'IA CRM',
+      description: 'Churn, leads e análise',
+      icon: Sparkles,
+      color: 'violet',
+      component: CRMIAPanel,
+      windowTitle: '🤖 IA CRM Insights',
+      width: 1300,
+      height: 750,
+      props: { windowMode: true }
+    },
   ];
+
+  // P3: RBAC — filtrar módulos pelo perfil do usuário
+  const allowedModules = modules.filter(m => hasPermission('CRM', (m.sectionKey || m.title), 'visualizar') || hasPermission('CRM', null, 'visualizar'));
 
   const handleModuleClick = (module) => {
     startTransition(() => {
@@ -187,9 +205,8 @@ export default function CRMPage() {
           </Button>
         </div>
       }>
+        {/* P4: CRMIAPanel e CRMScoreClienteWidget removidos do header fixo — header mais leve */}
         <ModuleKPIs>
-          <CRMIAPanel oportunidades={oportunidades} clientes={clientes} interacoes={interacoes} />
-          <CRMScoreClienteWidget compact />
           <KPIsCRM
             oportunidadesAbertas={oportunidadesAbertas}
             totalOportunidades={totalOportunidades}
@@ -202,7 +219,7 @@ export default function CRMPage() {
         </ModuleKPIs>
         <ModuleContent>
           <ModuleTabs
-            listagem={<ModulosGridCRM modules={modules} onModuleClick={handleModuleClick} />}
+            listagem={<ModulosGridCRM modules={allowedModules} onModuleClick={handleModuleClick} />}
           />
         </ModuleContent>
       </ModuleLayout>

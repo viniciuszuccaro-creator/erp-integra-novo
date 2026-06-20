@@ -15,7 +15,7 @@ import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
 import { Button } from "@/components/ui/button";
-import ProducaoIAPanel from "@/components/producao/ProducaoIAPanel";
+const ProducaoIAPanel = React.lazy(() => import("@/components/producao/ProducaoIAPanel"));
 
 const KanbanProducaoInteligente = React.lazy(() => import("@/components/producao/KanbanProducaoInteligente"));
 const ApontamentoProducao = React.lazy(() => import("@/components/producao/ApontamentoProducao"));
@@ -29,13 +29,16 @@ const OrdensProducaoListagem = React.lazy(() => import("@/components/producao/Or
 
 export default function Producao() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
-  const { empresaAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+  // P2: contexto válido requer empresa OU grupo
+  const contextoValido = !!(empresaAtual?.id || groupId);
   const { openWindow } = useWindow();
   const { user } = useUser();
 
   const { data: ordensProducao = [] } = useRLSQuery(
     'OrdemProducao', {}, '-created_date', 100,
-    { staleTime: 30000, retry: 2 }
+    { staleTime: 30000, retry: 2, enabled: contextoValido }
   );
 
   const opsLiberadas = ordensProducao.filter(op => op.status === "Liberada").length;
@@ -49,6 +52,20 @@ export default function Producao() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
       </div>
+    );
+  }
+
+  // P2: bloquear sem contexto multiempresa
+  if (!contextoValido) {
+    return (
+      <ProtectedSection module="Produção" action="visualizar">
+        <div className="w-full h-full flex items-center justify-center p-6">
+          <div className="max-w-xl w-full bg-white border rounded-xl p-6 text-center">
+            <p className="text-lg font-semibold">Selecione uma empresa para continuar</p>
+            <p className="text-slate-500 mt-1">Use o seletor de empresa no topo para habilitar os dados do módulo.</p>
+          </div>
+        </div>
+      </ProtectedSection>
     );
   }
 
@@ -151,12 +168,31 @@ export default function Producao() {
       height: 700,
       props: { windowMode: true }
     },
+    {
+      // P4: IA insights movido para cá — fora do header fixo
+      title: 'IA Insights',
+      description: 'Análise preditiva OPs',
+      icon: Zap,
+      color: 'violet',
+      component: ProducaoIAPanel,
+      windowTitle: '🤖 IA Produção',
+      width: 1200,
+      height: 700,
+      props: { ordensProducao, windowMode: true }
+    },
   ];
+
+  // P3: RBAC — filtrar módulos pelo perfil do usuário
+  const allowedModules = modules.filter(m => hasPermission('Produção', (m.sectionKey || m.title), 'visualizar') || hasPermission('Produção', null, 'visualizar'));
 
   const handleModuleClick = (module) => {
     startTransition(() => {
+      // P3: auditoria completa com empresa_id e group_id
       void base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário',
+        usuario_id: user?.id || null,
+        empresa_id: empresaAtual?.id || null,
+        group_id: groupId || null,
         acao: 'Visualização',
         modulo: 'Produção',
         tipo_auditoria: 'acesso',
@@ -188,8 +224,8 @@ export default function Producao() {
         subtitle="Chão de fábrica, OPs e desempenho"
         actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'producao_primary_action' })}>Nova OP</Button></div>}
       >
+        {/* P4: ProducaoIAPanel movido para janela no grid — header mais leve */}
         <ModuleKPIs>
-          <ProducaoIAPanel ordensProducao={ordensProducao} />
           <KPIsProducao
             totalOPs={ordensProducao.length}
             opsLiberadas={opsLiberadas}
@@ -199,7 +235,7 @@ export default function Producao() {
         </ModuleKPIs>
         <ModuleContent>
           <ModuleTabs
-            listagem={<ModulosGridProducao modules={modules} onModuleClick={handleModuleClick} />}
+            listagem={<ModulosGridProducao modules={allowedModules} onModuleClick={handleModuleClick} />}
           />
         </ModuleContent>
       </ModuleLayout>

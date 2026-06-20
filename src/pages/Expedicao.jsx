@@ -16,7 +16,7 @@ import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
 import { Button } from "@/components/ui/button";
-import ExpedicaoIAPanel from "@/components/expedicao/ExpedicaoIAPanel";
+const ExpedicaoIAPanel = React.lazy(() => import("@/components/expedicao/ExpedicaoIAPanel"));
 import HeaderExpedicaoCompacto from "@/components/expedicao/expedicao-launchpad/HeaderExpedicaoCompacto";
 import KPIsExpedicao from "@/components/expedicao/expedicao-launchpad/KPIsExpedicao";
 import ModulosGridExpedicao from "@/components/expedicao/expedicao-launchpad/ModulosGridExpedicao";
@@ -28,7 +28,6 @@ import RegistroOcorrenciaLogistica from "../components/logistica/RegistroOcorren
 import IntegracaoRomaneio from "../components/logistica/IntegracaoRomaneio";
 
 const EntregasListagem = React.lazy(() => import("../components/expedicao/EntregasListagem"));
-const SeparacaoConferencia = React.lazy(() => import("../components/expedicao/SeparacaoConferencia"));
 const SeparacaoConferenciaIA = React.lazy(() => import("@/components/expedicao/SeparacaoConferenciaIA"));
 const RoteirizacaoInteligente = React.lazy(() => import("@/components/expedicao/RoteirizacaoInteligente"));
 const PainelMetricasRealtime = React.lazy(() => import("../components/logistica/PainelMetricasRealtime"));
@@ -50,6 +49,9 @@ export default function Expedicao() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { estaNoGrupo, empresaAtual, empresasDoGrupo, grupoAtual } = useContextoVisual();
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+  // P2: contexto válido requer empresa OU grupo explícito
+  const contextoValido = !!(empresaAtual?.id || groupId);
 
   const [comprovanteModal, setComprovanteModal] = React.useState(null);
   const [entregaSelecionada, setEntregaSelecionada] = React.useState(null);
@@ -57,26 +59,27 @@ export default function Expedicao() {
   const [comprovanteOpen, setComprovanteOpen] = React.useState(false);
   const [ocorrenciaOpen, setOcorrenciaOpen] = React.useState(false);
 
-  // Queries via useRLSQuery (escopo multi-empresa automático)
+  // P2: queries só executam com contexto válido de empresa/grupo
+  const queryEnabled = canSeeExpedicao && contextoValido;
   const { data: entregas = [] } = useRLSQuery(
     'Entrega', {}, '-created_date', 100,
-    { staleTime: 30000, retry: 2, enabled: canSeeExpedicao }
+    { staleTime: 30000, retry: 2, enabled: queryEnabled }
   );
   const { data: clientes = [] } = useRLSQuery(
     'Cliente', {}, '-created_date', 100,
-    { staleTime: 30000, retry: 1, enabled: canSeeExpedicao }
+    { staleTime: 30000, retry: 1, enabled: queryEnabled }
   );
   const { data: pedidos = [] } = useRLSQuery(
     'Pedido', {}, '-created_date', 100,
-    { staleTime: 30000, retry: 1, enabled: canSeeExpedicao }
+    { staleTime: 30000, retry: 1, enabled: queryEnabled }
   );
   const { data: romaneios = [] } = useRLSQuery(
     'Romaneio', {}, '-created_date', 50,
-    { staleTime: 30000, retry: 1, enabled: canSeeExpedicao }
+    { staleTime: 30000, retry: 1, enabled: queryEnabled }
   );
   const { data: rotas = [] } = useRLSQuery(
     'Rota', {}, '-created_date', 50,
-    { staleTime: 30000, retry: 1, enabled: canSeeExpedicao }
+    { staleTime: 30000, retry: 1, enabled: queryEnabled }
   );
 
   const { data: entregasRealtime, hasChanges } = useRealtimeEntregas(empresaAtual?.id);
@@ -213,9 +216,22 @@ export default function Expedicao() {
       height: 700,
       props: { empresaId: empresaAtual?.id }
     },
+    {
+      // P4: IA insights movido para cá — fora do header fixo
+      title: 'IA Logística',
+      description: 'Análise preditiva entregas',
+      icon: Activity,
+      color: 'violet',
+      component: ExpedicaoIAPanel,
+      windowTitle: '🤖 IA Logística',
+      width: 1200,
+      height: 700,
+      props: { windowMode: true }
+    },
   ];
 
-  const allowedModules = modules.filter(m => hasPermission('Expedição', (m.sectionKey || m.title), 'ver'));
+  // P3: RBAC — 'visualizar' é o padrão do sistema (não 'ver')
+  const allowedModules = modules.filter(m => hasPermission('Expedição', (m.sectionKey || m.title), 'visualizar') || hasPermission('Expedição', null, 'visualizar'));
 
   const handleModuleClick = (module) => {
     startTransition(() => {
@@ -248,9 +264,9 @@ export default function Expedicao() {
     <ProtectedSection module="Expedição" action="visualizar">
     <ErrorBoundary>
       <ModuleLayout title="Expedição e Logística" subtitle="Entregas, romaneios e rotas" actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'expedicao_primary_action' })} data-permission="Expedição.Entregas.criar">Nova Entrega</Button></div>}>
+        {/* P4: ExpedicaoIAPanel removido do header fixo (pesado) — KPIs essenciais apenas */}
         <ModuleKPIs>
-          <ExpedicaoIAPanel entregas={entregas} />
-           <KPIsExpedicao statusCounts={statusCounts} />
+          <KPIsExpedicao statusCounts={statusCounts} />
         </ModuleKPIs>
         <ModuleContent>
           <ModuleTabs

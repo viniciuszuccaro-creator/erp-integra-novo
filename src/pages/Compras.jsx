@@ -26,7 +26,7 @@ const ComprasIAInsights = React.lazy(() => import("../components/compras/Compras
 
 export default function Compras() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
-  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual, createInContext } = useContextoVisual();
   const { user } = useUser();
   const { openWindow } = useWindow();
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
@@ -179,10 +179,42 @@ export default function Compras() {
     });
   };
 
+  // P2: handler de criação de OC com contexto multiempresa + P3: auditoria
+  const handleNovaOC = () => openWindow(OrdemCompraForm, {
+    windowMode: true,
+    onSubmit: async (data) => {
+      const payload = { ...data, empresa_id: data.empresa_id || empresaAtual?.id || null, group_id: data.group_id || groupId || null };
+      const created = await createInContext('OrdemCompra', payload, 'empresa_id');
+      try {
+        await base44.entities.AuditLog.create({
+          acao: 'Criação', modulo: 'Compras', tipo_auditoria: 'entidade', entidade: 'OrdemCompra',
+          registro_id: created?.id, usuario: user?.full_name || user?.email || 'Usuário', usuario_id: user?.id || null,
+          empresa_id: payload.empresa_id, group_id: payload.group_id, data_hora: new Date().toISOString(),
+          dados_novos: payload,
+        });
+      } catch (_) {}
+    }
+  }, { title: 'Nova Ordem de Compra', width: 1200, height: 780 });
+
   return (
     <ProtectedSection module="Compras" action="visualizar">
     <ErrorBoundary>
-      <ModuleLayout title="Compras e Suprimentos" subtitle="Fornecedores, OCs e recebimento" actions={<div className="flex items-center gap-2"><Button size="sm" disabled={!contextoValido || !podeCriarOC} onClick={() => openWindow(OrdemCompraForm, { windowMode: true, onSubmit: (data) => base44.entities.OrdemCompra.create(data) }, { title: 'Nova Ordem de Compra', width: 1200, height: 780 })} data-permission="Compras.Ordens de Compra.criar">Nova OC</Button></div>}>
+      <ModuleLayout
+        title="Compras e Suprimentos"
+        subtitle="Fornecedores, OCs e recebimento"
+        actions={
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              disabled={!contextoValido || !podeCriarOC}
+              onClick={handleNovaOC}
+              data-permission="Compras.Ordens de Compra.criar"
+            >
+              Nova OC
+            </Button>
+          </div>
+        }
+      >
         <ModuleKPIs>
           <KPIsCompras
             totalFornecedores={fornecedores.length}

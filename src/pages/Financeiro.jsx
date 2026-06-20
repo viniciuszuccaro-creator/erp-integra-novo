@@ -240,7 +240,7 @@ export default function Financeiro() {
       windowTitle: '⚠️ Alertas Financeiros',
       width: 1400,
       height: 800,
-      props: { empresaId: empresaAtual?.id, groupId: empresasDoGrupo[0]?.group_id }
+      props: { empresaId: empresaAtual?.id, groupId: groupId }
     },
   ];
 
@@ -254,7 +254,7 @@ export default function Financeiro() {
       windowTitle: '🔀 Rateio Multi-Empresa',
       width: 1400,
       height: 800,
-      props: { empresas: empresasDoGrupo, grupoId: empresasDoGrupo[0]?.group_id }
+      props: { empresas: empresasDoGrupo, grupoId: groupId }
     },
   ] : [];
 

@@ -18,13 +18,14 @@ import ModuleLayout from "@/components/layout/ModuleLayout";
 import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
-import RHIAPanel from "@/components/rh/RHIAPanel";
+// P4: RHIAPanel movido para uso sob demanda (janela), não mais no header fixo
 
 const PontoTab = React.lazy(() => import("../components/rh/PontoTab"));
 const GameficacaoProducao = React.lazy(() => import("@/components/rh/GameficacaoProducao"));
 const MonitoramentoRHInteligente = React.lazy(() => import("@/components/rh/MonitoramentoRHInteligente"));
 const PontoEletronicoBiometrico = React.lazy(() => import("@/components/rh/PontoEletronicoBiometrico"));
 const DashboardRHRealtime = React.lazy(() => import("../components/rh/DashboardRHRealtime"));
+const RHIAInsights = React.lazy(() => import('@/components/rh/RHIAPanel'));
 
 const ColaboradoresWindow = () => (
   <div className="h-full w-full">
@@ -42,21 +43,25 @@ const ColaboradoresWindow = () => (
 export default function RH() {
   const { hasPermission, canCreate, isLoading: loadingPermissions } = usePermissions();
   const canSeeRH = hasPermission('RH', null, 'visualizar');
-  const { empresaAtual } = useContextoVisual();
   const { openWindow } = useWindow();
   const { user } = useUser();
 
+  // P2: contexto multiempresa obrigatório antes de qualquer query
+  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+  const contextoValido = !!(empresaAtual?.id || groupId);
+
   const { data: colaboradores = [] } = useRLSQuery(
     'Colaborador', {}, '-created_date', 100,
-    { staleTime: 30000, retry: 2, enabled: canSeeRH }
+    { staleTime: 30000, retry: 2, enabled: canSeeRH && contextoValido }
   );
   const { data: pontos = [] } = useRLSQuery(
     'Ponto', {}, '-data', 100,
-    { staleTime: 30000, retry: 1, enabled: canSeeRH }
+    { staleTime: 30000, retry: 1, enabled: canSeeRH && contextoValido }
   );
   const { data: ferias = [] } = useRLSQuery(
     'Ferias', {}, '-created_date', 50,
-    { staleTime: 30000, retry: 1, enabled: canSeeRH }
+    { staleTime: 30000, retry: 1, enabled: canSeeRH && contextoValido }
   );
 
   const totalColaboradores = colaboradores.length;
@@ -149,6 +154,18 @@ export default function RH() {
       height: 800,
       props: { windowMode: true }
     },
+    {
+      // P4: IA insights movido para cá — fora do header fixo
+      title: 'IA RH Insights',
+      description: 'Análise preditiva de colaboradores',
+      icon: Activity,
+      color: 'violet',
+      component: RHIAInsights,
+      windowTitle: '🤖 IA RH — Insights',
+      width: 1200,
+      height: 700,
+      props: { colaboradores, pontos, ferias, windowMode: true }
+    },
   ];
 
   const allowedModules = modules.filter(m => hasPermission('RH', (m.sectionKey || m.title), 'visualizar'));
@@ -159,7 +176,7 @@ export default function RH() {
         usuario: user?.full_name || user?.email || 'Usuário',
         usuario_id: user?.id || null,
         empresa_id: empresaAtual?.id || null,
-        group_id: empresaAtual?.group_id || empresaAtual?.grupo_id || null,
+        group_id: groupId || null,
         acao: 'Visualização',
         modulo: 'RH',
         tipo_auditoria: 'acesso',
@@ -188,15 +205,26 @@ export default function RH() {
     <ErrorBoundary>
       <ModuleLayout title="Recursos Humanos" subtitle="Colaboradores, ponto e indicadores" actions={
         <div className="flex items-center gap-2">
-          {canCreate('RH') && (
-            <Button size="sm" className="bg-purple-600 hover:bg-purple-700" onClick={() => openWindow(ColaboradorForm, { windowMode: true, onSuccess: () => {} }, { title: '👤 Novo Colaborador', width: 1200, height: 750 })}>
+          {/* P3: RBAC granular — Colaboradores.criar */}
+          {canCreate('RH', 'Colaboradores') && contextoValido && (
+            <Button
+              size="sm"
+              className="bg-purple-600 hover:bg-purple-700"
+              data-permission="RH.Colaboradores.criar"
+              onClick={() => openWindow(ColaboradorForm, {
+                windowMode: true,
+                empresa_id: empresaAtual?.id || null,
+                group_id: groupId || null,
+                onSuccess: () => {}
+              }, { title: '👤 Novo Colaborador', width: 1200, height: 750 })}
+            >
               + Colaborador
             </Button>
           )}
         </div>
       }>
         <ModuleKPIs>
-          <RHIAPanel colaboradores={colaboradores} pontos={pontos} ferias={ferias} />
+          {/* P4: RHIAPanel removido do header (pesado) — KPIs essenciais apenas */}
           <KPIsRH
             colaboradoresAtivos={colaboradoresAtivos}
             totalColaboradores={totalColaboradores}

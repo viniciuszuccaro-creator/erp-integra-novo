@@ -28,6 +28,7 @@ const RequisicoesAlmoxarifadoTab = React.lazy(() => import("../components/estoqu
 const ControleLotesValidade = React.lazy(() => import("../components/estoque/ControleLotesValidade"));
 const RelatoriosEstoque = React.lazy(() => import("../components/estoque/RelatoriosEstoque"));
 const IAReposicao = React.lazy(() => import("../components/estoque/IAReposicao"));
+const InventarioForm = React.lazy(() => import('../components/estoque/InventarioForm'));
 
 export default function Estoque() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
@@ -111,8 +112,6 @@ export default function Estoque() {
   if (loadingPermissions) {
     return <div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div>;
   }
-
-  const InventarioForm = React.lazy(() => import('../components/estoque/InventarioForm'));
 
   const modules = [
     {

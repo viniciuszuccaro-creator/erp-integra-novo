@@ -9,19 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Plus, 
-  FileText, 
-  CheckCircle2, 
-  XCircle, 
-  Clock,
-  ShoppingCart,
-  AlertCircle,
-  Download
-} from "lucide-react";
+import { Plus, CheckCircle2, XCircle, ShoppingCart, Download } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import useContextoVisual from "@/components/lib/useContextoVisual";
 import SolicitacaoCompraForm from "./SolicitacaoCompraForm";
@@ -42,16 +31,12 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
   const [editando, setEditando] = useState(null);
   const { openWindow } = useWindow();
   const { hasPermission } = usePermissions();
-  // Seleção em massa + exportação
   const [selectedSolicitacoes, setSelectedSolicitacoes] = useState([]);
   const toggleSolicitacao = (id) => setSelectedSolicitacoes(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-  const toggleAllSolicitacoes = (checked, lista) => setSelectedSolicitacoes(checked ? lista.map(s => s.id) : []);
+
   const exportarSolicitacoesCSV = (lista) => {
     const headers = ['numero_solicitacao','produto_descricao','quantidade_solicitada','unidade_medida','solicitante','data_solicitacao','prioridade','status'];
-    const csv = [
-      headers.join(','),
-      ...lista.map(s => headers.map(h => JSON.stringify(s[h] ?? '')).join(','))
-    ].join('\n');
+    const csv = [headers.join(','), ...lista.map(s => headers.map(h => JSON.stringify(s[h] ?? '')).join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -60,211 +45,74 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
     a.click();
     URL.revokeObjectURL(url);
   };
+
   const [formData, setFormData] = useState({
     numero_solicitacao: `SC-${Date.now()}`,
     data_solicitacao: new Date().toISOString().split('T')[0],
-    solicitante: "",
-    setor: "",
-    produto_id: "",
-    produto_descricao: "",
-    quantidade_solicitada: 1,
-    unidade_medida: "UN",
-    justificativa: "",
-    prioridade: "Média",
-    data_necessidade: "",
-    status: "Pendente",
-    observacoes: ""
+    solicitante: "", setor: "", produto_id: "", produto_descricao: "",
+    quantidade_solicitada: 1, unidade_medida: "UN", justificativa: "",
+    prioridade: "Media", data_necessidade: "", status: "Pendente", observacoes: ""
   });
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { empresaAtual, createInContext, updateInContext } = useContextoVisual();
 
-  const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos'],
-    queryFn: () => base44.entities.Produto.list(),
-  });
-
-  const { data: user } = useQuery({
-    queryKey: ['user'],
-    queryFn: () => base44.auth.me(),
-  });
+  const { data: produtos = [] } = useQuery({ queryKey: ['produtos'], queryFn: () => base44.entities.Produto.list() });
+  const { data: user } = useQuery({ queryKey: ['user'], queryFn: () => base44.auth.me() });
 
   const createMutation = useMutation({
     mutationFn: (data) => createInContext('SolicitacaoCompra', {
-      ...data,
-      empresa_id: empresaAtual?.id,
-      group_id: empresaAtual?.grupo_id,
-      solicitante: user?.full_name,
-      solicitante_id: user?.id
+      ...data, empresa_id: empresaAtual?.id, group_id: empresaAtual?.grupo_id,
+      solicitante: user?.full_name, solicitante_id: user?.id
     }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['solicitacoes-compra'] });
-      handleCloseDialog();
-      toast({ title: "✅ Solicitação criada!" });
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['solicitacoes-compra'] }); handleCloseDialog(); toast({ title: "Solicitacao criada!" }); },
   });
 
   const aprovarMutation = useMutation({
     mutationFn: ({ id }) => updateInContext('SolicitacaoCompra', id, {
-      status: "Aprovada",
-      aprovador: user?.full_name,
-      data_aprovacao: new Date().toISOString().split('T')[0]
+      status: "Aprovada", aprovador: user?.full_name, data_aprovacao: new Date().toISOString().split('T')[0]
     }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['solicitacoes-compra'] });
-      toast({ title: "✅ Solicitação aprovada!" });
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['solicitacoes-compra'] }); toast({ title: "Solicitacao aprovada!" }); },
   });
 
   const rejeitarMutation = useMutation({
     mutationFn: ({ id, motivo }) => updateInContext('SolicitacaoCompra', id, {
-      status: "Rejeitada",
-      aprovador: user?.full_name,
-      data_aprovacao: new Date().toISOString().split('T')[0],
-      observacoes: motivo
+      status: "Rejeitada", aprovador: user?.full_name,
+      data_aprovacao: new Date().toISOString().split('T')[0], observacoes: motivo
     }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['solicitacoes-compra'] });
-      toast({ title: "❌ Solicitação rejeitada" });
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['solicitacoes-compra'] }); toast({ title: "Solicitacao rejeitada" }); },
   });
 
   const gerarOCMutation = useMutation({
     mutationFn: async (solicitacao) => {
-      // Criar Ordem de Compra
       const oc = await createInContext('OrdemCompra', {
-        numero_oc: `OC-${Date.now()}`,
-        fornecedor_nome: "A definir",
-        solicitacao_compra_id: solicitacao.id,
-        data_solicitacao: new Date().toISOString().split('T')[0],
-        valor_total: 0,
-        status: "Solicitada",
-        itens: [{
-          produto_id: solicitacao.produto_id,
-          descricao: solicitacao.produto_descricao,
-          quantidade_solicitada: solicitacao.quantidade_solicitada,
-          unidade: solicitacao.unidade_medida,
-          valor_unitario: 0,
-          valor_total: 0
-        }],
-        empresa_id: empresaAtual?.id,
-        group_id: empresaAtual?.grupo_id
+        numero_oc: `OC-${Date.now()}`, fornecedor_nome: "A definir",
+        solicitacao_compra_id: solicitacao.id, data_solicitacao: new Date().toISOString().split('T')[0],
+        valor_total: 0, status: "Solicitada",
+        itens: [{ produto_id: solicitacao.produto_id, descricao: solicitacao.produto_descricao,
+          quantidade_solicitada: solicitacao.quantidade_solicitada, unidade: solicitacao.unidade_medida,
+          valor_unitario: 0, valor_total: 0 }],
+        empresa_id: empresaAtual?.id, group_id: empresaAtual?.grupo_id
       });
-
-      // Atualizar solicitação
-      await updateInContext('SolicitacaoCompra', solicitacao.id, {
-        status: "Compra Gerada",
-        ordem_compra_id: oc.id
-      });
-
+      await updateInContext('SolicitacaoCompra', solicitacao.id, { status: "Compra Gerada", ordem_compra_id: oc.id });
       return oc;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['solicitacoes-compra'] });
       queryClient.invalidateQueries({ queryKey: ['ordensCompra'] });
-      toast({ title: "✅ OC gerada!" });
+      toast({ title: "OC gerada!" });
     },
   });
 
-  // BOTÃO IA - SUGERIR COMPRAS AUTOMÁTICAS
   const sugerirComprasIA = useMutation({
     mutationFn: async () => {
-      // Buscar produtos com estoque baixo
-      const todosProdutos = await base44.entities.Produto.list();
-      const produtosBaixos = todosProdutos.filter(p => 
-        p.status === 'Ativo' && 
-        (p.estoque_disponivel || p.estoque_atual || 0) <= (p.estoque_minimo || 0)
-      );
-
-      if (produtosBaixos.length === 0) {
-        throw new Error("Nenhum produto com estoque baixo");
-      }
-
-      // Criar prompt para IA
-      const prompt = `
-Analise os produtos com estoque baixo e sugira prioridades de compra.
-
-PRODUTOS COM ESTOQUE BAIXO:
-${produtosBaixos.map(p => `
-- ${p.descricao} (${p.codigo})
-  Estoque Atual: ${p.estoque_disponivel || p.estoque_atual || 0} ${p.unidade_medida}
-  Estoque Mínimo: ${p.estoque_minimo || 0}
-  Vendas 30 dias: ${p.quantidade_vendida_30dias || 0}
-  Fornecedor: ${p.fornecedor_principal || 'Não definido'}
-`).join('\n')}
-
-Retorne JSON com:
-- produtos prioritários (ordem de urgência)
-- quantidade sugerida
-- justificativa
-- prioridade (Baixa/Média/Alta/Urgente)
-      `.trim();
-
-      const resultado = await base44.integrations.Core.InvokeLLM({
-        prompt: prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            sugestoes: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  produto_codigo: { type: "string" },
-                  quantidade_sugerida: { type: "number" },
-                  justificativa: { type: "string" },
-                  prioridade: { type: "string" }
-                }
-              }
-            }
-          }
-        }
-      });
-
-      // Criar solicitações automaticamente
-      const solicitacoesCriadas = [];
-      for (const sug of resultado.sugestoes.slice(0, 10)) { // Limiting to 10 suggestions for practical reasons
-        const produto = produtosBaixos.find(p => p.codigo === sug.produto_codigo);
-        if (produto) {
-          const sol = await createInContext('SolicitacaoCompra', {
-            numero_solicitacao: `SC-IA-${Date.now()}-${solicitacoesCriadas.length}`,
-            data_solicitacao: new Date().toISOString().split('T')[0],
-            produto_id: produto.id,
-            produto_descricao: produto.descricao,
-            quantidade_solicitada: sug.quantidade_sugerida,
-            unidade_medida: produto.unidade_medida,
-            justificativa: `🤖 IA: ${sug.justificativa}`,
-            prioridade: sug.prioridade,
-            data_necessidade: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
-            status: "Pendente",
-            solicitante: "IA - Sistema Automático",
-            setor: "Estoque",
-            empresa_id: empresaAtual?.id,
-            group_id: empresaAtual?.grupo_id
-          });
-          solicitacoesCriadas.push(sol);
-        }
-      }
-
-      return solicitacoesCriadas;
-    },
-    onSuccess: (solicitacoes) => {
-      queryClient.invalidateQueries({ queryKey: ['solicitacoes-compra'] });
-      toast({ 
-        title: "✅ IA criou solicitações!",
-        description: `${solicitacoes.length} solicitações geradas automaticamente`
-      });
+      throw new Error("IA indisponivel: creditos de integracao esgotados ate 07/07/2026");
     },
     onError: (error) => {
-      toast({
-        title: "⚠️ Nenhuma sugestão",
-        description: error.message || "Não foi possível gerar sugestões de compra.",
-        variant: "destructive"
-      });
+      toast({ title: "IA indisponivel", description: error.message, variant: "destructive" });
     }
   });
-
 
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
@@ -272,51 +120,21 @@ Retorne JSON com:
     setFormData({
       numero_solicitacao: `SC-${Date.now()}`,
       data_solicitacao: new Date().toISOString().split('T')[0],
-      solicitante: "",
-      setor: "",
-      produto_id: "",
-      produto_descricao: "",
-      quantidade_solicitada: 1,
-      unidade_medida: "UN",
-      justificativa: "",
-      prioridade: "Média",
-      data_necessidade: "",
-      status: "Pendente",
-      observacoes: ""
+      solicitante: "", setor: "", produto_id: "", produto_descricao: "",
+      quantidade_solicitada: 1, unidade_medida: "UN", justificativa: "",
+      prioridade: "Media", data_necessidade: "", status: "Pendente", observacoes: ""
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    createMutation.mutate(formData);
-  };
-
-  const handleAprovar = (solicitacao) => {
-    if (confirm(`Aprovar solicitação de ${solicitacao.produto_descricao}?`)) {
-      aprovarMutation.mutate({ id: solicitacao.id });
-    }
-  };
-
-  const handleRejeitar = (solicitacao) => {
-    const motivo = prompt("Motivo da rejeição:");
-    if (motivo) {
-      rejeitarMutation.mutate({ id: solicitacao.id, motivo });
-    }
-  };
-
-  const handleGerarOC = (solicitacao) => {
-    if (confirm(`Gerar Ordem de Compra para ${solicitacao.produto_descricao}?`)) {
-      gerarOCMutation.mutate(solicitacao);
-    }
-  };
+  const handleSubmit = (e) => { e.preventDefault(); createMutation.mutate(formData); };
+  const handleAprovar = (s) => { if (confirm(`Aprovar solicitacao de ${s.produto_descricao}?`)) aprovarMutation.mutate({ id: s.id }); };
+  const handleRejeitar = (s) => { const m = prompt("Motivo da rejeicao:"); if (m) rejeitarMutation.mutate({ id: s.id, motivo: m }); };
+  const handleGerarOC = (s) => { if (confirm(`Gerar OC para ${s.produto_descricao}?`)) gerarOCMutation.mutate(s); };
 
   const statusColors = {
-    'Pendente': 'bg-yellow-100 text-yellow-700',
-    'Em Análise': 'bg-blue-100 text-blue-700',
-    'Aprovada': 'bg-green-100 text-green-700',
-    'Rejeitada': 'bg-red-100 text-red-700',
-    'Compra Gerada': 'bg-purple-100 text-purple-700',
-    'Finalizada': 'bg-gray-100 text-gray-700'
+    'Pendente': 'bg-yellow-100 text-yellow-700', 'Em Analise': 'bg-blue-100 text-blue-700',
+    'Aprovada': 'bg-green-100 text-green-700', 'Rejeitada': 'bg-red-100 text-red-700',
+    'Compra Gerada': 'bg-purple-100 text-purple-700', 'Finalizada': 'bg-gray-100 text-gray-700'
   };
 
   const content = (
@@ -324,182 +142,47 @@ Retorne JSON com:
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-bold">Solicitações de Compra</h2>
         <div className="flex gap-1">
-          <Button
-            onClick={() => sugerirComprasIA.mutate()}
-            disabled={sugerirComprasIA.isPending}
-            variant="outline"
-            size="sm"
-            className="border-purple-300 text-purple-700 hover:bg-purple-50"
-          >
-            {sugerirComprasIA.isPending ? (
-              <>
-                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-600 mr-1" />
-                <span className="text-xs">Analisando...</span>
-              </>
-            ) : (
-              <span className="text-xs">🤖 IA</span>
-            )}
+          <Button onClick={() => sugerirComprasIA.mutate()} disabled={sugerirComprasIA.isPending}
+            variant="outline" size="sm" className="border-purple-300 text-purple-700 hover:bg-purple-50">
+            <span className="text-xs">🤖 IA</span>
           </Button>
           {hasPermission('Compras','SolicitacaoCompra','criar') && (
-            <Button
-              size="sm"
-              className="bg-blue-600 hover:bg-blue-700"
-              data-permission="Compras.SolicitacaoCompra.criar"
-              data-sensitive="true"
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700"
+              data-permission="Compras.SolicitacaoCompra.criar" data-sensitive="true"
               onClick={() => openWindow(SolicitacaoCompraForm, {
                 windowMode: true,
                 onSubmit: async (data) => {
-                  try {
-                    await createMutation.mutateAsync(data);
-                    sonnerToast.success("✅ Solicitação criada!");
-                  } catch (error) {
-                    sonnerToast.error("Erro ao criar solicitação");
-                  }
+                  try { await createMutation.mutateAsync(data); sonnerToast.success("Solicitacao criada!"); }
+                  catch { sonnerToast.error("Erro ao criar solicitacao"); }
                 }
-              }, {
-                title: '🛒 Nova Solicitação de Compra',
-                width: 900,
-                height: 650
-              })}
-            >
-              <Plus className="w-3 h-3 mr-1" />
-              Nova
+              }, { title: 'Nova Solicitacao de Compra', width: 900, height: 650 })}>
+              <Plus className="w-3 h-3 mr-1" /> Nova
             </Button>
           )}
-
-          {/* BACKUP: Dialog removido */}
-          <Dialog open={false}>
-            <DialogTrigger asChild>
-              <Button className="hidden">Removido</Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Nova Solicitação de Compra</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Produto *</Label>
-                    <Select
-                      value={formData.produto_id}
-                      onValueChange={(v) => {
-                        const prod = produtos.find(p => p.id === v);
-                        setFormData({
-                          ...formData,
-                          produto_id: v,
-                          produto_descricao: prod?.descricao || "",
-                          unidade_medida: prod?.unidade_medida || "UN"
-                        });
-                      }}
-                      required
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {produtos.map(p => (
-                          <SelectItem key={p.id} value={p.id}>
-                            {p.descricao} ({p.codigo})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label>Quantidade *</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0.01"
-                        value={formData.quantidade_solicitada}
-                        onChange={(e) => setFormData({ ...formData, quantidade_solicitada: parseFloat(e.target.value) || 0 })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label>Unidade</Label>
-                      <Input
-                        value={formData.unidade_medida}
-                        readOnly
-                        className="bg-slate-50"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label>Prioridade</Label>
-                    <Select
-                      value={formData.prioridade}
-                      onValueChange={(v) => setFormData({ ...formData, prioridade: v })}
-                    >
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Baixa">Baixa</SelectItem>
-                        <SelectItem value="Média">Média</SelectItem>
-                        <SelectItem value="Alta">Alta</SelectItem>
-                        <SelectItem value="Urgente">🔥 Urgente</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label>Data Necessidade</Label>
-                    <Input
-                      type="date"
-                      value={formData.data_necessidade}
-                      onChange={(e) => setFormData({ ...formData, data_necessidade: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <Label>Justificativa *</Label>
-                    <Textarea
-                      value={formData.justificativa}
-                      onChange={(e) => setFormData({ ...formData, justificativa: e.target.value })}
-                      placeholder="Explique o motivo da compra..."
-                      required
-                      rows={3}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-3 pt-4 border-t">
-                  <Button type="button" variant="outline" onClick={handleCloseDialog}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit" disabled={createMutation.isPending}>
-                    Criar Solicitação
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
         </div>
       </div>
 
       <Card className="border-0 shadow-md">
         <CardHeader className="bg-slate-50 border-b">
-          <CardTitle>Lista de Solicitações ({solicitacoes.length})</CardTitle>
+          <CardTitle>Lista de Solicitações ({solList.length})</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {selectedSolicitacoes.length > 0 && (
             <Alert className="m-4 border-blue-300 bg-blue-50">
               <AlertDescription className="flex items-center justify-between">
-                <div className="text-blue-900 font-semibold">{selectedSolicitacoes.length} solicita e7 e3o(ões) selecionada(s)</div>
+                <div className="text-blue-900 font-semibold">{selectedSolicitacoes.length} solicitacao(oes) selecionada(s)</div>
                 <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => exportarSolicitacoesCSV(solicitacoes.filter(s => selectedSolicitacoes.includes(s.id)))}>
+                  <Button variant="outline" onClick={() => exportarSolicitacoesCSV(solList.filter(s => selectedSolicitacoes.includes(s.id)))}>
                     <Download className="w-4 h-4 mr-2" /> Exportar CSV
                   </Button>
-                  <Button variant="ghost" onClick={() => setSelectedSolicitacoes([])}>Limpar Seleção</Button>
+                  <Button variant="ghost" onClick={() => setSelectedSolicitacoes([])}>Limpar</Button>
                 </div>
               </AlertDescription>
             </Alert>
           )}
           <ERPDataTable
             columns={[
-              { key: 'numero_solicitacao', label: 'Nº Solicitação', render: (s) => <span className="font-medium">{s.numero_solicitacao}</span> },
+              { key: 'numero_solicitacao', label: 'N Solicitacao', render: (s) => <span className="font-medium">{s.numero_solicitacao}</span> },
               { key: 'produto_descricao', label: 'Produto' },
               { key: 'quantidade_solicitada', label: 'Qtd', isNumeric: true, render: (s) => `${s.quantidade_solicitada} ${s.unidade_medida}` },
               { key: 'solicitante', label: 'Solicitante' },
@@ -507,14 +190,11 @@ Retorne JSON com:
               { key: 'prioridade', label: 'Prioridade', render: (s) => (
                 <Badge variant="outline" className={
                   s.prioridade === 'Urgente' ? 'border-red-300 text-red-700' :
-                  s.prioridade === 'Alta' ? 'border-orange-300 text-orange-700' :
-                  'border-slate-300 text-slate-700'
-                }>
-                  {s.prioridade}
-                </Badge>
+                  s.prioridade === 'Alta' ? 'border-orange-300 text-orange-700' : 'border-slate-300 text-slate-700'
+                }>{s.prioridade}</Badge>
               ) },
               { key: 'status', label: 'Status', render: (s) => <Badge className={statusColors[s.status]}>{s.status}</Badge> },
-              { key: 'actions', label: 'Ações', render: (s) => (
+              { key: 'actions', label: 'Acoes', render: (s) => (
                 <div className="flex gap-1">
                   {s.status === 'Pendente' && (
                     <>
@@ -528,15 +208,15 @@ Retorne JSON com:
                           <XCircle className="w-4 h-4 text-red-600" />
                         </Button>
                       )}
-                      </>
-                      )}
-                      {s.status === 'Aprovada' && hasPermission('Compras','SolicitacaoCompra','gerar_oc') && (
-                      <Button variant="ghost" size="sm" data-permission="Compras.SolicitacaoCompra.gerar_oc" data-sensitive="true" onClick={() => handleGerarOC(s)} className="text-purple-600">
+                    </>
+                  )}
+                  {s.status === 'Aprovada' && hasPermission('Compras','SolicitacaoCompra','gerar_oc') && (
+                    <Button variant="ghost" size="sm" data-permission="Compras.SolicitacaoCompra.gerar_oc" data-sensitive="true" onClick={() => handleGerarOC(s)} className="text-purple-600">
                       <ShoppingCart className="w-4 h-4 mr-1" /> Gerar OC
                     </Button>
                   )}
                 </div>
-              ) }
+              )}
             ]}
             data={solList}
             entityName="SolicitacaoCompra"
@@ -547,12 +227,11 @@ Retorne JSON com:
             allSelected={selectedSolicitacoes.length === solList.length && solList.length > 0}
             onToggleSelectAll={() => {
               const all = selectedSolicitacoes.length === solList.length && solList.length > 0;
-              setSelectedSolicitacoes(all ? [] : solList.map(s=>s.id));
+              setSelectedSolicitacoes(all ? [] : solList.map(s => s.id));
             }}
             onToggleItem={(id) => toggleSolicitacao(id)}
             permission="Compras.SolicitacaoCompra.visualizar"
-            page={page}
-            pageSize={pageSize}
+            page={page} pageSize={pageSize}
             totalItems={page * pageSize + (solBackend.length < pageSize ? 0 : 1)}
             onPageChange={(p) => setPage(p)}
             onPageSizeChange={(n) => { setPageSize(n); setPage(1); }}
@@ -565,6 +244,5 @@ Retorne JSON com:
   if (windowMode) {
     return <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 to-orange-50 overflow-auto p-1.5">{content}</div>;
   }
-
   return content;
 }

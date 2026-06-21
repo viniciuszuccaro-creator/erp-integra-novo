@@ -90,7 +90,7 @@ export default function EntregasListagem({ entregas, clientes, pedidos, empresas
               </SelectContent>
             </Select>
             {selectedEntregas.length > 0 && hasPermission('Expedição','Entrega','exportar') && (
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" data-permission="Expedição.Entrega.exportar">
                 <Download className="w-3 h-3 mr-1" /> CSV ({selectedEntregas.length})
               </Button>
             )}
@@ -117,11 +117,11 @@ export default function EntregasListagem({ entregas, clientes, pedidos, empresas
               { key: 'status', label: 'Status', render: (e) => <Badge className={statusColors[e.status]} style={{ fontSize: '10px' }}>{e.status}</Badge> },
               { key: 'actions', label: 'Ações', render: (e) => (
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" onClick={() => openWindow(DetalhesEntregaView, { entrega: e, estaNoGrupo, obterNomeEmpresa, statusColors, windowMode: true }, { title: `🚚 ${e.numero_pedido}`, width: 1000, height: 700 })} className="h-7 w-7">
-                    <Eye className="w-3 h-3" />
+                  <Button variant="ghost" size="icon" data-permission="Expedição.Entrega.visualizar" onClick={() => openWindow(DetalhesEntregaView, { entrega: e, estaNoGrupo, obterNomeEmpresa, statusColors, windowMode: true }, { title: `🚚 ${e.numero_pedido}`, width: 1000, height: 700 })} className="h-7 w-7">
+                   <Eye className="w-3 h-3" />
                   </Button>
                   {hasPermission('Expedição','Entrega','editar') && (
-                    <Button variant="ghost" size="icon" onClick={() => openWindow(FormularioEntrega, { formData: e, windowMode: true, isEditing: true }, { title: `✏️ ${e.numero_pedido}`, width: 1100, height: 650 })} className="h-7 w-7">
+                    <Button variant="ghost" size="icon" data-permission="Expedição.Entrega.editar" onClick={() => openWindow(FormularioEntrega, { formData: e, windowMode: true, isEditing: true }, { title: `✏️ ${e.numero_pedido}`, width: 1100, height: 650 })} className="h-7 w-7">
                       <Edit className="w-3 h-3" />
                     </Button>
                   )}

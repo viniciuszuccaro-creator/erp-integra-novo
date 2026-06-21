@@ -257,6 +257,7 @@ export default function NotaFiscalFormCompleto({
                 variant="outline"
                 onClick={handleValidarIA}
                 disabled={loading}
+                data-permission="Fiscal.NotaFiscal.validar"
               >
                 <Calculator className="w-4 h-4 mr-2" />
                 {loading ? "Validando..." : "Validar com IA"}
@@ -268,9 +269,9 @@ export default function NotaFiscalFormCompleto({
                   Rascunho
                 </Badge>
               )}
-            </div>
+              </div>
 
-            <div className="flex gap-3">
+              <div className="flex gap-3">
               {onCancel && (
                 <Button type="button" variant="outline" onClick={onCancel}>
                   Cancelar
@@ -280,6 +281,7 @@ export default function NotaFiscalFormCompleto({
                 type="submit" 
                 className="bg-blue-600 hover:bg-blue-700"
                 disabled={loading}
+                data-permission="Fiscal.NotaFiscal.criar"
               >
                 <FileText className="w-4 h-4 mr-2" />
                 {notaFiscal ? 'Atualizar' : 'Salvar'} NF-e

@@ -1,8 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 /**
- * P2.2: Propagação Grupo → Empresas — OrdemCompra
- * OC criada no Grupo distribui para empresas específicas
+ * P2.3: Handler bidirecional para OrdemCompra
+ * Grupo → Empresas: replica OC do grupo para empresas
+ * Empresa → Grupo: sincroniza status e datas
  */
 Deno.serve(async (req) => {
   try {
@@ -10,60 +11,42 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { groupId, ocId, empresasDestino } = await req.json();
-    if (!groupId || !ocId) {
-      return Response.json({ error: 'groupId e ocId obrigatórios' }, { status: 400 });
+    const body = await req.json();
+    const { entity_id, event_type, data } = body;
+
+    if (!entity_id) return Response.json({ error: 'entity_id obrigatório' }, { status: 400 });
+
+    const oc = data || await base44.asServiceRole.entities.OrdemCompra.get(entity_id);
+    if (!oc) return Response.json({ error: `OrdemCompra ${entity_id} não encontrado` }, { status: 404 });
+    if (oc.e_replicado === true) return Response.json({ success: false, reason: 'anti-loop' });
+
+    const isGroupLevel = !!oc.group_id && !oc.empresa_id;
+
+    if (isGroupLevel && (event_type === 'create' || event_type === 'update')) {
+      const empresas = await base44.asServiceRole.entities.Empresa.filter({ group_id: oc.group_id });
+      const empresasArr = Array.isArray(empresas) ? empresas : [];
+
+      const resultados = await Promise.allSettled(empresasArr.map(async (emp) => {
+        const existing = await base44.asServiceRole.entities.OrdemCompra.filter({
+          group_id: oc.group_id, empresa_id: emp.id, numero_oc: oc.numero_oc, e_replicado: true
+        }, undefined, 1);
+
+        const payload = { ...oc, id: undefined, created_date: undefined, updated_date: undefined, empresa_id: emp.id, group_id: oc.group_id, e_replicado: true, documento_grupo_id: entity_id };
+        return (Array.isArray(existing) && existing.length > 0) ? base44.asServiceRole.entities.OrdemCompra.update(existing[0].id, payload) : base44.asServiceRole.entities.OrdemCompra.create(payload);
+      }));
+
+      const ok = resultados.filter(r => r.status === 'fulfilled').length;
+      return Response.json({ success: true, direction: 'down', ok });
     }
 
-    const oc = await base44.entities.OrdemCompra.get(ocId);
-    if (!oc || oc.group_id !== groupId) {
-      return Response.json({ error: 'OrdemCompra grupo não encontrada' }, { status: 404 });
+    if (oc.empresa_id && oc.documento_grupo_id) {
+      const patch = {};
+      ['status', 'data_entrega_real', 'quantidade_recebida', 'observacoes'].forEach(f => { if (oc[f] !== undefined) patch[f] = oc[f]; });
+      if (Object.keys(patch).length > 0) await base44.asServiceRole.entities.OrdemCompra.update(oc.documento_grupo_id, patch);
+      return Response.json({ success: true, direction: 'up', synced_fields: Object.keys(patch) });
     }
 
-    // Determinar empresas destino
-    let empresas = [];
-    if (empresasDestino && empresasDestino.length > 0) {
-      empresas = await Promise.all(empresasDestino.map(id => base44.entities.Empresa.get(id)));
-      empresas = empresas.filter(Boolean);
-    } else {
-      empresas = await base44.entities.Empresa.filter({ group_id: groupId }, null, 100);
-    }
-
-    if (!empresas.length) {
-      return Response.json({ success: true, message: 'Nenhuma empresa destino', replicated: [] });
-    }
-
-    const replicated = [];
-    const valorPorEmpresa = (oc.valor_total || 0) / empresas.length;
-
-    for (const empresa of empresas) {
-      try {
-        const ocEmpresa = {
-          ...oc,
-          id: undefined,
-          empresa_id: empresa.id,
-          e_replicado: true,
-          documento_grupo_id: ocId,
-          group_id: groupId,
-          valor_total: valorPorEmpresa,
-          solicitante: user.full_name || user.email,
-        };
-        delete ocEmpresa.id;
-
-        const nova = await base44.entities.OrdemCompra.create(ocEmpresa);
-        replicated.push({ empresa_id: empresa.id, oc_id: nova.id, valor: valorPorEmpresa });
-      } catch (err) {
-        console.error(`Erro ao replicar OC para ${empresa.id}:`, err.message);
-      }
-    }
-
-    await base44.entities.OrdemCompra.update(ocId, {
-      distribuicao_realizada: replicated.map(r => ({
-        empresa_id: r.empresa_id, titulo_id: r.oc_id, valor: r.valor, status: 'Solicitada',
-      })),
-    });
-
-    return Response.json({ success: true, replicated, message: `OC distribuída para ${replicated.length} empresa(s)` });
+    return Response.json({ success: false, reason: 'Sem direção de propagação' });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

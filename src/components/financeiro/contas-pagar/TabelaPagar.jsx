@@ -61,16 +61,16 @@ export default function TabelaPagar({
             <Button data-permission="Financeiro.ContasPagar.exportar" variant="ghost" size="icon" onClick={() => onPrint(r, emp)} title="Imprimir" className="h-7 w-7">
               <Printer className="w-3 h-3" />
             </Button>
-            <Button data-permission="Financeiro.ContasPagar.editar" variant="ghost" size="icon" onClick={() => onEdit(r)} title="Editar" className="h-7 w-7">
+            <Button data-permission="Financeiro.ContasPagar.editar" data-sensitive variant="ghost" size="icon" onClick={() => onEdit(r)} title="Editar" className="h-7 w-7">
               <Edit2 className="w-3 h-3" />
             </Button>
             {r.status === 'Pendente' && (
-              <Button data-permission="Financeiro.ContasPagar.aprovar" variant="ghost" size="icon" onClick={() => onAprovar(r.id)} disabled={aprovarPending} title="Aprovar" className="h-7 w-7">
+              <Button data-permission="Financeiro.ContasPagar.aprovar" data-sensitive variant="ghost" size="icon" onClick={() => onAprovar(r.id)} disabled={aprovarPending} title="Aprovar" className="h-7 w-7">
                 <Shield className="w-3 h-3 text-blue-600" />
               </Button>
             )}
             {r.status === 'Aprovado' && (
-              <Button data-permission="Financeiro.ContasPagar.baixar" variant="ghost" size="icon" onClick={() => onBaixar(r)} title="Pagar" className="h-7 w-7">
+              <Button data-permission="Financeiro.ContasPagar.baixar" data-sensitive variant="ghost" size="icon" onClick={() => onBaixar(r)} title="Pagar" className="h-7 w-7">
                 <CheckCircle className="w-3 h-3 text-green-600" />
               </Button>
             )}

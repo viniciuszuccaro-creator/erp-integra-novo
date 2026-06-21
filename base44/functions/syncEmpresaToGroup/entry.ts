@@ -1,17 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import { propagateBidirectional } from './_lib/propagationBidirectional.js';
 
 /**
  * P2.3: Propagação Empresa → Grupo (sincronização ascendente)
- * Quando status muda em uma Empresa (Baixa, Recebimento, Confirmação),
- * sincroniza o registro-pai no Grupo.
+ * Invoca syncBidirectional (já existente) para propagar Up
  *
  * Casos de uso:
- *  - ContaReceber baixada na Empresa → Grupo reflete status 'Recebido'
- *  - ContaPagar paga na Empresa → Grupo reflete status 'Pago'
- *  - Entrega confirmada → Grupo reflete status 'Entregue'
- *  - OrdemCompra recebida → Grupo reflete status 'Recebida'
- *  - Pedido aprovado → Grupo reflete status 'Aprovado'
+ *  - ContaReceber baixada → Grupo reflete status 'Recebido'
+ *  - ContaPagar paga → Grupo reflete status 'Pago'
+ *  - Entrega confirmada → Grupo reflete 'Entregue'
+ *  - OrdemCompra recebida → Grupo reflete 'Recebida'
+ *  - Pedido aprovado → Grupo reflete 'Aprovado'
  */
 Deno.serve(async (req) => {
   try {
@@ -32,36 +30,37 @@ Deno.serve(async (req) => {
       return Response.json({ error: `${entity_name} não encontrado` }, { status: 404 });
     }
 
-    // Só sincroniza se tem group_id E empresa_id (contexto empresa)
+    // Só sincroniza se tem group_id E empresa_id
     if (!entityData.group_id || !entityData.empresa_id) {
       return Response.json({ success: false, reason: 'Sem contexto multiempresa' });
     }
 
     // 1. Atualizar status localmente se fornecido
-    if (novo_status) {
-      await base44.asServiceRole.entities[entity_name].update(entity_id, {
-        status: novo_status,
-        ...(dados_extras || {}),
-      });
+    const updates = { ...(dados_extras || {}) };
+    if (novo_status) updates.status = novo_status;
+
+    if (Object.keys(updates).length > 0) {
+      await base44.asServiceRole.entities[entity_name].update(entity_id, updates);
     }
 
-    // 2. Propagar para cima (Empresa → Grupo)
-    const updatedData = { ...entityData, status: novo_status || entityData.status, ...(dados_extras || {}) };
-    const result = await propagateBidirectional(base44, {
-      entity_name,
-      entity_id,
-      type: 'update',
-      data: updatedData,
-    });
+    // 2. Propagar para cima (Empresa → Grupo) via syncBidirectional
+    let syncResult = null;
+    try {
+      const res = await base44.functions.invoke('syncBidirectional', {
+        entity_name,
+        entity_id,
+        direction: 'up',
+        updates,
+        group_id: entityData.group_id,
+        empresa_id: entityData.empresa_id,
+      });
+      syncResult = res?.data;
+    } catch (_) {}
 
-    // 3. Buscar documento-pai no grupo (via documento_grupo_id)
-    if (entityData.documento_grupo_id && novo_status) {
+    // 3. Sync direto no documento-pai (via documento_grupo_id) como fallback
+    if (entityData.documento_grupo_id && Object.keys(updates).length > 0) {
       try {
-        await base44.asServiceRole.entities[entity_name].update(entityData.documento_grupo_id, {
-          status: novo_status,
-          ...(dados_extras || {}),
-          sincronizar_baixa_com_grupo: true,
-        });
+        await base44.asServiceRole.entities[entity_name].update(entityData.documento_grupo_id, updates);
       } catch (_) {}
     }
 
@@ -77,18 +76,18 @@ Deno.serve(async (req) => {
         registro_id: entity_id,
         group_id: entityData.group_id,
         empresa_id: entityData.empresa_id,
-        descricao: `Sync ascendente ${entity_name}: status → ${novo_status || 'mantido'}`,
-        dados_novos: { status: novo_status, ...(dados_extras || {}) },
+        descricao: `Sync up ${entity_name}: ${novo_status || 'dados atualizados'}`,
+        dados_novos: updates,
         data_hora: new Date().toISOString(),
       });
     } catch (_) {}
 
     return Response.json({
-      success: result.ok || true,
+      success: true,
       direction: 'up',
       entity: entity_name,
       novo_status,
-      propagation: result,
+      sync: syncResult,
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

@@ -197,7 +197,7 @@ export default function FiscalPage() {
   return (
     <ProtectedSection module="Fiscal" action="visualizar">
     <ErrorBoundary>
-      <ModuleLayout title="Fiscal e Tributário" subtitle="NF-e, tributos e relatórios" actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'fiscal_primary_action' })}>Nova NF-e</Button></div>}>
+      <ModuleLayout title="Fiscal e Tributário" subtitle="NF-e, tributos e relatórios" actions={<div className="flex items-center gap-2"><Button size="sm" data-permission="Fiscal.NotaFiscal.criar" onClick={() => base44.analytics.track({ eventName: 'fiscal_primary_action' })}>Nova NF-e</Button></div>}>
         <ModuleKPIs>
           {/* P4: FiscalIAPanel movido para módulo no grid — header mais leve */}
           <KPIsFiscal

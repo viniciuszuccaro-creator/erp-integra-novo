@@ -620,6 +620,7 @@ export default function ContratosPage() {
 
         <Button 
           className="bg-emerald-600 hover:bg-emerald-700"
+          data-permission="Contratos.Contrato.criar"
           onClick={() => openWindow(ContratoForm, {
             windowMode: true,
             clientes,
@@ -760,12 +761,13 @@ export default function ContratosPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1 flex-wrap">
-                          <Button variant="ghost" size="icon" onClick={() => setViewingContrato(contrato)} title="Ver detalhes">
+                          <Button variant="ghost" size="icon" data-permission="Contratos.Contrato.ver" onClick={() => setViewingContrato(contrato)} title="Ver detalhes">
                             <Eye className="w-4 h-4" />
                           </Button>
                           <Button 
                             variant="ghost" 
-                            size="icon" 
+                            size="icon"
+                            data-permission="Contratos.Contrato.editar"
                             onClick={() => openWindow(ContratoForm, {
                               contrato,
                               windowMode: true,
@@ -808,6 +810,7 @@ export default function ContratosPage() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              data-permission="Contratos.Cobranca.criar"
                               onClick={() => gerarCobrancasMutation.mutate(contrato)}
                               title="Gerar Cobrança Manualmente"
                               className="text-purple-600 hover:text-purple-700"
@@ -842,7 +845,7 @@ export default function ContratosPage() {
                               <History className="w-4 h-4" />
                             </Button>
                           )}
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(contrato)} className="text-red-600 hover:text-red-700" title="Excluir">
+                          <Button variant="ghost" size="icon" data-permission="Contratos.Contrato.excluir" onClick={() => handleDelete(contrato)} className="text-red-600 hover:text-red-700" title="Excluir">
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>

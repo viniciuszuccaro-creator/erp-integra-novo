@@ -345,6 +345,7 @@ Retorne JSON com:
               size="sm"
               className="bg-blue-600 hover:bg-blue-700"
               data-permission="Compras.SolicitacaoCompra.criar"
+              data-sensitive="true"
               onClick={() => openWindow(SolicitacaoCompraForm, {
                 windowMode: true,
                 onSubmit: async (data) => {
@@ -518,19 +519,19 @@ Retorne JSON com:
                   {s.status === 'Pendente' && (
                     <>
                       {hasPermission('Compras','SolicitacaoCompra','aprovar') && (
-                        <Button variant="ghost" size="icon" data-permission="Compras.SolicitacaoCompra.aprovar" onClick={() => handleAprovar(s)} title="Aprovar">
+                        <Button variant="ghost" size="icon" data-permission="Compras.SolicitacaoCompra.aprovar" data-sensitive="true" onClick={() => handleAprovar(s)} title="Aprovar">
                           <CheckCircle2 className="w-4 h-4 text-green-600" />
                         </Button>
                       )}
                       {hasPermission('Compras','SolicitacaoCompra','rejeitar') && (
-                        <Button variant="ghost" size="icon" data-permission="Compras.SolicitacaoCompra.rejeitar" onClick={() => handleRejeitar(s)} title="Rejeitar">
+                        <Button variant="ghost" size="icon" data-permission="Compras.SolicitacaoCompra.rejeitar" data-sensitive="true" onClick={() => handleRejeitar(s)} title="Rejeitar">
                           <XCircle className="w-4 h-4 text-red-600" />
                         </Button>
                       )}
-                    </>
-                  )}
-                  {s.status === 'Aprovada' && hasPermission('Compras','SolicitacaoCompra','gerar_oc') && (
-                    <Button variant="ghost" size="sm" data-permission="Compras.SolicitacaoCompra.gerar_oc" onClick={() => handleGerarOC(s)} className="text-purple-600">
+                      </>
+                      )}
+                      {s.status === 'Aprovada' && hasPermission('Compras','SolicitacaoCompra','gerar_oc') && (
+                      <Button variant="ghost" size="sm" data-permission="Compras.SolicitacaoCompra.gerar_oc" data-sensitive="true" onClick={() => handleGerarOC(s)} className="text-purple-600">
                       <ShoppingCart className="w-4 h-4 mr-1" /> Gerar OC
                     </Button>
                   )}

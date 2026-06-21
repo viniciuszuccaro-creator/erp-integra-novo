@@ -152,6 +152,8 @@ export default function PontoTab({ pontos, colaboradores }) {
 
         <Button 
           className="bg-pink-600 hover:bg-pink-700"
+          data-permission="RH.Ponto.criar"
+          data-sensitive="true"
           onClick={() => openWindow(PontoForm, {
             windowMode: true,
             onSubmit: async (data) => {
@@ -350,6 +352,8 @@ export default function PontoTab({ pontos, colaboradores }) {
                         <Button
                           variant="ghost"
                           size="icon"
+                          data-permission="RH.Ponto.aprovar"
+                          data-sensitive="true"
                           onClick={() => aprovarMutation.mutate({ id: ponto.id })}
                           className="text-green-600 hover:text-green-700 hover:bg-green-50"
                         >
@@ -358,6 +362,8 @@ export default function PontoTab({ pontos, colaboradores }) {
                         <Button
                           variant="ghost"
                           size="icon"
+                          data-permission="RH.Ponto.rejeitar"
+                          data-sensitive="true"
                           onClick={() => rejeitarMutation.mutate({ id: ponto.id })}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >

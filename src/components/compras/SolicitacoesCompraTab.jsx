@@ -36,7 +36,10 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
 
   const exportarSolicitacoesCSV = (lista) => {
     const headers = ['numero_solicitacao','produto_descricao','quantidade_solicitada','unidade_medida','solicitante','data_solicitacao','prioridade','status'];
-    const csv = [headers.join(','), ...lista.map(s => headers.map(h => JSON.stringify(s[h] ?? '')).join(','))].join('\n');
+    const csv = [
+      headers.join(','),
+      ...lista.map(s => headers.map(h => JSON.stringify(s[h] ?? '')).join(','))
+    ].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -66,14 +69,22 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
       ...data, empresa_id: empresaAtual?.id, group_id: empresaAtual?.grupo_id,
       solicitante: user?.full_name, solicitante_id: user?.id
     }),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['solicitacoes-compra'] }); handleCloseDialog(); toast({ title: "Solicitacao criada!" }); },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['solicitacoes-compra'] });
+      handleCloseDialog();
+      toast({ title: "Solicitacao criada!" });
+    },
   });
 
   const aprovarMutation = useMutation({
     mutationFn: ({ id }) => updateInContext('SolicitacaoCompra', id, {
-      status: "Aprovada", aprovador: user?.full_name, data_aprovacao: new Date().toISOString().split('T')[0]
+      status: "Aprovada", aprovador: user?.full_name,
+      data_aprovacao: new Date().toISOString().split('T')[0]
     }),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['solicitacoes-compra'] }); toast({ title: "Solicitacao aprovada!" }); },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['solicitacoes-compra'] });
+      toast({ title: "Solicitacao aprovada!" });
+    },
   });
 
   const rejeitarMutation = useMutation({
@@ -81,14 +92,18 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
       status: "Rejeitada", aprovador: user?.full_name,
       data_aprovacao: new Date().toISOString().split('T')[0], observacoes: motivo
     }),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['solicitacoes-compra'] }); toast({ title: "Solicitacao rejeitada" }); },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['solicitacoes-compra'] });
+      toast({ title: "Solicitacao rejeitada" });
+    },
   });
 
   const gerarOCMutation = useMutation({
     mutationFn: async (solicitacao) => {
       const oc = await createInContext('OrdemCompra', {
         numero_oc: `OC-${Date.now()}`, fornecedor_nome: "A definir",
-        solicitacao_compra_id: solicitacao.id, data_solicitacao: new Date().toISOString().split('T')[0],
+        solicitacao_compra_id: solicitacao.id,
+        data_solicitacao: new Date().toISOString().split('T')[0],
         valor_total: 0, status: "Solicitada",
         itens: [{ produto_id: solicitacao.produto_id, descricao: solicitacao.produto_descricao,
           quantidade_solicitada: solicitacao.quantidade_solicitada, unidade: solicitacao.unidade_medida,
@@ -105,18 +120,8 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
     },
   });
 
-  const sugerirComprasIA = useMutation({
-    mutationFn: async () => {
-      throw new Error("IA indisponivel: creditos de integracao esgotados ate 07/07/2026");
-    },
-    onError: (error) => {
-      toast({ title: "IA indisponivel", description: error.message, variant: "destructive" });
-    }
-  });
-
   const handleCloseDialog = () => {
-    setIsDialogOpen(false);
-    setEditando(null);
+    setIsDialogOpen(false); setEditando(null);
     setFormData({
       numero_solicitacao: `SC-${Date.now()}`,
       data_solicitacao: new Date().toISOString().split('T')[0],
@@ -127,9 +132,23 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
   };
 
   const handleSubmit = (e) => { e.preventDefault(); createMutation.mutate(formData); };
-  const handleAprovar = (s) => { if (confirm(`Aprovar solicitacao de ${s.produto_descricao}?`)) aprovarMutation.mutate({ id: s.id }); };
-  const handleRejeitar = (s) => { const m = prompt("Motivo da rejeicao:"); if (m) rejeitarMutation.mutate({ id: s.id, motivo: m }); };
-  const handleGerarOC = (s) => { if (confirm(`Gerar OC para ${s.produto_descricao}?`)) gerarOCMutation.mutate(s); };
+
+  const handleAprovar = (solicitacao) => {
+    if (confirm(`Aprovar solicitacao de ${solicitacao.produto_descricao}?`)) {
+      aprovarMutation.mutate({ id: solicitacao.id });
+    }
+  };
+
+  const handleRejeitar = (solicitacao) => {
+    const motivo = prompt("Motivo da rejeicao:");
+    if (motivo) rejeitarMutation.mutate({ id: solicitacao.id, motivo });
+  };
+
+  const handleGerarOC = (solicitacao) => {
+    if (confirm(`Gerar Ordem de Compra para ${solicitacao.produto_descricao}?`)) {
+      gerarOCMutation.mutate(solicitacao);
+    }
+  };
 
   const statusColors = {
     'Pendente': 'bg-yellow-100 text-yellow-700', 'Em Analise': 'bg-blue-100 text-blue-700',
@@ -140,23 +159,28 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
   const content = (
     <div className="space-y-1.5">
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-bold">Solicitações de Compra</h2>
+        <h2 className="text-lg font-bold">Solicitacoes de Compra</h2>
         <div className="flex gap-1">
-          <Button onClick={() => sugerirComprasIA.mutate()} disabled={sugerirComprasIA.isPending}
-            variant="outline" size="sm" className="border-purple-300 text-purple-700 hover:bg-purple-50">
-            <span className="text-xs">🤖 IA</span>
-          </Button>
           {hasPermission('Compras','SolicitacaoCompra','criar') && (
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700"
-              data-permission="Compras.SolicitacaoCompra.criar" data-sensitive="true"
+            <Button
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700"
+              data-permission="Compras.SolicitacaoCompra.criar"
+              data-sensitive="true"
               onClick={() => openWindow(SolicitacaoCompraForm, {
                 windowMode: true,
                 onSubmit: async (data) => {
-                  try { await createMutation.mutateAsync(data); sonnerToast.success("Solicitacao criada!"); }
-                  catch { sonnerToast.error("Erro ao criar solicitacao"); }
+                  try {
+                    await createMutation.mutateAsync(data);
+                    sonnerToast.success("Solicitacao criada!");
+                  } catch (error) {
+                    sonnerToast.error("Erro ao criar solicitacao");
+                  }
                 }
-              }, { title: 'Nova Solicitacao de Compra', width: 900, height: 650 })}>
-              <Plus className="w-3 h-3 mr-1" /> Nova
+              }, { title: 'Nova Solicitacao de Compra', width: 900, height: 650 })}
+            >
+              <Plus className="w-3 h-3 mr-1" />
+              Nova
             </Button>
           )}
         </div>
@@ -164,7 +188,7 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
 
       <Card className="border-0 shadow-md">
         <CardHeader className="bg-slate-50 border-b">
-          <CardTitle>Lista de Solicitações ({solList.length})</CardTitle>
+          <CardTitle>Lista de Solicitacoes ({solList.length})</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {selectedSolicitacoes.length > 0 && (
@@ -175,7 +199,7 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
                   <Button variant="outline" onClick={() => exportarSolicitacoesCSV(solList.filter(s => selectedSolicitacoes.includes(s.id)))}>
                     <Download className="w-4 h-4 mr-2" /> Exportar CSV
                   </Button>
-                  <Button variant="ghost" onClick={() => setSelectedSolicitacoes([])}>Limpar</Button>
+                  <Button variant="ghost" onClick={() => setSelectedSolicitacoes([])}>Limpar Selecao</Button>
                 </div>
               </AlertDescription>
             </Alert>
@@ -190,7 +214,8 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
               { key: 'prioridade', label: 'Prioridade', render: (s) => (
                 <Badge variant="outline" className={
                   s.prioridade === 'Urgente' ? 'border-red-300 text-red-700' :
-                  s.prioridade === 'Alta' ? 'border-orange-300 text-orange-700' : 'border-slate-300 text-slate-700'
+                  s.prioridade === 'Alta' ? 'border-orange-300 text-orange-700' :
+                  'border-slate-300 text-slate-700'
                 }>{s.prioridade}</Badge>
               ) },
               { key: 'status', label: 'Status', render: (s) => <Badge className={statusColors[s.status]}>{s.status}</Badge> },
@@ -216,7 +241,7 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
                     </Button>
                   )}
                 </div>
-              )}
+              ) }
             ]}
             data={solList}
             entityName="SolicitacaoCompra"
@@ -231,7 +256,8 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
             }}
             onToggleItem={(id) => toggleSolicitacao(id)}
             permission="Compras.SolicitacaoCompra.visualizar"
-            page={page} pageSize={pageSize}
+            page={page}
+            pageSize={pageSize}
             totalItems={page * pageSize + (solBackend.length < pageSize ? 0 : 1)}
             onPageChange={(p) => setPage(p)}
             onPageSizeChange={(n) => { setPageSize(n); setPage(1); }}
@@ -244,5 +270,6 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
   if (windowMode) {
     return <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 to-orange-50 overflow-auto p-1.5">{content}</div>;
   }
+
   return content;
 }

@@ -1,95 +1,82 @@
-/**
- * DashboardEssentialKPIs — 5 KPIs essenciais, limpos, no topo do Dashboard.
- * Substitui blocos duplicados. Clicável para drill-down.
- */
 import React from "react";
-import { DollarSign, TrendingUp, Truck, Package, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { createPageUrl } from "@/utils";
-import { useNavigate } from "react-router-dom";
-
-function KPICard({ icon: Icon, label, value, sub, color, bgColor, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-3 p-4 rounded-xl border bg-white w-full text-left hover:shadow-md transition-all group`}
-    >
-      <div className={`w-10 h-10 rounded-lg ${bgColor} flex items-center justify-center shrink-0`}>
-        <Icon className={`w-5 h-5 ${color}`} />
-      </div>
-      <div className="min-w-0">
-        <div className="text-xs text-slate-500 truncate">{label}</div>
-        <div className="text-lg font-bold text-slate-900 leading-tight truncate">{value}</div>
-        {sub && <div className="text-xs text-slate-400 truncate">{sub}</div>}
-      </div>
-    </button>
-  );
-}
+import { Badge } from "@/components/ui/badge";
+import { TrendingUp, AlertTriangle, Package, DollarSign, Truck, Users } from "lucide-react";
 
 export default function DashboardEssentialKPIs({
-  totalVendas = 0,
-  taxaInadimplencia = 0,
-  valorVencido = 0,
-  entregasPendentes = 0,
-  produtosBaixoEstoque = 0,
-  otd = 0,
+  totalVendas,
+  inadimplencia,
+  produtosBaixoEstoque,
+  fluxoCaixaHoje,
+  entregasAtraso,
+  clientesAtivos,
+  periodo = "mês",
 }) {
-  const navigate = useNavigate();
-  const fmt = (v) => `R$ ${Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
   const kpis = [
     {
-      icon: DollarSign,
-      label: "Vendas do Período",
-      value: fmt(totalVendas),
-      sub: "receita total",
-      color: "text-green-600",
-      bgColor: "bg-green-50",
-      url: createPageUrl("Comercial"),
-    },
-    {
+      label: "Vendas do Mês",
+      value: `R$ ${(totalVendas || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`,
       icon: TrendingUp,
-      label: "OTD — Entregas no Prazo",
-      value: `${otd}%`,
-      sub: `${entregasPendentes} pendentes`,
-      color: otd >= 90 ? "text-green-600" : otd >= 70 ? "text-amber-600" : "text-red-600",
-      bgColor: otd >= 90 ? "bg-green-50" : otd >= 70 ? "bg-amber-50" : "bg-red-50",
-      url: createPageUrl("Expedicao"),
+      color: "bg-green-50 text-green-700",
+      trend: "+12% vs mês anterior",
     },
     {
-      icon: AlertCircle,
       label: "Inadimplência",
-      value: `${taxaInadimplencia}%`,
-      sub: fmt(valorVencido) + " vencido",
-      color: taxaInadimplencia < 5 ? "text-green-600" : taxaInadimplencia < 10 ? "text-amber-600" : "text-red-600",
-      bgColor: taxaInadimplencia < 5 ? "bg-green-50" : taxaInadimplencia < 10 ? "bg-amber-50" : "bg-red-50",
-      url: createPageUrl("Financeiro"),
+      value: `R$ ${(inadimplencia || 0).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`,
+      icon: AlertTriangle,
+      color: "bg-red-50 text-red-700",
+      trend: `${inadimplencia > 0 ? "⚠️ CRÍTICO" : "✅ OK"}`,
+      critical: inadimplencia > 0,
     },
     {
-      icon: Package,
-      label: "Estoque em Alerta",
+      label: "Estoque Crítico",
       value: produtosBaixoEstoque,
-      sub: "produtos abaixo do mínimo",
-      color: produtosBaixoEstoque > 0 ? "text-red-600" : "text-green-600",
-      bgColor: produtosBaixoEstoque > 0 ? "bg-red-50" : "bg-green-50",
-      url: createPageUrl("Estoque"),
+      icon: Package,
+      color: "bg-orange-50 text-orange-700",
+      trend: `${produtosBaixoEstoque} produtos abaixo do mínimo`,
+      critical: produtosBaixoEstoque > 0,
     },
     {
+      label: "Caixa Hoje",
+      value: `R$ ${(fluxoCaixaHoje || 0).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}`,
+      icon: DollarSign,
+      color: "bg-blue-50 text-blue-700",
+      trend: "Saldo em caixa",
+    },
+    {
+      label: "Entregas em Atraso",
+      value: entregasAtraso,
       icon: Truck,
-      label: "Entregas Pendentes",
-      value: entregasPendentes,
-      sub: "aguardando envio",
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
-      url: createPageUrl("Expedicao"),
+      color: "bg-yellow-50 text-yellow-700",
+      trend: `${entregasAtraso} entregas atrasadas`,
+      critical: entregasAtraso > 0,
+    },
+    {
+      label: "Clientes Ativos",
+      value: clientesAtivos,
+      icon: Users,
+      color: "bg-purple-50 text-purple-700",
+      trend: "Neste período",
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 w-full">
-      {kpis.map((k, i) => (
-        <KPICard key={i} {...k} onClick={() => navigate(k.url)} />
-      ))}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      {kpis.map((kpi, idx) => {
+        const Icon = kpi.icon;
+        return (
+          <Card key={idx} className={`border-l-4 ${kpi.critical ? "border-l-red-500" : "border-l-blue-500"}`}>
+            <CardContent className="p-4">
+              <div className={`rounded-lg p-3 mb-3 ${kpi.color} w-fit`}>
+                <Icon className="w-5 h-5" />
+              </div>
+              <p className="text-xs text-slate-600 font-medium uppercase mb-1">{kpi.label}</p>
+              <p className="text-2xl font-bold text-slate-900 mb-2">{kpi.value}</p>
+              <p className="text-xs text-slate-500">{kpi.trend}</p>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }

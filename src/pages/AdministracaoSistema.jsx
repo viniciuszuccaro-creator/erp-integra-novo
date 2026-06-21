@@ -3,16 +3,12 @@
  * - Layout limpo, responsivo, sem compressão em telas pequenas
  * - Admin vê tudo; não-admin vai ao Portal do Cliente
  * - Tab ativa sincronizada com URL param ?tab=...
- * - P5: Integra 3 Índices consolidados (Configuracoes, GestaoAcessos, Monitoramento)
  */
 import React, { Suspense, lazy } from "react";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import AdminHeader from "@/components/administracao-sistema/AdminHeader";
 import AdminSaudeBar from "@/components/administracao-sistema/AdminSaudeBar";
 import AdminTabs from "@/components/administracao-sistema/AdminTabs";
-import IndiceConfiguracoes from "@/components/administracao/IndiceConfiguracoes";
-import IndiceGestaoAcessos from "@/components/administracao/IndiceGestaoAcessos";
-import IndiceMonitoramento from "@/components/administracao/IndiceMonitoramento";
 import usePermissions from "@/components/lib/usePermissions";
 import { useUser } from "@/components/lib/UserContext";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
@@ -37,9 +33,6 @@ const TAB_MAP = {
   auditoria: "auditoria", logs: "auditoria", trilha: "auditoria", global: "auditoria",
   propagacao: "propagacao", propagação: "propagacao", sincronizacao: "propagacao",
   "grupo-empresas": "propagacao", sync: "propagacao",
-  "indice-configuracoes": "indices", "configuracoes-consolidadas": "indices",
-  "indice-acessos": "indices", "gestao-acessos-consolidada": "indices",
-  "indice-monitoramento": "indices", "monitoramento-consolidado": "indices",
 };
 
 export default function AdministracaoSistema() {
@@ -76,26 +69,12 @@ export default function AdministracaoSistema() {
         {/* Conteúdo principal */}
         <div className="flex-1 w-full overflow-auto">
           <div className="w-full max-w-screen-2xl mx-auto p-4 md:p-6">
-            {/* P5: Render Índices Consolidados */}
-            {initialTab === 'indices' && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                  <div className="lg:col-span-1"><IndiceConfiguracoes /></div>
-                  <div className="lg:col-span-1"><IndiceGestaoAcessos /></div>
-                  <div className="lg:col-span-1"><IndiceMonitoramento /></div>
-                </div>
-              </div>
-            )}
-            
-            {/* Legacy AdminTabs para outros abas */}
-            {initialTab !== 'indices' && (
-              <AdminTabs
-                initialTab={initialTab}
-                isAdmin={isAdmin}
-                empresaAtual={empresaAtual}
-                grupoAtual={grupoAtual}
-              />
-            )}
+            <AdminTabs
+              initialTab={initialTab}
+              isAdmin={isAdmin}
+              empresaAtual={empresaAtual}
+              grupoAtual={grupoAtual}
+            />
           </div>
         </div>
       </div>

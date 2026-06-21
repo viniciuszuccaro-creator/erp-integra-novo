@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,6 +12,8 @@ import AssinaturaEletronicaModal from "@/components/AssinaturaEletronicaModal";
 import { useToast } from "@/components/ui/use-toast";
 import { useWindow } from "@/components/lib/useWindow";
 import ContratoForm from "@/components/contratos/ContratoForm";
+import ContratoViewDialog from "@/components/contratos/ContratoViewDialog";
+import ContratoHistoryDialog from "@/components/contratos/ContratoHistoryDialog";
 import {
   FileText,
   Plus,
@@ -633,7 +634,7 @@ export default function ContratosPage() {
                 await base44.entities.Contrato.create({
                   ...data,
                   empresa_id: data.empresa_id || empresaAtual?.id,
-                  group_id: data.group_id || null,
+                  group_id: data.group_id || groupId,
                   data_proximo_reajuste: dataProximoReajuste.toISOString().split('T')[0],
                   proxima_cobranca: proximaCobranca.toISOString().split('T')[0],
                   historico_renovacoes: [],
@@ -772,7 +773,11 @@ export default function ContratosPage() {
                               fornecedores,
                               onSubmit: async (data) => {
                                 try {
-                                  await base44.entities.Contrato.update(contrato.id, data);
+                                  await base44.entities.Contrato.update(contrato.id, {
+                                    ...data,
+                                    empresa_id: data.empresa_id || empresaAtual?.id,
+                                    group_id: data.group_id || groupId,
+                                  });
                                   queryClient.invalidateQueries({ queryKey: ['contratos'] });
                                   toast({ title: "✅ Contrato atualizado!" });
                                 } catch (error) {
@@ -858,235 +863,9 @@ export default function ContratosPage() {
         </CardContent>
       </Card>
 
-      {/* Dialog Visualização */}
-      {viewingContrato && (
-        <Dialog open={!!viewingContrato} onOpenChange={() => setViewingContrato(null)}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Detalhes do Contrato</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-slate-600">Número</Label>
-                  <p className="font-bold text-lg">{viewingContrato.numero_contrato}</p>
-                </div>
-                <div>
-                  <Label className="text-slate-600">Status</Label>
-                  <Badge className={statusColors[viewingContrato.status]}>{viewingContrato.status}</Badge>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-slate-600">Tipo</Label>
-                  <p className="font-medium">{viewingContrato.tipo}</p>
-                </div>
-                <div>
-                  <Label className="text-slate-600">Parte Contratante</Label>
-                  <p className="font-medium">{viewingContrato.parte_contratante}</p>
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-slate-600">Objeto</Label>
-                <p className="font-medium">{viewingContrato.objeto}</p>
-              </div>
-
-              {viewingContrato.descricao && (
-                <div>
-                  <Label className="text-slate-600">Descrição</Label>
-                  <p className="text-sm">{viewingContrato.descricao}</p>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-slate-600">Valor Mensal</Label>
-                  <p className="text-xl font-bold text-emerald-600">
-                    R$ {viewingContrato.valor_mensal?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
-                </div>
-                <div>
-                  <Label className="text-slate-600">Valor Total</Label>
-                  <p className="text-xl font-bold text-slate-900">
-                    R$ {viewingContrato.valor_total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label className="text-slate-600">Data Início</Label>
-                  <p className="font-medium">{viewingContrato.data_inicio && new Date(viewingContrato.data_inicio).toLocaleDateString('pt-BR')}</p>
-                </div>
-                <div>
-                  <Label className="text-slate-600">Data Fim</Label>
-                  <p className="font-medium">{viewingContrato.data_fim && new Date(viewingContrato.data_fim).toLocaleDateString('pt-BR')}</p>
-                </div>
-                <div>
-                  <Label className="text-slate-600">Vigência</Label>
-                  <p className="font-medium">{viewingContrato.vigencia_meses} meses</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-slate-600">Forma de Pagamento</Label>
-                  <p className="font-medium">{viewingContrato.forma_pagamento}</p>
-                </div>
-                <div>
-                  <Label className="text-slate-600">Dia Vencimento</Label>
-                  <p className="font-medium">Dia {viewingContrato.dia_vencimento}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-slate-600">Índice de Reajuste</Label>
-                  <p className="font-medium">{viewingContrato.indice_reajuste}</p>
-                </div>
-                <div>
-                  <Label className="text-slate-600">Reajuste Anual</Label>
-                  <p className="font-medium">{viewingContrato.percentual_reajuste}%</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-slate-600">Renovação Automática</Label>
-                  <p className="font-medium">{viewingContrato.renovacao_automatica ? 'Sim' : 'Não'}</p>
-                </div>
-                <div>
-                  <Label className="text-slate-600">Alertar Renovação</Label>
-                  <p className="font-medium">{viewingContrato.prazo_aviso_renovacao} dias antes</p>
-                </div>
-              </div>
-
-              {viewingContrato.gerar_cobranca_automatica && (
-                <Card className="bg-purple-50 border-purple-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Zap className="w-5 h-5 text-purple-600" />
-                      <p className="font-semibold text-purple-900">Cobrança Automática Ativa</p>
-                    </div>
-                    <div className="text-sm text-purple-800 space-y-1">
-                      <p>Última cobrança: {viewingContrato.ultima_cobranca_gerada ? new Date(viewingContrato.ultima_cobranca_gerada).toLocaleDateString('pt-BR') : 'Nenhuma'}</p>
-                      <p>Próxima cobrança: {viewingContrato.proxima_cobranca ? new Date(viewingContrato.proxima_cobranca).toLocaleDateString('pt-BR') : 'Pendente'}</p>
-                      <p>Total de cobranças geradas: {viewingContrato.contas_geradas_ids?.length || 0}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {viewingContrato.responsavel_empresa && (
-                <div>
-                  <Label className="text-slate-600">Responsável</Label>
-                  <p className="font-medium">{viewingContrato.responsavel_empresa}</p>
-                </div>
-              )}
-
-              {viewingContrato.assinado && viewingContrato.assinatura_digital && (
-                <div className="border-t pt-4">
-                  <Label className="text-slate-600 mb-2 block">Assinatura Digital</Label>
-                  <Card className="p-4 bg-green-50 border-green-200">
-                    <div className="flex items-start gap-3">
-                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <div className="text-sm text-green-900">
-                        <p className="font-semibold mb-1">Documento Assinado Digitalmente</p>
-                        <p>Por: <strong>{viewingContrato.assinatura_digital.nome_completo}</strong></p>
-                        <p>Em: <strong>{viewingContrato.data_assinatura && new Date(viewingContrato.data_assinatura).toLocaleString('pt-BR')}</strong></p>
-                        <p className="text-xs text-green-700 mt-1">
-                          IP: {viewingContrato.assinatura_digital.ip_address} | 
-                          {viewingContrato.assinatura_digital.dispositivo} - {viewingContrato.assinatura_digital.navegador}
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-              )}
-
-              {viewingContrato.observacoes && (
-                <div>
-                  <Label className="text-slate-600">Observações</Label>
-                  <p className="text-sm">{viewingContrato.observacoes}</p>
-                </div>
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
-
-      {/* Dialog Histórico */}
-      <Dialog open={historicoDialogOpen} onOpenChange={setHistoricoDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Histórico do Contrato {contratoHistorico?.numero_contrato}</DialogTitle>
-          </DialogHeader>
-          {contratoHistorico && (
-            <div className="space-y-6">
-              {/* Histórico de Renovações */}
-              {contratoHistorico.historico_renovacoes && contratoHistorico.historico_renovacoes.length > 0 && (
-                <div>
-                  <h4 className="font-semibold mb-3 flex items-center gap-2">
-                    <RefreshCw className="w-4 h-4 text-blue-600" />
-                    Renovações e Reajustes
-                  </h4>
-                  <div className="space-y-2">
-                    {contratoHistorico.historico_renovacoes.map((renovacao, idx) => (
-                      <Card key={idx} className="p-3">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="font-semibold">{renovacao.observacao}</p>
-                            <p className="text-sm text-slate-600">
-                              {new Date(renovacao.data_renovacao).toLocaleDateString('pt-BR')} - Por {renovacao.usuario}
-                            </p>
-                            <div className="text-sm mt-2">
-                              <p>Valor anterior: <span className="font-semibold">R$ {renovacao.valor_anterior?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></p>
-                              <p>Valor novo: <span className="font-semibold text-green-600">R$ {renovacao.valor_novo?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></p>
-                              {renovacao.percentual_reajuste > 0 && (
-                                <p>Reajuste: <Badge className="bg-blue-100 text-blue-700">{renovacao.percentual_reajuste}% ({renovacao.indice_utilizado})</Badge></p>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Histórico de Alertas */}
-              {contratoHistorico.alertas_enviados && contratoHistorico.alertas_enviados.length > 0 && (
-                <div>
-                  <h4 className="font-semibold mb-3 flex items-center gap-2">
-                    <Bell className="w-4 h-4 text-orange-600" />
-                    Alertas Enviados
-                  </h4>
-                  <div className="space-y-2">
-                    {contratoHistorico.alertas_enviados.map((alerta, idx) => (
-                      <Card key={idx} className="p-3 bg-orange-50 border-orange-200">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="font-semibold text-orange-900">{alerta.tipo}</p>
-                            <p className="text-sm text-orange-700">
-                              Enviado em {new Date(alerta.data_envio).toLocaleString('pt-BR')}
-                            </p>
-                            <p className="text-xs text-orange-600">Para: {alerta.destinatario}</p>
-                          </div>
-                          {alerta.enviado && (
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                          )}
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* P1: Dialogs extraídos para componentes — ContratoViewDialog e ContratoHistoryDialog */}
+      <ContratoViewDialog contrato={viewingContrato} onClose={() => setViewingContrato(null)} />
+      <ContratoHistoryDialog contrato={contratoHistorico} open={historicoDialogOpen} onOpenChange={setHistoricoDialogOpen} />
 
       {/* P1: Dialog inline de confirmação de exclusão */}
       <Dialog open={!!contratoParaExcluir} onOpenChange={() => setContratoParaExcluir(null)}>

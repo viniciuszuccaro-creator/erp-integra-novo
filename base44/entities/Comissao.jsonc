@@ -2,6 +2,14 @@
   "name": "Comissao",
   "type": "object",
   "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa que paga a comiss\u00e3o"
+    },
     "vendedor": {
       "type": "string"
     },

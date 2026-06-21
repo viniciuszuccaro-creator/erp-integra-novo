@@ -227,10 +227,15 @@ export function useContextoVisual() {
 
   // Create helpers that always stamp context
   const MODULE_BY_ENTITY = {
-    Cliente: 'CRM', Oportunidade: 'CRM', Interacao: 'CRM', Pedido: 'Comercial', NotaFiscal: 'Fiscal', Entrega: 'Expedição',
-    Fornecedor: 'Compras', SolicitacaoCompra: 'Compras', OrdemCompra: 'Compras', Produto: 'Estoque', MovimentacaoEstoque: 'Estoque',
+    Cliente: 'CRM', Oportunidade: 'CRM', Interacao: 'CRM', Campanha: 'CRM', Pedido: 'Comercial', OrcamentoCliente: 'Comercial',
+    Comissao: 'Comercial', NotaFiscal: 'Fiscal', Entrega: 'Expedição', Romaneio: 'Expedição', Rota: 'Expedição',
+    Fornecedor: 'Compras', SolicitacaoCompra: 'Compras', OrdemCompra: 'Compras', Produto: 'Estoque',
+    MovimentacaoEstoque: 'Estoque', TransferenciaFilial: 'Estoque', Inventario: 'Estoque',
     ContaPagar: 'Financeiro', ContaReceber: 'Financeiro', CaixaMovimento: 'Financeiro', ConciliacaoBancaria: 'Financeiro',
-    CentroCusto: 'Financeiro', PlanoDeContas: 'Financeiro', PlanoContas: 'Financeiro', User: 'Sistema'
+    LancamentoContabil: 'Financeiro', CentroCusto: 'Financeiro', PlanoDeContas: 'Financeiro', PlanoContas: 'Financeiro',
+    Contrato: 'Contratos', Evento: 'Agenda', Chamado: 'Hub Atendimento',
+    OrdemProducao: 'Produção', ApontamentoProducao: 'Produção',
+    Colaborador: 'RH', Ferias: 'RH', Ponto: 'RH', User: 'Sistema'
   };
   const sanitizeOnWrite = (obj) => {
     if (!obj || typeof obj !== 'object') return obj;
@@ -353,7 +358,7 @@ export function useContextoVisual() {
           };
 
           const filterInContext = async (entityName, criterios = {}, order = undefined, limit = undefined, campo = 'empresa_id') => {
-                   const ENTITY_CONTEXT_FIELD = { Fornecedor: 'empresa_dona_id', Transportadora: 'empresa_dona_id', Colaborador: 'empresa_alocada_id' };
+                   const ENTITY_CONTEXT_FIELD = { Fornecedor: 'empresa_dona_id', Transportadora: 'empresa_dona_id', Colaborador: 'empresa_alocada_id', NotaFiscal: 'empresa_faturamento_id', TransferenciaFilial: 'empresa_origem_id' };
                    const SHARED_SET = new Set(['Cliente','Fornecedor','Transportadora']);
                    const ctxCampo = ENTITY_CONTEXT_FIELD[entityName] || campo || 'empresa_id';
 
@@ -421,6 +426,8 @@ export function useContextoVisual() {
                            );
                          } else if (entityName === 'Colaborador') {
                            orConds.push({ empresa_alocada_id: { $in: empresasIds } });
+                         } else if (entityName === 'TransferenciaFilial') {
+                           orConds.push({ empresa_origem_id: { $in: empresasIds } }, { empresa_destino_id: { $in: empresasIds } });
                          } else {
                            orConds.push({ [ctxCampo]: { $in: empresasIds } });
                          }

@@ -2,6 +2,14 @@
   "name": "Evento",
   "type": "object",
   "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa vinculada ao evento"
+    },
     "titulo": {
       "type": "string",
       "description": "T\u00edtulo do evento"

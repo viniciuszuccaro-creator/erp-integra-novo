@@ -2,6 +2,14 @@
   "name": "Contrato",
   "type": "object",
   "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa respons\u00e1vel pelo contrato"
+    },
     "numero_contrato": {
       "type": "string",
       "description": "N\u00famero \u00fanico do contrato"

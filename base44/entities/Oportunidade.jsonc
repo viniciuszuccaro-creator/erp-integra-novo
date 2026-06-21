@@ -2,6 +2,14 @@
   "name": "Oportunidade",
   "type": "object",
   "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa respons\u00e1vel pela oportunidade"
+    },
     "titulo": {
       "type": "string",
       "description": "T\u00edtulo da oportunidade"

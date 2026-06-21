@@ -68,7 +68,9 @@ function Agenda() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { openWindow } = useWindow();
-  const { filterInContext, carimbarContexto, updateInContext, empresaAtual } = useContextoVisual();
+  const { filterInContext, carimbarContexto, updateInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || null;
+  const contextoValido = !!(empresaAtual?.id || groupId);
 
   const [eventoForm, setEventoForm] = useState({
     titulo: "",
@@ -95,8 +97,9 @@ function Agenda() {
   });
 
   const { data: eventos = [] } = useQuery({
-    queryKey: ['eventos', empresaAtual?.id],
+    queryKey: ['eventos', empresaAtual?.id, groupId],
     queryFn: () => filterInContext('Evento', {}, '-data_inicio'),
+    enabled: contextoValido,
   });
 
   const { data: user } = useQuery({
@@ -105,13 +108,15 @@ function Agenda() {
   });
 
   const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes', empresaAtual?.id],
+    queryKey: ['clientes', empresaAtual?.id, groupId],
     queryFn: () => filterInContext('Cliente', {}, '-created_date'),
+    enabled: contextoValido,
   });
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos', empresaAtual?.id],
+    queryKey: ['pedidos', empresaAtual?.id, groupId],
     queryFn: () => filterInContext('Pedido', {}, '-data_pedido'),
+    enabled: contextoValido,
   });
 
   const { data: configuracoes } = useQuery({

@@ -2,6 +2,14 @@
   "name": "OrdemCompra",
   "type": "object",
   "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa que emitiu a ordem de compra"
+    },
     "numero_oc": {
       "type": "string"
     },

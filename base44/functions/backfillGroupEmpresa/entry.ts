@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 function chunk(arr, size) { const out = []; for (let i=0;i<arr.length;i+=size) out.push(arr.slice(i,i+size)); return out; }
 
@@ -8,7 +8,14 @@ async function getEmpresaById(sr, id) {
 }
 
 const DEFAULT_ENTITIES = [
-  'Cliente','Fornecedor','Produto','Pedido','Entrega','ContaPagar','ContaReceber','OrdemCompra','MovimentacaoEstoque','SolicitacaoCompra','Transportadora','Colaborador','CentroCusto','Oportunidade','Interacao','NotaFiscal' // NF será apenas validada (sem alterar)
+  // Core operacional
+  'Cliente','Fornecedor','Produto','Pedido','Entrega','ContaPagar','ContaReceber',
+  'OrdemCompra','MovimentacaoEstoque','SolicitacaoCompra','Transportadora','Colaborador',
+  'CentroCusto','NotaFiscal','OrdemProducao','ApontamentoProducao','Inventario',
+  'LancamentoContabil','CaixaMovimento','ConciliacaoBancaria','Romaneio','Rota',
+  // Entidades corrigidas na auditoria P2
+  'Contrato','OrcamentoCliente','Oportunidade','Interacao','Evento','Chamado',
+  'Comissao','Campanha','TransferenciaFilial','Ponto','Ferias',
 ];
 
 Deno.serve(async (req) => {

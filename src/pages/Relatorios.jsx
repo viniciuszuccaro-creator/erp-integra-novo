@@ -3,22 +3,18 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 const RelatorioPedidosPorOrigem = React.lazy(() => import("@/components/relatorios/RelatorioPedidosPorOrigem"));
 const DashboardCanaisOrigem = React.lazy(() => import("@/components/cadastros/DashboardCanaisOrigem"));
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import RelatorioCard from "@/components/relatorios/RelatorioCard";
 import RelatoriosFiltrosGlobais from "@/components/relatorios/RelatoriosFiltrosGlobais";
 import SelectedOperationalReport from "@/components/relatorios/SelectedOperationalReport";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, ComposedChart } from 'recharts';
-import { FileText, Download, Calendar, Filter, Eye, BarChart3, PieChart as PieChartIcon, TrendingUp, DollarSign, Users, Package, AlertCircle, Send, Mail, Activity, TrendingDown, MapPin } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+import { FileText, Download, Calendar, Filter, BarChart3, TrendingUp, DollarSign, Users, Package, AlertCircle, Activity, MapPin } from "lucide-react";
+import AgendarRelatorioDialog from "@/components/relatorios/AgendarRelatorioDialog";
 import { useToast } from "@/components/ui/use-toast";
 const DREComparativo = React.lazy(() => import("@/components/relatorios/DREComparativo"));
 const FluxoCaixaProjetado = React.lazy(() => import("@/components/relatorios/FluxoCaixaProjetado"));
@@ -33,8 +29,7 @@ import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import RelatoriosIAInsights from "@/components/relatorios/RelatoriosIAInsights";
 import SemEmpresaBanner from "@/components/common/SemEmpresaBanner";
-import { z } from "zod";
-import FormWrapper from "@/components/common/FormWrapper";
+
 
 
 const AgendamentoRelatorios = React.lazy(() => import("../components/relatorios/AgendamentoRelatorios"));
@@ -69,15 +64,6 @@ export default function Relatorios() {
     periodo: "mes"
   });
 
-  const [agendamentoForm, setAgendamentoForm] = useState({
-    relatorio: "",
-    frequencia: "Semanal",
-    dia_semana: "Segunda",
-    dia_mes: "1",
-    hora: "09:00",
-    destinatarios: "",
-    ativo: true
-  });
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -184,14 +170,6 @@ export default function Relatorios() {
     });
   };
 
-  const scheduleSchema = z.object({
-    frequencia: z.enum(['Diário', 'Semanal', 'Mensal']),
-    dia_semana: z.string().optional(),
-    dia_mes: z.string().optional(),
-    hora: z.string().optional(),
-    destinatarios: z.string().min(3, 'Informe ao menos um e-mail')
-  });
-
   const agendarRelatorioMutation = useMutation({
     mutationFn: async (data) => {
       toast({
@@ -210,14 +188,6 @@ export default function Relatorios() {
       setAgendarEmailDialogOpen(false);
     }
   });
-
-  const handleAgendarEmail = (e) => {
-    e.preventDefault();
-    agendarRelatorioMutation.mutate({
-      ...agendamentoForm,
-      relatorio: selectedReport?.titulo
-    });
-  };
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#64748b'];
 
@@ -525,132 +495,13 @@ export default function Relatorios() {
         </Tabs>
       </ErrorBoundary>
 
-      {/* Dialog de Agendamento */}
-      <Dialog open={agendarEmailDialogOpen} onOpenChange={setAgendarEmailDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Agendar Envio por E-mail</DialogTitle>
-          </DialogHeader>
-          <FormWrapper
-              schema={scheduleSchema}
-              defaultValues={agendamentoForm}
-              onSubmit={(values) => agendarRelatorioMutation.mutate({
-                ...values,
-                relatorio: selectedReport?.titulo
-              })}>
-              
-            {(methods) =>
-              <div className="space-y-4">
-            <div className="p-3 bg-blue-50 rounded border border-blue-200">
-              <Mail className="w-5 h-5 text-blue-600 mb-2" />
-              <p className="text-sm text-blue-900">
-                Configure o envio automático deste relatório por e-mail
-              </p>
-            </div>
-
-            <div>
-              <Label>Relatório</Label>
-              <p className="font-semibold">{selectedReport?.titulo}</p>
-            </div>
-
-            <div>
-              <Label htmlFor="frequencia">Frequência *</Label>
-              <Select
-                    value={methods.watch('frequencia')}
-                    onValueChange={(value) => methods.setValue('frequencia', value, { shouldValidate: true })}>
-                    
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Diário">Diário</SelectItem>
-                  <SelectItem value="Semanal">Semanal</SelectItem>
-                  <SelectItem value="Mensal">Mensal</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {methods.watch('frequencia') === 'Semanal' &&
-                <div>
-                <Label htmlFor="dia_semana">Dia da Semana</Label>
-                <Select
-                    value={methods.watch('dia_semana')}
-                    onValueChange={(value) => methods.setValue('dia_semana', value)}>
-                    
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Segunda">Segunda-feira</SelectItem>
-                    <SelectItem value="Terça">Terça-feira</SelectItem>
-                    <SelectItem value="Quarta">Quarta-feira</SelectItem>
-                    <SelectItem value="Quinta">Quinta-feira</SelectItem>
-                    <SelectItem value="Sexta">Sexta-feira</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-                }
-
-            {methods.watch('frequencia') === 'Mensal' &&
-                <div>
-                <Label htmlFor="dia_mes">Dia do Mês</Label>
-                <Input
-                    id="dia_mes"
-                    type="number"
-                    min="1"
-                    max="28"
-                    {...methods.register('dia_mes')} />
-                  
-              </div>
-                }
-
-            <div>
-              <Label htmlFor="hora">Horário</Label>
-              <Input
-                    id="hora"
-                    type="time"
-                    {...methods.register('hora')} />
-                  
-            </div>
-
-            <div>
-              <Label htmlFor="destinatarios">Destinatários * (separados por vírgula)</Label>
-              <Textarea
-                    id="destinatarios"
-                    {...methods.register('destinatarios')}
-                    placeholder="email1@exemplo.com, email2@exemplo.com"
-                    rows={2} />
-                  
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                    id="ativo"
-                    checked={agendamentoForm.ativo}
-                    onCheckedChange={(checked) => setAgendamentoForm({ ...agendamentoForm, ativo: checked })} />
-                  
-              <Label htmlFor="ativo" className="font-normal cursor-pointer">
-                Ativar agendamento
-              </Label>
-            </div>
-
-            <div className="flex gap-3 justify-end pt-4">
-              <Button type="button" variant="outline" onClick={() => setAgendarEmailDialogOpen(false)}>
-                Cancelar
-              </Button>
-              <Button
-                    type="submit"
-                    disabled={agendarRelatorioMutation.isPending}
-                    className="bg-blue-600 hover:bg-blue-700">
-                    
-                {agendarRelatorioMutation.isPending ? 'Agendando...' : 'Agendar'}
-              </Button>
-            </div>
-          </div>
-              }
-          </FormWrapper>
-        </DialogContent>
-      </Dialog>
+      <AgendarRelatorioDialog
+        open={agendarEmailDialogOpen}
+        onOpenChange={setAgendarEmailDialogOpen}
+        selectedReport={selectedReport}
+        onSubmit={(values) => agendarRelatorioMutation.mutate(values)}
+        isPending={agendarRelatorioMutation.isPending}
+      />
     </div>
     </ProtectedSection>);
 

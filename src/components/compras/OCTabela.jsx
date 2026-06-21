@@ -76,32 +76,32 @@ export default function OCTabela({
             </TableCell>
             <TableCell>
               <div className="flex gap-1">
-                <Button variant="ghost" size="sm" onClick={() => onImprimir(oc)} title="Imprimir OC" className="text-slate-600">
+                <Button variant="ghost" size="sm" data-permission="Compras.OrdemCompra.imprimir" onClick={() => onImprimir(oc)} title="Imprimir OC" className="text-slate-600">
                   <Printer className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => onVer(oc)} title="Ver Detalhes">
+                <Button variant="ghost" size="sm" data-permission="Compras.OrdemCompra.visualizar" onClick={() => onVer(oc)} title="Ver Detalhes">
                   <Eye className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => onEditar(oc)} title="Editar OC">
+                <Button variant="ghost" size="sm" data-permission="Compras.OrdemCompra.editar" onClick={() => onEditar(oc)} title="Editar OC">
                   <Edit className="w-4 h-4" />
                 </Button>
                 {oc.status === 'Solicitada' && (
-                  <Button variant="ghost" size="sm" onClick={() => onAprovar(oc)} className="text-purple-600">
+                  <Button variant="ghost" size="sm" data-permission="Compras.OrdemCompra.aprovar" data-sensitive="true" onClick={() => onAprovar(oc)} className="text-purple-600">
                     <CheckCircle2 className="w-4 h-4" />
                   </Button>
                 )}
                 {oc.status === 'Aprovada' && (
-                  <Button variant="ghost" size="sm" onClick={() => onEnviar(oc)} className="text-indigo-600">
+                  <Button variant="ghost" size="sm" data-permission="Compras.OrdemCompra.enviar_fornecedor" onClick={() => onEnviar(oc)} className="text-indigo-600">
                     <Send className="w-4 h-4" />
                   </Button>
                 )}
                 {(oc.status === 'Enviada ao Fornecedor' || oc.status === 'Em Processo') && (
-                  <Button variant="ghost" size="sm" onClick={() => onReceber(oc)} className="text-green-600">
+                  <Button variant="ghost" size="sm" data-permission="Compras.OrdemCompra.receber" data-sensitive="true" onClick={() => onReceber(oc)} className="text-green-600">
                     <CheckCircle2 className="w-4 h-4" />
                   </Button>
                 )}
                 {oc.status === 'Recebida' && !oc.avaliacao_fornecedor?.realizada && (
-                  <Button variant="ghost" size="sm" onClick={() => onAvaliar(oc)} className="text-amber-600">
+                  <Button variant="ghost" size="sm" data-permission="Compras.OrdemCompra.avaliar_fornecedor" onClick={() => onAvaliar(oc)} className="text-amber-600">
                     <Star className="w-4 h-4" />
                   </Button>
                 )}

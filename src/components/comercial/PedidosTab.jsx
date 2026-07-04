@@ -272,7 +272,7 @@ export default function PedidosTab({ pedidos, clientes, isLoading, empresas, onC
         </Button>
 
         {pedido.status_aprovacao === 'pendente' && (
-          <Button variant="ghost" size="sm" onClick={() => openWindow(CentralAprovacoesManager, { windowMode: true, initialTab: 'descontos' }, { title: '🔐 Central de Aprovações', width: 1200, height: 700 })} title="Analisar Aprovação" className="h-8 px-2 text-orange-600 animate-pulse">
+          <Button variant="ghost" size="sm" data-permission="Comercial.Pedido.aprovar" onClick={() => openWindow(CentralAprovacoesManager, { windowMode: true, initialTab: 'descontos' }, { title: '🔐 Central de Aprovações', width: 1200, height: 700 })} title="Analisar Aprovação" className="h-8 px-2 text-orange-600 animate-pulse">
             <ShieldCheck className="w-3 h-3 mr-1" />
             <span className="text-xs">Analisar</span>
           </Button>
@@ -322,6 +322,7 @@ export default function PedidosTab({ pedidos, clientes, isLoading, empresas, onC
                 </p>
                 </div>
                 <Button
+                data-permission="Comercial.Pedido.aprovar"
                 onClick={() => openWindow(CentralAprovacoesManager, { windowMode: true }, {
                 title: '🔐 Central de Aprovações',
                 width: 1200,

@@ -165,9 +165,9 @@ export default function AgendaCalendario({
       <CardHeader className="border-b bg-slate-50 p-4">
         <div className="flex flex-col sm:flex-row justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={navegarAnterior}><ChevronLeft className="w-4 h-4"/></Button>
-            <Button variant="outline" size="sm" onClick={irParaHoje}>Hoje</Button>
-            <Button variant="outline" size="icon" onClick={navegarProximo}><ChevronRight className="w-4 h-4"/></Button>
+            <Button variant="outline" size="icon" data-permission="Agenda.Evento.visualizar" onClick={navegarAnterior}><ChevronLeft className="w-4 h-4"/></Button>
+            <Button variant="outline" size="sm" data-permission="Agenda.Evento.visualizar" onClick={irParaHoje}>Hoje</Button>
+            <Button variant="outline" size="icon" data-permission="Agenda.Evento.visualizar" onClick={navegarProximo}><ChevronRight className="w-4 h-4"/></Button>
             <h2 className="text-base font-semibold">{getTitulo()}</h2>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
@@ -183,12 +183,13 @@ export default function AgendaCalendario({
             <div className="flex gap-1">
               {['mes','semana','dia'].map(v => (
                 <Button key={v} variant={visualizacao===v?'default':'outline'} size="sm"
+                  data-permission="Agenda.Evento.visualizar"
                   className="h-8 text-xs capitalize" onClick={() => setVisualizacao(v)}>
                   {v === 'mes' ? 'Mês' : v === 'semana' ? 'Semana' : 'Dia'}
                 </Button>
               ))}
             </div>
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 h-8" onClick={onNovoEvento}>
+            <Button size="sm" data-permission="Agenda.Evento.criar" className="bg-blue-600 hover:bg-blue-700 h-8" onClick={onNovoEvento}>
               <Plus className="w-3 h-3 mr-1"/>Novo
             </Button>
           </div>

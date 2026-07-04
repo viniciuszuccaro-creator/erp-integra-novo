@@ -258,6 +258,7 @@ export default function ComissoesTab({ comissoes, pedidos, empresas = [] }) {
               </Select>
 
               <Button 
+                data-permission="Comercial.Comissao.criar"
                 className="bg-purple-600 hover:bg-purple-700"
                 onClick={async () => {
                   const { default: CalcularComissoesForm } = await import('./CalcularComissoesForm');
@@ -331,6 +332,7 @@ export default function ComissoesTab({ comissoes, pedidos, empresas = [] }) {
                       <Button
                         variant="ghost"
                         size="icon"
+                        data-permission="Comercial.Comissao.imprimir"
                         onClick={() => {
                           const empresa = empresas?.find(e => e.id === comissao.empresa_id);
                           ImprimirComissao({ comissao, empresa, pedidos });
@@ -343,6 +345,7 @@ export default function ComissoesTab({ comissoes, pedidos, empresas = [] }) {
                       <Button
                         variant="ghost"
                         size="icon"
+                        data-permission="Comercial.Comissao.visualizar"
                         onClick={() => openWindow(DetalhesComissao, {
                           comissao,
                           windowMode: true
@@ -370,6 +373,7 @@ export default function ComissoesTab({ comissoes, pedidos, empresas = [] }) {
                           <Button
                             variant="ghost"
                             size="icon"
+                            data-permission="Comercial.Comissao.aprovar"
                             onClick={() => handleRecusar(comissao)}
                             title="Recusar"
                             className="text-red-600 hover:text-red-700"
@@ -382,6 +386,7 @@ export default function ComissoesTab({ comissoes, pedidos, empresas = [] }) {
                         <Button
                           variant="ghost"
                           size="icon"
+                          data-permission="Comercial.Comissao.pagar"
                           onClick={() => handlePagar(comissao)}
                           title="Gerar Pagamento"
                           className="text-blue-600 hover:text-blue-700"

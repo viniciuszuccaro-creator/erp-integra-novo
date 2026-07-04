@@ -307,7 +307,7 @@ Detecte anomalias:
                       <CheckCircle className="w-4 h-4 mr-2" />
                       Capturar
                     </Button>
-                    <Button onClick={() => setCameraAtiva(false)} variant="outline">
+                    <Button data-permission="RH.Ponto.registrar" onClick={() => setCameraAtiva(false)} variant="outline">
                       Cancelar
                     </Button>
                   </div>
@@ -321,7 +321,7 @@ Detecte anomalias:
                   </Badge>
                 </div>
               ) : (
-                <Button onClick={ativarCamera} className="w-full" variant="outline">
+                <Button data-permission="RH.Ponto.registrar" onClick={ativarCamera} className="w-full" variant="outline">
                   <Camera className="w-4 h-4 mr-2" />
                   Ativar Câmera
                 </Button>
@@ -337,6 +337,7 @@ Detecte anomalias:
               </div>
               
               <Button 
+                data-permission="RH.Ponto.registrar"
                 onClick={simularBiometria} 
                 className="w-full"
                 variant={registroPonto.biometria_validada ? 'default' : 'outline'}
@@ -364,7 +365,7 @@ Detecte anomalias:
                 <div className="text-sm text-slate-600">Registrar localização do ponto</div>
               </div>
               
-              <Button onClick={capturarLocalizacao} className="w-full" variant="outline">
+              <Button data-permission="RH.Ponto.registrar" onClick={capturarLocalizacao} className="w-full" variant="outline">
                 {registroPonto.localizacao_gps.latitude !== 0 ? (
                   <>
                     <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
@@ -393,6 +394,7 @@ Detecte anomalias:
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Button 
+              data-permission="RH.Ponto.registrar"
               onClick={() => handleRegistrarPonto('entrada')}
               disabled={!colaboradorSelecionado}
               className="h-24 flex-col gap-2 bg-green-600 hover:bg-green-700"
@@ -402,6 +404,7 @@ Detecte anomalias:
             </Button>
 
             <Button 
+              data-permission="RH.Ponto.registrar"
               onClick={() => handleRegistrarPonto('intervalo_inicio')}
               disabled={!colaboradorSelecionado}
               className="h-24 flex-col gap-2 bg-yellow-600 hover:bg-yellow-700"
@@ -411,6 +414,7 @@ Detecte anomalias:
             </Button>
 
             <Button 
+              data-permission="RH.Ponto.registrar"
               onClick={() => handleRegistrarPonto('intervalo_fim')}
               disabled={!colaboradorSelecionado}
               className="h-24 flex-col gap-2 bg-blue-600 hover:bg-blue-700"
@@ -420,6 +424,7 @@ Detecte anomalias:
             </Button>
 
             <Button 
+              data-permission="RH.Ponto.registrar"
               onClick={() => handleRegistrarPonto('saida')}
               disabled={!colaboradorSelecionado}
               className="h-24 flex-col gap-2 bg-red-600 hover:bg-red-700"

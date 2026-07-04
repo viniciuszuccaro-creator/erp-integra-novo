@@ -172,14 +172,14 @@ export default function CaixaPDVVendaTab({
                       <Input type="number" min="1" max={configForma?.max_parcelas || 12} value={fp.parcelas || 1} onChange={(e) => { const novas = [...formasPagamentoVenda]; novas[idx].parcelas = parseInt(e.target.value) || 1; setFormasPagamentoVenda(novas); }} placeholder="Parc" className="h-8 w-16" />
                     )}
                     {formasPagamentoVenda.length > 1 && (
-                      <Button size="sm" variant="ghost" onClick={() => setFormasPagamentoVenda(formasPagamentoVenda.filter((_, i) => i !== idx))} className="h-8 w-8 p-0">
+                      <Button size="sm" variant="ghost" data-permission="Financeiro.CaixaPDV.editar" onClick={() => setFormasPagamentoVenda(formasPagamentoVenda.filter((_, i) => i !== idx))} className="h-8 w-8 p-0">
                         <Trash2 className="w-4 h-4 text-red-600" />
                       </Button>
                     )}
                   </div>
                 );
               })}
-              <Button size="sm" variant="outline" onClick={() => setFormasPagamentoVenda([...formasPagamentoVenda, { forma_id: null, forma_descricao: "Selecione", valor: 0, parcelas: 1 }])} className="w-full">
+              <Button size="sm" variant="outline" data-permission="Financeiro.CaixaPDV.editar" onClick={() => setFormasPagamentoVenda([...formasPagamentoVenda, { forma_id: null, forma_descricao: "Selecione", valor: 0, parcelas: 1 }])} className="w-full">
                 <Plus className="w-4 h-4 mr-1" /> Adicionar Forma
               </Button>
             </div>

@@ -405,6 +405,7 @@ export default function AssinaturaEletronicaModal({
                   type="button"
                   variant="ghost"
                   size="sm"
+                  data-permission="Comercial.Assinatura.assinar"
                   onClick={limparAssinatura}
                   disabled={assinaturaVazia}
                 >

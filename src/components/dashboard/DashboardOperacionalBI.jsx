@@ -167,7 +167,7 @@ function DashboardOperacionalBI({ windowMode = false }) {
         <Alert className="border-red-300 bg-red-50">
           <AlertDescription className="flex items-center justify-between gap-3">
             <span>Erro ao carregar dados (possível limite de requisições).</span>
-            <Button size="sm" variant="outline" onClick={() => queryClient.invalidateQueries({ predicate: () => true })}>Tentar novamente</Button>
+            <Button size="sm" variant="outline" data-permission="Dashboard.atualizar" onClick={() => queryClient.invalidateQueries({ predicate: () => true })}>Tentar novamente</Button>
           </AlertDescription>
         </Alert>
       )}
@@ -175,7 +175,7 @@ function DashboardOperacionalBI({ windowMode = false }) {
         <Card className="border-2 border-amber-300 bg-amber-50">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">Sem dados para exibir</CardTitle>
-            <Button size="sm" variant="outline" onClick={() => queryClient.invalidateQueries({ predicate: () => true })}>Atualizar</Button>
+            <Button size="sm" variant="outline" data-permission="Dashboard.atualizar" onClick={() => queryClient.invalidateQueries({ predicate: () => true })}>Atualizar</Button>
           </CardHeader>
           <CardContent className="text-sm text-amber-700">
             Nenhuma informação encontrada no contexto atual. Selecione uma empresa/grupo ou cadastre registros para visualizar.
@@ -214,39 +214,7 @@ function DashboardOperacionalBI({ windowMode = false }) {
         </div>
       </div>
 
-      {/* IA: Tendência de Vendas */}
-      <Card className="border-2 border-purple-300 bg-gradient-to-r from-purple-50 to-blue-50">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-4 bg-purple-600 rounded-xl">
-                <Sparkles className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-purple-900 mb-1">
-                  IA: Análise de Tendência de Vendas
-                </h3>
-                <p className="text-sm text-purple-700">
-                  Crescimento de {tendenciaVendas.crescimento > 0 ? '+' : ''}{tendenciaVendas.crescimento}% em relação ao mês anterior
-                </p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-purple-600 font-medium">Mês Atual</p>
-              <p className="text-2xl font-bold text-purple-900">
-                R$ {tendenciaVendas.valorAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </p>
-              {tendenciaVendas.crescimento !== 0 && (
-                <Badge className={tendenciaVendas.crescimento > 0 ? 'bg-green-600' : 'bg-red-600'}>
-                  {tendenciaVendas.crescimento > 0 ? '↗' : '↘'} {Math.abs(tendenciaVendas.crescimento)}%
-                </Badge>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-stretch">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-stretch">
         <Card className="border-0 shadow-md h-full bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:shadow-xl transition-all">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -256,6 +224,11 @@ function DashboardOperacionalBI({ windowMode = false }) {
                   R$ {(totalVendas / 1000).toFixed(0)}k
                 </p>
                 <p className="text-xs opacity-75 mt-1">{pedidosFiltrados.length} pedidos</p>
+                {tendenciaVendas.crescimento !== 0 && (
+                  <Badge className={`mt-1 ${tendenciaVendas.crescimento > 0 ? 'bg-green-500' : 'bg-red-500'}`}>
+                    {tendenciaVendas.crescimento > 0 ? '↗' : '↘'} {Math.abs(tendenciaVendas.crescimento)}%
+                  </Badge>
+                )}
               </div>
               <DollarSign className="w-8 h-8 opacity-80" />
             </div>
@@ -314,31 +287,6 @@ function DashboardOperacionalBI({ windowMode = false }) {
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-md h-full bg-gradient-to-br from-indigo-500 to-indigo-600 text-white hover:shadow-xl transition-all">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs opacity-90">Produtos</p>
-                <p className="text-2xl font-bold">{produtosFiltrados.length}</p>
-                <p className="text-xs opacity-75 mt-1">no catálogo</p>
-              </div>
-              <Package className="w-8 h-8 opacity-80" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-md h-full bg-gradient-to-br from-cyan-500 to-cyan-600 text-white hover:shadow-xl transition-all">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs opacity-90">Clientes</p>
-                <p className="text-2xl font-bold">{clientesFiltrados.length}</p>
-                <p className="text-xs opacity-75 mt-1">cadastrados</p>
-              </div>
-              <Users className="w-8 h-8 opacity-80" />
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       <ResizablePanelGroup direction="horizontal" className="w-full min-h-[540px]">

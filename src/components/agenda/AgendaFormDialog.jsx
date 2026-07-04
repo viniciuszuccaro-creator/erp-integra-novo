@@ -271,7 +271,7 @@ export default function AgendaFormDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={isLoading}>
+          <Button data-permission="Agenda.Evento.criar" onClick={handleSubmit} disabled={isLoading}>
             {isLoading ? "Salvando..." : "Salvar"}
           </Button>
         </DialogFooter>

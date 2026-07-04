@@ -132,6 +132,7 @@ export default function GerenciarContatosClienteForm({ contatos = [], onChange }
                   <Button
                     variant="ghost"
                     size="icon"
+                    data-permission="Cadastros.ClienteContato.excluir"
                     onClick={() => handleExcluirContato(idx)}
                   >
                     <Trash2 className="w-4 h-4 text-red-600" />

@@ -253,6 +253,7 @@ IMPORTANTE: Extraia TODOS os itens, não apenas um exemplo.`,
                 Cancelar
               </Button>
               <Button 
+                data-permission="Cadastros.Produto.importar"
                 onClick={handleCriarProdutos}
                 disabled={processando || itensSelecionados.length === 0}
                 className="bg-green-600 hover:bg-green-700"

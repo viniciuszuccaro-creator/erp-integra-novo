@@ -199,6 +199,7 @@ export default function CadastroClienteCompleto({ cliente: clienteProp, item, da
               </>
             )}
             <Button
+              data-permission="Cadastros.Cliente.criar"
               onClick={async () => {
                 try {
                   await base44.entities.AuditLog.create({

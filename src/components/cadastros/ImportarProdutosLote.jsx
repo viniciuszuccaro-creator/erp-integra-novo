@@ -312,6 +312,7 @@ export default function ImportarProdutosLote({ onProdutosCriados, onClose }) {
             <div className="flex gap-2">
               <Button variant="outline" onClick={onClose}>Cancelar</Button>
               <Button 
+                data-permission="Cadastros.Produto.importar"
                 onClick={handleCriarProdutos}
                 disabled={processando || !mapeamento.descricao}
                 className="bg-purple-600 hover:bg-purple-700"

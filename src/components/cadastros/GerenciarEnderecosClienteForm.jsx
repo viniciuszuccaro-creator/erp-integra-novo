@@ -195,6 +195,7 @@ export default function GerenciarEnderecosClienteForm({ enderecos = [], onChange
                   <Button
                     variant="ghost"
                     size="icon"
+                    data-permission="Cadastros.ClienteEndereco.excluir"
                     onClick={() => handleExcluirEndereco(idx)}
                   >
                     <Trash2 className="w-4 h-4 text-red-600" />

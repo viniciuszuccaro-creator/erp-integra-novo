@@ -64,6 +64,7 @@ export default function AgendaToolbar({
           <Button
             size="sm"
             variant="destructive"
+            data-permission="Agenda.Evento.excluir"
             onClick={onDeleteEvento}
           >
             <Trash2 className="w-4 h-4 mr-1" /> Deletar

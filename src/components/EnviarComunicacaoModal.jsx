@@ -421,6 +421,7 @@ export default function EnviarComunicacaoModal({ open, onClose, pedido, tipo = "
           </Button>
           <Button 
             type="button" 
+            data-permission="Comercial.Comunicacao.enviar"
             onClick={handleEnviar} 
             disabled={enviando}
             className={canal === "email" ? "bg-blue-600" : "bg-green-600"}

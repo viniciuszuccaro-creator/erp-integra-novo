@@ -1,6 +1,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -21,17 +22,21 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
  * ✅ Integração com Ordens de Produção
  */
 export default function DashboardProdutosProducao({ onAbrirConversao }) {
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos-producao'],
+    queryKey: ['produtos-producao', contextoKey],
     queryFn: async () => {
-      const all = await base44.entities.Produto.list();
+      const all = await filterInContext('Produto', {}, 'descricao', 999);
       return all.filter(p => p.tipo_item === 'Matéria-Prima Produção');
-    }
+    },
+    enabled: !!contexto,
   });
 
   const { data: ordensProducao = [] } = useQuery({
-    queryKey: ['ordens-producao'],
-    queryFn: () => base44.entities.OrdemProducao.list('-created_date', 100)
+    queryKey: ['ordens-producao', contextoKey],
+    queryFn: () => filterInContext('OrdemProducao', {}, '-created_date', 100),
+    enabled: !!contexto,
   });
 
   // Análises

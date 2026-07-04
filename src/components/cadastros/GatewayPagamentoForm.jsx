@@ -12,11 +12,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreditCard, Globe, Lock, BarChart3, Settings } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function GatewayPagamentoForm({ gateway, windowMode = false, onSubmit }) {
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
   const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas'],
-    queryFn: () => base44.entities.Empresa.list(),
+    queryKey: ['empresas', grupoAtual?.id, empresaAtual?.id],
+    queryFn: () => filterInContext('Empresa', {}, 'nome_fantasia', 999),
+    enabled: !!contexto,
   });
 
   const [formData, setFormData] = useState(gateway || {

@@ -383,7 +383,7 @@ Caso contrário, sugira:
                       )}
                     </div>
                   </div>
-                  <Button size="sm" onClick={aplicarSugestaoIA} className="bg-purple-600">
+                  <Button size="sm" data-permission="Cadastros.Produto.editar" onClick={aplicarSugestaoIA} className="bg-purple-600">
                     Aplicar Tudo
                   </Button>
                 </div>

@@ -4,7 +4,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Receipt, Trash2, Power, PowerOff } from "lucide-react";
+import { Receipt, Trash2, Power, PowerOff, AlertTriangle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import usePermissions from "@/components/lib/usePermissions";
 import { toast } from "sonner";
 
@@ -60,14 +61,18 @@ export default function CentroCustoForm({ centroCusto, item, data, initialData, 
     }
   };
 
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+
   const handleExcluir = () => {
     if (!podeExcluir) {
       toast.error("Sem permissão para excluir centros de custo.");
       return;
     }
-    if (!window.confirm(`Tem certeza que deseja excluir o centro de custo "${formData.descricao}"? Esta ação não pode ser desfeita.`)) {
-      return;
-    }
+    setConfirmandoExclusao(true);
+  };
+
+  const confirmarExclusaoDefinitiva = () => {
+    setConfirmandoExclusao(false);
     if (onSubmit) {
       onSubmit({ ...formData, _action: 'delete' });
     }

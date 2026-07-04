@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ import { toast } from "sonner";
  */
 export default function HistoricoProduto({ produtoId, produto }) {
   const [convertendo, setConvertendo] = useState(false);
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
 
   const { data: movimentacoes = [] } = useQuery({
     queryKey: ['movimentacoes-produto', produtoId],
@@ -34,25 +36,25 @@ export default function HistoricoProduto({ produtoId, produto }) {
   });
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos-produto', produtoId],
+    queryKey: ['pedidos-produto', produtoId, grupoAtual?.id, empresaAtual?.id],
     queryFn: async () => {
-      const allPedidos = await base44.entities.Pedido.list();
+      const allPedidos = await filterInContext('Pedido', {}, '-created_date', 999);
       return allPedidos.filter(p => 
         p.itens_revenda?.some(item => item.produto_id === produtoId)
       ).slice(0, 50);
     },
-    enabled: !!produtoId
+    enabled: !!produtoId && !!contexto
   });
 
   const { data: ordensProducao = [] } = useQuery({
-    queryKey: ['ordens-producao-produto', produtoId],
+    queryKey: ['ordens-producao-produto', produtoId, grupoAtual?.id, empresaAtual?.id],
     queryFn: async () => {
-      const all = await base44.entities.OrdemProducao.list();
+      const all = await filterInContext('OrdemProducao', {}, '-created_date', 999);
       return all.filter(op => 
         op.itens?.some(item => item.produto_id === produtoId)
       );
     },
-    enabled: !!produtoId
+    enabled: !!produtoId && !!contexto
   });
 
   // Calcular métricas

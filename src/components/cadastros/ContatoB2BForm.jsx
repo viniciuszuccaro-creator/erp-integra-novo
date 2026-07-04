@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, MessageCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
 
 /**
@@ -31,9 +32,11 @@ export default function ContatoB2BForm({ contato, contatoB2B, item, data, onSubm
     ativo: true
   });
 
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
   const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes'],
-    queryFn: () => base44.entities.Cliente.list(),
+    queryKey: ['clientes', grupoAtual?.id, empresaAtual?.id],
+    queryFn: () => filterInContext('Cliente', {}, 'nome_fantasia', 999),
+    enabled: !!contexto,
   });
 
   const handleSubmit = (e) => {

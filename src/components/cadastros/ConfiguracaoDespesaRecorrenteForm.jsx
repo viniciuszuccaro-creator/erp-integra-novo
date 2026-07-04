@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,39 +51,49 @@ export default function ConfiguracaoDespesaRecorrenteForm({ config, windowMode =
     origem: "empresa"
   });
 
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+
   const { data: fornecedores = [] } = useQuery({
-    queryKey: ['fornecedores'],
-    queryFn: () => base44.entities.Fornecedor.list(),
+    queryKey: ['fornecedores', contextoKey],
+    queryFn: () => filterInContext('Fornecedor', {}, 'nome_fantasia', 999),
+    enabled: !!contexto,
   });
 
   const { data: centrosCusto = [] } = useQuery({
-    queryKey: ['centros-custo'],
-    queryFn: () => base44.entities.CentroCusto.list(),
+    queryKey: ['centros-custo', contextoKey],
+    queryFn: () => filterInContext('CentroCusto', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const { data: formasPagamento = [] } = useQuery({
-    queryKey: ['formas-pagamento'],
-    queryFn: () => base44.entities.FormaPagamento.list(),
+    queryKey: ['formas-pagamento', contextoKey],
+    queryFn: () => filterInContext('FormaPagamento', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas'],
-    queryFn: () => base44.entities.Empresa.list(),
+    queryKey: ['empresas', contextoKey],
+    queryFn: () => filterInContext('Empresa', {}, 'nome_fantasia', 999),
+    enabled: !!contexto,
   });
 
   const { data: tiposDespesa = [] } = useQuery({
-    queryKey: ['tipos-despesa'],
-    queryFn: () => base44.entities.TipoDespesa.filter({ pode_ser_recorrente: true, ativo: true }),
+    queryKey: ['tipos-despesa', contextoKey],
+    queryFn: () => filterInContext('TipoDespesa', { pode_ser_recorrente: true, ativo: true }, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const { data: planoContas = [] } = useQuery({
-    queryKey: ['plano-contas'],
-    queryFn: () => base44.entities.PlanoDeContas.list(),
+    queryKey: ['plano-contas', contextoKey],
+    queryFn: () => filterInContext('PlanoDeContas', {}, 'codigo', 999),
+    enabled: !!contexto,
   });
 
   const { data: centrosResultado = [] } = useQuery({
-    queryKey: ['centros-resultado'],
-    queryFn: () => base44.entities.CentroResultado.list(),
+    queryKey: ['centros-resultado', contextoKey],
+    queryFn: () => filterInContext('CentroResultado', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const handleSubmit = (e) => {

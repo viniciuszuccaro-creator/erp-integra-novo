@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Factory, Package, Award, Warehouse, Scale, TrendingUp, CheckCircle2, AlertCircle, ChevronRight, Stars } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * 🎯 DASHBOARD ESTRUTURANTES V21.2 FASE 2
@@ -12,34 +13,43 @@ import { base44 } from "@/api/base44Client";
  * Mostra métricas, qualidade de dados e status de integração
  */
 export default function DashboardEstruturantes() {
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+
   const { data: setores = [] } = useQuery({
-    queryKey: ['setores-atividade'],
-    queryFn: () => base44.entities.SetorAtividade.list(),
+    queryKey: ['setores-atividade', contextoKey],
+    queryFn: () => filterInContext('SetorAtividade', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const { data: grupos = [] } = useQuery({
-    queryKey: ['grupos-produto'],
-    queryFn: () => base44.entities.GrupoProduto.list(),
+    queryKey: ['grupos-produto', contextoKey],
+    queryFn: () => filterInContext('GrupoProduto', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const { data: marcas = [] } = useQuery({
-    queryKey: ['marcas'],
-    queryFn: () => base44.entities.Marca.list(),
+    queryKey: ['marcas', contextoKey],
+    queryFn: () => filterInContext('Marca', {}, 'nome_marca', 999),
+    enabled: !!contexto,
   });
 
   const { data: locais = [] } = useQuery({
-    queryKey: ['locais-estoque'],
-    queryFn: () => base44.entities.LocalEstoque.list(),
+    queryKey: ['locais-estoque', contextoKey],
+    queryFn: () => filterInContext('LocalEstoque', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const { data: tabelas = [] } = useQuery({
-    queryKey: ['tabelas-fiscais'],
-    queryFn: () => base44.entities.TabelaFiscal.list(),
+    queryKey: ['tabelas-fiscais', contextoKey],
+    queryFn: () => filterInContext('TabelaFiscal', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos'],
-    queryFn: () => base44.entities.Produto.list(),
+    queryKey: ['produtos', contextoKey],
+    queryFn: () => filterInContext('Produto', {}, 'descricao', 999),
+    enabled: !!contexto,
   });
 
   // Métricas calculadas

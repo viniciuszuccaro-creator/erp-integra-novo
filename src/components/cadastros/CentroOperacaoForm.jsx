@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,9 +28,11 @@ export default function CentroOperacaoForm({ centro, onSubmit, isSubmitting }) {
     ...centro
   });
 
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
-    queryFn: () => base44.entities.Colaborador.list(),
+    queryKey: ['colaboradores', grupoAtual?.id, empresaAtual?.id],
+    queryFn: () => filterInContext('Colaborador', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const handleCEPFound = async (endereco) => {

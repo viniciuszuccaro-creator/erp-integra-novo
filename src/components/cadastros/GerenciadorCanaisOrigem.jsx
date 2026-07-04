@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,16 +29,19 @@ import ExportButton from "@/components/ExportButton";
 export default function GerenciadorCanaisOrigem({ windowMode = false }) {
   const { user } = usePermissions();
   const queryClient = useQueryClient();
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: parametros = [], isLoading } = useQuery({
-    queryKey: ['parametros-origem-pedido'],
-    queryFn: () => base44.entities.ParametroOrigemPedido.list(),
+    queryKey: ['parametros-origem-pedido', contextoKey],
+    queryFn: () => filterInContext('ParametroOrigemPedido', {}, '-created_date', 999),
     initialData: [],
+    enabled: !!contexto,
   });
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos-ultimos'],
-    queryFn: () => base44.entities.Pedido.list('-created_date', 200),
+    queryKey: ['pedidos-ultimos', contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-created_date', 200),
     initialData: [],
   });
 

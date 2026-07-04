@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +18,7 @@ export default function ImportarProdutosNFe({ onProdutosCriados, onClose }) {
   const [processando, setProcessando] = useState(false);
   const [itensParsed, setItensParsed] = useState([]);
   const [itensSelecionados, setItensSelecionados] = useState([]);
+  const { filterInContext, contexto } = useContextoVisual();
 
   const handleUploadXML = async (e) => {
     const file = e.target.files[0];
@@ -71,7 +73,7 @@ IMPORTANTE: Extraia TODOS os itens, não apenas um exemplo.`,
       });
 
       // Verificar quais produtos já existem
-      const produtosExistentes = await base44.entities.Produto.list();
+      const produtosExistentes = await filterInContext('Produto', {}, 'descricao', 999);
       
       const itensComStatus = resultado.itens.map(item => {
         const existe = produtosExistentes.find(p => 

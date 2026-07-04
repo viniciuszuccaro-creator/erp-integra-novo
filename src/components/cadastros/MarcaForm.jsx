@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Award, Trash2, Power, PowerOff } from "lucide-react";
+import { Loader2, Award, Trash2, Power, PowerOff, AlertTriangle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
@@ -63,14 +64,18 @@ export default function MarcaForm({ marca, item, data, initialData, defaultValue
     });
   };
 
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+
   const handleExcluir = () => {
     if (!podeExcluir) {
       toast.error('Sem permissão para excluir marca.');
       return;
     }
-    if (!window.confirm(`Tem certeza que deseja excluir a marca "${formData.nome_marca}"? Esta ação não pode ser desfeita.`)) {
-      return;
-    }
+    setConfirmandoExclusao(true);
+  };
+
+  const confirmarExclusaoDefinitiva = () => {
+    setConfirmandoExclusao(false);
     if (onSubmit) {
       onSubmit({ ...formData, _action: 'delete' });
     }
@@ -155,6 +160,19 @@ export default function MarcaForm({ marca, item, data, initialData, defaultValue
           data-sensitive="true"
         />
       </div>
+
+      {confirmandoExclusao && (
+        <Alert className="border-red-300 bg-red-50">
+          <AlertTriangle className="w-4 h-4 text-red-600" />
+          <AlertDescription className="flex items-center justify-between">
+            <span className="text-sm text-red-900 font-medium">Confirmar exclusão da marca "{formData.nome_marca}"?</span>
+            <div className="flex gap-2">
+              <Button type="button" size="sm" variant="outline" onClick={() => setConfirmandoExclusao(false)}>Cancelar</Button>
+              <Button type="button" size="sm" variant="destructive" onClick={confirmarExclusaoDefinitiva}>Excluir</Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="flex justify-end gap-3 pt-4 border-t">
         {dadosIniciais && (

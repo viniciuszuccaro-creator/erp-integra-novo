@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Network, CheckCircle2, Trash2, Power, PowerOff } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, Network, CheckCircle2, Trash2, Power, PowerOff, AlertTriangle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -35,9 +37,11 @@ export default function GrupoEmpresarialForm({ grupo, onSubmit, isSubmitting, wi
     score_integracao_erp: 0
   });
 
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
   const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas'],
-    queryFn: () => base44.entities.Empresa.list(),
+    queryKey: ['empresas', grupoAtual?.id, empresaAtual?.id],
+    queryFn: () => filterInContext('Empresa', {}, 'nome_fantasia', 999),
+    enabled: !!contexto,
   });
 
   const handleSubmit = (e) => {
@@ -49,10 +53,14 @@ export default function GrupoEmpresarialForm({ grupo, onSubmit, isSubmitting, wi
     onSubmit(formData);
   };
 
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+
   const handleExcluir = () => {
-    if (!window.confirm(`Tem certeza que deseja excluir o grupo "${formData.nome}"? Esta ação não pode ser desfeita.`)) {
-      return;
-    }
+    setConfirmandoExclusao(true);
+  };
+
+  const confirmarExclusaoDefinitiva = () => {
+    setConfirmandoExclusao(false);
     if (onSubmit) {
       onSubmit({ ...formData, _action: 'delete' });
     }
@@ -166,6 +174,19 @@ export default function GrupoEmpresarialForm({ grupo, onSubmit, isSubmitting, wi
         <Network className="w-3 h-3 mr-1" />
         Score Integração ERP: {formData.score_integracao_erp}% (calculado por IA)
       </Badge>
+
+      {confirmandoExclusao && (
+        <Alert className="border-red-300 bg-red-50">
+          <AlertTriangle className="w-4 h-4 text-red-600" />
+          <AlertDescription className="flex items-center justify-between">
+            <span className="text-sm text-red-900 font-medium">Confirmar exclusão do grupo "{formData.nome}"?</span>
+            <div className="flex gap-2">
+              <Button type="button" size="sm" variant="outline" onClick={() => setConfirmandoExclusao(false)}>Cancelar</Button>
+              <Button type="button" size="sm" variant="destructive" onClick={confirmarExclusaoDefinitiva}>Excluir</Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="flex justify-end gap-3 pt-4 border-t">
         {grupo && (

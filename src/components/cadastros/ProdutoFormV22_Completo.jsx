@@ -434,14 +434,18 @@ function ProdutoFormV22_Completo({ produto, onSubmit, onSuccess, isSubmitting, w
 
   const unifiedSubmit = submitProduto;
 
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+
   const handleExcluir = () => {
-    if (!window.confirm(`Tem certeza que deseja excluir o produto "${formData.descricao}"? Esta ação não pode ser desfeita.`)) {
-      return;
-    }
     if (!podeExcluir) {
       toast.error('Seu perfil nao permite excluir produtos');
       return;
     }
+    setConfirmandoExclusao(true);
+  };
+
+  const confirmarExclusao = () => {
+    setConfirmandoExclusao(false);
     if (produto?.id) {
       deleteInContext('Produto', produto.id)
         .then(() => {

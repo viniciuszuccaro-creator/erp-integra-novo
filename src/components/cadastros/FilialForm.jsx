@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
 
 export default function FilialForm({ filial, onSubmit, isSubmitting }) {
@@ -19,9 +20,11 @@ export default function FilialForm({ filial, onSubmit, isSubmitting }) {
     status: 'Ativa'
   });
 
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
   const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas'],
-    queryFn: () => base44.entities.Empresa.list(),
+    queryKey: ['empresas', grupoAtual?.id, empresaAtual?.id],
+    queryFn: () => filterInContext('Empresa', {}, 'nome_fantasia', 999),
+    enabled: !!contexto,
   });
 
   const matrizes = empresas.filter(e => e.tipo === 'Matriz');

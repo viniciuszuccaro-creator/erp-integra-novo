@@ -4,7 +4,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Building2, Trash2, Power, PowerOff } from "lucide-react";
+import { Loader2, Building2, Trash2, Power, PowerOff, AlertTriangle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 
 /**
@@ -36,10 +37,14 @@ export default function DepartamentoForm({ departamento, item, data, initialData
     onSubmit(formData);
   };
 
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+
   const handleExcluir = () => {
-    if (!window.confirm(`Tem certeza que deseja excluir o departamento "${formData.nome}"? Esta ação não pode ser desfeita.`)) {
-      return;
-    }
+    setConfirmandoExclusao(true);
+  };
+
+  const confirmarExclusaoDefinitiva = () => {
+    setConfirmandoExclusao(false);
     if (onSubmit) {
       onSubmit({ ...formData, _action: 'delete' });
     }
@@ -87,6 +92,19 @@ export default function DepartamentoForm({ departamento, item, data, initialData
           onCheckedChange={(v) => setFormData({...formData, ativo: v})}
         />
       </div>
+
+      {confirmandoExclusao && (
+        <Alert className="border-red-300 bg-red-50">
+          <AlertTriangle className="w-4 h-4 text-red-600" />
+          <AlertDescription className="flex items-center justify-between">
+            <span className="text-sm text-red-900 font-medium">Confirmar exclusão do departamento "{formData.nome}"?</span>
+            <div className="flex gap-2">
+              <Button type="button" size="sm" variant="outline" onClick={() => setConfirmandoExclusao(false)}>Cancelar</Button>
+              <Button type="button" size="sm" variant="destructive" onClick={confirmarExclusaoDefinitiva}>Excluir</Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="flex justify-end gap-3 pt-4 border-t">
         {dadosIniciais && (

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -220,7 +219,7 @@ export default function ConfiguracaoProducao({ empresaId }) {
               </div>
             </div>
             {isAdmin && (
-              <Button onClick={() => toggleBloquear.mutate(false)} variant="outline" className="border-red-300">
+              <Button data-permission="Producao.Configuracao.bloquear" onClick={() => toggleBloquear.mutate(false)} variant="outline" className="border-red-300">
                 <Unlock className="w-4 h-4 mr-2" />
                 Desbloquear
               </Button>
@@ -237,7 +236,7 @@ export default function ConfiguracaoProducao({ empresaId }) {
                 <p className="text-sm text-blue-700">Todos os usuários podem editar estas configurações</p>
               </div>
             </div>
-            <Button onClick={() => toggleBloquear.mutate(true)} variant="outline" className="border-blue-300">
+            <Button data-permission="Producao.Configuracao.bloquear" onClick={() => toggleBloquear.mutate(true)} variant="outline" className="border-blue-300">
               <Lock className="w-4 h-4 mr-2" />
               Bloquear Edição
             </Button>

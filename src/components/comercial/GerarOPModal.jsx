@@ -534,6 +534,7 @@ export default function GerarOPModal({ isOpen, onClose, pedido, windowMode = fal
               </Button>
               <Button 
                 type="button" 
+                data-permission="Producao.OrdemProducao.criar"
                 onClick={avancarParaConfig}
                 disabled={itensSelecionados.filter(i => i.selecionado).length === 0}
                 className="bg-amber-600 hover:bg-amber-700"

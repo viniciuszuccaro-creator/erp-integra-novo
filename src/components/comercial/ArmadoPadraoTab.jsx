@@ -348,6 +348,7 @@ export default function ArmadoPadraoTab({ formData, setFormData, empresaId, onNe
               <Button
                 variant="outline"
                 size="sm"
+                data-permission="Comercial.ArmadoPadrao.editar"
                 onClick={() => {
                   setTipoPeca(null);
                   setDadosPeca({});
@@ -765,6 +766,7 @@ export default function ArmadoPadraoTab({ formData, setFormData, empresaId, onNe
                         <Button
                           variant="ghost"
                           size="icon"
+                          data-permission="Comercial.ArmadoPadrao.editar"
                           onClick={() => editarPeca(index)}
                           className="text-blue-600 hover:bg-blue-50"
                           title="Editar Peça"
@@ -774,6 +776,7 @@ export default function ArmadoPadraoTab({ formData, setFormData, empresaId, onNe
                         <Button
                           variant="ghost"
                           size="icon"
+                          data-permission="Comercial.ArmadoPadrao.excluir"
                           onClick={() => removerPeca(index)}
                           className="text-red-600 hover:bg-red-50"
                           title="Remover Peça"

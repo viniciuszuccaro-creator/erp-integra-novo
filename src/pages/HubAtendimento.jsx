@@ -322,6 +322,7 @@ export default function HubAtendimento() {
           {/* Navegação entre abas - Responsiva */}
           <div className="flex flex-wrap gap-2">
             <Button
+              data-permission="HubAtendimento.Atendimento.visualizar"
               variant={abaAtiva === "atendimento" ? "default" : "outline"}
               onClick={() => setAbaAtiva("atendimento")}
               size="sm"
@@ -340,6 +341,7 @@ export default function HubAtendimento() {
               <span className="hidden lg:inline">Meu Painel</span>
             </Button>
             <Button
+              data-permission="HubAtendimento.Analytics.visualizar"
               variant={abaAtiva === "analytics" ? "default" : "outline"}
               onClick={() => setAbaAtiva("analytics")}
               size="sm"
@@ -349,6 +351,7 @@ export default function HubAtendimento() {
               <span className="hidden lg:inline">Analytics</span>
             </Button>
             <Button
+              data-permission="HubAtendimento.Templates.visualizar"
               variant={abaAtiva === "templates" ? "default" : "outline"}
               onClick={() => setAbaAtiva("templates")}
               size="sm"
@@ -358,6 +361,7 @@ export default function HubAtendimento() {
               <span className="hidden lg:inline">Templates</span>
             </Button>
             <Button
+              data-permission="HubAtendimento.Canais.visualizar"
               variant={abaAtiva === "config" ? "default" : "outline"}
               onClick={() => setAbaAtiva("config")}
               size="sm"

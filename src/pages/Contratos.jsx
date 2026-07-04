@@ -799,6 +799,7 @@ export default function ContratosPage() {
                             <Button 
                               variant="ghost" 
                               size="icon" 
+                              data-permission="Contratos.Contrato.assinar"
                               onClick={() => abrirAssinatura(contrato)}
                               title="Assinar Eletronicamente"
                               className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
@@ -823,6 +824,7 @@ export default function ContratosPage() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              data-permission="Contratos.Contrato.renovar"
                               onClick={() => renovarContratoMutation.mutate(contrato)}
                               title="Renovar Contrato"
                               className="text-green-600 hover:text-green-700"
@@ -835,6 +837,7 @@ export default function ContratosPage() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              data-permission="Contratos.Contrato.visualizar"
                               onClick={() => {
                                 setContratoHistorico(contrato);
                                 setHistoricoDialogOpen(true);

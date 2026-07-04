@@ -264,7 +264,7 @@ export default function CotacoesTab({ windowMode = false }) {
               <div>
                 <div className="flex justify-between items-center mb-3">
                   <Label>Itens para Cotação *</Label>
-                  <Button type="button" size="sm" variant="outline" onClick={adicionarItem}>
+                  <Button type="button" size="sm" variant="outline" data-permission="Compras.Cotacao.criar" onClick={adicionarItem}>
                     <Plus className="w-4 h-4 mr-2" />
                     Adicionar Item
                   </Button>
@@ -445,6 +445,7 @@ export default function CotacoesTab({ windowMode = false }) {
                 <Button
                   variant="outline"
                   size="sm"
+                  data-permission="Compras.Cotacao.visualizar"
                   onClick={() => setComparativoModal(cotacao)}
                 >
                   <Eye className="w-4 h-4 mr-2" />

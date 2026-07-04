@@ -763,6 +763,7 @@ export default function FormularioArmadoCompleto({ onSalvar, onCancelar, itemIni
           </Card>
 
           <Button 
+            data-permission="Producao.Armado.calcular"
             onClick={tipoSelecionado === "Bloco" ? calcularBloco : calcularElemento}
             className="w-full h-16 text-lg bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
           >

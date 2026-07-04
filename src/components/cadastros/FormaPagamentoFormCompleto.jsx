@@ -416,6 +416,7 @@ export default function FormaPagamentoFormCompleto({ formaPagamento, item, data,
                     {!formData.configuracao_parcelas_cartao?.length && (
                       <div className="text-center py-4">
                         <Button
+                          data-permission="Cadastros.FormaPagamento.editar"
                           onClick={() => setFormData({
                             ...formData,
                             configuracao_parcelas_cartao: gerarConfiguracaoParcelas(formData.maximo_parcelas)

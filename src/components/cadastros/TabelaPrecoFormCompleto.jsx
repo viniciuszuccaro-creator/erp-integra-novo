@@ -756,6 +756,7 @@ RETORNE:
 
                   <Button 
                     type="button" 
+                    data-permission="Cadastros.TabelaPreco.editar"
                     onClick={handleAdicionarProdutosLote} 
                     className="w-full bg-purple-600 hover:bg-purple-700"
                     disabled={produtosDisponiveis.length === 0}
@@ -909,6 +910,7 @@ RETORNE:
 
                 <Button
                   type="button"
+                  data-permission="Cadastros.TabelaPreco.editar"
                   onClick={handleRecalcularPrecos}
                   disabled={calculando || itensTabela.length === 0}
                   className="w-full bg-blue-600 hover:bg-blue-700"
@@ -939,6 +941,7 @@ RETORNE:
 
                 <Button
                   type="button"
+                  data-permission="Cadastros.TabelaPreco.editar"
                   onClick={handleSugerirPrecosIA}
                   disabled={calculando || itensTabela.length === 0}
                   className="w-full bg-purple-600 hover:bg-purple-700"
@@ -1019,6 +1022,7 @@ RETORNE:
               <Button
                 type="button"
                 variant="outline"
+                data-permission="Cadastros.TabelaPreco.alterarStatus"
                 onClick={handleAlternarStatus}
                 disabled={!podeEditar || !contextoValido}
                 className={formData.ativo ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}
@@ -1038,6 +1042,7 @@ RETORNE:
               <Button
                 type="button"
                 variant="destructive"
+                data-permission="Cadastros.TabelaPreco.excluir"
                 onClick={handleExcluir}
                 disabled={!podeExcluir || !contextoValido}
                 data-permission="Comercial.TabelaPreco.excluir"

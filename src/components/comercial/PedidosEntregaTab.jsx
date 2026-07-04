@@ -160,6 +160,7 @@ export default function PedidosEntregaTab({ windowMode = false }) {
         
         <div className="flex flex-wrap gap-2">
           <Button
+            data-permission="Expedicao.Entrega.visualizar"
             onClick={() => openWindow(PainelMetricasRealtime, { windowMode: true }, {
               title: '⚡ Métricas em Tempo Real',
               width: 1100,
@@ -173,6 +174,7 @@ export default function PedidosEntregaTab({ windowMode = false }) {
           </Button>
 
           <Button
+            data-permission="Expedicao.Entrega.visualizar"
             onClick={() => openWindow(DashboardLogisticaInteligente, { windowMode: true }, {
               title: '📊 Dashboard Logística IA',
               width: 1200,
@@ -186,6 +188,7 @@ export default function PedidosEntregaTab({ windowMode = false }) {
           </Button>
           
           <Button
+            data-permission="Expedicao.Roteirizacao.criar"
             onClick={() => openWindow(MapaRoteirizacaoIA, { windowMode: true }, {
               title: '🗺️ Roteirização Inteligente',
               width: 1000,
@@ -199,6 +202,7 @@ export default function PedidosEntregaTab({ windowMode = false }) {
 
           {permissoes.podeCriarRomaneio && (
             <Button
+              data-permission="Expedicao.Romaneio.criar"
               onClick={() => setRomaneioOpen(true)}
               className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
             >

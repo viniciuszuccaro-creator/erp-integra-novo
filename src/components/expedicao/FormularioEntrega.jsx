@@ -335,6 +335,7 @@ Retorne no formato JSON.`,
               />
               <Button
                 type="button"
+                data-permission="Expedicao.Entrega.editar"
                 onClick={calcularPrevisaoEntrega}
                 disabled={calculandoPrevisao}
                 variant="outline"
@@ -487,6 +488,7 @@ Retorne no formato JSON.`,
             </div>
             <Button
               type="button"
+              data-permission="Expedicao.Entrega.editar"
               onClick={buscarDadosGoogleMaps}
               variant="outline"
               size="sm"

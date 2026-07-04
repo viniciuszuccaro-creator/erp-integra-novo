@@ -717,7 +717,7 @@ Caso contrário, sugira:
                           </Badge>
                         )}
                       </div>
-                      <Button size="sm" onClick={aplicarSugestaoIA} className="bg-purple-600">
+                      <Button size="sm" data-permission="Cadastros.Produto.editar" onClick={aplicarSugestaoIA} className="bg-purple-600">
                         Aplicar Tudo
                       </Button>
                     </div>
@@ -902,6 +902,7 @@ Caso contrário, sugira:
                       <Button
                         type="button"
                         size="sm"
+                        data-permission="Cadastros.Produto.editar"
                         onClick={gerarImagemIA}
                         disabled={gerandoImagem}
                         className="bg-purple-600 hover:bg-purple-700"
@@ -1144,6 +1145,7 @@ Caso contrário, sugira:
                   <Button
                     type="button"
                     size="sm"
+                    data-permission="Cadastros.Produto.editar"
                     onClick={gerarDescricaoSEO}
                     disabled={gerandoDescricaoSEO || modoManual}
                     className="bg-green-600 hover:bg-green-700"

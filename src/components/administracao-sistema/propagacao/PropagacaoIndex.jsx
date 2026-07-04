@@ -335,7 +335,7 @@ export default function PropagacaoIndex() {
                 <Activity className="w-4 h-4 text-slate-500" />
                 Log de Sincronização
               </CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => setLogs([])} className="text-xs">Limpar</Button>
+              <Button variant="ghost" size="sm" data-permission="Administracao.Propagacao.executar" onClick={() => setLogs([])} className="text-xs">Limpar</Button>
             </div>
           </CardHeader>
           <CardContent>

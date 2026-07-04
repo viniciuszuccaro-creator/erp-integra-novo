@@ -148,6 +148,7 @@ export default function RegistroOcorrenciaLogistica({ pedido, entrega, onClose, 
             <div className="flex gap-3">
               <Button
                 variant="outline"
+                data-permission="Logistica.Ocorrencia.criar"
                 onClick={() => document.getElementById('foto-ocorrencia-input').click()}
                 disabled={uploadando}
                 className="flex-1"
@@ -159,12 +160,14 @@ export default function RegistroOcorrenciaLogistica({ pedido, entrega, onClose, 
                 <>
                   <Button
                     variant="outline"
+                    data-permission="Logistica.Ocorrencia.visualizar"
                     onClick={() => window.open(fotoUrl, '_blank')}
                   >
                     Ver
                   </Button>
                   <Button
                     variant="outline"
+                    data-permission="Logistica.Ocorrencia.editar"
                     onClick={() => setFotoUrl(null)}
                     className="text-red-600"
                   >
@@ -207,6 +210,7 @@ export default function RegistroOcorrenciaLogistica({ pedido, entrega, onClose, 
         <div className="flex gap-3 pt-4 border-t">
           <Button
             variant="outline"
+            data-permission="Logistica.Ocorrencia.visualizar"
             onClick={onClose}
             className="flex-1"
           >
@@ -214,6 +218,7 @@ export default function RegistroOcorrenciaLogistica({ pedido, entrega, onClose, 
           </Button>
           <Button
             onClick={() => registrarOcorrenciaMutation.mutate()}
+            data-permission="Logistica.Ocorrencia.criar"
             disabled={!descricao.trim() || registrarOcorrenciaMutation.isPending}
             className="flex-1 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
           >

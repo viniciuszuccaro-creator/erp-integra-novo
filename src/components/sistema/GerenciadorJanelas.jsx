@@ -109,6 +109,7 @@ export default function GerenciadorJanelas() {
                   <Button
                     size="sm"
                     variant="ghost"
+                    data-permission="Sistema.Janela.gerenciar"
                     onClick={() => restoreWindow(window.id)}
                     title="Restaurar">
                     
@@ -118,6 +119,7 @@ export default function GerenciadorJanelas() {
                   <Button
                     size="sm"
                     variant="ghost"
+                    data-permission="Sistema.Janela.gerenciar"
                     onClick={() => minimizeWindow(window.id)}
                     title="Minimizar">
                     
@@ -128,6 +130,7 @@ export default function GerenciadorJanelas() {
                   <Button
                     size="sm"
                     variant="ghost"
+                    data-permission="Sistema.Janela.gerenciar"
                     onClick={() => toggleMaximize(window.id)}
                     title={window.isMaximized ? 'Restaurar' : 'Maximizar'}>
                     
@@ -137,6 +140,7 @@ export default function GerenciadorJanelas() {
                   <Button
                     size="sm"
                     variant="ghost"
+                    data-permission="Sistema.Janela.gerenciar"
                     onClick={() => bringToFront(window.id)}
                     title="Trazer para frente"
                     disabled={isActive}>
@@ -147,6 +151,7 @@ export default function GerenciadorJanelas() {
                   <Button
                     size="sm"
                     variant="ghost"
+                    data-permission="Sistema.Janela.gerenciar"
                     onClick={() => closeWindow(window.id)}
                     title="Fechar">
                     

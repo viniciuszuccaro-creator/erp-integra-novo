@@ -427,10 +427,10 @@ export default function NotasFiscaisTab({ notasFiscais, pedidos, clientes, onCre
                     />
                   </div>
                   <div className="flex justify-end gap-3 pt-4">
-                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    <Button type="button" variant="outline" data-permission="Fiscal.NotaFiscal.criar" onClick={() => setIsDialogOpen(false)}>
                       Cancelar
                     </Button>
-                    <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                    <Button type="submit" data-permission="Fiscal.NotaFiscal.criar" disabled={createMutation.isPending || updateMutation.isPending}>
                       {selectedNF ? 'Atualizar' : 'Criar'} {/* Changed from editingNota */}
                     </Button>
                   </div>
@@ -456,7 +456,7 @@ export default function NotasFiscaisTab({ notasFiscais, pedidos, clientes, onCre
                       <Download className="w-4 h-4 mr-2" /> Exportar CSV
                     </Button>
                   </ProtectedAction>
-                  <Button variant="ghost" onClick={() => setSelectedNotas([])}>Limpar Seleção</Button>
+                  <Button variant="ghost" data-permission="Fiscal.NotaFiscal.visualizar" onClick={() => setSelectedNotas([])}>Limpar Seleção</Button>
                 </div>
               </AlertDescription>
             </Alert>
@@ -591,12 +591,12 @@ export default function NotasFiscaisTab({ notasFiscais, pedidos, clientes, onCre
               )}
               <div className="flex gap-2 pt-4">
                 {viewingDetails.danfe_url && (
-                  <Button onClick={() => window.open(viewingDetails.danfe_url, '_blank')}>
+                  <Button data-permission="Fiscal.NotaFiscal.baixar_pdf" onClick={() => window.open(viewingDetails.danfe_url, '_blank')}>
                     <Download className="w-4 h-4 mr-2" />
                     Baixar DANFE
                   </Button>
                 )}
-                <Button variant="outline" onClick={() => setViewingDetails(null)}>
+                <Button variant="outline" data-permission="Fiscal.NotaFiscal.visualizar" onClick={() => setViewingDetails(null)}>
                   Fechar
                 </Button>
               </div>

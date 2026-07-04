@@ -360,10 +360,10 @@ export default function GerenciarEnderecosCliente({ clienteId, onSelecionarEnder
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button variant="outline" onClick={() => setDialogAberto(false)}>
+              <Button variant="outline" data-permission="Comercial.Cliente.visualizar" onClick={() => setDialogAberto(false)}>
                 Cancelar
               </Button>
-              <Button onClick={handleSalvarEndereco} disabled={updateClienteMutation.isPending}>
+              <Button onClick={handleSalvarEndereco} data-permission="Comercial.Cliente.editar" disabled={updateClienteMutation.isPending}>
                 <Check className="w-4 h-4 mr-2" />
                 {updateClienteMutation.isPending ? 'Salvando...' : 'Salvar Endereço'}
               </Button>

@@ -151,6 +151,7 @@ export default function AvaliacaoAtendimento({ conversa, onAvaliacaoEnviada }) {
 
             <Button
               onClick={() => setEtapa('feedback')}
+              data-permission="Chatbot.Atendimento.avaliar"
               disabled={nota === 0}
               className="w-full bg-blue-600 hover:bg-blue-700"
             >
@@ -191,6 +192,7 @@ export default function AvaliacaoAtendimento({ conversa, onAvaliacaoEnviada }) {
             <div className="flex gap-2">
               <Button
                 variant="outline"
+                data-permission="Chatbot.Atendimento.avaliar"
                 onClick={() => setEtapa('estrelas')}
                 className="flex-1"
               >
@@ -198,6 +200,7 @@ export default function AvaliacaoAtendimento({ conversa, onAvaliacaoEnviada }) {
               </Button>
               <Button
                 onClick={() => setEtapa('nps')}
+                data-permission="Chatbot.Atendimento.avaliar"
                 className="flex-1 bg-blue-600 hover:bg-blue-700"
               >
                 Continuar
@@ -252,6 +255,7 @@ export default function AvaliacaoAtendimento({ conversa, onAvaliacaoEnviada }) {
             <div className="flex gap-2">
               <Button
                 variant="outline"
+                data-permission="Chatbot.Atendimento.avaliar"
                 onClick={() => setEtapa('feedback')}
                 className="flex-1"
               >
@@ -259,6 +263,7 @@ export default function AvaliacaoAtendimento({ conversa, onAvaliacaoEnviada }) {
               </Button>
               <Button
                 onClick={() => enviarAvaliacaoMutation.mutate()}
+                data-permission="Chatbot.Atendimento.avaliar"
                 disabled={enviarAvaliacaoMutation.isPending}
                 className="flex-1 bg-green-600 hover:bg-green-700"
               >
@@ -275,6 +280,7 @@ export default function AvaliacaoAtendimento({ conversa, onAvaliacaoEnviada }) {
 
             <button
               onClick={() => enviarAvaliacaoMutation.mutate()}
+              data-permission="Chatbot.Atendimento.avaliar"
               className="w-full text-sm text-slate-500 hover:text-slate-700"
             >
               Pular NPS e enviar

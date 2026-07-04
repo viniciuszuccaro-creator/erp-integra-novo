@@ -160,21 +160,22 @@ export default function TabelaPrecoItensModal({ tabela, isOpen, onClose, windowM
             
             {podeEditar && !showItemForm && (
               <Button 
-                onClick={() => {
-                  setEditingItem(null);
-                  setFormItem({
-                    produto_id: "",
-                    preco_base: 0,
-                    percentual_desconto: 0,
-                    data_inicio_vigencia: new Date().toISOString().split('T')[0],
-                    data_fim_vigencia: "",
-                    ativo: true,
-                    observacoes: ""
-                  });
-                  setShowItemForm(true);
-                }}
-                className="bg-green-600 hover:bg-green-700"
-              >
+                 onClick={() => {
+                   setEditingItem(null);
+                   setFormItem({
+                     produto_id: "",
+                     preco_base: 0,
+                     percentual_desconto: 0,
+                     data_inicio_vigencia: new Date().toISOString().split('T')[0],
+                     data_fim_vigencia: "",
+                     ativo: true,
+                     observacoes: ""
+                   });
+                   setShowItemForm(true);
+                 }}
+                 data-permission="Comercial.TabelaPreco.criar"
+                 className="bg-green-600 hover:bg-green-700"
+               >
                 <Plus className="w-4 h-4 mr-2" />
                 Adicionar Produto
               </Button>
@@ -294,17 +295,19 @@ export default function TabelaPrecoItensModal({ tabela, isOpen, onClose, windowM
 
               <div className="flex justify-end gap-3 pt-4 border-t">
                 <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => {
-                    setShowItemForm(false);
-                    setEditingItem(null);
-                  }}
+                   type="button" 
+                   variant="outline" 
+                   data-permission="Comercial.TabelaPreco.visualizar"
+                   onClick={() => {
+                     setShowItemForm(false);
+                     setEditingItem(null);
+                   }}
                 >
                   Cancelar
                 </Button>
                 <Button 
                   type="submit" 
+                  data-permission="Comercial.TabelaPreco.criar"
                   disabled={createItemMutation.isPending || updateItemMutation.isPending}
                   className="bg-green-600 hover:bg-green-700"
                 >
@@ -383,6 +386,7 @@ export default function TabelaPrecoItensModal({ tabela, isOpen, onClose, windowM
                             <Button
                               variant="ghost"
                               size="icon"
+                              data-permission="Comercial.TabelaPreco.editar"
                               onClick={() => handleEditItem(item)}
                               title="Editar"
                             >
@@ -391,6 +395,7 @@ export default function TabelaPrecoItensModal({ tabela, isOpen, onClose, windowM
                             <Button
                               variant="ghost"
                               size="icon"
+                              data-permission="Comercial.TabelaPreco.excluir"
                               onClick={() => handleDeleteItem(item)}
                               title="Remover"
                             >
@@ -411,6 +416,7 @@ export default function TabelaPrecoItensModal({ tabela, isOpen, onClose, windowM
                   {podeEditar && (
                     <Button 
                       onClick={() => setShowItemForm(true)}
+                      data-permission="Comercial.TabelaPreco.criar"
                       className="mt-4 bg-green-600"
                     >
                       <Plus className="w-4 h-4 mr-2" />

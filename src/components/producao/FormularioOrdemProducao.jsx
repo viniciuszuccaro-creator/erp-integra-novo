@@ -454,6 +454,7 @@ Retorne sugestões de:
               <Button
                 type="button"
                 onClick={() => setSeletorProdutoAberto(true)}
+                data-permission="Producao.OrdemProducao.editar"
                 variant="outline"
                 className="w-full border-dashed border-2 border-blue-300 hover:bg-blue-50"
               >
@@ -542,6 +543,7 @@ Retorne sugestões de:
                         type="button"
                         variant="outline"
                         size="sm"
+                        data-permission="Producao.OrdemProducao.visualizar"
                         onClick={() => setSeletorProdutoAberto(false)}
                       >
                         Fechar
@@ -586,7 +588,7 @@ Retorne sugestões de:
         </div>
 
         <div className="border-t p-4 bg-slate-50 flex items-center justify-end gap-3">
-          <Button type="button" variant="outline" onClick={onClose}>
+          <Button type="button" variant="outline" data-permission="Producao.OrdemProducao.visualizar" onClick={onClose}>
             Cancelar
           </Button>
           <Button 

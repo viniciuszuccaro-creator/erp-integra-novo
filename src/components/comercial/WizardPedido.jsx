@@ -245,12 +245,14 @@ export default function WizardPedido({ pedido, onSalvar, onCancelar, clientes })
           <div className="flex gap-2">
             <Button
               variant="outline"
+              data-permission="Comercial.Pedido.criar"
               onClick={handleSalvarRascunho}
             >
               Salvar Rascunho
             </Button>
             <Button
               variant="outline"
+              data-permission="Comercial.Pedido.visualizar"
               onClick={onCancelar}
             >
               Cancelar
@@ -260,6 +262,7 @@ export default function WizardPedido({ pedido, onSalvar, onCancelar, clientes })
           <div className="flex gap-2">
             <Button
               variant="outline"
+              data-permission="Comercial.Pedido.visualizar"
               onClick={handleAnterior}
               disabled={etapaAtual === 1}
             >
@@ -269,6 +272,7 @@ export default function WizardPedido({ pedido, onSalvar, onCancelar, clientes })
             {etapaAtual < 4 ? (
               <Button
                 onClick={handleProxima}
+                data-permission="Comercial.Pedido.criar"
                 disabled={!podeAvancar()}
                 className="bg-blue-600 hover:bg-blue-700"
               >
@@ -277,6 +281,7 @@ export default function WizardPedido({ pedido, onSalvar, onCancelar, clientes })
             ) : (
               <Button
                 onClick={handleFinalizar}
+                data-permission="Comercial.Pedido.criar"
                 disabled={!podeAvancar()}
                 className="bg-green-600 hover:bg-green-700"
               >

@@ -155,6 +155,7 @@ export default function DocumentosCliente() {
                       <Button
                         size="sm"
                         variant="outline"
+                        data-permission="Portal.Documento.baixar"
                         onClick={() => handleDownloadNFe(nfe)}
                         className="flex items-center gap-2"
                       >
@@ -165,6 +166,7 @@ export default function DocumentosCliente() {
                         <Button
                           size="sm"
                           variant="outline"
+                          data-permission="Portal.Documento.visualizar"
                           onClick={() => window.open(nfe.danfe_url, '_blank')}
                           className="flex items-center gap-2"
                         >
@@ -236,6 +238,7 @@ export default function DocumentosCliente() {
                           {conta.linha_digitavel && (
                             <Button
                               size="sm"
+                              data-permission="Portal.Boleto.visualizar"
                               onClick={() => handleVisualizarBoleto(conta)}
                               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
                             >
@@ -247,6 +250,7 @@ export default function DocumentosCliente() {
                             <Button
                               size="sm"
                               variant="outline"
+                              data-permission="Portal.Boleto.visualizar"
                               onClick={() => handleCopiarPix(conta)}
                               className="flex items-center gap-2"
                             >
@@ -258,6 +262,7 @@ export default function DocumentosCliente() {
                             <Button
                               size="sm"
                               variant="outline"
+                              data-permission="Portal.Boleto.visualizar"
                               onClick={() => window.open(conta.url_fatura, '_blank')}
                               className="flex items-center gap-2"
                             >

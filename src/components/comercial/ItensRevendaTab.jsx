@@ -199,6 +199,7 @@ export default function ItensRevendaTab({ formData, setFormData, onNext }) {
             </div>
             <Button
               onClick={copiarUltimoPedido}
+              data-permission="Comercial.Pedido.criar"
               variant="outline"
               disabled={!formData?.cliente_id}
             >
@@ -248,6 +249,7 @@ export default function ItensRevendaTab({ formData, setFormData, onNext }) {
                 <p className="font-semibold">{produtoSelecionado.descricao}</p>
                 <Button
                   onClick={sugerirQuantidadeIA}
+                  data-permission="Comercial.Pedido.editar"
                   size="sm"
                   variant="outline"
                   className="border-purple-300 text-purple-600"
@@ -324,6 +326,7 @@ export default function ItensRevendaTab({ formData, setFormData, onNext }) {
 
               <Button
                 onClick={adicionarItem}
+                data-permission="Comercial.Pedido.editar"
                 className="w-full mt-3 bg-blue-600 hover:bg-blue-700"
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -418,7 +421,7 @@ export default function ItensRevendaTab({ formData, setFormData, onNext }) {
       {/* Navegação */}
       {formData?.itens_revenda && formData.itens_revenda.length > 0 && (
         <div className="flex justify-end">
-          <Button onClick={onNext} className="bg-blue-600">
+          <Button onClick={onNext} data-permission="Comercial.Pedido.visualizar" className="bg-blue-600">
             Próximo: Armado Padrão
             <ChevronRight className="w-4 h-4 ml-2" />
           </Button>

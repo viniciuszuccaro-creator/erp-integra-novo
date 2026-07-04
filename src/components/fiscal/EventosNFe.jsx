@@ -210,6 +210,7 @@ export default function EventosNFe({ nfe }) {
                   Voltar
                 </Button>
                 <Button
+                  data-permission="Fiscal.NotaFiscal.cancelar"
                   onClick={() => cancelarMutation.mutate(motivoCancelamento)}
                   disabled={motivoCancelamento.length < 15 || cancelarMutation.isPending}
                   className="flex-1 bg-red-600 hover:bg-red-700"

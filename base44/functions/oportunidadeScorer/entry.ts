@@ -6,6 +6,13 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     let payload; try { payload = await req.json(); } catch { payload = {}; }
     const event = payload?.event || null;
+
+    // Se chamada direta do frontend (sem event de automação), exige auth
+    if (!event) {
+      const user = await base44.auth.me();
+      if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const entityId = event?.entity_id || payload?.oportunidade_id;
     if (!entityId) return Response.json({ error: 'oportunidade_id obrigatório' }, { status: 400 });
 

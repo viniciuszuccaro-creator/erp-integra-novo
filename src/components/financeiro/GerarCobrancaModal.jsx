@@ -247,6 +247,7 @@ export default function GerarCobrancaModal({ isOpen, onClose, contaReceber }) {
                     </AlertDescription>
                   </Alert>
                   <Button
+                    data-permission="Financeiro.Cobranca.criar"
                     onClick={() => gerarPixMutation.mutate()}
                     disabled={gerando || !contextoValido || !podeGerarCobranca}
                     className="w-full bg-green-600 hover:bg-green-700"
@@ -263,6 +264,7 @@ export default function GerarCobrancaModal({ isOpen, onClose, contaReceber }) {
                     </AlertDescription>
                   </Alert>
                   <Button
+                    data-permission="Financeiro.Cobranca.criar"
                     onClick={() => gerarBoletoMutation.mutate()}
                     disabled={gerando || !contextoValido || !podeGerarCobranca}
                     className="w-full bg-orange-600 hover:bg-orange-700"

@@ -580,6 +580,7 @@ export default function AnalisePedidoAprovacao({
         <div className="flex justify-end gap-3 pt-4 border-t">
           <Button
             variant="outline"
+            data-permission="Comercial.Pedido.rejeitar"
             onClick={() => onNegar(comentarios)}
             className="border-red-300 text-red-600 hover:bg-red-50"
           >
@@ -587,7 +588,8 @@ export default function AnalisePedidoAprovacao({
             Negar Desconto
           </Button>
           <Button
-            className={fecharAutomatico 
+            data-permission="Comercial.Pedido.aprovar"
+            className={fecharAutomatico
               ? "bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-lg"
               : "bg-green-600 hover:bg-green-700 shadow-lg"
             }

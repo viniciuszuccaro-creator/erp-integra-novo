@@ -170,6 +170,7 @@ export default function ValidarPedidosExternos({ windowMode = true }) {
                           <Button
                             size="sm"
                             variant="ghost"
+                            data-permission="Comercial.PedidoExterno.excluir"
                             onClick={() => {
                               if (confirm('Excluir pedido externo?')) excluirExterno.mutate(ext);
                             }}

@@ -313,6 +313,7 @@ function CentralAprovacoesManager({ windowMode = false, initialTab = "descontos"
                           <div className="flex gap-2">
                             <Button
                               size="sm"
+                              data-permission="Comercial.Pedido.aprovar"
                               onClick={() => {
                                 openWindow(
                                   AnalisePedidoAprovacao,

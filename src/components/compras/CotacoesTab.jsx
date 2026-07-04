@@ -405,6 +405,7 @@ export default function CotacoesTab({ windowMode = false }) {
                 </Button>
                 <Button
                   type="submit"
+                  data-permission="Compras.Cotacao.criar"
                   disabled={criarCotacaoMutation.isPending || formCotacao.fornecedores_selecionados.length < 2}
                   className="bg-cyan-600 hover:bg-cyan-700"
                 >
@@ -499,7 +500,7 @@ export default function CotacoesTab({ windowMode = false }) {
               <p className="text-xs text-slate-500 mb-3">
                 Compare propostas de fornecedores
               </p>
-              <Button size="sm" onClick={() => setDialogOpen(true)} className="bg-cyan-600 hover:bg-cyan-700">
+              <Button size="sm" data-permission="Compras.Cotacao.criar" onClick={() => setDialogOpen(true)} className="bg-cyan-600 hover:bg-cyan-700">
                 <Plus className="w-3 h-3 mr-1" />
                 Criar Cotação
               </Button>

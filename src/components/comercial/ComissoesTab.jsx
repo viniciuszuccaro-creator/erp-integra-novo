@@ -360,6 +360,7 @@ export default function ComissoesTab({ comissoes, pedidos, empresas = [] }) {
                           <Button
                             variant="ghost"
                             size="icon"
+                            data-permission="Comercial.Comissao.aprovar"
                             onClick={() => handleAprovar(comissao)}
                             title="Aprovar"
                             className="text-green-600 hover:text-green-700"

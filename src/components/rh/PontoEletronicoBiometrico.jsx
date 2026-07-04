@@ -303,7 +303,7 @@ Detecte anomalias:
                 <div className="space-y-3">
                   <video ref={videoRef} autoPlay className="w-full rounded border" />
                   <div className="flex gap-2">
-                    <Button onClick={capturarFotoFacial} className="flex-1 bg-green-600 hover:bg-green-700">
+                    <Button data-permission="RH.Ponto.registrar" onClick={capturarFotoFacial} className="flex-1 bg-green-600 hover:bg-green-700">
                       <CheckCircle className="w-4 h-4 mr-2" />
                       Capturar
                     </Button>

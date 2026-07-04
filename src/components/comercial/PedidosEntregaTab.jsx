@@ -368,6 +368,7 @@ export default function PedidosEntregaTab({ windowMode = false }) {
                             <Button
                               size="sm"
                               variant="outline"
+                              data-permission="Comercial.Pedido.visualizar"
                               onClick={() => handleVerDetalhes(pedido)}
                             >
                               <Eye className="w-4 h-4 mr-1" />
@@ -377,6 +378,7 @@ export default function PedidosEntregaTab({ windowMode = false }) {
                             <Button
                               size="sm"
                               variant="outline"
+                              data-permission="Comercial.Pedido.notificar"
                               onClick={() => {
                                 setEntregaSelecionada({ pedido, entrega });
                                 setNotificadorOpen(true);
@@ -600,6 +602,7 @@ export default function PedidosEntregaTab({ windowMode = false }) {
                 <CardContent className="space-y-3">
                   {entregaSelecionada.pedido.status === 'Aprovado' || entregaSelecionada.pedido.status === 'Pronto para Faturar' ? (
                     <Button
+                      data-permission="Comercial.Pedido.expedir"
                       onClick={() => {
                         atualizarStatusMutation.mutate({
                           pedidoId: entregaSelecionada.pedido.id,
@@ -617,6 +620,7 @@ export default function PedidosEntregaTab({ windowMode = false }) {
 
                   {entregaSelecionada.pedido.status === 'Em Expedição' || entregaSelecionada.pedido.status === 'Faturado' ? (
                     <Button
+                      data-permission="Comercial.Pedido.expedir"
                       onClick={() => {
                         atualizarStatusMutation.mutate({
                           pedidoId: entregaSelecionada.pedido.id,
@@ -707,6 +711,7 @@ export default function PedidosEntregaTab({ windowMode = false }) {
               <Card className="bg-slate-50">
                 <CardContent className="p-4 space-y-2">
                   <Button
+                    data-permission="Comercial.Pedido.notificar"
                     onClick={() => setNotificadorOpen(true)}
                     className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
                   >

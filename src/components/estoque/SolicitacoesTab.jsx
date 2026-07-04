@@ -191,6 +191,7 @@ export default function SolicitacoesTab({ solicitacoes, produtos }) {
                         <Button
                           size="sm"
                           variant="outline"
+                          data-permission="Compras.SolicitacaoCompra.aprovar"
                           onClick={() => handleAprovar(sol)}
                           disabled={aprovarSolicitacaoMutation.isPending || !podeAprovarSolicitacao}
                           className="text-green-600 hover:bg-green-50 text-xs"
@@ -200,6 +201,7 @@ export default function SolicitacoesTab({ solicitacoes, produtos }) {
                         <Button
                           size="sm"
                           variant="outline"
+                          data-permission="Compras.SolicitacaoCompra.rejeitar"
                           onClick={() => handleRejeitar(sol)}
                           disabled={rejeitarSolicitacaoMutation.isPending || !podeAprovarSolicitacao}
                           className="text-red-600 hover:bg-red-50 text-xs"

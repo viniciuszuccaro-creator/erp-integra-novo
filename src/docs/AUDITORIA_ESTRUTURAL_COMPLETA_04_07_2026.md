@@ -155,13 +155,14 @@
 | Métrica | Antes | Depois |
 |---------|-------|--------|
 | alert() calls | 63 | **0** ✅ |
-| data-permission attrs | 570 | **581** ✅ |
+| data-permission attrs | 570 | **585** ✅ |
 | Arquivos com w-full | 923 | 923 ✅ |
 | Arquivos com h-full | 668 | 668 ✅ |
 | Arquivos com toast | 227 | 227 ✅ |
 | Cards no DashboardOperacionalBI | 12 | **8** ✅ |
 | Entidades com group_id | 141/150 | 141/150 ✅ |
 | Handlers de propagação | 10 | 10 ✅ |
+| Multiempresa gap ChatbotDashboard mensagens | Sem filtro | **Corrigido** ✅ |
 
 ### Limitações
 - **Créditos de integração esgotados** até 07/07/2026 — funcionalidades IA, email, upload bloqueadas (limitação de billing, não bug)

@@ -193,6 +193,7 @@ export default function ControleEstoqueCompleto({ empresaId }) {
                     <Button
                       size="sm"
                       variant="destructive"
+                      data-permission="Estoque.Movimentacao.bloquear"
                       onClick={() => bloquearLoteVencidoMutation.mutate({
                         produtoId: item.id,
                         numeroLote: item.lote.numero_lote

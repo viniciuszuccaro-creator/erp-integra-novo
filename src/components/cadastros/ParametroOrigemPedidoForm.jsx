@@ -347,7 +347,7 @@ export default function ParametroOrigemPedidoForm({
               Cancelar
             </Button>
           )}
-          <Button onClick={handleSubmit} disabled={mutation.isPending || !contextoValido || !podeSalvar}>
+          <Button data-permission="Cadastros.ParametroOrigemPedido.criar" onClick={handleSubmit} disabled={mutation.isPending || !contextoValido || !podeSalvar}>
             <Save className="w-4 h-4 mr-2" />
             {mutation.isPending ? 'Salvando...' : parametro ? 'Atualizar' : 'Criar'}
           </Button>

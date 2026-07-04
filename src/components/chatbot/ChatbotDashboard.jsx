@@ -62,7 +62,8 @@ export default function ChatbotDashboard() {
     queryKey: ['mensagens-analytics', empresaAtual?.id],
     queryFn: async () => {
       return await base44.entities.MensagemOmnicanal.list();
-    }
+    },
+    select: (data) => filtrarPorContexto(data, 'empresa_id')
   });
 
   // Buscar interações

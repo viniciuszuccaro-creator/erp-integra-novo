@@ -124,197 +124,8 @@ import StatusControleAcesso from "./StatusControleAcesso";
  * 🏆 CERTIFICADO: Sistema mais completo do mercado ERP brasileiro
  */
 
-// Estrutura completa de módulos, seções e abas do sistema
-const ESTRUTURA_SISTEMA = {
-  dashboard: {
-    nome: "Dashboard",
-    icone: LayoutDashboard,
-    cor: "blue",
-    secoes: {
-      principal: { nome: "Visão Geral", abas: ["kpis", "graficos", "alertas"] },
-      corporativo: { nome: "Dashboard Corporativo", abas: ["multiempresa", "consolidado"] }
-    }
-  },
-  comercial: {
-    nome: "Comercial e Vendas",
-    icone: ShoppingCart,
-    cor: "green",
-    secoes: {
-      clientes: { nome: "Clientes", abas: ["lista", "detalhes", "historico", "crm"] },
-      pedidos: { nome: "Pedidos", abas: ["lista", "novo", "aprovacao", "faturamento"] },
-      orcamentos: { nome: "Orçamentos", abas: ["lista", "novo", "conversao"] },
-      tabelas_preco: { nome: "Tabelas de Preço", abas: ["lista", "itens", "clientes_vinculados"] },
-      comissoes: { nome: "Comissões", abas: ["lista", "calculo", "pagamento"] },
-      notas_fiscais: { nome: "Notas Fiscais", abas: ["emissao", "lista", "cancelamento"] }
-    }
-  },
-  financeiro: {
-    nome: "Financeiro e Contábil",
-    icone: DollarSign,
-    cor: "emerald",
-    secoes: {
-      contas_receber: { nome: "Contas a Receber", abas: ["lista", "baixa", "cobranca", "boletos"] },
-      contas_pagar: { nome: "Contas a Pagar", abas: ["lista", "baixa", "aprovacao", "pagamento"] },
-      caixa: { nome: "Caixa Diário", abas: ["movimentos", "fechamento", "transferencias"] },
-      conciliacao: { nome: "Conciliação Bancária", abas: ["importar", "conciliar", "historico"] },
-      relatorios: { nome: "Relatórios Financeiros", abas: ["dre", "fluxo_caixa", "inadimplencia"] }
-    }
-  },
-  estoque: {
-    nome: "Estoque e Almoxarifado",
-    icone: Package,
-    cor: "purple",
-    secoes: {
-      produtos: { nome: "Produtos", abas: ["lista", "novo", "lotes", "validade"] },
-      movimentacoes: { nome: "Movimentações", abas: ["entrada", "saida", "transferencia", "ajuste"] },
-      inventario: { nome: "Inventário", abas: ["contagem", "acerto", "historico"] },
-      requisicoes: { nome: "Requisições", abas: ["lista", "aprovacao", "atendimento"] }
-    }
-  },
-  compras: {
-    nome: "Compras e Suprimentos",
-    icone: Briefcase,
-    cor: "orange",
-    secoes: {
-      fornecedores: { nome: "Fornecedores", abas: ["lista", "avaliacao", "historico"] },
-      solicitacoes: { nome: "Solicitações", abas: ["lista", "nova", "aprovacao"] },
-      cotacoes: { nome: "Cotações", abas: ["lista", "nova", "comparativo"] },
-      ordens_compra: { nome: "Ordens de Compra", abas: ["lista", "nova", "recebimento"] }
-    }
-  },
-  expedicao: {
-    nome: "Expedição e Logística",
-    icone: Truck,
-    cor: "cyan",
-    secoes: {
-      entregas: { nome: "Entregas", abas: ["lista", "separacao", "despacho", "rastreamento"] },
-      romaneios: { nome: "Romaneios", abas: ["lista", "novo", "impressao"] },
-      roteirizacao: { nome: "Roteirização", abas: ["mapa", "otimizacao", "motoristas"] },
-      transportadoras: { nome: "Transportadoras", abas: ["lista", "tabelas_frete"] }
-    }
-  },
-  producao: {
-    nome: "Produção e Manufatura",
-    icone: Factory,
-    cor: "indigo",
-    secoes: {
-      ordens_producao: { nome: "Ordens de Produção", abas: ["lista", "nova", "programacao", "kanban"] },
-      apontamentos: { nome: "Apontamentos", abas: ["producao", "paradas", "refugo"] },
-      qualidade: { nome: "Qualidade", abas: ["inspecao", "nao_conformidades", "acoes"] }
-    }
-  },
-  rh: {
-    nome: "Recursos Humanos",
-    icone: UserCircle,
-    cor: "pink",
-    secoes: {
-      colaboradores: { nome: "Colaboradores", abas: ["lista", "documentos", "historico"] },
-      ponto: { nome: "Ponto Eletrônico", abas: ["registros", "ajustes", "relatorios"] },
-      ferias: { nome: "Férias", abas: ["programacao", "solicitacoes", "aprovacao"] },
-      folha: { nome: "Folha de Pagamento", abas: ["calculo", "holerites", "encargos"] }
-    }
-  },
-  fiscal: {
-    nome: "Fiscal e Tributário",
-    icone: FileText,
-    cor: "red",
-    secoes: {
-      nfe: { nome: "NF-e", abas: ["emissao", "entrada", "manifestacao", "inutilizacao"] },
-      tabelas_fiscais: { nome: "Tabelas Fiscais", abas: ["cfop", "cst", "ncm", "aliquotas"] },
-      sped: { nome: "SPED", abas: ["fiscal", "contribuicoes", "contabil"] },
-      obrigacoes: { nome: "Obrigações Acessórias", abas: ["calendario", "guias", "declaracoes"] }
-    }
-  },
-  cadastros: {
-    nome: "Cadastros Gerais",
-    icone: Users,
-    cor: "slate",
-    secoes: {
-      pessoas: { nome: "Pessoas & Parceiros", abas: ["clientes", "fornecedores", "transportadoras", "colaboradores"] },
-      produtos: { nome: "Produtos & Serviços", abas: ["produtos", "servicos", "grupos", "marcas"] },
-      financeiro: { nome: "Financeiro", abas: ["bancos", "formas_pagamento", "centros_custo"] },
-      logistica: { nome: "Logística", abas: ["veiculos", "motoristas", "rotas"] },
-      organizacional: { nome: "Organizacional", abas: ["empresas", "departamentos", "cargos", "usuarios"] },
-      integracoes: { nome: "Integrações & IA", abas: ["apis", "webhooks", "chatbot", "jobs_ia"] }
-    }
-  },
-  crm: {
-    nome: "CRM - Relacionamento",
-    icone: MessageCircle,
-    cor: "violet",
-    secoes: {
-      oportunidades: { nome: "Oportunidades", abas: ["funil", "lista", "conversao"] },
-      interacoes: { nome: "Interações", abas: ["historico", "nova", "follow_up"] },
-      campanhas: { nome: "Campanhas", abas: ["lista", "nova", "resultados"] }
-    }
-  },
-  agenda: {
-    nome: "Agenda e Calendário",
-    icone: Calendar,
-    cor: "amber",
-    secoes: {
-      eventos: { nome: "Eventos", abas: ["calendario", "lista", "notificacoes"] },
-      tarefas: { nome: "Tarefas", abas: ["kanban", "lista", "atribuicao"] }
-    }
-  },
-  relatorios: {
-    nome: "Relatórios e Análises",
-    icone: BarChart3,
-    cor: "teal",
-    secoes: {
-      dashboards: { nome: "Dashboards", abas: ["executivo", "operacional", "financeiro"] },
-      relatorios: { nome: "Relatórios", abas: ["vendas", "estoque", "financeiro", "rh"] },
-      exportacao: { nome: "Exportação", abas: ["excel", "pdf", "api"] }
-    }
-  },
-  contratos: {
-    nome: "Gestão de Contratos",
-    icone: FileText,
-    cor: "sky",
-    secoes: {
-      contratos: { nome: "Contratos", abas: ["lista", "novo", "renovacao", "aditivos"] }
-    }
-  },
-  chatbot: {
-    nome: "Hub de Atendimento",
-    icone: MessageCircle,
-    cor: "green",
-    secoes: {
-      atendimento: { nome: "Atendimento", abas: ["conversas", "fila", "transferencia"] },
-      configuracoes: { nome: "Configurações", abas: ["canais", "templates", "base_conhecimento"] },
-      analytics: { nome: "Analytics", abas: ["metricas", "relatorios", "sla"] }
-    }
-  },
-  configuracoes: {
-    nome: "Configurações",
-    icone: Settings,
-    cor: "gray",
-    secoes: {
-      sistema: { nome: "Sistema", abas: ["geral", "notificacoes", "backup"] },
-      integracoes: { nome: "Integrações", abas: ["nfe", "boletos", "whatsapp", "marketplaces"] },
-      ia: { nome: "Inteligência Artificial", abas: ["modelos", "limites", "logs"] }
-    }
-  }
-};
-
-// Ações disponíveis
-const ACOES = [
-  { id: "visualizar", nome: "Visualizar", icone: Eye, cor: "slate" },
-  { id: "criar", nome: "Criar", icone: Plus, cor: "blue" },
-  { id: "editar", nome: "Editar", icone: Pencil, cor: "green" },
-  { id: "excluir", nome: "Excluir", icone: Trash2, cor: "red" },
-  { id: "aprovar", nome: "Aprovar", icone: CheckSquare, cor: "purple" },
-  { id: "exportar", nome: "Exportar", icone: Download, cor: "cyan" }
-];
-
-// Níveis de perfil
-const NIVEIS_PERFIL = [
-  { id: "Administrador", nome: "Administrador", descricao: "Acesso total ao sistema" },
-  { id: "Gerencial", nome: "Gerencial", descricao: "Acesso gerencial com aprovações" },
-  { id: "Operacional", nome: "Operacional", descricao: "Acesso operacional básico" },
-  { id: "Consulta", nome: "Consulta", descricao: "Apenas visualização" },
-  { id: "Personalizado", nome: "Personalizado", descricao: "Permissões customizadas" }
-];
+import { ESTRUTURA_SISTEMA, ACOES, NIVEIS_PERFIL } from "./gerenciamento-acessos/estruturaSistema";
+import DashboardTab from "./gerenciamento-acessos/DashboardTab";
 
 export default function GerenciamentoAcessosCompleto() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -1131,331 +942,31 @@ Forneça recomendações práticas de segurança.`,
 
         {/* Tab: Dashboard */}
         <TabsContent value="dashboard" className="space-y-6 w-full h-full">
-          <DashboardSeguranca
+          <DashboardTab
             estatisticas={estatisticas}
             perfis={perfis}
             usuarios={usuarios}
+            empresas={empresas}
             auditoriaAcessos={auditoriaAcessos}
+            recomendacoesIA={recomendacoesIA}
+            analisandoIA={analisandoIA}
+            onAnalisarIA={analisarComIA}
+            onCriarPerfil={() => { resetFormPerfil(); setPerfilDialogOpen(true); }}
+            onAtribuirUsuario={(u) => { setUsuarioSelecionado(u); setActiveTab("usuarios"); }}
+            onVerPermissoesEmpresa={() => setActiveTab("empresas")}
+            onVerAuditoria={() => setActiveTab("auditoria")}
+            onCorrigirPerfil={abrirEdicaoPerfil}
+            onImportarPerfis={(perfisImportados) => {
+              perfisImportados.forEach(p => {
+                salvarPerfilMutation.mutate({
+                  ...p, id: undefined,
+                  group_id: grupoAtivoId || null,
+                  empresa_id: empresaAtivaId || null,
+                  origem_configuracao: "importacao"
+                });
+              });
+            }}
           />
-
-          {/* KPIs */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-blue-100 text-sm">Perfis</p>
-                    <p className="text-2xl font-bold">{estatisticas.totalPerfis}</p>
-                  </div>
-                  <Shield className="w-8 h-8 text-blue-200" />
-                </div>
-                <p className="text-xs text-blue-100 mt-2">{estatisticas.perfisAtivos} ativos</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-green-100 text-sm">Usuários</p>
-                    <p className="text-2xl font-bold">{estatisticas.totalUsuarios}</p>
-                  </div>
-                  <Users className="w-8 h-8 text-green-200" />
-                </div>
-                <p className="text-xs text-green-100 mt-2">{estatisticas.admins} admins</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-purple-100 text-sm">Com Perfil</p>
-                    <p className="text-2xl font-bold">{estatisticas.usuariosComPerfil}</p>
-                  </div>
-                  <UserCheck className="w-8 h-8 text-purple-200" />
-                </div>
-                <Progress value={estatisticas.cobertura} className="mt-2 h-1.5 bg-purple-400" />
-              </CardContent>
-            </Card>
-
-            <Card className={`bg-gradient-to-br ${estatisticas.usuariosSemPerfil > 0 ? 'from-orange-500 to-orange-600' : 'from-emerald-500 to-emerald-600'} text-white`}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-white/80 text-sm">Sem Perfil</p>
-                    <p className="text-2xl font-bold">{estatisticas.usuariosSemPerfil}</p>
-                  </div>
-                  <Ban className="w-8 h-8 text-white/60" />
-                </div>
-                <p className="text-xs text-white/80 mt-2">
-                  {estatisticas.usuariosSemPerfil > 0 ? 'Atenção!' : 'Todos cobertos'}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className={`bg-gradient-to-br ${estatisticas.conflitosTotal > 0 ? 'from-red-500 to-red-600' : 'from-teal-500 to-teal-600'} text-white`}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-white/80 text-sm">Conflitos SoD</p>
-                    <p className="text-2xl font-bold">{estatisticas.conflitosTotal}</p>
-                  </div>
-                  <AlertTriangle className="w-8 h-8 text-white/60" />
-                </div>
-                <p className="text-xs text-white/80 mt-2">
-                  {estatisticas.conflitosTotal > 0 ? 'Resolver!' : 'OK'}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-indigo-100 text-sm">Cobertura</p>
-                    <p className="text-2xl font-bold">{estatisticas.cobertura}%</p>
-                  </div>
-                  <ShieldCheck className="w-8 h-8 text-indigo-200" />
-                </div>
-                <Progress value={estatisticas.cobertura} className="mt-2 h-1.5 bg-indigo-400" />
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Ações Rápidas e Resumo */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Ações Rápidas */}
-            <Card className="lg:col-span-1">
-              <CardHeader className="bg-slate-50 border-b">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Bolt className="w-5 h-5 text-yellow-500" />
-                  Ações Rápidas
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 space-y-3">
-                <Button
-                  className="w-full justify-start bg-blue-600 hover:bg-blue-700"
-                  onClick={() => {
-                    resetFormPerfil();
-                    setPerfilDialogOpen(true);
-                  }}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Criar Novo Perfil
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => setActiveTab("usuarios")}
-                >
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Atribuir Perfil a Usuário
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => setActiveTab("empresas")}
-                >
-                  <Building className="w-4 h-4 mr-2" />
-                  Permissão por Empresa
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="w-full justify-start border-purple-200 text-purple-700 hover:bg-purple-50"
-                  onClick={analisarComIA}
-                  disabled={analisandoIA}
-                >
-                  {analisandoIA ? (
-                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Brain className="w-4 h-4 mr-2" />
-                  )}
-                  Analisar com IA
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => setActiveTab("auditoria")}
-                >
-                  <History className="w-4 h-4 mr-2" />
-                  Ver Auditoria
-                </Button>
-
-                <div className="pt-3 border-t space-y-3">
-                  <RelatorioPermissoes
-                    perfis={perfis}
-                    usuarios={usuarios}
-                    empresas={empresas}
-                  />
-                  
-                  <ImportarExportarPerfis
-                    perfis={perfis}
-                    onImportar={(perfisImportados) => {
-                      perfisImportados.forEach(p => {
-                        salvarPerfilMutation.mutate({
-                          ...p,
-                          id: undefined,
-                          group_id: grupoAtivoId || null,
-                          empresa_id: empresaAtivaId || null,
-                          origem_configuracao: "importacao"
-                        });
-                      });
-                    }}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Usuários sem Perfil */}
-            <Card className="lg:col-span-1">
-              <CardHeader className="bg-orange-50 border-b">
-                <CardTitle className="text-lg flex items-center gap-2 text-orange-700">
-                  <AlertTriangle className="w-5 h-5" />
-                  Usuários sem Perfil
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <ScrollArea className="h-[200px]">
-                  {usuarios.filter(u => !u.perfil_acesso_id).length > 0 ? (
-                    usuarios.filter(u => !u.perfil_acesso_id).map(u => (
-                      <div key={u.id} className="flex items-center justify-between p-3 border-b hover:bg-slate-50">
-                        <div>
-                          <p className="font-medium text-sm">{u.full_name}</p>
-                          <p className="text-xs text-slate-500">{u.email}</p>
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setUsuarioSelecionado(u);
-                            setActiveTab("usuarios");
-                          }}
-                        >
-                          <Key className="w-3 h-3 mr-1" />
-                          Atribuir
-                        </Button>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-green-600">
-                      <CheckCircle className="w-10 h-10 mx-auto mb-2" />
-                      <p className="text-sm">Todos os usuários têm perfil!</p>
-                    </div>
-                  )}
-                </ScrollArea>
-              </CardContent>
-            </Card>
-
-            {/* Perfis com Conflitos */}
-            <Card className="lg:col-span-1">
-              <CardHeader className="bg-red-50 border-b">
-                <CardTitle className="text-lg flex items-center gap-2 text-red-700">
-                  <XCircle className="w-5 h-5" />
-                  Conflitos de SoD
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <ScrollArea className="h-[200px]">
-                  {perfis.filter(p => p.conflitos_sod_detectados?.length > 0).length > 0 ? (
-                    perfis.filter(p => p.conflitos_sod_detectados?.length > 0).map(p => (
-                      <div key={p.id} className="p-3 border-b hover:bg-slate-50">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="font-medium text-sm">{p.nome_perfil}</p>
-                          <Badge className="bg-red-100 text-red-700">
-                            {p.conflitos_sod_detectados.length} conflitos
-                          </Badge>
-                        </div>
-                        {p.conflitos_sod_detectados.slice(0, 2).map((c, i) => (
-                          <p key={i} className="text-xs text-slate-600 truncate">
-                            • {c.descricao}
-                          </p>
-                        ))}
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="w-full mt-2 text-red-600"
-                          onClick={() => abrirEdicaoPerfil(p)}
-                        >
-                          <Edit className="w-3 h-3 mr-1" />
-                          Corrigir
-                        </Button>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-green-600">
-                      <ShieldCheck className="w-10 h-10 mx-auto mb-2" />
-                      <p className="text-sm">Nenhum conflito detectado!</p>
-                    </div>
-                  )}
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Recomendações da IA */}
-          {recomendacoesIA && (
-            <Card className="border-purple-200 bg-purple-50/50">
-              <CardHeader className="border-b border-purple-200">
-                <CardTitle className="text-lg flex items-center gap-2 text-purple-700">
-                  <Sparkles className="w-5 h-5" />
-                  Análise de Segurança por IA
-                  <Badge className={
-                    recomendacoesIA.nivel_risco === 'Crítico' ? 'bg-red-600 text-white' :
-                    recomendacoesIA.nivel_risco === 'Alto' ? 'bg-orange-600 text-white' :
-                    recomendacoesIA.nivel_risco === 'Médio' ? 'bg-yellow-600 text-white' :
-                    'bg-green-600 text-white'
-                  }>
-                    Score: {recomendacoesIA.score_seguranca}/100 • {recomendacoesIA.nivel_risco}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 space-y-4">
-                <p className="text-slate-700">{recomendacoesIA.resumo}</p>
-
-                {recomendacoesIA.alertas?.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="font-medium text-red-700">⚠️ Alertas:</p>
-                    {recomendacoesIA.alertas.map((alerta, i) => (
-                      <Alert key={i} className="border-red-200 bg-red-50">
-                        <AlertDescription>{alerta}</AlertDescription>
-                      </Alert>
-                    ))}
-                  </div>
-                )}
-
-                {recomendacoesIA.recomendacoes?.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="font-medium text-purple-700">💡 Recomendações:</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {recomendacoesIA.recomendacoes.map((rec, i) => (
-                        <div key={i} className="p-3 border rounded-lg bg-white">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge className={
-                              rec.prioridade === 'Alta' ? 'bg-red-100 text-red-700' :
-                              rec.prioridade === 'Média' ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-blue-100 text-blue-700'
-                            }>
-                              {rec.prioridade}
-                            </Badge>
-                            <span className="font-medium text-sm">{rec.titulo}</span>
-                          </div>
-                          <p className="text-xs text-slate-600">{rec.descricao}</p>
-                          {rec.acao && (
-                            <p className="text-xs text-purple-600 mt-1 font-medium">→ {rec.acao}</p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
         </TabsContent>
 
         {/* Tab: Perfis de Acesso */}
@@ -1473,7 +984,7 @@ Forneça recomendações práticas de segurança.`,
                 }
               }}>
                 <DialogTrigger asChild>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
+                  <Button data-permission="Sistema.PerfilAcesso.criar" className="bg-blue-600 hover:bg-blue-700">
                     <Plus className="w-4 h-4 mr-2" />
                     Novo Perfil
                   </Button>
@@ -1795,6 +1306,7 @@ Forneça recomendações práticas de segurança.`,
                               size="sm"
                               onClick={() => abrirEdicaoPerfil(perfil)}
                               disabled={!contextoValido}
+                              data-permission="Sistema.PerfilAcesso.editar"
                               data-action="RBAC.Perfil.editar"
                               title="Editar Perfil"
                             >
@@ -1803,6 +1315,7 @@ Forneça recomendações práticas de segurança.`,
                             <Button
                               variant="ghost"
                               size="sm"
+                              data-permission="Sistema.PerfilAcesso.editar"
                               onClick={() => {
                                 if (!contextoValido) {
                                   toast.error("Selecione um grupo ou empresa antes de alterar permissoes.");
@@ -1818,6 +1331,7 @@ Forneça recomendações práticas de segurança.`,
                             <Button
                               variant="ghost"
                               size="sm"
+                              data-permission="Sistema.PerfilAcesso.criar"
                               onClick={() => {
                                 if (!contextoValido) {
                                   toast.error("Selecione um grupo ou empresa antes de clonar perfil.");
@@ -1833,6 +1347,7 @@ Forneça recomendações práticas de segurança.`,
                             <Button
                               variant="ghost"
                               size="sm"
+                              data-permission="Sistema.PerfilAcesso.visualizar"
                               onClick={() => {
                                 setPerfilHistorico(perfil);
                                 setHistoricoOpen(true);
@@ -1844,6 +1359,7 @@ Forneça recomendações práticas de segurança.`,
                             <Button
                               variant="ghost"
                               size="sm"
+                              data-permission="Sistema.PerfilAcesso.excluir"
                               onClick={() => {
                                 if (!contextoValido) {
                                   toast.error("Selecione um grupo ou empresa antes de excluir perfil.");
@@ -1985,7 +1501,7 @@ Forneça recomendações práticas de segurança.`,
               </CardTitle>
               <Dialog open={permissaoDialogOpen} onOpenChange={setPermissaoDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-green-600 hover:bg-green-700">
+                  <Button data-permission="Sistema.PermissaoEmpresa.criar" className="bg-green-600 hover:bg-green-700">
                     <Plus className="w-4 h-4 mr-2" />
                     Nova Permissão
                   </Button>

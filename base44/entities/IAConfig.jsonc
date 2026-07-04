@@ -2,7 +2,7 @@
   "name": "IAConfig",
   "type": "object",
   "properties": {
-    "grupo_id": {
+    "group_id": {
       "type": "string",
       "description": "ID do grupo empresarial"
     },

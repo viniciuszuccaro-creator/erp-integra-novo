@@ -2,6 +2,10 @@
   "name": "DocumentacaoTecnica",
   "type": "object",
   "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
     "titulo": {
       "type": "string",
       "description": "T\u00edtulo do documento/certificado"

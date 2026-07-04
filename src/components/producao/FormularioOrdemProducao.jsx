@@ -510,6 +510,7 @@ Retorne sugestões de:
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => removerItem(idx)}
+                                data-permission="Producao.OrdemProducao.editar"
                                 className="text-red-600 hover:bg-red-50"
                               >
                                 ✕
@@ -591,6 +592,7 @@ Retorne sugestões de:
           <Button 
             type="submit" 
             disabled={saveMutation.isPending}
+            data-permission="Producao.OrdemProducao.criar"
             className="bg-purple-600 hover:bg-purple-700"
           >
             <Save className="w-4 h-4 mr-2" />

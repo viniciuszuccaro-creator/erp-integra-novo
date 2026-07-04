@@ -2,7 +2,7 @@
   "name": "PoliticaDistribuicao",
   "type": "object",
   "properties": {
-    "grupo_id": {
+    "group_id": {
       "type": "string",
       "description": "ID do grupo empresarial"
     },
@@ -40,17 +40,7 @@
     "definicoes": {
       "type": "object",
       "additionalProperties": true,
-      "description": "JSON com defini\u00e7\u00f5es por empresa",
-      "examples": [
-        {
-          "CPA": 50,
-          "3Z": 50
-        },
-        {
-          "CPA": 7000,
-          "3Z": 3000
-        }
-      ]
+      "description": "JSON com defini\u00e7\u00f5es por empresa"
     },
     "empresas_participantes": {
       "type": "array",
@@ -123,7 +113,7 @@
     }
   },
   "required": [
-    "grupo_id",
+    "group_id",
     "nome",
     "tipo_documento",
     "criterio"

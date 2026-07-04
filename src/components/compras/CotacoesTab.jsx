@@ -344,6 +344,7 @@ export default function CotacoesTab({ windowMode = false }) {
                             variant="ghost"
                             size="icon"
                             onClick={() => removerItem(idx)}
+                            data-permission="Compras.Cotacao.editar"
                             className="text-red-600"
                           >
                             ×

@@ -2,6 +2,14 @@
   "name": "ParametroOrigemPedido",
   "type": "object",
   "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa"
+    },
     "nome": {
       "type": "string",
       "description": "Nome do canal (ex: ERP Manual, Site Autom\u00e1tico, Chatbot)"

@@ -2,13 +2,13 @@
   "name": "GovernancaEmpresa",
   "type": "object",
   "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
     "empresa_id": {
       "type": "string",
       "description": "ID da empresa"
-    },
-    "grupo_id": {
-      "type": "string",
-      "description": "ID do grupo empresarial"
     },
     "nivel_conformidade": {
       "type": "string",

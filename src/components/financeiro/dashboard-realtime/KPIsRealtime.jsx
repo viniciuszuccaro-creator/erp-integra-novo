@@ -12,7 +12,7 @@ import {
 
 export default function KPIsRealtime({ metricas }) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+    <div className="w-full h-full overflow-auto p-3">
       <Card className={metricas.saldoCaixa >= 0 ? 'border-green-200 min-h-[90px] max-h-[90px]' : 'border-red-200 min-h-[90px] max-h-[90px]'}>
         <CardHeader className="pb-2 pt-2 px-2.5">
           <CardTitle className="text-xs font-medium text-slate-600 truncate">Saldo Caixa Hoje</CardTitle>

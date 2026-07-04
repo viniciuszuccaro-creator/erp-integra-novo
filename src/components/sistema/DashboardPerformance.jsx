@@ -135,7 +135,7 @@ export default function DashboardPerformance({ empresaId, grupoId }) {
   const alertasWarning = alertas.filter(a => a.severidade === 'Warning').length;
 
   return (
-    <div className="space-y-6">
+    <div className="w-full h-full overflow-auto space-y-6">
       {/* Status Banner */}
       <Alert className={
         alertasCriticos > 0 ? 'border-red-300 bg-red-50' :

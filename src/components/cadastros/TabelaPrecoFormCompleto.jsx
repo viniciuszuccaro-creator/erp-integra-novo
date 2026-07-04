@@ -1040,6 +1040,7 @@ RETORNE:
                 variant="destructive"
                 onClick={handleExcluir}
                 disabled={!podeExcluir || !contextoValido}
+                data-permission="Comercial.TabelaPreco.excluir"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Excluir
@@ -1051,6 +1052,7 @@ RETORNE:
               onClick={handleSalvar}
               disabled={salvando || !podeAvancar || !contextoValido || (tabela?.id ? !podeEditar : !podeCriar)} 
               className="bg-green-600 hover:bg-green-700 min-w-[180px]"
+              data-permission="Comercial.TabelaPreco.editar"
             >
             {salvando && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             {!salvando && <Save className="w-4 h-4 mr-2" />}

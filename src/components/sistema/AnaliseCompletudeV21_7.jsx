@@ -45,7 +45,7 @@ export default function AnaliseCompletudeV21_7() {
       modulos: [
         { nome: 'Dashboard Executivo', status: 100, items: ['Tempo real', 'Resumo', 'BI Operacional', '3 abas'] },
         { nome: 'Dashboard Corporativo', status: 100, items: ['4 abas', 'Ranking', 'Gráficos', 'Consolidado'] },
-        { nome: 'DashboardTempoReal', status: 100, items: ['Auto-refresh 10s', 'IA insights', 'Multiempresa'] },
+        
         { nome: 'DashboardOperacionalBI', status: 100, items: ['IA preditiva', 'Churn detection', 'Tendências'] }
       ]
     },

@@ -2,6 +2,10 @@
   "name": "PermissaoEmpresaModulo",
   "type": "object",
   "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
     "usuario_id": {
       "type": "string",
       "description": "ID do usu\u00e1rio"

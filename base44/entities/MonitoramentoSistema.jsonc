@@ -2,14 +2,18 @@
   "name": "MonitoramentoSistema",
   "type": "object",
   "properties": {
-    "timestamp": {
+    "group_id": {
       "type": "string",
-      "format": "date-time",
-      "description": "Data/hora da coleta"
+      "description": "ID do grupo empresarial"
     },
     "empresa_id": {
       "type": "string",
       "description": "ID da empresa (se espec\u00edfico)"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/hora da coleta"
     },
     "metrica_tipo": {
       "type": "string",

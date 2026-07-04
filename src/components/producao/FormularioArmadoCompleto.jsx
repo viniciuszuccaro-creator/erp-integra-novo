@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -866,7 +865,7 @@ export default function FormularioArmadoCompleto({ onSalvar, onCancelar, itemIni
         <Button type="button" variant="outline" onClick={onCancelar}>
           Cancelar
         </Button>
-        <Button type="button" onClick={handleSalvar} disabled={!resumo} className="bg-blue-600 hover:bg-blue-700">
+        <Button type="button" onClick={handleSalvar} disabled={!resumo} data-permission="Producao.ItemProducao.criar" className="bg-blue-600 hover:bg-blue-700">
           <Save className="w-4 h-4 mr-2" />
           Adicionar Item
         </Button>

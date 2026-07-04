@@ -2,6 +2,10 @@
   "name": "Marca",
   "type": "object",
   "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
     "codigo": {
       "type": "string",
       "description": "C\u00f3digo \u00fanico da marca"

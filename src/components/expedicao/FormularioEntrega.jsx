@@ -695,6 +695,7 @@ Retorne no formato JSON.`,
         <Button
           type="submit"
           disabled={isSubmitting}
+          data-permission="Expedicao.Entrega.criar"
           className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
         >
           <CheckCircle2 className="w-4 h-4 mr-2" />

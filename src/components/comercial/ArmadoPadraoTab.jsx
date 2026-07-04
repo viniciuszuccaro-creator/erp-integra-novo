@@ -663,6 +663,7 @@ export default function ArmadoPadraoTab({ formData, setFormData, empresaId, onNe
 
             <Button
               onClick={adicionarOuEditarPeca}
+              data-permission="Comercial.ArmadoPadrao.criar"
               className="w-full bg-blue-600 hover:bg-blue-700"
               size="lg"
             >
@@ -677,6 +678,7 @@ export default function ArmadoPadraoTab({ formData, setFormData, empresaId, onNe
                   setPecaEditandoIndex(null);
                   toast.info('❌ Edição cancelada');
                 }}
+                data-permission="Comercial.ArmadoPadrao.editar"
                 variant="outline"
                 className="w-full mt-2"
                 size="lg"
@@ -698,6 +700,7 @@ export default function ArmadoPadraoTab({ formData, setFormData, empresaId, onNe
               {formData.itens_armado_padrao && formData.itens_armado_padrao.length > 0 && (
                 <Button
                   onClick={consolidarPorEtapa}
+                  data-permission="Comercial.ArmadoPadrao.visualizar"
                   variant="outline"
                   size="sm"
                   className="border-purple-300 text-purple-600"
@@ -709,6 +712,7 @@ export default function ArmadoPadraoTab({ formData, setFormData, empresaId, onNe
               {formData.itens_armado_padrao && formData.itens_armado_padrao.length > 0 && (
                 <Button
                   onClick={gerarItensComerciais}
+                  data-permission="Comercial.ArmadoPadrao.criar"
                   variant="outline"
                   size="sm"
                 >

@@ -119,7 +119,7 @@ export default function GerenciarEnderecosClienteForm({ enderecos = [], onChange
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Endereços de Entrega ({enderecos.length})</h3>
-        <Button onClick={() => { resetForm(); setDialogAberto(true); }} size="sm">
+        <Button onClick={() => { resetForm(); setDialogAberto(true); }} data-permission="Cadastros.Cliente.editar" size="sm">
           <Plus className="w-4 h-4 mr-2" />
           Adicionar Endereço
         </Button>
@@ -422,7 +422,7 @@ export default function GerenciarEnderecosClienteForm({ enderecos = [], onChange
               <Button variant="outline" onClick={() => { setDialogAberto(false); resetForm(); }}>
                 Cancelar
               </Button>
-              <Button onClick={handleSalvarEndereco}>
+              <Button onClick={handleSalvarEndereco} data-permission="Cadastros.Cliente.editar">
                 <Check className="w-4 h-4 mr-2" />
                 Salvar
               </Button>

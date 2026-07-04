@@ -289,7 +289,7 @@ Retorne APENAS posições claramente identificadas.`,
           </CardHeader>
           <CardContent>
             {!editando ? (
-              <Button onClick={adicionarManual} variant="outline" className="w-full">
+              <Button data-permission="Comercial.CorteDobra.criar" onClick={adicionarManual} variant="outline" className="w-full">
                 <Plus className="w-4 h-4 mr-2" />
                 Nova Posição
               </Button>
@@ -412,6 +412,7 @@ Retorne APENAS posições claramente identificadas.`,
                 <div className="flex gap-2">
                   <Button
                     onClick={() => setEditando(null)}
+                    data-permission="Comercial.CorteDobra.editar"
                     variant="outline"
                     className="flex-1"
                   >
@@ -419,6 +420,7 @@ Retorne APENAS posições claramente identificadas.`,
                   </Button>
                   <Button
                     onClick={salvarPosicao}
+                    data-permission="Comercial.CorteDobra.criar"
                     className="flex-1 bg-green-600 hover:bg-green-700"
                   >
                     Salvar Posição
@@ -535,6 +537,7 @@ Retorne APENAS posições claramente identificadas.`,
               toast.success('✅ Posições disponíveis para próxima etapa');
               onNext();
             }}
+            data-permission="Comercial.CorteDobra.criar"
             className="w-full bg-green-600 hover:bg-green-700"
             size="lg"
           >

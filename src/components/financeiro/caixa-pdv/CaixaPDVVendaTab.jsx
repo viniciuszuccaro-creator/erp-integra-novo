@@ -194,10 +194,10 @@ export default function CaixaPDVVendaTab({
               </div>
             )}
 
-            <Button onClick={() => finalizarVenda.mutate()} disabled={controlesDesabilitados || finalizarVenda.isPending || carrinho.length === 0 || totalPago < totalVenda} className="w-full bg-emerald-600 h-10">
+            <Button data-permission="Financeiro.CaixaPDV.criar" onClick={() => finalizarVenda.mutate()} disabled={controlesDesabilitados || finalizarVenda.isPending || carrinho.length === 0 || totalPago < totalVenda} className="w-full bg-emerald-600 h-10">
               <CheckCircle2 className="w-4 h-4 mr-2" /> Finalizar Venda
             </Button>
-            <Button onClick={() => { setCarrinho([]); setClienteSelecionado(null); setFormasPagamentoVenda([{ forma_id: null, forma_descricao: "Selecione", valor: 0, parcelas: 1 }]); setDesconto(0); setAcrescimo(0); }} variant="outline" className="w-full">
+            <Button data-permission="Financeiro.CaixaPDV.editar" onClick={() => { setCarrinho([]); setClienteSelecionado(null); setFormasPagamentoVenda([{ forma_id: null, forma_descricao: "Selecione", valor: 0, parcelas: 1 }]); setDesconto(0); setAcrescimo(0); }} variant="outline" className="w-full">
               <Trash2 className="w-4 h-4 mr-2" /> Limpar
             </Button>
           </div>

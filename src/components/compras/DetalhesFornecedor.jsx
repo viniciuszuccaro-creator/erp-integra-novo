@@ -367,7 +367,7 @@ export default function DetalhesFornecedor({ fornecedor, onClose, windowMode = f
                               onChange={(e) => setDocumentoForm({...documentoForm, observacao: e.target.value})}
                             />
                           </div>
-                          <Button onClick={handleAdicionarDocumento} className="w-full">
+                          <Button data-permission="Compras.Fornecedor.editar" onClick={handleAdicionarDocumento} className="w-full">
                             Adicionar
                           </Button>
                         </div>

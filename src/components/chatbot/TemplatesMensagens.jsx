@@ -206,7 +206,7 @@ export default function TemplatesMensagens({ onSelecionarTemplate }) {
               ))}
             </select>
             
-            <Button onClick={() => setExibirForm(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Button data-permission="HubAtendimento.Templates.criar" onClick={() => setExibirForm(true)} className="bg-blue-600 hover:bg-blue-700">
               <Plus className="w-4 h-4 mr-2" />
               Novo
             </Button>
@@ -291,11 +291,12 @@ export default function TemplatesMensagens({ onSelecionarTemplate }) {
                   )}
 
                   <div className="flex gap-2 justify-end">
-                    <Button variant="outline" onClick={resetForm}>
+                    <Button variant="outline" data-permission="HubAtendimento.Templates.editar" onClick={resetForm}>
                       Cancelar
                     </Button>
                     <Button
                       onClick={() => salvarTemplateMutation.mutate(novoTemplate)}
+                      data-permission="HubAtendimento.Templates.criar"
                       disabled={!novoTemplate.nome || !novoTemplate.conteudo || salvarTemplateMutation.isPending}
                       className="bg-blue-600 hover:bg-blue-700"
                     >

@@ -89,7 +89,7 @@ export default function GerenciarContatosClienteForm({ contatos = [], onChange }
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Contatos ({contatos.length})</h3>
-        <Button onClick={() => { resetForm(); setDialogAberto(true); }} size="sm">
+        <Button onClick={() => { resetForm(); setDialogAberto(true); }} data-permission="Cadastros.Cliente.editar" size="sm">
           <Plus className="w-4 h-4 mr-2" />
           Adicionar Contato
         </Button>
@@ -231,7 +231,7 @@ export default function GerenciarContatosClienteForm({ contatos = [], onChange }
               <Button variant="outline" onClick={() => { setDialogAberto(false); resetForm(); }}>
                 Cancelar
               </Button>
-              <Button onClick={handleSalvarContato}>
+              <Button onClick={handleSalvarContato} data-permission="Cadastros.Cliente.editar">
                 <Check className="w-4 h-4 mr-2" />
                 Salvar
               </Button>

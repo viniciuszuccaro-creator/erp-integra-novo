@@ -380,6 +380,7 @@ export default function AppEntregasMotorista() {
                 <div className="flex gap-2">
                   <Button
                     onClick={() => iniciarEntrega(entrega)}
+                    data-permission="Expedicao.Entrega.criar"
                     className="flex-1 bg-blue-600 hover:bg-blue-700"
                   >
                     <Navigation className="w-4 h-4 mr-2" />
@@ -574,6 +575,7 @@ export default function AppEntregasMotorista() {
       <div className="space-y-3">
         <Button
           onClick={confirmarEntrega}
+          data-permission="Expedicao.Entrega.criar"
           disabled={!fotoComprovante || !nomeRecebedor}
           className="w-full bg-green-600 hover:bg-green-700 h-14 text-lg"
         >

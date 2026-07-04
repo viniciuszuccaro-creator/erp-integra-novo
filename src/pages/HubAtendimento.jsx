@@ -905,6 +905,7 @@ export default function HubAtendimento() {
                           setArquivoAnexo(null);
                         }
                       }}
+                      data-permission="HubAtendimento.Atendimento.criar"
                       disabled={(!mensagemAtendente.trim() && !arquivoAnexo) || enviarMensagemMutation.isPending}
                       className="bg-blue-600 hover:bg-blue-700"
                     >

@@ -191,6 +191,7 @@ export default function RecebimentoTab({ recebimentos, ordensCompra, produtos })
 
         {canCreate('Estoque', 'Recebimento') && (
           <Button
+            data-permission="Estoque.Recebimento.criar"
             className="bg-green-600 hover:bg-green-700"
             onClick={() => openWindow(RecebimentoForm, {
             windowMode: true,
@@ -357,6 +358,7 @@ export default function RecebimentoTab({ recebimentos, ordensCompra, produtos })
                           type="button"
                           size="icon"
                           variant="ghost"
+                          data-permission="Estoque.Recebimento.editar"
                           onClick={() => handleRemoveItem(index)}
                           disabled={formData.itens.length === 1}
                         >
@@ -379,7 +381,7 @@ export default function RecebimentoTab({ recebimentos, ordensCompra, produtos })
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
-                <Button type="submit" disabled={createMutation.isPending} className="bg-green-600 hover:bg-green-700">
+                <Button type="submit" data-permission="Estoque.Recebimento.criar" disabled={createMutation.isPending} className="bg-green-600 hover:bg-green-700">
                   {createMutation.isPending ? 'Salvando...' : 'Registrar Recebimento'}
                 </Button>
               </div>
@@ -423,6 +425,7 @@ export default function RecebimentoTab({ recebimentos, ordensCompra, produtos })
                     <Button
                       variant="ghost"
                       size="icon"
+                      data-permission="Estoque.Recebimento.visualizar"
                       onClick={() => setViewingRecebimento(rec)}
                     >
                       <Eye className="w-4 h-4" />

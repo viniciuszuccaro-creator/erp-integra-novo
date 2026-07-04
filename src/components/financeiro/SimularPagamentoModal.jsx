@@ -153,7 +153,7 @@ export default function SimularPagamentoModal({ isOpen, onClose, contaReceber })
               <Zap className="w-5 h-5 text-green-600" />
               Simular Pagamento (Webhook Gateway)
             </CardTitle>
-            <Button variant="ghost" size="icon" onClick={onClose}>
+            <Button variant="ghost" size="icon" data-permission="Financeiro.ContaReceber.visualizar" onClick={onClose}>
               <X className="w-4 h-4" />
             </Button>
           </div>
@@ -255,12 +255,14 @@ export default function SimularPagamentoModal({ isOpen, onClose, contaReceber })
               <div className="flex gap-3 pt-4 border-t">
                 <Button
                   variant="outline"
+                  data-permission="Financeiro.ContaReceber.visualizar"
                   onClick={onClose}
                   className="flex-1"
                 >
                   Cancelar
                 </Button>
                 <Button
+                  data-permission="Financeiro.ContaReceber.baixar"
                   onClick={() => simularPagamentoMutation.mutate()}
                   className="flex-1 bg-green-600 hover:bg-green-700"
                   disabled={processando}
@@ -310,6 +312,7 @@ export default function SimularPagamentoModal({ isOpen, onClose, contaReceber })
               </Card>
 
               <Button
+                data-permission="Financeiro.ContaReceber.visualizar"
                 onClick={onClose}
                 className="w-full bg-blue-600 hover:bg-blue-700"
               >

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Factory, Trash2, Power, PowerOff } from "lucide-react";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { toast } from "sonner";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -42,11 +43,11 @@ export default function SetorAtividadeForm({ setor, setorAtividade, item, data, 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!contextoValido) {
-      alert('Selecione um grupo ou empresa antes de salvar.');
+      toast.error('Selecione um grupo ou empresa antes de salvar.');
       return;
     }
     if (!podeSalvar) {
-      alert('Sem permissão para salvar setor de atividade.');
+      toast.error('Sem permissão para salvar setor de atividade.');
       return;
     }
     onSubmit({
@@ -59,7 +60,7 @@ export default function SetorAtividadeForm({ setor, setorAtividade, item, data, 
 
   const handleExcluir = () => {
     if (!podeExcluir) {
-      alert('Sem permissão para excluir setor de atividade.');
+      toast.error('Sem permissão para excluir setor de atividade.');
       return;
     }
     if (!window.confirm(`Tem certeza que deseja excluir o setor "${formData.nome}"? Esta ação não pode ser desfeita.`)) {

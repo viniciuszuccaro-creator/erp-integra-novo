@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Landmark } from "lucide-react";
 import usePermissions from "@/components/lib/usePermissions";
+import { toast } from "sonner";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -45,15 +46,15 @@ export default function BancoForm({ banco, item, data, initialData, defaultValue
   const handleSubmit = (e) => {
     e.preventDefault();
     if (dadosIniciais?.id && !podeEditar) {
-      alert("Sem permissao para editar bancos.");
+      toast.error("Sem permissão para editar bancos.");
       return;
     }
     if (!dadosIniciais?.id && !podeCriar) {
-      alert("Sem permissao para criar bancos.");
+      toast.error("Sem permissão para criar bancos.");
       return;
     }
     if (!formData.nome_banco || !formData.agencia || !formData.conta) {
-      alert('Preencha os campos obrigatórios');
+      toast.error('Preencha os campos obrigatórios');
       return;
     }
     // Injeta 'nome' para compatibilidade com o Visualizador Universal

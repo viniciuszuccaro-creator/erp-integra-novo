@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Receipt, Trash2, Power, PowerOff } from "lucide-react";
 import usePermissions from "@/components/lib/usePermissions";
+import { toast } from "sonner";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -38,11 +39,11 @@ export default function CentroCustoForm({ centroCusto, item, data, initialData, 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (dadosCentroCusto?.id && !podeEditar) {
-      alert("Sem permissao para editar centros de custo.");
+      toast.error("Sem permissão para editar centros de custo.");
       return;
     }
     if (!dadosCentroCusto?.id && !podeCriar) {
-      alert("Sem permissao para criar centros de custo.");
+      toast.error("Sem permissão para criar centros de custo.");
       return;
     }
     const dataToSubmit = {
@@ -61,7 +62,7 @@ export default function CentroCustoForm({ centroCusto, item, data, initialData, 
 
   const handleExcluir = () => {
     if (!podeExcluir) {
-      alert("Sem permissao para excluir centros de custo.");
+      toast.error("Sem permissão para excluir centros de custo.");
       return;
     }
     if (!window.confirm(`Tem certeza que deseja excluir o centro de custo "${formData.descricao}"? Esta ação não pode ser desfeita.`)) {

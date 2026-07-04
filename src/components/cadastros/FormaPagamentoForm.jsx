@@ -8,6 +8,7 @@ import { Loader2, CreditCard, Trash2, Power, PowerOff } from "lucide-react";
 import { z } from "zod";
 import FormWrapper from "@/components/common/FormWrapper";
 import usePermissions from "@/components/lib/usePermissions";
+import { toast } from "sonner";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -40,11 +41,11 @@ export default function FormaPagamentoForm({ forma, onSubmit, isSubmitting, wind
 
   const handleSubmit = async () => {
     if (forma && !podeEditar) {
-      alert("Sem permissao para editar formas de pagamento.");
+      toast.error("Sem permissão para editar formas de pagamento.");
       return;
     }
     if (!forma && !podeCriar) {
-      alert("Sem permissao para criar formas de pagamento.");
+      toast.error("Sem permissão para criar formas de pagamento.");
       return;
     }
     onSubmit(formData);
@@ -52,7 +53,7 @@ export default function FormaPagamentoForm({ forma, onSubmit, isSubmitting, wind
 
   const handleExcluir = () => {
     if (!podeExcluir) {
-      alert("Sem permissao para excluir formas de pagamento.");
+      toast.error("Sem permissão para excluir formas de pagamento.");
       return;
     }
     if (!window.confirm(`Tem certeza que deseja excluir a forma de pagamento "${formData.descricao}"? Esta ação não pode ser desfeita.`)) {

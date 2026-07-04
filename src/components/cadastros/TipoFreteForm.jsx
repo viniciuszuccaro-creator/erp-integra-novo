@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Package } from "lucide-react";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { toast } from "sonner";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -34,15 +35,15 @@ export default function TipoFreteForm({ tipo, tipoFrete, onSubmit, isSubmitting,
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.descricao || !formData.modalidade) {
-      alert('Preencha os campos obrigatórios');
+      toast.error('Preencha os campos obrigatórios');
       return;
     }
     if (!contextoValido) {
-      alert('Selecione um grupo ou empresa antes de salvar.');
+      toast.error('Selecione um grupo ou empresa antes de salvar.');
       return;
     }
     if (!podeSalvar) {
-      alert('Sem permissão para salvar tipo de frete.');
+      toast.error('Sem permissão para salvar tipo de frete.');
       return;
     }
     onSubmit({

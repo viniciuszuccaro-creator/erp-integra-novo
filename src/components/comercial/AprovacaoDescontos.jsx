@@ -344,21 +344,24 @@ export default function AprovacaoDescontos({ windowMode = false, empresaId = nul
             </div>
 
             <div className="flex gap-3">
-              <Button 
+              <Button
+                data-permission="Comercial.Pedido.aprovar"
                 onClick={handleAprovar}
                 className="flex-1 bg-green-600 hover:bg-green-700"
               >
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Aprovar Integral
               </Button>
-              <Button 
+              <Button
+                data-permission="Comercial.Pedido.aprovar"
                 onClick={handleAprovarParcial}
                 className="flex-1 bg-blue-600 hover:bg-blue-700"
               >
                 <Percent className="w-4 h-4 mr-2" />
                 Aprovar Parcial
               </Button>
-              <Button 
+              <Button
+                data-permission="Comercial.Pedido.rejeitar"
                 onClick={handleRejeitar}
                 variant="destructive"
                 className="flex-1"

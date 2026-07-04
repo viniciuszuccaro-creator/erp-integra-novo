@@ -181,7 +181,7 @@ export default function GrupoEmpresarialForm({ grupo, onSubmit, isSubmitting, wi
                 <><Power className="w-4 h-4 mr-2" />Ativar</>
               )}
             </Button>
-            <Button type="button" variant="destructive" onClick={handleExcluir}>
+            <Button type="button" variant="destructive" data-permission="Cadastros.GrupoEmpresarial.excluir" onClick={handleExcluir}>
               <Trash2 className="w-4 h-4 mr-2" />Excluir
             </Button>
           </>

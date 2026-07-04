@@ -1,4 +1,3 @@
-
 import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -142,6 +141,7 @@ export default function AprovacaoOrcamentos({ clienteId }) {
                     {/* Ações */}
                     <div className="flex gap-2">
                       <Button
+                        data-permission="Comercial.Orcamento.aprovar"
                         onClick={() => aprovarMutation.mutate(orc)}
                         disabled={aprovarMutation.isPending}
                         className="flex-1 bg-green-600 hover:bg-green-700"
@@ -152,6 +152,7 @@ export default function AprovacaoOrcamentos({ clienteId }) {
 
                       <Button
                         variant="outline"
+                        data-permission="Comercial.Orcamento.rejeitar"
                         onClick={() => {
                           const motivo = prompt('Motivo da rejeição (opcional):');
                           rejeitarMutation.mutate({ orcamento: orc, motivo: motivo || 'Não informado' });

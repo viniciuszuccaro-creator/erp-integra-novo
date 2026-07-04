@@ -502,7 +502,7 @@ export default function NotasFiscaisTab({ notasFiscais, pedidos, clientes, onCre
                   )}
                   {nota.status === 'Autorizada' && (
                     <ProtectedAction module="Fiscal" section="NotaFiscal" action="cancelar" mode="disable">
-                      <Button variant="ghost" size="sm" onClick={() => handleCancelarNFe(nota)} className="h-8 px-2 text-red-600" title="Cancelar NF-e">
+                      <Button variant="ghost" size="sm" data-permission="Fiscal.NotaFiscal.cancelar" onClick={() => handleCancelarNFe(nota)} className="h-8 px-2 text-red-600" title="Cancelar NF-e">
                         <XCircle className="w-3 h-3 mr-1" /> <span className="text-xs">Cancelar</span>
                       </Button>
                     </ProtectedAction>

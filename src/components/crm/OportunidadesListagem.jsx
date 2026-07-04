@@ -96,7 +96,7 @@ export default function OportunidadesListagem({ oportunidades: propOps = [], win
                       <Button variant="ghost" size="icon" onClick={() => openWindow(OportunidadeForm, { oportunidade: op, windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['oportunidades-list'] }) }, { title: `Editar: ${op.titulo}`, width: 900, height: 650 })}>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="text-red-600" onClick={() => window.confirm('Excluir?') && deleteMutation.mutate(op.id)}>
+                      <Button variant="ghost" size="icon" data-permission="CRM.Oportunidade.excluir" className="text-red-600" onClick={() => window.confirm('Excluir?') && deleteMutation.mutate(op.id)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>

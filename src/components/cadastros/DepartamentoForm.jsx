@@ -102,7 +102,7 @@ export default function DepartamentoForm({ departamento, item, data, initialData
                 <><Power className="w-4 h-4 mr-2" />Ativar</>
               )}
             </Button>
-            <Button type="button" variant="destructive" onClick={handleExcluir}>
+            <Button type="button" variant="destructive" data-permission="Cadastros.Departamento.excluir" onClick={handleExcluir}>
               <Trash2 className="w-4 h-4 mr-2" />Excluir
             </Button>
           </>

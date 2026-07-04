@@ -568,7 +568,7 @@ export default function RegiaoAtendimentoForm({ regiaoId, regiaoAtendimento, ite
               >
                 {formData.ativo ? "Inativar" : "Ativar"}
               </Button>
-              <Button type="button" variant="destructive" onClick={handleExcluir}>
+              <Button type="button" variant="destructive" data-permission="Cadastros.RegiaoAtendimento.excluir" onClick={handleExcluir}>
                 Excluir
               </Button>
             </>

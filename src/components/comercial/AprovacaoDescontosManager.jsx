@@ -309,6 +309,7 @@ function AprovacaoDescontosManager({ windowMode = false, empresaId = null }) {
                     <TableCell>
                       <Button
                         size="sm"
+                        data-permission="Comercial.Pedido.aprovar"
                         onClick={() => {
                           openWindow(
                             AnalisePedidoAprovacao,
@@ -518,6 +519,7 @@ function AprovacaoDescontosManager({ windowMode = false, empresaId = null }) {
                 </Button>
                 <Button
                   variant="outline"
+                  data-permission="Comercial.Pedido.rejeitar"
                   onClick={handleNegar}
                   className="border-red-300 text-red-600 hover:bg-red-50"
                   disabled={negarPedidoMutation.isPending}
@@ -527,6 +529,7 @@ function AprovacaoDescontosManager({ windowMode = false, empresaId = null }) {
                 </Button>
                 <Button
                   className="bg-green-600 hover:bg-green-700"
+                  data-permission="Comercial.Pedido.aprovar"
                   onClick={handleAprovar}
                   disabled={aprovarPedidoMutation.isPending}
                 >

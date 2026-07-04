@@ -130,7 +130,7 @@ export default function CargoForm({ cargo, item, data, initialData, defaultValue
                 <><Power className="w-4 h-4 mr-2" />Ativar</>
               )}
             </Button>
-            <Button type="button" variant="destructive" onClick={handleExcluir}>
+            <Button type="button" variant="destructive" data-permission="Cadastros.Cargo.excluir" onClick={handleExcluir}>
               <Trash2 className="w-4 h-4 mr-2" />Excluir
             </Button>
           </>

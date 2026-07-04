@@ -78,7 +78,7 @@ export default function InteracoesListagem({ interacoes: propInt = [], windowMod
                     <TableCell>{i.responsavel}</TableCell>
                     <TableCell className="text-slate-500 text-xs">{i.data_interacao ? new Date(i.data_interacao).toLocaleDateString('pt-BR') : '-'}</TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="icon" className="text-red-600" onClick={() => window.confirm('Excluir?') && deleteMutation.mutate(i.id)}>
+                      <Button variant="ghost" size="icon" data-permission="CRM.Interacao.excluir" className="text-red-600" onClick={() => window.confirm('Excluir?') && deleteMutation.mutate(i.id)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </TableCell>

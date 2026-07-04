@@ -319,6 +319,7 @@ export default function TransferenciaEntreEmpresasForm({
         <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
           <Button
             type="submit"
+            data-permission="Estoque.Transferencia.criar"
             disabled={createTransferenciaMutation.isPending || !canCreate('Estoque','Transferencias')}
             className="bg-purple-600 hover:bg-purple-700"
           >

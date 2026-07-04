@@ -148,8 +148,9 @@ export default function FeriasForm({ ferias, colaboradores = [], onSubmit, windo
       </Card>
 
       <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
+          data-permission="RH.Ferias.criar"
           disabled={!formData.colaborador_id || !formData.data_inicio || !formData.data_fim}
           className="bg-blue-600 hover:bg-blue-700"
         >

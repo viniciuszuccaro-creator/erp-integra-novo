@@ -364,6 +364,7 @@ export default function RomaneioForm({ isOpen, onClose, empresaId, windowMode = 
             </Button>
             <Button
               type="submit"
+              data-permission="Expedicao.Romaneio.criar"
               disabled={
                 !formData.motorista ||
                 formData.entregas_selecionadas.length === 0 ||

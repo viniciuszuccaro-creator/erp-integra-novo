@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -197,7 +196,7 @@ export default function ProducaoMobile() {
   // TELA: Lista de OPs
   if (!opSelecionada) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-4">
+      <div className="w-full h-full overflow-auto min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-4">
         <div className="max-w-2xl mx-auto space-y-4">
           {/* Header */}
           <div className="bg-blue-600 text-white p-6 rounded-xl shadow-lg">
@@ -307,7 +306,7 @@ export default function ProducaoMobile() {
   // TELA: Itens da OP (seleção)
   if (opSelecionada && !itemSelecionado) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-4">
+      <div className="w-full h-full overflow-auto min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-4">
         <div className="max-w-2xl mx-auto space-y-4">
           {/* Header com voltar */}
           <div className="bg-blue-600 text-white p-6 rounded-xl shadow-lg">
@@ -417,7 +416,7 @@ export default function ProducaoMobile() {
 
   // TELA: Formulário de Apontamento
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-4">
+    <div className="w-full h-full overflow-auto min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-4">
       <div className="max-w-2xl mx-auto space-y-4">
         {/* Header */}
         <div className="bg-blue-600 text-white p-6 rounded-xl shadow-lg">

@@ -101,8 +101,8 @@ export default function InventarioForm({ windowMode = true }) { // w-full/h-full
         <InventarioContagem itens={inv.itens} disabled={controlesDesabilitados} onChange={(itens)=>setInv({ ...inv, itens })} />
 
         <div className="flex justify-end gap-2 pt-2 border-t">
-          <Button variant="outline" type="submit" disabled={controlesDesabilitados}>Salvar</Button>
-          <Button onClick={aprovar} className="bg-green-600 hover:bg-green-700" disabled={salvando || inv.status==='Concluído' || !contextoValido || !podeAprovar}>Aprovar e Aplicar Ajustes</Button>
+          <Button variant="outline" type="submit" data-permission="Estoque.Inventario.criar" disabled={controlesDesabilitados}>Salvar</Button>
+          <Button onClick={aprovar} data-permission="Estoque.Inventario.aprovar" className="bg-green-600 hover:bg-green-700" disabled={salvando || inv.status==='Concluído' || !contextoValido || !podeAprovar}>Aprovar e Aplicar Ajustes</Button>
         </div>
       </CardContent>
       </FormWrapper>

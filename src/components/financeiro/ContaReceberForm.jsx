@@ -192,7 +192,7 @@ export default function ContaReceberForm({ conta, onSubmit, isSubmitting, window
 
       {/* BOTÃO SUBMIT */}
       <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
-        <Button type="submit" disabled={isSubmitting} className="bg-green-600 hover:bg-green-700 px-8">
+        <Button type="submit" data-permission="Financeiro.ContaReceber.criar" disabled={isSubmitting} className="bg-green-600 hover:bg-green-700 px-8">
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {conta ? 'Atualizar Conta' : 'Criar Conta'}
         </Button>

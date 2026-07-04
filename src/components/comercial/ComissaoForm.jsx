@@ -177,7 +177,7 @@ export default function ComissaoForm({ comissao, onSubmit, windowMode = false })
       </Card>
 
       <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
-        <Button type="submit" className="bg-green-600 hover:bg-green-700">
+        <Button type="submit" data-permission="Comercial.Comissao.criar" className="bg-green-600 hover:bg-green-700">
           <Save className="w-4 h-4 mr-2" />
           {comissao ? 'Atualizar' : 'Registrar'} Comissão
         </Button>

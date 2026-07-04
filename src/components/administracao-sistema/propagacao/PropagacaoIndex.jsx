@@ -177,17 +177,17 @@ export default function PropagacaoIndex() {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button onClick={() => runAll("both")} disabled={globalLoading} size="sm" className="gap-2 bg-purple-600 hover:bg-purple-700">
+          <Button onClick={() => runAll("both")} data-permission="Administracao.Propagacao.executar" disabled={globalLoading} size="sm" className="gap-2 bg-purple-600 hover:bg-purple-700">
             {globalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
             🚀 Inicializar Histórico (Tudo)
           </Button>
-          <Button onClick={() => runAll("down")} disabled={globalLoading} variant="outline" size="sm" className="gap-2 border-blue-300 text-blue-700 hover:bg-blue-50">
+          <Button onClick={() => runAll("down")} data-permission="Administracao.Propagacao.executar" disabled={globalLoading} variant="outline" size="sm" className="gap-2 border-blue-300 text-blue-700 hover:bg-blue-50">
             <ArrowDown className="w-4 h-4" /> Grupo → Empresas
           </Button>
-          <Button onClick={() => runAll("up")} disabled={globalLoading} variant="outline" size="sm" className="gap-2 border-indigo-300 text-indigo-700 hover:bg-indigo-50">
+          <Button onClick={() => runAll("up")} data-permission="Administracao.Propagacao.executar" disabled={globalLoading} variant="outline" size="sm" className="gap-2 border-indigo-300 text-indigo-700 hover:bg-indigo-50">
             <ArrowUp className="w-4 h-4" /> Empresas → Grupo
           </Button>
-          <Button onClick={resetAll} disabled={globalLoading} variant="ghost" size="sm" className="text-slate-500">
+          <Button onClick={resetAll} data-permission="Administracao.Propagacao.executar" disabled={globalLoading} variant="ghost" size="sm" className="text-slate-500">
             Resetar
           </Button>
         </div>

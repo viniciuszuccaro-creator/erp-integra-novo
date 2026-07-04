@@ -395,6 +395,7 @@ export default function ItensRevendaTab({ formData, setFormData, onNext }) {
                         variant="ghost"
                         size="icon"
                         onClick={() => removerItem(index)}
+                        data-permission="Comercial.Pedido.editar"
                         className="text-red-600 hover:text-red-700"
                       >
                         <Trash2 className="w-4 h-4" />

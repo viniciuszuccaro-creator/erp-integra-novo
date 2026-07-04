@@ -211,6 +211,7 @@ export default function LogisticaEntregaTab({ formData, setFormData, clientes = 
             </CardTitle>
             <Button
               onClick={() => setModalEtapaOpen(true)}
+              data-permission="Comercial.Pedido.editar"
               size="sm"
               className="bg-blue-600 hover:bg-blue-700"
             >
@@ -283,6 +284,7 @@ export default function LogisticaEntregaTab({ formData, setFormData, clientes = 
                   <div className="flex justify-end gap-2">
                     <Button
                       onClick={() => removerEtapa(etapa.id)}
+                      data-permission="Comercial.Pedido.editar"
                       size="sm"
                       variant="outline"
                       className="text-red-600 border-red-300"

@@ -148,7 +148,7 @@ export default function GerenciarEnderecosCliente({ clienteId, onSelecionarEnder
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-base">Endereços Cadastrados ({enderecos.length})</CardTitle>
-        <Button onClick={() => { resetForm(); setDialogAberto(true); }}>
+        <Button onClick={() => { resetForm(); setDialogAberto(true); }} data-permission="Comercial.Cliente.editar">
           <Plus className="w-4 h-4 mr-2" />
           Novo Endereço
         </Button>
@@ -199,6 +199,7 @@ export default function GerenciarEnderecosCliente({ clienteId, onSelecionarEnder
                       variant="ghost"
                       size="icon"
                       onClick={() => handleEditarEndereco(idx)}
+                      data-permission="Comercial.Cliente.editar"
                     >
                       <Edit className="w-4 h-4 text-blue-600" />
                     </Button>
@@ -206,6 +207,7 @@ export default function GerenciarEnderecosCliente({ clienteId, onSelecionarEnder
                       variant="ghost"
                       size="icon"
                       onClick={() => handleExcluirEndereco(idx)}
+                      data-permission="Comercial.Cliente.excluir"
                     >
                       <Trash2 className="w-4 h-4 text-red-600" />
                     </Button>

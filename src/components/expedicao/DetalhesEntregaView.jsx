@@ -165,6 +165,7 @@ export default function DetalhesEntregaView({
             <div className="flex flex-wrap gap-2 pt-4 border-t">
               <Button
                 onClick={() => onStatusChange(entrega, "Em Separação")}
+                data-permission="Expedicao.Entrega.editar"
                 disabled={entrega.status !== "Aguardando Separação"}
                 size="sm"
                 variant="outline"
@@ -173,6 +174,7 @@ export default function DetalhesEntregaView({
               </Button>
               <Button
                 onClick={() => onStatusChange(entrega, "Pronto para Expedir")}
+                data-permission="Expedicao.Entrega.editar"
                 disabled={entrega.status !== "Em Separação"}
                 size="sm"
                 className="bg-indigo-600 hover:bg-indigo-700"
@@ -181,6 +183,7 @@ export default function DetalhesEntregaView({
               </Button>
               <Button
                 onClick={() => onStatusChange(entrega, "Saiu para Entrega")}
+                data-permission="Expedicao.Entrega.editar"
                 disabled={entrega.status !== "Pronto para Expedir"}
                 size="sm"
                 className="bg-orange-600 hover:bg-orange-700"
@@ -189,6 +192,7 @@ export default function DetalhesEntregaView({
               </Button>
               <Button
                 onClick={() => setShowAssinatura(true)}
+                data-permission="Expedicao.Entrega.editar"
                 disabled={!["Saiu para Entrega", "Em Trânsito"].includes(entrega.status)}
                 size="sm"
                 className="bg-green-600 hover:bg-green-700"
@@ -197,6 +201,7 @@ export default function DetalhesEntregaView({
               </Button>
               <Button
                 onClick={() => onStatusChange(entrega, "Entrega Frustrada")}
+                data-permission="Expedicao.Entrega.editar"
                 disabled={["Entregue", "Cancelado", "Aguardando Separação"].includes(entrega.status)}
                 size="sm"
                 variant="destructive"

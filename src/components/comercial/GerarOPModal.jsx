@@ -754,7 +754,7 @@ export default function GerarOPModal({ isOpen, onClose, pedido, windowMode = fal
             </Card>
 
             <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button type="button" onClick={fechar} className="bg-green-600 hover:bg-green-700">
+              <Button type="button" onClick={fechar} data-permission="Producao.OrdemProducao.criar" className="bg-green-600 hover:bg-green-700">
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Concluir
               </Button>

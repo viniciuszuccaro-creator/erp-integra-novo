@@ -7,6 +7,16 @@ async function getUsuarioAtual() {
 
 async function auditar(modulo, entidade, acao, registro_id, descricao, empresaId, dados_anteriores = null, dados_novos = null) {
   const user = await getUsuarioAtual();
+
+  // Resolver group_id a partir da empresa informada (multi-tenant obrigatório)
+  let groupId = null;
+  if (empresaId) {
+    try {
+      const empresa = await base44.entities.Empresa.get(empresaId);
+      groupId = empresa?.group_id || empresa?.grupo_id || null;
+    } catch { /* empresa pode não existir; groupId fica null */ }
+  }
+
   const mapModulo = (m) => {
     const mapa = {
       'Logística': 'Expedição',
@@ -22,6 +32,7 @@ async function auditar(modulo, entidade, acao, registro_id, descricao, empresaId
   };
   const moduloNorm = mapModulo(modulo);
   await base44.entities.AuditLog.create({
+    group_id: groupId,
     empresa_id: empresaId,
     usuario: user?.full_name || user?.email || 'Sistema',
     usuario_id: user?.id || '',

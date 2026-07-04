@@ -19,6 +19,7 @@ import {
   FileText
 } from "lucide-react";
 import { useUser } from "@/components/lib/UserContext";
+import useContextoVisual from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
 
 /**
@@ -41,6 +42,12 @@ export default function AprovacaoDescontos({ windowMode = false, empresaId = nul
   console.warn('⚠️ AprovacaoDescontos está DEPRECATED. Use CentralAprovacoesManager.jsx');
   const { user } = useUser();
   const queryClient = useQueryClient();
+  const { empresaAtual, grupoAtual, filterInContext } = useContextoVisual();
+  const resolvedEmpresaId = empresaId || empresaAtual?.id;
+  const groupId = grupoAtual?.id || empresaAtual?.group_id;
+  const contextKey = resolvedEmpresaId || groupId || "sem-contexto";
+  const contextoValido = contextKey !== "sem-contexto";
+
   const [filtros, setFiltros] = useState({
     empresa_id: "",
     vendedor: "",
@@ -53,21 +60,19 @@ export default function AprovacaoDescontos({ windowMode = false, empresaId = nul
     comentarios: ""
   });
 
-  // V21.6: Multi-empresa
+  // V21.6: Multi-empresa — query com contexto explícito
   const { data: pedidosPendentes = [], isLoading } = useQuery({
-    queryKey: ['pedidos-aprovacao', filtros, empresaId],
+    queryKey: ['pedidos-aprovacao', contextKey, filtros],
     queryFn: async () => {
-      const pedidos = empresaId
-        ? await base44.entities.Pedido.filter({ empresa_id: empresaId })
-        : await base44.entities.Pedido.list();
-      
-      return pedidos.filter(p => 
+      const pedidos = await filterInContext('Pedido', {}, '-created_date', 500);
+      return pedidos.filter(p =>
         p.status_aprovacao === "pendente" &&
-        (!filtros.empresa_id || p.empresa_id === filtros.empresa_id) &&
         (!filtros.vendedor || p.vendedor_id === filtros.vendedor) &&
         (!filtros.cliente || p.cliente_id === filtros.cliente)
       );
-    }
+    },
+    enabled: contextoValido,
+    initialData: [],
   });
 
   // Mutation para aprovar/rejeitar

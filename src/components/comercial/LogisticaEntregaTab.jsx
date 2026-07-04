@@ -188,6 +188,7 @@ export default function LogisticaEntregaTab({ formData, setFormData, clientes = 
                 <Button
                   variant="outline"
                   size="icon"
+                  data-permission="Comercial.Pedido.visualizar"
                   onClick={() => window.open(formData.endereco_entrega_principal.mapa_url, '_blank')}
                 >
                   <MapPin className="w-4 h-4" />
@@ -324,6 +325,7 @@ export default function LogisticaEntregaTab({ formData, setFormData, clientes = 
             <Button
               size="sm"
               variant="outline"
+              data-permission="Comercial.Pedido.editar"
               onClick={calcularFreteAutomatico}
             >
               <Calculator className="w-4 h-4 mr-2" />
@@ -380,6 +382,7 @@ export default function LogisticaEntregaTab({ formData, setFormData, clientes = 
                 <Button
                   size="sm"
                   variant="ghost"
+                  data-permission="Comercial.Pedido.editar"
                   onClick={sugerirDataEntrega}
                   className="h-6 text-xs"
                 >
@@ -454,6 +457,7 @@ export default function LogisticaEntregaTab({ formData, setFormData, clientes = 
 
       <div className="flex justify-end pt-4 border-t">
         <Button 
+          data-permission="Comercial.Pedido.visualizar"
           onClick={onNext}
           className="bg-blue-600 hover:bg-blue-700"
         >

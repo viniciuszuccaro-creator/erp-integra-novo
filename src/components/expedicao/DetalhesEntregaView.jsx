@@ -223,6 +223,7 @@ export default function DetalhesEntregaView({
                 <Button
                   variant="outline"
                   size="sm"
+                  data-permission="Expedicao.Entrega.editar"
                   onClick={() => setShowAssinatura(false)}
                   className="mt-3"
                 >

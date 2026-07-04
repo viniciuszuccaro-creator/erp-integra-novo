@@ -318,7 +318,7 @@ export default function AppEntregasMotorista() {
               Sem conexão: você pode enviar sua localização por SMS para o centro de operações.
               <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2">
                 <Input placeholder="Número do gateway SMS (ex.: 28900)" value={smsNumero} onChange={(e)=>setSmsNumero(e.target.value)} />
-                <Button variant="outline" onClick={()=>{
+                <Button variant="outline" data-permission="Expedicao.Entrega.editar" onClick={()=>{
                   const lat = localizacao?.latitude?.toFixed(6) || 'LAT';
                   const lng = localizacao?.longitude?.toFixed(6) || 'LNG';
                   const entrega = minhasEntregas?.[0]?.id || 'ENTREGA';
@@ -390,6 +390,7 @@ export default function AppEntregasMotorista() {
                   {entrega.endereco_entrega_completo?.mapa_url && (
                     <Button
                       variant="outline"
+                      data-permission="Expedicao.Entrega.visualizar"
                       onClick={() => window.open(entrega.endereco_entrega_completo.mapa_url, '_blank')}
                     >
                       <MapPin className="w-4 h-4" />
@@ -445,6 +446,7 @@ export default function AppEntregasMotorista() {
           {entregaAtual.endereco_entrega_completo?.mapa_url && (
             <Button
               variant="outline"
+              data-permission="Expedicao.Entrega.visualizar"
               className="w-full mt-3"
               onClick={() => window.open(entregaAtual.endereco_entrega_completo.mapa_url, '_blank')}
             >
@@ -456,6 +458,7 @@ export default function AppEntregasMotorista() {
           {entregaAtual.contato_entrega?.telefone && (
             <Button
               variant="outline"
+              data-permission="Expedicao.Entrega.visualizar"
               className="w-full mt-2"
               onClick={() => window.open(`tel:${entregaAtual.contato_entrega.telefone}`, '_self')}
             >
@@ -482,6 +485,7 @@ export default function AppEntregasMotorista() {
                 <Button
                   size="sm"
                   variant="outline"
+                  data-permission="Expedicao.Entrega.editar"
                   className="absolute top-2 right-2"
                   onClick={() => setFotoComprovante(null)}
                 >
@@ -491,6 +495,7 @@ export default function AppEntregasMotorista() {
             ) : (
               <Button
                 onClick={tirarFoto}
+                data-permission="Expedicao.Entrega.editar"
                 variant="outline"
                 className="w-full h-32 border-dashed"
               >
@@ -535,6 +540,7 @@ export default function AppEntregasMotorista() {
               <Button
                 size="sm"
                 variant="outline"
+                data-permission="Expedicao.Entrega.editar"
                 className="mt-2"
                 onClick={() => {
                   const canvas = document.getElementById('assinatura-canvas');
@@ -556,7 +562,7 @@ export default function AppEntregasMotorista() {
             Sem conexão: envie sua posição via SMS.
             <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2">
               <Input placeholder="Número do gateway SMS" value={smsNumero} onChange={(e)=>setSmsNumero(e.target.value)} />
-              <Button variant="outline" onClick={()=>{
+              <Button variant="outline" data-permission="Expedicao.Entrega.editar" onClick={()=>{
                 const lat = localizacao?.latitude?.toFixed(6) || 'LAT';
                 const lng = localizacao?.longitude?.toFixed(6) || 'LNG';
                 const entrega = entregaAtual?.id || 'ENTREGA';
@@ -588,9 +594,9 @@ export default function AppEntregasMotorista() {
             ⚠️ Entrega Frustrada?
           </summary>
           <div className="p-4 pt-0 space-y-2">
-            <Button variant="outline" className="w-full justify-start" onClick={() => registrarOcorrencia('Cliente Ausente')}>Cliente Ausente</Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => registrarOcorrencia('Endereço Incorreto')}>Endereço Incorreto</Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => registrarOcorrencia('Recusa de Recebimento')}>Recusa de Recebimento</Button>
+            <Button variant="outline" data-permission="Expedicao.Entrega.editar" className="w-full justify-start" onClick={() => registrarOcorrencia('Cliente Ausente')}>Cliente Ausente</Button>
+            <Button variant="outline" data-permission="Expedicao.Entrega.editar" className="w-full justify-start" onClick={() => registrarOcorrencia('Endereço Incorreto')}>Endereço Incorreto</Button>
+            <Button variant="outline" data-permission="Expedicao.Entrega.editar" className="w-full justify-start" onClick={() => registrarOcorrencia('Recusa de Recebimento')}>Recusa de Recebimento</Button>
           </div>
         </details>
 
@@ -619,6 +625,7 @@ export default function AppEntregasMotorista() {
             </div>
             <Button
               variant="outline"
+              data-permission="Expedicao.Entrega.editar"
               className="w-full border-red-300 text-red-700"
               onClick={async ()=>{
                 await base44.entities.Entrega.update(entregaAtual.id, {
@@ -644,7 +651,7 @@ export default function AppEntregasMotorista() {
           </div>
         </details>
 
-        <Button variant="outline" className="w-full" onClick={() => setEntregaAtual(null)}>Voltar para Lista</Button>
+        <Button variant="outline" data-permission="Expedicao.Entrega.visualizar" className="w-full" onClick={() => setEntregaAtual(null)}>Voltar para Lista</Button>
       </div>
     </div>
   );

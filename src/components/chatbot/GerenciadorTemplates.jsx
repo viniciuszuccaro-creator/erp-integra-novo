@@ -187,6 +187,7 @@ export default function GerenciadorTemplates() {
           </p>
         </div>
         <Button
+          data-permission="Chatbot.Template.criar"
           onClick={() => {
             resetForm();
             setDialogAberto(true);
@@ -224,6 +225,7 @@ export default function GerenciadorTemplates() {
                   <Button
                     variant="ghost"
                     size="icon"
+                    data-permission="Chatbot.Template.visualizar"
                     onClick={() => handleCopiar(template.conteudo)}
                     className="h-8 w-8"
                   >
@@ -232,6 +234,7 @@ export default function GerenciadorTemplates() {
                   <Button
                     variant="ghost"
                     size="icon"
+                    data-permission="Chatbot.Template.editar"
                     onClick={() => handleEditar(template)}
                     className="h-8 w-8"
                   >
@@ -240,6 +243,7 @@ export default function GerenciadorTemplates() {
                   <Button
                     variant="ghost"
                     size="icon"
+                    data-permission="Chatbot.Template.excluir"
                     onClick={() => {
                       if (confirm('Confirma exclusão?')) {
                         excluirTemplateMutation.mutate(template);

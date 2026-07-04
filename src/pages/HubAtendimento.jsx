@@ -740,6 +740,7 @@ export default function HubAtendimento() {
                       {conversaSelecionada.atendente_id !== user.id && (
                         <Button
                           size="sm"
+                          data-permission="Chatbot.Atendimento.assumir"
                           onClick={() => assumirConversaMutation.mutate(conversaSelecionada.id)}
                           disabled={assumirConversaMutation.isPending}
                           className="bg-green-600 hover:bg-green-700"
@@ -752,6 +753,7 @@ export default function HubAtendimento() {
                       <Button
                         size="sm"
                         variant="outline"
+                        data-permission="Chatbot.Atendimento.transferir"
                         onClick={() => setExibirTransferir(true)}
                         title="Transferir"
                       >
@@ -761,6 +763,7 @@ export default function HubAtendimento() {
                       <Button
                         size="sm"
                         variant="outline"
+                        data-permission="Chatbot.Atendimento.resolver"
                         onClick={() => resolverConversaMutation.mutate(conversaSelecionada.id)}
                         disabled={resolverConversaMutation.isPending}
                         className="text-green-600 hover:text-green-700"

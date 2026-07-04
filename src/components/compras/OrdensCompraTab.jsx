@@ -601,7 +601,7 @@ export default function OrdensCompraTab({ ordensCompra, fornecedores, empresas =
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancelar
                 </Button>
-                <Button type="submit">
+                <Button type="submit" data-permission="Compras.OrdemCompra.criar">
                   {editingOC ? 'Atualizar' : 'Criar'} OC
                 </Button>
               </div>

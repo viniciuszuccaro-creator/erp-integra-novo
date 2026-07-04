@@ -445,7 +445,7 @@ export default function ContasReceberTab({ contas, empresas = [], windowMode = f
 
             <div className="flex justify-end gap-3">
               <Button type="button" variant="outline" onClick={() => setDialogBaixaOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={baixarTituloMutation.isPending || baixarMultiplaMutation.isPending} className="bg-green-600">
+              <Button type="submit" data-permission="Financeiro.ContaReceber.baixar" disabled={baixarTituloMutation.isPending || baixarMultiplaMutation.isPending} className="bg-green-600">
                 {(baixarTituloMutation.isPending || baixarMultiplaMutation.isPending) ? 'Baixando...' : 'Confirmar'}
               </Button>
             </div>

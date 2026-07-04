@@ -47,7 +47,7 @@ export default function EmpresaOnboarding() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="w-full h-full min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 overflow-auto">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="mb-8 text-center">

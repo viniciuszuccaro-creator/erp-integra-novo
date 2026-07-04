@@ -52,7 +52,7 @@ export default function OrdensProducaoListagem({ windowMode }) {
         <h2 className="text-xl font-bold flex items-center gap-2">
           <Factory className="w-5 h-5 text-orange-600" /> Ordens de Produção
         </h2>
-        <Button size="sm" onClick={() => openWindow(FormularioOrdemProducao, { windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['ops-listagem'] }) }, { title: 'Nova Ordem de Produção', width: 1200, height: 750 })}>
+        <Button size="sm" data-permission="Producao.OrdemProducao.criar" onClick={() => openWindow(FormularioOrdemProducao, { windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['ops-listagem'] }) }, { title: 'Nova Ordem de Produção', width: 1200, height: 750 })}>
           <Plus className="w-4 h-4 mr-1" /> Nova OP
         </Button>
       </div>
@@ -100,10 +100,10 @@ export default function OrdensProducaoListagem({ windowMode }) {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openWindow(FormularioOrdemProducao, { op, windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['ops-listagem'] }) }, { title: `Editar OP: ${op.numero_op || ''}`, width: 1200, height: 750 })}>
+                      <Button variant="ghost" size="icon" data-permission="Producao.OrdemProducao.editar" onClick={() => openWindow(FormularioOrdemProducao, { op, windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['ops-listagem'] }) }, { title: `Editar OP: ${op.numero_op || ''}`, width: 1200, height: 750 })}>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="text-red-600" onClick={() => window.confirm('Excluir OP?') && deleteMutation.mutate(op.id)}>
+                      <Button variant="ghost" size="icon" data-permission="Producao.OrdemProducao.excluir" className="text-red-600" onClick={() => window.confirm('Excluir OP?') && deleteMutation.mutate(op.id)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>

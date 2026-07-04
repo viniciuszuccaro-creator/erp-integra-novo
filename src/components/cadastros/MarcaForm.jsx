@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Award, Trash2, Power, PowerOff } from "lucide-react";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { toast } from "sonner";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -43,15 +44,15 @@ export default function MarcaForm({ marca, item, data, initialData, defaultValue
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.nome_marca) {
-      alert('Preencha o nome da marca');
+      toast.error('Preencha o nome da marca');
       return;
     }
     if (!contextoValido) {
-      alert('Selecione um grupo ou empresa antes de salvar.');
+      toast.error('Selecione um grupo ou empresa antes de salvar.');
       return;
     }
     if (!podeSalvar) {
-      alert('Sem permissão para salvar marca.');
+      toast.error('Sem permissão para salvar marca.');
       return;
     }
     onSubmit({
@@ -64,7 +65,7 @@ export default function MarcaForm({ marca, item, data, initialData, defaultValue
 
   const handleExcluir = () => {
     if (!podeExcluir) {
-      alert('Sem permissão para excluir marca.');
+      toast.error('Sem permissão para excluir marca.');
       return;
     }
     if (!window.confirm(`Tem certeza que deseja excluir a marca "${formData.nome_marca}"? Esta ação não pode ser desfeita.`)) {

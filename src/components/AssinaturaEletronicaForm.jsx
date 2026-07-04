@@ -289,6 +289,7 @@ export default function AssinaturaEletronicaForm({
                 type="button"
                 variant="ghost"
                 size="sm"
+                data-permission="Sistema.AssinaturaEletronica.assinar"
                 onClick={limparAssinatura}
                 disabled={assinaturaVazia}
               >
@@ -375,6 +376,7 @@ export default function AssinaturaEletronicaForm({
           <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
             <Button 
               type="button" 
+              data-permission="Sistema.AssinaturaEletronica.assinar"
               onClick={assinarDocumento}
               disabled={assinando}
               className="bg-blue-600 hover:bg-blue-700"
@@ -418,7 +420,7 @@ export default function AssinaturaEletronicaForm({
           </Card>
 
           <div className="flex justify-center gap-3">
-            <Button type="button" variant="outline" onClick={baixarComprovante}>
+            <Button type="button" variant="outline" data-permission="Sistema.AssinaturaEletronica.baixar" onClick={baixarComprovante}>
               <Download className="w-4 h-4 mr-2" />
               Baixar Comprovante
             </Button>

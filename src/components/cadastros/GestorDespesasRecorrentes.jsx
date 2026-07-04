@@ -117,6 +117,7 @@ export default function GestorDespesasRecorrentes({ windowMode = false }) {
                 className="max-w-xs"
               />
               <Button
+                data-permission="Cadastros.ConfiguracaoDespesaRecorrente.criar"
                 onClick={() => openWindow(ConfiguracaoDespesaRecorrenteForm, {
                   windowMode: true,
                   onSubmit: async (data) => {
@@ -183,6 +184,7 @@ export default function GestorDespesasRecorrentes({ windowMode = false }) {
                       <Button
                         variant="ghost"
                         size="icon"
+                        data-permission="Cadastros.ConfiguracaoDespesaRecorrente.editar"
                         onClick={() => toggleAtivaMutation.mutate({ id: config.id, ativa: config.ativa })}
                         disabled={!contextoValido || !podeEditar || toggleAtivaMutation.isPending}
                         title={config.ativa ? "Desativar" : "Ativar"}
@@ -196,6 +198,7 @@ export default function GestorDespesasRecorrentes({ windowMode = false }) {
                       <Button
                         variant="ghost"
                         size="icon"
+                        data-permission="Cadastros.ConfiguracaoDespesaRecorrente.editar"
                         onClick={() => openWindow(ConfiguracaoDespesaRecorrenteForm, {
                           config,
                           windowMode: true,
@@ -222,6 +225,7 @@ export default function GestorDespesasRecorrentes({ windowMode = false }) {
                       <Button
                         variant="ghost"
                         size="icon"
+                        data-permission="Cadastros.ConfiguracaoDespesaRecorrente.excluir"
                         onClick={() => {
                           if (confirm('Deseja realmente excluir esta configuração?')) {
                             deleteMutation.mutate(config.id);

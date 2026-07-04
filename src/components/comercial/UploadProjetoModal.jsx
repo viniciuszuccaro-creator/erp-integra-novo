@@ -394,11 +394,12 @@ Retorne um JSON estruturado com todas as peças encontradas e um resumo do proje
         <div className="flex justify-end gap-3 pt-4 border-t">
           {resultado ? (
             <>
-              <Button type="button" variant="outline" onClick={resetar}>
+              <Button type="button" variant="outline" data-permission="Comercial.Pedido.visualizar" onClick={resetar}>
                 Analisar Outro Projeto
               </Button>
               <Button 
                 type="button" 
+                data-permission="Comercial.Pedido.criar"
                 onClick={confirmarPecas}
                 className="bg-green-600 hover:bg-green-700"
               >
@@ -408,11 +409,12 @@ Retorne um JSON estruturado com todas as peças encontradas e um resumo do proje
             </>
           ) : (
             <>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" data-permission="Comercial.Pedido.visualizar" onClick={onClose}>
                 Cancelar
               </Button>
               <Button 
                 type="button" 
+                data-permission="Comercial.Pedido.criar"
                 onClick={processarComIA}
                 disabled={!arquivo || processando}
                 className="bg-purple-600 hover:bg-purple-700"

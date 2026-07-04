@@ -179,7 +179,7 @@ export default function GestorFormasPagamento({ windowMode = false }) {
           <h2 className="text-2xl font-bold text-slate-900">Formas de Pagamento</h2>
           <p className="text-sm text-slate-600">Configuração centralizada de métodos de pagamento</p>
         </div>
-        <Button onClick={handleNova} disabled={!contextoValido || !podeCriar} className="bg-blue-600 hover:bg-blue-700">
+        <Button data-permission="Cadastros.FormaPagamento.criar" onClick={handleNova} disabled={!contextoValido || !podeCriar} className="bg-blue-600 hover:bg-blue-700">
           <Plus className="w-4 h-4 mr-2" />
           Nova Forma
         </Button>
@@ -333,6 +333,7 @@ export default function GestorFormasPagamento({ windowMode = false }) {
                   </TableCell>
                   <TableCell>
                     <button
+                      data-permission="Cadastros.FormaPagamento.editar"
                       onClick={() => toggleAtivaMutation.mutate({ id: forma.id, ativa: !forma.ativa })}
                       disabled={!contextoValido || !podeEditar || toggleAtivaMutation.isPending}
                       className="flex items-center gap-1"
@@ -355,6 +356,7 @@ export default function GestorFormasPagamento({ windowMode = false }) {
                       <Button
                         variant="ghost"
                         size="icon"
+                        data-permission="Cadastros.FormaPagamento.editar"
                         onClick={() => handleEditar(forma)}
                         disabled={!contextoValido || !podeEditar}
                         title="Editar"
@@ -364,6 +366,7 @@ export default function GestorFormasPagamento({ windowMode = false }) {
                       <Button
                         variant="ghost"
                         size="icon"
+                        data-permission="Cadastros.FormaPagamento.excluir"
                         onClick={() => {
                           if (confirm(`Excluir "${forma.descricao}"?`)) {
                             deleteMutation.mutate(forma.id);

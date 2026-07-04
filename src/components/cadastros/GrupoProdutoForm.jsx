@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Package, Trash2, Power, PowerOff } from "lucide-react";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { toast } from "sonner";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -42,15 +43,15 @@ export default function GrupoProdutoForm({ grupo, grupoProduto, item, data, init
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.nome_grupo || !formData.natureza) {
-      alert('Preencha os campos obrigatórios');
+      toast.error('Preencha os campos obrigatórios');
       return;
     }
     if (!contextoValido) {
-      alert('Selecione um grupo ou empresa antes de salvar.');
+      toast.error('Selecione um grupo ou empresa antes de salvar.');
       return;
     }
     if (!podeSalvar) {
-      alert('Sem permissão para salvar grupo de produto.');
+      toast.error('Sem permissão para salvar grupo de produto.');
       return;
     }
     onSubmit({
@@ -64,7 +65,7 @@ export default function GrupoProdutoForm({ grupo, grupoProduto, item, data, init
 
   const handleExcluir = () => {
     if (!podeExcluir) {
-      alert('Sem permissão para excluir grupo de produto.');
+      toast.error('Sem permissão para excluir grupo de produto.');
       return;
     }
     if (!window.confirm(`Tem certeza que deseja excluir o grupo "${formData.nome_grupo}"? Esta ação não pode ser desfeita.`)) {

@@ -146,7 +146,7 @@ export default function RepresentantesTab() {
           </Select>
         </div>
 
-        <Button onClick={handleNovo} className="bg-purple-600 hover:bg-purple-700">
+        <Button data-permission="Cadastros.Representante.criar" onClick={handleNovo} className="bg-purple-600 hover:bg-purple-700">
           <Plus className="w-4 h-4 mr-2" />
           Novo Representante
         </Button>
@@ -224,11 +224,11 @@ export default function RepresentantesTab() {
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <Button variant="outline" size="sm" onClick={() => handleEditar(rep)}>
+                      <Button variant="outline" size="sm" data-permission="Cadastros.Representante.editar" onClick={() => handleEditar(rep)}>
                         <Eye className="w-4 h-4 mr-1" />
                         Editar
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleAbrirJanela(rep)}>
+                      <Button variant="outline" size="sm" data-permission="Cadastros.Representante.visualizar" onClick={() => handleAbrirJanela(rep)}>
                         📊 Dashboard
                       </Button>
                     </div>

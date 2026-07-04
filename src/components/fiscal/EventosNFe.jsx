@@ -165,6 +165,7 @@ export default function EventosNFe({ nfe }) {
               variant="outline"
               className="w-full border-red-300 text-red-700 hover:bg-red-50"
               disabled={!dentroDoPrazo}
+              data-permission="Fiscal.NFe.cancelar"
             >
               <XCircle className="w-4 h-4 mr-2" />
               Cancelar NF-e
@@ -227,7 +228,7 @@ export default function EventosNFe({ nfe }) {
       {nfe.status === "Autorizada" && (
         <Dialog open={dialogCartaCorrecao} onOpenChange={setDialogCartaCorrecao}>
           <DialogTrigger asChild>
-            <Button variant="outline" className="w-full border-blue-300 text-blue-700 hover:bg-blue-50">
+            <Button variant="outline" className="w-full border-blue-300 text-blue-700 hover:bg-blue-50" data-permission="Fiscal.NFe.corrigir">
               <FileEdit className="w-4 h-4 mr-2" />
               Carta de Correção
               {nfe.carta_correcao?.length > 0 && ` (${nfe.carta_correcao.length}/20)`}

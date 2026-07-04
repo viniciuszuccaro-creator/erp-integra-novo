@@ -5,7 +5,7 @@ import { BarChart3, Users, ShoppingCart, DollarSign } from "lucide-react";
 
 export default function AdvancedAnalysisSection({ vendasPorMes, top5Clientes, statusPedidos, fluxoCaixaMensal, COLORS }) {
   return (
-    <div>
+    <div className="w-full">
       <h2 className="text-xl font-bold text-slate-900 mb-4">Análise Detalhada</h2>
       <div className="grid lg:grid-cols-2 gap-6">
         <Card className="border-0 shadow-md">

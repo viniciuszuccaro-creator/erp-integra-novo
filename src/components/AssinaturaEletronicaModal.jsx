@@ -559,11 +559,11 @@ export default function AssinaturaEletronicaModal({
             </Card>
 
             <div className="flex justify-center gap-3">
-              <Button type="button" variant="outline" onClick={baixarComprovante}>
+              <Button type="button" variant="outline" onClick={baixarComprovante} data-permission="Comercial.Assinatura.visualizar">
                 <Download className="w-4 h-4 mr-2" />
                 Baixar Comprovante
               </Button>
-              <Button onClick={fechar} className="bg-green-600 hover:bg-green-700">
+              <Button onClick={fechar} data-permission="Comercial.Assinatura.criar" className="bg-green-600 hover:bg-green-700">
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Concluir
               </Button>

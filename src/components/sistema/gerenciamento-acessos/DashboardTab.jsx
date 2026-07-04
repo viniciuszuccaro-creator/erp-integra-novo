@@ -134,23 +134,23 @@ export default function DashboardTab({
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 space-y-3">
-            <Button className="w-full justify-start bg-blue-600 hover:bg-blue-700" onClick={onCriarPerfil}>
+            <Button className="w-full justify-start bg-blue-600 hover:bg-blue-700" onClick={onCriarPerfil} data-permission="Sistema.PerfilAcesso.criar">
               <Plus className="w-4 h-4 mr-2" />
               Criar Novo Perfil
             </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={onAtribuirUsuario}>
+            <Button variant="outline" className="w-full justify-start" onClick={onAtribuirUsuario} data-permission="Sistema.Usuario.editar">
               <UserPlus className="w-4 h-4 mr-2" />
               Atribuir Perfil a Usuário
             </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={onVerPermissoesEmpresa}>
+            <Button variant="outline" className="w-full justify-start" onClick={onVerPermissoesEmpresa} data-permission="Sistema.PerfilAcesso.visualizar">
               <Building className="w-4 h-4 mr-2" />
               Permissão por Empresa
             </Button>
-            <Button variant="outline" className="w-full justify-start border-purple-200 text-purple-700 hover:bg-purple-50" onClick={onAnalisarIA} disabled={analisandoIA}>
+            <Button variant="outline" className="w-full justify-start border-purple-200 text-purple-700 hover:bg-purple-50" onClick={onAnalisarIA} data-permission="Sistema.PerfilAcesso.visualizar" disabled={analisandoIA}>
               {analisandoIA ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Brain className="w-4 h-4 mr-2" />}
               Analisar com IA
             </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={onVerAuditoria}>
+            <Button variant="outline" className="w-full justify-start" onClick={onVerAuditoria} data-permission="Sistema.Auditoria.visualizar">
               <History className="w-4 h-4 mr-2" />
               Ver Auditoria
             </Button>

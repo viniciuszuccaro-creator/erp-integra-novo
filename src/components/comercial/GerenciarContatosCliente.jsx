@@ -120,7 +120,7 @@ export default function GerenciarContatosCliente({ clienteId }) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-base">Contatos ({contatos.length})</CardTitle>
-        <Button onClick={() => { resetForm(); setDialogAberto(true); }}>
+        <Button onClick={() => { resetForm(); setDialogAberto(true); }} data-permission="Comercial.Cliente.editar">
           <Plus className="w-4 h-4 mr-2" />
           Novo Contato
         </Button>
@@ -153,6 +153,7 @@ export default function GerenciarContatosCliente({ clienteId }) {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleEditarContato(idx)}
+                      data-permission="Comercial.Cliente.editar"
                     >
                       <Edit className="w-4 h-4 text-blue-600" />
                     </Button>
@@ -160,6 +161,7 @@ export default function GerenciarContatosCliente({ clienteId }) {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleExcluirContato(idx)}
+                      data-permission="Comercial.Cliente.excluir"
                     >
                       <Trash2 className="w-4 h-4 text-red-600" />
                     </Button>
@@ -242,7 +244,7 @@ export default function GerenciarContatosCliente({ clienteId }) {
               <Button variant="outline" onClick={() => setDialogAberto(false)}>
                 Cancelar
               </Button>
-              <Button onClick={handleSalvarContato} disabled={updateClienteMutation.isPending}>
+              <Button onClick={handleSalvarContato} data-permission="Comercial.Cliente.editar" disabled={updateClienteMutation.isPending}>
                 <Check className="w-4 h-4 mr-2" />
                 {updateClienteMutation.isPending ? 'Salvando...' : 'Salvar Contato'}
               </Button>

@@ -348,6 +348,7 @@ export default function GerenciadorTemplates() {
             </Button>
             <Button
               onClick={() => salvarTemplateMutation.mutate(formData)}
+              data-permission="Chatbot.Template.criar"
               disabled={!formData.nome || !formData.conteudo || salvarTemplateMutation.isPending}
               className="bg-blue-600 hover:bg-blue-700"
             >

@@ -5,7 +5,7 @@ import { BarChart3, DollarSign } from "lucide-react";
 
 export default function ChartsSection({ vendasUltimos30Dias, fluxo7Dias }) {
   return (
-    <div className="grid lg:grid-cols-2 gap-6" suppressHydrationWarning>
+    <div className="w-full grid lg:grid-cols-2 gap-6" suppressHydrationWarning>
       <Card className="border-0 shadow-md">
         <CardHeader className="border-b bg-slate-50">
           <CardTitle className="flex items-center gap-2">

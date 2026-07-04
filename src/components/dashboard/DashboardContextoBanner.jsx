@@ -25,7 +25,7 @@ export default function DashboardContextoBanner() {
 
 
   return (
-    <div className={`flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl border text-sm ${
+    <div className={`w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl border text-sm ${
       isGrupo
         ? "bg-purple-50 border-purple-200 text-purple-800"
         : "bg-blue-50 border-blue-200 text-blue-800"

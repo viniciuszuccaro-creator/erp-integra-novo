@@ -420,6 +420,7 @@ function PedidoFormCompleto({ pedido, clientes = [], onSubmit, onCancel, windowM
             <Button
               variant="outline"
               onClick={onCancel}
+              data-permission="Comercial.Pedido.visualizar"
             >
               Cancelar
             </Button>
@@ -428,6 +429,7 @@ function PedidoFormCompleto({ pedido, clientes = [], onSubmit, onCancel, windowM
             {(!pedido || pedido.status === 'Rascunho') && (
               <Button
                 variant="outline"
+                data-permission="Comercial.Pedido.criar"
                 onClick={async () => {
                   if (salvando) return;
                   setSalvando(true);
@@ -457,6 +459,7 @@ function PedidoFormCompleto({ pedido, clientes = [], onSubmit, onCancel, windowM
             {/* V21.6: FECHAR PEDIDO COM AUTOMAÇÃO COMPLETA */}
             {(!pedido || pedido.status === 'Rascunho') && (
               <Button
+                data-permission="Comercial.Pedido.aprovar"
                 onClick={async () => {
                   if (salvando) return;
 
@@ -543,6 +546,7 @@ function PedidoFormCompleto({ pedido, clientes = [], onSubmit, onCancel, windowM
             
             {(pedido && pedido.status !== 'Rascunho' && pedido.status !== 'Aprovado') && (
               <Button
+                data-permission="Comercial.Pedido.editar"
                 onClick={async () => {
                   if (salvando) return;
                   setSalvando(true);
@@ -567,6 +571,7 @@ function PedidoFormCompleto({ pedido, clientes = [], onSubmit, onCancel, windowM
             {!pedido && (
               <Button
                 onClick={rhfHandleSubmit(handleSubmit)}
+                data-permission="Comercial.Pedido.criar"
                 className="bg-blue-600 hover:bg-blue-700"
                 disabled={salvando || !validacoes.identificacao || !validacoes.itens}
               >

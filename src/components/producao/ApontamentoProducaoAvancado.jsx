@@ -418,14 +418,14 @@ export default function ApontamentoProducaoAvancado({ opId, opNumero, onClose })
           <div className="border-t pt-4">
             <h3 className="font-semibold mb-3">Comprovação</h3>
             <div className="flex flex-wrap gap-3">
-              <Button onClick={capturarLocalizacao} variant="outline">
+              <Button onClick={capturarLocalizacao} data-permission="Producao.Apontamento.criar" variant="outline">
                 <MapPin className="w-4 h-4 mr-2" />
                 Capturar GPS
                 {apontamento.localizacao_gps.latitude !== 0 && (
                   <CheckCircle className="w-4 h-4 ml-2 text-green-600" />
                 )}
               </Button>
-              <Button onClick={capturarFoto} variant="outline">
+              <Button onClick={capturarFoto} data-permission="Producao.Apontamento.criar" variant="outline">
                 <Camera className="w-4 h-4 mr-2" />
                 Capturar Foto
                 {apontamento.foto_comprovacao_url && (

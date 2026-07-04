@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Building2, Trash2, Power, PowerOff } from "lucide-react";
+import { toast } from "sonner";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -29,7 +30,7 @@ export default function DepartamentoForm({ departamento, item, data, initialData
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.nome) {
-      alert('Preencha o nome do departamento');
+      toast.error('Preencha o nome do departamento');
       return;
     }
     onSubmit(formData);

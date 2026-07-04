@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MessageCircle, Save, Plus, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 export default function ChatbotIntentForm({ chatbotIntent, onSubmit, isSubmitting, windowMode = false }) {
   const [formData, setFormData] = useState(chatbotIntent || {
@@ -42,7 +43,7 @@ export default function ChatbotIntentForm({ chatbotIntent, onSubmit, isSubmittin
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nome_intent) {
-      alert('Nome da intent é obrigatório');
+      toast.error('Nome da intent é obrigatório');
       return;
     }
     await onSubmit({ ...formData, nome: formData.nome_intent });

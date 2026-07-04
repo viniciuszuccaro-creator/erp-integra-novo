@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Zap, Save } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ApiExternaForm({ apiExterna, onSubmit, isSubmitting, windowMode = false }) {
   const [formData, setFormData] = useState(apiExterna || {
@@ -25,7 +26,7 @@ export default function ApiExternaForm({ apiExterna, onSubmit, isSubmitting, win
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nome_integracao) {
-      alert('Nome da integração é obrigatório');
+      toast.error('Nome da integração é obrigatório');
       return;
     }
     await onSubmit({ ...formData, nome: formData.nome_integracao });

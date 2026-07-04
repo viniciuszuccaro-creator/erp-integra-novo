@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
 import { 
   Scissors, 
   TrendingDown, 
@@ -176,7 +177,7 @@ export default function OtimizadorCorte({ itens, onOtimizacaoCalculada }) {
         console.log("Salvando ponta:", ponta);
       }
 
-      alert(`${otimizacao.estatisticas.pontas_reutilizaveis.length} pontas salvas no estoque!`);
+      toast.success(`${otimizacao.estatisticas.pontas_reutilizaveis.length} pontas salvas no estoque!`);
     } catch (error) {
       console.error("Erro ao salvar pontas:", error);
     }

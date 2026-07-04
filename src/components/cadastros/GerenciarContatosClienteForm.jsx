@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Phone, Mail, Plus, Edit, Trash2, Check, MessageCircle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 
 /**
  * V21.1.2 - SUB-DIALOG MANTIDO (usado dentro de forms maiores)
@@ -39,7 +40,7 @@ export default function GerenciarContatosClienteForm({ contatos = [], onChange }
 
   const handleSalvarContato = () => {
     if (!novoContato.valor) {
-      alert("Preencha o valor do contato");
+      toast.error("Preencha o valor do contato");
       return;
     }
 

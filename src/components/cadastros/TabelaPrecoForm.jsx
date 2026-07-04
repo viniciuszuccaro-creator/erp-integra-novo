@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, DollarSign } from "lucide-react";
+import { toast } from "sonner";
 
 export default function TabelaPrecoForm({ tabela, onSubmit, isSubmitting }) {
   const [formData, setFormData] = useState(tabela || {
@@ -19,7 +20,7 @@ export default function TabelaPrecoForm({ tabela, onSubmit, isSubmitting }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.nome || !formData.tipo || !formData.data_inicio) {
-      alert('Preencha os campos obrigatórios');
+      toast.error('Preencha os campos obrigatórios');
       return;
     }
     onSubmit(formData);

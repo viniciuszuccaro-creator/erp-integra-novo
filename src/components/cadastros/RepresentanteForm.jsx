@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Briefcase } from "lucide-react";
+import { toast } from "sonner";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -25,7 +26,7 @@ export default function RepresentanteForm({ representante, onSubmit, isSubmittin
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.nome) {
-      alert('Preencha o nome do representante');
+      toast.error('Preencha o nome do representante');
       return;
     }
     onSubmit(formData);

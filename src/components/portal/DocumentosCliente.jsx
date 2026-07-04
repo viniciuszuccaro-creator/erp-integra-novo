@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileText, Download, Search, CreditCard, Eye, Calendar } from 'lucide-react';
+import { toast } from "sonner";
 
 /**
  * V21.5 - Documentos & Boletos COMPLETO
@@ -61,7 +62,7 @@ export default function DocumentosCliente() {
     if (nfe.xml_url) {
       window.open(nfe.xml_url, '_blank');
     } else {
-      alert('XML não disponível');
+      toast.error('XML não disponível');
     }
   };
 
@@ -69,18 +70,18 @@ export default function DocumentosCliente() {
     if (conta.url_boleto_pdf) {
       window.open(conta.url_boleto_pdf, '_blank');
     } else if (conta.linha_digitavel) {
-      alert(`Linha Digitável: ${conta.linha_digitavel}`);
+      toast.info(`Linha Digitável: ${conta.linha_digitavel}`);
     } else {
-      alert('Boleto não disponível');
+      toast.error('Boleto não disponível');
     }
   };
 
   const handleCopiarPix = (conta) => {
     if (conta.pix_copia_cola) {
       navigator.clipboard.writeText(conta.pix_copia_cola);
-      alert('Código PIX copiado!');
+      toast.success('Código PIX copiado!');
     } else {
-      alert('PIX não disponível');
+      toast.error('PIX não disponível');
     }
   };
 

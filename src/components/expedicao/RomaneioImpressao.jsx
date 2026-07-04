@@ -2,6 +2,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Printer, Download } from "lucide-react";
+import { toast } from "sonner";
 
 /**
  * Componente de impressão de Romaneio de Carga
@@ -14,7 +15,7 @@ export default function RomaneioImpressao({ romaneio, entregas, empresa }) {
 
   const handlePDF = () => {
     // TODO: Integrar com gerador de PDF
-    alert("Funcionalidade de PDF em desenvolvimento");
+    toast.info("Funcionalidade de PDF em desenvolvimento");
   };
 
   return (

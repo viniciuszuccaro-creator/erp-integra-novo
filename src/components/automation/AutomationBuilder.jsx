@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, Zap, GitBranch, Check } from 'lucide-react';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import { toast } from "sonner";
 
 const TRIGGERS = [
   { id: 'pedido_criado', nome: 'Pedido Criado', icon: '📦' },
@@ -37,7 +38,7 @@ export default function AutomationBuilder() {
 
   const handleAddAutomacao = () => {
     if (!novaAuto.nome || !novaAuto.trigger || novaAuto.acoes.length === 0) {
-      alert('Preencha todos os campos');
+      toast.error('Preencha todos os campos');
       return;
     }
 

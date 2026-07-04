@@ -93,7 +93,7 @@ export default function OportunidadesListagem({ oportunidades: propOps = [], win
                   <TableCell>{op.responsavel}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openWindow(OportunidadeForm, { oportunidade: op, windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['oportunidades-list'] }) }, { title: `Editar: ${op.titulo}`, width: 900, height: 650 })}>
+                      <Button variant="ghost" size="icon" data-permission="CRM.Oportunidade.editar" onClick={() => openWindow(OportunidadeForm, { oportunidade: op, windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['oportunidades-list'] }) }, { title: `Editar: ${op.titulo}`, width: 900, height: 650 })}>
                         <Edit className="w-4 h-4" />
                       </Button>
                       <Button variant="ghost" size="icon" data-permission="CRM.Oportunidade.excluir" className="text-red-600" onClick={() => window.confirm('Excluir?') && deleteMutation.mutate(op.id)}>

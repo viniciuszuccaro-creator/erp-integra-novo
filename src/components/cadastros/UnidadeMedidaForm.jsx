@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Ruler } from 'lucide-react';
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { toast } from "sonner";
 
 export default function UnidadeMedidaForm({ unidade, unidadeMedida, item, data, initialData, defaultValues, onSubmit, windowMode = false }) {
   const dadosIniciais = item || data || initialData || defaultValues || unidadeMedida || unidade;
@@ -41,11 +42,11 @@ export default function UnidadeMedidaForm({ unidade, unidadeMedida, item, data, 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!contextoValido) {
-      alert('Selecione um grupo ou empresa antes de salvar.');
+      toast.error('Selecione um grupo ou empresa antes de salvar.');
       return;
     }
     if (!podeSalvar) {
-      alert('Sem permissão para salvar unidade de medida.');
+      toast.error('Sem permissão para salvar unidade de medida.');
       return;
     }
     onSubmit({

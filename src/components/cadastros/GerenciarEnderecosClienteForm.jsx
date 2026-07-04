@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin, Plus, Edit, Trash2, Check, ExternalLink, Route } from "lucide-react";
 import BuscaCEP from "@/components/comercial/BuscaCEP";
+import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -66,7 +67,7 @@ export default function GerenciarEnderecosClienteForm({ enderecos = [], onChange
 
   const handleSalvarEndereco = () => {
     if (!novoEndereco.logradouro || !novoEndereco.numero) {
-      alert("Preencha logradouro e número");
+      toast.error("Preencha logradouro e número");
       return;
     }
 

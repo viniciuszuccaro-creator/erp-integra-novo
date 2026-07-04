@@ -10,6 +10,7 @@ import { formatarTelefone, formatarCEP } from '../lib/validacoes';
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormWrapper from "@/components/common/FormWrapper";
+import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { clienteSchema } from "./cliente/clienteSchema";
 
@@ -102,12 +103,12 @@ const setFormData = (updater) => {
     });
     if (!result.success) {
       // Exibe primeiro erro no topo e permite inline nos campos
-      alert(result.error.issues?.[0]?.message || 'Dados inválidos');
+      toast.error(result.error.issues?.[0]?.message || 'Dados inválidos');
       return;
     }
 
     if (!cpfCnpjValido && formData.cpf_cnpj) {
-      alert('CPF/CNPJ inválido. Verifique os dígitos.');
+      toast.error('CPF/CNPJ inválido. Verifique os dígitos.');
       return;
     }
 

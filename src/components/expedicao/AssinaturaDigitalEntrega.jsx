@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Pen, Eraser, CheckCircle, MapPin, Camera, Upload } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { toast } from "sonner";
 
 /**
  * Componente de Assinatura Digital para Confirmação de Entrega
@@ -91,12 +92,12 @@ export default function AssinaturaDigitalEntrega({ onAssinaturaConcluida, isLoad
 
   const handleConfirmar = async () => {
     if (!dados.nome_recebedor) {
-      alert("Informe o nome de quem recebeu");
+      toast.error("Informe o nome de quem recebeu");
       return;
     }
 
     if (!assinado) {
-      alert("É necessário assinar");
+      toast.error("É necessário assinar");
       return;
     }
 

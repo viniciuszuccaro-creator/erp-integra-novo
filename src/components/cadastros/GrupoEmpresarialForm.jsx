@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Network, CheckCircle2, Trash2, Power, PowerOff } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 
 /**
@@ -42,7 +43,7 @@ export default function GrupoEmpresarialForm({ grupo, onSubmit, isSubmitting, wi
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.nome) {
-      alert('Preencha o nome do grupo');
+      toast.error('Preencha o nome do grupo');
       return;
     }
     onSubmit(formData);

@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, FileText } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
 
 export default function CadastroFiscalForm({ cadastroFiscal, onSubmit, isSubmitting }) {
   const [formData, setFormData] = useState(cadastroFiscal || {
@@ -19,7 +20,7 @@ export default function CadastroFiscalForm({ cadastroFiscal, onSubmit, isSubmitt
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.tipo_cadastro || !formData.codigo) {
-      alert('Preencha os campos obrigatórios');
+      toast.error('Preencha os campos obrigatórios');
       return;
     }
     onSubmit(formData);

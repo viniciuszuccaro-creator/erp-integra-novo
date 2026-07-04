@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Target } from 'lucide-react';
 import usePermissions from '@/components/lib/usePermissions';
+import { toast } from "sonner";
 
 export default function CentroResultadoForm({ centro, centroResultado, item, data, onSubmit, onSave, onClose, windowMode = false }) {
   const dadosIniciais = item || data || centroResultado || centro;
@@ -23,11 +24,11 @@ export default function CentroResultadoForm({ centro, centroResultado, item, dat
   const handleSubmit = (e) => {
     e.preventDefault();
     if (dadosIniciais?.id && !podeEditar) {
-      alert("Sem permissao para editar centros de resultado.");
+      toast.error("Sem permissão para editar centros de resultado.");
       return;
     }
     if (!dadosIniciais?.id && !podeCriar) {
-      alert("Sem permissao para criar centros de resultado.");
+      toast.error("Sem permissão para criar centros de resultado.");
       return;
     }
     if (onSubmit) {

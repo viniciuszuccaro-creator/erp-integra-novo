@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Globe } from 'lucide-react';
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { toast } from "sonner";
 
 export default function CatalogoWebForm({ catalogo, catalogoWeb, onSubmit, windowMode = false }) {
   const dadosIniciais = catalogoWeb || catalogo;
@@ -30,11 +31,11 @@ export default function CatalogoWebForm({ catalogo, catalogoWeb, onSubmit, windo
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!contextoValido) {
-      alert('Selecione um grupo ou empresa antes de salvar.');
+      toast.error('Selecione um grupo ou empresa antes de salvar.');
       return;
     }
     if (!podeSalvar) {
-      alert('Sem permissão para salvar catálogo web.');
+      toast.error('Sem permissão para salvar catálogo web.');
       return;
     }
     onSubmit({

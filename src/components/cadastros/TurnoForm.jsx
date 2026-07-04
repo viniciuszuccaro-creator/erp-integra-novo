@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -43,7 +44,7 @@ export default function TurnoForm({ turno, item, data, initialData, defaultValue
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.nome_turno || !formData.horario_inicio || !formData.horario_fim) {
-      alert('Preencha os campos obrigatórios');
+      toast.error('Preencha os campos obrigatórios');
       return;
     }
     onSubmit({ ...formData, nome: formData.nome_turno });

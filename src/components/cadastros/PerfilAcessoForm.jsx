@@ -96,7 +96,7 @@ export default function PerfilAcessoForm({ perfil, onSubmit, isSubmitting, windo
     }
     
     if (!formData.nome) {
-      alert('Preencha o nome do perfil');
+      toast.error('Preencha o nome do perfil');
       return;
     }
 

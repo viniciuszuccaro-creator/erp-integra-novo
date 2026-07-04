@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Download, FileText, FileSpreadsheet } from "lucide-react";
 import usePermissions from "@/components/lib/usePermissions";
+import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { base44 } from "@/api/base44Client";
 
@@ -27,7 +28,7 @@ export default function ExportMenu({ data, fileName = "relatorio", title = "Rela
         empresa_id: empresaAtual?.id || null, group_id: grupoAtual?.id || null,
         data_hora: new Date().toISOString(), sucesso: false
       });
-      alert('Você não tem permissão para exportar.');
+      toast.error('Você não tem permissão para exportar.');
       return;
     }
     base44.entities.AuditLog.create({
@@ -37,7 +38,7 @@ export default function ExportMenu({ data, fileName = "relatorio", title = "Rela
       data_hora: new Date().toISOString(), sucesso: true
     });
     if (!data || data.length === 0) {
-      alert("Não há dados para exportar");
+      toast.error("Não há dados para exportar");
       return;
     }
 
@@ -64,7 +65,7 @@ export default function ExportMenu({ data, fileName = "relatorio", title = "Rela
         empresa_id: empresaAtual?.id || null, group_id: grupoAtual?.id || null,
         data_hora: new Date().toISOString(), sucesso: false
       });
-      alert('Você não tem permissão para exportar.');
+      toast.error('Você não tem permissão para exportar.');
       return;
     }
     base44.entities.AuditLog.create({
@@ -74,7 +75,7 @@ export default function ExportMenu({ data, fileName = "relatorio", title = "Rela
       data_hora: new Date().toISOString(), sucesso: true
     });
     if (!data || data.length === 0) {
-      alert("Não há dados para exportar");
+      toast.error("Não há dados para exportar");
       return;
     }
 

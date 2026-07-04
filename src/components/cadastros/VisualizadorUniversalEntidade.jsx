@@ -13,6 +13,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -231,7 +232,7 @@ export default function VisualizadorUniversalEntidade({
   // ── Delete ──
   const handleDelete = useCallback(async (item) => {
     if (!canDeleteCadastro) {
-      alert("Sem permissao para excluir.");
+      toast.error("Sem permissão para excluir.");
       return;
     }
     if (!window.confirm(`Confirma exclusão de "${item.nome || item.descricao || item.id}"?`)) return;
@@ -239,7 +240,7 @@ export default function VisualizadorUniversalEntidade({
       await deleteInContext(ENTITY, item.id);
       queryClient.invalidateQueries({ queryKey: [ENTITY, "vis-list"] });
     } catch (e) {
-      alert("Erro ao excluir: " + (e?.message || e));
+      toast.error("Erro ao excluir: " + (e?.message || e));
     }
   }, [ENTITY, deleteInContext, queryClient, canDeleteCadastro]);
 

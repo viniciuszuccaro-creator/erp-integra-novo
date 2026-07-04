@@ -8,6 +8,7 @@ import { Box, Plus, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { toast } from "sonner";
 
 export default function KitProdutoForm({ kit, kitProduto, onSubmit, windowMode = false }) {
   const dadosIniciais = kitProduto || kit;
@@ -32,11 +33,11 @@ export default function KitProdutoForm({ kit, kitProduto, onSubmit, windowMode =
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!contextoValido) {
-      alert('Selecione um grupo ou empresa antes de salvar.');
+      toast.error('Selecione um grupo ou empresa antes de salvar.');
       return;
     }
     if (!podeSalvar) {
-      alert('Sem permissão para salvar kit de produtos.');
+      toast.error('Sem permissão para salvar kit de produtos.');
       return;
     }
     onSubmit({

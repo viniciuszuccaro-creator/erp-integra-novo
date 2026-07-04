@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 import { 
   Package, 
   DollarSign, 
@@ -77,7 +78,7 @@ export default function AdicionarItemRevendaModal({
     if (!produtoSelecionado || !calculo) return;
 
     if (calculo.margem_violada && !justificativaDesconto.trim()) {
-      alert("Margem mínima violada! É necessário informar uma justificativa para o desconto.");
+      toast.error("Margem mínima violada! É necessário informar uma justificativa para o desconto.");
       return;
     }
 

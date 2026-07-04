@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Clock, Save } from "lucide-react";
+import { toast } from "sonner";
 
 export default function JobAgendadoForm({ jobAgendado, onSubmit, isSubmitting, windowMode = false }) {
   const [formData, setFormData] = useState(jobAgendado || {
@@ -23,7 +24,7 @@ export default function JobAgendadoForm({ jobAgendado, onSubmit, isSubmitting, w
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nome_job) {
-      alert('Nome do job é obrigatório');
+      toast.error('Nome do job é obrigatório');
       return;
     }
     await onSubmit({ ...formData, nome: formData.nome_job });

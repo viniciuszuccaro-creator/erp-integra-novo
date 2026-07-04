@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link2, Save } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ConfiguracaoIntegracaoForm({ config, onSubmit, isSubmitting, windowMode = false }) {
   const [formData, setFormData] = useState(config || {
@@ -26,7 +27,7 @@ export default function ConfiguracaoIntegracaoForm({ config, onSubmit, isSubmitt
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.marketplace && !formData.nome_integracao) {
-      alert('Nome da integração ou marketplace é obrigatório');
+      toast.error('Nome da integração ou marketplace é obrigatório');
       return;
     }
     await onSubmit(formData);

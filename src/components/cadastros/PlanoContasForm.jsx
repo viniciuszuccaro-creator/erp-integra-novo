@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { FileText } from 'lucide-react';
 import usePermissions from '@/components/lib/usePermissions';
+import { toast } from "sonner";
 
 export default function PlanoContasForm({ conta, item, data, onSubmit, onSave, onClose, windowMode = false }) {
   const dadosIniciais = item || data || conta;
@@ -38,11 +39,11 @@ export default function PlanoContasForm({ conta, item, data, onSubmit, onSave, o
   const handleSubmit = (e) => {
     e.preventDefault();
     if (dadosIniciais?.id && !podeEditar) {
-      alert("Sem permissao para editar plano de contas.");
+      toast.error("Sem permissão para editar plano de contas.");
       return;
     }
     if (!dadosIniciais?.id && !podeCriar) {
-      alert("Sem permissao para criar plano de contas.");
+      toast.error("Sem permissão para criar plano de contas.");
       return;
     }
     // Injeta 'nome'/'codigo'/'descricao' para o Visualizador Universal

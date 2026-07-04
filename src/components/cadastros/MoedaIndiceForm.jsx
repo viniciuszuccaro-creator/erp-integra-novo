@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { TrendingUp } from 'lucide-react';
 import usePermissions from '@/components/lib/usePermissions';
+import { toast } from "sonner";
 
 export default function MoedaIndiceForm({ moeda, moedaIndice, item, data, onSubmit, onSave, onClose, windowMode = false }) {
   const dadosIniciais = item || data || moedaIndice || moeda;
@@ -31,11 +32,11 @@ export default function MoedaIndiceForm({ moeda, moedaIndice, item, data, onSubm
   const handleSubmit = (e) => {
     e.preventDefault();
     if (dadosIniciais?.id && !podeEditar) {
-      alert("Sem permissao para editar moedas e indices.");
+      toast.error("Sem permissão para editar moedas e índices.");
       return;
     }
     if (!dadosIniciais?.id && !podeCriar) {
-      alert("Sem permissao para criar moedas e indices.");
+      toast.error("Sem permissão para criar moedas e índices.");
       return;
     }
     if (onSubmit) {

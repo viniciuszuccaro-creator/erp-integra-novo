@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { Download, Filter, BarChart3, FileText, Table as TableIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -125,7 +126,7 @@ export default function RelatorioPersonalizado() {
   const handleExportarExcel = () => {
     // Simulação de export Excel (na produção usar biblioteca como xlsx)
     handleExportarCSV();
-    alert('Para exportar para Excel real, integre com biblioteca xlsx');
+    toast.info('Para exportar para Excel real, integre com biblioteca xlsx');
   };
 
   const processarDadosGrafico = () => {

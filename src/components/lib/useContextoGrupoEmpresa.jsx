@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44, isApiKeyMode, isLocalOnlyMode, localApiUser } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const CONTEXTO_CACHE_KEY = 'contexto_grupo_empresa_cache_v1';
 const CONTEXTO_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -214,7 +215,7 @@ export function useContextoGrupoEmpresa() {
     onError: (error) => {
       // V21.7: Mostrar erro amigável
       console.error("Erro ao trocar grupo:", error);
-      alert(error.message);
+      toast.error(error.message);
     }
   });
 
@@ -265,7 +266,7 @@ export function useContextoGrupoEmpresa() {
     onError: (error) => {
       // V21.7: Mostrar erro amigável
       console.error("Erro ao trocar empresa:", error);
-      alert(error.message);
+      toast.error(error.message);
     }
   });
 

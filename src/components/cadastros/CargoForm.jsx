@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Briefcase, Trash2, Power, PowerOff } from "lucide-react";
+import { toast } from "sonner";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -32,7 +33,7 @@ export default function CargoForm({ cargo, item, data, initialData, defaultValue
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.nome_cargo) {
-      alert('Preencha o nome do cargo');
+      toast.error('Preencha o nome do cargo');
       return;
     }
     onSubmit({ ...formData, nome: formData.nome_cargo });

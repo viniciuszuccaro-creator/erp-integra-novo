@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 import { Bell, Mail, Monitor, Volume2, Clock, Save, CheckCircle, AlertCircle, Settings, User, Lock, Palette } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -19,7 +20,7 @@ const isPushHabilitado = () => {
 
 const solicitarPermissaoPush = async () => {
   if (!("Notification" in window)) {
-    alert("Este navegador não suporta notificações push");
+    toast.error("Este navegador não suporta notificações push");
     return false;
   }
   if (Notification.permission === "granted") return true;
@@ -32,7 +33,7 @@ const solicitarPermissaoPush = async () => {
 
 const testarPushNotification = () => {
   if (!isPushHabilitado()) {
-    alert("Permissão de notificações não concedida");
+    toast.error("Permissão de notificações não concedida");
     return;
   }
   new Notification("🔔 Teste de Notificação", {

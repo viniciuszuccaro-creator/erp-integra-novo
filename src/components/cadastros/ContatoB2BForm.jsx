@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, MessageCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { toast } from "sonner";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -38,7 +39,7 @@ export default function ContatoB2BForm({ contato, contatoB2B, item, data, onSubm
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.nome_contato || !formData.email) {
-      alert('Preencha os campos obrigatórios');
+      toast.error('Preencha os campos obrigatórios');
       return;
     }
     if (onSubmit) {

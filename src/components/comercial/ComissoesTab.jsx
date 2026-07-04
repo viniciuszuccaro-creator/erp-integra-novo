@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 import {
   Plus,
   Search,
@@ -98,7 +99,7 @@ export default function ComissoesTab({ comissoes, pedidos, empresas = [] }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['Comissao'] });
       queryClient.invalidateQueries({ queryKey: ['ContaPagar'] });
-      alert('Comissão aprovada para pagamento!\n\nTítulo criado no Financeiro.');
+      toast.success('Comissão aprovada para pagamento! Título criado no Financeiro.');
     },
   });
 

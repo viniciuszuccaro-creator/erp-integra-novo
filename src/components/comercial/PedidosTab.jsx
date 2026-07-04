@@ -345,13 +345,13 @@ export default function PedidosTab({ pedidos, clientes, isLoading, empresas, onC
               Há <span className="font-semibold">{pedidosPendentesAprovacao.length}</span> pedido(s) aguardando aprovação.
             </div>
             <div className="flex items-center gap-2">
-              <Button onClick={() => openWindow(CentralAprovacoesManager, { windowMode: true }, { title: '🔐 Central de Aprovações', width: 1200, height: 700 })} className="bg-orange-600 hover:bg-orange-600/90">
+              <Button data-permission="Comercial.Pedido.aprovar" onClick={() => openWindow(CentralAprovacoesManager, { windowMode: true }, { title: '🔐 Central de Aprovações', width: 1200, height: 700 })} className="bg-orange-600 hover:bg-orange-600/90">
                 Central de Aprovações
               </Button>
-              <Button variant="outline" onClick={() => notifyWhatsAppPendentes(selectedPedidos)}>
+              <Button variant="outline" data-permission="Comercial.Pedido.notificar" onClick={() => notifyWhatsAppPendentes(selectedPedidos)}>
                 Notificar WhatsApp
               </Button>
-              <Button variant="outline" onClick={() => notifyEmailPendentes(selectedPedidos)}>
+              <Button variant="outline" data-permission="Comercial.Pedido.notificar" onClick={() => notifyEmailPendentes(selectedPedidos)}>
                 Notificar Email
               </Button>
             </div>

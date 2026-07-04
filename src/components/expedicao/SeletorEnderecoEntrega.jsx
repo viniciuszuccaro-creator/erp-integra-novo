@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MapPin, Plus, CheckCircle } from "lucide-react";
 import BuscaCEP from "../comercial/BuscaCEP";
+import { toast } from "sonner";
 
 /**
  * Seletor de Endereço de Entrega
@@ -56,7 +57,7 @@ export default function SeletorEnderecoEntrega({ cliente, onEnderecoSelecionado 
       onEnderecoSelecionado(enderecoSelecionado, false);
     } else if (modo === "novo") {
       if (!novoEndereco.cep || !novoEndereco.logradouro) {
-        alert("Preencha CEP e Logradouro");
+        toast.error("Preencha CEP e Logradouro");
         return;
       }
       salvarEnderecoMutation.mutate();

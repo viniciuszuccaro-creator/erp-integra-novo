@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { DollarSign } from 'lucide-react';
 import usePermissions from '@/components/lib/usePermissions';
+import { toast } from "sonner";
 
 export default function CondicaoComercialForm({ condicao, condicaoComercial, onSubmit, windowMode = false }) {
   const dadosIniciais = condicaoComercial || condicao;
@@ -27,11 +28,11 @@ export default function CondicaoComercialForm({ condicao, condicaoComercial, onS
   const handleSubmit = (e) => {
     e.preventDefault();
     if (dadosIniciais?.id && !podeEditar) {
-      alert("Sem permissao para editar condicoes comerciais.");
+      toast.error("Sem permissão para editar condições comerciais.");
       return;
     }
     if (!dadosIniciais?.id && !podeCriar) {
-      alert("Sem permissao para criar condicoes comerciais.");
+      toast.error("Sem permissão para criar condições comerciais.");
       return;
     }
     onSubmit({ ...formData, nome: formData.nome_condicao || formData.nome || '' });

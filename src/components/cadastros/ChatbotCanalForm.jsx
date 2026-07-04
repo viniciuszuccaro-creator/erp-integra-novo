@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Smartphone, Save } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ChatbotCanalForm({ chatbotCanal, onSubmit, isSubmitting, windowMode = false }) {
   const dadosIniciais = chatbotCanal;
@@ -25,7 +26,7 @@ export default function ChatbotCanalForm({ chatbotCanal, onSubmit, isSubmitting,
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nome_canal) {
-      alert('Nome do canal é obrigatório');
+      toast.error('Nome do canal é obrigatório');
       return;
     }
     await onSubmit({ ...formData, nome: formData.nome_canal });

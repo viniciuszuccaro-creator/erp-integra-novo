@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Truck, Navigation, Calendar, Clock, Package, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from "sonner";
 
 /**
  * V21.5 - Rastreamento em Tempo Real COMPLETO
@@ -210,7 +211,7 @@ export default function RastreamentoRealtime() {
                       className="flex-1"
                       onClick={() => {
                         navigator.clipboard.writeText(entrega.link_publico_rastreamento);
-                        alert('Link de rastreamento copiado!');
+                        toast.success('Link de rastreamento copiado!');
                       }}
                     >
                       <MapPin className="w-4 h-4 mr-2" />

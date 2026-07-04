@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Bell, Save } from "lucide-react";
+import { toast } from "sonner";
 
 export default function EventoNotificacaoForm({ evento, onSubmit, isSubmitting, windowMode = false }) {
   const [formData, setFormData] = useState(evento || {
@@ -23,7 +24,7 @@ export default function EventoNotificacaoForm({ evento, onSubmit, isSubmitting, 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nome_evento) {
-      alert('Nome do evento é obrigatório');
+      toast.error('Nome do evento é obrigatório');
       return;
     }
     await onSubmit(formData);

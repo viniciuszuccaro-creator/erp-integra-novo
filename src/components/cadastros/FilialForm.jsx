@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { toast } from "sonner";
 
 export default function FilialForm({ filial, onSubmit, isSubmitting }) {
   const [formData, setFormData] = useState(filial || {
@@ -28,7 +29,7 @@ export default function FilialForm({ filial, onSubmit, isSubmitting }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.razao_social || !formData.cnpj) {
-      alert('Preencha os campos obrigatórios');
+      toast.error('Preencha os campos obrigatórios');
       return;
     }
     onSubmit(formData);

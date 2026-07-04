@@ -1045,7 +1045,6 @@ RETORNE:
                 data-permission="Cadastros.TabelaPreco.excluir"
                 onClick={handleExcluir}
                 disabled={!podeExcluir || !contextoValido}
-                data-permission="Comercial.TabelaPreco.excluir"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Excluir

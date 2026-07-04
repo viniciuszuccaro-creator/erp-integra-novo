@@ -29,30 +29,33 @@ import {
   Download
 } from "lucide-react";
 import ExportButton from "@/components/ExportButton";
+import useContextoVisual from "@/components/lib/useContextoVisual";
 
 /**
  * Dashboard de Canais de Origem de Pedidos V21.6
  * Visualiza performance, conversão e volume por canal
  */
 export default function DashboardCanaisOrigem({ empresaId, windowMode = false }) {
+  const { empresaAtual, grupoAtual, filterInContext } = useContextoVisual();
+  const resolvedEmpresaId = empresaId || empresaAtual?.id;
+  const groupId = grupoAtual?.id || empresaAtual?.group_id;
+  const contextKey = resolvedEmpresaId || groupId || "sem-contexto";
+  const contextoValido = contextKey !== "sem-contexto";
   
-  // Buscar parâmetros de origem
+  // Buscar parâmetros de origem (com contexto multi-tenant)
   const { data: parametros = [], isLoading: loadingParametros } = useQuery({
-    queryKey: ['parametros-origem-pedido'],
-    queryFn: () => base44.entities.ParametroOrigemPedido.list(),
+    queryKey: ['parametros-origem-pedido', contextKey],
+    queryFn: () => filterInContext('ParametroOrigemPedido', {}, 'canal', 200),
     initialData: [],
+    enabled: contextoValido,
   });
 
-  // Buscar pedidos para análise
+  // Buscar pedidos para análise (com contexto multi-tenant)
   const { data: pedidos = [], isLoading: loadingPedidos } = useQuery({
-    queryKey: ['pedidos', empresaId],
-    queryFn: () => {
-      if (empresaId) {
-        return base44.entities.Pedido.filter({ empresa_id: empresaId });
-      }
-      return base44.entities.Pedido.list('-created_date', 500);
-    },
+    queryKey: ['pedidos', contextKey],
+    queryFn: () => filterInContext('Pedido', {}, '-created_date', 500),
     initialData: [],
+    enabled: contextoValido,
   });
 
   // Calcular métricas por canal

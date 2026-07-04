@@ -175,7 +175,7 @@ Retorne sugestões de conciliação baseadas em valor, data, histórico e simila
               Gerar Conciliação com IA
             </Button>
 
-            <Button variant="outline" disabled={controlesDesabilitados}>
+            <Button variant="outline" disabled={controlesDesabilitados} data-permission="Financeiro.Conciliacao.importar">
               <Upload className="w-4 h-4 mr-2" />
               Importar Extrato OFX
             </Button>

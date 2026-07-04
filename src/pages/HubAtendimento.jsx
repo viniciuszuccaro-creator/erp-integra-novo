@@ -332,6 +332,7 @@ export default function HubAtendimento() {
               <span className="hidden lg:inline">Atendimento</span>
             </Button>
             <Button
+              data-permission="HubAtendimento.Painel.visualizar"
               variant={abaAtiva === "meupainel" ? "default" : "outline"}
               onClick={() => setAbaAtiva("meupainel")}
               size="sm"
@@ -371,6 +372,7 @@ export default function HubAtendimento() {
               <span className="hidden lg:inline">Canais</span>
             </Button>
             <Button
+              data-permission="HubAtendimento.SLA.visualizar"
               variant={abaAtiva === "sla" ? "default" : "outline"}
               onClick={() => setAbaAtiva("sla")}
               size="sm"
@@ -380,6 +382,7 @@ export default function HubAtendimento() {
               <span className="hidden lg:inline">SLA</span>
             </Button>
             <Button
+              data-permission="HubAtendimento.Fila.visualizar"
               variant={abaAtiva === "fila" ? "default" : "outline"}
               onClick={() => setAbaAtiva("fila")}
               size="sm"
@@ -389,6 +392,7 @@ export default function HubAtendimento() {
               <span className="hidden lg:inline">Fila</span>
             </Button>
             <Button
+              data-permission="HubAtendimento.Relatorios.visualizar"
               variant={abaAtiva === "relatorios" ? "default" : "outline"}
               onClick={() => setAbaAtiva("relatorios")}
               size="sm"
@@ -398,6 +402,7 @@ export default function HubAtendimento() {
               <span className="hidden lg:inline">Relatórios</span>
             </Button>
             <Button
+              data-permission="HubAtendimento.Multicanal.visualizar"
               variant={abaAtiva === "multicanal" ? "default" : "outline"}
               onClick={() => setAbaAtiva("multicanal")}
               size="sm"
@@ -407,6 +412,7 @@ export default function HubAtendimento() {
               <span className="hidden lg:inline">Multi</span>
             </Button>
             <Button
+              data-permission="HubAtendimento.BaseConhecimento.visualizar"
               variant={abaAtiva === "base" ? "default" : "outline"}
               onClick={() => setAbaAtiva("base")}
               size="sm"
@@ -461,7 +467,7 @@ export default function HubAtendimento() {
           <>
             {/* Métricas */}
             {metricas && (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 text-slate-600 text-sm mb-1">
@@ -509,16 +515,6 @@ export default function HubAtendimento() {
                   Resolvidas Hoje
                 </div>
                 <p className="text-2xl font-bold text-green-600">{metricas.resolvidasHoje}</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-purple-600 text-sm mb-1">
-                  <TrendingUp className="w-4 h-4" />
-                  Tempo Médio
-                </div>
-                <p className="text-2xl font-bold text-purple-600">{metricas.tempoMedioResposta}min</p>
               </CardContent>
             </Card>
 
@@ -604,6 +600,7 @@ export default function HubAtendimento() {
               <Button
                 variant="outline"
                 size="sm"
+                data-permission="HubAtendimento.Atendimento.visualizar"
                 onClick={() => queryClient.invalidateQueries({ queryKey: ['conversas-omnicanal'] })}
                 title="Atualizar"
               >

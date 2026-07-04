@@ -271,6 +271,7 @@ export default function EventosNFe({ nfe }) {
                   onClick={() => cartaCorrecaoMutation.mutate(textoCorrecao)}
                   disabled={textoCorrecao.length < 15 || cartaCorrecaoMutation.isPending}
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  data-permission="Fiscal.NFe.corrigir"
                 >
                   {cartaCorrecaoMutation.isPending ? 'Emitindo...' : 'Emitir CC-e'}
                 </Button>

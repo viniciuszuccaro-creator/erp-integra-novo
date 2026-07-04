@@ -469,6 +469,7 @@ export default function GestaoRemessaRetorno({ windowMode = false }) {
                           <Button
                             size="sm"
                             variant="outline"
+                            data-permission="Financeiro.Remessa.baixar"
                             onClick={() => {
                               const blob = new Blob([arquivo.conteudo_arquivo], { type: 'text/plain' });
                               const url = URL.createObjectURL(blob);

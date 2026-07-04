@@ -294,7 +294,7 @@ export default function OrdemCompraForm({ ordemCompra, onSubmit, windowMode = fa
 
             <div>
               <Label className="text-xs mb-1 block">Ação</Label>
-              <Button type="button" onClick={handleAddItem} size="sm" className="w-full h-9 bg-green-600 hover:bg-green-700">
+              <Button type="button" data-permission="Compras.OrdemCompra.criar" onClick={handleAddItem} size="sm" className="w-full h-9 bg-green-600 hover:bg-green-700">
                 <Plus className="w-3 h-3" />
               </Button>
             </div>

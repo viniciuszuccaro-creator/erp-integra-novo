@@ -323,7 +323,7 @@ export default function CalcularComissoesForm({ onSubmit, onCancel, pedidos = []
         <Button variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button onClick={handleCalcularComissoes} className="bg-purple-600 hover:bg-purple-700">
+        <Button data-permission="Comercial.Comissao.calcular" onClick={handleCalcularComissoes} className="bg-purple-600 hover:bg-purple-700">
           <Calculator className="w-4 h-4 mr-2" />
           Calcular Comissões Agora
         </Button>

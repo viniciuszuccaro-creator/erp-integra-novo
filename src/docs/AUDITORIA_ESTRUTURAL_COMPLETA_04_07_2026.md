@@ -155,7 +155,7 @@
 | Métrica | Antes | Depois |
 |---------|-------|--------|
 | alert() calls | 63 | **0** ✅ |
-| data-permission attrs | 570 | **597** ✅ |
+| data-permission attrs | 570 | **606** ✅ |
 | Arquivos com w-full | 923 | 923 ✅ |
 | Arquivos com h-full | 668 | 668 ✅ |
 | Arquivos com toast | 227 | 227 ✅ |

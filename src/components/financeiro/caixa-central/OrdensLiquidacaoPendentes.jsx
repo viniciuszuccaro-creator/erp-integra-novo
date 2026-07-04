@@ -180,7 +180,7 @@ export default function OrdensLiquidacaoPendentes() {
                     <TableCell><Badge className="bg-blue-100 text-blue-700">{ordem.forma_pagamento_pretendida}</Badge></TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button size="sm" disabled={!contextoValido || !podeLiquidar || liquidarOrdemMutation.isPending} onClick={() => handleLiquidar(ordem)} className="bg-emerald-600 hover:bg-emerald-700">
+                        <Button size="sm" data-permission="Financeiro.Caixa.liquidar" disabled={!contextoValido || !podeLiquidar || liquidarOrdemMutation.isPending} onClick={() => handleLiquidar(ordem)} className="bg-emerald-600 hover:bg-emerald-700">
                           <CheckCircle2 className="w-4 h-4 mr-1" />
                           Liquidar
                         </Button>

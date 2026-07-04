@@ -379,7 +379,7 @@ export default function ImportadorProdutosPlanilha({ onConcluido, closeSelf }) {
 
         <div className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={() => closeSelf && closeSelf()} disabled={processando}>Cancelar</Button>
-          <Button type="button" onClick={importar} disabled={processando || !arquivo || (!empresaId && !grupoId) || checando} className="gap-2 bg-indigo-600 hover:bg-indigo-700">
+          <Button type="button" data-permission="Estoque.Produto.importar" onClick={importar} disabled={processando || !arquivo || (!empresaId && !grupoId) || checando} className="gap-2 bg-indigo-600 hover:bg-indigo-700">
             {processando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
             {processando ? "Importando..." : "Importar Agora"}
           </Button>

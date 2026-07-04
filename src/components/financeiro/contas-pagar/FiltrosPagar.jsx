@@ -73,7 +73,7 @@ export default function FiltrosPagar({
 
           <DuplicarMesAnterior empresaId={empresaId} />
           
-          <Button size="sm" onClick={onNovaConta} className="bg-red-600 hover:bg-red-700 ml-auto">
+          <Button size="sm" data-permission="Financeiro.ContaPagar.criar" onClick={onNovaConta} className="bg-red-600 hover:bg-red-700 ml-auto">
             <Plus className="w-3 h-3 mr-1" /> Nova
           </Button>
         </div>

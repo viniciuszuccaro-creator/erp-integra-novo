@@ -158,7 +158,7 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
               <Label>Saldo Inicial em Dinheiro (R$)</Label>
               <Input type="number" step="0.01" value={saldoInicial} onChange={(e) => setSaldoInicial(parseFloat(e.target.value) || 0)} placeholder="0.00" className="text-lg" disabled={controlesDesabilitados} />
             </div>
-            <Button onClick={() => abrirCaixa.mutate(saldoInicial)} className="w-full bg-emerald-600 h-10" disabled={controlesDesabilitados || abrirCaixa.isPending}>
+            <Button data-permission="Financeiro.Caixa.abrir" onClick={() => abrirCaixa.mutate(saldoInicial)} className="w-full bg-emerald-600 h-10" disabled={controlesDesabilitados || abrirCaixa.isPending}>
               <CheckCircle2 className="w-4 h-4 mr-2" /> Abrir Caixa
             </Button>
           </CardContent>

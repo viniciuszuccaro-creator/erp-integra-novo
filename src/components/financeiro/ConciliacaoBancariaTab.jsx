@@ -160,6 +160,7 @@ Retorne sugestões de conciliação baseadas em valor, data, histórico e simila
 
           <div className="flex gap-3">
             <Button 
+              data-permission="Financeiro.Conciliacao.gerar"
               onClick={() => {
                 const contaId = contaSelecionadaId || contas[0]?.id;
                 if (contaId) {

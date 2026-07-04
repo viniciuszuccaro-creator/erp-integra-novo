@@ -80,6 +80,7 @@ export default function GerarLinkPagamentoModal({ isOpen, onClose, contaReceber 
 
           {!linkGerado ? (
             <Button
+              data-permission="Financeiro.LinkPagamento.gerar"
               onClick={() => gerarLinkMutation.mutate()}
               disabled={gerarLinkMutation.isPending}
               className="w-full bg-blue-600 hover:bg-blue-700"

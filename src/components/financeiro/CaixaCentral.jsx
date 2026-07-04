@@ -295,7 +295,7 @@ export default function CaixaCentral({ windowMode = false }) {
                     .toLocaleString('pt-BR', {minimumFractionDigits: 2})}
                 </p>
               </div>
-              <Button onClick={iniciarLiquidacao} disabled={!contextoValido || !podeLiquidar} className="bg-blue-600 hover:bg-blue-700">
+              <Button data-permission="Financeiro.Caixa.liquidar" onClick={iniciarLiquidacao} disabled={!contextoValido || !podeLiquidar} className="bg-blue-600 hover:bg-blue-700">
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Liquidar Selecionadas
               </Button>
@@ -515,6 +515,7 @@ export default function CaixaCentral({ windowMode = false }) {
                   Cancelar
                 </Button>
                 <Button 
+                  data-permission="Financeiro.Caixa.liquidar"
                   onClick={confirmarLiquidacao}
                   className="flex-1 bg-green-600 hover:bg-green-700"
                   disabled={!contextoValido || !podeLiquidar || liquidarOrdens.isPending}

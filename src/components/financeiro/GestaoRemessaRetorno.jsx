@@ -299,6 +299,7 @@ export default function GestaoRemessaRetorno({ windowMode = false }) {
                     </p>
                   </div>
                   <Button
+                    data-permission="Financeiro.Remessa.gerar"
                     onClick={() => setDialogRemessa(true)}
                     disabled={!contextoValido || !podeGerarRemessa}
                     className="bg-blue-600 hover:bg-blue-700"
@@ -546,6 +547,7 @@ export default function GestaoRemessaRetorno({ windowMode = false }) {
                   Cancelar
                 </Button>
                 <Button
+                  data-permission="Financeiro.Remessa.gerar"
                   onClick={() => {
                     if (!bancoSelecionado) {
                       toast.error("Selecione um banco");

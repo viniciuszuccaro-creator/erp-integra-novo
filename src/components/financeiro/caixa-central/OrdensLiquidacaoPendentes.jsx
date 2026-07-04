@@ -290,6 +290,7 @@ export default function OrdensLiquidacaoPendentes() {
               <div className="flex justify-end gap-3">
                 <Button variant="outline" onClick={() => setLiquidacaoDialogOpen(false)}>Cancelar</Button>
                 <Button
+                  data-permission="Financeiro.Caixa.liquidar"
                   className="bg-emerald-600 hover:bg-emerald-700"
                   onClick={confirmarLiquidacao}
                   disabled={!contextoValido || !podeLiquidar || liquidarOrdemMutation.isPending}

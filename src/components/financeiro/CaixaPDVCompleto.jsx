@@ -227,7 +227,7 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
                     <TableCell>{p.cliente_nome}</TableCell>
                     <TableCell className="font-bold">R$ {(p.valor_total || 0).toFixed(2)}</TableCell>
                     <TableCell>
-                      <Button size="sm" disabled={!contextoValido || !podeLiquidarTitulos || liquidarTitulo.isPending} onClick={() => liquidarTitulo.mutate({ titulo: { id: p.id, cliente: p.cliente_nome, valor: p.valor_total }, tipo: 'receber', forma: 'Dinheiro' })}>Receber</Button>
+                      <Button size="sm" data-permission="Financeiro.Caixa.liquidar" disabled={!contextoValido || !podeLiquidarTitulos || liquidarTitulo.isPending} onClick={() => liquidarTitulo.mutate({ titulo: { id: p.id, cliente: p.cliente_nome, valor: p.valor_total }, tipo: 'receber', forma: 'Dinheiro' })}>Receber</Button>
                     </TableCell>
                   </tr>
                 ))}

@@ -187,11 +187,12 @@ export default function GeradorLinkPagamento({
               />
             </div>
 
-            <Button 
-              onClick={() => gerarLink.mutate()}
-              className="w-full bg-blue-600 hover:bg-blue-700"
-              disabled={gerarLink.isPending}
-            >
+            <Button
+                data-permission="Financeiro.LinkPagamento.gerar"
+                onClick={() => gerarLink.mutate()}
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                disabled={gerarLink.isPending}
+              >
               <Link2 className="w-4 h-4 mr-2" />
               Gerar Link
             </Button>

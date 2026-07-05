@@ -215,9 +215,10 @@ export default function ImportacaoProdutoNFe({ onProdutosCriados }) {
         </div>
 
         {arquivo && (
-          <Button 
-            onClick={processarNFe} 
+          <Button
+            onClick={processarNFe}
             disabled={processando}
+            data-permission="Cadastros.Produto.importarNFe"
             className="w-full bg-purple-600 hover:bg-purple-700"
           >
             {processando ? (

@@ -128,6 +128,7 @@ export default function HistoricoProduto({ produtoId, produto }) {
               <Button
                 onClick={enviarParaProducao}
                 disabled={convertendo}
+                data-permission="Cadastros.Produto.enviarProducao"
                 className="bg-orange-600 hover:bg-orange-700"
               >
                 <Factory className="w-4 h-4 mr-2" />

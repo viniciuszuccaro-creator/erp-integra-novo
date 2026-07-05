@@ -102,7 +102,7 @@ export default function ProdutoIdentificacaoSection({
                     <p className="font-semibold text-sm text-orange-900 mb-1">🏭 Usar este produto na Produção?</p>
                     <p className="text-xs text-orange-700">Converte para Matéria-Prima e habilita uso em Ordens de Produção</p>
                   </div>
-                  <Button type="button" variant="outline" className="bg-orange-600 text-white hover:bg-orange-700 border-orange-600" onClick={enviarParaProducao}><Factory className="w-4 h-4 mr-2" /> Enviar para Produção</Button>
+                  <Button type="button" variant="outline" data-permission="Cadastros.Produto.enviarProducao" className="bg-orange-600 text-white hover:bg-orange-700 border-orange-600" onClick={enviarParaProducao}><Factory className="w-4 h-4 mr-2" /> Enviar para Produção</Button>
                 </div>
               </AlertDescription>
             </Alert>

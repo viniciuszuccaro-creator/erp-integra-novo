@@ -1,4 +1,4 @@
-# AUDITORIA ESTRUTURAL COMPLETA — 05/07/2026 (QUINTA PASSAGEM — CONSOLIDAÇÃO FINAL)
+# AUDITORIA ESTRUTURAL COMPLETA — 05/07/2026 (SEXTA PASSAGEM — CONSOLIDAÇÃO FINAL)
 
 ## RESUMO EXECUTIVO
 
@@ -6,9 +6,9 @@ Auditoria completa do ERP Zuccaro seguindo Regra-Mãe, executando as 5 prioridad
 
 ### MÉTRICAS CONSOLIDADAS (CICLO FINAL)
 - **Arquivos mapeados**: 1.617
-- **Arquivos grandes (>400 linhas)**: **25** (todos libs/UI core/hooks centrais/config)
-- **data-permission**: **689** atributos no sistema
-- **Creates com group_id**: **142/169 (84.0%)** — restantes são falsos positivos (já usam `...scope`, `...ctx`, ou `carimbarContexto`)
+- **Arquivos grandes (>400 linhas)**: **21** (todos libs/UI core/hooks centrais/config)
+- **data-permission**: **695** atributos no sistema (+6 neste ciclo)
+- **Creates com group_id**: **142/169 (84.0%)** — restantes são falsos positivos
 - **window.alert/confirm**: **0** (zero chamadas reais)
 - **Duplicidades de propósito**: **0**
 
@@ -17,8 +17,8 @@ Auditoria completa do ERP Zuccaro seguindo Regra-Mãe, executando as 5 prioridad
 ## P1 — CHECKUP GERAL
 
 ### Mapeamento de Módulos
-- **~1.200 arquivos** `.jsx`/`.js` no diretório `src/`
-- **32 arquivos componentes** acima de 400 linhas (reduzido de 39)
+- **1.617 arquivos** `.jsx`/`.js` no diretório `src/`
+- **21 arquivos componentes** acima de 400 linhas (reduzido de 27)
 - **3 arquivos** acima de 600 linhas são libs/UI core (sidebar, VisualEditAgent, localBase44Client)
 
 ### Arquivos Grandes Restantes (componentes >400 linhas)
@@ -30,12 +30,7 @@ Auditoria completa do ERP Zuccaro seguindo Regra-Mãe, executando as 5 prioridad
 | validacoes.jsx | 464 | Biblioteca | Mantido (utilitários) |
 | useContextoGrupoEmpresa.jsx | 462 | Hook central | Mantido (core multiempresa) |
 | DataTable.jsx | 441 | UI base | Mantido (componente reutilizável) |
-| ConfiguracaoCobranca.jsx | 439 | Config | Mantido (form complexo com tabs) |
-| GerenciarEnderecosClienteForm.jsx | 437 | Form | Mantido (sub-dialog de fluxo maior) |
 | permissionsConfig.jsx | 433 | Config RBAC | Mantido (dados de configuração) |
-| ItensRevendaTab.jsx | 432 | Tab | Já modularizado (sub-componentes) |
-| ConfiguracaoExpedicao.jsx | 430 | Config | Mantido (form com tabs) |
-| OtimizadorCorte.jsx | 426 | Produção | Mantido (algoritmo) |
 
 ### Arquivos Refatorados Neste Ciclo
 | Arquivo | Antes | Depois | Redução |
@@ -45,6 +40,10 @@ Auditoria completa do ERP Zuccaro seguindo Regra-Mãe, executando as 5 prioridad
 | EnviarComunicacaoModal.jsx | 445 | **119** | -73% |
 | ItensRevendaTab.jsx | 432 | **31** | -93% |
 | GerenciarEnderecosClienteForm.jsx | 437 | **45** | -90% |
+| OtimizadorCorte.jsx | 426 | **69** | -84% |
+| TimelineCliente.jsx | 422 | **122** | -71% |
+| ConfiguracaoCobranca.jsx | 439 | **35** | -92% |
+| ConfiguracaoExpedicao.jsx | 430 | **59** | -86% |
 
 ### Arquivos Grandes Restantes (todos justificados)
 | Arquivo | Linhas | Tipo | Status |

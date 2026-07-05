@@ -141,6 +141,7 @@ export default function AbaEcommerceProduto({ formData, setFormData }) {
                 size="sm"
                 onClick={gerarDescricaoSEO}
                 disabled={gerandoDescricaoSEO}
+                data-permission="Cadastros.Produto.gerarSEO"
                 className="bg-green-600 hover:bg-green-700"
               >
                 {gerandoDescricaoSEO ? (
@@ -177,6 +178,7 @@ export default function AbaEcommerceProduto({ formData, setFormData }) {
                 size="sm"
                 onClick={gerarImagemIA}
                 disabled={gerandoImagem}
+                data-permission="Cadastros.Produto.gerarImagem"
                 className="bg-orange-600 hover:bg-orange-700"
               >
                 {gerandoImagem ? (

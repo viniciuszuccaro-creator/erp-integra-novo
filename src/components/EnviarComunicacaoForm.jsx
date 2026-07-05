@@ -279,10 +279,11 @@ export default function EnviarComunicacaoForm({ pedido, tipo = "manual", onEnvia
       </Tabs>
 
       <div className="flex justify-end gap-3 pt-6 border-t sticky bottom-0 bg-white">
-        <Button 
-          type="button" 
-          onClick={handleEnviar} 
+        <Button
+          type="button"
+          onClick={handleEnviar}
           disabled={enviando}
+          data-permission="Comercial.Comunicacao.enviar"
           className={canal === "email" ? "bg-blue-600" : "bg-green-600"}
         >
           {enviando ? (

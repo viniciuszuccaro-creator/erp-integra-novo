@@ -1,29 +1,31 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Sparkles, TrendingUp, Target, Zap } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.6 - IA que sugere o melhor canal de venda por cliente
  * Baseado no histórico de compras e preferências
  */
 export default function SugestorCanalInteligente({ clienteId, className = "" }) {
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   
   // Buscar histórico do cliente
   const { data: pedidosCliente = [] } = useQuery({
-    queryKey: ['pedidos-cliente', clienteId],
-    queryFn: () => base44.entities.Pedido.filter({ cliente_id: clienteId }),
+    queryKey: ['pedidos-cliente', clienteId, contextoKey],
+    queryFn: () => filterInContext('Pedido', { cliente_id: clienteId }),
     initialData: [],
     enabled: !!clienteId
   });
 
   // Buscar uso do portal
   const { data: cliente } = useQuery({
-    queryKey: ['cliente', clienteId],
-    queryFn: () => base44.entities.Cliente.get(clienteId),
+    queryKey: ['cliente', clienteId, contextoKey],
+    queryFn: () => filterInContext('Cliente', {}, undefined, 999).then(lista => lista.find(c => c.id === clienteId)),
     enabled: !!clienteId
   });
 

@@ -1,22 +1,24 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Truck, Package, MapPin, Calendar, ExternalLink } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.1.2: Painel de Entregas do Pedido - WINDOW MODE READY
  * Mostra todas as entregas vinculadas a um pedido
  */
 export default function PainelEntregasPedido({ pedidoId, windowMode = false }) {
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const { data: entregas = [], isLoading } = useQuery({
-    queryKey: ['entregas-pedido', pedidoId],
+    queryKey: ['entregas-pedido', pedidoId, contextoKey],
     queryFn: async () => {
-      const todas = await base44.entities.Entrega.list('-created_date');
+      const todas = await filterInContext('Entrega', {}, '-created_date');
       return todas.filter(e => e.pedido_id === pedidoId);
     },
     enabled: !!pedidoId,

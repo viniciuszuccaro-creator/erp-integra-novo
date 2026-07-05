@@ -463,6 +463,7 @@ export default function AdicionarItemRevendaModal({
           onClick={handleAdicionarItem}
           disabled={!produtoSelecionado || quantidade <= 0 || (calculo?.margem_violada && !justificativaDesconto.trim())}
           className={calculo?.margem_violada ? "bg-orange-600 hover:bg-orange-700" : "bg-blue-600 hover:bg-blue-700"}
+          data-permission="Comercial.ItemRevenda.adicionar"
         >
           {calculo?.margem_violada ? "Adicionar (Aguardando Aprovação)" : "Adicionar Item"}
         </Button>

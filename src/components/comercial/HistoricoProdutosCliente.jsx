@@ -1,15 +1,17 @@
 import React, { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Package, Calendar } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function HistoricoProdutosCliente({ clienteId }) {
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['historico-produtos-cliente', clienteId],
-    queryFn: () => base44.entities.Pedido.filter({ cliente_id: clienteId }, '-data_pedido', 200),
+    queryKey: ['historico-produtos-cliente', clienteId, contextoKey],
+    queryFn: () => filterInContext('Pedido', { cliente_id: clienteId }, '-data_pedido', 200),
     enabled: !!clienteId,
     staleTime: 60_000,
   });

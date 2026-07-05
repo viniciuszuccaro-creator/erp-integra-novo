@@ -1,5 +1,4 @@
 import React from "react";
-import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,16 +16,19 @@ import {
   User,
   MapPin
 } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Timeline de Comunicação e Histórico do Pedido/Cliente
  * Integra todos os módulos: Pedido, Produção, Estoque, Expedição, Fiscal, Financeiro
  */
 export default function HistoricoComunicacao({ clienteId, pedidoId }) {
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const { data: historico = [], isLoading } = useQuery({
-    queryKey: ['historico-cliente', clienteId, pedidoId],
+    queryKey: ['historico-cliente', clienteId, pedidoId, contextoKey],
     queryFn: async () => {
-      let eventos = await base44.entities.HistoricoCliente.list('-data_evento', 100);
+      let eventos = await filterInContext('HistoricoCliente', {}, '-data_evento', 100);
       
       if (pedidoId) {
         eventos = eventos.filter(e => e.referencia_id === pedidoId || e.pedido_id === pedidoId);

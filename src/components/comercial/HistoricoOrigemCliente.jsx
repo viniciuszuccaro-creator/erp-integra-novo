@@ -1,21 +1,23 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import BadgeOrigemPedido from "./BadgeOrigemPedido";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { History, TrendingUp, ShoppingCart } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.6 - Histórico de Origens de um Cliente
  * Mostra preferências e padrões de compra por canal
  */
 export default function HistoricoOrigemCliente({ clienteId, compact = false }) {
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   
   const { data: pedidosCliente = [], isLoading } = useQuery({
-    queryKey: ['pedidos-cliente', clienteId],
-    queryFn: () => base44.entities.Pedido.filter({ cliente_id: clienteId }),
+    queryKey: ['pedidos-cliente', clienteId, contextoKey],
+    queryFn: () => filterInContext('Pedido', { cliente_id: clienteId }),
     initialData: [],
     enabled: !!clienteId
   });

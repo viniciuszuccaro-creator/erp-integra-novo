@@ -5,19 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { CreditCard, TrendingUp, TrendingDown, AlertCircle, CheckCircle, DollarSign } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function LimiteCreditoWidget({ 
   cliente, 
   valorPedidoAtual = 0,
   onLimiteAtualizado 
 }) {
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [limiteAtual, setLimiteAtual] = useState(cliente?.condicao_comercial?.limite_credito || 0);
   const [limiteUtilizado, setLimiteUtilizado] = useState(cliente?.condicao_comercial?.limite_credito_utilizado || 0);
 
   const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contasReceberCliente', cliente?.id],
-    queryFn: () => cliente?.id ? base44.entities.ContaReceber.filter({ cliente_id: cliente.id }) : Promise.resolve([]),
+    queryKey: ['contasReceberCliente', cliente?.id, contextoKey],
+    queryFn: () => cliente?.id ? filterInContext('ContaReceber', { cliente_id: cliente.id }) : Promise.resolve([]),
     enabled: !!cliente?.id
   });
 

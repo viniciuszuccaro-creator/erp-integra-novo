@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Upload, XCircle, AlertTriangle, Building2, TrendingUp, FileText } from 'lucide-react';
 import ResumoNFeCard from './importar-xml/ResumoNFeCard';
 import ItensTabela from './importar-xml/ItensTabela';
 import DuplicatasTabela from './importar-xml/DuplicatasTabela';
 import OpcoesImportacao from './importar-xml/OpcoesImportacao';
+import useImportarXMLNFe from './importar-xml/useImportarXMLNFe';
 import { toast } from 'sonner';
 import { parseNFeXML, validarXMLNFe, lerArquivoXML } from '../lib/parserXMLNFe';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
@@ -19,6 +17,7 @@ import { useContextoVisual } from '@/components/lib/useContextoVisual';
 /**
  * Componente de Importação de XML de NF-e
  * Processa XML, cria fornecedor, ordem de compra, entrada de estoque e contas a pagar
+ * Lógica de importação extraída para useImportarXMLNFe hook (Regra-Mãe)
  */
 export default function ImportarXMLNFe({ empresaId }) {
   const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
@@ -36,8 +35,6 @@ export default function ImportarXMLNFe({ empresaId }) {
     criarContasPagar: true
   });
 
-  const queryClient = useQueryClient();
-
   const { data: produtos = [] } = useQuery({
     queryKey: ['produtos', contextoKey],
     queryFn: () => filterInContext('Produto', {}, 'descricao', 999),
@@ -49,6 +46,9 @@ export default function ImportarXMLNFe({ empresaId }) {
     queryFn: () => filterInContext('Fornecedor', {}, 'nome_fantasia', 999),
     enabled: !!contexto,
   });
+
+  // Hook extraído com toda a lógica de importação multiempresa
+  const { importarMutation } = useImportarXMLNFe({ arquivo, dadosNFe, opcoes, empresaId });
 
   // Processar arquivo XML
   const handleFileUpload = async (event) => {
@@ -67,10 +67,7 @@ export default function ImportarXMLNFe({ empresaId }) {
     setDadosNFe(null);
 
     try {
-      // Ler arquivo
       const xmlString = await lerArquivoXML(file);
-
-      // Validar XML
       const validacao = validarXMLNFe(xmlString);
       if (!validacao.valido) {
         setErros(validacao.erros);
@@ -79,22 +76,15 @@ export default function ImportarXMLNFe({ empresaId }) {
         return;
       }
 
-      // Parse do XML
       const dados = parseNFeXML(xmlString);
+      const fornecedorExistente = fornecedores.find(f => f.cnpj === dados.fornecedor.cnpj);
 
-      // Verificar se fornecedor já existe
-      const fornecedorExistente = fornecedores.find(f => 
-        f.cnpj === dados.fornecedor.cnpj
-      );
-
-      // Mapear produtos
       const itensMapeados = dados.itens.map(item => {
-        const produtoEncontrado = produtos.find(p => 
-          p.codigo === item.codigo_produto || 
+        const produtoEncontrado = produtos.find(p =>
+          p.codigo === item.codigo_produto ||
           p.codigo_barras === item.codigo_ean ||
           p.descricao?.toLowerCase() === item.descricao?.toLowerCase()
         );
-
         return {
           ...item,
           produto_id_mapeado: produtoEncontrado?.id || null,
@@ -104,8 +94,6 @@ export default function ImportarXMLNFe({ empresaId }) {
       });
 
       const produtosNaoMapeados = itensMapeados.filter(i => !i.produto_encontrado);
-
-      // Avisos
       const avisosTemp = [];
       if (fornecedorExistente) {
         avisosTemp.push(`Fornecedor "${fornecedorExistente.nome}" já existe no sistema`);
@@ -124,7 +112,6 @@ export default function ImportarXMLNFe({ empresaId }) {
       setAvisos(avisosTemp);
       setProcessando(false);
       toast.success('XML processado com sucesso!');
-
     } catch (error) {
       console.error('Erro ao processar XML:', error);
       setErros([error.message]);
@@ -133,271 +120,8 @@ export default function ImportarXMLNFe({ empresaId }) {
     }
   };
 
-  // Importar NF-e
-  const importarMutation = useMutation({
-    mutationFn: async () => {
-      const resultados = {
-        fornecedor_id: null,
-        ordem_compra_id: null,
-        movimentacoes_ids: [],
-        contas_pagar_ids: [],
-        produtos_criados: []
-      };
-
-      // 1. Criar/Encontrar Fornecedor
-      if (opcoes.criarFornecedor && !dadosNFe.fornecedorExistente) {
-        const novoFornecedor = await base44.entities.Fornecedor.create({
-          nome: dadosNFe.fornecedor.razao_social,
-          nome_fantasia: dadosNFe.fornecedor.nome_fantasia,
-          cnpj: dadosNFe.fornecedor.cnpj,
-          inscricao_estadual: dadosNFe.fornecedor.inscricao_estadual,
-          endereco: dadosNFe.fornecedor.endereco ? 
-            `${dadosNFe.fornecedor.endereco.logradouro}, ${dadosNFe.fornecedor.endereco.numero}` : '',
-          cidade: dadosNFe.fornecedor.endereco?.cidade,
-          estado: dadosNFe.fornecedor.endereco?.estado,
-          telefone: dadosNFe.fornecedor.endereco?.telefone,
-          categoria: 'Matéria Prima',
-          status: 'Ativo'
-        });
-        resultados.fornecedor_id = novoFornecedor.id;
-      } else {
-        resultados.fornecedor_id = dadosNFe.fornecedorExistente?.id;
-      }
-
-      // 2. Criar Produtos Não Mapeados
-      if (opcoes.criarProdutos && dadosNFe.produtosNaoMapeados.length > 0) {
-        for (const item of dadosNFe.produtosNaoMapeados) {
-          const novoProduto = await base44.entities.Produto.create({
-            empresa_id: empresaId,
-            codigo: item.codigo_produto,
-            codigo_barras: item.codigo_ean,
-            descricao: item.descricao,
-            ncm: item.ncm,
-            unidade_medida: item.unidade,
-            grupo: 'Matéria Prima',
-            tipo_item: 'Matéria-Prima Produção',
-            custo_aquisicao: item.valor_unitario,
-            custo_medio: item.valor_unitario,
-            preco_venda: item.valor_unitario * 1.3, // 30% markup padrão
-            estoque_atual: 0,
-            estoque_minimo: 0,
-            status: 'Ativo',
-            fornecedor_id: resultados.fornecedor_id,
-            fornecedor_principal: dadosNFe.fornecedor.razao_social,
-            ultima_compra: dadosNFe.dataEmissao,
-            ultimo_preco_compra: item.valor_unitario
-          });
-          
-          resultados.produtos_criados.push(novoProduto.id);
-          
-          // Atualizar mapeamento
-          const itemIndex = dadosNFe.itensMapeados.findIndex(i => 
-            i.codigo_produto === item.codigo_produto
-          );
-          if (itemIndex >= 0) {
-            dadosNFe.itensMapeados[itemIndex].produto_id_mapeado = novoProduto.id;
-          }
-        }
-      }
-
-      // 3. Criar Ordem de Compra
-      if (opcoes.criarOrdemCompra) {
-        const ordemCompra = await base44.entities.OrdemCompra.create({
-          numero_oc: `OC-NFE-${dadosNFe.numeroNFe}`,
-          fornecedor_id: resultados.fornecedor_id,
-          fornecedor_nome: dadosNFe.fornecedor.razao_social,
-          data_solicitacao: dadosNFe.dataEmissao,
-          data_entrega_real: dadosNFe.dataEmissao,
-          valor_total: dadosNFe.valores.total,
-          status: 'Recebida',
-          itens: dadosNFe.itensMapeados.map(item => ({
-            produto_id: item.produto_id_mapeado,
-            codigo_sku: item.codigo_produto,
-            descricao: item.descricao,
-            quantidade_solicitada: item.quantidade,
-            quantidade_recebida: item.quantidade,
-            unidade: item.unidade,
-            valor_unitario: item.valor_unitario,
-            valor_total: item.valor_total
-          })),
-          nota_fiscal_entrada: dadosNFe.numeroNFe,
-          observacoes: `Importado de XML NF-e ${dadosNFe.numeroNFe}. Chave: ${dadosNFe.chaveAcesso}`
-        });
-        resultados.ordem_compra_id = ordemCompra.id;
-      }
-
-      // 4. Dar Entrada no Estoque
-      if (opcoes.darEntradaEstoque) {
-        for (const item of dadosNFe.itensMapeados) {
-          if (!item.produto_id_mapeado) continue;
-
-          // Buscar produto atualizado
-          const produtoAtual = await base44.entities.Produto.filter({ id: item.produto_id_mapeado });
-          if (produtoAtual.length === 0) continue;
-
-          const produto = produtoAtual[0];
-          const novoEstoque = (produto.estoque_atual || 0) + item.quantidade;
-
-          // Atualizar estoque do produto
-          await base44.entities.Produto.update(produto.id, {
-            estoque_atual: novoEstoque,
-            ultima_compra: dadosNFe.dataEmissao,
-            ultimo_preco_compra: item.valor_unitario
-          });
-
-          // Criar movimentação
-          const movimentacao = await base44.entities.MovimentacaoEstoque.create({
-            empresa_id: empresaId,
-            origem_movimento: 'nfe',
-            origem_documento_id: resultados.ordem_compra_id,
-            tipo_movimento: 'entrada',
-            produto_id: produto.id,
-            produto_descricao: produto.descricao,
-            codigo_produto: produto.codigo,
-            quantidade: item.quantidade,
-            unidade_medida: item.unidade,
-            estoque_anterior: produto.estoque_atual || 0,
-            estoque_atual: novoEstoque,
-            data_movimentacao: new Date().toISOString(),
-            documento: `NF-e ${dadosNFe.numeroNFe}`,
-            motivo: `Entrada de compra - NF-e ${dadosNFe.numeroNFe}`,
-            responsavel: 'Sistema - Importação XML',
-            valor_unitario: item.valor_unitario,
-            valor_total: item.valor_total,
-            observacoes: `Importado de XML. Chave: ${dadosNFe.chaveAcesso}`
-          });
-
-          resultados.movimentacoes_ids.push(movimentacao.id);
-        }
-      }
-
-      // 5. Criar Contas a Pagar
-      if (opcoes.criarContasPagar && dadosNFe.duplicatas.length > 0) {
-        for (const duplicata of dadosNFe.duplicatas) {
-          // Mapear centro de custo e plano de contas por NCM/fornecedor (se existir config)
-          let centro_custo_id = null; let plano_contas_id = null;
-          try {
-            const cfgs = await base44.entities.ConfiguracaoSistema.filter({ chave: 'mapa_xml_centro_custo', empresa_id: empresaId }, undefined, 1);
-            const mapa = cfgs?.[0]?.valor_json || {};
-            const chave = dadosNFe.fornecedor.cnpj;
-            const mapFornecedor = mapa[chave] || {};
-            centro_custo_id = mapFornecedor?.centro_custo_id || null;
-            plano_contas_id = mapFornecedor?.plano_contas_id || null;
-          } catch {}
-
-          const conta = await base44.entities.ContaPagar.create({
-            empresa_id: empresaId,
-            descricao: `NF-e ${dadosNFe.numeroNFe} - Parcela ${duplicata.numero}`,
-            fornecedor: dadosNFe.fornecedor.razao_social,
-            fornecedor_id: resultados.fornecedor_id,
-            favorecido_cpf_cnpj: dadosNFe.fornecedor.cnpj,
-            centro_custo_id,
-            plano_contas_id,
-            categoria: 'Fornecedores',
-            valor: duplicata.valor,
-            data_emissao: dadosNFe.dataEmissao,
-            data_vencimento: duplicata.vencimento,
-            status: 'Pendente',
-            numero_documento: dadosNFe.numeroNFe,
-            numero_parcela: duplicata.numero,
-            nota_fiscal_id: null,
-            ordem_compra_id: resultados.ordem_compra_id,
-            origem_tipo: 'nfe', canal_origem: 'Importação',
-            observacoes: `Importado de XML NF-e. Chave: ${dadosNFe.chaveAcesso}`
-          });
-
-          resultados.contas_pagar_ids.push(conta.id);
-        }
-      } else if (opcoes.criarContasPagar && dadosNFe.duplicatas.length === 0) {
-        // Criar conta única
-        const conta = await base44.entities.ContaPagar.create({
-          empresa_id: empresaId,
-          descricao: `NF-e ${dadosNFe.numeroNFe}`,
-          fornecedor: dadosNFe.fornecedor.razao_social,
-          fornecedor_id: resultados.fornecedor_id,
-          favorecido_cpf_cnpj: dadosNFe.fornecedor.cnpj,
-          categoria: 'Fornecedores',
-          valor: dadosNFe.valores.total,
-          data_emissao: dadosNFe.dataEmissao,
-          data_vencimento: dadosNFe.dataEmissao,
-          status: 'Pendente',
-          numero_documento: dadosNFe.numeroNFe,
-          ordem_compra_id: resultados.ordem_compra_id,
-          observacoes: `Importado de XML NF-e. Chave: ${dadosNFe.chaveAcesso}`
-        });
-
-        resultados.contas_pagar_ids.push(conta.id);
-      }
-
-      return resultados;
-    },
-    onSuccess: async (resultados) => {
-      // Criar registro de importação
-      const arquivoUpload = await base44.integrations.Core.UploadFile({ file: arquivo });
-
-      await base44.entities.ImportacaoXMLNFe.create({
-        empresa_id: empresaId,
-        numero_importacao: `IMP-${Date.now()}`,
-        data_importacao: new Date().toISOString(),
-        tipo_nfe: 'Entrada',
-        arquivo_xml_nome: arquivo.name,
-        arquivo_xml_url: arquivoUpload.file_url,
-        chave_acesso: dadosNFe.chaveAcesso,
-        numero_nfe: dadosNFe.numeroNFe,
-        serie_nfe: dadosNFe.serieNFe,
-        data_emissao: dadosNFe.dataEmissao,
-        fornecedor_cnpj: dadosNFe.fornecedor.cnpj,
-        fornecedor_nome: dadosNFe.fornecedor.razao_social,
-        fornecedor_id: resultados.fornecedor_id,
-        fornecedor_criado: !dadosNFe.fornecedorExistente,
-        valor_total_nfe: dadosNFe.valores.total,
-        valor_produtos: dadosNFe.valores.produtos,
-        valor_icms: dadosNFe.valores.icms,
-        valor_ipi: dadosNFe.valores.ipi,
-        valor_pis: dadosNFe.valores.pis,
-        valor_cofins: dadosNFe.valores.cofins,
-        quantidade_itens: dadosNFe.quantidadeItens,
-        itens_xml: dadosNFe.itensMapeados,
-        status_processamento: 'Processado',
-        validado_usuario: true,
-        ordem_compra_criada: opcoes.criarOrdemCompra,
-        ordem_compra_id: resultados.ordem_compra_id,
-        entrada_estoque_realizada: opcoes.darEntradaEstoque,
-        movimentacoes_estoque_ids: resultados.movimentacoes_ids,
-        conta_pagar_criada: opcoes.criarContasPagar,
-        contas_pagar_ids: resultados.contas_pagar_ids,
-        produtos_criados_automaticamente: resultados.produtos_criados.length,
-        produtos_nao_mapeados: dadosNFe.produtosNaoMapeados.map(p => p.codigo_produto),
-        usuario_importacao: 'Sistema'
-      });
-
-      queryClient.invalidateQueries({ queryKey: ['fornecedores'] });
-      queryClient.invalidateQueries({ queryKey: ['produtos'] });
-      queryClient.invalidateQueries({ queryKey: ['ordens-compra'] });
-      queryClient.invalidateQueries({ queryKey: ['movimentacoes-estoque'] });
-      queryClient.invalidateQueries({ queryKey: ['contasPagar'] });
-      queryClient.invalidateQueries({ queryKey: ['importacoes-xml'] });
-
-      toast.success('✅ NF-e importada com sucesso!', {
-        description: `${resultados.movimentacoes_ids.length} entrada(s) no estoque, ${resultados.contas_pagar_ids.length} conta(s) a pagar`
-      });
-
-      // Reset
-      setArquivo(null);
-      setDadosNFe(null);
-      setErros([]);
-      setAvisos([]);
-    },
-    onError: (error) => {
-      console.error('Erro ao importar:', error);
-      toast.error('❌ Erro ao importar NF-e', {
-        description: error.message
-      });
-    }
-  });
-
   return (
-    <div className="space-y-6">
+    <div className="w-full h-full space-y-6">
       {/* Upload */}
       <Card className="border-2 border-dashed border-blue-300 bg-blue-50">
         <CardContent className="p-8">
@@ -409,7 +133,6 @@ export default function ImportarXMLNFe({ empresaId }) {
             <p className="text-sm text-blue-700 mb-4">
               Envie o XML da Nota Fiscal de Entrada para processar automaticamente
             </p>
-            
             <input
               type="file"
               accept=".xml"
@@ -419,7 +142,7 @@ export default function ImportarXMLNFe({ empresaId }) {
               disabled={processando}
             />
             <label htmlFor="xml-upload">
-              <Button asChild className="bg-blue-600 hover:bg-blue-700">
+              <Button asChild className="bg-blue-600 hover:bg-blue-700" data-permission="Fiscal.ImportarXMLNFe.importar">
                 <span>
                   {processando ? (
                     <>
@@ -435,11 +158,8 @@ export default function ImportarXMLNFe({ empresaId }) {
                 </span>
               </Button>
             </label>
-
             {arquivo && (
-              <p className="text-xs text-blue-600 mt-3">
-                📎 {arquivo.name}
-              </p>
+              <p className="text-xs text-blue-600 mt-3">📎 {arquivo.name}</p>
             )}
           </div>
         </CardContent>
@@ -452,9 +172,7 @@ export default function ImportarXMLNFe({ empresaId }) {
           <AlertDescription>
             <p className="font-semibold text-red-900 mb-2">Erros ao processar XML:</p>
             <ul className="list-disc list-inside text-sm text-red-700 space-y-1">
-              {erros.map((erro, i) => (
-                <li key={i}>{erro}</li>
-              ))}
+              {erros.map((erro, i) => <li key={i}>{erro}</li>)}
             </ul>
           </AlertDescription>
         </Alert>
@@ -467,9 +185,7 @@ export default function ImportarXMLNFe({ empresaId }) {
           <AlertDescription>
             <p className="font-semibold text-orange-900 mb-2">Avisos:</p>
             <ul className="list-disc list-inside text-sm text-orange-700 space-y-1">
-              {avisos.map((aviso, i) => (
-                <li key={i}>{aviso}</li>
-              ))}
+              {avisos.map((aviso, i) => <li key={i}>{aviso}</li>)}
             </ul>
           </AlertDescription>
         </Alert>
@@ -478,7 +194,6 @@ export default function ImportarXMLNFe({ empresaId }) {
       {/* Preview dos Dados */}
       {dadosNFe && (
         <div className="space-y-6">
-          {/* Resumo da NF-e */}
           <ResumoNFeCard dadosNFe={dadosNFe} />
 
           {/* Dados do Fornecedor */}
@@ -514,10 +229,8 @@ export default function ImportarXMLNFe({ empresaId }) {
                   <div className="md:col-span-2">
                     <p className="text-xs text-slate-600 mb-1">Endereço</p>
                     <p className="text-sm">
-                      {dadosNFe.fornecedor.endereco.logradouro}, {dadosNFe.fornecedor.endereco.numero}
-                      <br />
-                      {dadosNFe.fornecedor.endereco.bairro} - {dadosNFe.fornecedor.endereco.cidade}/{dadosNFe.fornecedor.endereco.estado}
-                      <br />
+                      {dadosNFe.fornecedor.endereco.logradouro}, {dadosNFe.fornecedor.endereco.numero}<br />
+                      {dadosNFe.fornecedor.endereco.bairro} - {dadosNFe.fornecedor.endereco.cidade}/{dadosNFe.fornecedor.endereco.estado}<br />
                       CEP: {dadosNFe.fornecedor.endereco.cep}
                     </p>
                   </div>
@@ -526,13 +239,8 @@ export default function ImportarXMLNFe({ empresaId }) {
             </CardContent>
           </Card>
 
-          {/* Itens da NF-e */}
           <ItensTabela itens={dadosNFe.itensMapeados} quantidadeItens={dadosNFe.quantidadeItens} />
-
-          {/* Duplicatas */}
           <DuplicatasTabela duplicatas={dadosNFe.duplicatas} />
-
-          {/* Opções de Importação */}
           <OpcoesImportacao opcoes={opcoes} setOpcoes={setOpcoes} dadosNFe={dadosNFe} />
 
           {/* Resumo de Valores */}
@@ -577,12 +285,7 @@ export default function ImportarXMLNFe({ empresaId }) {
           <div className="flex justify-end gap-3">
             <Button
               variant="outline"
-              onClick={() => {
-                setDadosNFe(null);
-                setArquivo(null);
-                setErros([]);
-                setAvisos([]);
-              }}
+              onClick={() => { setDadosNFe(null); setArquivo(null); setErros([]); setAvisos([]); }}
             >
               Cancelar
             </Button>
@@ -590,6 +293,7 @@ export default function ImportarXMLNFe({ empresaId }) {
               onClick={() => importarMutation.mutate()}
               disabled={importarMutation.isPending}
               className="bg-green-600 hover:bg-green-700"
+              data-permission="Fiscal.ImportarXMLNFe.confirmar"
             >
               {importarMutation.isPending ? (
                 <>

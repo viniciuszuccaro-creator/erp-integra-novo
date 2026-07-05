@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RefreshCw, CheckCircle2, XCircle, Download, Upload, ExternalLink } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import useContextoVisual from "@/components/lib/useContextoVisual";
 
 export default function ValidarPedidosExternos({ windowMode = true }) {
   const queryClient = useQueryClient();
   const { createInContext } = useContextoVisual();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const { data: externos = [], isFetching, refetch } = useQuery({
     queryKey: ["pedidos-externos"],
@@ -171,8 +173,9 @@ export default function ValidarPedidosExternos({ windowMode = true }) {
                             size="sm"
                             variant="ghost"
                             data-permission="Comercial.PedidoExterno.excluir"
-                            onClick={() => {
-                              if (confirm('Excluir pedido externo?')) excluirExterno.mutate(ext);
+                            onClick={async () => {
+                              const ok = await confirm({ title: "Excluir Pedido Externo", description: "Deseja realmente excluir este pedido externo?", variant: "danger", confirmText: "Excluir" });
+                              if (ok) excluirExterno.mutate(ext);
                             }}
                             className="h-8 px-2 text-red-600"
                             title="Excluir Registro Externo"
@@ -189,7 +192,8 @@ export default function ValidarPedidosExternos({ windowMode = true }) {
             </div>
           )}
         </CardContent>
-      </Card>
-    </div>
-  );
-}
+        </Card>
+        <ConfirmDialog />
+        </div>
+        );
+        }

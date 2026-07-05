@@ -18,6 +18,7 @@ import {
   Tag
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import {
   Dialog,
@@ -245,10 +246,9 @@ export default function GerenciadorTemplates() {
                     variant="ghost"
                     size="icon"
                     data-permission="Chatbot.Template.excluir"
-                    onClick={() => {
-                      if (confirm('Confirma exclusão?')) {
-                        excluirTemplateMutation.mutate(template);
-                      }
+                    onClick={async () => {
+                      const ok = await confirm({ title: "Excluir Template", description: "Confirma a exclusão deste template?", variant: "danger", confirmText: "Excluir" });
+                      if (ok) excluirTemplateMutation.mutate(template);
                     }}
                     className="h-8 w-8 text-red-600 hover:text-red-700"
                   >

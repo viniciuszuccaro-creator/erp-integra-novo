@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Package, TrendingUp, Calendar } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import SearchInput from "@/components/ui/SearchInput";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
@@ -122,10 +123,11 @@ export default function TabelaPrecoItensModal({ tabela, isOpen, onClose, windowM
     setShowItemForm(true);
   };
 
-  const handleDeleteItem = (item) => {
-    if (confirm(`Remover "${item.produto_descricao}" desta tabela?`)) {
-      deleteItemMutation.mutate(item.id);
-    }
+  const { confirm, ConfirmDialog } = useConfirm();
+
+  const handleDeleteItem = async (item) => {
+    const ok = await confirm({ title: "Remover Item", description: `Remover "${item.produto_descricao}" desta tabela?`, variant: "danger", confirmText: "Remover" });
+    if (ok) deleteItemMutation.mutate(item.id);
   };
 
   const filteredItens = itens.filter(i =>
@@ -432,6 +434,7 @@ export default function TabelaPrecoItensModal({ tabela, isOpen, onClose, windowM
             </>
           )}
         </div>
+        <ConfirmDialog />
       </div>
   );
 

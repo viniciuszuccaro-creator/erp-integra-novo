@@ -11,6 +11,7 @@ import useContextoVisual from '@/components/lib/useContextoVisual';
 import usePermissions from '@/components/lib/usePermissions';
 import { Plus, Edit, Trash2, CreditCard, DollarSign, Zap, CheckCircle2, XCircle, ArrowUpDown, TrendingUp, AlertTriangle, BarChart3, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import FormaPagamentoFormCompleto from './FormaPagamentoFormCompleto';
 import GestorGatewaysPagamento from './GestorGatewaysPagamento';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -22,6 +23,7 @@ export default function GestorFormasPagamento({ windowMode = false }) {
   const [filtroStatus, setFiltroStatus] = useState('todas');
   const [abaAtiva, setAbaAtiva] = useState('gestao');
   const queryClient = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const { openWindow } = useWindow();
   const { empresaAtual, grupoAtual, filterInContext, createInContext, updateInContext, deleteInContext } = useContextoVisual();
   const { canCreate, canEdit, canDelete } = usePermissions();
@@ -367,10 +369,9 @@ export default function GestorFormasPagamento({ windowMode = false }) {
                         variant="ghost"
                         size="icon"
                         data-permission="Cadastros.FormaPagamento.excluir"
-                        onClick={() => {
-                          if (confirm(`Excluir "${forma.descricao}"?`)) {
-                            deleteMutation.mutate(forma.id);
-                          }
+                        onClick={async () => {
+                           const ok = await confirm({ title: "Excluir Forma de Pagamento", description: `Excluir "${forma.descricao}"?`, variant: "danger", confirmText: "Excluir" });
+                           if (ok) deleteMutation.mutate(forma.id);
                         }}
                         disabled={!podeExcluir || deleteMutation.isPending}
                         title="Excluir"

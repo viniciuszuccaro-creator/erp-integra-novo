@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { useWindow } from "@/components/lib/useWindow";
 import useContextoVisual from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
@@ -21,6 +22,7 @@ import GatewayPagamentoForm from "./GatewayPagamentoForm";
  */
 export default function GestorGatewaysPagamento({ windowMode = false }) {
   const { toast } = useToast();
+  const { confirm, ConfirmDialog } = useConfirm();
   const queryClient = useQueryClient();
   const { openWindow } = useWindow();
   const { empresaAtual, grupoAtual, filterInContext, createInContext, updateInContext, deleteInContext } = useContextoVisual();
@@ -242,10 +244,9 @@ export default function GestorGatewaysPagamento({ windowMode = false }) {
                         variant="ghost"
                         size="icon"
                         data-permission="Cadastros.GatewayPagamento.excluir"
-                        onClick={() => {
-                          if (confirm('Deseja realmente excluir este gateway?')) {
-                            deleteMutation.mutate(gateway.id);
-                          }
+                        onClick={async () => {
+                           const ok = await confirm({ title: "Excluir Gateway", description: "Deseja realmente excluir este gateway de pagamento?", variant: "danger", confirmText: "Excluir" });
+                           if (ok) deleteMutation.mutate(gateway.id);
                         }}
                         disabled={!podeExcluir || deleteMutation.isPending}
                         title="Excluir"

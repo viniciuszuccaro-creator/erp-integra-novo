@@ -18,6 +18,7 @@ import {
   Tag
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
@@ -358,10 +359,9 @@ export default function TemplatesMensagens({ onSelecionarTemplate }) {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 text-red-600"
-                          onClick={() => {
-                            if (confirm('Excluir template?')) {
-                              excluirTemplateMutation.mutate(template);
-                            }
+                          onClick={async () => {
+                            const ok = await confirm({ title: "Excluir Template", description: "Deseja realmente excluir este template de mensagem?", variant: "danger", confirmText: "Excluir" });
+                            if (ok) excluirTemplateMutation.mutate(template);
                           }}
                         >
                           <Trash2 className="w-3 h-3" />

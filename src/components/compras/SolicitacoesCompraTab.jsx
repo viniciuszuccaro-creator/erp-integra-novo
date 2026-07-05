@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Plus, CheckCircle2, XCircle, ShoppingCart, Download } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import useContextoVisual from "@/components/lib/useContextoVisual";
 import SolicitacaoCompraForm from "./SolicitacaoCompraForm";
 import { useWindow } from "@/components/lib/useWindow";
@@ -134,21 +135,21 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
 
   const handleSubmit = (e) => { e.preventDefault(); createMutation.mutate(formData); };
 
-  const handleAprovar = (solicitacao) => {
-    if (confirm(`Aprovar solicitacao de ${solicitacao.produto_descricao}?`)) {
-      aprovarMutation.mutate({ id: solicitacao.id });
-    }
+  const { confirm, ConfirmDialog } = useConfirm();
+
+  const handleAprovar = async (solicitacao) => {
+    const ok = await confirm({ title: "Aprovar Solicitação", description: `Aprovar solicitação de ${solicitacao.produto_descricao}?`, variant: "success", confirmText: "Aprovar" });
+    if (ok) aprovarMutation.mutate({ id: solicitacao.id });
   };
 
-  const handleRejeitar = (solicitacao) => {
-    const motivo = prompt("Motivo da rejeicao:");
-    if (motivo) rejeitarMutation.mutate({ id: solicitacao.id, motivo });
+  const handleRejeitar = async (solicitacao) => {
+    const ok = await confirm({ title: "Rejeitar Solicitação", description: `Rejeitar solicitação de ${solicitacao.produto_descricao}?`, variant: "danger", confirmText: "Rejeitar" });
+    if (ok) rejeitarMutation.mutate({ id: solicitacao.id, motivo: "Rejeitado pelo usuário" });
   };
 
-  const handleGerarOC = (solicitacao) => {
-    if (confirm(`Gerar Ordem de Compra para ${solicitacao.produto_descricao}?`)) {
-      gerarOCMutation.mutate(solicitacao);
-    }
+  const handleGerarOC = async (solicitacao) => {
+    const ok = await confirm({ title: "Gerar Ordem de Compra", description: `Gerar Ordem de Compra para ${solicitacao.produto_descricao}?`, variant: "warning", confirmText: "Gerar OC" });
+    if (ok) gerarOCMutation.mutate(solicitacao);
   };
 
   const statusColors = {
@@ -264,11 +265,12 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
             onPageSizeChange={(n) => { setPageSize(n); setPage(1); }}
           />
         </CardContent>
-      </Card>
-    </div>
-  );
+        </Card>
+        <ConfirmDialog />
+        </div>
+        );
 
-  if (windowMode) {
+        if (windowMode) {
     return <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-50 to-orange-50 overflow-auto p-1.5">{content}</div>;
   }
 

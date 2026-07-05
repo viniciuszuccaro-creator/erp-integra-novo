@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Wallet, CheckCircle2 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
 import useContextoVisual from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
@@ -38,6 +39,7 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
 
   const queryClient = useQueryClient();
   const { empresaAtual: empresaContexto, grupoAtual, filterInContext, createInContext, updateInContext } = useContextoVisual();
+  const { confirm, ConfirmDialog } = useConfirm();
   const { canCreate, canEdit, hasPermission } = usePermissions();
   const empresaAtual = empresaProp || empresaContexto;
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
@@ -179,7 +181,7 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
             <p className="text-xs text-slate-500">Saldo em Dinheiro</p>
             <p className="text-lg font-bold text-emerald-600">R$ {saldoAtual.toFixed(2)}</p>
           </div>
-          <Button onClick={() => { if (confirm(`Fechar caixa?\nSaldo: R$ ${saldoAtual.toFixed(2)}`)) fecharCaixa.mutate(); }} variant="outline" size="sm" disabled={controlesDesabilitados || fecharCaixa.isPending}>Fechar Caixa</Button>
+          <Button onClick={async () => { const ok = await confirm({ title: "Fechar Caixa", description: `Fechar caixa?\nSaldo: R$ ${saldoAtual.toFixed(2)}`, variant: "warning", confirmText: "Fechar" }); if (ok) fecharCaixa.mutate(); }} variant="outline" size="sm" disabled={controlesDesabilitados || fecharCaixa.isPending}>Fechar Caixa</Button>
         </div>
       </div>
 
@@ -248,6 +250,7 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
           <CaixaPDVMovimentosTab movimentosHoje={movimentosHoje} somatoriaFormasPagamento={somatoriaFormasPagamento} pedidos={pedidos} />
         </TabsContent>
       </Tabs>
+      <ConfirmDialog />
     </div>
   );
 }

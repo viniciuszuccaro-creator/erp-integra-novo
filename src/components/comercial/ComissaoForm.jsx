@@ -152,6 +152,9 @@ export default function ComissaoForm({ comissao, onSubmit, windowMode = false })
                   variant="outline"
                   size="icon"
                   title="Calcular"
+                  onClick={() => handlePercentualChange(formData.percentual_comissao)}
+                  data-permission="Comercial.Comissao.calcular"
+                  data-action="Comercial.Comissao.calcular"
                 >
                   <Calculator className="w-4 h-4" />
                 </Button>

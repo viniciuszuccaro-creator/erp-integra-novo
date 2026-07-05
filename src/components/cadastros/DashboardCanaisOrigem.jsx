@@ -231,6 +231,9 @@ export default function DashboardCanaisOrigem({ empresaId, windowMode = false })
                 }))}
                 filename="performance-canais-origem"
                 className="bg-green-600 hover:bg-green-700"
+                data-permission="Cadastros.ParametroOrigemPedido.exportar"
+                data-action="Cadastros.ParametroOrigemPedido.exportar"
+                data-sensitive="true"
               >
                 <Download className="w-4 h-4 mr-2" />
                 Exportar

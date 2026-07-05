@@ -25,8 +25,16 @@ export default function useConfiguracaoSistema({ categoria, chave } = {}) {
 
   const setMutation = useMutation({
     mutationFn: async (payload) => {
+      // Multiempresa: sempre stamp group_id/empresa_id ao criar (Regra-Mãe P2)
+      const scope = JSON.parse(localStorage.getItem('erp_scope') || '{}');
       if (!data?.id) {
-        const novo = { categoria: categoria || "Sistema", chave: chave || "default", ...payload };
+        const novo = {
+          categoria: categoria || "Sistema",
+          chave: chave || "default",
+          group_id: scope.group_id || payload.group_id || null,
+          empresa_id: scope.empresa_id || payload.empresa_id || null,
+          ...payload
+        };
         return base44.entities.ConfiguracaoSistema.create(novo);
       }
       return base44.entities.ConfiguracaoSistema.update(data.id, payload);

@@ -1,16 +1,16 @@
-# AUDITORIA ESTRUTURAL COMPLETA — 05/07/2026 (QUARTA PASSAGEM — CONSOLIDAÇÃO FINAL)
+# AUDITORIA ESTRUTURAL COMPLETA — 05/07/2026 (QUINTA PASSAGEM — CONSOLIDAÇÃO FINAL)
 
 ## RESUMO EXECUTIVO
 
 Auditoria completa do ERP Zuccaro seguindo Regra-Mãe, executando as 5 prioridades em ordem.
 
 ### MÉTRICAS CONSOLIDADAS (CICLO FINAL)
-- **Arquivos mapeados**: 1.605
-- **Arquivos grandes (>400 linhas)**: **26** (maioria libs/UI core/hooks centrais)
-- **data-permission**: **687** atributos no sistema
+- **Arquivos mapeados**: 1.617
+- **Arquivos grandes (>400 linhas)**: **25** (todos libs/UI core/hooks centrais/config)
+- **data-permission**: **689** atributos no sistema
 - **Creates com group_id**: **142/169 (84.0%)** — restantes são falsos positivos (já usam `...scope`, `...ctx`, ou `carimbarContexto`)
 - **window.alert/confirm**: **0** (zero chamadas reais)
-- **Duplicidades de propósito**: **0** (HistoricoTab em contextos diferentes não é duplicidade)
+- **Duplicidades de propósito**: **0**
 
 ---
 
@@ -43,6 +43,22 @@ Auditoria completa do ERP Zuccaro seguindo Regra-Mãe, executando as 5 prioridad
 | UploadProjetoModal.jsx | 440 | **107** | -76% |
 | AssinaturaEletronicaForm.jsx | 438 | **126** | -71% |
 | EnviarComunicacaoModal.jsx | 445 | **119** | -73% |
+| ItensRevendaTab.jsx | 432 | **31** | -93% |
+| GerenciarEnderecosClienteForm.jsx | 437 | **45** | -90% |
+
+### Arquivos Grandes Restantes (todos justificados)
+| Arquivo | Linhas | Tipo | Status |
+|---------|--------|------|--------|
+| sidebar.jsx | 627 | UI base | Não refatorar (Radix) |
+| calculoImpostos.jsx | 523 | Biblioteca | Mantido (lógica fiscal) |
+| BuscaDadosPublicos.jsx | 509 | Biblioteca | Mantido (APIs externas) |
+| useContextoVisual.jsx | 487 | Hook central | Mantido (core multiempresa) |
+| validacoes.jsx | 464 | Biblioteca | Mantido (utilitários) |
+| useContextoGrupoEmpresa.jsx | 462 | Hook central | Mantido (core multiempresa) |
+| DataTable.jsx | 441 | UI base | Mantido (reutilizável) |
+| ConfiguracaoCobranca.jsx | 439 | Config | Mantido (form complexo) |
+| permissionsConfig.jsx | 433 | Config RBAC | Mantido (dados) |
+| ConfiguracaoExpedicao.jsx | 430 | Config | Mantido (form com tabs) |
 | ItensRevendaTab.jsx | 432 | Tab |
 | ConfiguracaoExpedicao.jsx | 430 | Config |
 | DashboardInadimplencia.jsx | 428 | Dashboard |

@@ -102,7 +102,7 @@ export default function AnalyticsDashboard() {
           <BarChart3 className="w-8 h-8 text-indigo-600" />
           Analytics Avançado
         </h2>
-        <Button onClick={handleExport} className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2">
+        <Button onClick={handleExport} data-permission="Relatorios.Analytics.exportar" className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2">
           <Download className="w-4 h-4" />
           Exportar
         </Button>

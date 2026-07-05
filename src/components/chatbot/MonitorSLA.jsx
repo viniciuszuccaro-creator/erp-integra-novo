@@ -19,7 +19,8 @@ import { Progress } from '@/components/ui/progress';
  * ✅ Alertas em tempo real
  */
 export default function MonitorSLA() {
-  const { empresaAtual, filtrarPorContexto } = useContextoVisual();
+  const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   // Metas de SLA configuráveis
   const metasSLA = {
@@ -29,11 +30,9 @@ export default function MonitorSLA() {
   };
 
   const { data: conversas = [] } = useQuery({
-    queryKey: ['conversas-sla', empresaAtual?.id],
-    queryFn: async () => {
-      return await base44.entities.ConversaOmnicanal.list();
-    },
-    select: (data) => filtrarPorContexto(data, 'empresa_id'),
+    queryKey: ['conversas-sla', contextoKey],
+    queryFn: () => filterInContext('ConversaOmnicanal', {}, '-created_date', 999),
+    enabled: !!contexto,
     refetchInterval: 10000
   });
 

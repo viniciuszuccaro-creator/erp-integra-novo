@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -8,11 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Package, Plus, Calendar } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast"; // Assuming toast is imported from here
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function Top10ProdutosCliente({ clienteId, onSelecionarProduto }) {
   const [usandoIA, setUsandoIA] = useState(false);
   const [sugestoesIA, setSugestoesIA] = useState([]);
   const { toast } = useToast();
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: pedidos = [], isLoading: isLoadingPedidos } = useQuery({
     queryKey: ['pedidosCliente', clienteId],
@@ -29,15 +31,16 @@ export default function Top10ProdutosCliente({ clienteId, onSelecionarProduto })
   });
 
   const { data: produtos = [], isLoading: isLoadingProdutos } = useQuery({
-    queryKey: ['produtosDisponiveis'],
+    queryKey: ['produtosDisponiveis', contextoKey],
     queryFn: async () => {
       try {
-        return await base44.entities.Produto.list();
+        return await filterInContext('Produto', {}, 'descricao', 999);
       } catch (error) {
         console.error('Erro ao buscar produtos disponíveis:', error);
         return [];
       }
     },
+    enabled: !!contexto,
     enabled: !!clienteId // Only fetch products if a client ID is provided
   });
 

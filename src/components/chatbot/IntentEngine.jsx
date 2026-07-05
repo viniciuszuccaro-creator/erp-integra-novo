@@ -476,7 +476,7 @@ const IntentEngine = {
             centroId = centros?.[0]?.id;
           } catch {}
           try {
-            const planos = await base44.entities.PlanoDeContas ? await base44.entities.PlanoDeContas.list() : [];
+            const planos = await base44.entities.PlanoDeContas ? await base44.entities.PlanoDeContas.filter({ empresa_id: contexto?.empresaId, group_id: contexto?.groupId }) : [];
             planoId = planos?.[0]?.id;
           } catch {}
 

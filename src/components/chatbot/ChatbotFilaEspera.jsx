@@ -17,16 +17,13 @@ import { useContextoVisual } from '@/components/lib/useContextoVisual';
  * ✅ Distribuição inteligente
  */
 export default function ChatbotFilaEspera() {
-  const { empresaAtual, filtrarPorContexto } = useContextoVisual();
+  const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: conversasAguardando = [] } = useQuery({
-    queryKey: ['fila-espera', empresaAtual?.id],
-    queryFn: async () => {
-      return await base44.entities.ConversaOmnicanal.filter({
-        status: 'Aguardando',
-        empresa_id: empresaAtual?.id
-      }, '-transferido_em');
-    },
+    queryKey: ['fila-espera', contextoKey],
+    queryFn: () => filterInContext('ConversaOmnicanal', { status: 'Aguardando' }, '-transferido_em', 999),
+    enabled: !!contexto,
     refetchInterval: 5000
   });
 

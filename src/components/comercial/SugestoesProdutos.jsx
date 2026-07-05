@@ -5,22 +5,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Package, Plus, Zap } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function SugestoesProdutos({ clienteId, itensAtuais = [], onAdicionarProduto }) {
   const [sugestoes, setSugestoes] = useState([]);
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidosCliente', clienteId],
+    queryKey: ['pedidosCliente', clienteId, contextoKey],
     queryFn: async () => {
       if (!clienteId) return [];
       return base44.entities.Pedido.filter({ cliente_id: clienteId });
     },
-    enabled: !!clienteId
+    enabled: !!clienteId && !!contexto
   });
 
   const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos'],
-    queryFn: () => base44.entities.Produto.list(),
+    queryKey: ['produtos', contextoKey],
+    queryFn: () => filterInContext('Produto', {}, 'descricao', 999),
+    enabled: !!contexto,
   });
 
   useEffect(() => {

@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/components/ui/use-toast";
 import { CheckCircle, XCircle, AlertTriangle, Package, Camera, QrCode, List } from "lucide-react";
 import { useUser } from "@/components/lib/UserContext";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import ScannerQRCode from './ScannerQRCode'; // Import the new ScannerQRCode component
@@ -23,6 +24,8 @@ export default function SeparacaoConferencia({ entregaId, pedido, empresaId, onC
   const { user } = useUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const [activeTab, setActiveTab] = useState("scanner");
   
@@ -30,10 +33,9 @@ export default function SeparacaoConferencia({ entregaId, pedido, empresaId, onC
 
   // Fetch the delivery details (only if entregaId provided and no pedido)
   const { data: entrega, isLoading, isError, error } = useQuery({
-    queryKey: ['entrega', entregaId],
+    queryKey: ['entrega', entregaId, contextoKey],
     queryFn: async () => {
-      const entregas = await base44.entities.Entrega.list();
-      return entregas.find(e => e.id === entregaId);
+      return await base44.entities.Entrega.get(entregaId);
     },
     enabled: !!entregaId && !pedido,
   });

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Badge } from "@/components/ui/badge";
 import { Lock, Bolt, User } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Badge visual inteligente para origem de pedido
@@ -17,11 +18,14 @@ export default function BadgeOrigemPedido({
   showLock = true,
   className = "" 
 }) {
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   
   // Buscar parâmetros configurados
   const { data: parametros = [] } = useQuery({
-    queryKey: ['parametros-origem-pedido'],
-    queryFn: () => base44.entities.ParametroOrigemPedido.list(),
+    queryKey: ['parametros-origem-pedido', contextoKey],
+    queryFn: () => filterInContext('ParametroOrigemPedido', {}, '-updated_date', 999),
+    enabled: !!contexto,
     initialData: [],
   });
 

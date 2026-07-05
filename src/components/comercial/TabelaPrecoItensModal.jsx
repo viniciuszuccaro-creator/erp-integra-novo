@@ -11,6 +11,7 @@ import { Plus, Edit, Trash2, Package, TrendingUp, Calendar } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast";
 import SearchInput from "@/components/ui/SearchInput";
 import usePermissions from "@/components/lib/usePermissions";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { DollarSign } from "lucide-react";
 
 /**
@@ -24,6 +25,8 @@ export default function TabelaPrecoItensModal({ tabela, isOpen, onClose, windowM
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { hasPermission } = usePermissions();
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const [formItem, setFormItem] = useState({
     produto_id: "",
@@ -42,8 +45,9 @@ export default function TabelaPrecoItensModal({ tabela, isOpen, onClose, windowM
   });
 
   const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos'],
-    queryFn: () => base44.entities.Produto.list(),
+    queryKey: ['produtos', contextoKey],
+    queryFn: () => filterInContext('Produto', {}, 'descricao', 999),
+    enabled: !!contexto,
   });
 
   const createItemMutation = useMutation({

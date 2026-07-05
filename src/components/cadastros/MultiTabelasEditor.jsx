@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,8 @@ import { toast } from 'sonner';
  */
 export default function MultiTabelasEditor({ isOpen, onClose, tabelas }) {
   const queryClient = useQueryClient();
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [tabelasSelecionadas, setTabelasSelecionadas] = useState([]);
   const [aplicando, setAplicando] = useState(false);
   
@@ -61,7 +64,7 @@ export default function MultiTabelasEditor({ isOpen, onClose, tabelas }) {
         
         // Buscar produtos para pegar custo atualizado
         const produtoIds = itens.map(i => i.produto_id);
-        const produtos = await base44.entities.Produto.list();
+        const produtos = await filterInContext('Produto', {}, 'descricao', 999);
         const produtosMap = {};
         produtos.forEach(p => produtosMap[p.id] = p);
 

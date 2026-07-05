@@ -12,6 +12,7 @@ import { useUser } from '@/components/lib/UserContext';
 import WidgetPerfilRiscoCliente from '../WidgetPerfilRiscoCliente';
 import SugestorCanalInteligente from '../SugestorCanalInteligente';
 import HistoricoOrigemCliente from '../HistoricoOrigemCliente';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 /**
  * Aba 1: Identificação do Pedido e Seleção de Cliente
@@ -20,11 +21,14 @@ import HistoricoOrigemCliente from '../HistoricoOrigemCliente';
 export default function WizardEtapa1Cliente({ formData, setFormData, clientes = [], onNext, bloquearOrigemEdicao = false }) {
   const { user } = useUser();
   const [clienteSelecionado, setClienteSelecionado] = useState(null);
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   
   // V21.6: Buscar configurações de origem
   const { data: parametrosOrigem = [] } = useQuery({
-    queryKey: ['parametros-origem-pedido'],
-    queryFn: () => base44.entities.ParametroOrigemPedido.list(),
+    queryKey: ['parametros-origem-pedido', contextoKey],
+    queryFn: () => filterInContext('ParametroOrigemPedido', {}, '-updated_date', 999),
+    enabled: !!contexto,
     initialData: [],
   });
 

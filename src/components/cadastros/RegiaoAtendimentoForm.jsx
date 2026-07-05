@@ -74,12 +74,11 @@ export default function RegiaoAtendimentoForm({ regiaoId, regiaoAtendimento, ite
     if (dadosIniciaisProps && (open || windowMode)) {
       setFormData(dadosIniciaisProps);
     } else if (regiaoId && open && !dadosIniciaisProps) {
-      base44.entities.RegiaoAtendimento.list().then(regioes => {
-        const regiao = regioes.find(r => r.id === regiaoId);
+      base44.entities.RegiaoAtendimento.get(regiaoId).then(regiao => {
         if (regiao) {
           setFormData(regiao);
         }
-      });
+      }).catch(() => {});
     } else if (!regiaoId && !dadosIniciaisProps && open) {
       setFormData({
         nome_regiao: "",

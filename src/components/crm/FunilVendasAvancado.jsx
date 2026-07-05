@@ -19,6 +19,7 @@ import {
   CheckCircle,
   Award
 } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * ETAPA 10: FUNIL DE VENDAS AVANÇADO V21.4
@@ -47,10 +48,13 @@ const etapas = [
 export default function FunilVendasAvancado() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: oportunidades = [] } = useQuery({
-    queryKey: ['oportunidades'],
-    queryFn: () => base44.entities.Oportunidade.list()
+    queryKey: ['oportunidades', contextoKey],
+    queryFn: () => filterInContext('Oportunidade', {}, '-updated_date', 999),
+    enabled: !!contexto,
   });
 
   const updateEtapaMutation = useMutation({

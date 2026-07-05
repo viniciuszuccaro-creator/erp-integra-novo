@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Shield, AlertTriangle, CheckCircle2, Clock, User, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 /**
  * AUDITORIA DE FORMAS DE PAGAMENTO V21.8
@@ -13,6 +14,8 @@ import { format } from 'date-fns';
  */
 export default function AuditoriaFormasPagamento() {
   const [filtroTipo, setFiltroTipo] = useState('todas');
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: auditLogs = [] } = useQuery({
     queryKey: ['audit-logs-formas-pagamento'],
@@ -27,8 +30,9 @@ export default function AuditoriaFormasPagamento() {
   });
 
   const { data: formasPagamento = [] } = useQuery({
-    queryKey: ['formas-pagamento'],
-    queryFn: () => base44.entities.FormaPagamento.list(),
+    queryKey: ['formas-pagamento', contextoKey],
+    queryFn: () => filterInContext('FormaPagamento', {}, '-updated_date', 999),
+    enabled: !!contexto,
   });
 
   const agruparPorAcao = () => {

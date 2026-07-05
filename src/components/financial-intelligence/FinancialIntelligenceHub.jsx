@@ -6,7 +6,6 @@ import { TrendingUp, DollarSign, AlertCircle, BarChart3, Zap, Brain } from 'luci
 import CashFlowRealtime from './CashFlowRealtime';
 import ProfitabilityAnalyzer from './ProfitabilityAnalyzer';
 import RiskAssessmentIA from './RiskAssessmentIA';
-import ScenarioSimulator from './ScenarioSimulator';
 import StrategicRecommendations from './StrategicRecommendations';
 import usePermissions from '@/components/lib/usePermissions';
 
@@ -26,7 +25,6 @@ export default function FinancialIntelligenceHub() {
     { id: 'cashflow', label: 'Fluxo de Caixa Tempo Real', icon: DollarSign },
     { id: 'profitability', label: 'Análise de Rentabilidade', icon: TrendingUp },
     { id: 'risk', label: 'Avaliação de Risco (IA)', icon: AlertCircle },
-    { id: 'scenario', label: 'Simulador de Cenários', icon: BarChart3 },
     { id: 'recommendations', label: 'Recomendações IA', icon: Brain },
   ];
 
@@ -126,10 +124,6 @@ export default function FinancialIntelligenceHub() {
 
             <TabsContent value="risk" className="p-6 h-full">
               <RiskAssessmentIA />
-            </TabsContent>
-
-            <TabsContent value="scenario" className="p-6 h-full">
-              <ScenarioSimulator />
             </TabsContent>
 
             <TabsContent value="recommendations" className="p-6 h-full">

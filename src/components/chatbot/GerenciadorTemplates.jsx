@@ -44,7 +44,8 @@ export default function GerenciadorTemplates() {
   const [templateEditando, setTemplateEditando] = useState(null);
   const [busca, setBusca] = useState('');
   const queryClient = useQueryClient();
-  const { empresaAtual } = useContextoVisual();
+  const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const [formData, setFormData] = useState({
     nome: '',
@@ -56,9 +57,9 @@ export default function GerenciadorTemplates() {
 
   // Buscar templates
   const { data: templates = [] } = useQuery({
-    queryKey: ['templates-mensagens', empresaAtual?.id],
+    queryKey: ['templates-mensagens', contextoKey],
     queryFn: async () => {
-      const configs = await base44.entities.ConfiguracaoCanal.list();
+      const configs = await filterInContext('ConfiguracaoCanal', {}, '-updated_date', 999);
       const allTemplates = [];
       
       configs.forEach(config => {

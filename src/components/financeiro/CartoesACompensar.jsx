@@ -6,14 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, CheckCircle, AlertCircle, DollarSign } from "lucide-react";
 import { toast } from "sonner";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function CartoesACompensar() {
   const queryClient = useQueryClient();
   const [filtroStatus, setFiltroStatus] = useState("todos");
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: cartoes = [], isLoading } = useQuery({
-    queryKey: ["movimento-cartao"],
-    queryFn: () => base44.entities.MovimentoCartao.list(),
+    queryKey: ["movimento-cartao", contextoKey],
+    queryFn: () => filterInContext('MovimentoCartao', {}, '-created_date', 999),
+    enabled: !!contexto,
   });
 
   const conciliarMutation = useMutation({

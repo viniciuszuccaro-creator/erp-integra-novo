@@ -20,7 +20,8 @@ export default function BaseConhecimento() {
   const [busca, setBusca] = useState('');
   const [editando, setEditando] = useState(null);
   const queryClient = useQueryClient();
-  const { empresaAtual } = useContextoVisual();
+  const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const [form, setForm] = useState({
     pergunta: '',
@@ -30,11 +31,12 @@ export default function BaseConhecimento() {
   });
 
   const { data: conhecimentos = [] } = useQuery({
-    queryKey: ['base-conhecimento', empresaAtual?.id],
+    queryKey: ['base-conhecimento', contextoKey],
     queryFn: async () => {
-      const configs = await base44.entities.ConfiguracaoCanal.list();
+      const configs = await filterInContext('ConfiguracaoCanal', {}, '-updated_date', 999);
       return configs.flatMap(c => c.base_conhecimento || []);
-    }
+    },
+    enabled: !!contexto
   });
 
   const salvarMutation = useMutation({

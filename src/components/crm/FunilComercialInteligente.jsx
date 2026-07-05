@@ -8,6 +8,7 @@ import { Zap, TrendingUp, Users, Target, DollarSign } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { toast } from "sonner";
 import { useWindow } from "@/components/lib/useWindow";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 const etapasFunil = [
   { id: "Prospecção", nome: "Prospecção", cor: "bg-slate-100" },
@@ -21,10 +22,13 @@ const etapasFunil = [
 export default function FunilComercialInteligente({ windowMode = false }) {
   const queryClient = useQueryClient();
   const { openWindow } = useWindow();
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: oportunidades = [], isLoading } = useQuery({
-    queryKey: ["oportunidades"],
-    queryFn: () => base44.entities.Oportunidade.list(),
+    queryKey: ["oportunidades", contextoKey],
+    queryFn: () => filterInContext('Oportunidade', {}, '-updated_date', 999),
+    enabled: !!contexto,
   });
 
   const updateEtapaMutation = useMutation({

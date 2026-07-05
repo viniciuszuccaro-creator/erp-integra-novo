@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Brain, TrendingUp, Target, Zap } from 'lucide-react';
 import ExecutiveBriefing from './ExecutiveBriefing';
 import DecisionEngine from './DecisionEngine';
-import ScenarioSimulator from './ScenarioSimulator';
 
 export default function ExecutiveAIHub() {
   const [activeTab, setActiveTab] = useState('briefing');
@@ -74,7 +73,6 @@ export default function ExecutiveAIHub() {
             {[
               { value: 'briefing', label: 'Briefing Diário', icon: Brain },
               { value: 'decisions', label: 'Decisões', icon: Target },
-              { value: 'scenarios', label: 'Cenários', icon: TrendingUp },
             ].map((tab) => {
               const Icon = tab.icon;
               return (
@@ -95,9 +93,6 @@ export default function ExecutiveAIHub() {
           </TabsContent>
           <TabsContent value="decisions" className="flex-1 m-0 overflow-auto">
             <DecisionEngine role={role} empresa={empresa} />
-          </TabsContent>
-          <TabsContent value="scenarios" className="flex-1 m-0 overflow-auto">
-            <ScenarioSimulator role={role} empresa={empresa} />
           </TabsContent>
         </Tabs>
       </div>

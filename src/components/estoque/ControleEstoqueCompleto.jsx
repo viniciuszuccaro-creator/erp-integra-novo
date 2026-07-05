@@ -23,6 +23,7 @@ import {
   CheckCircle,
   XCircle
 } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Componente completo de controle de estoque com:
@@ -38,21 +39,25 @@ export default function ControleEstoqueCompleto({ empresaId }) {
   const [produtoInventario, setProdutoInventario] = useState(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos-controle', empresaId],
+    queryKey: ['produtos-controle', empresaId || contextoKey],
     queryFn: async () => {
-      const prods = await base44.entities.Produto.list();
+      const prods = await filterInContext('Produto', {}, 'descricao', 999);
       return prods.filter(p => p.empresa_id === empresaId);
     },
+    enabled: !!contexto,
   });
 
   const { data: movimentacoes = [] } = useQuery({
-    queryKey: ['movimentacoes-controle', empresaId],
+    queryKey: ['movimentacoes-controle', empresaId || contextoKey],
     queryFn: async () => {
-      const movs = await base44.entities.MovimentacaoEstoque.list('-created_date', 200);
+      const movs = await filterInContext('MovimentacaoEstoque', {}, '-created_date', 200);
       return movs.filter(m => m.empresa_id === empresaId);
     },
+    enabled: !!contexto,
   });
 
   // Reservas ativas

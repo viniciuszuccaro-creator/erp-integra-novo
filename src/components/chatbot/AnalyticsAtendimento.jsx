@@ -35,25 +35,21 @@ import { useContextoVisual } from "@/components/lib/useContextoVisual";
  * Dashboard de métricas e KPIs do Hub de Atendimento
  */
 export default function AnalyticsAtendimento() {
-  const { empresaAtual } = useContextoVisual();
+  const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   // Buscar todas as conversas
   const { data: conversas = [] } = useQuery({
-    queryKey: ['analytics-conversas', empresaAtual?.id],
-    queryFn: async () => {
-      return await base44.entities.ConversaOmnicanal.filter({
-        empresa_id: empresaAtual?.id
-      });
-    },
-    enabled: !!empresaAtual
+    queryKey: ['analytics-conversas', contextoKey],
+    queryFn: () => filterInContext('ConversaOmnicanal', {}, '-created_date', 999),
+    enabled: !!contexto
   });
 
   // Buscar todas as mensagens
   const { data: mensagens = [] } = useQuery({
-    queryKey: ['analytics-mensagens', empresaAtual?.id],
-    queryFn: async () => {
-      return await base44.entities.MensagemOmnicanal.filter({});
-    }
+    queryKey: ['analytics-mensagens', contextoKey],
+    queryFn: () => filterInContext('MensagemOmnicanal', {}, '-created_date', 999),
+    enabled: !!contexto
   });
 
   // Calcular métricas

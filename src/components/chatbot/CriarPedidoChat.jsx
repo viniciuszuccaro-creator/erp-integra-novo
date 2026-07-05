@@ -33,7 +33,8 @@ export default function CriarPedidoChat({ conversa, clienteId, onPedidoCriado })
   const [buscaProduto, setBuscaProduto] = useState('');
   const [mostrarBusca, setMostrarBusca] = useState(false);
   const queryClient = useQueryClient();
-  const { empresaAtual } = useContextoVisual();
+  const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   // Buscar cliente
   const { data: cliente } = useQuery({
@@ -48,16 +49,16 @@ export default function CriarPedidoChat({ conversa, clienteId, onPedidoCriado })
 
   // Buscar produtos
   const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos-busca', buscaProduto],
+    queryKey: ['produtos-busca', buscaProduto, contextoKey],
     queryFn: async () => {
       if (!buscaProduto || buscaProduto.length < 2) return [];
-      const todos = await base44.entities.Produto.list();
+      const todos = await filterInContext('Produto', {}, 'descricao', 999);
       return todos.filter(p => 
         p.descricao?.toLowerCase().includes(buscaProduto.toLowerCase()) ||
         p.codigo?.toLowerCase().includes(buscaProduto.toLowerCase())
       ).slice(0, 10);
     },
-    enabled: buscaProduto.length >= 2
+    enabled: buscaProduto.length >= 2 && !!contexto
   });
 
   // Criar pedido

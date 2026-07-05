@@ -41,6 +41,7 @@ import RegistroOcorrenciaLogistica from "../logistica/RegistroOcorrenciaLogistic
 import IntegracaoRomaneio from "../logistica/IntegracaoRomaneio";
 import PainelMetricasRealtime from "../logistica/PainelMetricasRealtime";
 import { useWindow } from "@/components/lib/useWindow";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { usePermissoesLogistica } from "../logistica/ControleAcessoLogistica";
 
 /**
@@ -65,20 +66,25 @@ export default function PedidosEntregaTab({ windowMode = false }) {
   const queryClient = useQueryClient();
   const { openWindow } = useWindow();
   const permissoes = usePermissoesLogistica();
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos'],
-    queryFn: () => base44.entities.Pedido.list('-created_date'),
+    queryKey: ['pedidos', contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-created_date', 999),
+    enabled: !!contexto,
   });
 
   const { data: entregas = [] } = useQuery({
-    queryKey: ['entregas'],
-    queryFn: () => base44.entities.Entrega.list('-created_date'),
+    queryKey: ['entregas', contextoKey],
+    queryFn: () => filterInContext('Entrega', {}, '-created_date', 999),
+    enabled: !!contexto,
   });
 
   const { data: regioes = [] } = useQuery({
-    queryKey: ['regioes'],
-    queryFn: () => base44.entities.RegiaoAtendimento.list(),
+    queryKey: ['regioes', contextoKey],
+    queryFn: () => filterInContext('RegiaoAtendimento', {}, '-updated_date', 999),
+    enabled: !!contexto,
   });
 
   // Filtrar pedidos para entrega (tipo_frete = CIF ou FOB, status = Aprovado ou posterior)

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Activity, TrendingUp, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.6 - Monitoramento em Tempo Real de Pedidos por Canal
@@ -13,24 +14,23 @@ import { motion, AnimatePresence } from "framer-motion";
  */
 export default function MonitoramentoCanaisRealtime({ empresaId, autoRefresh = true }) {
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState(new Date());
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   // Buscar pedidos em tempo real
   const { data: pedidos = [], refetch } = useQuery({
-    queryKey: ['pedidos-realtime', empresaId],
-    queryFn: () => {
-      if (empresaId) {
-        return base44.entities.Pedido.filter({ empresa_id: empresaId });
-      }
-      return base44.entities.Pedido.list('-created_date', 100);
-    },
+    queryKey: ['pedidos-realtime', empresaId || contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-created_date', 100),
+    enabled: !!contexto,
     initialData: [],
     refetchInterval: autoRefresh ? 30000 : false // 30 segundos
   });
 
   // Buscar parâmetros
   const { data: parametros = [] } = useQuery({
-    queryKey: ['parametros-origem-pedido'],
-    queryFn: () => base44.entities.ParametroOrigemPedido.list(),
+    queryKey: ['parametros-origem-pedido', contextoKey],
+    queryFn: () => filterInContext('ParametroOrigemPedido', {}, '-updated_date', 999),
+    enabled: !!contexto,
     initialData: []
   });
 

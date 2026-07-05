@@ -59,9 +59,10 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { empresaAtual, createInContext, updateInContext } = useContextoVisual();
+  const { empresaAtual, createInContext, updateInContext, filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
-  const { data: produtos = [] } = useQuery({ queryKey: ['produtos'], queryFn: () => base44.entities.Produto.list() });
+  const { data: produtos = [] } = useQuery({ queryKey: ['produtos', contextoKey], queryFn: () => filterInContext('Produto', {}, 'descricao', 999), enabled: !!contexto });
   const { data: user } = useQuery({ queryKey: ['user'], queryFn: () => base44.auth.me() });
 
   const createMutation = useMutation({

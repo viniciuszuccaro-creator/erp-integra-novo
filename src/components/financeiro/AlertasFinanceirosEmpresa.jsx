@@ -5,8 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, CheckCircle2, Clock, DollarSign } from 'lucide-react';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 export default function AlertasFinanceirosEmpresa({ empresaId, groupId, windowMode = false }) {
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const { data: contasPagar = [] } = useQuery({
     queryKey: ['alertas-pagar', empresaId],
     queryFn: () => base44.entities.ContaPagar.filter(
@@ -30,14 +33,15 @@ export default function AlertasFinanceirosEmpresa({ empresaId, groupId, windowMo
   });
 
   const { data: pedidosAprovacao = [] } = useQuery({
-    queryKey: ['alertas-aprovacao', empresaId],
+    queryKey: ['alertas-aprovacao', empresaId || contextoKey],
     queryFn: async () => {
-      const pedidos = await base44.entities.Pedido.list();
+      const pedidos = await filterInContext('Pedido', {}, '-created_date', 999);
       return pedidos.filter(p => 
         p.status_aprovacao === 'pendente' && 
         (empresaId ? p.empresa_id === empresaId : p.group_id === groupId)
       );
     },
+    enabled: !!contexto,
   });
 
   const hoje = new Date();

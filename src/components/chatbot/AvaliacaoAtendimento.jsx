@@ -48,6 +48,8 @@ export default function AvaliacaoAtendimento({ conversa, onAvaliacaoEnviada }) {
         conversa_id: conversa.id,
         sessao_id: conversa.sessao_id,
         canal: conversa.canal,
+        empresa_id: conversa.empresa_id,
+        group_id: conversa.group_id,
         tipo_remetente: 'Sistema',
         remetente_nome: 'Sistema',
         mensagem: `Cliente avaliou o atendimento: ${nota}/5 estrelas${feedback ? `\nFeedback: "${feedback}"` : ''}${nps !== null ? `\nNPS: ${nps}/10` : ''}`,

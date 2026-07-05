@@ -41,7 +41,7 @@ export default function TemplatesMensagens({ onSelecionarTemplate }) {
   
   const queryClient = useQueryClient();
   const { confirm, ConfirmDialog } = useConfirm();
-  const { empresaAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual } = useContextoVisual();
 
   const categorias = ['Saudação', 'Despedida', 'Orçamento', 'Pedido', 'Entrega', 'Financeiro', 'Suporte', 'Geral'];
 
@@ -93,6 +93,7 @@ export default function TemplatesMensagens({ onSelecionarTemplate }) {
         config = await base44.entities.ConfiguracaoCanal.create({
           canal: 'Portal',
           empresa_id: empresaAtual?.id,
+          group_id: grupoAtual?.id || empresaAtual?.group_id,
           ativo: true,
           templates_mensagem: []
         });

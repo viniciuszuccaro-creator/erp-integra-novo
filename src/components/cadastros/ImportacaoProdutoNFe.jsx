@@ -145,6 +145,7 @@ export default function ImportacaoProdutoNFe({ onProdutosCriados }) {
       for (const prod of produtosNovos) {
         const novoProduto = await base44.entities.Produto.create({
           empresa_id: empresaAtual.id,
+          group_id: empresaAtual.group_id,
           descricao: prod.descricao,
           codigo: prod.codigo,
           ncm: prod.ncm,

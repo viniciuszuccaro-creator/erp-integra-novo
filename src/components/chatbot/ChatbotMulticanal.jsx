@@ -33,7 +33,7 @@ import { useContextoVisual } from '@/components/lib/useContextoVisual';
  * ✅ Links para configuração detalhada
  */
 export default function ChatbotMulticanal() {
-  const { empresaAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const queryClient = useQueryClient();
 
   const canaisDisponiveis = [
@@ -88,6 +88,7 @@ export default function ChatbotMulticanal() {
         await base44.entities.ConfiguracaoCanal.create({
           canal: canalId,
           empresa_id: empresaAtual?.id || 'default',
+          group_id: grupoAtual?.id || empresaAtual?.group_id,
           ativo,
           modo_atendimento: 'Bot com Transbordo',
           mensagem_boas_vindas: `Olá! Bem-vindo ao atendimento via ${canalId}. Como posso ajudar?`

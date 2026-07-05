@@ -7,12 +7,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, Loader2, FileSpreadsheet, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 /**
  * V21.1.2 - IMPORTAR PRODUTOS EM LOTE (CSV/XLSX)
  * Com mapeamento de colunas e preview antes de salvar
  */
 export default function ImportarProdutosLote({ onProdutosCriados, onClose }) {
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const [arquivo, setArquivo] = useState(null);
   const [processando, setProcessando] = useState(false);
   const [dadosParsed, setDadosParsed] = useState(null);
@@ -111,7 +113,9 @@ export default function ImportarProdutosLote({ onProdutosCriados, onClose }) {
           peso_teorico_kg_m: mapeamento.peso_teorico_kg_m ? parseFloat(linha[mapeamento.peso_teorico_kg_m]) || 0 : 0,
           grupo: mapeamento.grupo ? linha[mapeamento.grupo] : 'Outros',
           tipo_item: 'Revenda',
-          status: 'Ativo'
+          status: 'Ativo',
+          empresa_id: empresaAtual?.id,
+          group_id: grupoAtual?.id || empresaAtual?.group_id,
         };
 
         // IA pode sugerir eh_bitola se tiver peso_teorico

@@ -48,6 +48,7 @@ export default function BaseConhecimento() {
         config = await base44.entities.ConfiguracaoCanal.create({
           canal: 'Portal',
           empresa_id: empresaAtual?.id,
+          group_id: grupoAtual?.id || empresaAtual?.group_id,
           ativo: true,
           base_conhecimento: []
         });

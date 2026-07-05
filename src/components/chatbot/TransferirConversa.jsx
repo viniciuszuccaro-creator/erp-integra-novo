@@ -84,6 +84,8 @@ export default function TransferirConversa({ conversa, onTransferido }) {
         conversa_id: conversa.id,
         sessao_id: conversa.sessao_id,
         canal: conversa.canal,
+        empresa_id: conversa.empresa_id,
+        group_id: conversa.group_id,
         tipo_remetente: 'Sistema',
         remetente_nome: 'Sistema',
         mensagem: tipo === 'atendente' 
@@ -105,7 +107,9 @@ export default function TransferirConversa({ conversa, onTransferido }) {
           categoria: 'Atendimento',
           prioridade: conversa.prioridade === 'Urgente' ? 'Alta' : 'Normal',
           destinatario_id: destinoId,
-          link_acao: `/hub-atendimento?conversa=${conversa.id}`
+          link_acao: `/hub-atendimento?conversa=${conversa.id}`,
+          empresa_id: conversa.empresa_id,
+          group_id: conversa.group_id,
         });
       }
     },

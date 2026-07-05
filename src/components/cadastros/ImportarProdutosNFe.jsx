@@ -14,6 +14,7 @@ import { toast } from 'sonner';
  * Lê XML de NF-e e cria produtos automaticamente
  */
 export default function ImportarProdutosNFe({ onProdutosCriados, onClose }) {
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const [xmlFile, setXmlFile] = useState(null);
   const [processando, setProcessando] = useState(false);
   const [itensParsed, setItensParsed] = useState([]);
@@ -123,7 +124,9 @@ IMPORTANTE: Extraia TODOS os itens, não apenas um exemplo.`,
           custo_aquisicao: item.valor_unitario || 0,
           tipo_item: 'Revenda',
           grupo: 'Outros',
-          status: 'Ativo'
+          status: 'Ativo',
+          empresa_id: empresaAtual?.id,
+          group_id: grupoAtual?.id || empresaAtual?.group_id,
         };
 
         const produtoCriado = await base44.entities.Produto.create(novoProduto);

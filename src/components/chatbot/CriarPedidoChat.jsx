@@ -82,6 +82,7 @@ export default function CriarPedidoChat({ conversa, clienteId, onPedidoCriado })
         tipo: 'Pedido',
         origem_pedido: 'Chatbot',
         empresa_id: empresaAtual?.id,
+        group_id: grupoAtual?.id || empresaAtual?.group_id,
         cliente_id: clienteId,
         cliente_nome: cliente?.nome || conversa?.cliente_nome,
         cliente_cpf_cnpj: cliente?.cpf || cliente?.cnpj,

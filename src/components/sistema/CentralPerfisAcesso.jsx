@@ -32,6 +32,7 @@ export default function CentralPerfisAcesso() {
   const { contexto, empresaAtual, grupoAtual, empresasDoGrupo = [], filterInContext } = useContextoVisual();
   const { user } = useUser();
   const { hasPermission, isAdmin } = usePermissions();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const accessScope = getAccessScope({ contexto, empresaAtual, grupoAtual, empresasDoGrupo });
   const { groupId: grupoAtivoId, empresaId: empresaAtivaId, scopeKey, contextoValido } = accessScope;

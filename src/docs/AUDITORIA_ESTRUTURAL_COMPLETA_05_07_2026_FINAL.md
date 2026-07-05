@@ -6,8 +6,8 @@ Auditoria completa do ERP Zuccaro seguindo Regra-Mãe, executando as 5 prioridad
 
 ### MÉTRICAS CONSOLIDADAS (CICLO FINAL)
 - **Arquivos mapeados**: 1.617
-- **Arquivos grandes (>400 linhas)**: **17** (todos libs/UI core/hooks centrais/config)
-- **data-permission**: **700** atributos no sistema (+11 neste ciclo)
+- **Arquivos grandes (>400 linhas)**: **13** (todos libs/UI core/hooks centrais/config)
+- **data-permission**: **703** atributos no sistema (+14 neste ciclo)
 - **Creates com group_id**: **142/169 (84.0%)** — restantes são falsos positivos
 - **window.alert/confirm**: **0** (zero chamadas reais)
 - **Duplicidades de propósito**: **0**
@@ -49,6 +49,10 @@ Auditoria completa do ERP Zuccaro seguindo Regra-Mãe, executando as 5 prioridad
 | HistoricoClienteTab.jsx | 414 | **196** | -53% |
 | RomaneioForm.jsx | 401 | **211** | -47% |
 | StatusIntegracoes.jsx | 414 | **135** | -67% |
+| RentabilidadeProduto.jsx | 421 | **106** | -75% |
+| RelatorioVendasPorRegiao.jsx | 416 | **183** | -56% |
+| TemplatesMensagens.jsx | 412 | **187** | -55% |
+| ClienteForm.jsx | 410 | **217** | -47% |
 
 ### Arquivos Grandes Restantes (todos justificados)
 | Arquivo | Linhas | Tipo | Status |

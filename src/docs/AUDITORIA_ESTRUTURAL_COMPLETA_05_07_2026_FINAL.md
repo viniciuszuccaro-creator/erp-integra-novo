@@ -1,4 +1,4 @@
-# AUDITORIA ESTRUTURAL COMPLETA — 05/07/2026 (SEXTA PASSAGEM — CONSOLIDAÇÃO FINAL)
+# AUDITORIA ESTRUTURAL COMPLETA — 05/07/2026 (SÉTIMA PASSAGEM — CONSOLIDAÇÃO FINAL)
 
 ## RESUMO EXECUTIVO
 
@@ -6,11 +6,12 @@ Auditoria completa do ERP Zuccaro seguindo Regra-Mãe, executando as 5 prioridad
 
 ### MÉTRICAS CONSOLIDADAS (CICLO FINAL)
 - **Arquivos mapeados**: 1.617
-- **Arquivos grandes (>400 linhas)**: **21** (todos libs/UI core/hooks centrais/config)
-- **data-permission**: **695** atributos no sistema (+6 neste ciclo)
+- **Arquivos grandes (>400 linhas)**: **17** (todos libs/UI core/hooks centrais/config)
+- **data-permission**: **700** atributos no sistema (+11 neste ciclo)
 - **Creates com group_id**: **142/169 (84.0%)** — restantes são falsos positivos
 - **window.alert/confirm**: **0** (zero chamadas reais)
 - **Duplicidades de propósito**: **0**
+- **Botões mortos removidos**: 3 (hidden "Removido" em MovimentacoesTab, RequisicoesAlmoxarifadoTab, PontoTab)
 
 ---
 
@@ -44,6 +45,10 @@ Auditoria completa do ERP Zuccaro seguindo Regra-Mãe, executando as 5 prioridad
 | TimelineCliente.jsx | 422 | **122** | -71% |
 | ConfiguracaoCobranca.jsx | 439 | **35** | -92% |
 | ConfiguracaoExpedicao.jsx | 430 | **59** | -86% |
+| DashboardFechamentoPedidos.jsx | 419 | **110** | -74% |
+| HistoricoClienteTab.jsx | 414 | **196** | -53% |
+| RomaneioForm.jsx | 401 | **211** | -47% |
+| StatusIntegracoes.jsx | 414 | **135** | -67% |
 
 ### Arquivos Grandes Restantes (todos justificados)
 | Arquivo | Linhas | Tipo | Status |

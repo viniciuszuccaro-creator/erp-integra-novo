@@ -202,7 +202,7 @@ export default function RequisicoesAlmoxarifadoTab({ requisicoes, produtos }) {
 
         <Dialog open={false}>
           <DialogTrigger asChild>
-            <Button className="hidden">Removido</Button>
+            
           </DialogTrigger>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto hidden">
             <DialogHeader>

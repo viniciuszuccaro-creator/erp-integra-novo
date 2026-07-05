@@ -179,7 +179,7 @@ export default function PontoTab({ pontos, colaboradores }) {
         {/* BACKUP: Dialog removido */}
         <Dialog open={false}>
           <DialogTrigger asChild>
-            <Button className="hidden">Removido</Button>
+            
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>

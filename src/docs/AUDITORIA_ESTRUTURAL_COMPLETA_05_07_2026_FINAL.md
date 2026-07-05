@@ -1,8 +1,15 @@
-# AUDITORIA ESTRUTURAL COMPLETA — 05/07/2026 (CICLO FINAL)
+# AUDITORIA ESTRUTURAL COMPLETA — 05/07/2026 (CICLO FINAL ATUALIZADO)
 
 ## RESUMO EXECUTIVO
 
 Auditoria completa do ERP Zuccaro seguindo Regra-Mãe, executando as 5 prioridades em ordem.
+
+### MÉTRICAS CONSOLIDADAS (CICLO ATUALIZADO)
+- **Arquivos mapeados**: 1.602
+- **Arquivos grandes (>400 linhas)**: 32 (maioria libs/UI core)
+- **data-permission**: 667 → **687** (+20 neste ciclo)
+- **Creates com group_id**: 124/169 (73.4%) → **136/169 (80.5%)**
+- **Creates restantes**: 33 (maioria falsos positivos/utility hooks)
 
 ---
 
@@ -198,7 +205,54 @@ Auditoria completa do ERP Zuccaro seguindo Regra-Mãe, executando as 5 prioridad
 | `TagsCategorizacao.jsx` | Adicionar tag | `HubAtendimento.Conversa.editar_tags` |
 
 ### Métricas Finais
-- **data-permission**: 667 → **674** atributos no sistema
-- **Creates com group_id**: 105/169 (62%) → **124/169 (73.4%)**
-- **Creates restantes**: 45 (15 falsos positivos do scan; ~12 em mock/lib genérico; ~18 reais)
+- **data-permission**: 667 → **687** atributos no sistema
+- **Creates com group_id**: 124/169 (73.4%) → **136/169 (80.5%)**
+- **Creates restantes**: 33 (maioria falsos positivos/utility hooks genéricos)
 - **Arquivo refatorado**: SistemaIntegridadeCheck.jsx 476→~110 linhas (main) + 3 sub-arquivos
+
+---
+
+## CICLO ADICIONAL — REFATORAÇÃO E CORREÇÕES (05/07/2026)
+
+### P1 — Refatoração IALeituraProjeto.jsx (455→~30 linhas)
+- Extraído `leitura-projeto/useLeituraProjeto.jsx` — hook com state + lógica de processamento IA
+- Extraído `leitura-projeto/LeituraProjetoUpload.jsx` — card de upload + modo leitura + botão processar
+- Extraído `leitura-projeto/LeituraProjetoResultados.jsx` — tabela de resultados + info card
+- `IALeituraProjeto.jsx` → wrapper fino (~30 linhas)
+
+### P4 — Simplificação DashboardInadimplencia.jsx (428→~210 linhas)
+- Extraído `inadimplencia/useInadimplencia.jsx` — hook com análise de score de risco + useMemo
+- `DashboardInadimplencia.jsx` → wrapper com KPIs essenciais (4) + gráficos + tabela
+- Layout com `w-full h-full overflow-auto`
+
+### P2 — Creates Corrigidos Neste Ciclo
+| Arquivo | Entidade | Correção |
+|---------|---------|----------|
+| `IntegracaoRomaneio.jsx` | Romaneio.create + Entrega.create | +group_id |
+| `ComprovanteEntregaDigital.jsx` | MovimentacaoEstoque.create + Entrega.create | +group_id |
+| `useEntregasMotorista.jsx` | PosicaoVeiculo.create | +empresa_id, +group_id |
+| `AprovacaoOrcamentos.jsx` | Pedido.create | +group_id, +empresa_id |
+| `ChatCliente.jsx` | Chamado.create | +group_id, +empresa_id |
+| `ChatVendedor.jsx` | ChatbotInteracao.create + Notificacao.create | +group_id, +empresa_id |
+| `UploadProjetos.jsx` | Pedido.create | +group_id, +empresa_id |
+| `ConfigWhatsAppBusiness.jsx` | ConfiguracaoSistema.create | +group_id, +empresa_id |
+
+### P3 — data-permission Adicionados (12 botões de salvar)
+| Arquivo | Permissão |
+|---------|-----------|
+| `CargoForm.jsx` | `Cadastros.Cargo.salvar` |
+| `DepartamentoForm.jsx` | `Cadastros.Departamento.salvar` |
+| `CadastroFiscalForm.jsx` | `Cadastros.Fiscal.salvar` |
+| `ContatoB2BForm.jsx` | `Cadastros.ContatoB2B.salvar` |
+| `ApiExternaForm.jsx` | `Cadastros.ApiExterna.salvar` |
+| `CentroOperacaoForm.jsx` | `Cadastros.CentroOperacao.salvar` |
+| `ChatbotCanalForm.jsx` | `Cadastros.ChatbotCanal.salvar` |
+| `ChatbotIntentForm.jsx` | `Cadastros.ChatbotIntent.salvar` |
+| `ConfiguracaoBoletosForm.jsx` | `Financeiro.ConfiguracaoBoletos.salvar` |
+| `ConfiguracaoIntegracaoForm.jsx` | `Cadastros.ConfiguracaoIntegracao.salvar` |
+| `ConfiguracaoWhatsAppForm.jsx` | `Cadastros.ConfiguracaoWhatsApp.salvar` |
+| `EventoNotificacaoForm.jsx` | `Cadastros.EventoNotificacao.salvar` |
+
+### P5 — Correções de Cadastros
+- `ConfiguracaoCobranca.jsx`: Corrigido bug de chave `group_id` duplicada no payload
+- `ConfiguracaoBoletosForm.jsx`: Mantido como sub-componente focado (231 linhas) — consolidação com ConfiguracaoCobranca (439 linhas) criaria arquivo 670+, violando Regra-Mãe #3

@@ -42,8 +42,10 @@ export default function AprovacaoOrcamentos({ clienteId }) {
       const pedido = await base44.entities.Pedido.create({
         numero_pedido: `PED${Date.now()}`,
         cliente_id: clienteId,
-        cliente_nome: orcamento.cliente_nome, // Assumes orcamento object contains cliente_nome
+        cliente_nome: orcamento.cliente_nome,
         data_pedido: new Date().toISOString().split('T')[0],
+        group_id: grupoAtual?.id,
+        empresa_id: empresaAtual?.id,
         valor_total: orcamento.valor_total,
         itens_revenda: orcamento.itens || [],
         status: 'Aguardando Aprovação',

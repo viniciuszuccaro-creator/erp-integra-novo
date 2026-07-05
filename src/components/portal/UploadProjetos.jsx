@@ -68,6 +68,8 @@ export default function UploadProjetos({ clienteId, clienteNome }) {
         numero_pedido: `PROJ-${Date.now()}`,
         cliente_id: clienteId,
         cliente_nome: clienteNome,
+        group_id: grupoAtual?.id,
+        empresa_id: empresaAtual?.id,
         data_pedido: new Date().toISOString().split('T')[0],
         tipo: 'Orçamento',
         tipo_pedido: 'Produção Sob Medida',

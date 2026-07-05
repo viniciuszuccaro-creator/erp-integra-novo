@@ -72,6 +72,7 @@ export default function useEntregasMotorista() {
         if (entregaAtual) {
           base44.entities.PosicaoVeiculo.create({
             entrega_id: entregaAtual.id, romaneio_id: entregaAtual.romaneio_id, motorista_id: user.id, motorista_nome: user.full_name, placa: entregaAtual.placa,
+            empresa_id: entregaAtual.empresa_id, group_id: entregaAtual.group_id,
             ...novaLocalizacao, bateria_nivel: 0, conectividade: navigator.connection?.effectiveType || "4G",
           });
         }

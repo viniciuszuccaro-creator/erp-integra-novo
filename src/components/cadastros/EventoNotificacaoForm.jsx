@@ -113,7 +113,7 @@ export default function EventoNotificacaoForm({ evento, onSubmit, isSubmitting, 
       </Card>
 
       <div className="flex justify-end gap-3">
-        <Button type="submit" className="bg-amber-600 hover:bg-amber-700" disabled={isSubmitting}>
+        <Button type="submit" className="bg-amber-600 hover:bg-amber-700" disabled={isSubmitting} data-permission="Cadastros.EventoNotificacao.salvar">
           <Save className="w-4 h-4 mr-2" />
           {isSubmitting ? 'Salvando...' : evento ? 'Atualizar' : 'Criar'}
         </Button>

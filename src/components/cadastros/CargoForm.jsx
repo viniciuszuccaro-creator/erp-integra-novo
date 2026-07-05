@@ -154,7 +154,7 @@ export default function CargoForm({ cargo, item, data, initialData, defaultValue
             </Button>
           </>
         )}
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting} data-permission="Cadastros.Cargo.salvar">
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {dadosIniciais ? 'Atualizar' : 'Criar Cargo'}
         </Button>

@@ -16,6 +16,7 @@ import {
   Send
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import WhatsAppBusinessEngine from '../sistema/WhatsAppBusinessEngine';
 
 /**
@@ -24,6 +25,7 @@ import WhatsAppBusinessEngine from '../sistema/WhatsAppBusinessEngine';
 export default function ConfigWhatsAppBusiness({ empresaId }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { grupoAtual, empresaAtual } = useContextoVisual();
 
   const [config, setConfig] = useState({
     ativo: false,
@@ -44,6 +46,8 @@ export default function ConfigWhatsAppBusiness({ empresaId }) {
       await base44.entities.ConfiguracaoSistema.create({
         chave: `whatsapp_business_${empresaId}`,
         categoria: 'Integracoes',
+        empresa_id: empresaId || empresaAtual?.id,
+        group_id: grupoAtual?.id,
         integracao_whatsapp: dados
       });
     },

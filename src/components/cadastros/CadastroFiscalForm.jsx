@@ -96,7 +96,7 @@ export default function CadastroFiscalForm({ cadastroFiscal, onSubmit, isSubmitt
       </Alert>
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting} data-permission="Cadastros.Fiscal.salvar">
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {cadastroFiscal ? 'Atualizar' : 'Criar Cadastro Fiscal'}
         </Button>

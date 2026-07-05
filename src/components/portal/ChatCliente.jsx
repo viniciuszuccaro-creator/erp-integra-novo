@@ -63,6 +63,8 @@ export default function ChatCliente({ clienteId, clienteNome }) {
         return base44.entities.Chamado.create({
           cliente_id: clienteId,
           cliente_nome: clienteNome,
+          group_id: grupoAtual?.id,
+          empresa_id: empresaAtual?.id,
           titulo: "Chat - " + new Date().toLocaleDateString('pt-BR'),
           descricao: novaMensagem,
           categoria: "Suporte Técnico",

@@ -59,9 +59,8 @@ export default function ConfiguracaoCobranca({ empresas, windowMode = false }) {
   const salvarMutation = useMutation({
     mutationFn: async () => {
       const dadosConfig = {
-        group_id: empresaSelecionada.grupo_id,
+        group_id: empresaSelecionada.group_id || empresaSelecionada.grupo_id,
         empresa_id: empresaSelecionada.id,
-        group_id: empresaSelecionada.group_id,
         empresa_nome: empresaSelecionada.nome_fantasia || empresaSelecionada.razao_social,
         ...config,
         status_conexao: config.ativo ? "configurado" : "nao_configurado"

@@ -73,7 +73,8 @@ export default function IntegracaoRomaneio({ pedidosSelecionados = [], onClose, 
         valor_total_mercadorias: valorTotal,
         status: 'Em Rota',
         responsavel_criacao: user?.full_name || "Sistema",
-        empresa_id: pedidosParaRomaneio[0]?.empresa_id
+        empresa_id: pedidosParaRomaneio[0]?.empresa_id,
+        group_id: pedidosParaRomaneio[0]?.group_id || grupoAtual?.id
       });
 
       // Criar entregas e vincular ao romaneio
@@ -84,6 +85,7 @@ export default function IntegracaoRomaneio({ pedidosSelecionados = [], onClose, 
           cliente_id: pedido.cliente_id,
           cliente_nome: pedido.cliente_nome,
           empresa_id: pedido.empresa_id,
+          group_id: pedido.group_id || grupoAtual?.id,
           endereco_entrega_completo: pedido.endereco_entrega_principal,
           romaneio_id: romaneio.id,
           motorista: motorista,

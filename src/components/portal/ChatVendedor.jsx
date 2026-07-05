@@ -53,6 +53,8 @@ export default function ChatVendedor({ clienteId }) {
       const interacao = await base44.entities.ChatbotInteracao.create({
         cliente_id: clienteId,
         cliente_nome: cliente?.nome,
+        group_id: grupoAtual?.id,
+        empresa_id: empresaAtual?.id,
         canal: 'Portal',
         mensagem_cliente: mensagemTexto,
         sentimento: 'neutro',
@@ -69,6 +71,8 @@ export default function ChatVendedor({ clienteId }) {
       if (cliente?.vendedor_responsavel_id) {
         await base44.entities.Notificacao.create({
           usuario_id: cliente.vendedor_responsavel_id,
+          group_id: grupoAtual?.id,
+          empresa_id: empresaAtual?.id,
           tipo: 'chat_cliente',
           titulo: `💬 Nova mensagem de ${cliente.nome}`,
           mensagem: mensagemTexto.substring(0, 100),

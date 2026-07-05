@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { MapPin, Truck, DollarSign, TrendingUp, X, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
@@ -122,8 +123,11 @@ export default function RegiaoAtendimentoForm({ regiaoId, regiaoAtendimento, ite
     }
   };
 
-  const handleExcluir = () => {
-    if (window.confirm("Tem certeza que deseja excluir esta região?")) {
+  const { confirm, ConfirmDialog: ConfirmExcluirDialog } = useConfirm();
+
+  const handleExcluir = async () => {
+    const ok = await confirm({ title: 'Confirmar Exclusão', description: 'Tem certeza que deseja excluir esta região? Esta ação não pode ser desfeita.', confirmText: 'Excluir' });
+    if (ok) {
       onSubmit({ ...formData, _delete: true });
       onOpenChange(false);
     }
@@ -603,6 +607,7 @@ export default function RegiaoAtendimentoForm({ regiaoId, regiaoAtendimento, ite
           <DialogTitle>{regiaoId ? "Editar" : "Nova"} Região de Atendimento</DialogTitle>
         </DialogHeader>
         {FormContent}
+        <ConfirmExcluirDialog />
       </DialogContent>
     </Dialog>
   );

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Factory, Plus, Search, Edit, Trash2, Eye, Clock } from "lucide-react";
+import ConfirmDialog from "@/components/ui/confirm-dialog";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { useWindow } from "@/components/lib/useWindow";
 import FormularioOrdemProducao from "./FormularioOrdemProducao";
@@ -25,6 +26,7 @@ const STATUS_COLORS = {
 export default function OrdensProducaoListagem({ windowMode }) {
   const [search, setSearch] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
+  const [itemParaExcluir, setItemParaExcluir] = useState(null);
   const { empresaAtual, filterInContext } = useContextoVisual();
   const { openWindow } = useWindow();
   const qc = useQueryClient();
@@ -103,7 +105,7 @@ export default function OrdensProducaoListagem({ windowMode }) {
                       <Button variant="ghost" size="icon" data-permission="Producao.OrdemProducao.editar" onClick={() => openWindow(FormularioOrdemProducao, { op, windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['ops-listagem'] }) }, { title: `Editar OP: ${op.numero_op || ''}`, width: 1200, height: 750 })}>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" data-permission="Producao.OrdemProducao.excluir" className="text-red-600" onClick={() => window.confirm('Excluir OP?') && deleteMutation.mutate(op.id)}>
+                      <Button variant="ghost" size="icon" data-permission="Producao.OrdemProducao.excluir" className="text-red-600" onClick={() => setItemParaExcluir(op)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -125,6 +127,7 @@ export default function OrdensProducaoListagem({ windowMode }) {
         <Clock className="w-3 h-3" />
         {filtered.length} de {ops.length} OPs exibidas
       </div>
+      <ConfirmDialog open={!!itemParaExcluir} onOpenChange={(open) => !open && setItemParaExcluir(null)} onConfirm={() => { if (itemParaExcluir) deleteMutation.mutate(itemParaExcluir.id); setItemParaExcluir(null); }} title="Confirmar Exclusão" description="Excluir esta ordem de produção? Esta ação não pode ser desfeita." confirmText="Excluir" />
     </div>
   );
 }

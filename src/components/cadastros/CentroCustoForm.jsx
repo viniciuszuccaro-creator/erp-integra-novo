@@ -193,6 +193,19 @@ export default function CentroCustoForm({ centroCusto, item, data, initialData, 
         </div>
       </div>
 
+      {confirmandoExclusao && (
+        <Alert className="border-red-300 bg-red-50">
+          <AlertTriangle className="w-4 h-4 text-red-600" />
+          <AlertDescription className="flex items-center justify-between">
+            <span className="text-sm text-red-900 font-medium">Confirmar exclusão do centro de custo "{formData.descricao}"?</span>
+            <div className="flex gap-2">
+              <Button type="button" size="sm" variant="outline" onClick={() => setConfirmandoExclusao(false)}>Cancelar</Button>
+              <Button type="button" size="sm" variant="destructive" onClick={confirmarExclusaoDefinitiva}>Excluir</Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex justify-end gap-3 pt-4">
         {dadosCentroCusto && (
           <>

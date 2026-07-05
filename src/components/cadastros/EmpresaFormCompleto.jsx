@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Building2, FileText, MapPin, Webhook, Sparkles, Upload, Calendar, Trash2, Power, PowerOff } from "lucide-react";
 import { toast } from "sonner";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import BuscaCEP from "../comercial/BuscaCEP";
 import usePermissions from "@/components/lib/usePermissions";
 
@@ -83,12 +84,15 @@ export default function EmpresaFormCompleto({ empresa, onSubmit, isSubmitting })
     onSubmit(formData);
   };
 
-  const handleExcluir = () => {
+  const { confirm, ConfirmDialog: ConfirmExcluirDialog } = useConfirm();
+
+  const handleExcluir = async () => {
     if (!podeExcluir) {
       toast.error('Seu perfil nao permite excluir empresas.');
       return;
     }
-    if (!window.confirm(`Tem certeza que deseja excluir a empresa "${formData.razao_social}"? Esta ação não pode ser desfeita.`)) return;
+    const ok = await confirm({ title: 'Confirmar Exclusão', description: `Tem certeza que deseja excluir a empresa "${formData.razao_social}"? Esta ação não pode ser desfeita.`, confirmText: 'Excluir' });
+    if (!ok) return;
     if (onSubmit) onSubmit({ ...formData, _action: 'delete' });
   };
 
@@ -264,6 +268,7 @@ export default function EmpresaFormCompleto({ empresa, onSubmit, isSubmitting })
           {isSubmitting ? 'Salvando...' : (empresa ? 'Salvar Alterações' : 'Criar Empresa')}
         </Button>
       </div>
+      <ConfirmExcluirDialog />
     </form>
   );
 }

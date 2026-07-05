@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Package, Trash2, Power, PowerOff } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
@@ -63,14 +64,15 @@ export default function GrupoProdutoForm({ grupo, grupoProduto, item, data, init
     if (typeof closeSelf === 'function') closeSelf();
   };
 
-  const handleExcluir = () => {
+  const { confirm, ConfirmDialog: ConfirmExcluirDialog } = useConfirm();
+
+  const handleExcluir = async () => {
     if (!podeExcluir) {
       toast.error('Sem permissão para excluir grupo de produto.');
       return;
     }
-    if (!window.confirm(`Tem certeza que deseja excluir o grupo "${formData.nome_grupo}"? Esta ação não pode ser desfeita.`)) {
-      return;
-    }
+    const ok = await confirm({ title: 'Confirmar Exclusão', description: `Tem certeza que deseja excluir o grupo "${formData.nome_grupo}"? Esta ação não pode ser desfeita.`, confirmText: 'Excluir' });
+    if (!ok) return;
     if (onSubmit) {
       onSubmit({ ...formData, _action: 'delete' });
     if (typeof closeSelf === 'function') closeSelf();
@@ -206,5 +208,5 @@ export default function GrupoProdutoForm({ grupo, grupoProduto, item, data, init
     );
   }
 
-  return formContent;
+  return (<>{formContent}<ConfirmExcluirDialog /></>);
 }

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import {
   Plus,
   Search,
@@ -117,8 +118,11 @@ export default function ComissoesTab({ comissoes, pedidos, empresas = [] }) {
     }
   };
 
-  const handlePagar = (comissao) => {
-    if (window.confirm(`Deseja gerar o pagamento da comissão?\n\nVendedor: ${comissao.vendedor}\nValor: R$ ${comissao.valor_comissao?.toFixed(2)}\n\nSerá criado um título no Financeiro.`)) {
+  const { confirm, ConfirmDialog: ConfirmPagarDialog } = useConfirm();
+
+  const handlePagar = async (comissao) => {
+    const ok = await confirm({ title: 'Gerar Pagamento', description: `Deseja gerar o pagamento da comissão?\n\nVendedor: ${comissao.vendedor}\nValor: R$ ${comissao.valor_comissao?.toFixed(2)}\n\nSerá criado um título no Financeiro.`, confirmText: 'Gerar Pagamento', variant: 'success' });
+    if (ok) {
       pagarComissaoMutation.mutate({ id: comissao.id, comissao });
     }
   };
@@ -461,6 +465,7 @@ export default function ComissoesTab({ comissoes, pedidos, empresas = [] }) {
       </Card>
 
       {/* Dialog de Visualização REMOVIDO - Agora usa Window */}
+      <ConfirmPagarDialog />
     </div>
   );
 }

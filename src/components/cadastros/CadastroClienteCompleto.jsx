@@ -12,6 +12,7 @@ import {
   Save, ExternalLink, Trash2, Power, PowerOff
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import useContextoVisual from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
 import GerenciarContatosClienteForm from "./GerenciarContatosClienteForm";
@@ -33,6 +34,7 @@ export default function CadastroClienteCompleto({ cliente: clienteProp, item, da
   const queryClient = useQueryClient();
   const { empresaAtual, grupoAtual, filterInContext, createInContext, updateInContext, deleteInContext } = useContextoVisual();
   const { canCreate, canEdit, canDelete } = usePermissions();
+  const { confirm: confirmExcluir, ConfirmDialog: ConfirmExcluirDialog } = useConfirm();
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
   const contextKey = empresaAtual?.id || groupId || "sem-contexto";
   const contextoValido = contextKey !== "sem-contexto";
@@ -179,7 +181,8 @@ export default function CadastroClienteCompleto({ cliente: clienteProp, item, da
                   type="button" variant="destructive"
                   data-permission="Cadastros.Cliente.excluir" data-sensitive="true"
                   onClick={async () => {
-                    if (!window.confirm(`Excluir o cliente "${formData.nome}"? Esta ação não pode ser desfeita.`)) return;
+                    const ok = await confirmExcluir({ title: 'Confirmar Exclusão', description: `Excluir o cliente "${formData.nome}"? Esta ação não pode ser desfeita.`, confirmText: 'Excluir' });
+                    if (!ok) return;
                     try {
                       await base44.entities.AuditLog.create({
                         usuario: usuarioLogado?.full_name || 'Usuário', usuario_id: usuarioLogado?.id,
@@ -348,6 +351,7 @@ export default function CadastroClienteCompleto({ cliente: clienteProp, item, da
     <Dialog open={isOpen} onOpenChange={onCloseNorm}>
       <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full flex flex-col p-0 overflow-hidden">
         {content}
+        <ConfirmExcluirDialog />
       </DialogContent>
     </Dialog>
   );

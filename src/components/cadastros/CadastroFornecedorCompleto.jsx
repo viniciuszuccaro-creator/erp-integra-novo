@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { 
   Building2, 
   Phone, 
@@ -128,10 +129,11 @@ export default function CadastroFornecedorCompleto({ fornecedor: fornecedorProp,
     }
   });
 
-  const handleExcluir = () => {
-    if (!window.confirm(`Tem certeza que deseja excluir o fornecedor "${formData.nome}"? Esta ação não pode ser desfeita.`)) {
-      return;
-    }
+  const { confirm, ConfirmDialog: ConfirmExcluirDialog } = useConfirm();
+
+  const handleExcluir = async () => {
+    const ok = await confirm({ title: 'Confirmar Exclusão', description: `Tem certeza que deseja excluir o fornecedor "${formData.nome}"? Esta ação não pode ser desfeita.`, confirmText: 'Excluir' });
+    if (!ok) return;
     deleteMutation.mutate(fornecedor.id);
   };
 
@@ -674,6 +676,7 @@ export default function CadastroFornecedorCompleto({ fornecedor: fornecedorProp,
     <Dialog open={isOpen} onOpenChange={onCloseNorm}>
       <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full overflow-hidden flex flex-col p-0">
         {content}
+        <ConfirmExcluirDialog />
       </DialogContent>
     </Dialog>
   );

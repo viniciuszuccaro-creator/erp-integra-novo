@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -167,8 +168,11 @@ export default function RepresentanteFormCompleto({ representante: representante
   });
 
   const handleSave = () => saveMutation.mutate(formData);
-  const handleExcluir = () => {
-    if (window.confirm(`Excluir "${formData.nome}"?`)) {
+  const { confirm, ConfirmDialog: ConfirmExcluirDialog } = useConfirm();
+
+  const handleExcluir = async () => {
+    const ok = await confirm({ title: 'Confirmar Exclusão', description: `Excluir "${formData.nome}"? Esta ação não pode ser desfeita.`, confirmText: 'Excluir' });
+    if (ok) {
       deleteMutation.mutate(representante.id);
     }
   };
@@ -742,13 +746,14 @@ export default function RepresentanteFormCompleto({ representante: representante
   );
 
   if (windowMode) {
-    return <div className="w-full h-full flex flex-col bg-white">{content}</div>;
+    return <div className="w-full h-full flex flex-col bg-white">{content}<ConfirmExcluirDialog /></div>;
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onCloseNorm}>
       <DialogContent className="max-w-[95vw] max-h-[95vh] flex flex-col p-0 overflow-hidden">
         {content}
+        <ConfirmExcluirDialog />
       </DialogContent>
     </Dialog>
   );

@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { z } from "zod";
 import FormWrapper from "@/components/common/FormWrapper";
 import { Save, User, Trash2, Power, PowerOff } from "lucide-react";
@@ -64,10 +65,11 @@ function ColaboradorForm({ colaborador: colaboradorProp, item, data, onSubmit, o
     onSubmit(carimbarContexto(formData, 'empresa_alocada_id'));
   };
 
-  const handleExcluir = () => {
-    if (!window.confirm(`Tem certeza que deseja excluir o colaborador "${formData.nome_completo}"? Esta ação não pode ser desfeita.`)) {
-      return;
-    }
+  const { confirm, ConfirmDialog: ConfirmExcluirDialog } = useConfirm();
+
+  const handleExcluir = async () => {
+    const ok = await confirm({ title: 'Confirmar Exclusão', description: `Tem certeza que deseja excluir o colaborador "${formData.nome_completo}"? Esta ação não pode ser desfeita.`, confirmText: 'Excluir' });
+    if (!ok) return;
     if (onSubmit) {
       onSubmit({ ...carimbarContexto(formData, 'empresa_alocada_id'), _action: 'delete' });
     }
@@ -321,7 +323,7 @@ function ColaboradorForm({ colaborador: colaboradorProp, item, data, onSubmit, o
     return <div className="w-full h-full bg-white">{content}</div>;
   }
 
-  return content;
+  return (<>{content}<ConfirmExcluirDialog /></>);
 }
 
 export default React.memo(ColaboradorForm);

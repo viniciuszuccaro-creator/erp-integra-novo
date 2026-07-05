@@ -8,6 +8,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +38,7 @@ export default function CadastrosTableUniversal({
   const podeVisualizar = hasPermission("Cadastros", entityName, "visualizar") || hasPermission("Cadastros", null, "visualizar");
   const podeEditar = canEdit("Cadastros", entityName) || canEdit("Cadastros", null);
   const podeExcluir = canDelete("Cadastros", entityName) || canDelete("Cadastros", null);
+  const { confirm: confirmDel, ConfirmDialog: ConfirmDelDialog } = useConfirm();
   const permissaoVisualizar = `Cadastros.${entityName}.visualizar`;
   const permissaoEditar = `Cadastros.${entityName}.editar`;
   const permissaoExcluir = `Cadastros.${entityName}.excluir`;
@@ -217,10 +219,9 @@ export default function CadastrosTableUniversal({
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => {
-                                if (window.confirm(`Regra-Mae: confirma excluir este registro de ${entityName}? Esta acao sera auditada.`)) {
-                                  onDelete(item);
-                                }
+                              onClick={async () => {
+                                const ok = await confirmDel({ title: 'Confirmar Exclusão', description: `Regra-Mae: confirma excluir este registro de ${entityName}? Esta ação será auditada.`, confirmText: 'Excluir' });
+                                if (ok) onDelete(item);
                               }}
                               disabled={!podeExcluir}
                               className="h-8 w-8 p-0 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-sm"
@@ -271,6 +272,7 @@ export default function CadastrosTableUniversal({
           </div>
         </div>
       )}
+      <ConfirmDelDialog />
     </div>
   );
 }

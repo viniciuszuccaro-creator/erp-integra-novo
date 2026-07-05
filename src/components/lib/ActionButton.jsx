@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Loader2, XCircle } from 'lucide-react';
 import { useActionState } from './useActionState';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 
 /**
  * V22.0 ETAPA 1 - Botão com Estados Padronizados
@@ -99,21 +100,23 @@ export function ActionButtonWithConfirm({
   confirmTitle = 'Confirmar ação',
   ...props
 }) {
-  const [confirming, setConfirming] = React.useState(false);
+  const { confirm, ConfirmDialog: ConfirmActionDialog } = useConfirm();
 
   const handleConfirmedAction = async () => {
-    if (!window.confirm(`${confirmTitle}\n\n${confirmMessage}`)) {
-      return;
-    }
+    const ok = await confirm({ title: confirmTitle, description: confirmMessage, confirmText: 'Confirmar' });
+    if (!ok) return;
     await onAction();
   };
 
   return (
-    <ActionButton
-      {...props}
-      onAction={handleConfirmedAction}
-    >
-      {children}
-    </ActionButton>
+    <>
+      <ActionButton
+        {...props}
+        onAction={handleConfirmedAction}
+      >
+        {children}
+      </ActionButton>
+      <ConfirmActionDialog />
+    </>
   );
 }

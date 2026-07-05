@@ -12,6 +12,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import usePermissions from "@/components/lib/usePermissions";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -74,6 +75,7 @@ export default function VisualizadorUniversalEntidade({
 }) {
   const ENTITY  = nomeEntidade || entityName || "";
   const TITULO  = tituloDisplay || ENTITY;
+  const { confirm: confirmDel, ConfirmDialog: ConfirmDelDialog } = useConfirm();
 
   // ── Columns definition ──
   const COLUMNS = useMemo(() => {
@@ -235,7 +237,8 @@ export default function VisualizadorUniversalEntidade({
       toast.error("Sem permissão para excluir.");
       return;
     }
-    if (!window.confirm(`Confirma exclusão de "${item.nome || item.descricao || item.id}"?`)) return;
+    const ok = await confirmDel({ title: 'Confirmar Exclusão', description: `Confirma exclusão de "${item.nome || item.descricao || item.id}"?`, confirmText: 'Excluir' });
+    if (!ok) return;
     try {
       await deleteInContext(ENTITY, item.id);
       queryClient.invalidateQueries({ queryKey: [ENTITY, "vis-list"] });
@@ -478,5 +481,5 @@ export default function VisualizadorUniversalEntidade({
     );
   }
 
-  return content;
+  return (<>{content}<ConfirmDelDialog /></>);
 }

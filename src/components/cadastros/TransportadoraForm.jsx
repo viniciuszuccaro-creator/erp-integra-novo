@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Save, Truck, Trash2, Power, PowerOff } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { BotaoBuscaAutomatica } from "@/components/lib/BuscaDadosPublicos";
 import { z } from "zod";
 import FormWrapper from "@/components/common/FormWrapper";
@@ -84,14 +85,15 @@ export default function TransportadoraForm({ transportadora: transportadoraProp,
     if (onCloseNorm) onCloseNorm();
   };
 
-  const handleExcluir = () => {
+  const { confirm, ConfirmDialog: ConfirmExcluirDialog } = useConfirm();
+
+  const handleExcluir = async () => {
     if (!podeExcluir) {
       toast({ title: "Seu perfil nao permite excluir transportadoras.", variant: "destructive" });
       return;
     }
-    if (!window.confirm(`Tem certeza que deseja excluir a transportadora "${formData.razao_social}"? Esta ação não pode ser desfeita.`)) {
-      return;
-    }
+    const ok = await confirm({ title: 'Confirmar Exclusão', description: `Tem certeza que deseja excluir a transportadora "${formData.razao_social}"? Esta ação não pode ser desfeita.`, confirmText: 'Excluir' });
+    if (!ok) return;
     if (onSubmit) {
       onSubmit({ ...formData, _action: 'delete' });
     }
@@ -397,5 +399,5 @@ export default function TransportadoraForm({ transportadora: transportadoraProp,
     return <div className="w-full h-full bg-white">{content}</div>;
   }
 
-  return content;
+  return (<>{content}<ConfirmExcluirDialog /></>);
 }

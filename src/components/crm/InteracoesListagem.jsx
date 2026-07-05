@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Search, MessageSquare, Edit, Trash2, Phone, Mail, Video, Users } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import ConfirmDialog from "@/components/ui/confirm-dialog";
 import InteracaoForm from "./InteracaoForm";
 import { useWindow } from "@/components/lib/useWindow";
 
@@ -22,6 +23,7 @@ const tipoColor = {
 
 export default function InteracoesListagem({ interacoes: propInt = [], windowMode }) {
   const [search, setSearch] = useState("");
+  const [itemParaExcluir, setItemParaExcluir] = useState(null);
   const { empresaAtual, filterInContext } = useContextoVisual();
   const { openWindow } = useWindow();
   const qc = useQueryClient();
@@ -78,7 +80,7 @@ export default function InteracoesListagem({ interacoes: propInt = [], windowMod
                     <TableCell>{i.responsavel}</TableCell>
                     <TableCell className="text-slate-500 text-xs">{i.data_interacao ? new Date(i.data_interacao).toLocaleDateString('pt-BR') : '-'}</TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="icon" data-permission="CRM.Interacao.excluir" className="text-red-600" onClick={() => window.confirm('Excluir?') && deleteMutation.mutate(i.id)}>
+                      <Button variant="ghost" size="icon" data-permission="CRM.Interacao.excluir" className="text-red-600" onClick={() => setItemParaExcluir(i)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </TableCell>
@@ -90,6 +92,7 @@ export default function InteracoesListagem({ interacoes: propInt = [], windowMod
           {filtered.length === 0 && <div className="text-center py-12 text-slate-400"><MessageSquare className="w-10 h-10 mx-auto mb-2 opacity-30" /><p>Nenhuma interação encontrada</p></div>}
         </CardContent>
       </Card>
+      <ConfirmDialog open={!!itemParaExcluir} onOpenChange={(open) => !open && setItemParaExcluir(null)} onConfirm={() => { if (itemParaExcluir) deleteMutation.mutate(itemParaExcluir.id); setItemParaExcluir(null); }} title="Confirmar Exclusão" description="Excluir esta interação? Esta ação não pode ser desfeita." confirmText="Excluir" />
     </div>
   );
 }

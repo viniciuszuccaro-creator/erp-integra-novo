@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Search, TrendingUp, Edit, Trash2, Eye } from "lucide-react";
+import ConfirmDialog from "@/components/ui/confirm-dialog";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import OportunidadeForm from "./OportunidadeForm";
 import { useWindow } from "@/components/lib/useWindow";
@@ -15,6 +16,7 @@ import { useWindow } from "@/components/lib/useWindow";
 export default function OportunidadesListagem({ oportunidades: propOps = [], windowMode }) {
   const [search, setSearch] = useState("");
   const [filtroEstagio, setFiltroEstagio] = useState("todos");
+  const [itemParaExcluir, setItemParaExcluir] = useState(null);
   const { empresaAtual, filterInContext } = useContextoVisual();
   const { openWindow } = useWindow();
   const qc = useQueryClient();
@@ -96,7 +98,7 @@ export default function OportunidadesListagem({ oportunidades: propOps = [], win
                       <Button variant="ghost" size="icon" data-permission="CRM.Oportunidade.editar" onClick={() => openWindow(OportunidadeForm, { oportunidade: op, windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['oportunidades-list'] }) }, { title: `Editar: ${op.titulo}`, width: 900, height: 650 })}>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" data-permission="CRM.Oportunidade.excluir" className="text-red-600" onClick={() => window.confirm('Excluir?') && deleteMutation.mutate(op.id)}>
+                      <Button variant="ghost" size="icon" data-permission="CRM.Oportunidade.excluir" className="text-red-600" onClick={() => setItemParaExcluir(op)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -113,6 +115,7 @@ export default function OportunidadesListagem({ oportunidades: propOps = [], win
           )}
         </CardContent>
       </Card>
+      <ConfirmDialog open={!!itemParaExcluir} onOpenChange={(open) => !open && setItemParaExcluir(null)} onConfirm={() => { if (itemParaExcluir) deleteMutation.mutate(itemParaExcluir.id); setItemParaExcluir(null); }} title="Confirmar Exclusão" description="Excluir esta oportunidade? Esta ação não pode ser desfeita." confirmText="Excluir" />
     </div>
   );
 }

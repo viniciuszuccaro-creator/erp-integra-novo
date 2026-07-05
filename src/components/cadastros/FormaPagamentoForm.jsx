@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, CreditCard, Trash2, Power, PowerOff } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { z } from "zod";
 import FormWrapper from "@/components/common/FormWrapper";
 import usePermissions from "@/components/lib/usePermissions";
@@ -51,14 +52,15 @@ export default function FormaPagamentoForm({ forma, onSubmit, isSubmitting, wind
     onSubmit(formData);
   };
 
-  const handleExcluir = () => {
+  const { confirm, ConfirmDialog: ConfirmExcluirDialog } = useConfirm();
+
+  const handleExcluir = async () => {
     if (!podeExcluir) {
       toast.error("Sem permissão para excluir formas de pagamento.");
       return;
     }
-    if (!window.confirm(`Tem certeza que deseja excluir a forma de pagamento "${formData.descricao}"? Esta ação não pode ser desfeita.`)) {
-      return;
-    }
+    const ok = await confirm({ title: 'Confirmar Exclusão', description: `Tem certeza que deseja excluir a forma de pagamento "${formData.descricao}"? Esta ação não pode ser desfeita.`, confirmText: 'Excluir' });
+    if (!ok) return;
     if (onSubmit) {
       onSubmit({ ...formData, _action: 'delete' });
     }
@@ -232,5 +234,5 @@ export default function FormaPagamentoForm({ forma, onSubmit, isSubmitting, wind
     );
   }
 
-  return formContent;
+  return (<>{formContent}<ConfirmExcluirDialog /></>);
 }

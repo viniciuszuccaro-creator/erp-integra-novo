@@ -104,17 +104,28 @@ export default function ComissoesTab({ comissoes, pedidos, empresas = [] }) {
     },
   });
 
-  const handleAprovar = (comissao) => {
-    const aprovador = prompt("Digite seu nome para aprovar:");
-    if (aprovador) {
-      aprovarComissaoMutation.mutate({ id: comissao.id, aprovador });
+  const handleAprovar = async (comissao) => {
+    const user = await base44.auth.me();
+    const ok = await confirm({
+      title: 'Aprovar Comissão',
+      description: `Deseja aprovar a comissão de ${comissao.vendedor}?\nValor: R$ ${comissao.valor_comissao?.toFixed(2)}\n\nVocê está aprovando como: ${user?.full_name || 'Sistema'}`,
+      confirmText: 'Aprovar',
+      variant: 'success'
+    });
+    if (ok) {
+      aprovarComissaoMutation.mutate({ id: comissao.id, aprovador: user?.full_name || 'Sistema' });
     }
   };
 
-  const handleRecusar = (comissao) => {
-    const motivo = prompt("Digite o motivo da recusa:");
-    if (motivo) {
-      recusarComissaoMutation.mutate({ id: comissao.id, motivo, obs: comissao.observacoes });
+  const handleRecusar = async (comissao) => {
+    const ok = await confirm({
+      title: 'Recusar Comissão',
+      description: `Deseja recusar a comissão de ${comissao.vendedor}?\nValor: R$ ${comissao.valor_comissao?.toFixed(2)}\n\nInforme o motivo na caixa de confirmação.`,
+      confirmText: 'Recusar',
+      variant: 'destructive'
+    });
+    if (ok) {
+      recusarComissaoMutation.mutate({ id: comissao.id, motivo: 'Recusado pelo usuário', obs: comissao.observacoes });
     }
   };
 

@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { useWindow } from "@/components/lib/useWindow";
 import SolicitacaoCompraForm from "@/components/compras/SolicitacaoCompraForm";
 import { useToast } from "@/components/ui/use-toast";
@@ -20,6 +21,7 @@ import { useContextoVisual } from "@/components/lib/useContextoVisual";
 export default function SolicitacoesTab({ solicitacoes, produtos }) {
   const { openWindow } = useWindow();
   const { toast } = useToast();
+  const { confirm, ConfirmDialog: ConfirmRejeitarDialog } = useConfirm();
   const { canCreate, canApprove, canEdit } = usePermissions();
   const { empresaAtual, grupoAtual, createInContext, updateInContext } = useContextoVisual();
   const contextoValido = Boolean(empresaAtual?.id || grupoAtual?.id);
@@ -69,12 +71,17 @@ export default function SolicitacoesTab({ solicitacoes, produtos }) {
 
   const handleRejeitar = async (solicitacao) => {
     const user = await base44.auth.me();
-    const motivo = prompt('Motivo da rejeição:');
-    if (motivo) {
+    const ok = await confirm({
+      title: 'Rejeitar Solicitação',
+      description: `Deseja rejeitar a solicitação ${solicitacao.numero_solicitacao || solicitacao.produto_nome}?\n\nA rejeição será registrada com seu usuário.`,
+      confirmText: 'Rejeitar',
+      variant: 'destructive'
+    });
+    if (ok) {
       rejeitarSolicitacaoMutation.mutate({
         solicitacao,
         aprovador: user?.full_name || 'Sistema',
-        motivo
+        motivo: 'Rejeitado pelo usuário'
       });
     }
   };
@@ -223,6 +230,7 @@ export default function SolicitacoesTab({ solicitacoes, produtos }) {
           </div>
         )}
       </Card>
+      <ConfirmRejeitarDialog />
     </div>
   );
 }

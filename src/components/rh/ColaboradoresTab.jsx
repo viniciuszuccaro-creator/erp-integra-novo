@@ -1,6 +1,6 @@
 import React from "react";
 import { Users } from "lucide-react";
-import VisualizadorUniversalEntidade from "@/components/cadastros/VisualizadorUniversalEntidade";
+import VisualizadorUniversalEntidade from "@/components/cadastros/VisualizadorUniversalEntidadeV24";
 import ColaboradorForm from "@/components/rh/ColaboradorForm";
 
 export default function ColaboradoresTab({ windowMode = false }) {

@@ -15,7 +15,7 @@ import { useWindow } from "@/components/lib/useWindow";
 import ConversaoProducaoMassa from "@/components/cadastros/ConversaoProducaoMassa";
 import DashboardProdutosProducao from "@/components/cadastros/DashboardProdutosProducao";
 import ImportadorProdutosPlanilha from "@/components/estoque/ImportadorProdutosPlanilha";
-import VisualizadorUniversalEntidade from "@/components/cadastros/VisualizadorUniversalEntidade";
+import VisualizadorUniversalEntidade from "@/components/cadastros/VisualizadorUniversalEntidadeV24";
 
 export default function ProdutosTab(props) {
   const { hasPermission } = usePermissions();

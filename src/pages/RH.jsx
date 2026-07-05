@@ -11,7 +11,7 @@ import usePermissions from "@/components/lib/usePermissions";
 import { Button } from "@/components/ui/button";
 import KPIsRH from "@/components/rh/rh-launchpad/KPIsRH";
 const FeriasTab = React.lazy(() => import('@/components/rh/FeriasTab'));
-import VisualizadorUniversalEntidade from "@/components/cadastros/VisualizadorUniversalEntidade";
+import VisualizadorUniversalEntidade from "@/components/cadastros/VisualizadorUniversalEntidadeV24";
 import ColaboradorForm from "@/components/rh/ColaboradorForm";
 import ModulosGridRH from "@/components/rh/rh-launchpad/ModulosGridRH";
 import ModuleLayout from "@/components/layout/ModuleLayout";

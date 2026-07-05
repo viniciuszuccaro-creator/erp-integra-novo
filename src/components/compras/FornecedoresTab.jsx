@@ -10,7 +10,7 @@ import IconeAcessoFornecedor from "@/components/cadastros/IconeAcessoFornecedor"
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import useContextoVisual from "@/components/lib/useContextoVisual";
-import VisualizadorUniversalEntidade from "@/components/cadastros/VisualizadorUniversalEntidade";
+import VisualizadorUniversalEntidade from "@/components/cadastros/VisualizadorUniversalEntidadeV24";
 import CadastroFornecedorCompleto from "@/components/cadastros/CadastroFornecedorCompleto";
 
 export default function FornecedoresTab({ fornecedores, windowMode = false }) {

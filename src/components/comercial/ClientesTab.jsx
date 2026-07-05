@@ -1,6 +1,6 @@
 import React from "react";
 import { Users } from "lucide-react";
-import VisualizadorUniversalEntidade from "@/components/cadastros/VisualizadorUniversalEntidade";
+import VisualizadorUniversalEntidade from "@/components/cadastros/VisualizadorUniversalEntidadeV24";
 import CadastroClienteCompleto from "@/components/cadastros/CadastroClienteCompleto";
 
 export default function ClientesTab({ windowMode = false }) {

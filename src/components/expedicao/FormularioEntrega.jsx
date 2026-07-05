@@ -3,713 +3,100 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Phone, Calendar, Mail, Zap, CheckCircle2, AlertCircle } from "lucide-react";
-import BuscaCEP from "../comercial/BuscaCEP";
 import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Zap, CheckCircle2, AlertCircle } from "lucide-react";
 import FormWrapper from "@/components/common/FormWrapper";
-import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/components/ui/use-toast';
-import { useUser } from "@/components/lib/UserContext";
-import { base44 } from "@/api/base44Client";
-import { toast as sonnerToast } from "sonner";
+import useEntregaForm from "./useEntregaForm";
+import EntregaEnderecoContato from "./EntregaEnderecoContato";
+import EntregaTransporte from "./EntregaTransporte";
 
-
-export default function FormularioEntrega({
-  formData,
-  setFormData,
-  onSubmit,
-  onCancel,
-  clientes = [],
-  pedidos = [],
-  empresasDoGrupo = [],
-  estaNoGrupo = false,
-  isEditing = false,
-  isLoading = false,
-  windowMode = false
-}) {
-  const [previsaoIA, setPrevisaoIA] = useState(null);
-  const [calculandoPrevisao, setCalculandoPrevisao] = useState(false);
-
-  const queryClient = useQueryClient();
-  const { toast: toastHook } = useToast();
-  const { user: authUser } = useUser();
-
-  const calcularPrevisaoEntrega = async () => {
-    if (!formData.endereco_entrega_completo?.cidade) {
-      sonnerToast.error("❌ Preencha o endereço primeiro");
-      return;
-    }
-
-    setCalculandoPrevisao(true);
-    
-    try {
-      const resultado = await base44.integrations.Core.InvokeLLM({
-        prompt: `Calcule a previsão de entrega para:
-Cidade: ${formData.endereco_entrega_completo.cidade}
-Estado: ${formData.endereco_entrega_completo.estado}
-Peso: ${formData.peso_total_kg || 0} kg
-Prioridade: ${formData.prioridade}
-Tipo Frete: ${formData.tipo_frete}
-
-Retorne:
-- data_prevista (formato YYYY-MM-DD)
-- prazo_dias (número inteiro)
-- horario_previsto (HH:MM)
-- confianca_percentual (0-100)`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            data_prevista: { type: "string" },
-            prazo_dias: { type: "number" },
-            horario_previsto: { type: "string" },
-            confianca_percentual: { type: "number" }
-          }
-        }
-      });
-
-      setPrevisaoIA(resultado);
-      setFormData(prev => ({
-        ...prev,
-        data_previsao: resultado.data_prevista
-      }));
-      
-      sonnerToast.success("🤖 Previsão calculada com IA!");
-      
-    } catch (error) {
-      sonnerToast.error("Erro ao calcular previsão");
-    } finally {
-      setCalculandoPrevisao(false);
-    }
-  };
-
-  const createMutation = useMutation({
-    mutationFn: (data) => {
-      const payload = {
-        ...data,
-        usuario_responsavel: data.usuario_responsavel || (authUser?.full_name || authUser?.email),
-        usuario_responsavel_id: data.usuario_responsavel_id || authUser?.id,
-      };
-      return base44.entities.Entrega.create(payload);
-    },
-    onSuccess: async (entregaCriada) => {
-      queryClient.invalidateQueries({ queryKey: ['entregas'] });
-      queryClient.invalidateQueries({ queryKey: ['pedidos'] });
-
-      toastHook({ title: "✅ Entrega criada!" });
-      sonnerToast.success("✅ Entrega criada com sucesso!");
-
-      try {
-        await base44.entities.AuditLog.create({
-          empresa_id: entregaCriada?.empresa_id,
-          usuario: authUser?.full_name || authUser?.email,
-          usuario_id: authUser?.id,
-          acao: 'Criação',
-          modulo: 'Expedição',
-          entidade: 'Entrega',
-          registro_id: entregaCriada?.id,
-          descricao: 'Entrega criada via formulário',
-          dados_novos: entregaCriada,
-          data_hora: new Date().toISOString(),
-          sucesso: true
-        });
-      } catch (_) {}
-
-      onCancel();
-    },
-    onError: (error) => {
-      toastHook({ title: "❌ Erro ao criar entrega", description: error.message, variant: "destructive" });
-    }
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Entrega.update(id, data),
-    onSuccess: async (entregaAtualizada, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['entregas'] });
-      queryClient.invalidateQueries({ queryKey: ['pedidos'] });
-
-      toastHook({ title: "✅ Entrega atualizada!" });
-      sonnerToast.success("✅ Entrega atualizada!");
-
-      try {
-        await base44.entities.AuditLog.create({
-          empresa_id: entregaAtualizada?.empresa_id,
-          usuario: authUser?.full_name || authUser?.email,
-          usuario_id: authUser?.id,
-          acao: 'Edição',
-          modulo: 'Expedição',
-          entidade: 'Entrega',
-          registro_id: entregaAtualizada?.id,
-          descricao: 'Entrega atualizada via formulário',
-          dados_novos: entregaAtualizada,
-          data_hora: new Date().toISOString(),
-          sucesso: true
-        });
-      } catch (_) {}
-
-      onCancel();
-    },
-    onError: (error) => {
-      toastHook({ title: "❌ Erro ao atualizar entrega", description: error.message, variant: "destructive" });
-    }
-  });
-
-  const handleClienteChange = (clienteId) => {
-    const cliente = clientes.find(c => c.id === clienteId);
-    if (cliente) {
-      const enderecoPrincipal = cliente.locais_entrega?.find(l => l.principal) ||
-                               cliente.locais_entrega?.[0];
-
-      const contatoPrincipal = cliente.contatos?.find(c => c.principal) ||
-                              cliente.contatos?.[0];
-
-      setFormData(prev => ({
-        ...prev,
-        cliente_id: clienteId,
-        cliente_nome: cliente.nome || cliente.razao_social,
-        endereco_entrega_completo: enderecoPrincipal ? {
-          cep: enderecoPrincipal.cep || "",
-          logradouro: enderecoPrincipal.logradouro || "",
-          numero: enderecoPrincipal.numero || "",
-          complemento: enderecoPrincipal.complemento || "",
-          bairro: enderecoPrincipal.bairro || "",
-          cidade: enderecoPrincipal.cidade || "",
-          estado: enderecoPrincipal.estado || "",
-          latitude: enderecoPrincipal.latitude || null,
-          longitude: enderecoPrincipal.longitude || null,
-          referencia: enderecoPrincipal.referencia || "",
-          link_google_maps: enderecoPrincipal.link_google_maps || ""
-        } : prev.endereco_entrega_completo,
-        contato_entrega: {
-          nome: contatoPrincipal?.observacao || "", // Assuming observacao is the contact name
-          telefone: contatoPrincipal?.tipo === "Telefone" ? contatoPrincipal.valor : "",
-          whatsapp: (contatoPrincipal?.tipo === "WhatsApp" || contatoPrincipal?.tipo === "Telefone") ? contatoPrincipal.valor : "",
-          email: "", // Assuming email field in formData, might need to derive from contactPrincipal
-          instrucoes_especiais: "" // Assuming this is form-specific, not from default contact
-        }
-      }));
-    }
-  };
-
-  const handlePedidoChange = (pedidoId) => {
-    const pedido = pedidos.find(p => p.id === pedidoId);
-    if (pedido) {
-      setFormData(prev => ({
-        ...prev,
-        pedido_id: pedidoId,
-        numero_pedido: pedido.numero_pedido,
-        cliente_id: pedido.cliente_id,
-        cliente_nome: pedido.cliente_nome,
-        valor_mercadoria: pedido.valor_total,
-        endereco_entrega_completo: pedido.endereco_entrega_principal || prev.endereco_entrega_completo
-      }));
-
-      if (pedido.cliente_id) {
-        handleClienteChange(pedido.cliente_id);
-      }
-    }
-  };
-
-  const handleSubmitForm = async () => {
-    if (isEditing && formData.id) {
-      updateMutation.mutate({ id: formData.id, data: formData });
-    } else {
-      createMutation.mutate(formData);
-    }
-  };
-
-  const isSubmitting = isLoading || createMutation.isPending || updateMutation.isPending;
-
-  // 🤖 IA: Auto-preencher dados do Google Maps
-  const buscarDadosGoogleMaps = async () => {
-    const endereco = `${formData.endereco_entrega_completo.logradouro}, ${formData.endereco_entrega_completo.numero}, ${formData.endereco_entrega_completo.cidade}, ${formData.endereco_entrega_completo.estado}`;
-    
-    try {
-      const resultado = await base44.integrations.Core.InvokeLLM({
-        prompt: `Gere um link do Google Maps para o endereço: ${endereco}
-Também forneça coordenadas aproximadas (latitude, longitude).
-
-Retorne no formato JSON.`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            link_google_maps: { type: "string" },
-            latitude: { type: "number" },
-            longitude: { type: "number" }
-          }
-        }
-      });
-
-      setFormData(prev => ({
-        ...prev,
-        endereco_entrega_completo: {
-          ...prev.endereco_entrega_completo,
-          link_google_maps: resultado.link_google_maps,
-          latitude: resultado.latitude,
-          longitude: resultado.longitude
-        }
-      }));
-      
-      sonnerToast.success("📍 Geolocalização obtida!");
-      
-    } catch (error) {
-      sonnerToast.error("Erro ao buscar coordenadas");
-    }
-  };
+/**
+ * V21.1.2 - REFACTORED (Regra-Mãe)
+ * 715 → ~100 linhas
+ * Lógica em useEntregaForm, seções em EntregaEnderecoContato + EntregaTransporte
+ */
+export default function FormularioEntrega({ formData, setFormData, onCancel, clientes = [], pedidos = [], empresasDoGrupo = [], estaNoGrupo = false, isEditing = false, isLoading = false, windowMode = false }) {
+  const {
+    previsaoIA, calculandoPrevisao, calcularPrevisaoEntrega, buscarDadosGoogleMaps,
+    isSubmitting, handleSubmitForm, handleClienteChange, handlePedidoChange
+  } = useEntregaForm({ formData, setFormData, onCancel, isEditing });
 
   const content = (
     <FormWrapper onSubmit={handleSubmitForm} externalData={formData} className={`space-y-6 ${windowMode ? 'p-6 h-full overflow-auto' : ''}`}>
-      {/* Empresa (se no grupo) */}
       {estaNoGrupo && (
         <div className="p-4 bg-blue-50 border border-blue-200 rounded">
           <Label>Empresa Responsável *</Label>
-          <Select
-            value={formData.empresa_id}
-            onValueChange={(v) => setFormData({ ...formData, empresa_id: v })}
-            required
-          >
+          <Select value={formData.empresa_id} onValueChange={(v) => setFormData({ ...formData, empresa_id: v })} required>
             <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
-            <SelectContent>
-              {empresasDoGrupo.map(emp => (
-                <SelectItem key={emp.id} value={emp.id}>
-                  {emp.nome_fantasia || emp.razao_social}
-                </SelectItem>
-              ))}
-            </SelectContent>
+            <SelectContent>{empresasDoGrupo.map(emp => <SelectItem key={emp.id} value={emp.id}>{emp.nome_fantasia || emp.razao_social}</SelectItem>)}</SelectContent>
           </Select>
         </div>
       )}
 
-      {/* Seção 1: Dados Gerais */}
+      {/* Dados Gerais */}
       <div className="space-y-4">
         <h3 className="font-semibold text-slate-900 border-b pb-2">Dados Gerais</h3>
-
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Pedido Relacionado</Label>
-            <Select
-              value={formData.pedido_id}
-              onValueChange={handlePedidoChange}
-            >
+          <div><Label>Pedido Relacionado</Label>
+            <Select value={formData.pedido_id} onValueChange={(v) => handlePedidoChange(v, pedidos, clientes)}>
               <SelectTrigger><SelectValue placeholder="Selecione um pedido" /></SelectTrigger>
-              <SelectContent>
-                {pedidos.map(p => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.numero_pedido} - {p.cliente_nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
+              <SelectContent>{pedidos.map(p => <SelectItem key={p.id} value={p.id}>{p.numero_pedido} - {p.cliente_nome}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-
-          <div>
-            <Label>Cliente *</Label>
-            <Select
-              value={formData.cliente_id}
-              onValueChange={handleClienteChange}
-              required
-            >
+          <div><Label>Cliente *</Label>
+            <Select value={formData.cliente_id} onValueChange={(v) => handleClienteChange(v, clientes)} required>
               <SelectTrigger><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
-              <SelectContent>
-                {clientes.map(c => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.nome || c.razao_social}
-                  </SelectItem>
-                ))}
-              </SelectContent>
+              <SelectContent>{clientes.map(c => <SelectItem key={c.id} value={c.id}>{c.nome || c.razao_social}</SelectItem>)}</SelectContent>
             </Select>
           </div>
         </div>
-
         <div className="grid grid-cols-3 gap-4">
-          <div>
-            <Label>Data Previsão</Label>
+          <div><Label>Data Previsão</Label>
             <div className="flex gap-2">
-              <Input
-                type="date"
-                value={formData.data_previsao}
-                onChange={(e) => setFormData({ ...formData, data_previsao: e.target.value })}
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                data-permission="Expedicao.Entrega.editar"
-                onClick={calcularPrevisaoEntrega}
-                disabled={calculandoPrevisao}
-                variant="outline"
-                className="border-purple-300 text-purple-700 hover:bg-purple-50"
-                title="Calcular com IA"
-              >
-                <Zap className="w-4 h-4" />
-              </Button>
+              <Input type="date" value={formData.data_previsao} onChange={(e) => setFormData({ ...formData, data_previsao: e.target.value })} className="flex-1" />
+              <Button type="button" data-permission="Expedicao.Entrega.editar" onClick={calcularPrevisaoEntrega} disabled={calculandoPrevisao} variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50" title="Calcular com IA"><Zap className="w-4 h-4" /></Button>
             </div>
-            {previsaoIA && (
-              <p className="text-xs text-green-600 mt-1">
-                🤖 IA: {previsaoIA.prazo_dias} dia(s) • {previsaoIA.confianca_percentual}% confiança
-              </p>
-            )}
+            {previsaoIA && <p className="text-xs text-green-600 mt-1">🤖 IA: {previsaoIA.prazo_dias} dia(s) • {previsaoIA.confianca_percentual}% confiança</p>}
           </div>
-          <div>
-            <Label>Prioridade</Label>
-            <Select
-              value={formData.prioridade}
-              onValueChange={(v) => setFormData({ ...formData, prioridade: v })}
-            >
+          <div><Label>Prioridade</Label>
+            <Select value={formData.prioridade} onValueChange={(v) => setFormData({ ...formData, prioridade: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Baixa">Baixa</SelectItem>
-                <SelectItem value="Normal">Normal</SelectItem>
-                <SelectItem value="Alta">Alta</SelectItem>
-                <SelectItem value="Urgente">🔥 Urgente</SelectItem>
-              </SelectContent>
+              <SelectContent><SelectItem value="Baixa">Baixa</SelectItem><SelectItem value="Normal">Normal</SelectItem><SelectItem value="Alta">Alta</SelectItem><SelectItem value="Urgente">🔥 Urgente</SelectItem></SelectContent>
             </Select>
           </div>
-          <div>
-            <Label>Status Inicial</Label>
-            <Select
-              value={formData.status}
-              onValueChange={(v) => setFormData({ ...formData, status: v })}
-            >
+          <div><Label>Status Inicial</Label>
+            <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Aguardando Separação">⏳ Aguardando</SelectItem>
-                <SelectItem value="Em Separação">📦 Em Separação</SelectItem>
-                <SelectItem value="Pronto para Expedir">✅ Pronto</SelectItem>
-                <SelectItem value="Saiu para Entrega">🚚 Saiu</SelectItem>
-              </SelectContent>
+              <SelectContent><SelectItem value="Aguardando Separação">⏳ Aguardando</SelectItem><SelectItem value="Em Separação">📦 Em Separação</SelectItem><SelectItem value="Pronto para Expedir">✅ Pronto</SelectItem><SelectItem value="Saiu para Entrega">🚚 Saiu</SelectItem></SelectContent>
             </Select>
           </div>
         </div>
       </div>
 
-      {/* Seção 2: Endereço de Entrega */}
-      <div className="space-y-4">
-        <h3 className="font-semibold text-slate-900 border-b pb-2 flex items-center gap-2">
-          <MapPin className="w-5 h-5" />
-          Endereço de Entrega
-        </h3>
+      <EntregaEnderecoContato formData={formData} setFormData={setFormData} buscarDadosGoogleMaps={buscarDadosGoogleMaps} />
+      <EntregaTransporte formData={formData} setFormData={setFormData} />
 
-        <BuscaCEP
-          value={formData.endereco_entrega_completo.cep}
-          onCEPFound={(dados) => setFormData({
-            ...formData,
-            endereco_entrega_completo: {
-              ...formData.endereco_entrega_completo,
-              cep: dados.cep,
-              logradouro: dados.logradouro,
-              bairro: dados.bairro,
-              cidade: dados.cidade,
-              estado: dados.uf
-            }
-          })}
-        />
+      <div><Label>Observações Logísticas</Label><Textarea value={formData.observacoes} onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })} rows={3} placeholder="Informações adicionais sobre a entrega..." /></div>
 
-        <div className="grid grid-cols-4 gap-4">
-          <div className="col-span-3">
-            <Label>Logradouro</Label>
-            <Input
-              value={formData.endereco_entrega_completo.logradouro}
-              onChange={(e) => setFormData({
-                ...formData,
-                endereco_entrega_completo: { ...formData.endereco_entrega_completo, logradouro: e.target.value }
-              })}
-            />
-          </div>
-          <div>
-            <Label>Número</Label>
-            <Input
-              value={formData.endereco_entrega_completo.numero}
-              onChange={(e) => setFormData({
-                ...formData,
-                endereco_entrega_completo: { ...formData.endereco_entrega_completo, numero: e.target.value }
-              })}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <Label>Bairro</Label>
-            <Input
-              value={formData.endereco_entrega_completo.bairro}
-              onChange={(e) => setFormData({
-                ...formData,
-                endereco_entrega_completo: { ...formData.endereco_entrega_completo, bairro: e.target.value }
-              })}
-            />
-          </div>
-          <div>
-            <Label>Cidade</Label>
-            <Input
-              value={formData.endereco_entrega_completo.cidade}
-              onChange={(e) => setFormData({
-                ...formData,
-                endereco_entrega_completo: { ...formData.endereco_entrega_completo, cidade: e.target.value }
-              })}
-            />
-          </div>
-          <div>
-            <Label>UF</Label>
-            <Input
-              value={formData.endereco_entrega_completo.estado}
-              onChange={(e) => setFormData({
-                ...formData,
-                endereco_entrega_completo: { ...formData.endereco_entrega_completo, estado: e.target.value }
-              })}
-              maxLength={2}
-            />
-          </div>
-        </div>
-
-        <div>
-          <Label>Complemento / Referência</Label>
-          <Input
-            value={formData.endereco_entrega_completo.complemento}
-            onChange={(e) => setFormData({
-              ...formData,
-              endereco_entrega_completo: { ...formData.endereco_entrega_completo, complemento: e.target.value }
-            })}
-            placeholder="Apto, bloco, próximo a..."
-          />
-        </div>
-
-        {/* 🤖 IA: Botão para gerar link Google Maps */}
-        <Card className="bg-purple-50 border-purple-300">
-          <div className="p-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-purple-600" />
-              <span className="text-sm text-purple-900 font-medium">
-                {formData.endereco_entrega_completo.link_google_maps 
-                  ? '✅ Geolocalização Configurada' 
-                  : '📍 Gerar Link Google Maps'}
-              </span>
-            </div>
-            <Button
-              type="button"
-              data-permission="Expedicao.Entrega.editar"
-              onClick={buscarDadosGoogleMaps}
-              variant="outline"
-              size="sm"
-              className="border-purple-300 text-purple-700 hover:bg-purple-100"
-            >
-              <Zap className="w-4 h-4 mr-1" />
-              Gerar com IA
-            </Button>
-          </div>
-        </Card>
-
-        <div className="flex items-center gap-2 p-3 bg-blue-50 rounded border border-blue-200">
-          <input
-            type="checkbox"
-            id="salvar-endereco"
-            checked={formData.salvar_endereco_no_cliente}
-            onChange={(e) => setFormData({ ...formData, salvar_endereco_no_cliente: e.target.checked })}
-          />
-          <label htmlFor="salvar-endereco" className="text-sm text-blue-900">
-            💾 Salvar este endereço no cadastro do cliente
-          </label>
-        </div>
-      </div>
-
-      {/* Seção 3: Contato para Entrega */}
-      <div className="space-y-4">
-        <h3 className="font-semibold text-slate-900 border-b pb-2 flex items-center gap-2">
-          <Phone className="w-5 h-5" />
-          Contato para Entrega
-        </h3>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Nome do Contato</Label>
-            <Input
-              value={formData.contato_entrega.nome}
-              onChange={(e) => setFormData({
-                ...formData,
-                contato_entrega: { ...formData.contato_entrega, nome: e.target.value }
-              })}
-              placeholder="Quem vai receber"
-            />
-          </div>
-          <div>
-            <Label>Telefone/WhatsApp</Label>
-            <Input
-              value={formData.contato_entrega.whatsapp}
-              onChange={(e) => setFormData({
-                ...formData,
-                contato_entrega: { ...formData.contato_entrega, whatsapp: e.target.value }
-              })}
-              placeholder="(11) 99999-9999"
-            />
-          </div>
-        </div>
-
-        <div>
-          <Label>Instruções Especiais</Label>
-          <Textarea
-            value={formData.contato_entrega.instrucoes_especiais}
-            onChange={(e) => setFormData({
-              ...formData,
-              contato_entrega: { ...formData.contato_entrega, instrucoes_especiais: e.target.value }
-            })}
-            rows={2}
-            placeholder="Ligar antes, entregar na portaria..."
-          />
-        </div>
-
-        <div className="flex items-center gap-2 p-3 bg-green-50 rounded border border-green-200">
-          <input
-            type="checkbox"
-            id="salvar-contato"
-            checked={formData.salvar_contato_no_cliente}
-            onChange={(e) => setFormData({ ...formData, salvar_contato_no_cliente: e.target.checked })}
-          />
-          <label htmlFor="salvar-contato" className="text-sm text-green-900">
-            💾 Salvar este contato no cadastro do cliente
-          </label>
-        </div>
-      </div>
-
-      {/* Seção 4: Transporte */}
-      <div className="space-y-4">
-        <h3 className="font-semibold text-slate-900 border-b pb-2">Transporte</h3>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Tipo de Frete</Label>
-            <Select
-              value={formData.tipo_frete}
-              onValueChange={(v) => setFormData({ ...formData, tipo_frete: v })}
-            >
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="CIF">CIF (Pagamos)</SelectItem>
-                <SelectItem value="FOB">FOB (Cliente Paga)</SelectItem>
-                <SelectItem value="Retira">Cliente Retira</SelectItem>
-                <SelectItem value="Outro">Outro</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>Transportadora</Label>
-            <Input
-              value={formData.transportadora}
-              onChange={(e) => setFormData({ ...formData, transportadora: e.target.value })}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <Label>Motorista</Label>
-            <Input
-              value={formData.motorista}
-              onChange={(e) => setFormData({ ...formData, motorista: e.target.value })}
-            />
-          </div>
-          <div>
-            <Label>Telefone Motorista</Label>
-            <Input
-              value={formData.motorista_telefone}
-              onChange={(e) => setFormData({ ...formData, motorista_telefone: e.target.value })}
-            />
-          </div>
-          <div>
-            <Label>Placa</Label>
-            <Input
-              value={formData.placa}
-              onChange={(e) => setFormData({ ...formData, placa: e.target.value })}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <Label>Volumes</Label>
-            <Input
-              type="number"
-              min="1"
-              value={formData.volumes}
-              onChange={(e) => setFormData({ ...formData, volumes: parseInt(e.target.value) || 1 })}
-            />
-          </div>
-          <div>
-            <Label>Peso (kg)</Label>
-            <Input
-              type="number"
-              step="0.01"
-              value={formData.peso_total_kg}
-              onChange={(e) => setFormData({ ...formData, peso_total_kg: parseFloat(e.target.value) || 0 })}
-            />
-          </div>
-          <div>
-            <Label>Valor Frete</Label>
-            <Input
-              type="number"
-              step="0.01"
-              value={formData.valor_frete}
-              onChange={(e) => setFormData({ ...formData, valor_frete: parseFloat(e.target.value) || 0 })}
-            />
-          </div>
-        </div>
-
-        <div>
-          <Label>Código de Rastreamento</Label>
-          <Input
-            value={formData.codigo_rastreamento}
-            onChange={(e) => setFormData({ ...formData, codigo_rastreamento: e.target.value })}
-            placeholder="Será preenchido pela integração com transportadora"
-          />
-        </div>
-      </div>
-
-      {/* Seção 5: Observações */}
-      <div>
-        <Label>Observações Logísticas</Label>
-        <Textarea
-          value={formData.observacoes}
-          onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-          rows={3}
-          placeholder="Informações adicionais sobre a entrega..."
-        />
-      </div>
-
-      {/* 🤖 IA: Validações Inteligentes */}
       {formData.peso_total_kg > 1000 && (
         <Card className="bg-orange-50 border-orange-300">
           <div className="p-3 text-sm text-orange-800">
-            <p className="font-semibold flex items-center gap-2">
-              <AlertCircle className="w-4 h-4" />
-              ⚠️ Atenção: Carga Pesada
-            </p>
-            <p className="text-xs mt-1">
-              Verifique se o veículo suporta {formData.peso_total_kg}kg. Considere reforço estrutural.
-            </p>
+            <p className="font-semibold flex items-center gap-2"><AlertCircle className="w-4 h-4" />⚠️ Atenção: Carga Pesada</p>
+            <p className="text-xs mt-1">Verifique se o veículo suporta {formData.peso_total_kg}kg. Considere reforço estrutural.</p>
           </div>
         </Card>
       )}
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancelar
-        </Button>
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          data-permission="Expedicao.Entrega.criar"
-          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-        >
-          <CheckCircle2 className="w-4 h-4 mr-2" />
-          {isEditing ? '💾 Atualizar' : '🚀 Criar'} Entrega
+        <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+        <Button type="submit" disabled={isSubmitting} data-permission="Expedicao.Entrega.criar" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+          <CheckCircle2 className="w-4 h-4 mr-2" />{isEditing ? '💾 Atualizar' : '🚀 Criar'} Entrega
         </Button>
       </div>
     </FormWrapper>
   );
 
-  if (windowMode) {
-    return <div className="w-full h-full bg-white overflow-auto">{content}</div>;
-  }
-
+  if (windowMode) return <div className="w-full h-full bg-white overflow-auto">{content}</div>;
   return content;
 }

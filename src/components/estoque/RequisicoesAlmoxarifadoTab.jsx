@@ -21,7 +21,7 @@ export default function RequisicoesAlmoxarifadoTab({ requisicoes, produtos }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { openWindow } = useWindow();
-  const { empresaAtual, contexto } = useContextoVisual();
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const { canCreate } = usePermissions();
   const [formData, setFormData] = useState({
     numero_requisicao: `REQ-ALM-${Date.now()}`,
@@ -43,7 +43,7 @@ export default function RequisicoesAlmoxarifadoTab({ requisicoes, produtos }) {
       for (const item of data.itens) {
         await base44.entities.MovimentacaoEstoque.create({
           empresa_id: empresaAtual?.id,
-          group_id: contexto?.group_id,
+          group_id: grupoAtual?.id,
           produto_id: item.produto_id,
           produto_descricao: item.produto_descricao,
           tipo_movimento: "saida",
@@ -161,7 +161,7 @@ export default function RequisicoesAlmoxarifadoTab({ requisicoes, produtos }) {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="w-full h-full overflow-y-auto space-y-6">
       <div className="flex justify-between items-center gap-4">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -175,6 +175,7 @@ export default function RequisicoesAlmoxarifadoTab({ requisicoes, produtos }) {
         {canCreate('Estoque', 'Requisicoes') && (
           <Button
             className="bg-orange-600 hover:bg-orange-700"
+            data-permission="Estoque.Requisicoes.criar"
             onClick={() => openWindow(RequisicaoAlmoxarifadoForm, {
             windowMode: true,
             onSubmit: async (data) => {
@@ -200,154 +201,6 @@ export default function RequisicoesAlmoxarifadoTab({ requisicoes, produtos }) {
           </Button>
         )}
 
-        <Dialog open={false}>
-          <DialogTrigger asChild>
-            
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto hidden">
-            <DialogHeader>
-              <DialogTitle>Requisição de Almoxarifado</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="numero_requisicao">Nº Requisição</Label>
-                  <Input
-                    id="numero_requisicao"
-                    value={formData.numero_requisicao}
-                    onChange={(e) => setFormData({ ...formData, numero_requisicao: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="data_requisicao">Data</Label>
-                  <Input
-                    id="data_requisicao"
-                    type="date"
-                    value={formData.data_requisicao}
-                    onChange={(e) => setFormData({ ...formData, data_requisicao: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="solicitante">Solicitante *</Label>
-                  <Input
-                    id="solicitante"
-                    value={formData.solicitante}
-                    onChange={(e) => setFormData({ ...formData, solicitante: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="setor">Setor *</Label>
-                  <Select
-                    value={formData.setor}
-                    onValueChange={(value) => setFormData({ ...formData, setor: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o setor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Produção">Produção</SelectItem>
-                      <SelectItem value="Manutenção">Manutenção</SelectItem>
-                      <SelectItem value="Administrativo">Administrativo</SelectItem>
-                      <SelectItem value="Comercial">Comercial</SelectItem>
-                      <SelectItem value="TI">TI</SelectItem>
-                      <SelectItem value="RH">RH</SelectItem>
-                      <SelectItem value="Logística">Logística</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="col-span-2">
-                  <Label htmlFor="finalidade">Finalidade</Label>
-                  <Input
-                    id="finalidade"
-                    value={formData.finalidade}
-                    onChange={(e) => setFormData({ ...formData, finalidade: e.target.value })}
-                    placeholder="Ex: Manutenção preventiva, Uso interno..."
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <Label>Itens da Requisição</Label>
-                  <Button type="button" size="sm" variant="outline" onClick={handleAddItem}>
-                    <Plus className="w-4 h-4 mr-1" /> Adicionar Item
-                  </Button>
-                </div>
-
-                <div className="space-y-3">
-                  {formData.itens.map((item, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-2 p-3 border rounded-lg">
-                      <div className="col-span-7">
-                        <Select
-                          value={item.produto_id}
-                          onValueChange={(value) => handleItemChange(index, 'produto_id', value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione produto" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {produtos.filter(p => p.status === 'Ativo').map((produto) => (
-                              <SelectItem key={produto.id} value={produto.id}>
-                                {produto.codigo ? `${produto.codigo} - ` : ''}{produto.descricao}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="col-span-2">
-                        <Input
-                          type="number"
-                          placeholder="Qtd"
-                          value={item.quantidade}
-                          onChange={(e) => handleItemChange(index, 'quantidade', parseFloat(e.target.value) || 0)}
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Input
-                          value={item.unidade_medida}
-                          readOnly
-                          className="bg-slate-50"
-                        />
-                      </div>
-                      <div className="col-span-1 flex items-center">
-                        <Button
-                          type="button"
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => handleRemoveItem(index)}
-                          disabled={formData.itens.length === 1}
-                        >
-                          ×
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="observacoes">Observações</Label>
-                <Textarea
-                  id="observacoes"
-                  value={formData.observacoes}
-                  onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-                  rows={3}
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4">
-                <Button type="submit" disabled={createMutation.isPending} className="bg-indigo-600 hover:bg-indigo-700">
-                  {createMutation.isPending ? 'Salvando...' : 'Criar Requisição'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
       </div>
 
       <Card className="border-0 shadow-md">

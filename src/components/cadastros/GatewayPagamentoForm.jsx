@@ -13,6 +13,8 @@ import { CreditCard, Globe, Lock, BarChart3, Settings } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import GatewayTaxasTab from "./gateway-pagamento/GatewayTaxasTab";
+import GatewayConfigTab from "./gateway-pagamento/GatewayConfigTab";
 
 export default function GatewayPagamentoForm({ gateway, windowMode = false, onSubmit }) {
   const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
@@ -72,9 +74,9 @@ export default function GatewayPagamentoForm({ gateway, windowMode = false, onSu
   ];
 
   return (
-    <div className={windowMode ? "w-full h-full flex flex-col" : ""}>
-      <form onSubmit={handleSubmit} className={windowMode ? "flex-1 flex flex-col overflow-hidden" : ""}>
-        <div className={windowMode ? "flex-1 overflow-auto p-6" : ""}>
+    <div className={windowMode ? "w-full h-full flex flex-col" : "w-full h-full"}>
+      <form onSubmit={handleSubmit} className={windowMode ? "flex-1 flex flex-col overflow-hidden" : "w-full h-full"}>
+        <div className={windowMode ? "flex-1 overflow-auto p-6" : "w-full h-full"}>
           <Tabs defaultValue="geral" className="w-full">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="geral">
@@ -245,150 +247,18 @@ export default function GatewayPagamentoForm({ gateway, windowMode = false, onSu
             </TabsContent>
 
             <TabsContent value="taxas" className="space-y-4 mt-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Taxa Boleto (Fixa em R$)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.taxas_gateway?.taxa_boleto_fixa || 0}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      taxas_gateway: {
-                        ...formData.taxas_gateway,
-                        taxa_boleto_fixa: parseFloat(e.target.value) || 0
-                      }
-                    })}
-                  />
-                </div>
-                <div>
-                  <Label>Taxa PIX (%)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.taxas_gateway?.taxa_pix_percentual || 0}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      taxas_gateway: {
-                        ...formData.taxas_gateway,
-                        taxa_pix_percentual: parseFloat(e.target.value) || 0
-                      }
-                    })}
-                  />
-                </div>
-                <div>
-                  <Label>Taxa Cartão Débito (%)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.taxas_gateway?.taxa_cartao_debito_percentual || 0}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      taxas_gateway: {
-                        ...formData.taxas_gateway,
-                        taxa_cartao_debito_percentual: parseFloat(e.target.value) || 0
-                      }
-                    })}
-                  />
-                </div>
-                <div>
-                  <Label>Taxa Cartão Crédito (%)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.taxas_gateway?.taxa_cartao_credito_percentual || 0}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      taxas_gateway: {
-                        ...formData.taxas_gateway,
-                        taxa_cartao_credito_percentual: parseFloat(e.target.value) || 0
-                      }
-                    })}
-                  />
-                </div>
-              </div>
+              <GatewayTaxasTab formData={formData} setFormData={setFormData} />
             </TabsContent>
 
             <TabsContent value="config" className="space-y-4 mt-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Valor Mínimo Transação (R$)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.limites_transacao?.valor_minimo || 0}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      limites_transacao: {
-                        ...formData.limites_transacao,
-                        valor_minimo: parseFloat(e.target.value) || 0
-                      }
-                    })}
-                  />
-                </div>
-                <div>
-                  <Label>Valor Máximo Transação (R$)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.limites_transacao?.valor_maximo || 0}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      limites_transacao: {
-                        ...formData.limites_transacao,
-                        valor_maximo: parseFloat(e.target.value) || 0
-                      }
-                    })}
-                  />
-                </div>
-                <div>
-                  <Label>Limite Diário (R$)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.limites_transacao?.limite_diario || 0}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      limites_transacao: {
-                        ...formData.limites_transacao,
-                        limite_diario: parseFloat(e.target.value) || 0
-                      }
-                    })}
-                  />
-                </div>
-                <div>
-                  <Label>Limite Mensal (R$)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={formData.limites_transacao?.limite_mensal || 0}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      limites_transacao: {
-                        ...formData.limites_transacao,
-                        limite_mensal: parseFloat(e.target.value) || 0
-                      }
-                    })}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label>Observações</Label>
-                <Textarea
-                  value={formData.observacoes || ''}
-                  onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-                  placeholder="Informações adicionais sobre este gateway..."
-                  rows={3}
-                />
-              </div>
+              <GatewayConfigTab formData={formData} setFormData={setFormData} />
             </TabsContent>
           </Tabs>
         </div>
 
         <div className={windowMode ? "border-t bg-slate-50 p-4" : "mt-6"}>
           <div className="flex justify-end gap-3">
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" data-permission="Cadastros.GatewayPagamento.salvar" className="bg-blue-600 hover:bg-blue-700">
               <CreditCard className="w-4 h-4 mr-2" />
               {gateway ? 'Atualizar Gateway' : 'Cadastrar Gateway'}
             </Button>

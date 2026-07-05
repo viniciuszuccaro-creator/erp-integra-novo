@@ -15,6 +15,7 @@ import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
 import { Button } from "@/components/ui/button";
+import FormularioOrdemProducao from "@/components/producao/FormularioOrdemProducao";
 const ProducaoIAPanel = React.lazy(() => import("@/components/producao/ProducaoIAPanel"));
 
 const KanbanProducaoInteligente = React.lazy(() => import("@/components/producao/KanbanProducaoInteligente"));
@@ -222,7 +223,18 @@ export default function Producao() {
       <ModuleLayout
         title="Produção"
         subtitle="Chão de fábrica, OPs e desempenho"
-        actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'producao_primary_action' })}>Nova OP</Button></div>}
+        actions={<div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            data-permission="Produção.OrdensProducao.criar"
+            onClick={() => openWindow(FormularioOrdemProducao, {
+              windowMode: true,
+              empresa_id: empresaAtual?.id || null,
+              group_id: groupId || null,
+              onSuccess: () => {}
+            }, { title: '🏭 Nova Ordem de Produção', width: 1200, height: 800 })}
+          >Nova OP</Button>
+        </div>}
       >
         {/* P4: ProducaoIAPanel movido para janela no grid — header mais leve */}
         <ModuleKPIs>

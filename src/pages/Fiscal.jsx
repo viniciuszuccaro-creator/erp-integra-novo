@@ -15,6 +15,8 @@ import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
 import { Button } from "@/components/ui/button";
+import NotasFiscaisTab from "@/components/comercial/NotasFiscaisTab";
+import NotaFiscalFormCompleto from "@/components/comercial/NotaFiscalFormCompleto";
 const FiscalIAPanel = React.lazy(() => import("@/components/fiscal/FiscalIAPanel"));
 
 const ConfigFiscalAutomatica = React.lazy(() => import("../components/fiscal/ConfigFiscalAutomatica"));
@@ -74,10 +76,11 @@ export default function FiscalPage() {
       description: 'NF-e emitidas',
       icon: FileText,
       color: 'blue',
-      component: () => <div className="p-4">Listagem de NF-e (em desenvolvimento)</div>,
+      component: NotasFiscaisTab,
       windowTitle: '📄 Notas Fiscais',
       width: 1500,
       height: 850,
+      props: { notasFiscais, windowMode: true }
     },
     {
       title: 'Motor Fiscal IA',
@@ -197,7 +200,18 @@ export default function FiscalPage() {
   return (
     <ProtectedSection module="Fiscal" action="visualizar">
     <ErrorBoundary>
-      <ModuleLayout title="Fiscal e Tributário" subtitle="NF-e, tributos e relatórios" actions={<div className="flex items-center gap-2"><Button size="sm" data-permission="Fiscal.NotaFiscal.criar" onClick={() => base44.analytics.track({ eventName: 'fiscal_primary_action' })}>Nova NF-e</Button></div>}>
+      <ModuleLayout title="Fiscal e Tributário" subtitle="NF-e, tributos e relatórios" actions={<div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            data-permission="Fiscal.NotaFiscal.criar"
+            onClick={() => openWindow(NotaFiscalFormCompleto, {
+              windowMode: true,
+              empresa_id: empresaAtual?.id || null,
+              group_id: groupId || null,
+              onSuccess: () => {}
+            }, { title: '📄 Nova NF-e', width: 1200, height: 800 })}
+          >Nova NF-e</Button>
+        </div>}>
         <ModuleKPIs>
           {/* P4: FiscalIAPanel movido para módulo no grid — header mais leve */}
           <KPIsFiscal

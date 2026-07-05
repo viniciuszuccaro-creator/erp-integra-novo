@@ -31,6 +31,7 @@ const ConfiguracaoExpedicao = React.lazy(() => import("../components/expedicao/C
 const MapaRoteirizacaoIA = React.lazy(() => import("../components/logistica/MapaRoteirizacaoIA"));
 const RoteirizacaoMapa = React.lazy(() => import("../components/expedicao/RoteirizacaoMapa"));
 const ComprovanteDigital = React.lazy(() => import("../components/expedicao/ComprovanteDigital"));
+const FormularioEntrega = React.lazy(() => import("../components/expedicao/FormularioEntrega"));
 const LogisticaFinanceiroPanel = React.lazy(() => import("../components/expedicao/financeiro/LogisticaFinanceiroPanel"));
 const ConfigFinanceiroLogistica = React.lazy(() => import("../components/expedicao/financeiro/ConfigFinanceiroLogistica"));
 const RelatorioFinanceiroLogistica = React.lazy(() => import("../components/expedicao/financeiro/RelatorioFinanceiroLogistica"));
@@ -267,7 +268,20 @@ export default function Expedicao() {
   return (
     <ProtectedSection module="Expedição" action="visualizar">
     <ErrorBoundary>
-      <ModuleLayout title="Expedição e Logística" subtitle="Entregas, romaneios e rotas" actions={<div className="flex items-center gap-2"><Button size="sm" onClick={() => base44.analytics.track({ eventName: 'expedicao_primary_action' })} data-permission="Expedição.Entregas.criar">Nova Entrega</Button></div>}>
+      <ModuleLayout title="Expedição e Logística" subtitle="Entregas, romaneios e rotas" actions={<div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            data-permission="Expedição.Entregas.criar"
+            onClick={() => openWindow(FormularioEntrega, {
+              windowMode: true,
+              empresa_id: empresaAtual?.id || null,
+              group_id: groupId || null,
+              pedidos,
+              clientes,
+              onSuccess: () => {}
+            }, { title: '🚚 Nova Entrega', width: 1200, height: 800 })}
+          >Nova Entrega</Button>
+        </div>}>
         {/* P4: ExpedicaoIAPanel removido do header fixo (pesado) — KPIs essenciais apenas */}
         <ModuleKPIs>
           <KPIsExpedicao statusCounts={statusCounts} />

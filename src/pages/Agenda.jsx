@@ -11,6 +11,8 @@ import AgendaCalendarioView from "@/components/agenda/AgendaCalendarioView";
 import AgendaListaView from "@/components/agenda/AgendaListaView";
 import AgendaFormDialog from "@/components/agenda/AgendaFormDialog";
 import AgendaToolbar from "@/components/agenda/AgendaToolbar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 function Agenda() {
   const [visualizacao, setVisualizacao] = useState(() => {
@@ -29,6 +31,7 @@ function Agenda() {
   });
   const [eventoDialogOpen, setEventoDialogOpen] = useState(false);
   const [eventoSelecionado, setEventoSelecionado] = useState(null);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -142,11 +145,15 @@ function Agenda() {
     setEventoDialogOpen(false);
   };
 
-  const handleDeleteEvento = async () => {
+  const handleDeleteEvento = () => {
     if (!eventoSelecionado?.id) return;
-    if (confirm("Tem certeza que deseja deletar este evento?")) {
-      await deleteEventoMutation.mutateAsync(eventoSelecionado.id);
-    }
+    setConfirmDeleteOpen(true);
+  };
+
+  const confirmarDeleteEvento = async () => {
+    if (!eventoSelecionado?.id) return;
+    await deleteEventoMutation.mutateAsync(eventoSelecionado.id);
+    setConfirmDeleteOpen(false);
   };
 
   if (!contextoValido) {
@@ -201,6 +208,19 @@ function Agenda() {
             onSave={handleSaveEvento}
             isLoading={createEventoMutation.isPending || updateEventoMutation.isPending}
           />
+
+          <Dialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+            <DialogContent className="max-w-md">
+              <DialogHeader><DialogTitle>Confirmar Exclusão</DialogTitle></DialogHeader>
+              <p className="text-slate-600 text-sm">Tem certeza que deseja deletar este evento? Esta ação não pode ser desfeita.</p>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setConfirmDeleteOpen(false)}>Cancelar</Button>
+                <Button className="bg-red-600 hover:bg-red-700" onClick={confirmarDeleteEvento} disabled={deleteEventoMutation.isPending}>
+                  {deleteEventoMutation.isPending ? 'Excluindo...' : 'Excluir'}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </ProtectedSection>
     </ErrorBoundary>

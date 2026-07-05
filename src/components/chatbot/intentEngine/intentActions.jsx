@@ -11,11 +11,11 @@ export async function executarAcaoIntent(intent, entidades, clienteId, contexto 
   try {
     switch (intent) {
       case 'consultar_pedido':
-        return await consultarPedidos(clienteId);
+        return await consultarPedidos(clienteId, contexto);
       case 'consultar_entrega':
-        return await consultarEntregas(clienteId);
+        return await consultarEntregas(clienteId, contexto);
       case 'segunda_via_boleto':
-        return await consultarBoletos(clienteId);
+        return await consultarBoletos(clienteId, contexto);
       case 'criar_pedido':
         return await criarPedido(clienteId, entidades, contexto);
       case 'emitir_boleto':
@@ -30,11 +30,14 @@ export async function executarAcaoIntent(intent, entidades, clienteId, contexto 
   }
 }
 
-async function consultarPedidos(clienteId) {
+async function consultarPedidos(clienteId, contexto = {}) {
   if (!clienteId) {
     return { tipo: 'erro', mensagem: 'Para consultar pedidos, preciso identificar você. Qual seu CPF ou CNPJ?' };
   }
-  const pedidos = await base44.entities.Pedido.filter({ cliente_id: clienteId }, '-data_pedido', 5);
+  const filtro = { cliente_id: clienteId };
+  if (contexto?.groupId) filtro.group_id = contexto.groupId;
+  if (contexto?.empresaId) filtro.empresa_id = contexto.empresaId;
+  const pedidos = await base44.entities.Pedido.filter(filtro, '-data_pedido', 5);
   if (pedidos.length === 0) {
     return { tipo: 'info', mensagem: 'Não encontrei pedidos em seu nome. Deseja fazer um novo pedido?' };
   }
@@ -44,13 +47,14 @@ async function consultarPedidos(clienteId) {
   return { tipo: 'lista_pedidos', mensagem: `📦 Seus últimos pedidos:\n\n${lista}\n\nDeseja detalhes de algum pedido específico?`, dados: pedidos };
 }
 
-async function consultarEntregas(clienteId) {
+async function consultarEntregas(clienteId, contexto = {}) {
   if (!clienteId) {
     return { tipo: 'erro', mensagem: 'Para consultar entregas, preciso identificar você.' };
   }
-  const entregas = await base44.entities.Entrega.filter(
-    { cliente_id: clienteId, status: { $nin: ['Entregue', 'Cancelado'] } }, '-data_previsao', 5
-  );
+  const filtro = { cliente_id: clienteId, status: { $nin: ['Entregue', 'Cancelado'] } };
+  if (contexto?.groupId) filtro.group_id = contexto.groupId;
+  if (contexto?.empresaId) filtro.empresa_id = contexto.empresaId;
+  const entregas = await base44.entities.Entrega.filter(filtro, '-data_previsao', 5);
   if (entregas.length === 0) {
     return { tipo: 'info', mensagem: 'Não encontrei entregas pendentes. Seus pedidos já foram entregues!' };
   }
@@ -60,13 +64,14 @@ async function consultarEntregas(clienteId) {
   return { tipo: 'lista_entregas', mensagem: `🚚 Suas entregas em andamento:\n\n${lista}`, dados: entregas };
 }
 
-async function consultarBoletos(clienteId) {
+async function consultarBoletos(clienteId, contexto = {}) {
   if (!clienteId) {
     return { tipo: 'erro', mensagem: 'Para consultar boletos, preciso identificar você.' };
   }
-  const boletos = await base44.entities.ContaReceber.filter(
-    { cliente_id: clienteId, status: { $in: ['Pendente', 'Atrasado'] } }, 'data_vencimento', 5
-  );
+  const filtro = { cliente_id: clienteId, status: { $in: ['Pendente', 'Atrasado'] } };
+  if (contexto?.groupId) filtro.group_id = contexto.groupId;
+  if (contexto?.empresaId) filtro.empresa_id = contexto.empresaId;
+  const boletos = await base44.entities.ContaReceber.filter(filtro, 'data_vencimento', 5);
   if (boletos.length === 0) {
     return { tipo: 'info', mensagem: '✅ Parabéns! Você não tem boletos em aberto.' };
   }
@@ -108,6 +113,8 @@ async function criarPedido(clienteId, entidades, contexto) {
     await base44.entities.AuditLog.create({
       usuario: 'Chatbot', acao: 'Criação', modulo: 'Comercial', entidade: 'Pedido',
       registro_id: pedido.id, descricao: `Pedido criado via chatbot (${numero})`,
+      group_id: contexto?.groupId || null,
+      empresa_id: contexto?.empresaId || null,
       data_hora: new Date().toISOString(),
     });
   } catch {}
@@ -172,6 +179,8 @@ async function gerarBoleto(clienteId, entidades, contexto) {
       usuario: 'Chatbot', acao: 'Criação', modulo: 'Financeiro', entidade: 'ContaReceber',
       registro_id: cr.id,
       descricao: `Boleto emitido via chatbot no valor de R$ ${valor.toLocaleString('pt-BR')}`,
+      group_id: contexto?.groupId || null,
+      empresa_id: contexto?.empresaId || null,
       data_hora: new Date().toISOString(),
     });
   } catch {}

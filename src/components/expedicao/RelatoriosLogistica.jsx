@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,6 +24,7 @@ import {
   Legend,
   ResponsiveContainer
 } from "recharts";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Relatórios de Logística e Expedição
@@ -32,19 +32,23 @@ import {
 export default function RelatoriosLogistica({ empresaId, windowMode = false }) {
   const [periodoInicio, setPeriodoInicio] = useState("");
   const [periodoFim, setPeriodoFim] = useState("");
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: entregas = [] } = useQuery({
-    queryKey: ['entregas-relatorio', empresaId],
-    queryFn: () => base44.entities.Entrega.list('-created_date'),
+    queryKey: ['entregas-relatorio', contextoKey],
+    queryFn: () => filterInContext('Entrega', {}, '-created_date', 200),
+    enabled: !!contexto,
   });
 
   const { data: romaneios = [] } = useQuery({
-    queryKey: ['romaneios-relatorio', empresaId],
-    queryFn: () => base44.entities.Romaneio.list('-created_date'),
+    queryKey: ['romaneios-relatorio', contextoKey],
+    queryFn: () => filterInContext('Romaneio', {}, '-created_date', 200),
+    enabled: !!contexto,
   });
 
   const entregasFiltradas = entregas.filter(e => {
-    if (empresaId && e.empresa_id !== empresaId) return false;
+    if (empresaId && e.empresa_id !== empresaId && e.empresa_id !== empresaAtual?.id) return false;
     if (periodoInicio && e.data_saida < periodoInicio) return false;
     if (periodoFim && e.data_saida > periodoFim) return false;
     return true;

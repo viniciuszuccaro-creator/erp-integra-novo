@@ -61,9 +61,9 @@ export default function CaixaPDVVendaTab({
                   <div className="flex-1 mr-2">
                     <p className="text-sm font-medium truncate">{item.descricao}</p>
                     <div className="flex gap-2 mt-1">
-                      <Button size="sm" variant="outline" disabled={controlesDesabilitados} onClick={() => setCarrinho(carrinho.map(i => i.id === item.id ? {...i, quantidade: i.quantidade - 1} : i).filter(i => i.quantidade > 0))} className="h-7 w-7 p-0">-</Button>
+                      <Button size="sm" variant="outline" data-permission="Financeiro.CaixaPDV.editar" disabled={controlesDesabilitados} onClick={() => setCarrinho(carrinho.map(i => i.id === item.id ? {...i, quantidade: i.quantidade - 1} : i).filter(i => i.quantidade > 0))} className="h-7 w-7 p-0">-</Button>
                       <span className="font-bold w-8 text-center">{item.quantidade}</span>
-                      <Button size="sm" variant="outline" disabled={controlesDesabilitados} onClick={() => setCarrinho(carrinho.map(i => i.id === item.id ? {...i, quantidade: i.quantidade + 1} : i))} className="h-7 w-7 p-0">+</Button>
+                      <Button size="sm" variant="outline" data-permission="Financeiro.CaixaPDV.editar" disabled={controlesDesabilitados} onClick={() => setCarrinho(carrinho.map(i => i.id === item.id ? {...i, quantidade: i.quantidade + 1} : i))} className="h-7 w-7 p-0">+</Button>
                     </div>
                   </div>
                   <div className="text-right">

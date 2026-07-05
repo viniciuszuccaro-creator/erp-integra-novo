@@ -116,6 +116,8 @@ export default function CopiarUltimoPedido({ clienteId, onCopiar, windowMode = f
                 type="button"
                 size="sm"
                 className="bg-blue-600 hover:bg-blue-700"
+                data-permission="Comercial.Pedido.criar"
+                data-action="Comercial.Pedido.criar"
               >
                 <Copy className="w-4 h-4 mr-2" />
                 Copiar

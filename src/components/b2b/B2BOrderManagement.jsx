@@ -88,11 +88,11 @@ export default function B2BOrderManagement() {
               className="bg-transparent text-sm outline-none flex-1"
             />
           </div>
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button variant="outline" className="flex items-center gap-2" disabled data-permission="Comercial.Pedido.listar" data-action="Comercial.Pedido.filtrar">
             <Filter className="w-4 h-4" />
             Filtrar
           </Button>
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button variant="outline" className="flex items-center gap-2" disabled data-permission="Comercial.Pedido.exportar" data-action="Comercial.Pedido.exportar" data-sensitive="true">
             <Download className="w-4 h-4" />
             Exportar
           </Button>
@@ -148,14 +148,14 @@ export default function B2BOrderManagement() {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline">
-                    Visualizar
+                  <Button size="sm" variant="outline" disabled data-permission="Comercial.Pedido.visualizar" data-action="Comercial.Pedido.visualizar">
+                   Visualizar
                   </Button>
-                  <Button size="sm" variant="outline">
-                    Editar
+                   <Button size="sm" variant="outline" disabled data-permission="Comercial.Pedido.editar" data-action="Comercial.Pedido.editar" data-sensitive="true">
+                   Editar
                   </Button>
-                  <Button size="sm" variant="outline">
-                    Download
+                   <Button size="sm" variant="outline" disabled data-permission="Comercial.Pedido.exportar" data-action="Comercial.Pedido.exportar" data-sensitive="true">
+                   Download
                   </Button>
                 </div>
               </Card>

@@ -115,6 +115,9 @@ export default function LiquidarReceberPagar() {
                   })}
                   disabled={!contextoValido || !podeEnviarCaixa || enviarParaCaixaMutation.isPending}
                   className="bg-green-600 hover:bg-green-700"
+                  data-permission="Financeiro.ContaReceber.baixar"
+                  data-action="Financeiro.ContaReceber.baixar"
+                  data-sensitive="true"
                 >
                   <Send className="w-4 h-4 mr-2" />
                   Enviar {titulosSelecionadosReceber.length} para Caixa
@@ -172,6 +175,9 @@ export default function LiquidarReceberPagar() {
                           variant="outline"
                           onClick={() => enviarParaCaixaMutation.mutate({ titulos: [conta], tipo: 'receber' })}
                           disabled={!contextoValido || !podeEnviarCaixa || enviarParaCaixaMutation.isPending}
+                          data-permission="Financeiro.ContaReceber.baixar"
+                          data-action="Financeiro.ContaReceber.baixar"
+                          data-sensitive="true"
                         >
                           <ArrowRight className="w-4 h-4 mr-1" />
                           Enviar
@@ -207,6 +213,9 @@ export default function LiquidarReceberPagar() {
                   })}
                   disabled={!contextoValido || !podeEnviarCaixa || enviarParaCaixaMutation.isPending}
                   className="bg-red-600 hover:bg-red-700"
+                  data-permission="Financeiro.ContaPagar.baixar"
+                  data-action="Financeiro.ContaPagar.baixar"
+                  data-sensitive="true"
                 >
                   <Send className="w-4 h-4 mr-2" />
                   Enviar {titulosSelecionadosPagar.length} para Caixa
@@ -264,6 +273,9 @@ export default function LiquidarReceberPagar() {
                           variant="outline"
                           onClick={() => enviarParaCaixaMutation.mutate({ titulos: [conta], tipo: 'pagar' })}
                           disabled={!contextoValido || !podeEnviarCaixa || enviarParaCaixaMutation.isPending}
+                          data-permission="Financeiro.ContaPagar.baixar"
+                          data-action="Financeiro.ContaPagar.baixar"
+                          data-sensitive="true"
                         >
                           <ArrowRight className="w-4 h-4 mr-1" />
                           Enviar

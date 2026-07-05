@@ -12,7 +12,7 @@ import { format } from "date-fns";
  * e o status de cada título gerado
  * WINDOW MODE READY
  */
-export default function VerEspelhosModal({ open, onClose, documento, tipo = "ContaPagar", windowMode = false }) {
+export default function VerEspelhosModal({ open, onClose, documento, tipo = "ContaPagar", windowMode = false, onBaixarGrupo }) {
   if (!documento || !documento.distribuicao_realizada) {
     return null;
   }
@@ -205,7 +205,13 @@ export default function VerEspelhosModal({ open, onClose, documento, tipo = "Con
       {/* AÇÕES */}
       <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
         {!todosPagos && (
-          <Button className="bg-blue-600 hover:bg-blue-700">
+          <Button
+            className="bg-blue-600 hover:bg-blue-700"
+            onClick={() => onBaixarGrupo?.(documento)}
+            data-permission={tipo === 'ContaPagar' ? 'Financeiro.ContaPagar.baixar' : 'Financeiro.ContaReceber.baixar'}
+            data-action={tipo === 'ContaPagar' ? 'Financeiro.ContaPagar.baixar' : 'Financeiro.ContaReceber.baixar'}
+            data-sensitive="true"
+          >
             Baixar no Grupo
           </Button>
         )}

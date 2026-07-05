@@ -1,67 +1,28 @@
-
 import React, { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DollarSign, Percent, Calendar } from "lucide-react"; // Changed CreditCard to DollarSign, added Percent
+import { DollarSign, Percent, Calendar } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
-// Assuming base44 and useQuery are available in the project context
-// For a fully functional example, you might need to mock or define 'base44' and 'useQuery'
-// Example of useQuery if react-query is installed:
-// import { useQuery } from '@tanstack/react-query';
-// const base44 = {
-//   entities: {
-//     FormaPagamento: {
-//       list: async () => [
-//         { id: "1", tipo: "À Vista", descricao: "Pagamento total", icone: "💵", ativa: true },
-//         { id: "2", tipo: "PIX", descricao: "Via PIX", icone: "🔷", ativa: true },
-//         { id: "3", tipo: "Boleto", descricao: "Boleto bancário", icone: "📄", ativa: true },
-//         { id: "4", tipo: "Cartão de Crédito", descricao: "Cartão de crédito", icone: "💳", ativa: true },
-//         { id: "5", tipo: "Cartão de Débito", descricao: "Cartão de débito", icone: "💳", ativa: true },
-//         { id: "6", tipo: "Transferência", descricao: "Transferência bancária", icone: "🏦", ativa: true },
-//         { id: "7", tipo: "Dinheiro", descricao: "Em espécie", icone: "💵", ativa: true },
-//         { id: "8", tipo: "Parcelado", descricao: "Pagamento parcelado", icone: "📊", ativa: true },
-//         { id: "9", tipo: "Outro", descricao: "Outra forma", icone: "❔", ativa: false }, // Inactive example
-//       ],
-//     },
-//   },
-// };
-// import { useQuery } from 'react-query'; // Or '@tanstack/react-query'
+const FORMAS_FALLBACK = [
+  { tipo: "À Vista", descricao: "Pagamento à vista", icone: "💵" },
+  { tipo: "PIX", descricao: "Via PIX", icone: "🔷" },
+  { tipo: "Boleto", descricao: "Boleto bancário", icone: "📄" },
+  { tipo: "Cartão de Crédito", descricao: "Cartão de crédito", icone: "💳" },
+  { tipo: "Cartão de Débito", descricao: "Cartão de débito", icone: "💳" },
+  { tipo: "Transferência", descricao: "Transferência bancária", icone: "🏦" },
+  { tipo: "Dinheiro", descricao: "Em espécie", icone: "💵" },
+  { tipo: "Parcelado", descricao: "Pagamento parcelado", icone: "📊" },
+];
 
-// Placeholder for `useQuery` and `base44` if not actually imported in the project
-// In a real project, these would be properly imported and configured.
-const useQuery = ({ queryKey, queryFn }) => {
-  const [data, setData] = useState([]);
-  useEffect(() => {
-    queryFn().then(setData);
-  }, [queryKey[0]]); // eslint-disable-line react-hooks/exhaustive-deps
-  return { data };
-};
-
-const base44 = {
-  entities: {
-    FormaPagamento: {
-      list: async () => [
-        { id: "1", tipo: "À Vista", descricao: "Pagamento total", icone: "💵", ativa: true },
-        { id: "2", tipo: "PIX", descricao: "Via PIX", icone: "🔷", ativa: true },
-        { id: "3", tipo: "Boleto", descricao: "Boleto bancário", icone: "📄", ativa: true },
-        { id: "4", tipo: "Cartão de Crédito", descricao: "Cartão de crédito", icone: "💳", ativa: true },
-        { id: "5", tipo: "Cartão de Débito", descricao: "Cartão de débito", icone: "💳", ativa: true },
-        { id: "6", tipo: "Transferência", descricao: "Transferência bancária", icone: "🏦", ativa: true },
-        { id: "7", tipo: "Dinheiro", descricao: "Em espécie", icone: "💵", ativa: true },
-        { id: "8", tipo: "Parcelado", descricao: "Pagamento parcelado", icone: "📊", ativa: true },
-        { id: "9", tipo: "Outro", descricao: "Outra forma", icone: "❔", ativa: false }, // Inactive example
-      ],
-    },
-  },
-};
-
-
-export default function FormasPagamentoPedido({ 
+export default function FormasPagamentoPedido({
   valorTotal, 
   formaPagamento, 
   condicaoPagamento,
@@ -74,13 +35,17 @@ export default function FormasPagamentoPedido({
 }) {
   const [numeroParcelas, setNumeroParcelas] = useState(1);
   const [percentualAcrescimo, setPercentualAcrescimo] = useState(acrescimo || 0);
+  const { filterInContext, empresaAtual, estaNoGrupo, grupoAtual } = useContextoVisual();
 
-  const { data: formasPagamento = [] } = useQuery({
-    queryKey: ['formas-pagamento'],
-    queryFn: () => base44.entities.FormaPagamento.list(),
+  const { data: formasPagamento = [], isLoading: loadingFormas } = useQuery({
+    queryKey: ['formas-pagamento', empresaAtual?.id, estaNoGrupo, grupoAtual?.id],
+    queryFn: () => filterInContext('FormaPagamento', { ativa: true }),
+    staleTime: 120000,
   });
 
-  const formasAtivas = formasPagamento.filter(f => f.ativa);
+  const formasAtivas = (formasPagamento.length > 0)
+    ? formasPagamento.filter(f => f.ativa !== false)
+    : FORMAS_FALLBACK;
 
   useEffect(() => {
     // Only generate parcels if the payment method is 'Parcelado'
@@ -158,14 +123,13 @@ export default function FormasPagamentoPedido({
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="À Vista">💵 À Vista</SelectItem>
-                <SelectItem value="PIX">🔷 PIX</SelectItem>
-                <SelectItem value="Boleto">📄 Boleto</SelectItem>
-                <SelectItem value="Cartão de Crédito">💳 Cartão de Crédito</SelectItem>
-                <SelectItem value="Cartão de Débito">💳 Cartão de Débito</SelectItem>
-                <SelectItem value="Transferência">🏦 Transferência</SelectItem>
-                <SelectItem value="Dinheiro">💵 Dinheiro</SelectItem>
-                <SelectItem value="Parcelado">📊 Parcelado</SelectItem>
+                {loadingFormas && <SelectItem value="_loading" disabled>Carregando...</SelectItem>}
+                {formasAtivas.length === 0 && !loadingFormas && <SelectItem value="_empty" disabled>Nenhuma forma cadastrada</SelectItem>}
+                {formasAtivas.map(forma => (
+                  <SelectItem key={forma.id || forma.tipo} value={forma.tipo}>
+                    {forma.icone || '💰'} {forma.descricao || forma.tipo}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

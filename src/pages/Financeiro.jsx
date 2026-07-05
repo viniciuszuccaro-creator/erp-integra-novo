@@ -28,7 +28,7 @@ const GestaoRemessaRetorno = React.lazy(() => import("../components/financeiro/G
 const VendasMulticanal = React.lazy(() => import("../components/financeiro/VendasMulticanal"));
 const RateioMultiempresa = React.lazy(() => import("../components/financeiro/RateioMultiempresa"));
 const AlertasFinanceirosEmpresa = React.lazy(() => import("../components/financeiro/AlertasFinanceirosEmpresa"));
-const RelatorioFinanceiro = React.lazy(() => import("../components/financeiro/RelatorioFinanceiro"));
+const RelatorioFinanceiro = React.lazy(() => import("../components/relatorios/RelatorioFinanceiro"));
 const DashboardFormasPagamento = React.lazy(() => import("../components/financeiro/DashboardFormasPagamento"));
 const LogisticaFinanceiroPanel = React.lazy(() => import("../components/expedicao/financeiro/LogisticaFinanceiroPanel"));
 

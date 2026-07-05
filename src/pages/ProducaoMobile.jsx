@@ -49,15 +49,19 @@ export default function ProducaoMobile() {
   }, []);
 
   const { data: ops = [], isLoading } = useQuery({
-    queryKey: ['ops-mobile', user?.empresa_atual_id],
+    queryKey: ['ops-mobile', user?.empresa_atual_id, user?.group_id],
     queryFn: async () => {
-      const todas = await base44.entities.OrdemProducao.list('-created_date');
-      return todas.filter(op => 
-        op.empresa_id === user?.empresa_atual_id &&
-        ['Liberada', 'Em Corte', 'Em Dobra', 'Em Armação', 'Aguardando Matéria-Prima'].includes(op.status)
-      );
+      // P2: consulta com contexto multiempresa explícito — nunca busca sem escopo
+      const filtro = {
+        $or: [
+          { empresa_id: user?.empresa_atual_id },
+          ...(user?.group_id ? [{ group_id: user?.group_id }] : [])
+        ],
+        status: { $in: ['Liberada', 'Em Corte', 'Em Dobra', 'Em Armação', 'Aguardando Matéria-Prima'] }
+      };
+      return await base44.entities.OrdemProducao.filter(filtro, '-created_date', 200);
     },
-    enabled: !!user?.empresa_atual_id,
+    enabled: !!(user?.empresa_atual_id || user?.group_id),
   });
 
   const apontarMutation = useMutation({

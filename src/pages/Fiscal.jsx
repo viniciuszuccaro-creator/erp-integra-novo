@@ -21,7 +21,7 @@ const FiscalIAPanel = React.lazy(() => import("@/components/fiscal/FiscalIAPanel
 
 const ConfigFiscalAutomatica = React.lazy(() => import("../components/fiscal/ConfigFiscalAutomatica"));
 const PlanoDeContasTree = React.lazy(() => import("../components/fiscal/PlanoDeContasTree"));
-const RelatorioDRE = React.lazy(() => import("../components/fiscal/RelatorioDRE"));
+const RelatorioDRE = React.lazy(() => import("../components/relatorios/RelatorioDRE"));
 const MotorFiscalInteligente = React.lazy(() => import("@/components/fiscal/MotorFiscalInteligente"));
 const ExportacaoSPED = React.lazy(() => import("../components/fiscal/ExportacaoSPED"));
 const ImportarXMLNFe = React.lazy(() => import('../components/fiscal/ImportarXMLNFe'));

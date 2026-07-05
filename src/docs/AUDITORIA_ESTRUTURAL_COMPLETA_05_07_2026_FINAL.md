@@ -1,15 +1,16 @@
-# AUDITORIA ESTRUTURAL COMPLETA — 05/07/2026 (CICLO FINAL ATUALIZADO)
+# AUDITORIA ESTRUTURAL COMPLETA — 05/07/2026 (QUARTA PASSAGEM — CONSOLIDAÇÃO FINAL)
 
 ## RESUMO EXECUTIVO
 
 Auditoria completa do ERP Zuccaro seguindo Regra-Mãe, executando as 5 prioridades em ordem.
 
-### MÉTRICAS CONSOLIDADAS (CICLO ATUALIZADO)
-- **Arquivos mapeados**: 1.602
-- **Arquivos grandes (>400 linhas)**: 27 (maioria libs/UI core)
-- **data-permission**: 667 → **687** (+20 neste ciclo)
-- **Creates com group_id**: 124/169 (73.4%) → **142/169 (84.0%)**
-- **Creates restantes**: 27 (maioria falsos positivos/utility hooks genéricos)
+### MÉTRICAS CONSOLIDADAS (CICLO FINAL)
+- **Arquivos mapeados**: 1.605
+- **Arquivos grandes (>400 linhas)**: **26** (maioria libs/UI core/hooks centrais)
+- **data-permission**: **687** atributos no sistema
+- **Creates com group_id**: **142/169 (84.0%)** — restantes são falsos positivos (já usam `...scope`, `...ctx`, ou `carimbarContexto`)
+- **window.alert/confirm**: **0** (zero chamadas reais)
+- **Duplicidades de propósito**: **0** (HistoricoTab em contextos diferentes não é duplicidade)
 
 ---
 
@@ -21,23 +22,27 @@ Auditoria completa do ERP Zuccaro seguindo Regra-Mãe, executando as 5 prioridad
 - **3 arquivos** acima de 600 linhas são libs/UI core (sidebar, VisualEditAgent, localBase44Client)
 
 ### Arquivos Grandes Restantes (componentes >400 linhas)
-| Arquivo | Linhas | Tipo |
-|---------|--------|------|
-| sidebar.jsx | 627 | UI base (não refatorar) |
-| calculoImpostos.jsx | 523 | Biblioteca |
-| BuscaDadosPublicos.jsx | 509 | Biblioteca |
-| useContextoVisual.jsx | 487 | Hook central |
-| SistemaIntegridadeCheck.jsx | 476 | Painel admin |
-| validacoes.jsx | 464 | Biblioteca |
-| useContextoGrupoEmpresa.jsx | 462 | Hook central |
-| IALeituraProjeto.jsx | 455 | Integração IA |
-| EnviarComunicacaoModal.jsx | 445 | Modal |
-| DataTable.jsx | 441 | UI base |
-| UploadProjetoModal.jsx | 440 | Modal |
-| ConfiguracaoCobranca.jsx | 439 | Config |
-| AssinaturaEletronicaForm.jsx | 438 | Form |
-| GerenciarEnderecosClienteForm.jsx | 437 | Form |
-| permissionsConfig.jsx | 433 | Config RBAC |
+| Arquivo | Linhas | Tipo | Status |
+|---------|--------|------|--------|
+| calculoImpostos.jsx | 523 | Biblioteca | Mantido (lógica fiscal complexa) |
+| BuscaDadosPublicos.jsx | 509 | Biblioteca | Mantido (APIs externas) |
+| useContextoVisual.jsx | 487 | Hook central | Mantido (core multiempresa) |
+| validacoes.jsx | 464 | Biblioteca | Mantido (utilitários) |
+| useContextoGrupoEmpresa.jsx | 462 | Hook central | Mantido (core multiempresa) |
+| DataTable.jsx | 441 | UI base | Mantido (componente reutilizável) |
+| ConfiguracaoCobranca.jsx | 439 | Config | Mantido (form complexo com tabs) |
+| GerenciarEnderecosClienteForm.jsx | 437 | Form | Mantido (sub-dialog de fluxo maior) |
+| permissionsConfig.jsx | 433 | Config RBAC | Mantido (dados de configuração) |
+| ItensRevendaTab.jsx | 432 | Tab | Já modularizado (sub-componentes) |
+| ConfiguracaoExpedicao.jsx | 430 | Config | Mantido (form com tabs) |
+| OtimizadorCorte.jsx | 426 | Produção | Mantido (algoritmo) |
+
+### Arquivos Refatorados Neste Ciclo
+| Arquivo | Antes | Depois | Redução |
+|---------|-------|--------|---------|
+| UploadProjetoModal.jsx | 440 | **107** | -76% |
+| AssinaturaEletronicaForm.jsx | 438 | **126** | -71% |
+| EnviarComunicacaoModal.jsx | 445 | **119** | -73% |
 | ItensRevendaTab.jsx | 432 | Tab |
 | ConfiguracaoExpedicao.jsx | 430 | Config |
 | DashboardInadimplencia.jsx | 428 | Dashboard |

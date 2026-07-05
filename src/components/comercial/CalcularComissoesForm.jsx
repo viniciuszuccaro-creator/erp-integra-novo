@@ -9,6 +9,7 @@ import { Calculator, Calendar } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 export default function CalcularComissoesForm({ onSubmit, onCancel, pedidos = [] }) {
   const [periodo, setPeriodo] = useState('mes');
@@ -16,6 +17,7 @@ export default function CalcularComissoesForm({ onSubmit, onCancel, pedidos = []
   const [dataFim, setDataFim] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { empresaAtual, grupoAtual } = useContextoVisual();
 
   const handleCalcularComissoes = async () => {
     try {
@@ -78,6 +80,8 @@ export default function CalcularComissoesForm({ onSubmit, onCancel, pedidos = []
           percentual_comissao: percentual,
           valor_comissao: valorComissao,
           status: 'Pendente',
+          group_id: grupoAtual?.id || empresaAtual?.group_id || null,
+          empresa_id: empresaAtual?.id || null,
           observacoes: `Comissão calculada automaticamente para ${dados.pedidos.length} vendas no período.`
         });
         contador++;

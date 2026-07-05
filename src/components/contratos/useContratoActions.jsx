@@ -23,7 +23,9 @@ export function useContratoActions({ contratos, empresaAtual, groupId, user }) {
         destinatario_email: user?.email,
         link_acao: typeof window !== 'undefined' ? window.location.href : '',
         entidade_relacionada: 'Contrato',
-        registro_id: contrato.id
+        registro_id: contrato.id,
+        group_id: groupId || contrato.group_id || null,
+        empresa_id: contrato.empresa_id || empresaAtual?.id || null
       });
 
       const novaDataAlerta = new Date();
@@ -52,7 +54,9 @@ export function useContratoActions({ contratos, empresaAtual, groupId, user }) {
         tipo: 'info', categoria: 'Sistema', prioridade: 'Normal',
         destinatario_email: user?.email,
         link_acao: typeof window !== 'undefined' ? window.location.href : '',
-        entidade_relacionada: 'Contrato', registro_id: contrato.id
+        entidade_relacionada: 'Contrato', registro_id: contrato.id,
+        group_id: groupId || contrato.group_id || null,
+        empresa_id: contrato.empresa_id || empresaAtual?.id || null
       });
 
       const novaDataAlerta = new Date();

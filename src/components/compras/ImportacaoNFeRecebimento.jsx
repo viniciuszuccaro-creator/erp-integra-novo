@@ -11,6 +11,7 @@ import { Upload, FileText, CheckCircle2, AlertCircle, Sparkles, Package, Downloa
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function ImportacaoNFeRecebimento({ windowMode = false }) {
   const [arquivo, setArquivo] = useState(null);
@@ -18,6 +19,7 @@ export default function ImportacaoNFeRecebimento({ windowMode = false }) {
   const [resultado, setResultado] = useState(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { empresaAtual, grupoAtual } = useContextoVisual();
 
   const processarXMLMutation = useMutation({
     mutationFn: async (file) => {
@@ -114,7 +116,9 @@ export default function ImportacaoNFeRecebimento({ windowMode = false }) {
             documento: `NF-e ${dados.nfe.numero}`,
             data_movimentacao: dados.nfe.data_emissao,
             motivo: `Recebimento NF-e ${dados.nfe.numero}`,
-            responsavel: "Sistema - Importação XML"
+            responsavel: "Sistema - Importação XML",
+            group_id: grupoAtual?.id || empresaAtual?.group_id || null,
+            empresa_id: empresaAtual?.id || null
           });
 
           // Atualizar estoque do produto

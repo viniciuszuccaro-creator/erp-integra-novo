@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import {
   ShoppingBag,
   Factory,
@@ -316,10 +317,13 @@ export default function TimelineCliente({ clienteId, limitarModulo = null, limit
  * Hook para registrar evento no histórico do cliente
  */
 export function useRegistrarEvento() {
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   return async (evento) => {
     try {
       await base44.entities.HistoricoCliente.create({
         ...evento,
+        group_id: evento.group_id || grupoAtual?.id || empresaAtual?.group_id || null,
+        empresa_id: evento.empresa_id || empresaAtual?.id || null,
         data_evento: evento.data_evento || new Date().toISOString()
       });
     } catch (error) {

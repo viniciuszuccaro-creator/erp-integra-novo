@@ -54,6 +54,8 @@ export default function useChatbotWidget({ clienteId, canal = 'Portal', conversa
         canal, sessao_id: sessaoId, cliente_id: clienteId, status: 'Em Progresso', tipo_atendimento: 'Bot',
         data_inicio: new Date().toISOString(), data_ultima_mensagem: new Date().toISOString(),
         total_mensagens: 0, mensagens_bot: 0, mensagens_cliente: 0,
+        group_id: grupoAtual?.id || empresaAtual?.group_id || null,
+        empresa_id: empresaAtual?.id || null,
       });
       setConversaAtiva(novaConversa);
 
@@ -62,6 +64,8 @@ export default function useChatbotWidget({ clienteId, canal = 'Portal', conversa
         conversa_id: novaConversa.id, sessao_id: sessaoId, canal, tipo_remetente: 'Bot', remetente_nome: 'Assistente IA',
         mensagem: mensagemBoasVindas, tipo_conteudo: 'texto', data_envio: new Date().toISOString(),
         resposta_automatica: true, sugestoes_acoes: ['Ver meus pedidos', 'Consultar entrega', '2ª via de boleto', 'Solicitar orçamento'],
+        group_id: grupoAtual?.id || empresaAtual?.group_id || null,
+        empresa_id: empresaAtual?.id || null,
       });
     } catch (error) { console.error('Erro ao inicializar conversa:', error); }
   };
@@ -83,6 +87,8 @@ export default function useChatbotWidget({ clienteId, canal = 'Portal', conversa
         tipo: 'urgente', categoria: 'Atendimento', prioridade: resultado.sentimento === 'Frustrado' ? 'Urgente' : 'Alta',
         destinatario_id: atendenteId, link_acao: `/hub-atendimento?conversa=${conversaId}`,
         dados_adicionais: { conversa_id: conversaId, sessao_id: sessaoId, canal },
+        group_id: grupoAtual?.id || empresaAtual?.group_id || null,
+        empresa_id: empresaAtual?.id || null,
       });
     } catch (error) { console.error('Erro ao transferir para atendente:', error); }
   };
@@ -102,6 +108,8 @@ export default function useChatbotWidget({ clienteId, canal = 'Portal', conversa
         conversa_id: conversaId, sessao_id: sessaoId, canal, tipo_remetente: 'Cliente', remetente_id: clienteId,
         mensagem, tipo_conteudo: arquivo ? 'documento' : 'texto', midia_url: arquivoUrl, midia_tipo: arquivoTipo,
         midia_tamanho_kb: arquivoTamanho, data_envio: new Date().toISOString(), entregue: true,
+        group_id: grupoAtual?.id || empresaAtual?.group_id || null,
+        empresa_id: empresaAtual?.id || null,
       });
 
       const resultado = await IntentEngine.detectarIntent(mensagem, clienteId, {
@@ -124,6 +132,8 @@ export default function useChatbotWidget({ clienteId, canal = 'Portal', conversa
         data_envio: new Date().toISOString(), resposta_automatica: !resultado.necessita_atendente,
         intent_detectado: resultado.intent, confianca_intent: resultado.confianca, sentimento: resultado.sentimento,
         sugestoes_acoes: resultado.acoes_sugeridas, entidades_extraidas: resultado.entidades_detectadas,
+        group_id: grupoAtual?.id || empresaAtual?.group_id || null,
+        empresa_id: empresaAtual?.id || null,
       });
 
       await base44.entities.ConversaOmnicanal.update(conversaId, {
@@ -137,6 +147,7 @@ export default function useChatbotWidget({ clienteId, canal = 'Portal', conversa
 
       await base44.entities.ChatbotInteracao.create({
         sessao_id: sessaoId, canal, cliente_id: clienteId, empresa_id: empresaAtual?.id,
+        group_id: grupoAtual?.id || empresaAtual?.group_id || null,
         mensagem_usuario: mensagem, intent_detectado: resultado.intent, confianca_intent: resultado.confianca,
         resposta_bot: acaoResultado?.mensagem || resultado.resposta_sugerida, acao_executada: acaoResultado?.tipo || 'resposta_padrao',
         sentimento_detectado: resultado.sentimento, transferido_atendente: resultado.necessita_atendente,

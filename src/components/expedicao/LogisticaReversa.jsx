@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/components/ui/use-toast';
 import { RotateCcw, AlertTriangle, Package } from 'lucide-react';
 import { useUser } from "@/components/lib/UserContext";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Logística Reversa Automatizada
@@ -16,6 +17,7 @@ import { useUser } from "@/components/lib/UserContext";
  */
 export default function LogisticaReversa({ entrega, onConcluido }) {
   const { user } = useUser();
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const [motivo, setMotivo] = useState('');
   const [detalhes, setDetalhes] = useState('');
   const [acao, setAcao] = useState('');
@@ -58,7 +60,8 @@ export default function LogisticaReversa({ entrega, onConcluido }) {
           // Retornar itens de revenda ao estoque
           for (const item of (pedidoRef.itens_revenda || [])) {
             await base44.entities.MovimentacaoEstoque.create({
-              empresa_id: entrega.empresa_id,
+              empresa_id: entrega.empresa_id || empresaAtual?.id,
+              group_id: grupoAtual?.id || empresaAtual?.group_id || entrega.group_id || null,
               origem_movimento: 'devolucao',
               origem_documento_id: entrega.id,
               tipo_movimento: 'entrada',
@@ -79,12 +82,14 @@ export default function LogisticaReversa({ entrega, onConcluido }) {
       // Auditoria + Notificação
       const destinatario = ped?.vendedor_id || null;
       await base44.entities.Notificacao.create({
-        destinatario_id: destinatario, 
+        destinatario_id: destinatario,
         tipo: 'urgente',
         categoria: 'Comercial',
         titulo: `Devolução Total - Pedido ${entrega.numero_pedido}`,
         mensagem: `Cliente ${entrega.cliente_nome} recusou a entrega. Motivo: ${motivo}. Ação tomada: ${acao}.`,
-        link_acao: `/expedicao?ver=entrega&id=${entrega.id}`
+        link_acao: `/expedicao?ver=entrega&id=${entrega.id}`,
+        group_id: grupoAtual?.id || empresaAtual?.group_id || entrega.group_id || null,
+        empresa_id: entrega.empresa_id || empresaAtual?.id || null
       });
 
       // AuditLog

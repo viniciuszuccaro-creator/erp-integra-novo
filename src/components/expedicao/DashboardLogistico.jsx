@@ -51,7 +51,7 @@ export default function DashboardLogistico({ empresaId, entregas: entregasProp =
       if (rows?.length) {
         await base44.entities.ConfiguracaoSistema.update(rows[0].id, { valor_json: newRules });
       } else {
-        await base44.entities.ConfiguracaoSistema.create({ chave: rulesKey, valor_json: newRules });
+        await base44.entities.ConfiguracaoSistema.create({ chave: rulesKey, valor_json: newRules, group_id: grupoAtual?.id || empresaAtual?.group_id || null, empresa_id: empresaAtual?.id || null });
       }
       return newRules;
     },

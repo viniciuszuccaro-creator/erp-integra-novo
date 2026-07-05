@@ -10,12 +10,14 @@ import { useToast } from "@/components/ui/use-toast";
 import { MessageCircle, Send, CheckCircle, AlertCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { mockEnviarWhatsApp, avisoModoSimulacao } from "@/components/integracoes/MockIntegracoes";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Componente para envio de WhatsApp automático nas entregas
  * EM MODO SIMULAÇÃO
  */
 export default function EnvioMensagemAutomatica({ entrega, tipo = "saida_entrega" }) {
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const [enviando, setEnviando] = React.useState(false);
   const [mensagemCustom, setMensagemCustom] = React.useState("");
   const [enviado, setEnviado] = React.useState(false);
@@ -66,7 +68,8 @@ export default function EnvioMensagemAutomatica({ entrega, tipo = "saida_entrega
 
       // Registrar no histórico do cliente
       await base44.entities.HistoricoCliente.create({
-        empresa_id: entrega.empresa_id,
+        empresa_id: entrega.empresa_id || empresaAtual?.id,
+        group_id: grupoAtual?.id || empresaAtual?.group_id || entrega.group_id || null,
         cliente_id: entrega.cliente_id,
         cliente_nome: entrega.cliente_nome,
         modulo_origem: "Expedicao",

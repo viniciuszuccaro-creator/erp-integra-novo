@@ -74,6 +74,8 @@ Retorne a melhor sequência de entregas, distância total, tempo estimado e cust
 
       return base44.entities.RoteirizacaoInteligente.create({
         data_rota: dataRota,
+        group_id: grupoAtual?.id || empresaAtual?.group_id || null,
+        empresa_id: empresaAtual?.id || null,
         motorista_id: motoristaId,
         motorista_nome: motorista?.nome || "",
         veiculo_id: veiculoId,

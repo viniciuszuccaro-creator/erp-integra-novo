@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { MessageSquare, CheckCircle, AlertCircle, Settings, Eye } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Componente de configuração de notificações WhatsApp/Email
@@ -19,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export default function ConfigWhatsApp() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { empresaAtual, grupoAtual } = useContextoVisual();
 
   const [config, setConfig] = useState({
     exp_notif_whatsapp_ativo: false,
@@ -55,7 +57,9 @@ export default function ConfigWhatsApp() {
         return await base44.entities.ConfiguracaoSistema.create({
           chave: "expedicao_notificacoes",
           categoria: "Integracoes",
-          configuracoes_sistema: data
+          configuracoes_sistema: data,
+          group_id: grupoAtual?.id || empresaAtual?.group_id || null,
+          empresa_id: empresaAtual?.id || null
         });
       }
     },

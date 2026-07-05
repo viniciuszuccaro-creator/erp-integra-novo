@@ -98,6 +98,7 @@ async function criarPedido(clienteId, entidades, contexto) {
     cliente_nome: clienteNome,
     valor_total: isNaN(valor) ? 0 : valor,
     empresa_id: contexto?.empresaId || undefined,
+    group_id: contexto?.groupId || undefined,
     pode_ver_no_portal: true,
     prioridade: 'Normal',
     status: 'Rascunho'
@@ -155,6 +156,7 @@ async function gerarBoleto(clienteId, entidades, contexto) {
     status_cobranca: 'gerada',
     url_boleto_pdf: null,
     empresa_id: contexto?.empresaId || undefined,
+    group_id: contexto?.groupId || undefined,
     canal_origem: 'Chatbot'
   });
 

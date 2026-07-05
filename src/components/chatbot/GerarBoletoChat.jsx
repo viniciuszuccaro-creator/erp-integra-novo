@@ -57,18 +57,22 @@ export default function GerarBoletoChat({ conversa, clienteId, onBoletoEnviado }
       const urlBoleto = titulo.url_boleto_pdf || titulo.boleto_url || 
         `https://boleto.exemplo.com/${titulo.id}`;
 
-      // Atualizar título com dados do boleto
+      // Atualizar título com dados do boleto — preserva group_id/empresa_id
       await base44.entities.ContaReceber.update(titulo.id, {
         linha_digitavel: linhaDigitavel,
         url_boleto_pdf: urlBoleto,
         status_cobranca: 'gerada',
-        data_envio_cobranca: new Date().toISOString()
+        data_envio_cobranca: new Date().toISOString(),
+        group_id: titulo.group_id || conversa?.group_id,
+        empresa_id: titulo.empresa_id || conversa?.empresa_id,
       });
 
       // Registrar na conversa
       if (conversa?.id) {
         await base44.entities.ConversaOmnicanal.update(conversa.id, {
           conta_receber_gerada_id: titulo.id,
+          group_id: conversa?.group_id,
+          empresa_id: conversa?.empresa_id,
           acoes_automaticas_executadas: [
             ...(conversa.acoes_automaticas_executadas || []),
             {
@@ -233,6 +237,7 @@ export default function GerarBoletoChat({ conversa, clienteId, onBoletoEnviado }
                         size="sm"
                         variant="outline"
                         onClick={copiarLinhaDigitavel}
+                        data-permission="Financeiro.ContaReceber.visualizar"
                       >
                         {copiado ? (
                           <Check className="w-4 h-4 text-green-600" />
@@ -250,6 +255,7 @@ export default function GerarBoletoChat({ conversa, clienteId, onBoletoEnviado }
                     onClick={() => enviarBoletoMutation.mutate(tituloSelecionado)}
                     disabled={enviarBoletoMutation.isPending}
                     className="bg-green-600 hover:bg-green-700"
+                    data-permission="Financeiro.ContaReceber.gerar_boleto"
                   >
                     {enviarBoletoMutation.isPending ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
@@ -265,6 +271,7 @@ export default function GerarBoletoChat({ conversa, clienteId, onBoletoEnviado }
                     <Button
                       variant="outline"
                       onClick={() => window.open(tituloSelecionado.url_boleto_pdf, '_blank')}
+                      data-permission="Financeiro.ContaReceber.visualizar"
                     >
                       <ExternalLink className="w-4 h-4 mr-2" />
                       Ver PDF

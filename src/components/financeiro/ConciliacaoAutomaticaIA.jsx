@@ -89,6 +89,7 @@ export default function ConciliacaoAutomaticaIA({ empresaId }) {
 
         await base44.entities.ConciliacaoBancaria.create({
           empresa_id: match.extrato.empresa_id,
+          group_id: match.extrato.group_id,
           extrato_bancario_id: match.extrato.id,
           movimento_caixa_id: match.movimento.id,
           data_conciliacao: new Date().toISOString(),

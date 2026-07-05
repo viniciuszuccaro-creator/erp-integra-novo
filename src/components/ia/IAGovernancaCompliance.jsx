@@ -97,6 +97,7 @@ export default function IAGovernancaCompliance() {
           await base44.entities.LogsIA.create({
             tipo_ia: 'IA_Governanca',
             contexto_execucao: 'Sistema',
+            group_id: perfil.group_id,
             entidade_relacionada: 'PerfilAcesso',
             entidade_id: perfil.id,
             acao_sugerida: `Detectados ${conflitos.length} conflitos de SoD no perfil "${perfil.nome_perfil}"`,
@@ -138,6 +139,7 @@ export default function IAGovernancaCompliance() {
           await base44.entities.LogsIA.create({
             tipo_ia: 'IA_Governanca',
             contexto_execucao: 'Sistema',
+            group_id: usuario.group_id,
             entidade_relacionada: 'User',
             entidade_id: usuario.id,
             acao_sugerida: `Detectados ${alertas.length} alertas de segurança para usuário ${usuario.full_name}`,

@@ -21,6 +21,7 @@ export default function GerarLinkPagamentoModal({ isOpen, onClose, contaReceber 
       // Criar PagamentoOmnichannel pendente
       await base44.entities.PagamentoOmnichannel.create({
         empresa_id: contaReceber.empresa_id,
+        group_id: contaReceber.group_id,
         origem_pagamento: 'Link Pagamento',
         cliente_nome: contaReceber.cliente,
         cliente_cpf_cnpj: contaReceber.cliente_cpf_cnpj || '',

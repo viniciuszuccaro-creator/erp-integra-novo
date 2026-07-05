@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { FileText, Download, CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
 
 /**
@@ -16,6 +17,7 @@ import { FileText, Download, CheckCircle, AlertTriangle, Loader2 } from "lucide-
 export default function ExportacaoSPED({ empresaId }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { grupoAtual } = useContextoVisual();
 
   const [tipoSped, setTipoSped] = useState("Fiscal (EFD ICMS/IPI)");
   const [periodoInicial, setPeriodoInicial] = useState(
@@ -51,6 +53,7 @@ export default function ExportacaoSPED({ empresaId }) {
 
       const novoSPED = await base44.entities.SPEDFiscal.create({
         empresa_id: empresaId,
+        group_id: grupoAtual?.id,
         tipo_sped: tipoSped,
         periodo_inicial: periodoInicial,
         periodo_final: periodoFinal,

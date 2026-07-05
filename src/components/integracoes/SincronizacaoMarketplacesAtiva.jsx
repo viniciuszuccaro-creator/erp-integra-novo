@@ -59,6 +59,8 @@ export default function SincronizacaoMarketplacesAtiva() {
             cpf: pedidoExterno.cliente_cpf_cnpj?.length === 11 ? pedidoExterno.cliente_cpf_cnpj : undefined,
             cnpj: pedidoExterno.cliente_cpf_cnpj?.length === 14 ? pedidoExterno.cliente_cpf_cnpj : undefined,
             email: pedidoExterno.cliente_email,
+            group_id: pedidoExterno.group_id,
+            empresa_id: pedidoExterno.empresa_id,
             endereco_principal: pedidoExterno.endereco_entrega,
             contatos: [{
               tipo: 'Telefone',
@@ -77,6 +79,8 @@ export default function SincronizacaoMarketplacesAtiva() {
         cliente_id: clienteId,
         cliente_nome: pedidoExterno.cliente_nome,
         cliente_cpf_cnpj: pedidoExterno.cliente_cpf_cnpj,
+        group_id: pedidoExterno.group_id,
+        empresa_id: pedidoExterno.empresa_id,
         data_pedido: new Date(pedidoExterno.data_pedido_externo).toISOString().split('T')[0],
         tipo: 'Pedido',
         tipo_pedido: 'Revenda',
@@ -158,6 +162,8 @@ export default function SincronizacaoMarketplacesAtiva() {
     for (const pedido of novosPedidos) {
       await base44.entities.PedidoExterno.create({
         ...pedido,
+        group_id: pedido.group_id,
+        empresa_id: pedido.empresa_id,
         status_importacao: 'A Validar',
         json_completo: pedido
       });

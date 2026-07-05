@@ -267,6 +267,7 @@ export async function aprovarPedidoCompleto(pedido, empresaId) {
     const userHC = await getUsuarioAtual();
     await base44.entities.HistoricoCliente.create({
       empresa_id: empresaId,
+      group_id: pedido.group_id,
       cliente_id: pedido.cliente_id,
       cliente_nome: pedido.cliente_nome,
       modulo_origem: "Comercial",

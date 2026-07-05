@@ -46,7 +46,11 @@ export default function TagsCategorizacao({ conversa }) {
 
   const salvarTagsMutation = useMutation({
     mutationFn: async (tags) => {
-      await base44.entities.ConversaOmnicanal.update(conversa.id, { tags });
+      await base44.entities.ConversaOmnicanal.update(conversa.id, {
+        tags,
+        group_id: conversa.group_id,
+        empresa_id: conversa.empresa_id,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversas-omnicanal'] });
@@ -88,6 +92,7 @@ export default function TagsCategorizacao({ conversa }) {
           size="sm"
           onClick={() => setEditando(!editando)}
           className="text-xs"
+          data-permission="HubAtendimento.Conversa.editar_tags"
         >
           {editando ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
         </Button>
@@ -133,6 +138,7 @@ export default function TagsCategorizacao({ conversa }) {
               onClick={() => adicionarTag(novaTag)}
               disabled={!novaTag.trim()}
               className="h-7 px-2"
+              data-permission="HubAtendimento.Conversa.editar_tags"
             >
               <Plus className="w-3 h-3" />
             </Button>

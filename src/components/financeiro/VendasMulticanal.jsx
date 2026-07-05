@@ -102,6 +102,7 @@ export default function VendasMulticanal({ windowMode = false }) {
       const pedido = pedidos.find(p => p.id === pedidoId);
       await base44.entities.PagamentoOmnichannel.create({
         empresa_id: pedido.empresa_id,
+        group_id: pedido.group_id,
         origem_canal: pedido.origem_pedido,
         pedido_id: pedido.id,
         numero_pedido: pedido.numero_pedido,

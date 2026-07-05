@@ -33,7 +33,13 @@ export default function useEntregaForm({ formData, setFormData, onCancel, isEdit
 
   const createMutation = useMutation({
     mutationFn: (data) => {
-      const payload = { ...data, usuario_responsavel: data.usuario_responsavel || (authUser?.full_name || authUser?.email), usuario_responsavel_id: data.usuario_responsavel_id || authUser?.id };
+      const payload = {
+        ...data,
+        usuario_responsavel: data.usuario_responsavel || (authUser?.full_name || authUser?.email),
+        usuario_responsavel_id: data.usuario_responsavel_id || authUser?.id,
+        group_id: data.group_id,
+        empresa_id: data.empresa_id,
+      };
       return base44.entities.Entrega.create(payload);
     },
     onSuccess: async (entregaCriada) => {

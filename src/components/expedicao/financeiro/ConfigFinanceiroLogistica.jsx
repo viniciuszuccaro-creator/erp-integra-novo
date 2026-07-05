@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 
 export default function ConfigFinanceiroLogistica({ empresaId }) {
   const queryClient = useQueryClient();
-  const { filterInContext } = useContextoVisual();
+  const { filterInContext, getFiltroContexto } = useContextoVisual();
   const cfgKey = React.useMemo(() => empresaId ? `log_finance_cfg_${empresaId}` : `log_finance_cfg_global`, [empresaId]);
 
   const { data: cfg } = useQuery({
@@ -60,7 +60,8 @@ export default function ConfigFinanceiroLogistica({ empresaId }) {
       if (rows?.length) {
         await base44.entities.ConfiguracaoSistema.update(rows[0].id, { valor_json: values });
       } else {
-        await base44.entities.ConfiguracaoSistema.create({ chave: cfgKey, valor_json: values });
+        const scope = getFiltroContexto?.('empresa_id', true) || {};
+        await base44.entities.ConfiguracaoSistema.create({ chave: cfgKey, valor_json: values, group_id: scope.group_id, empresa_id: scope.empresa_id });
       }
       return values;
     },

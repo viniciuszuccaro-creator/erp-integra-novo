@@ -62,6 +62,7 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
       const ordens = await Promise.all(titulos.map(async (titulo) => {
         return await base44.entities.CaixaOrdemLiquidacao.create({
           empresa_id: titulo.empresa_id,
+          group_id: titulo.group_id,
           tipo_operacao: 'Pagamento',
           origem: 'Contas a Pagar',
           valor_total: titulo.valor,

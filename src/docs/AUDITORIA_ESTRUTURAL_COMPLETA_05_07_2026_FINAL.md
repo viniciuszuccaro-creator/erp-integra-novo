@@ -145,8 +145,60 @@ Auditoria completa do ERP Zuccaro seguindo Regra-Mãe, executando as 5 prioridad
 
 ## PRÓXIMOS PASSOS RECOMENDADOS
 
-1. **P1**: Refatorar `SistemaIntegridadeCheck.jsx` (476) e `IALeituraProjeto.jsx` (455)
-2. **P2**: Corrigir creates restantes sem group_id (~68, maioria em mock/client)
-3. **P3**: Adicionar `data-permission` em `VisualizadorBody.jsx`, `GerarBoletoChat.jsx`, `TagsCategorizacao.jsx`
-4. **P4**: Simplificar `DashboardInadimplencia.jsx` e `DashboardRepresentantes.jsx`
-5. **P5**: Consolidar `ConfiguracaoBoletosForm` após auditoria de imports
+1. ~~**P1**: Refatorar `SistemaIntegridadeCheck.jsx` (476)~~ ✅ **FEITO** — refatorado em hook + 3 sub-componentes
+2. **P1**: Refatorar `IALeituraProjeto.jsx` (455) — pendente
+3. ~~**P2**: Corrigir creates restantes sem group_id~~ ✅ Cobertura 62%→**73.4%** (124/169)
+4. ~~**P3**: Adicionar `data-permission` em `VisualizadorBody.jsx`, `GerarBoletoChat.jsx`, `TagsCategorizacao.jsx`~~ ✅ **FEITO** — total 667→**674**
+5. **P4**: Simplificar `DashboardInadimplencia.jsx` (428) e `DashboardRepresentantes.jsx` (311) — pendente
+6. **P5**: Consolidar `ConfiguracaoBoletosForm` após auditoria de imports
+
+---
+
+## ATUALIZAÇÃO CICLO 05/07/2026 (EXECUÇÃO)
+
+### P1 — Refatoração SistemaIntegridadeCheck (476→~110 linhas)
+- Extraído `integridadeMeta.jsx` — constantes, cache, resultados offline
+- Extraído `useSistemaIntegridade.jsx` — hook com state management
+- Extraído `IntegridadeEtapaRow.jsx` — componente de linha expansível
+- `SistemaIntegridadeCheck.jsx` → wrapper fino (~110 linhas)
+
+### P2 — Creates Corrigidos Neste Ciclo
+| Arquivo | Entidade | Correção |
+|---------|---------|----------|
+| `useEntregaForm.jsx` | Entrega.create | +group_id, +empresa_id |
+| `ConciliacaoAutomaticaIA.jsx` | ConciliacaoBancaria.create | +group_id |
+| `GerarLinkPagamentoModal.jsx` | PagamentoOmnichannel.create | +group_id |
+| `VendasMulticanal.jsx` | PagamentoOmnichannel.create | +group_id |
+| `ReguaCobrancaIA.jsx` | Interacao.create (×2) | +group_id, +empresa_id |
+| `ReguaCobrancaIA.jsx` | Notificacao.create | +group_id, +empresa_id |
+| `SincronizacaoMarketplacesAtiva.jsx` | Cliente.create | +group_id, +empresa_id |
+| `SincronizacaoMarketplacesAtiva.jsx` | Pedido.create | +group_id, +empresa_id |
+| `SincronizacaoMarketplacesAtiva.jsx` | PedidoExterno.create | +group_id, +empresa_id |
+| `ExportacaoSPED.jsx` | SPEDFiscal.create | +group_id |
+| `IAGovernancaCompliance.jsx` | LogsIA.create (×2) | +group_id |
+| `ContasPagarTab.jsx` | CaixaOrdemLiquidacao.create | +group_id |
+| `ConfigFinanceiroLogistica.jsx` | ConfiguracaoSistema.create | +group_id, +empresa_id |
+| `ConfiguracaoCobranca.jsx` | ConfiguracaoCobrancaEmpresa.create | +group_id |
+| `aprovarPedido.jsx` | HistoricoCliente.create | +group_id |
+| `integracaoBoletos.jsx` | LogCobranca.create | +group_id |
+| `GerarBoletoChat.jsx` | ContaReceber.update + ConversaOmnicanal.update | +group_id |
+| `TagsCategorizacao.jsx` | ConversaOmnicanal.update | +group_id, +empresa_id |
+
+**Total: ~19 creates/updates corrigidos neste ciclo**
+
+### P3 — data-permission Adicionados
+| Arquivo | Botão | Permissão |
+|---------|-------|-----------|
+| `VisualizadorBody.jsx` | Selecionar todos | `Cadastros.Selecao.selecionar_todos` |
+| `VisualizadorBody.jsx` | Cancelar seleção | `Cadastros.Selecao.cancelar` |
+| `GerarBoletoChat.jsx` | Gerar 2ª Via | `Financeiro.ContaReceber.gerar_boleto` |
+| `GerarBoletoChat.jsx` | Copiar linha | `Financeiro.ContaReceber.visualizar` |
+| `GerarBoletoChat.jsx` | Ver PDF | `Financeiro.ContaReceber.visualizar` |
+| `TagsCategorizacao.jsx` | Editar tags | `HubAtendimento.Conversa.editar_tags` |
+| `TagsCategorizacao.jsx` | Adicionar tag | `HubAtendimento.Conversa.editar_tags` |
+
+### Métricas Finais
+- **data-permission**: 667 → **674** atributos no sistema
+- **Creates com group_id**: 105/169 (62%) → **124/169 (73.4%)**
+- **Creates restantes**: 45 (15 falsos positivos do scan; ~12 em mock/lib genérico; ~18 reais)
+- **Arquivo refatorado**: SistemaIntegridadeCheck.jsx 476→~110 linhas (main) + 3 sub-arquivos

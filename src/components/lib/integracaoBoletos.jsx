@@ -258,6 +258,7 @@ export async function gerarCobranca(contaReceber, tipo = 'BOLETO') {
   // 3. Log da tentativa
   const logId = await base44.entities.LogCobranca.create({
     empresa_id: contaReceber.empresa_id,
+    group_id: contaReceber.group_id,
     conta_receber_id: contaReceber.id,
     tipo_operacao: tipo === 'BOLETO' ? 'gerar_boleto' : 'gerar_pix',
     provedor: verificacao.integracao.provedor,

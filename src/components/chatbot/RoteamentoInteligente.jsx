@@ -24,7 +24,8 @@ import { useContextoVisual } from '@/components/lib/useContextoVisual';
  */
 export default function RoteamentoInteligente({ canalConfig }) {
   const queryClient = useQueryClient();
-  const { empresaAtual } = useContextoVisual();
+  const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const [regras, setRegras] = useState({
     tipo_roteamento: 'round-robin',
@@ -47,9 +48,9 @@ export default function RoteamentoInteligente({ canalConfig }) {
   });
 
   const { data: estatisticas = [] } = useQuery({
-    queryKey: ['estatisticas-atendentes'],
+    queryKey: ['estatisticas-atendentes', contextoKey],
     queryFn: async () => {
-      const conversas = await base44.entities.ConversaOmnicanal.list();
+      const conversas = await filterInContext('ConversaOmnicanal', {}, '-created_date', 999);
       
       return atendentes.map(atendente => {
         const conversasAtendente = conversas.filter(c => c.atendente_id === atendente.id);

@@ -8,26 +8,34 @@ import { TrendingUp, DollarSign, Zap, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import HeaderFormasCompacto from './formas-pagamento/HeaderFormasCompacto';
 import KPIsFormas from './formas-pagamento/KPIsFormas';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 export default function DashboardFormasPagamento({ windowMode = false }) {
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+
   const { data: formasPagamento = [] } = useQuery({
-    queryKey: ['formas-pagamento'],
-    queryFn: () => base44.entities.FormaPagamento.list(),
+    queryKey: ['formas-pagamento', contextoKey],
+    queryFn: () => filterInContext('FormaPagamento', {}, '-updated_date', 999),
+    enabled: !!contexto,
   });
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos-analytics-formas'],
-    queryFn: () => base44.entities.Pedido.list('-created_date', 1000),
+    queryKey: ['pedidos-analytics-formas', contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-created_date', 1000),
+    enabled: !!contexto,
   });
 
   const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contas-receber-analytics-formas'],
-    queryFn: () => base44.entities.ContaReceber.list('-created_date', 1000),
+    queryKey: ['contas-receber-analytics-formas', contextoKey],
+    queryFn: () => filterInContext('ContaReceber', {}, '-created_date', 1000),
+    enabled: !!contexto,
   });
 
   const { data: movimentosCaixa = [] } = useQuery({
-    queryKey: ['movimentos-caixa-analytics'],
-    queryFn: () => base44.entities.CaixaMovimento.list('-data_movimento', 1000),
+    queryKey: ['movimentos-caixa-analytics', contextoKey],
+    queryFn: () => filterInContext('CaixaMovimento', {}, '-data_movimento', 1000),
+    enabled: !!contexto,
   });
 
   const analisarUso = () => {

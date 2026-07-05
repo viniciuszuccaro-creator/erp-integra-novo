@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -10,18 +9,23 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { AlertTriangle, TrendingDown, Download, Clock, DollarSign, Shield } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import ExportMenu from "@/components/ui/ExportMenu"; // Added import
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function DashboardInadimplencia({ empresaId }) {
   const [filtroRisco, setFiltroRisco] = useState("todos");
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contasReceber'],
-    queryFn: () => base44.entities.ContaReceber.list('-data_vencimento'),
+    queryKey: ['contasReceber', contextoKey],
+    queryFn: () => filterInContext('ContaReceber', {}, '-data_vencimento', 999),
+    enabled: !!contexto,
   });
 
   const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes'],
-    queryFn: () => base44.entities.Cliente.list(),
+    queryKey: ['clientes', contextoKey],
+    queryFn: () => filterInContext('Cliente', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const hoje = new Date();

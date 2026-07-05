@@ -11,10 +11,13 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Lock, Unlock, Save, AlertTriangle, TrendingDown, DollarSign, Clock, Settings, Package } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function ConfiguracaoProducao({ empresaId }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -35,11 +38,12 @@ export default function ConfiguracaoProducao({ empresaId }) {
   });
 
   const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos-bitola'],
+    queryKey: ['produtos-bitola', contextoKey],
     queryFn: async () => {
-      const todos = await base44.entities.Produto.list();
+      const todos = await filterInContext('Produto', {}, 'descricao', 999);
       return todos.filter(p => p.eh_bitola && p.status === 'Ativo');
     },
+    enabled: !!contexto,
   });
 
   const [formData, setFormData] = useState({

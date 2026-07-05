@@ -25,6 +25,7 @@ import {
   BarChart3
 } from "lucide-react";
 import { useWindow } from "@/components/lib/useWindow";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import PedidoFormCompleto from "@/components/comercial/PedidoFormCompleto";
 
 /**
@@ -33,6 +34,8 @@ import PedidoFormCompleto from "@/components/comercial/PedidoFormCompleto";
  */
 export default function RelatorioPedidosPorOrigem({ empresaId, windowMode = false }) {
   const { openWindow } = useWindow();
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [abaAtiva, setAbaAtiva] = useState('relatorio');
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
@@ -40,20 +43,17 @@ export default function RelatorioPedidosPorOrigem({ empresaId, windowMode = fals
 
   // Buscar pedidos
   const { data: pedidos = [], isLoading } = useQuery({
-    queryKey: ['pedidos', empresaId],
-    queryFn: () => {
-      if (empresaId) {
-        return base44.entities.Pedido.filter({ empresa_id: empresaId });
-      }
-      return base44.entities.Pedido.list('-created_date', 500);
-    },
+    queryKey: ['pedidos', empresaId || contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-created_date', 500),
+    enabled: !!contexto,
     initialData: [],
   });
 
   // Buscar clientes para referência
   const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes'],
-    queryFn: () => base44.entities.Cliente.list(),
+    queryKey: ['clientes', contextoKey],
+    queryFn: () => filterInContext('Cliente', {}, 'nome', 999),
+    enabled: !!contexto,
     initialData: [],
   });
 

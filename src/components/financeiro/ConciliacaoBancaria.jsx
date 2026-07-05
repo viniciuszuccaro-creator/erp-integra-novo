@@ -26,10 +26,13 @@ import { toast } from "sonner";
 import ConciliacaoAutomaticaIA from "./ConciliacaoAutomaticaIA";
 import HeaderConciliacaoCompacto from "./conciliacao/HeaderConciliacaoCompacto";
 import KPIsConciliacao from "./conciliacao/KPIsConciliacao";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function ConciliacaoBancaria({ windowMode = false }) {
   const { user } = useUser();
   const queryClient = useQueryClient();
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [filtros, setFiltros] = useState({
     banco_id: "",
     data_inicio: "",
@@ -41,8 +44,9 @@ export default function ConciliacaoBancaria({ windowMode = false }) {
   const [movimentoParaConciliar, setMovimentoParaConciliar] = useState(null);
 
   const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas'],
-    queryFn: () => base44.entities.Empresa.list(),
+    queryKey: ['empresas', contextoKey],
+    queryFn: () => filterInContext('Empresa', {}, 'nome_fantasia', 999),
+    enabled: !!contexto,
   });
 
   const { data: extratos = [] } = useQuery({

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -10,19 +9,24 @@ import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, L
 import { Package, TrendingUp, Download, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import ExportMenu from "@/components/ui/ExportMenu";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function RentabilidadeProduto({ empresaId }) {
   const [periodo, setPeriodo] = useState(12);
   const [ordenacao, setOrdenacao] = useState("margem_valor");
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos'],
-    queryFn: () => base44.entities.Produto.list(),
+    queryKey: ['produtos', contextoKey],
+    queryFn: () => filterInContext('Produto', {}, 'descricao', 999),
+    enabled: !!contexto,
   });
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos'],
-    queryFn: () => base44.entities.Pedido.list('-data_pedido'),
+    queryKey: ['pedidos', contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-data_pedido', 999),
+    enabled: !!contexto,
   });
 
   // Calcular rentabilidade por produto

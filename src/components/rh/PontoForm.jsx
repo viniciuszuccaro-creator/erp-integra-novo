@@ -10,11 +10,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Save, Clock, AlertCircle } from "lucide-react";
 import { z } from "zod";
 import FormWrapper from "@/components/common/FormWrapper";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.1.2: Ponto Form - Adaptado para Window Mode
  */
 export default function PontoForm({ ponto, onSubmit, windowMode = false }) {
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [formData, setFormData] = useState(ponto || {
     colaborador_id: '',
     colaborador_nome: '',
@@ -31,8 +34,9 @@ export default function PontoForm({ ponto, onSubmit, windowMode = false }) {
   });
 
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
-    queryFn: () => base44.entities.Colaborador.list(),
+    queryKey: ['colaboradores', contextoKey],
+    queryFn: () => filterInContext('Colaborador', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const calcularHoras = () => {

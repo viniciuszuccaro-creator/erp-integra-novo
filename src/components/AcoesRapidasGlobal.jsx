@@ -38,11 +38,13 @@ import { toast } from 'sonner';
 export default function AcoesRapidasGlobal() {
   const navigate = useNavigate();
   const { openWindow } = useWindow();
-  const { empresaAtual, estaNoGrupo, createInContext } = useContextoVisual();
+  const { empresaAtual, estaNoGrupo, createInContext, filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes'],
-    queryFn: () => base44.entities.Cliente.list(),
+    queryKey: ['clientes', contextoKey],
+    queryFn: () => filterInContext('Cliente', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const { hasPermission, isLoading: loadingPerms, user } = usePermissions();

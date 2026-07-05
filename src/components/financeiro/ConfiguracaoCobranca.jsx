@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import { CreditCard, DollarSign, Building2, CheckCircle, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Configuração de Cobrança (Boletos/PIX) por Empresa
@@ -18,6 +19,8 @@ import { Badge } from "@/components/ui/badge";
 export default function ConfiguracaoCobranca({ empresas, windowMode = false }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const [empresaSelecionada, setEmpresaSelecionada] = React.useState(null);
   const [config, setConfig] = React.useState({
@@ -48,8 +51,9 @@ export default function ConfiguracaoCobranca({ empresas, windowMode = false }) {
   });
 
   const { data: configsExistentes = [] } = useQuery({
-    queryKey: ['configs-cobranca'],
-    queryFn: () => base44.entities.ConfiguracaoCobrancaEmpresa.list(),
+    queryKey: ['configs-cobranca', contextoKey],
+    queryFn: () => filterInContext('ConfiguracaoCobrancaEmpresa', {}, '-updated_date', 999),
+    enabled: !!contexto,
   });
 
   const salvarMutation = useMutation({

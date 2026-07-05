@@ -21,7 +21,7 @@ import ImportadorErrosPanel from "./importador/ImportadorErrosPanel";
 import ImportadorMapeamentoPanel from "./importador/ImportadorMapeamentoPanel";
 
 export default function ImportadorProdutosPlanilha({ onConcluido, closeSelf }) {
-  const { empresaAtual } = useContextoVisual();
+  const { empresaAtual, filterInContext } = useContextoVisual();
   const [arquivo, setArquivo] = useState(null);
   const [processando, setProcessando] = useState(false);
   const [preview, setPreview] = useState([]);
@@ -60,8 +60,8 @@ export default function ImportadorProdutosPlanilha({ onConcluido, closeSelf }) {
     },
     staleTime: 60000,
   });
-  const { data: gruposProduto = [] } = useQuery({ queryKey: ['grupos-produto'], queryFn: () => base44.entities.GrupoProduto.list(), staleTime: 300000 });
-  const { data: setoresAtividade = [] } = useQuery({ queryKey: ['setores-atividade'], queryFn: () => base44.entities.SetorAtividade.list(), staleTime: 300000 });
+  const { data: gruposProduto = [] } = useQuery({ queryKey: ['grupos-produto', empresaAtual?.id], queryFn: () => filterInContext('GrupoProduto', {}, 'nome_grupo', 999), staleTime: 300000, enabled: !!empresaAtual });
+  const { data: setoresAtividade = [] } = useQuery({ queryKey: ['setores-atividade', empresaAtual?.id], queryFn: () => filterInContext('SetorAtividade', {}, 'nome', 999), staleTime: 300000, enabled: !!empresaAtual });
 
   const gruposByCodigo = React.useMemo(() => { const m = {}; (gruposProduto || []).forEach(g => { if (g?.codigo != null) m[String(g.codigo).trim()] = g.id; }); return m; }, [gruposProduto]);
   const gruposByNome = React.useMemo(() => { const m = {}; (gruposProduto || []).forEach(g => { const n = g?.nome_grupo || g?.nome; if (n) m[norm(n)] = g.id; }); return m; }, [gruposProduto]);

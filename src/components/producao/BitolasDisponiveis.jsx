@@ -4,18 +4,22 @@ import { useQuery } from "@tanstack/react-query";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Package, AlertCircle } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function BitolasDisponiveis({ value, onChange, label = "Bitola", tipo = "aco" }) {
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   // Buscar produtos que são bitolas (do estoque)
   const { data: produtos = [], isLoading } = useQuery({
-    queryKey: ['produtos-bitolas'],
+    queryKey: ['produtos-bitolas', contextoKey],
     queryFn: async () => {
-      const allProdutos = await base44.entities.Produto.list();
+      const allProdutos = await filterInContext('Produto', {}, 'descricao', 999);
       
       // Filtrar apenas bitolas ativas
       // Critério: grupo = "Bitola" ou "Aço" ou "Ferro" E status = "Ativo"
       return allProdutos.filter(p => {
-        const grupoMatch = p.grupo && 
+        const grupoMatch = p.grupo &&
+
           (p.grupo.toLowerCase().includes('bitola') || 
            p.grupo.toLowerCase().includes('aço') ||
            p.grupo.toLowerCase().includes('aco') ||

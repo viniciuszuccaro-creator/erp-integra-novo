@@ -19,9 +19,11 @@ import useBackendPagination from "@/components/lib/useBackendPagination";
 import usePersistedSort from "@/components/lib/usePersistedSort";
 import useRLS from "@/components/lib/useRLS";
 import useRLSQuery from "@/components/lib/useRLSQuery";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function ContasPagarTab({ contas, windowMode = false }) {
   const { create: createRLS, update: updateRLS } = useRLS();
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
   const { page, setPage, pageSize, setPageSize } = useBackendPagination('ContaPagar', 20);
   const [sortField, setSortField, sortDirection, setSortDirection] = usePersistedSort('ContaPagar', 'data_vencimento', 'asc');
 
@@ -50,8 +52,9 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
   });
 
   const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas'],
-    queryFn: () => base44.entities.Empresa.list(),
+    queryKey: ['empresas', empresaAtual?.id],
+    queryFn: () => filterInContext('Empresa', {}, 'nome_fantasia', 999),
+    enabled: !!contexto,
   });
 
   const enviarParaCaixaMutation = useMutation({

@@ -11,6 +11,7 @@ import {
   CheckCircle2, Zap, Filter 
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.6 - SELETOR INTELIGENTE DE PRODUTOS PARA PRODUÇÃO
@@ -22,19 +23,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
  * ✅ Filtros por tipo de aço, diâmetro
  */
 export default function SeletorProdutosProducao({ onSelecionarProduto, quantidadeNecessaria }) {
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [busca, setBusca] = useState('');
   const [filtroBitola, setFiltroBitola] = useState('todos');
   const [filtroTipoAco, setFiltroTipoAco] = useState('todos');
 
   const { data: produtos = [], isLoading } = useQuery({
-    queryKey: ['produtos-producao-ativas'],
+    queryKey: ['produtos-producao-ativas', contextoKey],
     queryFn: async () => {
-      const all = await base44.entities.Produto.list();
-      return all.filter(p => 
-        p.tipo_item === 'Matéria-Prima Produção' && 
+      const all = await filterInContext('Produto', {}, 'descricao', 999);
+      return all.filter(p =>
+        p.tipo_item === 'Matéria-Prima Produção' &&
         p.status === 'Ativo'
       );
-    }
+    },
+    enabled: !!contexto,
   });
 
   const produtosFiltrados = produtos.filter(p => {

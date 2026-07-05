@@ -36,8 +36,7 @@ export default function ConfigFiscalAutomatica({ empresaId, groupId }) {
   const { data: empresa } = useQuery({
     queryKey: ['empresa', empresaId],
     queryFn: async () => {
-      const empresas = await base44.entities.Empresa.list();
-      return empresas.find(e => e.id === empresaId);
+      return await base44.entities.Empresa.get(empresaId);
     },
     enabled: !!empresaId,
   });

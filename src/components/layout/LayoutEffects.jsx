@@ -245,5 +245,118 @@ export default function LayoutEffects({
     } catch {}
   }, [isOffline]);
 
+  // 11. PWA manifest injection + service worker registration
+  useEffect(() => {
+    try {
+      const manifest = {
+        name: "ERP Zuccaro", short_name: "ERP", start_url: "/", scope: "/",
+        display: "standalone", background_color: "#0f172a", theme_color: "#0f172a",
+        icons: [
+          { src: "https://base44.com/logo_v2.svg", sizes: "192x192", type: "image/svg+xml", purpose: "any maskable" },
+          { src: "https://base44.com/logo_v2.svg", sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" },
+        ],
+      };
+      const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
+      const link = document.createElement("link");
+      link.rel = "manifest";
+      link.href = URL.createObjectURL(blob);
+      if (!document.head.querySelector('link[rel="manifest"]')) document.head.appendChild(link);
+
+      const themeMeta = document.querySelector('meta[name="theme-color"]') || document.createElement("meta");
+      themeMeta.setAttribute("name", "theme-color");
+      themeMeta.setAttribute("content", "#0f172a");
+      if (!themeMeta.parentElement) document.head.appendChild(themeMeta);
+
+      const appleMeta = document.querySelector('meta[name="apple-mobile-web-app-capable"]') || document.createElement("meta");
+      appleMeta.setAttribute("name", "apple-mobile-web-app-capable");
+      appleMeta.setAttribute("content", "yes");
+      if (!appleMeta.parentElement) document.head.appendChild(appleMeta);
+
+      const appleIcon = document.querySelector('link[rel="apple-touch-icon"]') || document.createElement("link");
+      appleIcon.setAttribute("rel", "apple-touch-icon");
+      appleIcon.setAttribute("href", "https://base44.com/logo_v2.svg");
+      if (!appleIcon.parentElement) document.head.appendChild(appleIcon);
+
+      try {
+        const csp = document.querySelector('meta[http-equiv="Content-Security-Policy"]') || document.createElement("meta");
+        csp.setAttribute("http-equiv", "Content-Security-Policy");
+        csp.setAttribute("content", "upgrade-insecure-requests; default-src 'self' https: data: blob:; connect-src 'self' https: wss:; img-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https:; frame-ancestors 'self'; object-src 'none'");
+        if (!csp.parentElement) document.head.appendChild(csp);
+      } catch {}
+
+      try {
+        if (window.location.protocol === "http:" && window.location.hostname !== "localhost") {
+          window.location.replace("https://" + window.location.host + window.location.pathname + window.location.search + window.location.hash);
+        }
+      } catch {}
+    } catch {}
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        fetch("/functions/pwaSw", { method: "HEAD" }).then((res) => {
+          if (!res.ok) return;
+          navigator.serviceWorker.register("/functions/pwaSw").then((reg) => {
+            if (reg && reg.waiting) { try { reg.waiting.postMessage({ type: "SKIP_WAITING" }); } catch {} }
+            reg.onupdatefound = () => {
+              const nw = reg.installing;
+              if (!nw) return;
+              nw.onstatechange = () => {
+                if (nw.state === "installed" && navigator.serviceWorker.controller) {
+                  (async () => { try {
+                    if (await base44.auth.isAuthenticated()) {
+                      await base44.entities.AuditLog.create({
+                        acao: "Visualização", modulo: moduleName || "Sistema", tipo_auditoria: "sistema", entidade: "PWA",
+                        descricao: "Nova versão PWA disponível", data_hora: new Date().toISOString(),
+                        usuario: user?.full_name || "Usuário", usuario_id: user?.id || null,
+                        empresa_id: empresaAtual?.id || null, group_id: grupoAtual?.id || null,
+                      });
+                    }
+                  } catch {} })();
+                }
+              };
+            };
+            try { setInterval(() => { try { reg.update(); } catch {} }, 60 * 60 * 1000); } catch {}
+            try {
+              navigator.serviceWorker.addEventListener("controllerchange", () => {
+                (async () => { try {
+                  if (await base44.auth.isAuthenticated()) {
+                    await base44.entities.AuditLog.create({
+                      acao: "Visualização", modulo: moduleName || "Sistema", tipo_auditoria: "sistema", entidade: "PWA",
+                      descricao: "Service Worker atualizado e ativo", data_hora: new Date().toISOString(),
+                      usuario: user?.full_name || "Usuário", usuario_id: user?.id || null,
+                      empresa_id: empresaAtual?.id || null, group_id: grupoAtual?.id || null,
+                    });
+                  }
+                } catch {} })();
+              });
+            } catch {}
+          }).catch(() => {});
+        }).catch(() => {});
+      });
+    }
+  }, [user?.id, empresaAtual?.id, grupoAtual?.id, moduleName]);
+
+  // 12. React Query cache persistence (offline snapshot)
+  useEffect(() => {
+    const cache = queryClient.getQueryCache();
+    const indexKey = "rq_index_keys";
+    const addToIndex = (k) => {
+      try {
+        const curr = JSON.parse(localStorage.getItem(indexKey) || "[]");
+        if (!curr.includes(k)) { curr.push(k); localStorage.setItem(indexKey, JSON.stringify(curr)); }
+      } catch {}
+    };
+    const sub = cache.subscribe((event) => {
+      try {
+        if (event?.type !== "updated") return;
+        const q = event.query; const state = q.getState?.();
+        if (state?.data === undefined) return;
+        const sk = `rq_${JSON.stringify(q.queryKey)}_${empresaAtual?.id || ""}_${grupoAtual?.id || ""}`;
+        localStorage.setItem(sk, JSON.stringify(state.data)); addToIndex(sk);
+      } catch {}
+    });
+    return () => { if (typeof sub === "function") sub(); };
+  }, [queryClient, empresaAtual?.id, grupoAtual?.id]);
+
   return null; // Renderiza apenas efeitos, sem UI
 }

@@ -1,61 +1,42 @@
 import React, { useState, useEffect, useRef, Suspense } from "react";
-import { base44 } from "@/api/base44Client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-
+import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  MessageCircle, User, Bot, Send, Clock, CheckCircle, AlertCircle,
-  Search, Paperclip, MoreVertical, UserPlus, TrendingUp, Activity,
-  BarChart3, Settings, FileText, Timer, Tag, ArrowRightLeft, RefreshCw,
-  Brain, Maximize2, Minimize2, Users,
-} from "lucide-react";
-import { toast } from "sonner";
+import { MessageCircle, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import SemEmpresaBanner from "@/components/common/SemEmpresaBanner";
 import IAContextualModulo from "@/components/ia/IAContextualModulo";
 
+import { useHubAtendimentoData } from "@/components/hub-atendimento/useHubAtendimentoData";
+import HubAtendimentoTabs from "@/components/hub-atendimento/HubAtendimentoTabs";
+import HubAtendimentoKPIs from "@/components/hub-atendimento/HubAtendimentoKPIs";
+import HubAtendimentoFiltros from "@/components/hub-atendimento/HubAtendimentoFiltros";
+import HubAtendimentoListaConversas from "@/components/hub-atendimento/HubAtendimentoListaConversas";
+import HubAtendimentoChatPanel from "@/components/hub-atendimento/HubAtendimentoChatPanel";
+import HubAtendimentoPainelLateral from "@/components/hub-atendimento/HubAtendimentoPainelLateral";
+
 const ChatbotDashboard = React.lazy(() => import("@/components/chatbot/ChatbotDashboard"));
 const ConfiguracaoCanais = React.lazy(() => import("@/components/chatbot/ConfiguracaoCanais"));
 const GerenciadorTemplates = React.lazy(() => import("@/components/chatbot/GerenciadorTemplates"));
 const AnalyticsAtendimento = React.lazy(() => import("@/components/chatbot/AnalyticsAtendimento"));
-const HistoricoClienteChat = React.lazy(() => import("@/components/chatbot/HistoricoClienteChat"));
 const MonitorSLA = React.lazy(() => import("@/components/chatbot/MonitorSLA"));
 const ChatbotFilaEspera = React.lazy(() => import("@/components/chatbot/ChatbotFilaEspera"));
-const RespostasRapidas = React.lazy(() => import("@/components/chatbot/RespostasRapidas"));
-const TagsCategorizacao = React.lazy(() => import("@/components/chatbot/TagsCategorizacao"));
-const SugestoesIA = React.lazy(() => import("@/components/chatbot/SugestoesIA"));
-const ExportarConversas = React.lazy(() => import("@/components/chatbot/ExportarConversas"));
-const IAConversacional = React.lazy(() => import("@/components/chatbot/IAConversacional"));
-const CriarPedidoChat = React.lazy(() => import("@/components/chatbot/CriarPedidoChat"));
-const GerarBoletoChat = React.lazy(() => import("@/components/chatbot/GerarBoletoChat"));
-const ConsultarEntregaChat = React.lazy(() => import("@/components/chatbot/ConsultarEntregaChat"));
-const DashboardAtendente = React.lazy(() => import("@/components/chatbot/DashboardAtendente"));
-const TransferirConversa = React.lazy(() => import("@/components/chatbot/TransferirConversa"));
 const RelatoriosAtendimento = React.lazy(() => import("@/components/chatbot/RelatoriosAtendimento"));
 const ChatbotMulticanal = React.lazy(() => import("@/components/chatbot/ChatbotMulticanal"));
 const BaseConhecimento = React.lazy(() => import("@/components/chatbot/BaseConhecimento"));
+const ExportarConversas = React.lazy(() => import("@/components/chatbot/ExportarConversas"));
+const DashboardAtendente = React.lazy(() => import("@/components/chatbot/DashboardAtendente"));
+const TransferirConversa = React.lazy(() => import("@/components/chatbot/TransferirConversa"));
+
+const SuspenseFallback = () => <div className="h-40 rounded-md bg-slate-100 animate-pulse" />;
 
 /**
  * V21.5 - HUB DE ATENDIMENTO OMNICANAL
- * 
- * Central unificada de atendimento para todos os canais:
- * ✅ Visualização em tempo real de todas as conversas
- * ✅ Categorização por status (Em Progresso, Aguardando, Não Atribuída)
- * ✅ Interface de chat para atendentes
- * ✅ Histórico completo de cada conversa
- * ✅ Métricas e analytics
- * ✅ Atribuição de conversas
- * ✅ Multi-canal (WhatsApp, Instagram, Telegram, Email, WebChat, Portal)
- * ✅ Integração com ERP (criar pedidos, consultar dados, etc)
- * ✅ Controle de acesso por perfil
+ * Central unificada de atendimento para todos os canais.
+ * V22.1: Refatorado — queries, tabs, KPIs, filtros, lista, chat e painel extraídos.
  */
 export default function HubAtendimento() {
   const [abaAtiva, setAbaAtiva] = useState("atendimento");
@@ -66,200 +47,24 @@ export default function HubAtendimento() {
   const [conversaSelecionada, setConversaSelecionada] = useState(null);
   const [mensagemAtendente, setMensagemAtendente] = useState("");
   const [exibirPainelLateral, setExibirPainelLateral] = useState(true);
-  const [painelLateralConteudo, setPainelLateralConteudo] = useState('info');
+  const [painelLateralConteudo, setPainelLateralConteudo] = useState("info");
   const [layoutExpandido, setLayoutExpandido] = useState(false);
   const [exibirTransferir, setExibirTransferir] = useState(false);
   const [arquivoAnexo, setArquivoAnexo] = useState(null);
-  const [notificacoesAudio, setNotificacoesAudio] = useState(true);
   const messagesEndRef = useRef(null);
-  const fileInputRef = useRef(null);
-  
-  const queryClient = useQueryClient();
-  const { hasPermission, isAdmin } = usePermissions();
-  const { empresaAtual, filterInContext } = useContextoVisual();
 
-  // Auto-scroll para última mensagem
+  const {
+    user, podeAtenderTransbordo, conversasFiltradas, isLoading, mensagens,
+    metricas, botSla, enviarMensagemMutation, assumirConversaMutation,
+    resolverConversaMutation, queryClient,
+  } = useHubAtendimentoData({
+    filtroStatus, filtroCanal, filtroPrioridade, buscaTexto,
+    conversaSelecionada, setConversaSelecionada, setMensagemAtendente,
+  });
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversaSelecionada]);
-
-  // Notificação sonora para novas mensagens
-  useEffect(() => {
-    if (notificacoesAudio && typeof window !== 'undefined') {
-      // Implementar som de notificação
-    }
-  }, []);
-
-  const { user } = usePermissions();
-  // Verificar permissão
-  const podeAtenderTransbordo = isAdmin() || hasPermission('chatbot', null, 'visualizar') || hasPermission('CRM', null, 'visualizar');
-
-  // Buscar conversas
-  const { data: conversas = [], isLoading } = useQuery({
-    queryKey: ['conversas-omnicanal', filtroStatus, filtroCanal, empresaAtual?.id],
-    queryFn: async () => {
-      let filtros = {};
-      
-      if (filtroStatus !== "Todas") {
-        filtros.status = filtroStatus;
-      }
-      
-      if (filtroCanal !== "Todos") {
-        filtros.canal = filtroCanal;
-      }
-
-      if (empresaAtual?.id) {
-        filtros.empresa_id = empresaAtual.id;
-      }
-
-      // Apenas conversas atribuídas ao usuário ou não atribuídas
-      if (!hasPermission('chatbot', 'ver_todas_conversas')) {
-        filtros.$or = [
-          { atendente_id: user.id },
-          { atendente_id: { $exists: false } }
-        ];
-      }
-
-      return await base44.entities.ConversaOmnicanal.filter(
-        filtros,
-        '-data_ultima_mensagem',
-        50
-      );
-    },
-    refetchInterval: 5000 // Atualizar a cada 5 segundos
-  });
-
-  // Buscar mensagens da conversa selecionada
-  const { data: mensagens = [] } = useQuery({
-    queryKey: ['mensagens-conversa', conversaSelecionada?.id],
-    queryFn: async () => {
-      if (!conversaSelecionada) return [];
-      return await base44.entities.MensagemOmnicanal.filter(
-        { conversa_id: conversaSelecionada.id },
-        'data_envio',
-        200
-      );
-    },
-    enabled: !!conversaSelecionada,
-    refetchInterval: 3000
-  });
-
-  // Buscar métricas
-  const { data: metricas } = useQuery({
-    queryKey: ['metricas-atendimento', empresaAtual?.id],
-    queryFn: async () => {
-      const todasConversas = await base44.entities.ConversaOmnicanal.filter({
-        empresa_id: empresaAtual?.id
-      });
-
-      return {
-        total: todasConversas.length,
-        emProgresso: todasConversas.filter(c => c.status === 'Em Progresso').length,
-        aguardando: todasConversas.filter(c => c.status === 'Aguardando').length,
-        naoAtribuidas: todasConversas.filter(c => c.status === 'Não Atribuída').length,
-        resolvidasHoje: todasConversas.filter(c => {
-          if (!c.data_finalizacao) return false;
-          const hoje = new Date().toDateString();
-          return new Date(c.data_finalizacao).toDateString() === hoje;
-        }).length,
-        tempoMedioResposta: 2.5, // TODO: calcular real
-        taxaResolucaoBot: 78 // TODO: calcular real
-      };
-    },
-    refetchInterval: 10000
-  });
-
-  // KPIs SLA 24h (Chatbot)
-  const { data: botSla = { chats: 0, sla_ok: 0, sla_total: 0 } } = useQuery({
-    queryKey: ['bot-sla-24h', empresaAtual?.id],
-    queryFn: async () => {
-      const since = Date.now() - 24 * 60 * 60 * 1000;
-      const items = await filterInContext('ChatbotInteracao', {}, '-created_date', 500);
-      const within = (items || []).filter(i => new Date(i?.created_date || Date.now()).getTime() >= since);
-      const acc = within.reduce((a,i)=>{ const ms=Number(i?.tempo_primeira_resposta_ms||0); if(!isNaN(ms)){a.total++; if(ms<=60000) a.ok++;} return a; }, {ok:0,total:0});
-      return { chats: within.length, sla_ok: acc.ok, sla_total: acc.total };
-    },
-    staleTime: 60000,
-  });
-
-  // Enviar mensagem do atendente
-  const enviarMensagemMutation = useMutation({
-    mutationFn: async ({ mensagem, arquivo }) => {
-      if (!conversaSelecionada) return;
-
-      let arquivoUrl = null;
-      if (arquivo) {
-        const result = await base44.integrations.Core.UploadFile({ file: arquivo });
-        arquivoUrl = result.file_url;
-      }
-
-      // Criar mensagem
-      const novaMensagem = await base44.entities.MensagemOmnicanal.create({
-        conversa_id: conversaSelecionada.id,
-        empresa_id: conversaSelecionada.empresa_id || empresaAtual?.id,
-        group_id: empresaAtual?.group_id || null,
-        sessao_id: conversaSelecionada.sessao_id,
-        canal: conversaSelecionada.canal,
-        tipo_remetente: 'Atendente',
-        remetente_id: user.id,
-        remetente_nome: user.full_name,
-        mensagem,
-        tipo_conteudo: arquivo ? 'documento' : 'texto',
-        midia_url: arquivoUrl,
-        data_envio: new Date().toISOString(),
-        resposta_automatica: false
-      });
-
-      // Atualizar conversa
-      await base44.entities.ConversaOmnicanal.update(conversaSelecionada.id, {
-        data_ultima_mensagem: new Date().toISOString(),
-        total_mensagens: (conversaSelecionada.total_mensagens || 0) + 1,
-        mensagens_humano: (conversaSelecionada.mensagens_humano || 0) + 1,
-        tipo_atendimento: 'Humano'
-      });
-
-      return novaMensagem;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['mensagens-conversa'] });
-      queryClient.invalidateQueries({ queryKey: ['conversas-omnicanal'] });
-      setMensagemAtendente("");
-      toast.success("Mensagem enviada!");
-    }
-  });
-
-  // Assumir conversa
-  const assumirConversaMutation = useMutation({
-    mutationFn: async (conversaId) => {
-      await base44.entities.ConversaOmnicanal.update(conversaId, {
-        atendente_id: user.id,
-        atendente_nome: user.full_name,
-        status: 'Em Progresso',
-        tipo_atendimento: 'Humano',
-        transferido_em: new Date().toISOString()
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conversas-omnicanal'] });
-      toast.success("Conversa assumida!");
-    }
-  });
-
-  // Resolver conversa
-  const resolverConversaMutation = useMutation({
-    mutationFn: async (conversaId) => {
-      await base44.entities.ConversaOmnicanal.update(conversaId, {
-        status: 'Resolvida',
-        resolvido: true,
-        data_finalizacao: new Date().toISOString()
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conversas-omnicanal'] });
-      setConversaSelecionada(null);
-      toast.success("Conversa resolvida!");
-    }
-  });
 
   if (!podeAtenderTransbordo) {
     return (
@@ -267,878 +72,119 @@ export default function HubAtendimento() {
         <Alert className="border-red-300 bg-red-50">
           <AlertCircle className="w-5 h-5 text-red-600" />
           <AlertDescription className="text-red-900">
-            Você não tem permissão para acessar o Hub de Atendimento.
-            Entre em contato com o administrador.
+            Você não tem permissão para acessar o Hub de Atendimento. Entre em contato com o administrador.
           </AlertDescription>
         </Alert>
       </div>
     );
   }
 
-  const conversasFiltradas = conversas.filter(c => {
-    // Filtro por texto
-    if (buscaTexto) {
-      const texto = buscaTexto.toLowerCase();
-      const matchTexto = (
-        c.cliente_nome?.toLowerCase().includes(texto) ||
-        c.cliente_email?.toLowerCase().includes(texto) ||
-        c.cliente_telefone?.includes(texto) ||
-        c.sessao_id?.toLowerCase().includes(texto) ||
-        c.intent_principal?.toLowerCase().includes(texto) ||
-        c.assuntos_detectados?.some(a => a.toLowerCase().includes(texto)) ||
-        c.tags?.some(t => t.toLowerCase().includes(texto))
-      );
-      if (!matchTexto) return false;
-    }
-    
-    // Filtro por prioridade
-    if (filtroPrioridade !== "Todas" && c.prioridade !== filtroPrioridade) {
-      return false;
-    }
-    
-    return true;
-  });
-
   return (
     <div className="w-full h-full min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 lg:p-6 overflow-auto">
       <SemEmpresaBanner modulo="Hub de Atendimento" />
-      <div className={`${layoutExpandido ? 'max-w-full' : 'max-w-7xl'} mx-auto space-y-4`}>
+      <div className={`${layoutExpandido ? "max-w-full" : "max-w-7xl"} mx-auto space-y-4`}>
         <ErrorBoundary>
-        {/* Header Responsivo */}
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 flex items-center gap-3">
-                <MessageCircle className="w-7 h-7 lg:w-8 lg:h-8 text-blue-600" />
-                Hub de Atendimento Omnicanal
-              </h1>
-              <p className="text-slate-600 text-sm lg:text-base mt-1">
-                Central unificada • Multi-empresa • IA Avançada • V21.6
-              </p>
+          {/* Header */}
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 flex items-center gap-3">
+                  <MessageCircle className="w-7 h-7 lg:w-8 lg:h-8 text-blue-600" />
+                  Hub de Atendimento Omnicanal
+                </h1>
+                <p className="text-slate-600 text-sm lg:text-base mt-1">
+                  Central unificada • Multi-empresa • IA Avançada • V22.1
+                </p>
+              </div>
+              <div className="mt-1"><IAContextualModulo modulo="Hub Atendimento" compact /></div>
             </div>
-            <div className="mt-1"><IAContextualModulo modulo="Hub Atendimento" compact /></div>
+            <HubAtendimentoTabs abaAtiva={abaAtiva} setAbaAtiva={setAbaAtiva} layoutExpandido={layoutExpandido} setLayoutExpandido={setLayoutExpandido} />
           </div>
-          
-          {/* Navegação entre abas - Responsiva */}
-          <div className="flex flex-wrap gap-2">
-            <Button
-              data-permission="HubAtendimento.Atendimento.visualizar"
-              variant={abaAtiva === "atendimento" ? "default" : "outline"}
-              onClick={() => setAbaAtiva("atendimento")}
-              size="sm"
-              className={abaAtiva === "atendimento" ? "bg-blue-600" : ""}
-            >
-              <MessageCircle className="w-4 h-4 lg:mr-2" />
-              <span className="hidden lg:inline">Atendimento</span>
-            </Button>
-            <Button
-              data-permission="HubAtendimento.Painel.visualizar"
-              variant={abaAtiva === "meupainel" ? "default" : "outline"}
-              onClick={() => setAbaAtiva("meupainel")}
-              size="sm"
-              className={abaAtiva === "meupainel" ? "bg-purple-600" : ""}
-            >
-              <User className="w-4 h-4 lg:mr-2" />
-              <span className="hidden lg:inline">Meu Painel</span>
-            </Button>
-            <Button
-              data-permission="HubAtendimento.Analytics.visualizar"
-              variant={abaAtiva === "analytics" ? "default" : "outline"}
-              onClick={() => setAbaAtiva("analytics")}
-              size="sm"
-              className={abaAtiva === "analytics" ? "bg-blue-600" : ""}
-            >
-              <BarChart3 className="w-4 h-4 lg:mr-2" />
-              <span className="hidden lg:inline">Analytics</span>
-            </Button>
-            <Button
-              data-permission="HubAtendimento.Templates.visualizar"
-              variant={abaAtiva === "templates" ? "default" : "outline"}
-              onClick={() => setAbaAtiva("templates")}
-              size="sm"
-              className={abaAtiva === "templates" ? "bg-blue-600" : ""}
-            >
-              <FileText className="w-4 h-4 lg:mr-2" />
-              <span className="hidden lg:inline">Templates</span>
-            </Button>
-            <Button
-              data-permission="HubAtendimento.Canais.visualizar"
-              variant={abaAtiva === "config" ? "default" : "outline"}
-              onClick={() => setAbaAtiva("config")}
-              size="sm"
-              className={abaAtiva === "config" ? "bg-blue-600" : ""}
-            >
-              <Settings className="w-4 h-4 lg:mr-2" />
-              <span className="hidden lg:inline">Canais</span>
-            </Button>
-            <Button
-              data-permission="HubAtendimento.SLA.visualizar"
-              variant={abaAtiva === "sla" ? "default" : "outline"}
-              onClick={() => setAbaAtiva("sla")}
-              size="sm"
-              className={abaAtiva === "sla" ? "bg-blue-600" : ""}
-            >
-              <Timer className="w-4 h-4 lg:mr-2" />
-              <span className="hidden lg:inline">SLA</span>
-            </Button>
-            <Button
-              data-permission="HubAtendimento.Fila.visualizar"
-              variant={abaAtiva === "fila" ? "default" : "outline"}
-              onClick={() => setAbaAtiva("fila")}
-              size="sm"
-              className={abaAtiva === "fila" ? "bg-blue-600" : ""}
-            >
-              <Users className="w-4 h-4 lg:mr-2" />
-              <span className="hidden lg:inline">Fila</span>
-            </Button>
-            <Button
-              data-permission="HubAtendimento.Relatorios.visualizar"
-              variant={abaAtiva === "relatorios" ? "default" : "outline"}
-              onClick={() => setAbaAtiva("relatorios")}
-              size="sm"
-              className={abaAtiva === "relatorios" ? "bg-blue-600" : ""}
-            >
-              <BarChart3 className="w-4 h-4 lg:mr-2" />
-              <span className="hidden lg:inline">Relatórios</span>
-            </Button>
-            <Button
-              data-permission="HubAtendimento.Multicanal.visualizar"
-              variant={abaAtiva === "multicanal" ? "default" : "outline"}
-              onClick={() => setAbaAtiva("multicanal")}
-              size="sm"
-              className={abaAtiva === "multicanal" ? "bg-blue-600" : ""}
-            >
-              <MessageCircle className="w-4 h-4 lg:mr-2" />
-              <span className="hidden lg:inline">Multi</span>
-            </Button>
-            <Button
-              data-permission="HubAtendimento.BaseConhecimento.visualizar"
-              variant={abaAtiva === "base" ? "default" : "outline"}
-              onClick={() => setAbaAtiva("base")}
-              size="sm"
-              className={abaAtiva === "base" ? "bg-blue-600" : ""}
-            >
-              <Brain className="w-4 h-4 lg:mr-2" />
-              <span className="hidden lg:inline">Base IA</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setLayoutExpandido(!layoutExpandido)}
-              title={layoutExpandido ? "Reduzir" : "Expandir"}
-            >
-              {layoutExpandido ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-            </Button>
-          </div>
-        </div>
 
-        {/* Renderizar aba ativa */}
-        {abaAtiva === "meupainel" && (
-          <div className="grid lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-1">
-              <Suspense fallback={<div className="h-40 rounded-md bg-slate-100 animate-pulse" />}><DashboardAtendente /></Suspense>
+          {/* Abas não-atendimento */}
+          {abaAtiva === "meupainel" && (
+            <div className="grid lg:grid-cols-4 gap-6">
+              <div className="lg:col-span-1"><Suspense fallback={<SuspenseFallback />}><DashboardAtendente /></Suspense></div>
+              <div className="lg:col-span-3"><Suspense fallback={<SuspenseFallback />}><ChatbotDashboard /></Suspense></div>
             </div>
-            <div className="lg:col-span-3">
-              <Suspense fallback={<div className="h-40 rounded-md bg-slate-100 animate-pulse" />}><ChatbotDashboard /></Suspense>
+          )}
+          {abaAtiva === "analytics" && (
+            <div className="grid lg:grid-cols-4 gap-6">
+              <div className="lg:col-span-3"><Suspense fallback={<SuspenseFallback />}><ChatbotDashboard /></Suspense></div>
+              <div className="lg:col-span-1 space-y-4">
+                <Suspense fallback={<SuspenseFallback />}><ExportarConversas /></Suspense>
+                <Suspense fallback={<SuspenseFallback />}><AnalyticsAtendimento /></Suspense>
+              </div>
             </div>
-          </div>
-        )}
-        {abaAtiva === "analytics" && (
-          <div className="grid lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-3">
-              <Suspense fallback={<div className="h-40 rounded-md bg-slate-100 animate-pulse" />}><ChatbotDashboard /></Suspense>
-            </div>
-            <div className="lg:col-span-1 space-y-4">
-              <Suspense fallback={<div className="h-32 rounded-md bg-slate-100 animate-pulse" />}><ExportarConversas /></Suspense>
-              <Suspense fallback={<div className="h-32 rounded-md bg-slate-100 animate-pulse" />}><AnalyticsAtendimento /></Suspense>
-            </div>
-          </div>
-        )}
-        {abaAtiva === "templates" && (<Suspense fallback={<div className="h-40 rounded-md bg-slate-100 animate-pulse" />}><GerenciadorTemplates /></Suspense>)}
-        {abaAtiva === "config" && (<Suspense fallback={<div className="h-40 rounded-md bg-slate-100 animate-pulse" />}><ConfiguracaoCanais /></Suspense>)}
-        {abaAtiva === "sla" && (<Suspense fallback={<div className="h-40 rounded-md bg-slate-100 animate-pulse" />}><MonitorSLA /></Suspense>)}
-        {abaAtiva === "fila" && (<Suspense fallback={<div className="h-40 rounded-md bg-slate-100 animate-pulse" />}><ChatbotFilaEspera /></Suspense>)}
-        {abaAtiva === "relatorios" && (<Suspense fallback={<div className="h-40 rounded-md bg-slate-100 animate-pulse" />}><RelatoriosAtendimento /></Suspense>)}
-        {abaAtiva === "multicanal" && (<Suspense fallback={<div className="h-40 rounded-md bg-slate-100 animate-pulse" />}><ChatbotMulticanal /></Suspense>)}
-        {abaAtiva === "base" && (<Suspense fallback={<div className="h-40 rounded-md bg-slate-100 animate-pulse" />}><BaseConhecimento /></Suspense>)}
-        
-        {/* Aba de Atendimento */}
-        {abaAtiva === "atendimento" && (
-          <>
-            {/* Métricas */}
-            {metricas && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-slate-600 text-sm mb-1">
-                  <Activity className="w-4 h-4" />
-                  Total
-                </div>
-                <p className="text-2xl font-bold">{metricas.total}</p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-blue-600 text-sm mb-1">
-                  <MessageCircle className="w-4 h-4" />
-                  Em Progresso
-                </div>
-                <p className="text-2xl font-bold text-blue-600">{metricas.emProgresso}</p>
-              </CardContent>
-            </Card>
+          )}
+          {abaAtiva === "templates" && <Suspense fallback={<SuspenseFallback />}><GerenciadorTemplates /></Suspense>}
+          {abaAtiva === "config" && <Suspense fallback={<SuspenseFallback />}><ConfiguracaoCanais /></Suspense>}
+          {abaAtiva === "sla" && <Suspense fallback={<SuspenseFallback />}><MonitorSLA /></Suspense>}
+          {abaAtiva === "fila" && <Suspense fallback={<SuspenseFallback />}><ChatbotFilaEspera /></Suspense>}
+          {abaAtiva === "relatorios" && <Suspense fallback={<SuspenseFallback />}><RelatoriosAtendimento /></Suspense>}
+          {abaAtiva === "multicanal" && <Suspense fallback={<SuspenseFallback />}><ChatbotMulticanal /></Suspense>}
+          {abaAtiva === "base" && <Suspense fallback={<SuspenseFallback />}><BaseConhecimento /></Suspense>}
 
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-orange-600 text-sm mb-1">
-                  <Clock className="w-4 h-4" />
-                  Aguardando
-                </div>
-                <p className="text-2xl font-bold text-orange-600">{metricas.aguardando}</p>
-              </CardContent>
-            </Card>
+          {/* Aba Atendimento */}
+          {abaAtiva === "atendimento" && (
+            <>
+              <HubAtendimentoKPIs metricas={metricas} botSla={botSla} />
+              <HubAtendimentoFiltros
+                buscaTexto={buscaTexto} setBuscaTexto={setBuscaTexto}
+                filtroStatus={filtroStatus} setFiltroStatus={setFiltroStatus}
+                filtroCanal={filtroCanal} setFiltroCanal={setFiltroCanal}
+                filtroPrioridade={filtroPrioridade} setFiltroPrioridade={setFiltroPrioridade}
+                onRefresh={() => queryClient.invalidateQueries({ queryKey: ["conversas-omnicanal"] })}
+              />
 
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-red-600 text-sm mb-1">
-                  <AlertCircle className="w-4 h-4" />
-                  Não Atribuídas
-                </div>
-                <p className="text-2xl font-bold text-red-600">{metricas.naoAtribuidas}</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-green-600 text-sm mb-1">
-                  <CheckCircle className="w-4 h-4" />
-                  Resolvidas Hoje
-                </div>
-                <p className="text-2xl font-bold text-green-600">{metricas.resolvidasHoje}</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 text-indigo-600 text-sm mb-1">
-                  <Bot className="w-4 h-4" />
-                  Resolução Bot
-                </div>
-                <p className="text-2xl font-bold text-indigo-600">{metricas.taxaResolucaoBot}%</p>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        <Card className="mt-4">
-          <CardContent className="p-3 lg:p-4">
-            <div className="flex items-center gap-4 flex-wrap">
-              <div className="text-sm text-slate-600">Conversas 24h:</div>
-              <Badge variant="outline" className="text-xs">{botSla.chats}</Badge>
-              <div className="text-sm text-slate-600 ml-4">SLA 1ª resp ≤ 60s:</div>
-              <Badge className={(botSla.sla_total ? Math.round(100*(botSla.sla_ok/(botSla.sla_total||1))) : 0) >= 80 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}>
-                {botSla.sla_total ? Math.round(100*(botSla.sla_ok/(botSla.sla_total||1))) : 0}%
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Filtros Avançados */}
-        <Card>
-          <CardContent className="p-3 lg:p-4">
-            <div className="flex flex-wrap items-center gap-2 lg:gap-3">
-              <div className="flex-1 min-w-[180px] relative">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <Input
-                  placeholder="Buscar cliente, assunto..."
-                  value={buscaTexto}
-                  onChange={(e) => setBuscaTexto(e.target.value)}
-                  className="pl-9 w-full"
+              <div className={`grid gap-4 lg:gap-6 ${exibirPainelLateral && conversaSelecionada ? "grid-cols-1 lg:grid-cols-4" : "grid-cols-1 lg:grid-cols-3"}`}>
+                <HubAtendimentoListaConversas
+                  conversasFiltradas={conversasFiltradas} isLoading={isLoading}
+                  conversaSelecionada={conversaSelecionada} setConversaSelecionada={setConversaSelecionada}
+                  metricas={metricas}
                 />
-              </div>
-
-              <select
-                value={filtroStatus}
-                onChange={(e) => setFiltroStatus(e.target.value)}
-                className="px-3 py-2 border rounded-md text-sm bg-white"
-              >
-                <option value="Todas">Todos Status</option>
-                <option value="Em Progresso">Em Progresso</option>
-                <option value="Aguardando">Aguardando</option>
-                <option value="Não Atribuída">Não Atribuída</option>
-                <option value="Resolvida">Resolvidas</option>
-              </select>
-
-              <select
-                value={filtroCanal}
-                onChange={(e) => setFiltroCanal(e.target.value)}
-                className="px-3 py-2 border rounded-md text-sm bg-white"
-              >
-                <option value="Todos">Todos Canais</option>
-                <option value="WhatsApp">WhatsApp</option>
-                <option value="Instagram">Instagram</option>
-                <option value="Facebook">Facebook</option>
-                <option value="Telegram">Telegram</option>
-                <option value="Email">Email</option>
-                <option value="WebChat">WebChat</option>
-                <option value="Portal">Portal</option>
-                <option value="SMS">SMS</option>
-              </select>
-
-              <select
-                value={filtroPrioridade}
-                onChange={(e) => setFiltroPrioridade(e.target.value)}
-                className="px-3 py-2 border rounded-md text-sm bg-white"
-              >
-                <option value="Todas">Todas Prioridades</option>
-                <option value="Urgente">🔴 Urgente</option>
-                <option value="Alta">🟠 Alta</option>
-                <option value="Normal">🟢 Normal</option>
-                <option value="Baixa">⚪ Baixa</option>
-              </select>
-
-              <Button
-                variant="outline"
-                size="sm"
-                data-permission="HubAtendimento.Atendimento.visualizar"
-                onClick={() => queryClient.invalidateQueries({ queryKey: ['conversas-omnicanal'] })}
-                title="Atualizar"
-              >
-                <RefreshCw className="w-4 h-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Layout Principal - Responsivo e Redimensionável */}
-        <div className={`grid gap-4 lg:gap-6 ${
-          exibirPainelLateral && conversaSelecionada 
-            ? 'grid-cols-1 lg:grid-cols-4' 
-            : 'grid-cols-1 lg:grid-cols-3'
-        }`}>
-          {/* Lista de Conversas */}
-          <Card className="lg:col-span-1 flex flex-col">
-            <CardHeader className="border-b p-3 lg:p-4">
-              <CardTitle className="text-base lg:text-lg flex items-center justify-between">
-                <span>Conversas ({conversasFiltradas.length})</span>
-                <Badge variant="outline" className="text-xs">
-                  {metricas?.naoAtribuidas || 0} novas
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 flex-1">
-              <div className="h-[500px] lg:h-[600px] overflow-y-auto">
-                {isLoading ? (
-                  <div className="p-4 text-center text-slate-500">Carregando...</div>
-                ) : conversasFiltradas.length === 0 ? (
-                  <div className="p-4 text-center text-slate-500">Nenhuma conversa encontrada</div>
-                ) : (
-                  conversasFiltradas.map((conversa) => (
-                    <motion.button
-                      key={conversa.id}
-                      onClick={() => setConversaSelecionada(conversa)}
-                      whileHover={{ scale: 1.02 }}
-                      className={`w-full text-left p-4 border-b hover:bg-slate-50 transition-colors ${
-                        conversaSelecionada?.id === conversa.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : ''
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <p className="font-semibold text-sm truncate">
-                              {conversa.cliente_nome || 'Cliente Anônimo'}
-                            </p>
-                            <Badge className={`text-xs ${
-                              conversa.canal === 'WhatsApp' ? 'bg-green-600' :
-                              conversa.canal === 'Instagram' ? 'bg-pink-600' :
-                              conversa.canal === 'Telegram' ? 'bg-blue-600' :
-                              'bg-slate-600'
-                            }`}>
-                              {conversa.canal}
-                            </Badge>
-                          </div>
-                          
-                          <p className="text-xs text-slate-600 truncate mb-2">
-                            {conversa.intent_principal || 'Sem assunto'}
-                          </p>
-
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Badge variant="outline" className="text-xs">
-                              {conversa.status}
-                            </Badge>
-                            {conversa.tipo_atendimento && (
-                              <Badge variant="outline" className="text-xs">
-                                {conversa.tipo_atendimento === 'Bot' ? <Bot className="w-3 h-3 mr-1" /> : <User className="w-3 h-3 mr-1" />}
-                                {conversa.tipo_atendimento}
-                              </Badge>
-                            )}
-                            {conversa.prioridade === 'Urgente' && (
-                              <Badge className="bg-red-600 text-xs">Urgente</Badge>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="text-xs text-slate-500 flex-shrink-0">
-                          {new Date(conversa.data_ultima_mensagem).toLocaleTimeString('pt-BR', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </div>
-                      </div>
-                    </motion.button>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Área de Chat - Responsiva */}
-          <Card className={`${exibirPainelLateral && conversaSelecionada ? 'lg:col-span-2' : 'lg:col-span-2'} flex flex-col h-[500px] lg:h-[700px]`}>
-            {conversaSelecionada ? (
-              <>
-                {/* Header da Conversa */}
-                <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-purple-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="flex items-center gap-2">
-                        {conversaSelecionada.cliente_nome || 'Cliente Anônimo'}
-                        <Badge className="ml-2 bg-blue-600">
-                          {conversaSelecionada.canal}
-                        </Badge>
-                        {conversaSelecionada.prioridade === 'Urgente' && (
-                          <Badge className="bg-red-600">Urgente</Badge>
-                        )}
-                      </CardTitle>
-                      <div className="flex items-center gap-3 mt-2">
-                        <p className="text-xs text-slate-600">
-                          Sessão: {conversaSelecionada.sessao_id.substring(0, 16)}...
-                        </p>
-                        {conversaSelecionada.intent_principal && (
-                          <Badge variant="outline" className="text-xs">
-                            {conversaSelecionada.intent_principal}
-                          </Badge>
-                        )}
-                      </div>
-                      
-                      {/* Tags da conversa */}
-                      {conversaSelecionada.tags && conversaSelecionada.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {conversaSelecionada.tags.slice(0, 3).map((tag, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs">
-                              <Tag className="w-3 h-3 mr-1" />
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1 lg:gap-2">
-                      {conversaSelecionada.atendente_id !== user.id && (
-                        <Button
-                          size="sm"
-                          data-permission="Chatbot.Atendimento.assumir"
-                          onClick={() => assumirConversaMutation.mutate(conversaSelecionada.id)}
-                          disabled={assumirConversaMutation.isPending}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          <UserPlus className="w-4 h-4 lg:mr-2" />
-                          <span className="hidden lg:inline">Assumir</span>
-                        </Button>
-                      )}
-                      
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        data-permission="Chatbot.Atendimento.transferir"
-                        onClick={() => setExibirTransferir(true)}
-                        title="Transferir"
-                      >
-                        <ArrowRightLeft className="w-4 h-4" />
-                      </Button>
-                      
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        data-permission="Chatbot.Atendimento.resolver"
-                        onClick={() => resolverConversaMutation.mutate(conversaSelecionada.id)}
-                        disabled={resolverConversaMutation.isPending}
-                        className="text-green-600 hover:text-green-700"
-                      >
-                        <CheckCircle className="w-4 h-4 lg:mr-2" />
-                        <span className="hidden lg:inline">Resolver</span>
-                      </Button>
-
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setExibirPainelLateral(!exibirPainelLateral)}
-                      >
-                        <MoreVertical className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-
-                {/* Mensagens */}
-                <CardContent className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
-                  {mensagens.map((msg) => {
-                    const isCliente = msg.tipo_remetente === 'Cliente';
-                    
-                    return (
-                      <div
-                        key={msg.id}
-                        className={`flex ${isCliente ? 'justify-start' : 'justify-end'}`}
-                      >
-                        <div className={`max-w-[70%] rounded-lg p-3 ${
-                          isCliente
-                            ? 'bg-white border'
-                            : msg.tipo_remetente === 'Bot'
-                            ? 'bg-purple-100 border border-purple-200'
-                            : 'bg-blue-600 text-white'
-                        }`}>
-                          <div className="flex items-center gap-2 mb-1">
-                            {msg.tipo_remetente === 'Bot' ? (
-                              <Bot className="w-4 h-4 text-purple-600" />
-                            ) : isCliente ? (
-                              <User className="w-4 h-4 text-slate-600" />
-                            ) : (
-                              <User className="w-4 h-4" />
-                            )}
-                            <span className="text-xs font-semibold">
-                              {msg.remetente_nome}
-                            </span>
-                          </div>
-                          
-                          <p className="text-sm whitespace-pre-wrap">{msg.mensagem}</p>
-                          
-                          {msg.midia_url && (
-                            <a
-                              href={msg.midia_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="mt-2 flex items-center gap-2 text-xs underline"
-                            >
-                              <Paperclip className="w-3 h-3" />
-                              Arquivo
-                            </a>
-                          )}
-
-                          <p className="text-xs opacity-60 mt-1">
-                            {new Date(msg.data_envio).toLocaleTimeString('pt-BR')}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </CardContent>
-
-                {/* Input de Mensagem Avançado */}
-                <div className="border-t p-3 lg:p-4 bg-slate-50">
-                  {/* Arquivo anexado */}
-                  {arquivoAnexo && (
-                    <div className="mb-2 flex items-center gap-2 text-sm bg-blue-50 border border-blue-200 p-2 rounded-lg">
-                      <Paperclip className="w-4 h-4 text-blue-600" />
-                      <span className="flex-1 truncate">{arquivoAnexo.name}</span>
-                      <button
-                        onClick={() => setArquivoAnexo(null)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  )}
-                  
-                  <div className="flex gap-2">
-                    {/* Botão anexar */}
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          setArquivoAnexo(file);
-                          toast.success('Arquivo anexado!');
-                        }
-                      }}
-                      accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => fileInputRef.current?.click()}
-                      title="Anexar arquivo"
-                    >
-                      <Paperclip className="w-4 h-4" />
-                    </Button>
-                    
-                    <Input
-                      value={mensagemAtendente}
-                      onChange={(e) => setMensagemAtendente(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          if (mensagemAtendente.trim() || arquivoAnexo) {
-                            enviarMensagemMutation.mutate({ mensagem: mensagemAtendente, arquivo: arquivoAnexo });
-                            setArquivoAnexo(null);
-                          }
-                        }
-                      }}
-                      placeholder="Digite sua mensagem... (Enter para enviar)"
-                      disabled={enviarMensagemMutation.isPending}
-                      className="flex-1"
-                    />
-                    
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => {
-                        setExibirPainelLateral(true);
-                        setPainelLateralConteudo('respostas');
-                      }}
-                      title="Respostas Rápidas"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                    </Button>
-                    
-                    <Button
-                      onClick={() => {
-                        if (mensagemAtendente.trim() || arquivoAnexo) {
-                          enviarMensagemMutation.mutate({ mensagem: mensagemAtendente, arquivo: arquivoAnexo });
-                          setArquivoAnexo(null);
-                        }
-                      }}
-                      data-permission="HubAtendimento.Atendimento.criar"
-                      disabled={(!mensagemAtendente.trim() && !arquivoAnexo) || enviarMensagemMutation.isPending}
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      <Send className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-                
-                <div ref={messagesEndRef} />
-              </>
-            ) : (
-              <CardContent className="flex-1 flex items-center justify-center text-slate-400">
-                <div className="text-center">
-                  <MessageCircle className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                  <p>Selecione uma conversa para iniciar o atendimento</p>
-                </div>
-              </CardContent>
-            )}
-          </Card>
-
-          {/* Painel Lateral Contextual - Responsivo */}
-          {exibirPainelLateral && conversaSelecionada && (
-            <Card className="lg:col-span-1 flex flex-col">
-              <CardHeader className="border-b p-2 lg:p-3">
-                <div className="flex flex-wrap gap-1">
-                  <Button
-                    size="sm"
-                    variant={painelLateralConteudo === 'info' ? 'default' : 'outline'}
-                    onClick={() => setPainelLateralConteudo('info')}
-                  >
-                    Info
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={painelLateralConteudo === 'respostas' ? 'default' : 'outline'}
-                    onClick={() => setPainelLateralConteudo('respostas')}
-                  >
-                    Rápidas
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={painelLateralConteudo === 'acoes' ? 'default' : 'outline'}
-                    onClick={() => setPainelLateralConteudo('acoes')}
-                  >
-                    Ações
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={painelLateralConteudo === 'ia' ? 'default' : 'outline'}
-                    onClick={() => setPainelLateralConteudo('ia')}
-                  >
-                    IA
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-3 lg:p-4 h-[400px] lg:h-[600px] overflow-y-auto flex-1">
-                {painelLateralConteudo === 'info' && (
-                  <div className="space-y-4">
-                    {/* Informações do Cliente */}
-                    <div>
-                      <h3 className="font-semibold text-sm text-slate-900 mb-2">Dados do Cliente</h3>
-                      <div className="space-y-2 text-sm">
-                        <div>
-                          <span className="text-slate-600">Email:</span>
-                          <p className="font-medium">{conversaSelecionada.cliente_email || '-'}</p>
-                        </div>
-                        <div>
-                          <span className="text-slate-600">Telefone:</span>
-                          <p className="font-medium">{conversaSelecionada.cliente_telefone || '-'}</p>
-                        </div>
-                        <div>
-                          <span className="text-slate-600">Canal Origem:</span>
-                          <p className="font-medium">{conversaSelecionada.canal_id_externo || '-'}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Métricas da Conversa */}
-                    <div className="border-t pt-4">
-                      <h3 className="font-semibold text-sm text-slate-900 mb-2">Métricas</h3>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-slate-600">Total Mensagens:</span>
-                          <span className="font-bold">{conversaSelecionada.total_mensagens || 0}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-600">Bot:</span>
-                          <span className="font-bold text-purple-600">{conversaSelecionada.mensagens_bot || 0}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-600">Cliente:</span>
-                          <span className="font-bold text-blue-600">{conversaSelecionada.mensagens_cliente || 0}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-600">Sentimento:</span>
-                          <Badge className={`${
-                            conversaSelecionada.sentimento_geral === 'Positivo' ? 'bg-green-600' :
-                            conversaSelecionada.sentimento_geral === 'Negativo' ? 'bg-red-600' :
-                            'bg-slate-600'
-                          }`}>
-                            {conversaSelecionada.sentimento_geral || 'Neutro'}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Tags */}
-                    <div className="border-t pt-4">
-                      <Suspense fallback={<div className="h-24 rounded-md bg-slate-100 animate-pulse" />}><TagsCategorizacao conversa={conversaSelecionada} /></Suspense>
-                    </div>
-
-                    {/* Sugestões da IA */}
-                    <div className="border-t pt-4">
-                      <Suspense fallback={<div className="h-24 rounded-md bg-slate-100 animate-pulse" />}><SugestoesIA conversa={conversaSelecionada} mensagens={mensagens} /></Suspense>
-                    </div>
-
-                    {/* Histórico Cliente */}
-                    {conversaSelecionada.cliente_id && (
-                      <div className="border-t pt-4">
-                        <Suspense fallback={<div className="h-32 rounded-md bg-slate-100 animate-pulse" />}><HistoricoClienteChat clienteId={conversaSelecionada.cliente_id} /></Suspense>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {painelLateralConteudo === 'respostas' && (
-                  <Suspense fallback={<div className="h-32 rounded-md bg-slate-100 animate-pulse" />}><RespostasRapidas
-                    onSelecionarResposta={(texto) => {
-                      setMensagemAtendente(texto);
-                      setPainelLateralConteudo('info');
-                    }}
-                    contextoConversa={{
-                      pedido: conversaSelecionada.pedido_gerado_id || 'PED-XXX',
-                      status: 'Em Processamento',
-                      data_entrega: 'DD/MM/AAAA',
-                      endereco: 'Endereço do cliente',
-                      link: '#',
-                      linha_digitavel: 'XXXXX.XXXXX',
-                      vencimento: 'DD/MM/AAAA',
-                      quantidade: '3',
-                      valor_total: 'R$ 5.000,00',
-                      valor: 'R$ 5.000,00',
-                      prazo: '5',
-                      forma_pagamento: 'Boleto'
-                    }}
-                  /></Suspense>
-                )}
-
-                {painelLateralConteudo === 'acoes' && (
-                  <div className="space-y-4">
-                    <Suspense fallback={<div className="h-32 rounded-md bg-slate-100 animate-pulse" />}><CriarPedidoChat 
-                      conversa={conversaSelecionada}
-                      clienteId={conversaSelecionada.cliente_id}
-                      onPedidoCriado={(pedido) => {
-                        setMensagemAtendente(`✅ Pedido ${pedido.numero_pedido} criado com sucesso! Valor: R$ ${pedido.valor_total?.toLocaleString('pt-BR')}`);
-                        setPainelLateralConteudo('info');
-                      }}
-                    /></Suspense>
-                    <Suspense fallback={<div className="h-32 rounded-md bg-slate-100 animate-pulse" />}><GerarBoletoChat 
-                      conversa={conversaSelecionada}
-                      clienteId={conversaSelecionada.cliente_id}
-                      onBoletoEnviado={(boleto) => {
-                        setMensagemAtendente(`📄 Boleto gerado!\n\nValor: R$ ${boleto.valor?.toLocaleString('pt-BR')}\nVencimento: ${new Date(boleto.data_vencimento).toLocaleDateString('pt-BR')}\n\nLinha digitável:\n${boleto.linha_digitavel || 'Disponível no link'}`);
-                        setPainelLateralConteudo('info');
-                      }}
-                    /></Suspense>
-                    <Suspense fallback={<div className="h-32 rounded-md bg-slate-100 animate-pulse" />}><ConsultarEntregaChat 
-                      clienteId={conversaSelecionada.cliente_id}
-                      conversa={conversaSelecionada}
-                    /></Suspense>
-                  </div>
-                )}
-
-                {painelLateralConteudo === 'ia' && (
-                  <div className="space-y-4">
-                    <Suspense fallback={<div className="h-32 rounded-md bg-slate-100 animate-pulse" />}><IAConversacional 
-                      conversa={conversaSelecionada}
-                      mensagens={mensagens}
-                      clienteId={conversaSelecionada.cliente_id}
-                    /></Suspense>
-                    <Suspense fallback={<div className="h-24 rounded-md bg-slate-100 animate-pulse" />}><SugestoesIA conversa={conversaSelecionada} mensagens={mensagens} /></Suspense>
-                  </div>
-                )}
-
-                {painelLateralConteudo === 'transferir' && (
-                  <TransferirConversa 
-                    conversa={conversaSelecionada}
-                    onTransferido={() => {
-                      setPainelLateralConteudo('info');
-                      setConversaSelecionada(null);
-                    }}
+                <HubAtendimentoChatPanel
+                  conversaSelecionada={conversaSelecionada} mensagens={mensagens} user={user}
+                  mensagemAtendente={mensagemAtendente} setMensagemAtendente={setMensagemAtendente}
+                  arquivoAnexo={arquivoAnexo} setArquivoAnexo={setArquivoAnexo}
+                  enviarMensagemMutation={enviarMensagemMutation}
+                  assumirConversaMutation={assumirConversaMutation}
+                  resolverConversaMutation={resolverConversaMutation}
+                  exibirPainelLateral={exibirPainelLateral} setExibirPainelLateral={setExibirPainelLateral}
+                  setPainelLateralConteudo={setPainelLateralConteudo}
+                  setExibirTransferir={setExibirTransferir} messagesEndRef={messagesEndRef}
+                />
+                {exibirPainelLateral && conversaSelecionada && (
+                  <HubAtendimentoPainelLateral
+                    conversaSelecionada={conversaSelecionada} mensagens={mensagens}
+                    painelLateralConteudo={painelLateralConteudo} setPainelLateralConteudo={setPainelLateralConteudo}
+                    setMensagemAtendente={setMensagemAtendente} setConversaSelecionada={setConversaSelecionada}
                   />
                 )}
-              </CardContent>
-            </Card>
-          )}
-        </div>
+              </div>
 
-        {/* Modal de Transferência */}
-        <AnimatePresence>
-          {exibirTransferir && conversaSelecionada && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-              onClick={() => setExibirTransferir(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-md"
-              >
-                <TransferirConversa 
-                  conversa={conversaSelecionada}
-                  onTransferido={() => {
-                    setExibirTransferir(false);
-                    setConversaSelecionada(null);
-                    queryClient.invalidateQueries({ queryKey: ['conversas-omnicanal'] });
-                  }}
-                />
-              </motion.div>
-            </motion.div>
+              {/* Modal de Transferência */}
+              <AnimatePresence>
+                {exibirTransferir && conversaSelecionada && (
+                  <motion.div
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+                    onClick={() => setExibirTransferir(false)}
+                  >
+                    <motion.div
+                      initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+                      onClick={(e) => e.stopPropagation()} className="w-full max-w-md"
+                    >
+                      <TransferirConversa
+                        conversa={conversaSelecionada}
+                        onTransferido={() => { setExibirTransferir(false); setConversaSelecionada(null); queryClient.invalidateQueries({ queryKey: ["conversas-omnicanal"] }); }}
+                      />
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
           )}
-        </AnimatePresence>
-          </>
-        )}
         </ErrorBoundary>
       </div>
     </div>

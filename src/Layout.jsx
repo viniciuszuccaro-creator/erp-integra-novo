@@ -2,34 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import { createPageUrl } from "@/utils";
 import { useLocation } from "react-router-dom";
 import { 
-        LayoutDashboard, 
-        Users, 
-        ShoppingCart, 
-        Truck, 
-        DollarSign, 
-        Package,
-        UserCircle,
-        Box,
-        FileText,
-        Settings,
-        Shield,
-        Calendar,
-        BarChart3,
-        Factory,
-        BookOpen,
-        MessageCircle,
-        CheckCircle2,
-        Trophy,
-        Zap,
-        Building2,
-        AlertCircle,
-        Mic,
-        Lock,
-        Brain
+        LayoutDashboard, Users, ShoppingCart, Truck, DollarSign, Package,
+        UserCircle, Box, FileText, Settings, Calendar, BarChart3, Factory,
+        MessageCircle, Building2,
       } from "lucide-react";
-import {
-  SidebarProvider,
-} from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { base44 } from "@/api/base44Client";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import usePermissions from "@/components/lib/usePermissions";
@@ -54,8 +31,6 @@ import LayoutRBACWrapper from "@/components/layout/LayoutRBACWrapper";
 import LayoutSidebar from "@/components/layout/LayoutSidebar";
 import LayoutHeaderBar from "@/components/layout/LayoutHeaderBar";
 import LayoutMainContent from "@/components/layout/LayoutMainContent";
-// v21.9 — layout refatorado (ciclos UI resolvidos)
-
 
 const navigationItems = [
     { title: "Dashboard", url: "/Dashboard", icon: LayoutDashboard, group: "principal" },
@@ -76,7 +51,6 @@ const navigationItems = [
     { title: "Hub de Atendimento", url: "/HubAtendimento", icon: MessageCircle, group: "principal" },
   ];
 
-// React Query client centralizado (padrões seguros + performance)
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -91,28 +65,26 @@ const queryClient = new QueryClient({
   }
 });
 
+const titleToModule = {
+  "CRM - Relacionamento": "CRM",
+  "Comercial e Vendas": "Comercial",
+  "Estoque e Almoxarifado": "Estoque",
+  "Compras e Suprimentos": "Compras",
+  "Financeiro e Contábil": "Financeiro",
+  "Fiscal e Tributário": "Fiscal",
+  "Recursos Humanos": "RH",
+};
+
+const pageToModule = {
+  CRM: 'CRM', Comercial: 'Comercial', Estoque: 'Estoque', Compras: 'Compras',
+  Financeiro: 'Financeiro', Fiscal: 'Fiscal', RH: 'RH', Expedicao: 'Expedição',
+  Producao: 'Produção', Dashboard: 'Dashboard', Relatorios: 'Relatórios',
+  Agenda: 'Agenda', Cadastros: 'Cadastros', Contratos: 'Contratos',
+  AdministracaoSistema: 'Sistema', PlanoMelhoria: 'Sistema', HubAtendimento: 'HubAtendimento',
+};
+
 function LayoutContent({ children, currentPageName }) {
-  const pageToModule = {
-    CRM: 'CRM',
-    Comercial: 'Comercial',
-    Estoque: 'Estoque',
-    Compras: 'Compras',
-    Financeiro: 'Financeiro',
-    Fiscal: 'Fiscal',
-    RH: 'RH',
-    Expedicao: 'Expedição',
-    Producao: 'Produção',
-    Dashboard: 'Dashboard',
-    Relatorios: 'Relatórios',
-    Agenda: 'Agenda',
-    Cadastros: 'Cadastros',
-    Contratos: 'Contratos',
-    AdministracaoSistema: 'Sistema',
-    PlanoMelhoria: 'Sistema',
-    HubAtendimento: 'HubAtendimento',
-  };
   const moduleName = pageToModule?.[currentPageName] || 'Sistema';
-  const location = useLocation();
   const { user } = useUser();
   const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
   const { hasPermission } = usePermissions();
@@ -122,929 +94,68 @@ function LayoutContent({ children, currentPageName }) {
   const { prefetch: prefetchModule } = usePrefetchModuleData();
   const queryClient = useQueryClient();
   const contextRef = useRef({ user, empresaAtual, grupoAtual, contexto, moduleName });
-
   contextRef.current = { user, empresaAtual, grupoAtual, contexto, moduleName };
 
-        // Fase 2: Barramento de invalidação seletiva — substitui broadcast global por keys específicas
-        useInvalidationBus([
-          'Cliente', 'Fornecedor', 'Transportadora', 'Colaborador', 'Produto',
-          'Pedido', 'ContaReceber', 'ContaPagar', 'Entrega', 'NotaFiscal',
-          'OrdemCompra', 'MovimentacaoEstoque', 'Oportunidade', 'Representante',
-          'ContatoB2B', 'SegmentoCliente', 'RegiaoAtendimento',
-        ], { enabled: true });
+  // Invalidação seletiva + rastreamento + prefetch preditivo
+  useInvalidationBus([
+    'Cliente', 'Fornecedor', 'Transportadora', 'Colaborador', 'Produto',
+    'Pedido', 'ContaReceber', 'ContaPagar', 'Entrega', 'NotaFiscal',
+    'OrdemCompra', 'MovimentacaoEstoque', 'Oportunidade', 'Representante',
+    'ContatoB2B', 'SegmentoCliente', 'RegiaoAtendimento',
+  ], { enabled: true });
+  useNavHistory();
+  usePredictivePrefetch();
 
-        // Fase 3: Rastreamento de histórico + prefetch preditivo (com debounce de rate limit)
-        useNavHistory();
-        usePredictivePrefetch();
-
-  // pageToModule/moduleName movidos para antes dos efeitos para evitar TDZ
-
-        // Auditoria global de erros do React Query (queries e mutations)
-        React.useEffect(() => {
+  // Prefetch ao passar o mouse em itens do menu
+  const prefetchForItem = (title) => {
+    try {
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(() => {
           try {
-            queryClient.setDefaultOptions({
-              queries: {
-                staleTime: 120000,
-                gcTime: 300000,
-                refetchOnWindowFocus: false,
-                refetchOnReconnect: false,
-                retry: 0,
-                onError: (error) => {
-                                                                                    const m = String(error?.message || '');
-                                                                                    const code = error?.code;
-                                                                                    const name = error?.name;
-                                                                                    const status = error?.response?.status || error?.status;
-                                                                                    if (name === 'AbortError' || code === 'ERR_CANCELED' || /aborted|abort|canceled|cancelled/i.test(m)) { return; }
-                                                                                    if (status === 429 || /rate limit/i.test(m)) { return; }
-                                                                                    try {
-                                                                                      const msg = (error && (error.message || String(error))) || 'Erro em query';
-                                                                (async () => {
-                                                                  try {
-                                                                    if (await base44.auth.isAuthenticated()) {
-                                                                      await base44.functions.invoke('auditError', {
-                                                                        module: moduleName || 'Sistema',
-                                                                        message: `Query error: ${msg}`,
-                                                                        stack: error?.stack || null,
-                                                                        page: currentPageName,
-                                                                        empresa_id: empresaAtual?.id || null,
-                                                                        group_id: grupoAtual?.id || null,
-                                                                        metadata: { queryKey: 'unknown' }
-                                                                      });
-                                                                    }
-                                                                  } catch (_) {}
-                                                                })();
-                                                              } catch (_) {}
-                                                            }
-              },
-              mutations: {
-                retry: 0,
-                onError: (error) => {
-                                                                                    const m = String(error?.message || '');
-                                                                                    const code = error?.code;
-                                                                                    const name = error?.name;
-                                                                                    const status = error?.response?.status || error?.status;
-                                                                                    if (name === 'AbortError' || code === 'ERR_CANCELED' || /aborted|abort|canceled|cancelled/i.test(m)) { return; }
-                                                                                    if (status === 429 || /rate limit/i.test(m)) { return; }
-                                                                                    try {
-                                                                                      const msg = (error && (error.message || String(error))) || 'Erro em mutation';
-                                                                (async () => {
-                                                                  try {
-                                                                    if (await base44.auth.isAuthenticated()) {
-                                                                      await base44.functions.invoke('auditError', {
-                                                                        module: moduleName || 'Sistema',
-                                                                        message: `Mutation error: ${msg}`,
-                                                                        stack: error?.stack || null,
-                                                                        page: currentPageName,
-                                                                        empresa_id: empresaAtual?.id || null,
-                                                                        group_id: grupoAtual?.id || null,
-                                                                        metadata: { mutation: true }
-                                                                      });
-                                                                    }
-                                                                  } catch (_) {}
-                                                                })();
-                                                              } catch (_) {}
-                                                            }
-              }
-            });
+            switch (title) {
+              case 'Dashboard':
+                queryClient.prefetchQuery({ queryKey: ['dash', 'kpis'], queryFn: () => base44.entities.AuditLog.filter({}, '-data_hora', 5) });
+                queryClient.prefetchQuery({ queryKey: ['dash', 'groupConsolidation', empresaAtual?.id, grupoAtual?.id, contexto], queryFn: async () => (await base44.functions.invoke('groupConsolidation', { filtros: {} }))?.data });
+                break;
+              case 'CRM - Relacionamento':
+                queryClient.prefetchQuery({ queryKey: ['crm', 'clientes'], queryFn: () => filterInContext('Cliente', {}, '-updated_date', 10) });
+                queryClient.prefetchQuery({ queryKey: ['crm', 'oportunidades'], queryFn: () => filterInContext('Oportunidade', {}, '-updated_date', 10) });
+                break;
+              case 'Comercial e Vendas':
+                queryClient.prefetchQuery({ queryKey: ['comercial', 'pedidos'], queryFn: () => filterInContext('Pedido', {}, '-updated_date', 10) });
+                break;
+              case 'Estoque e Almoxarifado':
+                queryClient.prefetchQuery({ queryKey: ['estoque', 'produtos'], queryFn: () => filterInContext('Produto', {}, '-updated_date', 10) });
+                break;
+              case 'Compras e Suprimentos':
+                queryClient.prefetchQuery({ queryKey: ['compras', 'ocs'], queryFn: () => filterInContext('OrdemCompra', {}, '-updated_date', 10) });
+                break;
+              case 'Financeiro e Contábil':
+                queryClient.prefetchQuery({ queryKey: ['fin', 'pagar'], queryFn: () => filterInContext('ContaPagar', {}, '-updated_date', 10) });
+                queryClient.prefetchQuery({ queryKey: ['fin', 'receber'], queryFn: () => filterInContext('ContaReceber', {}, '-updated_date', 10) });
+                break;
+              case 'Expedição e Logística':
+                queryClient.prefetchQuery({ queryKey: ['log', 'entregas'], queryFn: () => filterInContext('Entrega', {}, '-updated_date', 10) });
+                break;
+              default: break;
+            }
           } catch (_) {}
-        }, [user?.id, empresaAtual?.id, grupoAtual?.id, moduleName, currentPageName]);
+        }, { timeout: 3000 });
+      }
+    } catch (_) {}
+  };
 
-        const prefetchForItem = (title) => {
-                        // Defer prefetch via requestIdleCallback to avoid synchronous load on mount
-                        try {
-                          if ('requestIdleCallback' in window) {
-                            window.requestIdleCallback(() => {
-                              try {
-                                switch (title) {
-                                  case 'Dashboard':
-                                    queryClient.prefetchQuery({ queryKey: ['dash', 'kpis'], queryFn: () => base44.entities.AuditLog.filter({}, '-data_hora', 5) });
-                                    queryClient.prefetchQuery({
-                                      queryKey: ['dash', 'groupConsolidation', empresaAtual?.id, grupoAtual?.id, contexto],
-                                      queryFn: async () => {
-                                        const res = await base44.functions.invoke('groupConsolidation', { filtros: {} });
-                                        return res?.data;
-                                      }
-                                    });
-                                    break;
-                                  case 'CRM - Relacionamento':
-                                    queryClient.prefetchQuery({ queryKey: ['crm', 'clientes'], queryFn: () => filterInContext('Cliente', {}, '-updated_date', 10) });
-                                    queryClient.prefetchQuery({ queryKey: ['crm', 'oportunidades'], queryFn: () => filterInContext('Oportunidade', {}, '-updated_date', 10) });
-                                    break;
-                                  case 'Comercial e Vendas':
-                                    queryClient.prefetchQuery({ queryKey: ['comercial', 'pedidos'], queryFn: () => filterInContext('Pedido', {}, '-updated_date', 10) });
-                                    break;
-                                  case 'Estoque e Almoxarifado':
-                                    queryClient.prefetchQuery({ queryKey: ['estoque', 'produtos'], queryFn: () => filterInContext('Produto', {}, '-updated_date', 10) });
-                                    break;
-                                  case 'Compras e Suprimentos':
-                                    queryClient.prefetchQuery({ queryKey: ['compras', 'ocs'], queryFn: () => filterInContext('OrdemCompra', {}, '-updated_date', 10) });
-                                    break;
-                                  case 'Financeiro e Contábil':
-                                    queryClient.prefetchQuery({ queryKey: ['fin', 'pagar'], queryFn: () => filterInContext('ContaPagar', {}, '-updated_date', 10) });
-                                    queryClient.prefetchQuery({ queryKey: ['fin', 'receber'], queryFn: () => filterInContext('ContaReceber', {}, '-updated_date', 10) });
-                                    break;
-                                  case 'Expedição e Logística':
-                                    queryClient.prefetchQuery({ queryKey: ['log', 'entregas'], queryFn: () => filterInContext('Entrega', {}, '-updated_date', 10) });
-                                    break;
-                                  default:
-                                    break;
-                                }
-                              } catch (_) {}
-                            }, { timeout: 3000 });
-                          }
-                        } catch (_) {}
-                        };
-
-                        // pageToModule/moduleName já declarados acima (remoção da duplicata para evitar TDZ)
-
-                        useEffect(() => {
+  // Atalhos de teclado (Ctrl+K = pesquisa, Ctrl+Shift+D = dashboard, Ctrl+Shift+C = comercial)
+  useEffect(() => {
     const handleKeyDown = (e) => {
       const ctrl = e.ctrlKey || e.metaKey;
-
-      if (ctrl && e.key === 'k') {
-        e.preventDefault();
-        setPesquisaOpen(true);
-      }
-
-      if (ctrl && e.shiftKey && e.key === 'D') {
-        e.preventDefault();
-        window.location.href = createPageUrl('Dashboard');
-      }
-
-      if (ctrl && e.shiftKey && e.key === 'C') {
-        e.preventDefault();
-        window.location.href = createPageUrl('Comercial');
-      }
-
+      if (ctrl && e.key === 'k') { e.preventDefault(); setPesquisaOpen(true); }
+      if (ctrl && e.shiftKey && e.key === 'D') { e.preventDefault(); window.location.href = createPageUrl('Dashboard'); }
+      if (ctrl && e.shiftKey && e.key === 'C') { e.preventDefault(); window.location.href = createPageUrl('Comercial'); }
     };
-
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
-
-
-
-  // Offline status + basic offline shell cache (last data snapshot)
-  useEffect(() => {
-    const goOnline = () => setIsOffline(false);
-    const goOffline = () => setIsOffline(true);
-    window.addEventListener('online', goOnline);
-    window.addEventListener('offline', goOffline);
-    return () => {
-      window.removeEventListener('online', goOnline);
-      window.removeEventListener('offline', goOffline);
-    };
-  }, []);
-
-  // Verificação de integrações delegada ao LayoutEffects (via setIntegracoesOk prop)
-
-  // PWA-lite: injeta manifest em runtime e tenta registrar service worker (se disponível)
-  useEffect(() => {
-    try {
-      // Injeta <link rel="manifest"> dinâmico
-      const manifest = {
-        name: 'ERP Zuccaro',
-        short_name: 'ERP',
-        start_url: '/',
-        scope: '/',
-        display: 'standalone',
-        background_color: '#0f172a',
-        theme_color: '#0f172a',
-        icons: [
-          { src: 'https://base44.com/logo_v2.svg', sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
-          { src: 'https://base44.com/logo_v2.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
-        ]
-      };
-      const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
-      const link = document.createElement('link');
-      link.rel = 'manifest';
-      link.href = URL.createObjectURL(blob);
-      // Evita múltiplas inserções
-      const existing = document.head.querySelector('link[rel="manifest"]');
-      if (!existing) document.head.appendChild(link);
-
-      // Meta para barra de status em mobile
-      const themeMeta = document.querySelector('meta[name="theme-color"]') || document.createElement('meta');
-      themeMeta.setAttribute('name', 'theme-color');
-      themeMeta.setAttribute('content', '#0f172a');
-      if (!themeMeta.parentElement) document.head.appendChild(themeMeta);
-
-      // Apple PWA meta/icons
-      const appleMeta = document.querySelector('meta[name="apple-mobile-web-app-capable"]') || document.createElement('meta');
-      appleMeta.setAttribute('name', 'apple-mobile-web-app-capable');
-      appleMeta.setAttribute('content', 'yes');
-      if (!appleMeta.parentElement) document.head.appendChild(appleMeta);
-
-      const appleIcon = document.querySelector('link[rel="apple-touch-icon"]') || document.createElement('link');
-      appleIcon.setAttribute('rel', 'apple-touch-icon');
-      appleIcon.setAttribute('href', 'https://base44.com/logo_v2.svg');
-      if (!appleIcon.parentElement) document.head.appendChild(appleIcon);
-
-      // CSP meta (melhora segurança client-side)
-      try {
-        const csp = document.querySelector('meta[http-equiv="Content-Security-Policy"]') || document.createElement('meta');
-        csp.setAttribute('http-equiv', 'Content-Security-Policy');
-        csp.setAttribute('content', "upgrade-insecure-requests; default-src 'self' https: data: blob:; connect-src 'self' https: wss:; img-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https:; frame-ancestors 'self'; object-src 'none'");
-        if (!csp.parentElement) document.head.appendChild(csp);
-      } catch (_) {}
-      
-      // Enforce HTTPS at client as fallback (HSTS at edge)
-      try {
-        if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost') {
-          window.location.replace('https://' + window.location.host + window.location.pathname + window.location.search + window.location.hash);
-        }
-      } catch (_) {}
-    
-    } catch (_) {}
-
-    // Registrar service worker com estratégia de atualização
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        // Registra SW servido por função (compatível com Vite 6, sem plugin)
-        fetch('/functions/pwaSw', { method: 'HEAD' }).then((res) => {
-          if (!res.ok) {
-            try {
-              (async () => {
-                try {
-                  if (await base44.auth.isAuthenticated()) {
-                    await base44.entities.AuditLog.create({
-                      acao: 'Visualização', modulo: moduleName || 'Sistema', tipo_auditoria: 'sistema', entidade: 'PWA',
-                      descricao: 'Service Worker ausente - registro pulado', data_hora: new Date().toISOString(),
-                      usuario: user?.full_name || 'Usuário', usuario_id: user?.id || null,
-                      empresa_id: empresaAtual?.id || null, group_id: grupoAtual?.id || null,
-                    });
-                  }
-                } catch {}
-              })();
-            } catch {}
-            return;
-          }
-          navigator.serviceWorker.register('/functions/pwaSw').then((reg) => {
-            // Força ativação da nova versão quando disponível
-            if (reg && reg.waiting) { try { reg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch {} }
-            reg.onupdatefound = () => {
-              const nw = reg.installing;
-              if (!nw) return;
-              nw.onstatechange = () => {
-                if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-                  try {
-                    (async () => {
-                      try {
-                        if (await base44.auth.isAuthenticated()) {
-                          await base44.entities.AuditLog.create({
-                            acao: 'Visualização', modulo: moduleName || 'Sistema', tipo_auditoria: 'sistema', entidade: 'PWA',
-                            descricao: 'Nova versão PWA disponível', data_hora: new Date().toISOString(),
-                            usuario: user?.full_name || 'Usuário', usuario_id: user?.id || null,
-                            empresa_id: empresaAtual?.id || null, group_id: grupoAtual?.id || null,
-                          });
-                        }
-                      } catch {}
-                    })();
-                  } catch {}
-                }
-              };
-            };
-            // Checagens periódicas por atualização (1h)
-            try {
-              setInterval(() => { try { reg.update(); } catch {} }, 60 * 60 * 1000);
-            } catch {}
-            // Auditoria quando o SW assumir controle (atualização aplicada)
-            try {
-              navigator.serviceWorker.addEventListener('controllerchange', () => {
-                try { (async () => { try { if (await base44.auth.isAuthenticated()) { await base44.entities.AuditLog.create({
-                  acao: 'Visualização', modulo: moduleName || 'Sistema', tipo_auditoria: 'sistema', entidade: 'PWA',
-                  descricao: 'Service Worker atualizado e ativo', data_hora: new Date().toISOString(),
-                  usuario: user?.full_name || 'Usuário', usuario_id: user?.id || null,
-                  empresa_id: empresaAtual?.id || null, group_id: grupoAtual?.id || null,
-                }); } } catch {} })(); } catch {}
-              });
-            } catch {}
-          }).catch(() => {});
-        }).catch(() => {});
-      });
-    }
-    }, []);
-
-  // Cache persistência RQ — mantido aqui (acesso ao queryClient local)
-  useEffect(() => {
-    const cache = queryClient.getQueryCache();
-    const indexKey = 'rq_index_keys';
-    const addToIndex = (k) => {
-      try {
-        const curr = JSON.parse(localStorage.getItem(indexKey) || '[]');
-        if (!curr.includes(k)) { curr.push(k); localStorage.setItem(indexKey, JSON.stringify(curr)); }
-      } catch {}
-    };
-    const sub = cache.subscribe((event) => {
-      try {
-        if (event?.type !== 'updated') return;
-        const q = event.query; const state = q.getState?.();
-        if (state?.data === undefined) return;
-        const sk = `rq_${JSON.stringify(q.queryKey)}_${empresaAtual?.id||''}_${grupoAtual?.id||''}`;
-        localStorage.setItem(sk, JSON.stringify(state.data)); addToIndex(sk);
-      } catch {}
-    });
-    return () => { if (typeof sub === 'function') sub(); };
-  }, [queryClient, empresaAtual?.id, grupoAtual?.id]);
-
-  // Erros de UI — delegado ao LayoutEffects
-  /* useEffect(() => {
-    const onError = (e) => {
-                                    try {
-                                      const msg = e?.message || e?.error?.message || 'Erro de UI';
-                                      const code = e?.error?.code;
-                                      const name = e?.error?.name;
-                                      const status = e?.error?.response?.status || e?.error?.status;
-                                      if (name === 'AbortError' || code === 'ERR_CANCELED' || /aborted|abort|canceled|cancelled/i.test(String(msg))) { return; }
-                                      if (status === 429 || /rate limit/i.test(String(msg))) { return; }
-                            const stack = e?.error?.stack || null;
-                            (async () => {
-                              try {
-                                if (await base44.auth.isAuthenticated()) {
-                                  await base44.functions.invoke('auditError', {
-                                    module: moduleName || 'Sistema',
-                                    message: `Erro não tratado: ${msg}`,
-                                    stack,
-                                    page: currentPageName,
-                                    empresa_id: empresaAtual?.id || null,
-                                    group_id: grupoAtual?.id || null,
-                                    metadata: { source: e?.filename, lineno: e?.lineno, colno: e?.colno }
-                                  });
-                                }
-                              } catch (_) {}
-                            })();
-                } catch (e) {}
-              };
-    const onUnhandled = (e) => {
-                                    try {
-                                      const msg = e?.reason?.message || String(e?.reason);
-                                      const code = e?.reason?.code;
-                                      const name = e?.reason?.name;
-                                      const status = e?.reason?.response?.status || e?.reason?.status;
-                                      if (name === 'AbortError' || code === 'ERR_CANCELED' || /aborted|abort|canceled|cancelled/i.test(String(msg))) { return; }
-                                      if (status === 429 || /rate limit/i.test(String(msg))) { return; }
-                            (async () => {
-                              try {
-                                if (await base44.auth.isAuthenticated()) {
-                                  await base44.functions.invoke('auditError', {
-                                    module: moduleName || 'Sistema',
-                                    message: `Promise rejeitada: ${msg}`,
-                                    stack: e?.reason?.stack || null,
-                                    page: currentPageName,
-                                    empresa_id: empresaAtual?.id || null,
-                                    group_id: grupoAtual?.id || null,
-                                    metadata: { reason: e?.reason }
-                                  });
-                                }
-                              } catch (_) {}
-                            })();
-                } catch (e) {}
-              };
-    window.addEventListener('error', onError);
-    window.addEventListener('unhandledrejection', onUnhandled);
-    return () => {
-      window.removeEventListener('error', onError);
-      window.removeEventListener('unhandledrejection', onUnhandled);
-    };
-  }, []); */
-
-
-
-  // Entity subscriptions — delegado ao LayoutEffects
-  /* useEffect(() => {
-    if (!user) return;
-    const entityToModule = {
-      Cliente: 'CRM',
-      Oportunidade: 'CRM',
-      Interacao: 'CRM',
-      Pedido: 'Comercial',
-      NotaFiscal: 'Fiscal',
-      Entrega: 'Expedição',
-      Romaneio: 'Expedição',
-      Fornecedor: 'Compras',
-      SolicitacaoCompra: 'Compras',
-      OrdemCompra: 'Compras',
-      Produto: 'Estoque',
-      MovimentacaoEstoque: 'Estoque',
-      ContaPagar: 'Financeiro',
-      ContaReceber: 'Financeiro',
-      Evento: 'Agenda',
-      Comissao: 'Comercial',
-    };
-    const stampConfig = {
-      Cliente: { nameField: 'vendedor_responsavel', idField: 'vendedor_responsavel_id' },
-      Oportunidade: { nameField: 'responsavel', idField: 'responsavel_id' },
-      Interacao: { nameField: 'responsavel', idField: 'responsavel_id' },
-      Entrega: { nameField: 'usuario_responsavel', idField: 'usuario_responsavel_id' },
-      MovimentacaoEstoque: { nameField: 'responsavel', idField: 'responsavel_id' },
-      Pedido: { nameField: 'vendedor', idField: 'vendedor_id' },
-    };
-
-    const entities = Object.keys(entityToModule);
-    const unsubs = entities.map((name) => {
-      const api = base44.entities?.[name];
-      if (!api?.subscribe) return null;
-      return api.subscribe(async (evt) => {
-        try {
-          // 1) Auditoria universal
-          await base44.entities.AuditLog.create({
-                            usuario: user?.full_name || user?.email || 'Usuário',
-                            usuario_id: user?.id,
-                            empresa_id: empresaAtual?.id || null,
-                            empresa_nome: empresaAtual?.nome_fantasia || empresaAtual?.razao_social || null,
-                            acao: evt.type === 'create' ? 'Criação' : evt.type === 'update' ? 'Edição' : 'Exclusão',
-                            modulo: entityToModule[name],
-                            tipo_auditoria: 'entidade',
-                            entidade: name,
-                            registro_id: evt.id,
-                            descricao: `${name} ${evt.type}`,
-                            dados_novos: evt?.data || null,
-                          });
-
-          // 2) Carimbo de responsável + multiempresa no momento da criação, quando fizer sentido
-          if (evt.type === 'create') {
-            const cfg = stampConfig[name];
-            const data = evt?.data || {};
-            const patch = {};
-
-            if (cfg) {
-              const hasName = data?.[cfg.nameField];
-              const hasId = data?.[cfg.idField];
-              if (!hasName) patch[cfg.nameField] = user?.full_name || user?.email;
-              if (!hasId) patch[cfg.idField] = user?.id;
-            }
-            if ('empresa_id' in data && !data?.empresa_id && empresaAtual?.id) {
-              patch.empresa_id = empresaAtual.id;
-            }
-
-            if (Object.keys(patch).length > 0) {
-              try {
-                await base44.entities?.[name]?.update?.(evt.id, patch);
-              } catch (_) {
-                // silencioso: se não puder atualizar, seguimos
-              }
-            }
-
-            // Replicação descendente: se o registro foi criado no contexto de Grupo (tem group_id e não tem empresa_id)
-            try {
-              if (evt?.data?.group_id && !evt?.data?.empresa_id) {
-                if (await base44.auth.isAuthenticated()) {
-                  await base44.functions.invoke('propagateGroupConfigs', {
-                    entity_name: name,
-                    source_id: evt.id,
-                    group_id: evt.data.group_id
-                  });
-                }
-              }
-            } catch (_) {}
-          }
-
-          // Invalidação de queries relacionadas ao evento (sync frontend↔backend)
-          try {
-            const map = {
-              Pedido: [['pedidos']],
-              ContaReceber: [['contasReceber'], ['cobrancas']],
-              ContaPagar: [['contasPagar']],
-              Entrega: [['entregas']],
-              Colaborador: [['colaboradores']],
-              Produto: [['produtos'], ['produtos-count-dash']],
-              Cliente: [['clientes'], ['clientes-count']],
-              OrdemProducao: [['ordensProducao']],
-              NotaFiscal: [['notasFiscais']],
-            };
-            (map[name] || []).forEach((qk) => {
-              try { queryClient.invalidateQueries({ queryKey: qk }); } catch (_) {}
-            });
-          } catch (_) {}
-
-        } catch (e) { }
-      });
-    }).filter(Boolean);
-
-    return () => { unsubs.forEach(u => { if (typeof u === 'function') u(); }); };
-  }, [user?.id, empresaAtual?.id, queryClient]); */
-
-  // RBAC entity wrap — delegado ao LayoutRBACWrapper
-  /* useEffect(() => {
-    if (!base44?.entities) return;
-
-    const stamp = (dados) => {
-      const out = { ...(dados || {}) };
-      try {
-        const ctx = contextRef.current;
-        if (ctx.grupoAtual?.id && !out.group_id) out.group_id = ctx.grupoAtual.id;
-        if (ctx.contexto !== 'grupo' && ctx.empresaAtual?.id && !out.empresa_id) out.empresa_id = ctx.empresaAtual.id;
-      } catch (_) {}
-      return out;
-    };
-
-    const getScope = () => {
-      const scope = {};
-      try {
-        const ctx = contextRef.current;
-        if (ctx.grupoAtual?.id) scope.group_id = ctx.grupoAtual.id;
-        if (ctx.contexto !== 'grupo' && ctx.empresaAtual?.id) scope.empresa_id = ctx.empresaAtual.id;
-        // Strict scope: mark blocked when no empresa in empresa-context
-        if (ctx.contexto !== 'grupo' && !ctx.empresaAtual?.id) scope.__blocked = true;
-      } catch (_) {}
-      return scope;
-    };
-
-    // Cache local de permissões RBAC (evita chamadas repetidas ao backend)
-    const __rbacCache = window.__layoutRbacCache || (window.__layoutRbacCache = new Map());
-    const __RBAC_TTL = 5 * 60 * 1000; // 5 minutos
-
-    const checkRBAC = async (entityName, action, sectionHint = null, op = null) => {
-      try {
-        // Proteção imediata de entidades críticas (sem chamada backend)
-        if (entityName === 'AuditLog') {
-          if (['criar','editar','excluir'].includes(action)) throw new Error('RBAC: entidade protegida');
-        }
-        // Admin sempre permitido (sem chamada backend)
-        if (contextRef.current.user?.role === 'admin') return;
-
-        const map = {
-          Cliente: 'CRM', Oportunidade: 'CRM', Interacao: 'CRM',
-          Pedido: 'Comercial', Comissao: 'Comercial',
-          NotaFiscal: 'Fiscal',
-          Entrega: 'Expedição', Romaneio: 'Expedição',
-          Fornecedor: 'Compras', SolicitacaoCompra: 'Compras', OrdemCompra: 'Compras',
-          Produto: 'Estoque', MovimentacaoEstoque: 'Estoque',
-          ContaPagar: 'Financeiro', ContaReceber: 'Financeiro', CentroCusto: 'Financeiro',
-          PerfilAcesso: 'Administração', User: 'Administração', Evento: 'Agenda'
-        };
-        const modName = map[entityName] || 'Sistema';
-        const scope = getScope();
-        const cacheKey = `${modName}|${sectionHint || entityName}|${action}|${scope.empresa_id || ''}|${scope.group_id || ''}`;
-        const now = Date.now();
-        const cached = __rbacCache.get(cacheKey);
-        if (cached && now - cached.ts < __RBAC_TTL) {
-          if (!cached.allowed) throw new Error('RBAC backend: ação negada');
-          return;
-        }
-
-        const payload = {
-          module: modName,
-          section: sectionHint || entityName,
-          action,
-          entity_name: entityName,
-          operation: op,
-          empresa_id: scope.empresa_id || null,
-          group_id: scope.group_id || null,
-        };
-        const res = await base44.functions.invoke('entityGuard', payload);
-        const allowed = !(res?.data?.allowed === false);
-        __rbacCache.set(cacheKey, { allowed, ts: now });
-        if (!allowed) throw new Error('RBAC backend: ação negada');
-      } catch (err) {
-        // Só bloqueia em 403 explícito — erros de rede/créditos não bloqueiam
-        if (err?.message === 'RBAC backend: ação negada' || err?.response?.status === 403) {
-          throw new Error('RBAC backend: ação negada');
-        }
-        // Qualquer outro erro (402, 500, rede) → fail-open (não bloqueia operação)
-      }
-    };
-
-    const wrapEntity = (api, name) => {
-      if (!api || api.__wrappedContext === true || name === 'AuditLog') return;
-      const orig = {
-        create: typeof api.create === 'function' ? api.create.bind(api) : null,
-        bulkCreate: typeof api.bulkCreate === 'function' ? api.bulkCreate.bind(api) : null,
-        update: typeof api.update === 'function' ? api.update.bind(api) : null,
-        delete: typeof api.delete === 'function' ? api.delete.bind(api) : null,
-        filter: typeof api.filter === 'function' ? api.filter.bind(api) : null,
-        list: typeof api.list === 'function' ? api.list.bind(api) : null,
-      };
-
-      // Sanitização centralizada (utilitário):
-      // usar sanitizeOnWrite em todas as escritas
-
-
-      if (orig.create) {
-        api.create = async (data) => {
-          await checkRBAC(name, 'criar');
-          const res = await orig.create(stamp(sanitizeOnWrite(data)));
-          try { await base44.entities.AuditLog.create({
-            usuario: user?.full_name || user?.email || 'Usuário',
-            usuario_id: user?.id,
-            acao: 'Criação', modulo: 'Sistema', tipo_auditoria: 'entidade',
-            entidade: name, registro_id: res?.id, dados_novos: res,
-            empresa_id: empresaAtual?.id || null,
-            data_hora: new Date().toISOString(),
-          }); } catch (_) {}
-          // PII encryption pass (server-side) for sensitive entities
-          try {
-            if (name === 'Cliente' || name === 'Colaborador') {
-              await base44.functions.invoke('piiEncryptor', { entity_name: name, id: res?.id, action: 'encrypt' });
-            }
-          } catch (_) {}
-          return res;
-        };
-      }
-
-      if (orig.bulkCreate) {
-        api.bulkCreate = async (arr) => {
-          const stamped = Array.isArray(arr) ? arr.map((x) => stamp(sanitizeOnWrite(x))) : arr;
-          const res = await orig.bulkCreate(stamped);
-          try { await base44.entities.AuditLog.create({
-            usuario: user?.full_name || user?.email || 'Usuário',
-            usuario_id: user?.id,
-            acao: 'Criação', modulo: 'Sistema', tipo_auditoria: 'entidade',
-            entidade: name, descricao: `bulkCreate`,
-            empresa_id: empresaAtual?.id || null,
-            data_hora: new Date().toISOString(),
-          }); } catch (_) {}
-          return res;
-        };
-      }
-
-      if (orig.update) {
-        api.update = async (id, data) => {
-          await checkRBAC(name, 'editar');
-          const res = await orig.update(id, stamp(sanitizeOnWrite(data)));
-          try { await base44.entities.AuditLog.create({
-            usuario: user?.full_name || user?.email || 'Usuário',
-            usuario_id: user?.id,
-            acao: 'Edição', modulo: 'Sistema', tipo_auditoria: 'entidade',
-            entidade: name, registro_id: id, dados_novos: data,
-            empresa_id: empresaAtual?.id || null,
-            data_hora: new Date().toISOString(),
-          }); } catch (_) {}
-          // PII encryption pass (server-side) for sensitive entities
-          try {
-            if (name === 'Cliente' || name === 'Colaborador') {
-              await base44.functions.invoke('piiEncryptor', { entity_name: name, id, action: 'encrypt' });
-            }
-          } catch (_) {}
-          return res;
-        };
-      }
-
-      if (orig.delete) {
-        api.delete = async (id) => {
-          await checkRBAC(name, 'excluir');
-          const res = await orig.delete(id);
-          try { await base44.entities.AuditLog.create({
-            usuario: user?.full_name || user?.email || 'Usuário',
-            usuario_id: user?.id,
-            acao: 'Exclusão', modulo: 'Sistema', tipo_auditoria: 'entidade',
-            entidade: name, registro_id: id,
-            empresa_id: empresaAtual?.id || null,
-            data_hora: new Date().toISOString(),
-          }); } catch (_) {}
-          return res;
-        };
-      }
-
-      // Multiempresa em list/filter por padrão + STRICT empresa_id
-      if (orig.filter) {
-        api.filter = async (criteria = {}, order, limit, skip) => {
-          const ctx = contextRef.current;
-          // Lógica ajustada: se está em modo empresa SEM empresa selecionada, apenas registros de grupo passam
-          // Se está em modo grupo, retorna tudo (sem filtro empresa_id)
-          const scope = getScope();
-          // Se o filtro já contém $or/$and ou campos de escopo, não injetar AND adicional
-          const hasScope = !!criteria?.empresa_id || !!criteria?.group_id || !!criteria?.$or || !!criteria?.$and;
-          const merged = (!hasScope) ? { ...criteria, ...scope } : criteria;
-          return await orig.filter(merged, order, limit, skip);
-        };
-      }
-
-      if (orig.list) {
-        api.list = async (order, limit, skip) => {
-          const ctx = contextRef.current;
-          if (orig.filter) {
-            return await orig.filter(getScope(), order, limit, skip);
-          }
-          return await orig.list(order, limit, skip);
-        };
-      }
-
-      api.__wrappedContext = true;
-    };
-
-    try {
-      Object.keys(base44.entities).forEach((name) => wrapEntity(base44.entities[name], name));
-    } catch (_) {}
-
-    // Phase 4: RBAC + Auditoria + Strict empresa scope para chamadas de funções backend
-    try {
-      if (base44?.functions && base44.functions.invoke && base44.functions.__wrappedPhase4 !== true) {
-        const origInvoke = base44.functions.invoke.bind(base44.functions);
-        // Política híbrida: apenas funções sensíveis exigem guard; demais apenas auditam
-        const SENSITIVE_FUNCTIONS = new Set([
-          'permissionOptimizer', 'securityAlerts', 'adminInviteUser', 'propagateGroupConfigs',
-          'migrateAuditoriasToAuditLog', 'migrateIntegrationsToConfiguracaoSistema', 'migrateChatbotIntents',
-          'applyInventoryAdjustments', 'applyOrderStockMovements', 'emitirBoleto', 'sendEmailProvider',
-          'groupConsolidation', 'sodValidator', 'solicitacoesAprovacao',
-          'nfeActions', 'paymentStatusManager'
-        ]);
-
-        base44.functions.invoke = async (functionName, params) => {
-          // Evita loops e ruído de auditoria
-          if (functionName === 'auditError') {
-            return await origInvoke(functionName, params);
-          }
-
-          // RBAC somente para funções sensíveis (evita chamadas extras)
-          const shouldGuard = SENSITIVE_FUNCTIONS.has(functionName) || (params && params.__sensitive === true);
-          if (shouldGuard && functionName !== 'entityGuard') {
-            try {
-              const scope = getScope();
-              const guardPayload = {
-                module: contextRef.current.moduleName || 'Sistema',
-                section: 'Funções',
-                action: 'executar',
-                function_name: functionName,
-                empresa_id: scope.empresa_id || null,
-                group_id: scope.group_id || null,
-              };
-              const res = await origInvoke('entityGuard', guardPayload);
-              if (res?.data && res.data.allowed === false) {
-                try { await base44.entities.AuditLog.create({
-                  acao: 'Bloqueio', modulo: contextRef.current.moduleName || 'Sistema', tipo_auditoria: 'seguranca',
-                  entidade: 'Function', descricao: `Acesso negado à função ${functionName}`, data_hora: new Date().toISOString(),
-                }); } catch {}
-                throw new Error('RBAC backend: ação negada');
-              }
-            } catch (err) {
-              if (err?.response?.status === 403) throw err;
-              // Se o guard falhar por indisponibilidade, não bloquear a UI
-            }
-          }
-
-          // Injetar contexto multiempresa em chamadas de função — NÃO injeta em funções que já têm scope explícito
-          // (upsertConfig, getEntityRecord e similares passam scope próprio e não devem ser contaminados)
-          const SKIP_AUTO_SCOPE = new Set(['upsertConfig', 'getEntityRecord', 'entityGuard', 'entityListSorted', 'propagateGroupConfigs', 'auditError', 'deployAudit', 'piiEncryptor', 'portalToken']);
-          try {
-            const ctx = getScope ? getScope() : {};
-            if (!SKIP_AUTO_SCOPE.has(functionName) && params && typeof params === 'object' && !Array.isArray(params)) {
-              params = { ...params };
-              if (ctx?.group_id && (params.group_id === undefined || params.group_id === null)) params.group_id = ctx.group_id;
-              // aceitar alias empresaId, mas padronizar empresa_id
-              const hasEmpresa = !(params.empresa_id === undefined || params.empresa_id === null) || !(params.empresaId === undefined || params.empresaId === null);
-              if (ctx?.empresa_id && !hasEmpresa) params.empresa_id = ctx.empresa_id;
-            }
-          } catch (_) {}
-          // Sanitização hardening (anti-XSS/injeção)
-          try { params = sanitizeOnWrite(params); } catch (_) {}
-
-          // De-duplicação + retry com backoff para 429/500
-          // upsertConfig e outras escritas NUNCA são deduplicadas (cada chamada é uma mutação distinta)
-          const SKIP_DEDUP = new Set(['upsertConfig', 'applyInventoryAdjustments', 'applyOrderStockMovements', 'nfeActions', 'emitirBoleto', 'adminInviteUser']);
-          base44.functions.__inflight = base44.functions.__inflight || new Map();
-          const serialize = (o)=>{try{return JSON.stringify(o, Object.keys(o||{}).sort())}catch{ return JSON.stringify(o||{})}};
-          const key = `${functionName}:${serialize(params || {})}`;
-          if (!SKIP_DEDUP.has(functionName) && base44.functions.__inflight.has(key)) {
-            return await base44.functions.__inflight.get(key);
-          }
-          const exec = async () => {
-            let attempt = 0;
-            while (true) {
-              try {
-                return await origInvoke(functionName, params);
-              } catch (err) {
-                const status = err?.response?.status || err?.status;
-                if (((status === 429) || (typeof status === 'number' && status >= 500)) && attempt < 3) {
-                  const delay = (800 + Math.floor(Math.random() * 600)) * (attempt + 1);
-                  await new Promise(r => setTimeout(r, delay));
-                  attempt++;
-                  continue;
-                }
-                throw err;
-              }
-            }
-          };
-          const startedAt = Date.now();
-          const p = exec().finally(() => base44.functions.__inflight.delete(key));
-          if (!SKIP_DEDUP.has(functionName)) base44.functions.__inflight.set(key, p);
-          const result = await p;
-
-          // Telemetria de latência (auditoria de performance > 1500ms)
-          try {
-            const dur = Date.now() - startedAt;
-            if (dur > 1500) {
-              await base44.entities.AuditLog.create({
-                usuario: user?.full_name || user?.email || 'Usuário',
-                usuario_id: user?.id,
-                acao: 'Visualização', modulo: moduleName || 'Sistema', tipo_auditoria: 'sistema',
-                entidade: 'FunctionLatency', descricao: `Função ${functionName} lenta (${dur}ms)`,
-                empresa_id: empresaAtual?.id || null,
-                group_id: grupoAtual?.id || null,
-                data_hora: new Date().toISOString(),
-                duracao_ms: dur,
-              });
-            }
-          } catch (_) {}
-
-          // Auditoria (throttle 3s)
-          try {
-            const now = Date.now();
-            const last = (base44.functions.__invokeAuditLastAt || 0);
-            if (now - last > 3000) {
-              base44.functions.__invokeAuditLastAt = now;
-              await base44.entities.AuditLog.create({
-                usuario: user?.full_name || user?.email || 'Usuário',
-                usuario_id: user?.id,
-                empresa_id: empresaAtual?.id || null,
-                acao: 'Execução', modulo: moduleName || 'Sistema', tipo_auditoria: 'sistema',
-                entidade: 'Function', descricao: `Função ${functionName} chamada`, dados_novos: { params }, data_hora: new Date().toISOString(),
-              });
-            }
-          } catch {}
-          return result;
-        };
-
-        base44.functions.__wrappedPhase4 = true;
-      }
-    } catch (_) {}
-    }, [user?.id, empresaAtual?.id, grupoAtual?.id, contexto]); */
-
-  // Auditoria de navegação + bloqueio delegada ao LayoutEffects
-  // Auditoria de cliques (AUDIT_BUSINESS_ONLY=true → desabilitado)
-  /* useEffect(() => {
-    if (!user) return;
-    if (true) return; // AUDIT_BUSINESS_ONLY
-    const handlerClick = (e) => {
-      try {
-        const now = Date.now();
-        if (now - auditThrottleRef.current.click < 1500) return; // throttle 1.5s
-        auditThrottleRef.current.click = now;
-        const target = e.target.closest('button, a, [role="button"], [data-radix-collection-item]');
-        if (!target) return;
-        const label = target.getAttribute('aria-label') || target.innerText?.trim()?.slice(0, 80) || target.tagName;
-        base44.entities?.AuditLog?.create?.({
-          usuario: user?.full_name || user?.email || 'Usuário',
-          usuario_id: user?.id,
-          empresa_id: empresaAtual?.id || null,
-          empresa_nome: empresaAtual?.nome_fantasia || empresaAtual?.razao_social || null,
-          acao: 'Visualização',
-          modulo: moduleName || 'Sistema',
-          tipo_auditoria: 'ui',
-          entidade: 'Clique',
-          descricao: `Click: ${label}`,
-          data_hora: new Date().toISOString(),
-        });
-      } catch (_) {}
-    };
-
-    const handlerChange = (e) => {
-      try {
-        const now = Date.now();
-        if (now - auditThrottleRef.current.change < 1000) return; // throttle 1s
-        auditThrottleRef.current.change = now;
-        const el = e.target;
-        if (!el) return;
-        const tag = el.tagName;
-        if (tag !== 'SELECT' && tag !== 'INPUT' && tag !== 'TEXTAREA') return;
-        const name = el.name || el.id || tag;
-        base44.entities?.AuditLog?.create?.({
-          usuario: user?.full_name || user?.email || 'Usuário',
-          usuario_id: user?.id,
-          empresa_id: empresaAtual?.id || null,
-          empresa_nome: empresaAtual?.nome_fantasia || empresaAtual?.razao_social || null,
-          acao: 'Visualização',
-          modulo: moduleName || 'Sistema',
-          tipo_auditoria: 'ui',
-          entidade: 'Input',
-          descricao: `Change: ${name}`,
-          data_hora: new Date().toISOString(),
-        });
-      } catch (_) {}
-    };
-
-    document.addEventListener('click', handlerClick, true);
-    document.addEventListener('change', handlerChange, true);
-    return () => {
-      document.removeEventListener('click', handlerClick, true);
-      document.removeEventListener('change', handlerChange, true);
-    };
-  }, [user?.id, empresaAtual?.id, moduleName]); */
-
-  const handleIAEstoque = async () => {
-          try {
-            const filtros = {
-              ...(grupoAtual?.id ? { group_id: grupoAtual.id } : {}),
-              ...(empresaAtual?.id ? { empresa_id: empresaAtual.id } : {}),
-            };
-            await base44.functions.invoke('iaFinanceAnomalyScan', {
-              filtros,
-              previsao_estoque: { enabled: true, horizon_days: 14 }
-            });
-          } catch (_) {}
-        };
-        const handleIAFinanceiro = async () => {
-          try {
-            const filtros = {
-              ...(grupoAtual?.id ? { group_id: grupoAtual.id } : {}),
-              ...(empresaAtual?.id ? { empresa_id: empresaAtual.id } : {}),
-            };
-            await base44.functions.invoke('iaFinanceAnomalyScan', { filtros });
-          } catch (_) {}
-        };
-        const isMobilePage = false; // ProducaoMobile consolidado em SPA responsivo (P1/P5)
-
-
 
   // Idle prefetch common datasets (multiempresa-aware)
   useEffect(() => {
@@ -1052,46 +163,23 @@ function LayoutContent({ children, currentPageName }) {
     if (!can) return;
     const run = () => {
       try {
-        if (hasPermission('Comercial', null, 'ver')) {
-          queryClient.prefetchQuery({ queryKey: ['pedidos', empresaAtual?.id, grupoAtual?.id, contexto], queryFn: () => filterInContext('Pedido', {}, '-updated_date', 20) });
-        }
-        if (hasPermission('Financeiro', null, 'ver')) {
-          queryClient.prefetchQuery({ queryKey: ['contasReceber', empresaAtual?.id, grupoAtual?.id, contexto], queryFn: () => filterInContext('ContaReceber', {}, '-data_vencimento', 20) });
-        }
-        if (hasPermission('Estoque', null, 'ver')) {
-          queryClient.prefetchQuery({ queryKey: ['produtos', empresaAtual?.id, grupoAtual?.id, contexto], queryFn: () => filterInContext('Produto', {}, '-updated_date', 20) });
-        }
+        if (hasPermission('Comercial', null, 'ver')) queryClient.prefetchQuery({ queryKey: ['pedidos', empresaAtual?.id, grupoAtual?.id, contexto], queryFn: () => filterInContext('Pedido', {}, '-updated_date', 20) });
+        if (hasPermission('Financeiro', null, 'ver')) queryClient.prefetchQuery({ queryKey: ['contasReceber', empresaAtual?.id, grupoAtual?.id, contexto], queryFn: () => filterInContext('ContaReceber', {}, '-data_vencimento', 20) });
+        if (hasPermission('Estoque', null, 'ver')) queryClient.prefetchQuery({ queryKey: ['produtos', empresaAtual?.id, grupoAtual?.id, contexto], queryFn: () => filterInContext('Produto', {}, '-updated_date', 20) });
       } catch (_) {}
     };
-    if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(run, { timeout: 2000 });
-    } else {
-      setTimeout(run, 1500);
-    }
+    if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 2000 });
+    else setTimeout(run, 1500);
   }, [empresaAtual?.id, grupoAtual?.id, contexto]);
 
-  // IDB cleanup + performance metrics delegados ao LayoutEffects
-
-  const titleToModule = {
-    "CRM - Relacionamento": "CRM",
-    "Comercial e Vendas": "Comercial",
-    "Estoque e Almoxarifado": "Estoque",
-    "Compras e Suprimentos": "Compras",
-    "Financeiro e Contábil": "Financeiro",
-    "Fiscal e Tributário": "Fiscal",
-    "Recursos Humanos": "RH",
-  };
+  const isMobilePage = false;
 
   const itemsFiltrados = navigationItems.filter(item => {
     if (item.adminOnly && user?.role !== 'admin') return false;
     const mod = titleToModule[item.title];
-    if (!mod) return true; // itens públicos ou informativos continuam visíveis
+    if (!mod) return true;
     return hasPermission(mod, null, 'ver');
   });
-
-  // Auditoria de bloqueio de módulo delegada ao LayoutEffects
-
-
 
   const groupedItems = {
     principal: itemsFiltrados.filter(item => item.group === "principal"),
@@ -1129,10 +217,7 @@ function LayoutContent({ children, currentPageName }) {
             empresaAtual={empresaAtual}
           />
 
-          <LayoutMainContent
-            moduleName={moduleName}
-            currentPageName={currentPageName}
-          >
+          <LayoutMainContent moduleName={moduleName} currentPageName={currentPageName}>
             {children}
           </LayoutMainContent>
         </main>
@@ -1142,7 +227,6 @@ function LayoutContent({ children, currentPageName }) {
     </SidebarProvider>
   );
 }
-
 
 export default function Layout({ children, currentPageName }) {
   return (

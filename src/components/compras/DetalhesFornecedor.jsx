@@ -131,7 +131,7 @@ export default function DetalhesFornecedor({ fornecedor, onClose, windowMode = f
               </p>
             </div>
             {!windowMode && (
-              <Button variant="ghost" size="icon" onClick={onClose}>
+              <Button variant="ghost" size="icon" onClick={onClose} data-permission="Compras.Fornecedor.visualizar" data-action="Compras.Fornecedor.fechar">
                 <X className="w-5 h-5" />
               </Button>
             )}

@@ -29,8 +29,8 @@ export default function AdminKPIBar() {
       const [empresas, users, configs, logs] = await Promise.allSettled([
         base44.entities.Empresa.filter(grupoAtual?.id ? { group_id: grupoAtual.id } : {}, null, 100),
         base44.entities.User.list(null, 200),
-        base44.entities.ConfiguracaoSistema.filter({}, null, 200),
-        base44.entities.AuditLog.filter({}, "-created_date", 100),
+        base44.entities.ConfiguracaoSistema.filter(grupoAtual?.id ? { group_id: grupoAtual.id } : {}, null, 200),
+        base44.entities.AuditLog.filter(grupoAtual?.id ? { group_id: grupoAtual.id } : {}, "-created_date", 100),
       ]);
 
       const empresasList = empresas.status === "fulfilled" ? empresas.value : [];

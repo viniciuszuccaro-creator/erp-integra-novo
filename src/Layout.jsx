@@ -114,7 +114,7 @@ function LayoutContent({ children, currentPageName }) {
           try {
             switch (title) {
               case 'Dashboard':
-                queryClient.prefetchQuery({ queryKey: ['dash', 'kpis'], queryFn: () => base44.entities.AuditLog.filter({}, '-data_hora', 5) });
+                queryClient.prefetchQuery({ queryKey: ['dash', 'kpis'], queryFn: () => base44.entities.AuditLog.filter(grupoAtual?.id ? { group_id: grupoAtual.id } : {}, '-data_hora', 5) });
                 queryClient.prefetchQuery({ queryKey: ['dash', 'groupConsolidation', empresaAtual?.id, grupoAtual?.id, contexto], queryFn: async () => (await base44.functions.invoke('groupConsolidation', { filtros: {} }))?.data });
                 break;
               case 'CRM - Relacionamento':

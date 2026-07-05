@@ -20,7 +20,7 @@ export default function SistemaHealthPanel() {
     queryKey: ["sistema-health", grupoAtual?.id, empresaAtual?.id, refreshKey],
     queryFn: async () => {
       const since = Date.now() - 2 * 60 * 60 * 1000;
-      const logs = await base44.entities.AuditLog.filter({}, '-data_hora', 200).catch(() => []);
+      const logs = await base44.entities.AuditLog.filter(grupoAtual?.id ? { group_id: grupoAtual.id } : {}, '-data_hora', 200).catch(() => []);
       const recent = (logs || []).filter(l => new Date(l?.data_hora || l?.created_date || 0).getTime() >= since);
       const errors = recent.filter(l => /erro|error|failed|exception/i.test(`${l?.descricao || ''} ${l?.acao || ''}`));
       const secAlerts = recent.filter(l => l?.tipo_auditoria === 'seguranca');
@@ -28,13 +28,13 @@ export default function SistemaHealthPanel() {
 
       let syncMaps = 0;
       try {
-        const maps = await base44.entities.SyncMap.filter({}, '-updated_date', 1);
+        const maps = await base44.entities.SyncMap.filter(grupoAtual?.id ? { group_id: grupoAtual.id } : {}, '-updated_date', 1);
         syncMaps = Array.isArray(maps) ? maps.length : 0;
       } catch {}
 
       let cfgCount = 0;
       try {
-        const cfgs = await base44.entities.ConfiguracaoSistema.filter({}, '-updated_date', 1);
+        const cfgs = await base44.entities.ConfiguracaoSistema.filter(grupoAtual?.id ? { group_id: grupoAtual.id } : {}, '-updated_date', 1);
         cfgCount = Array.isArray(cfgs) ? cfgs.length : 0;
       } catch {}
 

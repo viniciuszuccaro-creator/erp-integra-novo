@@ -500,7 +500,7 @@ export default function AssinaturaEletronicaModal({
             </Card>
 
             <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button type="button" variant="outline" onClick={fechar}>
+              <Button type="button" variant="outline" onClick={fechar} data-permission="Comercial.AssinaturaEletronica.cancelar" data-action="Comercial.AssinaturaEletronica.cancelar">
                 Cancelar
               </Button>
               <Button 

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import {
   Package,
   CheckCircle2,
@@ -31,6 +32,7 @@ import { Textarea } from "@/components/ui/textarea";
  * - Baixa automática de estoque na retirada
  */
 export default function PedidosRetiradaTab({ windowMode = false }) {
+  const { filterInContext } = useContextoVisual();
   const [busca, setBusca] = useState("");
   const [statusFiltro, setStatusFiltro] = useState("todos");
   const [detalhesOpen, setDetalhesOpen] = useState(false);
@@ -43,7 +45,7 @@ export default function PedidosRetiradaTab({ windowMode = false }) {
 
   const { data: pedidos = [] } = useQuery({
     queryKey: ['pedidos'],
-    queryFn: () => base44.entities.Pedido.list('-created_date'),
+    queryFn: () => filterInContext('Pedido', {}, '-created_date'),
   });
 
   const { data: user } = useQuery({

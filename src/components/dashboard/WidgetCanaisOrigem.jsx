@@ -8,6 +8,7 @@ import { Activity, TrendingUp, ArrowRight } from "lucide-react";
 import BadgeOrigemPedido from "@/components/comercial/BadgeOrigemPedido";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.6 - Widget de Canais no Dashboard Principal
@@ -15,6 +16,7 @@ import { createPageUrl } from "@/utils";
  */
 export default function WidgetCanaisOrigem({ empresaId }) {
   const navigate = useNavigate();
+  const { filterInContext } = useContextoVisual();
 
   const { data: pedidos = [], isLoading } = useQuery({
     queryKey: ['pedidos-30-dias', empresaId],
@@ -23,12 +25,7 @@ export default function WidgetCanaisOrigem({ empresaId }) {
       const dias30Atras = new Date(hoje.getTime() - 30 * 24 * 60 * 60 * 1000);
       const dataInicio = dias30Atras.toISOString().split('T')[0];
 
-      let todosPedidos;
-      if (empresaId) {
-        todosPedidos = await base44.entities.Pedido.filter({ empresa_id: empresaId });
-      } else {
-        todosPedidos = await base44.entities.Pedido.list('-created_date', 500);
-      }
+      const todosPedidos = await filterInContext('Pedido', { ...(empresaId ? { empresa_id: empresaId } : {}) }, '-created_date', 500);
 
       return todosPedidos.filter(p => {
         if (!p.created_date) return false;

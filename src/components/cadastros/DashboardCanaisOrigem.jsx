@@ -368,59 +368,6 @@ export default function DashboardCanaisOrigem({ empresaId, windowMode = false })
             </CardContent>
           </Card>
 
-          {/* Ranking de Conversão */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">🏆 Ranking de Conversão</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {Object.values(metricas)
-                  .filter(m => m.totalPedidos > 0)
-                  .sort((a, b) => b.taxaConversao - a.taxaConversao)
-                  .slice(0, 5)
-                  .map((metrica, idx) => (
-                    <div key={idx} className="flex items-center gap-3">
-                      <div className="text-2xl font-bold text-slate-300 w-8">
-                        {idx + 1}º
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-sm">{metrica.nome}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Progress value={metrica.taxaConversao} className="flex-1 h-2" />
-                          <span className="text-sm font-bold text-green-600">
-                            {metrica.taxaConversao.toFixed(0)}%
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Ticket Médio por Canal */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">💰 Ticket Médio por Canal</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart 
-                  data={Object.values(metricas)
-                    .filter(m => m.totalPedidos > 0)
-                    .sort((a, b) => b.ticketMedio - a.ticketMedio)}
-                  layout="horizontal"
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" tick={{ fontSize: 12 }} />
-                  <YAxis dataKey="canal" type="category" width={100} tick={{ fontSize: 11 }} />
-                  <Tooltip formatter={(value) => `R$ ${value.toFixed(2)}`} />
-                  <Bar dataKey="ticketMedio" fill="#a855f7" radius={[0, 8, 8, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Insights IA */}

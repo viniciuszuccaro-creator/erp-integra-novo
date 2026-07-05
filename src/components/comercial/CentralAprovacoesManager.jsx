@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import {
   AlertCircle,
   CheckCircle2,
@@ -44,12 +45,11 @@ function CentralAprovacoesManager({ windowMode = false, initialTab = "descontos"
   const { toast } = useToast();
   const { openWindow } = useWindow();
   const { user } = useUser();
+  const { filterInContext } = useContextoVisual();
 
   const { data: pedidos = [] } = useQuery({
     queryKey: ['pedidos', empresaId],
-    queryFn: () => empresaId
-      ? base44.entities.Pedido.filter({ empresa_id: empresaId }, '-created_date')
-      : base44.entities.Pedido.list('-created_date'),
+    queryFn: () => filterInContext('Pedido', { ...(empresaId ? { empresa_id: empresaId } : {}) }, '-created_date'),
   });
 
   // V21.6: Validar permissão

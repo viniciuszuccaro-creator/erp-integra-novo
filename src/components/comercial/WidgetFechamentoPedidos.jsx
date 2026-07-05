@@ -8,11 +8,13 @@ import { Zap, TrendingUp, CheckCircle2, ArrowRight, Sparkles, Activity } from 'l
 import { useWindow } from '@/components/lib/useWindow';
 import DashboardFechamentoPedidos from './DashboardFechamentoPedidos';
 import { obterEstatisticasAutomacao } from '@/components/lib/useFluxoPedido';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 /**
  * V21.6 FINAL - WIDGET RESUMIDO COM IA ANALYTICS
  */
 export default function WidgetFechamentoPedidos({ empresaId = null }) {
+  const { filterInContext } = useContextoVisual();
   const { openWindow } = useWindow();
   const [estatisticasIA, setEstatisticasIA] = useState(null);
 
@@ -27,9 +29,7 @@ export default function WidgetFechamentoPedidos({ empresaId = null }) {
 
   const { data: pedidos = [] } = useQuery({
     queryKey: ['pedidos', empresaId],
-    queryFn: () => empresaId
-      ? base44.entities.Pedido.filter({ empresa_id: empresaId }, '-created_date', 50)
-      : base44.entities.Pedido.list('-created_date', 50),
+    queryFn: () => filterInContext('Pedido', { ...(empresaId ? { empresa_id: empresaId } : {}) }, '-created_date', 50),
     initialData: [],
   });
 

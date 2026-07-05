@@ -135,7 +135,7 @@ export default function AvaliacaoFornecedorForm({ ordemCompra, onSubmit, windowM
       </Card>
 
       <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
-        <Button type="submit" className="bg-amber-600 hover:bg-amber-700">
+        <Button type="submit" className="bg-amber-600 hover:bg-amber-700" data-permission="Compras.Fornecedor.avaliar">
           <Save className="w-4 h-4 mr-2" />
           Salvar Avaliação
         </Button>

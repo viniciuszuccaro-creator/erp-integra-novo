@@ -177,6 +177,7 @@ export default function ImportadorProdutosPlanilha({ onConcluido, closeSelf }) {
     let setorIdResolved = (rawSetorNome && setoresNomeMap[norm(rawSetorNome)]) || undefined;
     const produto = {
       empresa_id: empresaId,
+      group_id: grupoId || empresaAtual?.group_id || null,
       codigo: sanitize(getWithMap(row, 'codigo')),
       descricao: sanitize(getWithMap(row, 'descricao'))?.slice(0, 250),
       unidade_medida: mapUnidade(getWithMap(row, 'unidade_medida')),

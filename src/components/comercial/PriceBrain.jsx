@@ -84,6 +84,7 @@ RETORNE em JSON:
 
       await base44.entities.AuditoriaIA.create({
         empresa_id: pedido.empresa_id,
+        group_id: pedido.group_id || null,
         modulo: 'Comercial',
         funcionalidade: 'PriceBrain',
         usuario_id: 'sistema',

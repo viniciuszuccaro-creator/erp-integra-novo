@@ -235,6 +235,7 @@ export default function TransferirConversa({ conversa, onTransferido }) {
           onClick={() => transferirMutation.mutate()}
           disabled={transferirMutation.isPending || (tipo !== 'fila' && !destinoId)}
           className="w-full bg-blue-600 hover:bg-blue-700"
+          data-permission="HubAtendimento.Conversa.transferir"
         >
           {transferirMutation.isPending ? (
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />

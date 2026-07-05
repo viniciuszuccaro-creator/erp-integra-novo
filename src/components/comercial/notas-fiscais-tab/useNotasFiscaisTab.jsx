@@ -55,6 +55,7 @@ export default function useNotasFiscaisTab() {
       });
       await base44.entities.LogFiscal.create({
         empresa_id: nfe.empresa_id || empresaAtual?.id,
+        group_id: nfe.group_id || empresaAtual?.group_id || null,
         nfe_id: nfe.id, numero_nfe: nfe.numero, chave_acesso: nfe.chave_acesso,
         data_hora: new Date().toISOString(), acao: "cancelar", provedor: "Mock/Simulação",
         ambiente: nfe.ambiente, status: "sucesso", mensagem: resultado.mensagem_sefaz,

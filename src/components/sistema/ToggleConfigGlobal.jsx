@@ -1,144 +1,45 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { base44 } from "@/api/base44Client";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
-import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { Loader2 } from "lucide-react";
 
 /**
- * ToggleConfigGlobal v3.1
- * - Contexto dual: salva em Grupo E Empresa quando ambos disponíveis
- * - Busca progressiva: empresa+grupo → empresa → grupo → global
- * - Badge de contexto: mostra onde foi salvo (Grupo/Empresa/Global)
- * - Optimistic UI + rollback em erro
+ * ToggleConfigGlobal — toggle persistido via useToggleConfig.
+ * Componente focado recriado para restaurar imports ativos.
  */
 export default function ToggleConfigGlobal({
-  configKey,
+  chave,
   label,
-  description,
-  onChangeLocal,
-  defaultValue = false,
+  desc,
+  categoria = "Geral",
+  saving = false,
+  isFetching = false,
+  onToggle,
+  getToggleValue,
+  configs = [],
+  accentColor = "blue",
+  disabled = false,
 }) {
-  const { grupoAtual, empresaAtual } = useContextoVisual();
-  const [value, setValue] = useState(defaultValue);
-  const [loading, setLoading] = useState(true); // começa loading até buscar
-  const [syncStatus, setSyncStatus] = useState("idle");
-  const loadedRef = useRef(false);
-  const prevContextRef = useRef(`${grupoAtual?.id}-${empresaAtual?.id}`);
-
-  const scopeObj = {
-    group_id: grupoAtual?.id || null,
-    empresa_id: empresaAtual?.id || null,
+  const checked = getToggleValue ? getToggleValue(chave, configs) : false;
+  const accentMap = {
+    blue: "text-blue-600",
+    purple: "text-purple-600",
+    green: "text-green-600",
+    amber: "text-amber-600",
   };
-
-  useEffect(() => {
-    const ctxKey = `${grupoAtual?.id}-${empresaAtual?.id}`;
-    const contextChanged = prevContextRef.current !== ctxKey;
-    if (!loadedRef.current || contextChanged) {
-      loadedRef.current = true;
-      prevContextRef.current = ctxKey;
-      loadConfigValue();
-    }
-  }, [grupoAtual?.id, empresaAtual?.id]);
-
-  const loadConfigValue = async () => {
-    setLoading(true);
-    try {
-      // Busca progressiva: escopo exato → grupo → sem escopo
-      const attempts = [];
-      if (scopeObj.empresa_id && scopeObj.group_id) {
-        attempts.push({ chave: configKey, empresa_id: scopeObj.empresa_id, group_id: scopeObj.group_id });
-      }
-      if (scopeObj.empresa_id) {
-        attempts.push({ chave: configKey, empresa_id: scopeObj.empresa_id });
-      }
-      if (scopeObj.group_id) {
-        attempts.push({ chave: configKey, group_id: scopeObj.group_id });
-      }
-      attempts.push({ chave: configKey }); // fallback global
-
-      let record = null;
-      for (const filter of attempts) {
-        const res = await base44.functions.invoke("getEntityRecord", {
-          entityName: "ConfiguracaoSistema",
-          filter,
-          limit: 1,
-        });
-        const data = Array.isArray(res?.data) ? res.data : [];
-        if (data.length > 0) { record = data[0]; break; }
-      }
-
-      if (record) {
-        setValue(record.ativa === true);
-      } else {
-        setValue(defaultValue);
-      }
-    } catch (_) {
-      setValue(defaultValue);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleToggle = async (newValue) => {
-    const prev = value;
-    setValue(newValue); // Optimistic UI
-    setSyncStatus("saving");
-    setLoading(true);
-
-    try {
-      await base44.functions.invoke("upsertConfig", {
-        chave: configKey,
-        data: {
-          chave: configKey,
-          ativa: newValue,           // boolean — campo correto no schema
-          categoria: "sistema",
-        },
-        scope: scopeObj,
-      });
-      setSyncStatus("saved");
-      if (onChangeLocal) onChangeLocal(newValue);
-      setTimeout(() => setSyncStatus("idle"), 2000);
-    } catch (err) {
-      setValue(prev); // rollback
-      setSyncStatus("error");
-      console.error("Erro ao salvar config:", err?.message || err);
-      setTimeout(() => setSyncStatus("idle"), 3000);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Badge de contexto onde foi salvo
-  const ctxBadge = scopeObj.empresa_id
-    ? <span className="text-[9px] text-blue-600 bg-blue-50 border border-blue-200 rounded px-1">Empresa</span>
-    : scopeObj.group_id
-    ? <span className="text-[9px] text-indigo-600 bg-indigo-50 border border-indigo-200 rounded px-1">Grupo</span>
-    : <span className="text-[9px] text-slate-500 bg-slate-100 border border-slate-200 rounded px-1">Global</span>;
-
   return (
-    <div className="flex items-start justify-between py-3 px-3 bg-white rounded border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <Label className="block font-medium text-slate-900 cursor-pointer text-sm">{label}</Label>
-          {!loading && ctxBadge}
-        </div>
-        {description && <p className="text-xs text-slate-500 mt-1 leading-relaxed">{description}</p>}
+    <div className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+      <div className="flex-1 pr-4">
+        <p className={`text-sm font-medium ${accentMap[accentColor] || accentMap.blue}`}>{label}</p>
+        {desc && <p className="text-xs text-slate-500 mt-0.5">{desc}</p>}
       </div>
-
-      <div className="flex items-center gap-2 ml-3 flex-shrink-0">
-        {loading && syncStatus !== "saving" ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-400" />
-        ) : null}
+      <div className="flex items-center gap-2">
+        {(saving || isFetching) && <Loader2 className="w-3 h-3 animate-spin text-slate-400" />}
         <Switch
-          checked={value}
-          onCheckedChange={handleToggle}
-          disabled={loading}
-          className={value ? "data-[state=checked]:bg-blue-600" : ""}
+          checked={checked}
+          onCheckedChange={() => onToggle && onToggle(chave, !checked, categoria)}
+          disabled={disabled || saving}
+          data-permission="Sistema.Configuracao.editar"
         />
-        {syncStatus === "saving" && <Loader2 className="w-3 h-3 animate-spin text-blue-600" />}
-        {syncStatus === "saved" && <CheckCircle2 className="w-3 h-3 text-green-600" />}
-        {syncStatus === "error" && <AlertCircle className="w-3 h-3 text-red-600" />}
       </div>
     </div>
   );

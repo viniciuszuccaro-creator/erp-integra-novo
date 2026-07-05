@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronRight, Plus } from "lucide-react";
 import CadastrosTableUniversal from "./CadastrosTableUniversal";
 import CadastrosGroupCountBadge from "./CadastrosGroupCountBadge";
-import EntityCountBadge from "./EntityCountBadge";
+import CountBadgeSimplificado from "./CountBadgeSimplificado";
 import { CADASTROS_GROUPS, CADASTROS_ENTITIES, getGroupEntities } from "./CadastrosConfig";
 
 export default function CadastrosPageLayout() {
@@ -41,7 +41,7 @@ export default function CadastrosPageLayout() {
                 {CADASTROS_ENTITIES[selectedEntity]?.label || selectedEntity}
               </h2>
               <Badge variant="outline" className="text-xs rounded-sm">
-                <EntityCountBadge entityName={selectedEntity} />
+                <CountBadgeSimplificado entities={[selectedEntity]} />
               </Badge>
             </div>
             <Button className="gap-2 rounded-sm">
@@ -113,7 +113,7 @@ export default function CadastrosPageLayout() {
                                   {config?.label || entityName}
                                 </div>
                                 <div className="text-xs text-slate-500 mt-1">
-                                  <EntityCountBadge entityName={entityName} />
+                                  <CountBadgeSimplificado entities={[entityName]} />
                                 </div>
                               </div>
                               <EntityIcon className="w-4 h-4 text-slate-400 group-hover:text-blue-500 flex-shrink-0" />

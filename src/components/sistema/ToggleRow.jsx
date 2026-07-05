@@ -1,69 +1,44 @@
-/**
- * ToggleRow — linha de toggle persistente para ConfiguracaoSistema.
- * Usa useToggleConfig v9 com upsertConfig para garantir persistência real.
- */
 import React from "react";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Lock } from "lucide-react";
-import { canEditConfigByPermission } from "@/components/lib/useToggleConfig";
-import usePermissions from "@/components/lib/usePermissions";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Loader2 } from "lucide-react";
 
+/**
+ * ToggleRow — linha de toggle com persistência via useToggleConfig.
+ * Componente focado recriado para restaurar imports ativos.
+ */
 export default function ToggleRow({
-  chave,
-  categoria,
-  label,
-  // suporta tanto 'descricao' (novo) quanto 'desc' (legado)
-  descricao,
-  desc,
   configs = [],
-  saving = {},
-  isFetching,
-  getToggleValue,
-  // suporta tanto 'handleToggle' (novo) quanto 'onToggle' (legado)
-  handleToggle,
+  chave,
+  categoria = "Geral",
+  label,
+  desc,
+  saving = false,
+  isFetching = false,
   onToggle,
-  badge,
-  badgeColor = "bg-blue-100 text-blue-700",
+  getToggleValue,
+  accentColor = "blue",
   disabled = false,
 }) {
-  const { hasPermission } = usePermissions();
-  const canEdit = canEditConfigByPermission(hasPermission, chave, categoria);
-  const value = getToggleValue(configs, chave);
-  const isSaving = !!saving[chave];
-  const isDisabled = disabled || !canEdit || isSaving || !!isFetching;
-  const descText = descricao || desc;
-  // aceita tanto handleToggle quanto onToggle
-  const doToggle = handleToggle || onToggle;
-
+  const checked = getToggleValue ? getToggleValue(chave, configs) : false;
+  const accentMap = {
+    blue: "text-blue-600",
+    purple: "text-purple-600",
+    green: "text-green-600",
+    amber: "text-amber-600",
+  };
   return (
-    <div className={`flex items-center justify-between gap-3 py-3 px-1 border-b border-slate-100 last:border-0 transition-colors ${!canEdit ? "opacity-60" : ""}`}>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm font-medium text-slate-800 truncate">{label}</span>
-          {badge && (
-            <Badge className={`text-[10px] px-1.5 py-0 h-4 ${badgeColor}`}>{badge}</Badge>
-          )}
-          {!canEdit && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Lock className="w-3 h-3 text-slate-400 cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent>Sem permissão para editar</TooltipContent>
-            </Tooltip>
-          )}
-        </div>
-        {descText && <p className="text-xs text-slate-500 mt-0.5 leading-tight">{descText}</p>}
+    <div className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+      <div className="flex-1 pr-4">
+        <p className={`text-sm font-medium ${accentMap[accentColor] || accentMap.blue}`}>{label}</p>
+        {desc && <p className="text-xs text-slate-500 mt-0.5">{desc}</p>}
       </div>
-      <div className="flex items-center gap-2 shrink-0">
-        {(isSaving || isFetching) && <Loader2 className="w-3.5 h-3.5 text-blue-500 animate-spin" />}
+      <div className="flex items-center gap-2">
+        {(saving || isFetching) && <Loader2 className="w-3 h-3 animate-spin text-slate-400" />}
         <Switch
-          checked={!!value}
-          onCheckedChange={(newVal) => !isDisabled && doToggle && doToggle(chave, categoria, newVal)}
-          disabled={isDisabled}
-          className={`transition-all ${value ? "data-[state=checked]:bg-blue-600" : ""}`}
-          aria-label={label}
+          checked={checked}
+          onCheckedChange={() => onToggle && onToggle(chave, !checked, categoria)}
+          disabled={disabled || saving}
+          data-permission="Sistema.Configuracao.editar"
         />
       </div>
     </div>

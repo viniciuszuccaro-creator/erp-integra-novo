@@ -20,7 +20,8 @@ export default function HealthReportGenerator() {
       // Buscar logs de performance
       const logs = await base44.entities.AuditLog.filter({
         tipo_auditoria: 'sistema',
-        empresa_id: empresaAtual?.id,
+        ...(grupoAtual?.id && { group_id: grupoAtual.id }),
+        ...(empresaAtual?.id && { empresa_id: empresaAtual.id }),
       }, '-data_hora', 1000);
 
       // Buscar últimos 429s

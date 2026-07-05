@@ -53,6 +53,7 @@ export default function SystemHealthDashboard() {
     queryFn: () => base44.entities.AuditLog.filter(
       { 
         entidade: 'FunctionLatency',
+        ...(grupoAtual?.id && { group_id: grupoAtual.id }),
         ...(empresaAtual?.id && { empresa_id: empresaAtual.id })
       },
       '-data_hora',

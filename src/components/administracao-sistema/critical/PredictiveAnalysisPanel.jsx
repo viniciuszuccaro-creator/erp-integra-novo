@@ -10,7 +10,7 @@ import { base44 } from '@/api/base44Client';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 export default function PredictiveAnalysisPanel() {
-  const { empresaAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -20,7 +20,8 @@ export default function PredictiveAnalysisPanel() {
         // Buscar últimos 7 dias de logs
         const logs = await base44.entities.AuditLog.filter({
           tipo_auditoria: 'sistema',
-          empresa_id: empresaAtual?.id,
+          ...(grupoAtual?.id && { group_id: grupoAtual.id }),
+          ...(empresaAtual?.id && { empresa_id: empresaAtual.id }),
         }, '-data_hora', 10000);
 
         // Análise de padrões

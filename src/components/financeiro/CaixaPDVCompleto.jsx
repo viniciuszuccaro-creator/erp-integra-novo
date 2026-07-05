@@ -181,7 +181,7 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
             <p className="text-xs text-slate-500">Saldo em Dinheiro</p>
             <p className="text-lg font-bold text-emerald-600">R$ {saldoAtual.toFixed(2)}</p>
           </div>
-          <Button onClick={async () => { const ok = await confirm({ title: "Fechar Caixa", description: `Fechar caixa?\nSaldo: R$ ${saldoAtual.toFixed(2)}`, variant: "warning", confirmText: "Fechar" }); if (ok) fecharCaixa.mutate(); }} variant="outline" size="sm" disabled={controlesDesabilitados || fecharCaixa.isPending}>Fechar Caixa</Button>
+          <Button data-permission="Financeiro.Caixa.fechar" onClick={async () => { const ok = await confirm({ title: "Fechar Caixa", description: `Fechar caixa?\nSaldo: R$ ${saldoAtual.toFixed(2)}`, variant: "warning", confirmText: "Fechar" }); if (ok) fecharCaixa.mutate(); }} variant="outline" size="sm" disabled={controlesDesabilitados || fecharCaixa.isPending}>Fechar Caixa</Button>
         </div>
       </div>
 

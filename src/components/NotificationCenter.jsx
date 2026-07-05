@@ -17,19 +17,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function NotificationCenter() {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
-  const { empresaAtual, estaNoGrupo } = useContextoVisual();
+  const { empresaAtual, grupoAtual, estaNoGrupo } = useContextoVisual();
 
   const { data: notificacoes = [], refetch } = useQuery({
-    queryKey: ['notificacoes', empresaAtual?.id],
+    queryKey: ['notificacoes', empresaAtual?.id, grupoAtual?.id],
     queryFn: async () => {
       const user = await base44.auth.me();
-      // Preferir filtro no servidor para respeitar multiempresa
-      const filtroSrv = (!estaNoGrupo && empresaAtual) ? { empresa_id: empresaAtual.id } : {};
+      // Filtro multiempresa: grupo sempre, empresa se contexto empresa
+      const filtroSrv = {};
+      if (grupoAtual?.id) filtroSrv.group_id = grupoAtual.id;
+      if (!estaNoGrupo && empresaAtual) filtroSrv.empresa_id = empresaAtual.id;
       const todas = await base44.entities.Notificacao.filter(filtroSrv, '-created_date', 100);
       const visiveis = todas.filter(n => !n.arquivada && (!n.destinatario_email || n.destinatario_email === user.email));
       return visiveis;
     },
-    refetchInterval: 30000, // Atualiza a cada 30 segundos
+    refetchInterval: 30000,
   });
 
   // Separar notificações

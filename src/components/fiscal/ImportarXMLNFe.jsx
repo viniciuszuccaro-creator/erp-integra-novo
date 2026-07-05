@@ -283,7 +283,7 @@ export default function ImportarXMLNFe({ empresaId }) {
 
           {/* Ações */}
           <div className="flex justify-end gap-3">
-            <Button
+            <Button data-permission="Fiscal.NFe.importar"
               variant="outline"
               onClick={() => { setDadosNFe(null); setArquivo(null); setErros([]); setAvisos([]); }}
             >

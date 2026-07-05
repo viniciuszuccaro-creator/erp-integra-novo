@@ -321,7 +321,7 @@ export default function OperadorCaixaForm({ operador, item, data, initialData, d
             <X className="w-4 h-4 mr-2" />
             Cancelar
           </Button>
-          <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700" disabled={!contextoValido || !podeSalvar}>
+          <Button type="submit" data-permission="Cadastros.OperadorCaixa.salvar" className="bg-emerald-600 hover:bg-emerald-700" disabled={!contextoValido || !podeSalvar}>
             <Save className="w-4 h-4 mr-2" />
             Salvar Operador
           </Button>

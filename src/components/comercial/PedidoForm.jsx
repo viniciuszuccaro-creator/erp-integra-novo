@@ -151,7 +151,7 @@ export default function PedidoForm({ clientes = [], onSubmit, isSubmitting }) {
       </div>
 
       <div className="flex justify-end gap-3 pt-4">
-        <Button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
+        <Button type="submit" data-permission="Comercial.Pedido.salvar" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
           {isSubmitting ? "Salvando..." : "Salvar Pedido"}
         </Button>
       </div>

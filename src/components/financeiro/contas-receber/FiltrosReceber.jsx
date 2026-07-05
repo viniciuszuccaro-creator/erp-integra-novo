@@ -58,7 +58,7 @@ export default function FiltrosReceber({
               </Badge>
               
               <ProtectedAction permission="financeiro_receber_baixar_multiplos">
-                <Button variant="outline" size="sm" onClick={onBaixarMultipla} disabled={baixarPending}>
+                <Button data-permission="Financeiro.ContaReceber.baixar" variant="outline" size="sm" onClick={onBaixarMultipla} disabled={baixarPending}>
                   <CheckCircle2 className="w-3 h-3 mr-1" /> Baixar
                 </Button>
               </ProtectedAction>

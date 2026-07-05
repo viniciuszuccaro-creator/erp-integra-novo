@@ -42,9 +42,11 @@ export default function SincronizacaoMarketplacesAtiva() {
       let clienteId = pedidoExterno.cliente_erp_id;
       
       if (!clienteId) {
-        const clientesExistentes = await base44.entities.Cliente.filter({
-          cnpj: pedidoExterno.cliente_cpf_cnpj
-        });
+        const clienteFilter = {
+          cnpj: pedidoExterno.cliente_cpf_cnpj,
+        };
+        if (pedidoExterno.group_id) clienteFilter.group_id = pedidoExterno.group_id;
+        const clientesExistentes = await base44.entities.Cliente.filter(clienteFilter);
 
         if (clientesExistentes.length > 0) {
           clienteId = clientesExistentes[0].id;

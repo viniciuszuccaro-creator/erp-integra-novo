@@ -60,7 +60,7 @@ export default function FiltrosPagar({
               </Badge>
               
               <ProtectedAction permission="financeiro_pagar_baixar_multiplos">
-                <Button variant="outline" size="sm" onClick={onBaixarMultipla} disabled={baixarPending}>
+                <Button data-permission="Financeiro.ContaPagar.baixar" variant="outline" size="sm" onClick={onBaixarMultipla} disabled={baixarPending}>
                   <CheckCircle2 className="w-3 h-3 mr-1" /> Pagar
                 </Button>
               </ProtectedAction>

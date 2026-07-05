@@ -294,7 +294,7 @@ export default function EnviarProducaoParaItensButton({
             )}
 
             <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button
+              <Button data-permission="Producao.Item.enviar"
                 type="button"
                 variant="outline"
                 onClick={() => setDialogAberto(false)}

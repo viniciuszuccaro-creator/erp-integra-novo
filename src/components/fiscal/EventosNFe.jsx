@@ -259,7 +259,7 @@ export default function EventosNFe({ nfe }) {
               </div>
 
               <div className="flex gap-3">
-                <Button
+                <Button data-permission="Fiscal.NFe.evento"
                   type="button"
                   variant="outline"
                   onClick={() => setDialogCartaCorrecao(false)}

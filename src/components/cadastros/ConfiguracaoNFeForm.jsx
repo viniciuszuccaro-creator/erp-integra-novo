@@ -211,7 +211,7 @@ export default function ConfiguracaoNFeForm({ config, onSubmit, isSubmitting, wi
       </Card>
 
       <div className="flex justify-end gap-3">
-        <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={salvando || !contextoValido || !podeSalvar} data-action="Fiscal.NFe.salvar">
+        <Button type="submit" data-permission="Fiscal.ConfiguracaoNFe.salvar" className="bg-blue-600 hover:bg-blue-700" disabled={salvando || !contextoValido || !podeSalvar} data-action="Fiscal.NFe.salvar">
           <Save className="w-4 h-4 mr-2" />
           {salvando ? 'Salvando...' : config ? 'Atualizar' : 'Criar'}
         </Button>

@@ -208,7 +208,7 @@ export default function GrupoEmpresarialForm({ grupo, onSubmit, isSubmitting, wi
             </Button>
           </>
         )}
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" data-permission="Cadastros.GrupoEmpresarial.salvar" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {grupo ? 'Atualizar Grupo' : 'Criar Grupo'}
         </Button>

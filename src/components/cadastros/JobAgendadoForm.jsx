@@ -124,7 +124,7 @@ export default function JobAgendadoForm({ jobAgendado, onSubmit, isSubmitting, w
       </Card>
 
       <div className="flex justify-end gap-3">
-        <Button type="submit" className="bg-amber-600 hover:bg-amber-700" disabled={isSubmitting}>
+        <Button type="submit" data-permission="Sistema.Job.salvar" className="bg-amber-600 hover:bg-amber-700" disabled={isSubmitting}>
           <Save className="w-4 h-4 mr-2" />
           {isSubmitting ? 'Salvando...' : jobAgendado ? 'Atualizar' : 'Criar'}
         </Button>

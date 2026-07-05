@@ -29,20 +29,23 @@ export default function VendasMulticanal({ windowMode = false }) {
   const [canalFiltro, setCanalFiltro] = useState("todos");
   const [statusFiltro, setStatusFiltro] = useState("todos");
   const [busca, setBusca] = useState("");
-  const { empresaAtual, filtrarPorContexto } = useContextoVisual();
+  const { empresaAtual, filtrarPorContexto, filterInContext, estaNoGrupo, grupoAtual } = useContextoVisual();
   const queryClient = useQueryClient();
+  const hasContext = Boolean(empresaAtual?.id || estaNoGrupo || grupoAtual?.id);
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos-multicanal'],
-    queryFn: () => base44.entities.Pedido.list('-created_date'),
+    queryKey: ['pedidos-multicanal', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
+    queryFn: () => filterInContext('Pedido', {}, '-created_date', 200),
+    enabled: hasContext,
   });
 
   const { data: pagamentosOmnichannel = [] } = useQuery({
-    queryKey: ['pagamentos-omnichannel'],
-    queryFn: () => base44.entities.PagamentoOmnichannel.list('-created_date'),
+    queryKey: ['pagamentos-omnichannel', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
+    queryFn: () => filterInContext('PagamentoOmnichannel', {}, '-created_date', 200),
+    enabled: hasContext,
   });
 
-  const pedidosFiltrados = filtrarPorContexto(pedidos, 'empresa_id');
+  const pedidosFiltrados = pedidos;
 
   const pedidosMulticanal = pedidosFiltrados.filter(p => 
     ['E-commerce', 'Site', 'Marketplace', 'Portal', 'WhatsApp', 'Chatbot', 'App'].includes(p.origem_pedido)

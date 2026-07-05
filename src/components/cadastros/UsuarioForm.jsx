@@ -115,7 +115,7 @@ export default function UsuarioForm({ usuario, onSubmit, isSubmitting, windowMod
       </Alert>
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" data-permission="Sistema.Usuario.salvar" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {usuario ? 'Atualizar' : 'Convidar Usuário'}
         </Button>

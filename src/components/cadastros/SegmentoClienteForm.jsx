@@ -71,7 +71,7 @@ export default function SegmentoClienteForm({ segmento, segmentoCliente, item, d
         />
       </div>
 
-      <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
+      <Button type="submit" data-permission="Cadastros.Segmento.salvar" className="w-full bg-blue-600 hover:bg-blue-700">
         {dadosIniciais ? 'Atualizar Segmento' : 'Criar Segmento'}
       </Button>
     </form>

@@ -94,7 +94,7 @@ export default function ParametroPortalClienteForm({ parametro, onSubmit, window
         </Card>
 
         <div className="flex justify-end gap-3">
-          <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+          <Button type="submit" data-permission="Cadastros.ParametroPortal.salvar" className="bg-blue-600 hover:bg-blue-700">
             <Save className="w-4 h-4 mr-2" />
             Salvar Parâmetros
           </Button>

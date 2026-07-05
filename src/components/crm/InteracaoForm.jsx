@@ -158,7 +158,7 @@ export default function InteracaoForm({ interacao, onSubmit, windowMode = false 
         </div>
       </div>
       <div className="flex justify-end gap-3 pt-4">
-        <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+        <Button type="submit" data-permission="CRM.Interacao.salvar" className="bg-blue-600 hover:bg-blue-700">
           {interacao ? 'Atualizar' : 'Registrar Interação'}
         </Button>
       </div>

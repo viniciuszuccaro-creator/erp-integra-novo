@@ -18,10 +18,10 @@ export function useItensRevenda({ formData, setFormData }) {
   const { data: produtos = [] } = useQuery({
     queryKey: ['produtos-revenda', formData?.empresa_id, formData?.group_id],
     queryFn: async () => {
-      const filter = formData?.empresa_id
-        ? { empresa_id: formData.empresa_id, tipo_item: 'Revenda', status: 'Ativo' }
-        : { tipo_item: 'Revenda', status: 'Ativo' };
+      const filter = { tipo_item: 'Revenda', status: 'Ativo' };
+      if (formData?.empresa_id) filter.empresa_id = formData.empresa_id;
       if (formData?.group_id) filter.group_id = formData.group_id;
+      if (!filter.empresa_id && !filter.group_id) return [];
       return await base44.entities.Produto.filter(filter);
     },
     enabled: true

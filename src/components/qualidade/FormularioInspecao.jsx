@@ -232,7 +232,7 @@ export default function FormularioInspecao({ op, item, onConcluido, windowMode =
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
-        <Button type="submit" disabled={criarInspecaoMutation.isPending} className="bg-purple-600 hover:bg-purple-700">
+        <Button type="submit" data-permission="Qualidade.Inspecao.salvar" disabled={criarInspecaoMutation.isPending} className="bg-purple-600 hover:bg-purple-700">
           <Save className="w-4 h-4 mr-2" />
           {criarInspecaoMutation.isPending ? 'Salvando...' : 'Salvar Inspeção'}
         </Button>

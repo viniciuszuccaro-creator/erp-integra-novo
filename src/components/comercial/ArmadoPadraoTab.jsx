@@ -26,9 +26,11 @@ export default function ArmadoPadraoTab({ formData, setFormData, empresaId, onNe
     queryKey: ['bitolas', empresaId || formData?.empresa_id],
     queryFn: async () => {
       const empId = empresaId || formData?.empresa_id;
-      const filter = empId
-        ? { empresa_id: empId, eh_bitola: true, status: 'Ativo' }
-        : { eh_bitola: true, status: 'Ativo' };
+      const grpId = formData?.group_id;
+      const filter = { eh_bitola: true, status: 'Ativo' };
+      if (empId) filter.empresa_id = empId;
+      if (grpId) filter.group_id = grpId;
+      if (!empId && !grpId) return [];
       return await base44.entities.Produto.filter(filter);
     },
     enabled: true

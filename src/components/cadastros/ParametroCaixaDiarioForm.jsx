@@ -90,7 +90,7 @@ export default function ParametroCaixaDiarioForm({ parametro, onSubmit, windowMo
         </Card>
 
         <div className="flex justify-end gap-3">
-          <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700">
+          <Button type="submit" data-permission="Financeiro.ParametroCaixa.salvar" className="bg-emerald-600 hover:bg-emerald-700">
             <Save className="w-4 h-4 mr-2" />
             Salvar Parâmetros
           </Button>

@@ -235,7 +235,7 @@ export function useRealtimePedidos(empresaId, limite = 10, groupId = null) {
         ? base44.entities.Pedido.filter({ empresa_id: empresaId }, '-created_date', limite)
         : groupId
           ? base44.entities.Pedido.filter({ group_id: groupId }, '-created_date', limite)
-          : base44.entities.Pedido.list('-created_date', limite)
+          : []
     ),
     { 
       refetchInterval: 30000,
@@ -270,7 +270,7 @@ export function useRealtimeEntregas(empresaId, groupId = null) {
           ? base44.entities.Entrega.filter({ empresa_id: empresaId }, '-created_date', 20)
           : groupId
             ? base44.entities.Entrega.filter({ group_id: groupId }, '-created_date', 20)
-            : base44.entities.Entrega.list('-created_date', 20)
+            : []
       );
       
       return entregas.filter(e => !['Entregue', 'Cancelado', 'Devolvido'].includes(e.status));

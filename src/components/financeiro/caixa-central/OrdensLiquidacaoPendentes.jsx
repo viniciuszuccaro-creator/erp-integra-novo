@@ -184,7 +184,7 @@ export default function OrdensLiquidacaoPendentes() {
                           <CheckCircle2 className="w-4 h-4 mr-1" />
                           Liquidar
                         </Button>
-                        <Button 
+                        <Button data-permission="Financeiro.Caixa.liquidar" 
                           size="sm" 
                           variant="outline" 
                           onClick={() => cancelarOrdemMutation.mutate(ordem.id)} 

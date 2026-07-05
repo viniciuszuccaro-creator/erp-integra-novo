@@ -123,7 +123,7 @@ Retorne a melhor sequência de entregas, distância total, tempo estimado e cust
           <p className="text-sm text-slate-600 mt-1">Otimização de rotas com IA</p>
         </div>
 
-        <Button
+        <Button data-permission="Expedicao.Rota.criar"
           onClick={() => {
             if (entregasPendentes.length > 0 && motoristas.length > 0 && veiculos.length > 0) {
               gerarRotaIAMutation.mutate({

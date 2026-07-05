@@ -81,7 +81,7 @@ export default function DriverChat({ entrega, onUpdated }) {
       </CardContent>
       <form onSubmit={handleSend} className="border-t p-2 flex gap-2">
         <Input value={msg} onChange={(e)=>setMsg(e.target.value)} placeholder="Escreva uma mensagem..." className="flex-1" disabled={enviarMutation.isPending} />
-        <Button type="submit" disabled={!msg.trim() || enviarMutation.isPending} className="bg-blue-600 hover:bg-blue-700">
+        <Button type="submit" data-permission="Expedicao.Motorista.enviar" disabled={!msg.trim() || enviarMutation.isPending} className="bg-blue-600 hover:bg-blue-700">
           <Send className="w-4 h-4"/>
         </Button>
       </form>

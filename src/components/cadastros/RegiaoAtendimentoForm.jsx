@@ -80,7 +80,7 @@ export default function RegiaoAtendimentoForm({ regiaoId, regiaoAtendimento, ite
             </>
           )}
         </div>
-        <Button type="submit">{regiaoId || dadosIniciaisProps ? "Atualizar" : "Criar"} Região</Button>
+        <Button type="submit" data-permission="Cadastros.Regiao.salvar">{regiaoId || dadosIniciaisProps ? "Atualizar" : "Criar"} Região</Button>
       </div>
     </form>
   );

@@ -351,7 +351,7 @@ export default function OrdemCompraForm({ ordemCompra, onSubmit, windowMode = fa
       </Card>
 
       <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
-        <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+        <Button type="submit" data-permission="Compras.OrdemCompra.salvar" className="bg-blue-600 hover:bg-blue-700">
           <Save className="w-4 h-4 mr-2" />
           {ordemCompra ? 'Atualizar' : 'Criar'} Ordem de Compra
         </Button>

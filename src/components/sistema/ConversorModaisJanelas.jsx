@@ -215,7 +215,7 @@ function ExemploFormulario({ data, onSave, onCancel }) {
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" className="bg-green-600 hover:bg-green-700">
+        <Button type="submit" data-permission="Sistema.Configuracao.salvar" className="bg-green-600 hover:bg-green-700">
           Salvar
         </Button>
       </div>

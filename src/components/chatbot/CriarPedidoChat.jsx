@@ -69,8 +69,10 @@ export default function CriarPedidoChat({ conversa, clienteId, onPedidoCriado })
       const valorTotal = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
       const pesoTotal = carrinho.reduce((sum, item) => sum + ((item.peso || 0) * item.quantidade), 0);
 
-      // Gerar número do pedido
-      const pedidos = await base44.entities.Pedido.list('-created_date', 1);
+      // Gerar número do pedido (filtrado por empresa para multi-tenant)
+      const pedidos = await base44.entities.Pedido.filter(
+        { empresa_id: empresaAtual?.id }, '-created_date', 1
+      );
       const ultimoNumero = pedidos[0]?.numero_pedido?.replace('PED-', '') || '0';
       const novoNumero = `PED-${String(parseInt(ultimoNumero) + 1).padStart(6, '0')}`;
 

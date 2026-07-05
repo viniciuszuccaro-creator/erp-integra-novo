@@ -100,7 +100,7 @@ export default function DepartamentoForm({ departamento, item, data, initialData
             <span className="text-sm text-red-900 font-medium">Confirmar exclusão do departamento "{formData.nome}"?</span>
             <div className="flex gap-2">
               <Button type="button" size="sm" variant="outline" onClick={() => setConfirmandoExclusao(false)}>Cancelar</Button>
-              <Button type="button" size="sm" variant="destructive" onClick={confirmarExclusaoDefinitiva}>Excluir</Button>
+              <Button type="button" size="sm" variant="destructive" data-permission="Cadastros.Departamento.excluir" data-action="Cadastros.Departamento.excluir" data-sensitive="true" onClick={confirmarExclusaoDefinitiva}>Excluir</Button>
             </div>
           </AlertDescription>
         </Alert>

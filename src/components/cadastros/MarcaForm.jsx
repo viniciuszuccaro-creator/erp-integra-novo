@@ -168,7 +168,7 @@ export default function MarcaForm({ marca, item, data, initialData, defaultValue
             <span className="text-sm text-red-900 font-medium">Confirmar exclusão da marca "{formData.nome_marca}"?</span>
             <div className="flex gap-2">
               <Button type="button" size="sm" variant="outline" onClick={() => setConfirmandoExclusao(false)}>Cancelar</Button>
-              <Button type="button" size="sm" variant="destructive" onClick={confirmarExclusaoDefinitiva}>Excluir</Button>
+              <Button type="button" size="sm" variant="destructive" data-permission="Cadastros.Marca.excluir" data-action="Cadastros.Marca.excluir" data-sensitive="true" onClick={confirmarExclusaoDefinitiva}>Excluir</Button>
             </div>
           </AlertDescription>
         </Alert>

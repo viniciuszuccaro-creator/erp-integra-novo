@@ -31,6 +31,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { ImprimirPedido } from "@/components/lib/impressao";
 import { useToast } from "@/components/ui/use-toast";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 import SearchInput from "../ui/SearchInput";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -56,6 +57,7 @@ export default function PedidosTab({ pedidos, clientes, isLoading, empresas, onC
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
   const { toast } = useToast();
+  const { confirm, ConfirmDialog } = useConfirm();
   const queryClient = useQueryClient();
   const { openWindow, closeWindow } = useWindow();
 
@@ -278,7 +280,7 @@ export default function PedidosTab({ pedidos, clientes, isLoading, empresas, onC
           </Button>
         )}
 
-        <Button variant="ghost" size="sm" data-permission="Comercial.Pedido.excluir" data-sensitive onClick={async () => { if (confirm('Excluir pedido?')) { try { await base44.entities.AuditLog.create({ acao: 'Exclusão', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Exclusão solicitada via UI', data_hora: new Date().toISOString() }); } catch {} deleteMutation.mutate(pedido.id); } }} title="Excluir" className="h-8 px-2 text-red-600">
+        <Button variant="ghost" size="sm" data-permission="Comercial.Pedido.excluir" data-sensitive onClick={async () => { const ok = await confirm({ title: "Excluir Pedido", description: "Deseja realmente excluir este pedido?", variant: "danger", confirmText: "Excluir" }); if (ok) { try { await base44.entities.AuditLog.create({ acao: 'Exclusão', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Exclusão solicitada via UI', data_hora: new Date().toISOString() }); } catch {} deleteMutation.mutate(pedido.id); } }} title="Excluir" className="h-8 px-2 text-red-600">
           <Trash2 className="w-3 h-3 mr-1" />
           <span className="text-xs">Excluir</span>
         </Button>
@@ -299,7 +301,7 @@ export default function PedidosTab({ pedidos, clientes, isLoading, empresas, onC
     if ((pedido.tipo_pedido === 'Produção Sob Medida' || pedido.itens_corte_dobra?.length > 0 || pedido.itens_armado_padrao?.length > 0) && pedido.status !== 'Cancelado') {
       items.push({ key: 'op', label: 'Gerar OP', action: async () => { toast({ title: '🏭 Criando OP...' }); try { await base44.entities.AuditLog.create({ acao: 'Gerar OP', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada geração de OP', data_hora: new Date().toISOString() }); } catch {} } });
     }
-    items.push({ key: 'excluir', label: 'Excluir', action: async () => { if (confirm('Excluir pedido?')) { try { await base44.entities.AuditLog.create({ acao: 'Exclusão', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Exclusão solicitada via UI', data_hora: new Date().toISOString() }); } catch {} deleteMutation.mutate(pedido.id); } } });
+    items.push({ key: 'excluir', label: 'Excluir', action: async () => { const ok = await confirm({ title: "Excluir Pedido", description: "Deseja realmente excluir este pedido?", variant: "danger", confirmText: "Excluir" }); if (ok) { try { await base44.entities.AuditLog.create({ acao: 'Exclusão', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Exclusão solicitada via UI', data_hora: new Date().toISOString() }); } catch {} deleteMutation.mutate(pedido.id); } } });
     if (pedido.status_aprovacao === 'pendente') {
       items.push({ key: 'aprovar', label: 'Analisar Aprovação', action: () => openWindow(CentralAprovacoesManager, { windowMode: true, initialTab: 'descontos' }, { title: '🔐 Central de Aprovações', width: 1200, height: 700 }) });
     }
@@ -497,6 +499,7 @@ export default function PedidosTab({ pedidos, clientes, isLoading, empresas, onC
       </Card>
     </ResizablePanel>
   </ResizablePanelGroup>
-</div>
+  <ConfirmDialog />
+  </div>
   );
-}
+  }

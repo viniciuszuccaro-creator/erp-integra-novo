@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Shield, Search, Plus } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
@@ -138,17 +139,19 @@ export default function CentralPerfisAcesso() {
     });
   };
 
-  const handleExcluirPerfil = (perfil) => {
+  const handleExcluirPerfil = async (perfil) => {
     const using = usuarios.filter((u) => u.perfil_acesso_id === perfil.id);
     if (using.length > 0) {
       toast.error(`❌ ${using.length} usuário(s) usando este perfil`);
       return;
     }
-    if (
-      confirm(
-        `Confirma exclusão do perfil "${perfil.nome_perfil}"? Esta ação sensível será auditada.`
-      )
-    ) {
+    const ok = await confirm({
+      title: "Excluir Perfil",
+      description: `Confirma exclusão do perfil "${perfil.nome_perfil}"? Esta ação sensível será auditada.`,
+      variant: "danger",
+      confirmText: "Excluir"
+    });
+    if (ok) {
       excluirPerfilMutation.mutate(perfil.id);
     }
   };
@@ -272,6 +275,7 @@ export default function CentralPerfisAcesso() {
           canManage={canManageOpenProfile}
         />
       )}
+      <ConfirmDialog />
     </div>
   );
 }

@@ -40,6 +40,7 @@ export default function TemplatesMensagens({ onSelecionarTemplate }) {
   const [exibirForm, setExibirForm] = useState(false);
   
   const queryClient = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const { empresaAtual } = useContextoVisual();
 
   const categorias = ['Saudação', 'Despedida', 'Orçamento', 'Pedido', 'Entrega', 'Financeiro', 'Suporte', 'Geral'];
@@ -404,6 +405,7 @@ export default function TemplatesMensagens({ onSelecionarTemplate }) {
           )}
         </div>
       </div>
+      <ConfirmDialog />
     </div>
   );
 }

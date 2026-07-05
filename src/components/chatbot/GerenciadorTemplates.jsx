@@ -45,6 +45,7 @@ export default function GerenciadorTemplates() {
   const [templateEditando, setTemplateEditando] = useState(null);
   const [busca, setBusca] = useState('');
   const queryClient = useQueryClient();
+  const { confirm, ConfirmDialog } = useConfirm();
   const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
@@ -363,6 +364,7 @@ export default function GerenciadorTemplates() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ConfirmDialog />
     </div>
   );
 }

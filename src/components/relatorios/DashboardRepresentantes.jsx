@@ -15,6 +15,7 @@ import {
   Download
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 const tiposRepresentante = [
   { value: 'todos', label: 'Todos os Tipos' },
@@ -30,20 +31,25 @@ const tiposRepresentante = [
 export default function DashboardRepresentantes() {
   const [periodoFiltro, setPeriodoFiltro] = React.useState("mes");
   const [tipoFiltro, setTipoFiltro] = React.useState("todos");
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: representantes = [] } = useQuery({
-    queryKey: ['representantes'],
-    queryFn: () => base44.entities.Representante.filter({ status: 'Ativo' })
+    queryKey: ['representantes', contextoKey],
+    queryFn: () => filterInContext('Representante', { status: 'Ativo' }, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes'],
-    queryFn: () => base44.entities.Cliente.list()
+    queryKey: ['clientes', contextoKey],
+    queryFn: () => filterInContext('Cliente', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos'],
-    queryFn: () => base44.entities.Pedido.list()
+    queryKey: ['pedidos', contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-created_date', 999),
+    enabled: !!contexto,
   });
 
   const calcularMetricasGerais = () => {

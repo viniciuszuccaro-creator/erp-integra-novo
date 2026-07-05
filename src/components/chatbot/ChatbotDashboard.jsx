@@ -46,33 +46,28 @@ import {
  * ✅ Satisfação do cliente (CSAT)
  */
 export default function ChatbotDashboard() {
-  const { empresaAtual, filtrarPorContexto } = useContextoVisual();
+  const { empresaAtual, filtrarPorContexto, filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   // Buscar todas as conversas
   const { data: conversas = [] } = useQuery({
-    queryKey: ['conversas-analytics', empresaAtual?.id],
-    queryFn: async () => {
-      return await base44.entities.ConversaOmnicanal.list();
-    },
-    select: (data) => filtrarPorContexto(data, 'empresa_id')
+    queryKey: ['conversas-analytics', contextoKey],
+    queryFn: () => filterInContext('ConversaOmnicanal', {}, '-created_date', 999),
+    enabled: !!contexto,
   });
 
   // Buscar todas as mensagens
   const { data: mensagens = [] } = useQuery({
-    queryKey: ['mensagens-analytics', empresaAtual?.id],
-    queryFn: async () => {
-      return await base44.entities.MensagemOmnicanal.list();
-    },
-    select: (data) => filtrarPorContexto(data, 'empresa_id')
+    queryKey: ['mensagens-analytics', contextoKey],
+    queryFn: () => filterInContext('MensagemOmnicanal', {}, '-created_date', 999),
+    enabled: !!contexto,
   });
 
   // Buscar interações
   const { data: interacoes = [] } = useQuery({
-    queryKey: ['interacoes-analytics', empresaAtual?.id],
-    queryFn: async () => {
-      return await base44.entities.ChatbotInteracao.list();
-    },
-    select: (data) => filtrarPorContexto(data, 'empresa_id')
+    queryKey: ['interacoes-analytics', contextoKey],
+    queryFn: () => filterInContext('ChatbotInteracao', {}, '-data_hora', 999),
+    enabled: !!contexto,
   });
 
   // Calcular métricas

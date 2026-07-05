@@ -14,12 +14,15 @@ import DuplicatasTabela from './importar-xml/DuplicatasTabela';
 import OpcoesImportacao from './importar-xml/OpcoesImportacao';
 import { toast } from 'sonner';
 import { parseNFeXML, validarXMLNFe, lerArquivoXML } from '../lib/parserXMLNFe';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 /**
  * Componente de Importação de XML de NF-e
  * Processa XML, cria fornecedor, ordem de compra, entrada de estoque e contas a pagar
  */
 export default function ImportarXMLNFe({ empresaId }) {
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [arquivo, setArquivo] = useState(null);
   const [processando, setProcessando] = useState(false);
   const [dadosNFe, setDadosNFe] = useState(null);
@@ -36,13 +39,15 @@ export default function ImportarXMLNFe({ empresaId }) {
   const queryClient = useQueryClient();
 
   const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos'],
-    queryFn: () => base44.entities.Produto.list(),
+    queryKey: ['produtos', contextoKey],
+    queryFn: () => filterInContext('Produto', {}, 'descricao', 999),
+    enabled: !!contexto,
   });
 
   const { data: fornecedores = [] } = useQuery({
-    queryKey: ['fornecedores'],
-    queryFn: () => base44.entities.Fornecedor.list(),
+    queryKey: ['fornecedores', contextoKey],
+    queryFn: () => filterInContext('Fornecedor', {}, 'nome_fantasia', 999),
+    enabled: !!contexto,
   });
 
   // Processar arquivo XML

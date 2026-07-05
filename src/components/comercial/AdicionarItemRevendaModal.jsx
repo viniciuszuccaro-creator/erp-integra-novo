@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { calcularPrecoItem } from "./CalculadorPrecoItem";
 import Top10ProdutosCliente from "./Top10ProdutosCliente";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -45,10 +46,13 @@ export default function AdicionarItemRevendaModal({
   const [observacoes, setObservacoes] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [mostrarSugestoes, setMostrarSugestoes] = useState(true);
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos'],
-    queryFn: () => base44.entities.Produto.list(),
+    queryKey: ['produtos', contextoKey],
+    queryFn: () => filterInContext('Produto', {}, 'descricao', 999),
+    enabled: !!contexto,
   });
 
   const produtosAtivos = produtos.filter(p => 

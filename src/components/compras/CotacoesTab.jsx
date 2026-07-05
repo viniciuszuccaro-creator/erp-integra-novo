@@ -16,6 +16,7 @@ import { Plus, Send, Eye, CheckCircle2, TrendingUp, Award, FileText, ShoppingCar
 import CotacaoForm from "./CotacaoForm";
 import { useWindow } from "@/components/lib/useWindow";
 import usePermissions from "@/components/lib/usePermissions";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast as sonnerToast } from "sonner";
 
 export default function CotacoesTab({ windowMode = false }) {
@@ -24,6 +25,8 @@ export default function CotacoesTab({ windowMode = false }) {
   const [comparativoModal, setComparativoModal] = useState(null);
   const { openWindow } = useWindow();
   const { hasPermission } = usePermissions();
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [formCotacao, setFormCotacao] = useState({
     descricao: "",
     data_limite_resposta: "",
@@ -36,13 +39,15 @@ export default function CotacoesTab({ windowMode = false }) {
   const queryClient = useQueryClient();
 
   const { data: fornecedores = [] } = useQuery({
-    queryKey: ['fornecedores'],
-    queryFn: () => base44.entities.Fornecedor.list(),
+    queryKey: ['fornecedores', contextoKey],
+    queryFn: () => filterInContext('Fornecedor', {}, 'nome_fantasia', 999),
+    enabled: !!contexto,
   });
 
   const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos'],
-    queryFn: () => base44.entities.Produto.list(),
+    queryKey: ['produtos', contextoKey],
+    queryFn: () => filterInContext('Produto', {}, 'descricao', 999),
+    enabled: !!contexto,
   });
 
   // Criar entidade Cotacao (mock local)

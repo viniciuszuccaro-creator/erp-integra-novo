@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { 
   Clock, 
   CheckCircle, 
@@ -55,16 +56,21 @@ export default function PontoEletronicoBiometrico() {
   const [cameraAtiva, setCameraAtiva] = useState(false);
   const [colaboradorSelecionado, setColaboradorSelecionado] = useState(null);
 
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+
   // Fetch colaboradores
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
-    queryFn: () => base44.entities.Colaborador.list()
+    queryKey: ['colaboradores', contextoKey],
+    queryFn: () => filterInContext('Colaborador', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   // Fetch pontos do dia
   const { data: pontosHoje = [] } = useQuery({
-    queryKey: ['pontos-hoje'],
-    queryFn: () => base44.entities.Ponto.list()
+    queryKey: ['pontos-hoje', contextoKey],
+    queryFn: () => filterInContext('Ponto', {}, '-created_date', 999),
+    enabled: !!contexto,
   });
 
   // Mutation para registrar ponto

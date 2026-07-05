@@ -7,12 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, DollarSign } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Componente que gerencia aplicação de tabela de preço
- * - Carrega tabela padrão do cliente
- * - Permite trocar tabela manualmente
- * - Registra alterações no histórico
  */
 export default function AplicadorTabelaPreco({ 
   cliente, 
@@ -21,10 +19,13 @@ export default function AplicadorTabelaPreco({
   onHistoricoAdd 
 }) {
   const [tabelaAlteradaManualmente, setTabelaAlteradaManualmente] = useState(false);
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: tabelas = [] } = useQuery({
-    queryKey: ['tabelas-preco'],
-    queryFn: () => base44.entities.TabelaPreco.list(),
+    queryKey: ['tabelas-preco', contextoKey],
+    queryFn: () => filterInContext('TabelaPreco', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const tabelasVigentes = tabelas.filter(t => {

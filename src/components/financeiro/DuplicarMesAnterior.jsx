@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Copy, Calendar, CheckCircle2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * DUPLICAR MÊS ANTERIOR V21.8
@@ -21,6 +22,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 export default function DuplicarMesAnterior({ empresaId }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [dialogOpen, setDialogOpen] = useState(false);
   const [empresaSelecionada, setEmpresaSelecionada] = useState(empresaId || '');
   const [incluirRecorrentes, setIncluirRecorrentes] = useState(false);
@@ -36,14 +39,15 @@ export default function DuplicarMesAnterior({ empresaId }) {
   const [contasSelecionadas, setContasSelecionadas] = useState([]);
 
   const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas'],
-    queryFn: () => base44.entities.Empresa.list(),
+    queryKey: ['empresas', contextoKey],
+    queryFn: () => filterInContext('Empresa', {}, 'nome_fantasia', 999),
+    enabled: !!contexto,
   });
 
   const { data: configsRecorrentes = [] } = useQuery({
-    queryKey: ['configs-recorrentes'],
-    queryFn: () => base44.entities.ConfiguracaoDespesaRecorrente.list(),
-    enabled: dialogOpen && !incluirRecorrentes
+    queryKey: ['configs-recorrentes', contextoKey],
+    queryFn: () => filterInContext('ConfiguracaoDespesaRecorrente', {}, '-created_date', 999),
+    enabled: !!contexto && dialogOpen && !incluirRecorrentes
   });
 
   const { data: contasMesAnterior = [] } = useQuery({

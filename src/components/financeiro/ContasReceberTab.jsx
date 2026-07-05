@@ -14,7 +14,7 @@ import SimularPagamentoModal from "./SimularPagamentoModal";
 import GerarLinkPagamentoModal from "./GerarLinkPagamentoModal";
 import ContaReceberForm from "./ContaReceberForm";
 import { useWindow } from "@/components/lib/useWindow";
-// useContextoVisual removed — using useRLS for operations
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
 import { useUser } from "@/components/lib/UserContext";
 import usePermissions from "@/components/lib/usePermissions";
@@ -62,14 +62,19 @@ export default function ContasReceberTab({ contas, empresas = [], windowMode = f
     observacoes: ""
   });
 
+  const { filterInContext: filterEmpresas, empresaAtual: empCtx, grupoAtual: grpCtx, contexto: ctxEmp } = useContextoVisual();
+  const contextoKeyEmp = `${grpCtx?.id || 'sem-grupo'}-${empCtx?.id || 'sem-empresa'}`;
+
   const { data: empresasQuery = [] } = useQuery({
-    queryKey: ['empresas'],
-    queryFn: () => base44.entities.Empresa.list(),
+    queryKey: ['empresas', contextoKeyEmp],
+    queryFn: () => filterEmpresas('Empresa', {}, 'nome_fantasia', 999),
+    enabled: !!ctxEmp,
   });
 
   const { data: configsCobranca = [] } = useQuery({
-    queryKey: ['configs-cobranca'],
-    queryFn: () => base44.entities.ConfiguracaoCobrancaEmpresa.list(),
+    queryKey: ['configs-cobranca', contextoKeyEmp],
+    queryFn: () => filterEmpresas('ConfiguracaoCobrancaEmpresa', {}, '-created_date', 999),
+    enabled: !!ctxEmp,
   });
 
   const empresasData = empresas.length > 0 ? empresas : empresasQuery;

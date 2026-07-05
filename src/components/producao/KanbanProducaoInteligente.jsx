@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Plus, AlertTriangle, TrendingUp, Package, Clock } from "lucide-react";
 import { useWindow } from "@/components/lib/useWindow";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
 import FormularioOrdemProducao from "./FormularioOrdemProducao";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
@@ -24,16 +25,20 @@ const colunas = [
 export default function KanbanProducaoInteligente({ windowMode = false }) {
   const queryClient = useQueryClient();
   const { openWindow } = useWindow();
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [filtroEmpresa, setFiltroEmpresa] = useState("todas");
 
   const { data: ops = [], isLoading } = useQuery({
-    queryKey: ["ordens-producao"],
-    queryFn: () => base44.entities.OrdemProducao.list(),
+    queryKey: ["ordens-producao", contextoKey],
+    queryFn: () => filterInContext('OrdemProducao', {}, '-created_date', 999),
+    enabled: !!contexto,
   });
 
   const { data: empresas = [] } = useQuery({
-    queryKey: ["empresas"],
-    queryFn: () => base44.entities.Empresa.list(),
+    queryKey: ["empresas", contextoKey],
+    queryFn: () => filterInContext('Empresa', {}, 'nome_fantasia', 999),
+    enabled: !!contexto,
   });
 
   const updateStatusMutation = useMutation({

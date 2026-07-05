@@ -9,12 +9,15 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FileText, Truck, User, Package, Plus, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * 📋 INTEGRAÇÃO COM ROMANEIO V21.5
  * Cria romaneios automaticamente com entregas selecionadas
  */
 export default function IntegracaoRomaneio({ pedidosSelecionados = [], onClose, windowMode = false }) {
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [motorista, setMotorista] = useState("");
   const [veiculo, setVeiculo] = useState("");
   const [placa, setPlaca] = useState("");
@@ -25,18 +28,21 @@ export default function IntegracaoRomaneio({ pedidosSelecionados = [], onClose, 
   const queryClient = useQueryClient();
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos'],
-    queryFn: () => base44.entities.Pedido.list('-created_date'),
+    queryKey: ['pedidos', contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-created_date', 999),
+    enabled: !!contexto,
   });
 
   const { data: motoristas = [] } = useQuery({
-    queryKey: ['motoristas'],
-    queryFn: () => base44.entities.Motorista.list(),
+    queryKey: ['motoristas', contextoKey],
+    queryFn: () => filterInContext('Motorista', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const { data: veiculos = [] } = useQuery({
-    queryKey: ['veiculos'],
-    queryFn: () => base44.entities.Veiculo.list(),
+    queryKey: ['veiculos', contextoKey],
+    queryFn: () => filterInContext('Veiculo', {}, 'placa', 999),
+    enabled: !!contexto,
   });
 
   const { data: user } = useQuery({

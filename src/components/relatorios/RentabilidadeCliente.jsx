@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -9,24 +8,30 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { Users, TrendingUp, Download, Star, Award, Calendar } from "lucide-react";
 import { format } from "date-fns";
-import ExportMenu from "@/components/ui/ExportMenu"; // Added import
+import ExportMenu from "@/components/ui/ExportMenu";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
-export default function RentabilidadeCliente({ empresaId }) { // Kept empresaId as it was in original code, even if not in outline
-  const [periodo, setPeriodo] = useState(12); // meses
+export default function RentabilidadeCliente({ empresaId }) {
+  const [periodo, setPeriodo] = useState(12);
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes'],
-    queryFn: () => base44.entities.Cliente.list(),
+    queryKey: ['clientes', contextoKey],
+    queryFn: () => filterInContext('Cliente', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos'],
-    queryFn: () => base44.entities.Pedido.list('-data_pedido'),
+    queryKey: ['pedidos', contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-data_pedido', 999),
+    enabled: !!contexto,
   });
 
   const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contasReceber'],
-    queryFn: () => base44.entities.ContaReceber.list(),
+    queryKey: ['contasReceber', contextoKey],
+    queryFn: () => filterInContext('ContaReceber', {}, '-created_date', 999),
+    enabled: !!contexto,
   });
 
   // Calcular rentabilidade por cliente

@@ -4,16 +4,22 @@ import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, TrendingDown, TrendingUp, Users, Shield } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function MonitoramentoRHInteligente({ windowMode = false }) {
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+
   const { data: monitoramentos = [], isLoading } = useQuery({
-    queryKey: ["monitoramento-rh"],
-    queryFn: () => base44.entities.MonitoramentoRH.list(),
+    queryKey: ["monitoramento-rh", contextoKey],
+    queryFn: () => filterInContext('MonitoramentoRH', {}, '-created_date', 999),
+    enabled: !!contexto,
   });
 
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ["colaboradores"],
-    queryFn: () => base44.entities.Colaborador.list(),
+    queryKey: ["colaboradores", contextoKey],
+    queryFn: () => filterInContext('Colaborador', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const alertasCriticos = monitoramentos.filter(m => 

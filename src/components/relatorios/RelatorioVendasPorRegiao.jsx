@@ -8,31 +8,38 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { MapPin, TrendingUp, DollarSign, Users, Package, Award, FileDown } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 const CORES_GRAFICO = ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#06B6D4', '#EC4899', '#6366F1'];
 
 export default function RelatorioVendasPorRegiao() {
   const [periodoSelecionado, setPeriodoSelecionado] = useState('30');
   const [vendedorSelecionado, setVendedorSelecionado] = useState('todos');
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: regioes = [] } = useQuery({
-    queryKey: ['regioes-atendimento'],
-    queryFn: () => base44.entities.RegiaoAtendimento.list()
+    queryKey: ['regioes-atendimento', contextoKey],
+    queryFn: () => filterInContext('RegiaoAtendimento', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos'],
-    queryFn: () => base44.entities.Pedido.list('-data_pedido')
+    queryKey: ['pedidos', contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-data_pedido', 999),
+    enabled: !!contexto,
   });
 
   const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes'],
-    queryFn: () => base44.entities.Cliente.list()
+    queryKey: ['clientes', contextoKey],
+    queryFn: () => filterInContext('Cliente', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
-    queryFn: () => base44.entities.Colaborador.filter({ departamento: 'Comercial' })
+    queryKey: ['colaboradores', contextoKey],
+    queryFn: () => filterInContext('Colaborador', { departamento: 'Comercial' }, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const calcularDataLimite = () => {

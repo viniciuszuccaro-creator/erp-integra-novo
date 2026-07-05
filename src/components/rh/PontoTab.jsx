@@ -132,7 +132,7 @@ export default function PontoTab({ pontos, colaboradores }) {
   }, {});
 
   return (
-    <div className="space-y-6">
+    <div className="w-full h-full overflow-y-auto space-y-6">
       <div className="flex justify-between items-center">
         <div className="flex gap-4">
           <Card className="px-4 py-2">
@@ -176,131 +176,6 @@ export default function PontoTab({ pontos, colaboradores }) {
           Registrar Ponto
         </Button>
 
-        {/* BACKUP: Dialog removido */}
-        <Dialog open={false}>
-          <DialogTrigger asChild>
-            
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Registrar Ponto</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <Label htmlFor="colaborador">Colaborador *</Label>
-                  <Select
-                    value={formData.colaborador_id}
-                    onValueChange={(value) => {
-                      const colab = colaboradores.find(c => c.id === value);
-                      setFormData({ 
-                        ...formData, 
-                        colaborador_id: value,
-                        colaborador_nome: colab?.nome_completo || ''
-                      });
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o colaborador" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {colaboradores.filter(c => c.status === 'Ativo').map((colab) => (
-                        <SelectItem key={colab.id} value={colab.id}>
-                          {colab.nome_completo}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="data">Data *</Label>
-                  <Input
-                    id="data"
-                    type="date"
-                    value={formData.data}
-                    onChange={(e) => setFormData({ ...formData, data: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="tipo_dia">Tipo de Dia</Label>
-                  <Select
-                    value={formData.tipo_dia}
-                    onValueChange={(value) => setFormData({ ...formData, tipo_dia: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Normal">Normal</SelectItem>
-                      <SelectItem value="Feriado">Feriado</SelectItem>
-                      <SelectItem value="Fim de Semana">Fim de Semana</SelectItem>
-                      <SelectItem value="Folga">Folga</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="entrada_manha">Entrada Manhã</Label>
-                  <Input
-                    id="entrada_manha"
-                    type="time"
-                    value={formData.entrada_manha}
-                    onChange={(e) => setFormData({ ...formData, entrada_manha: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="saida_almoco">Saída Almoço</Label>
-                  <Input
-                    id="saida_almoco"
-                    type="time"
-                    value={formData.saida_almoco}
-                    onChange={(e) => setFormData({ ...formData, saida_almoco: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="retorno_almoco">Retorno Almoço</Label>
-                  <Input
-                    id="retorno_almoco"
-                    type="time"
-                    value={formData.retorno_almoco}
-                    onChange={(e) => setFormData({ ...formData, retorno_almoco: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="saida_tarde">Saída Tarde</Label>
-                  <Input
-                    id="saida_tarde"
-                    type="time"
-                    value={formData.saida_tarde}
-                    onChange={(e) => setFormData({ ...formData, saida_tarde: e.target.value })}
-                  />
-                </div>
-
-                <div className="col-span-2">
-                  <Label htmlFor="observacoes">Observações</Label>
-                  <Textarea
-                    id="observacoes"
-                    value={formData.observacoes}
-                    onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-                    rows={2}
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4">
-                <Button type="submit" disabled={createMutation.isPending} className="bg-pink-600 hover:bg-pink-700">
-                  {createMutation.isPending ? 'Salvando...' : 'Registrar'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
       </div>
 
       <Card className="border-0 shadow-md">

@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,28 +46,27 @@ import { useContextoVisual } from '@/components/lib/useContextoVisual';
  */
 export default function RelatoriosAtendimento() {
   const [periodo, setPeriodo] = useState('7dias');
-  const { empresaAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual, filterInContext, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const CORES = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
   // Buscar dados
   const { data: conversas = [], isLoading } = useQuery({
-    queryKey: ['relatorio-conversas', periodo, empresaAtual?.id],
+    queryKey: ['relatorio-conversas', periodo, contextoKey],
     queryFn: async () => {
       const dataInicio = new Date();
       if (periodo === '7dias') dataInicio.setDate(dataInicio.getDate() - 7);
       else if (periodo === '30dias') dataInicio.setDate(dataInicio.getDate() - 30);
       else if (periodo === '90dias') dataInicio.setDate(dataInicio.getDate() - 90);
 
-      return await base44.entities.ConversaOmnicanal.filter({
-        empresa_id: empresaAtual?.id
-      });
+      return await filterInContext('ConversaOmnicanal', {}, '-created_date', 999);
     },
-    enabled: !!empresaAtual?.id
+    enabled: !!contexto
   });
 
   // Calcular métricas
-  const metricas = React.useMemo(() => {
+  const metricas = useMemo(() => {
     if (conversas.length === 0) return null;
 
     const resolvidas = conversas.filter(c => c.status === 'Resolvida');
@@ -189,7 +187,7 @@ export default function RelatoriosAtendimento() {
               <option value="90dias">Últimos 90 dias</option>
             </select>
 
-            <Button onClick={exportarRelatorio} variant="outline">
+            <Button onClick={exportarRelatorio} variant="outline" data-permission="Chatbot.Relatorios.exportar">
               <Download className="w-4 h-4 mr-2" />
               Exportar
             </Button>
@@ -199,7 +197,7 @@ export default function RelatoriosAtendimento() {
         {metricas && (
           <>
             {/* KPIs */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 text-slate-600 text-xs mb-1">
@@ -216,16 +214,7 @@ export default function RelatoriosAtendimento() {
                     <TrendingUp className="w-3 h-3" />
                     Resolvidas
                   </div>
-                  <p className="text-xl font-bold text-green-600">{metricas.resolvidas}</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2 text-blue-600 text-xs mb-1">
-                    Taxa
-                  </div>
-                  <p className="text-xl font-bold text-blue-600">{metricas.taxaResolucao.toFixed(0)}%</p>
+                  <p className="text-xl font-bold text-green-600">{metricas.resolvidas} ({metricas.taxaResolucao.toFixed(0)}%)</p>
                 </CardContent>
               </Card>
 
@@ -235,7 +224,7 @@ export default function RelatoriosAtendimento() {
                     <Bot className="w-3 h-3" />
                     Bot
                   </div>
-                  <p className="text-xl font-bold text-purple-600">{metricas.resolvidasBot}</p>
+                  <p className="text-xl font-bold text-purple-600">{metricas.taxaBot.toFixed(0)}%</p>
                 </CardContent>
               </Card>
 
@@ -253,7 +242,7 @@ export default function RelatoriosAtendimento() {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 text-orange-600 text-xs mb-1">
                     <Clock className="w-3 h-3" />
-                    Tempo
+                    Tempo Médio
                   </div>
                   <p className="text-xl font-bold text-orange-600">{metricas.tempoMedioResposta.toFixed(1)}m</p>
                 </CardContent>
@@ -266,15 +255,6 @@ export default function RelatoriosAtendimento() {
                     CSAT
                   </div>
                   <p className="text-xl font-bold text-yellow-600">{metricas.csatMedio.toFixed(1)}/5</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2 text-pink-600 text-xs mb-1">
-                    % Bot
-                  </div>
-                  <p className="text-xl font-bold text-pink-600">{metricas.taxaBot.toFixed(0)}%</p>
                 </CardContent>
               </Card>
             </div>

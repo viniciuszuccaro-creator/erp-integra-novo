@@ -1,21 +1,17 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Shield, 
   Lock, 
-  Eye, 
   AlertTriangle,
   CheckCircle,
-  Activity,
-  Database,
-  FileText,
-  Clock
+  Activity
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 /**
  * Painel de Governança Corporativa
@@ -23,26 +19,28 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
  */
 export default function PainelGovernanca({ empresaId, grupoId }) {
   const [periodo, setPeriodo] = useState('hoje');
+  const { filterInContext, contexto } = useContextoVisual();
+  const contextoKey = `${grupoId || 'sem-grupo'}-${empresaId || 'sem-empresa'}`;
 
   const { data: auditoriaGlobal = [] } = useQuery({
-    queryKey: ['auditoria-global', empresaId],
-    queryFn: () => base44.entities.AuditoriaGlobal.list('-data_hora', 100),
+    queryKey: ['auditoria-global', contextoKey],
+    queryFn: () => filterInContext('AuditoriaGlobal', {}, '-data_hora', 100),
+    enabled: !!contexto,
   });
 
   const { data: auditoriaAcessos = [] } = useQuery({
-    queryKey: ['auditoria-acessos', empresaId],
-    queryFn: () => base44.entities.AuditoriaAcesso.list('-data_hora', 50),
+    queryKey: ['auditoria-acessos', contextoKey],
+    queryFn: () => filterInContext('AuditoriaAcesso', {}, '-data_hora', 50),
+    enabled: !!contexto,
   });
 
   const { data: governanca } = useQuery({
-    queryKey: ['governanca-empresa', empresaId],
+    queryKey: ['governanca-empresa', contextoKey],
     queryFn: async () => {
-      const configs = await base44.entities.GovernancaEmpresa.filter({
-        empresa_id: empresaId
-      });
+      const configs = await filterInContext('GovernancaEmpresa', { empresa_id: empresaId }, '-created_date', 10);
       return configs[0];
     },
-    enabled: !!empresaId
+    enabled: !!contexto && !!empresaId
   });
 
   // KPIs de Governança
@@ -64,7 +62,7 @@ export default function PainelGovernanca({ empresaId, grupoId }) {
   const alertasIA = auditoriaGlobal.filter(a => a.alerta_ia_gerado).length;
 
   return (
-    <div className="space-y-6">
+    <div className="w-full h-full overflow-y-auto space-y-6">
       {/* KPIs de Segurança */}
       <div className="grid grid-cols-4 gap-4">
         <Card className="border-green-200 bg-green-50">

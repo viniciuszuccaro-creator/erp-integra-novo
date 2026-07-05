@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 import { BotaoBuscaAutomatica } from "@/components/lib/BuscaDadosPublicos";
+import ClienteEnderecoSection from "./ClienteEnderecoSection";
 
 export default function ClienteDadosGeraisTab({ formData, setFormData, regioes, colaboradores, representantes }) {
   return (
@@ -173,110 +174,7 @@ export default function ClienteDadosGeraisTab({ formData, setFormData, regioes, 
           </>
         )}
 
-        <div className="col-span-2 pt-4 border-t">
-          <h3 className="font-semibold mb-3">Endereço Principal</h3>
-          <div className="grid grid-cols-4 gap-4">
-            <div>
-              <Label htmlFor="cep">CEP</Label>
-              <Input
-                id="cep"
-                value={formData.endereco_principal?.cep || ""}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  endereco_principal: { ...formData.endereco_principal, cep: e.target.value }
-                })}
-                placeholder="00000-000"
-              />
-            </div>
-
-            <div>
-              <Label>&nbsp;</Label>
-              <BotaoBuscaAutomatica
-                tipo="cep"
-                valor={formData.endereco_principal?.cep}
-                onDadosEncontrados={(dados) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    endereco_principal: {
-                      ...prev.endereco_principal,
-                      logradouro: dados.logradouro || "",
-                      bairro: dados.bairro || "",
-                      cidade: dados.cidade || "",
-                      estado: dados.uf || "",
-                      latitude: dados.latitude || null,
-                      longitude: dados.longitude || null,
-                      mapa_url: dados.latitude && dados.longitude
-                        ? `https://www.google.com/maps?q=${dados.latitude},${dados.longitude}`
-                        : ""
-                    }
-                  }));
-                }}
-                disabled={!formData.endereco_principal?.cep || formData.endereco_principal.cep.replace(/\D/g, '').length < 8}
-              />
-            </div>
-
-            <div className="col-span-2">
-              <Label htmlFor="logradouro">Logradouro</Label>
-              <Input
-                id="logradouro"
-                value={formData.endereco_principal?.logradouro || ""}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  endereco_principal: { ...formData.endereco_principal, logradouro: e.target.value }
-                })}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="numero">Número</Label>
-              <Input
-                id="numero"
-                value={formData.endereco_principal?.numero || ""}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  endereco_principal: { ...formData.endereco_principal, numero: e.target.value }
-                })}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="bairro">Bairro</Label>
-              <Input
-                id="bairro"
-                value={formData.endereco_principal?.bairro || ""}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  endereco_principal: { ...formData.endereco_principal, bairro: e.target.value }
-                })}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="cidade">Cidade</Label>
-              <Input
-                id="cidade"
-                value={formData.endereco_principal?.cidade || ""}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  endereco_principal: { ...formData.endereco_principal, cidade: e.target.value }
-                })}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="estado">UF</Label>
-              <Input
-                id="estado"
-                value={formData.endereco_principal?.estado || ""}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  endereco_principal: { ...formData.endereco_principal, estado: e.target.value }
-                })}
-                maxLength={2}
-              />
-            </div>
-          </div>
-        </div>
+        <ClienteEnderecoSection formData={formData} setFormData={setFormData} />
 
         <div>
           <Label htmlFor="regiao_atendimento_id">Região de Atendimento</Label>

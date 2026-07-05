@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,23 +17,7 @@ import {
   CheckCircle,
   Tag
 } from "lucide-react";
-
-// TABELA DE PESOS ESPECÍFICOS (Kg/m)
-const PESOS_FERRO = {
-  "6.3mm": 0.245,
-  "8.0mm": 0.395,
-  "10.0mm": 0.617,
-  "12.5mm": 0.963,
-  "16.0mm": 1.578,
-  "20.0mm": 2.466,
-  "25.0mm": 3.853,
-  "4.2mm": 0.109,
-  "5.0mm": 0.154,
-};
-
-const PRECO_FERRO_KG = 6.50;
-const MARGEM_MINIMA = 15;
-const COBRIMENTO_PADRAO = 2.5; // cm
+import { calcularTudo, PESOS_FERRO, PRECO_FERRO_KG, MARGEM_MINIMA, COBRIMENTO_PADRAO } from "./producao/useItemProducaoCalculo";
 
 export default function ItemProducaoForm({ item, onChange, index }) {
   const [formData, setFormData] = useState(item || {
@@ -93,7 +76,7 @@ export default function ItemProducaoForm({ item, onChange, index }) {
   });
 
   useEffect(() => {
-    calcularTudo();
+    calcularTudoLocal();
   }, [
     formData.tipo_peca,
     formData.comprimento,
@@ -127,145 +110,13 @@ export default function ItemProducaoForm({ item, onChange, index }) {
     formData.comprimento_sem_estribo // Added for completeness in dependencies
   ]);
 
-  const calcularTudo = () => {
-    let pesoFerroPrincipal = 0;
-    let pesoReforco = 0;
-    let pesoEstribos = 0;
-    let pesoMalha = 0;
-    let quantidadeEstribos = 0;
-
-    // CÁLCULO BASEADO NO TIPO DE PEÇA
-    if (formData.tipo_peca === "Coluna" || formData.tipo_peca === "Viga") {
-      // 1. FERRO PRINCIPAL
-      const comprimentoMetros = (formData.comprimento || 0) / 100;
-      const dobrasTotal = ((formData.dobra_le ? formData.tamanho_dobra_le : 0) + 
-                          (formData.dobra_ld ? formData.tamanho_dobra_ld : 0)) / 100;
-      const comprimentoTotalPrincipal = comprimentoMetros + dobrasTotal;
-      const pesoEspecificoPrincipal = PESOS_FERRO[formData.ferro_principal_bitola] || 0;
-      pesoFerroPrincipal = comprimentoTotalPrincipal * (formData.ferro_principal_quantidade || 0) * pesoEspecificoPrincipal;
-
-      // 2. REFORÇO (se tiver)
-      if (formData.tem_reforco && (formData.reforco_quantidade || 0) > 0) {
-        const pesoEspecificoReforco = PESOS_FERRO[formData.reforco_bitola] || 0;
-        pesoReforco = comprimentoTotalPrincipal * (formData.reforco_quantidade || 0) * pesoEspecificoReforco;
-      }
-
-      // 3. ESTRIBOS (retangular)
-      const larguraEstribo = (formData.largura - (2 * COBRIMENTO_PADRAO)) / 100;
-      const alturaEstribo = (formData.altura - (2 * COBRIMENTO_PADRAO)) / 100;
-      
-      // Calcular comprimento sem estribo
-      let comprimentoComEstribo = formData.comprimento;
-      if (formData.lado_sem_estribo_le || formData.lado_sem_estribo_ld) {
-        comprimentoComEstribo = (formData.comprimento || 0) - (formData.comprimento_sem_estribo || 0);
-      }
-      
-      // Ensure dimensions are positive before calculating estribo
-      const validLarguraEstribo = Math.max(0, larguraEstribo);
-      const validAlturaEstribo = Math.max(0, alturaEstribo);
-
-      if (formData.estribo_distancia > 0 && comprimentoComEstribo > 0 && validLarguraEstribo > 0 && validAlturaEstribo > 0) {
-        quantidadeEstribos = Math.ceil((comprimentoComEstribo / (formData.estribo_distancia || 1))) + 2; // +2 for ends
-        const perimetroEstribo = 2 * (validLarguraEstribo + validAlturaEstribo) + 0.10; // 10cm de gancho
-        const pesoEspecificoEstribo = PESOS_FERRO[formData.estribo_bitola] || 0;
-        pesoEstribos = quantidadeEstribos * perimetroEstribo * pesoEspecificoEstribo;
-      }
-
-    } else if (formData.tipo_peca === "Estaca" || formData.tipo_peca === "Broca") {
-      // 1. FERRO PRINCIPAL (circular)
-      const comprimentoMetros = (formData.comprimento || 0) / 100;
-      const pesoEspecificoPrincipal = PESOS_FERRO[formData.ferro_principal_bitola] || 0;
-      pesoFerroPrincipal = comprimentoMetros * (formData.ferro_principal_quantidade || 0) * pesoEspecificoPrincipal;
-
-      // 2. ESTRIBO ESPIRAL (circular)
-      const diametroEstribo = (formData.diametro - (2 * COBRIMENTO_PADRAO)) / 100;
-      const validDiametroEstribo = Math.max(0, diametroEstribo); // Ensure positive diameter
-      if (formData.estribo_distancia > 0 && validDiametroEstribo > 0) {
-        const numeroVoltas = (formData.comprimento || 0) / (formData.estribo_distancia || 1);
-        const comprimentoEspiral = numeroVoltas * Math.PI * validDiametroEstribo;
-        const pesoEspecificoEstribo = PESOS_FERRO[formData.estribo_bitola] || 0;
-        pesoEstribos = comprimentoEspiral * pesoEspecificoEstribo;
-        quantidadeEstribos = Math.ceil(numeroVoltas);
-      }
-
-    } else if (formData.tipo_peca === "Bloco") {
-      // BLOCO DE FUNDAÇÃO - MALHA
-      const comprimentoM = (formData.comprimento || 0) / 100;
-      const larguraM = (formData.largura || 0) / 100;
-      
-      // Quantidade de ferros na malha (2 lados)
-      const qtdFerroCmpr = Math.ceil(((formData.comprimento || 0) / (formData.espacamento_malha || 15))) + 1;
-      const qtdFerroLarg = Math.ceil(((formData.largura || 0) / (formData.espacamento_malha || 15))) + 1;
-      
-      // Malha superior e inferior (2 lados)
-      const comprimentoMalhaTotal = (qtdFerroCmpr * larguraM + qtdFerroLarg * comprimentoM) * 2;
-      const pesoEspecificoMalha = PESOS_FERRO[formData.bitola_malha] || 0;
-      pesoMalha = comprimentoMalhaTotal * pesoEspecificoMalha;
-
-      // Costelas (reforço vertical)
-      if ((formData.quantidade_costela || 0) > 0) {
-        const alturaM = (formData.altura || 0) / 100;
-        const pesoEspecificoCostela = PESOS_FERRO[formData.bitola_malha] || 0;
-        const pesoCostelas = alturaM * (formData.quantidade_costela || 0) * pesoEspecificoCostela;
-        pesoMalha += pesoCostelas;
-      }
-    }
-
-    // PESO TOTAL
-    const pesoUnitario = pesoFerroPrincipal + pesoReforco + pesoEstribos + pesoMalha;
-    const pesoTotal = pesoUnitario * (formData.quantidade || 1);
-
-    // CUSTO MATERIAL AUTOMÁTICO
-    const custoMaterial = pesoTotal * PRECO_FERRO_KG;
-
-    // CUSTO TOTAL
-    const custoTotal = 
-      custoMaterial + 
-      (formData.custo_mao_obra || 0) +
-      (formData.custo_lacamento || 0) +
-      (formData.custo_overhead || 0);
-
-    // PREÇO SUGERIDO
-    const precoSugeridoUnitario = (custoTotal / (formData.quantidade || 1)) * 1.20;
-    const precoVendaUnitario = (formData.preco_venda_unitario || 0) <= 0 ? parseFloat(precoSugeridoUnitario.toFixed(2)) : formData.preco_venda_unitario;
-    const precoVendaTotal = precoVendaUnitario * (formData.quantidade || 1);
-
-    // TEMPO DE PRODUÇÃO
-    const tempoProducao = calcularTempoProd(formData.tipo_peca, pesoTotal, quantidadeEstribos);
-
-    const dadosAtualizados = {
-      ...formData,
-      ferro_principal_peso_kg: parseFloat(pesoFerroPrincipal.toFixed(2)),
-      reforco_peso_kg: parseFloat(pesoReforco.toFixed(2)),
-      estribo_quantidade: quantidadeEstribos,
-      estribo_peso_kg: parseFloat(pesoEstribos.toFixed(2)),
-      estribo_largura: formData.largura ? Math.max(0, formData.largura - (2 * COBRIMENTO_PADRAO)) : 0,
-      estribo_altura: formData.altura ? Math.max(0, formData.altura - (2 * COBRIMENTO_PADRAO)) : 0,
-      estribo_diametro: formData.diametro ? Math.max(0, formData.diametro - (2 * COBRIMENTO_PADRAO)) : 0,
-      quantidade_ferro_malha: formData.tipo_peca === "Bloco" ? 
-        (Math.ceil(((formData.comprimento || 0) / (formData.espacamento_malha || 15))) + 1 + 
-         Math.ceil(((formData.largura || 0) / (formData.espacamento_malha || 15))) + 1) : 0,
-      peso_unitario_kg: parseFloat(pesoUnitario.toFixed(2)),
-      peso_total_kg: parseFloat(pesoTotal.toFixed(2)),
-      custo_material: parseFloat(custoMaterial.toFixed(2)),
-      custo_total: parseFloat(custoTotal.toFixed(2)),
-      preco_venda_unitario: parseFloat(precoVendaUnitario.toFixed(2)),
-      preco_venda_total: parseFloat(precoVendaTotal.toFixed(2)),
-      tempo_producao_horas: parseFloat(tempoProducao.toFixed(1))
-    };
-
+  const calcularTudoLocal = () => {
+    const calculos = calcularTudo(formData);
+    const dadosAtualizados = { ...formData, ...calculos };
     setFormData(dadosAtualizados);
     if (onChange) {
       onChange(dadosAtualizados);
     }
-  };
-
-  const calcularTempoProd = (tipo, pesoKg, qtdEstribos) => {
-    const tempoBase = tipo === "Coluna" || tipo === "Viga" ? 0.5 : 
-                     tipo === "Bloco" ? 0.8 : 0.4;
-    const tempoPeso = (pesoKg || 0) * 0.02;
-    const tempoEstribos = (qtdEstribos || 0) * 0.01;
-    return tempoBase + tempoPeso + tempoEstribos;
   };
 
   const calcularMargem = () => {

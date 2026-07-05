@@ -36,7 +36,8 @@ export default function PesquisaUniversal({ open, onOpenChange }) {
   const [resultados, setResultados] = useState([]);
   const [buscando, setBuscando] = useState(false);
   const navigate = useNavigate();
-  const { filtrarPorContexto, estaNoGrupo, empresaAtual } = useContextoVisual();
+  const { filterInContext, estaNoGrupo, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -53,66 +54,45 @@ export default function PesquisaUniversal({ open, onOpenChange }) {
   }, [query]);
 
   const buscar = async () => {
+    if (!contexto) { setResultados([]); return; }
     setBuscando(true);
 
     try {
       const q = query.toLowerCase();
 
-      // Buscar em paralelo em TODAS as entidades do sistema - 100% COMPLETO
+      // Buscar em paralelo com filterInContext (server-side, multi-tenant)
       const [
-        clientesRaw, pedidosRaw, produtosRaw, entregasRaw, fornecedoresRaw, opsRaw,
-        colaboradoresRaw, contasPagarRaw, contasReceberRaw, oportunidadesRaw,
-        transportadorasRaw, notasFiscaisRaw, ordensCompraRaw, interacoesRaw,
-        comissoesRaw, campanhasRaw, eventosRaw, contratosRaw, solicitacoesCompraRaw,
-        movimentacoesRaw, representantesRaw, centroCustoRaw
+        clientesFiltrados, pedidosFiltrados, produtosFiltrados, entregasFiltradas,
+        fornecedoresFiltrados, opsFiltradas, colaboradoresFiltrados,
+        contasPagarFiltradas, contasReceberFiltradas, oportunidadesFiltradas,
+        transportadorasFiltradas, notasFiscaisFiltradas, ordensCompraFiltradas,
+        interacoesFiltradas, comissoesFiltradas, campanhasFiltradas,
+        eventosFiltrados, contratosFiltrados, solicitacoesCompraFiltradas,
+        movimentacoesFiltradas, representantesFiltrados, centroCustoFiltrados
       ] = await Promise.all([
-        base44.entities.Cliente.list('-created_date', 100).catch(() => []),
-        base44.entities.Pedido.list('-created_date', 100).catch(() => []),
-        base44.entities.Produto.list('-created_date', 100).catch(() => []),
-        base44.entities.Entrega.list('-created_date', 100).catch(() => []),
-        base44.entities.Fornecedor.list('-created_date', 100).catch(() => []),
-        base44.entities.OrdemProducao.list('-created_date', 100).catch(() => []),
-        base44.entities.Colaborador.list('-created_date', 100).catch(() => []),
-        base44.entities.ContaPagar.list('-created_date', 100).catch(() => []),
-        base44.entities.ContaReceber.list('-created_date', 100).catch(() => []),
-        base44.entities.Oportunidade.list('-created_date', 100).catch(() => []),
-        base44.entities.Transportadora.list('-created_date', 100).catch(() => []),
-        base44.entities.NotaFiscal.list('-created_date', 100).catch(() => []),
-        base44.entities.OrdemCompra.list('-created_date', 100).catch(() => []),
-        base44.entities.Interacao.list('-created_date', 100).catch(() => []),
-        base44.entities.Comissao.list('-created_date', 100).catch(() => []),
-        base44.entities.Campanha.list('-created_date', 100).catch(() => []),
-        base44.entities.Evento.list('-created_date', 100).catch(() => []),
-        base44.entities.Contrato.list('-created_date', 100).catch(() => []),
-        base44.entities.SolicitacaoCompra.list('-created_date', 100).catch(() => []),
-        base44.entities.MovimentacaoEstoque.list('-created_date', 100).catch(() => []),
-        base44.entities.Representante.list('-created_date', 100).catch(() => []),
-        base44.entities.CentroCusto.list('-created_date', 100).catch(() => [])
+        filterInContext('Cliente', {}, '-created_date', 100).catch(() => []),
+        filterInContext('Pedido', {}, '-created_date', 100).catch(() => []),
+        filterInContext('Produto', {}, '-created_date', 100).catch(() => []),
+        filterInContext('Entrega', {}, '-created_date', 100).catch(() => []),
+        filterInContext('Fornecedor', {}, '-created_date', 100).catch(() => []),
+        filterInContext('OrdemProducao', {}, '-created_date', 100).catch(() => []),
+        filterInContext('Colaborador', {}, '-created_date', 100).catch(() => []),
+        filterInContext('ContaPagar', {}, '-created_date', 100).catch(() => []),
+        filterInContext('ContaReceber', {}, '-created_date', 100).catch(() => []),
+        filterInContext('Oportunidade', {}, '-created_date', 100).catch(() => []),
+        filterInContext('Transportadora', {}, '-created_date', 100).catch(() => []),
+        filterInContext('NotaFiscal', {}, '-created_date', 100).catch(() => []),
+        filterInContext('OrdemCompra', {}, '-created_date', 100).catch(() => []),
+        filterInContext('Interacao', {}, '-created_date', 100).catch(() => []),
+        filterInContext('Comissao', {}, '-created_date', 100).catch(() => []),
+        filterInContext('Campanha', {}, '-created_date', 100).catch(() => []),
+        filterInContext('Evento', {}, '-created_date', 100).catch(() => []),
+        filterInContext('Contrato', {}, '-created_date', 100).catch(() => []),
+        filterInContext('SolicitacaoCompra', {}, '-created_date', 100).catch(() => []),
+        filterInContext('MovimentacaoEstoque', {}, '-created_date', 100).catch(() => []),
+        filterInContext('Representante', {}, '-created_date', 100).catch(() => []),
+        filterInContext('CentroCusto', {}, '-created_date', 100).catch(() => [])
       ]);
-
-      // Filtrar por contexto empresa/grupo - TODAS AS ENTIDADES
-      const clientesFiltrados = filtrarPorContexto(clientesRaw, 'empresa_id');
-      const pedidosFiltrados = filtrarPorContexto(pedidosRaw, 'empresa_id');
-      const produtosFiltrados = filtrarPorContexto(produtosRaw, 'empresa_id');
-      const entregasFiltradas = filtrarPorContexto(entregasRaw, 'empresa_id');
-      const fornecedoresFiltrados = filtrarPorContexto(fornecedoresRaw, 'empresa_dona_id');
-      const opsFiltradas = filtrarPorContexto(opsRaw, 'empresa_id');
-      const colaboradoresFiltrados = filtrarPorContexto(colaboradoresRaw, 'empresa_alocada_id');
-      const contasPagarFiltradas = filtrarPorContexto(contasPagarRaw, 'empresa_id');
-      const contasReceberFiltradas = filtrarPorContexto(contasReceberRaw, 'empresa_id');
-      const oportunidadesFiltradas = filtrarPorContexto(oportunidadesRaw, 'empresa_id');
-      const transportadorasFiltradas = filtrarPorContexto(transportadorasRaw, 'empresa_dona_id');
-      const notasFiscaisFiltradas = filtrarPorContexto(notasFiscaisRaw, 'empresa_faturamento_id');
-      const ordensCompraFiltradas = filtrarPorContexto(ordensCompraRaw, 'empresa_id');
-      const interacoesFiltradas = filtrarPorContexto(interacoesRaw, 'empresa_id');
-      const comissoesFiltradas = filtrarPorContexto(comissoesRaw, 'empresa_id');
-      const campanhasFiltradas = filtrarPorContexto(campanhasRaw, 'empresa_dona_id');
-      const eventosFiltrados = filtrarPorContexto(eventosRaw, 'empresa_id');
-      const contratosFiltrados = filtrarPorContexto(contratosRaw, 'empresa_id');
-      const solicitacoesCompraFiltradas = filtrarPorContexto(solicitacoesCompraRaw, 'empresa_id');
-      const movimentacoesFiltradas = filtrarPorContexto(movimentacoesRaw, 'empresa_id');
-      const representantesFiltrados = filtrarPorContexto(representantesRaw, 'empresa_dona_id');
-      const centroCustoFiltrados = filtrarPorContexto(centroCustoRaw, 'empresa_id');
 
       // Função helper para buscar em arrays de objetos
       const buscarEmArray = (array, campos) => {

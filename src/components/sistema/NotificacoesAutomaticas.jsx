@@ -1,4 +1,3 @@
-
 import { base44 } from '@/api/base44Client';
 import WhatsAppBusinessEngine from './WhatsAppBusinessEngine';
 
@@ -24,7 +23,9 @@ export const NotificacoesAutomaticas = {
       destinatario_id: cliente.portal_usuario_id,
       link_acao: `/pedidos/${pedido.id}`,
       entidade_relacionada: 'Pedido',
-      registro_id: pedido.id
+      registro_id: pedido.id,
+      empresa_id: pedido.empresa_id,
+      group_id: pedido.group_id
     });
 
     // Enviar WhatsApp se configurado
@@ -54,7 +55,9 @@ export const NotificacoesAutomaticas = {
       destinatario_id: cliente.portal_usuario_id,
       link_acao: linkRastreamento,
       entidade_relacionada: 'Entrega',
-      registro_id: entrega.id
+      registro_id: entrega.id,
+      empresa_id: entrega.empresa_id,
+      group_id: entrega.group_id
     });
 
     // NOVO: Enviar WhatsApp
@@ -79,7 +82,9 @@ export const NotificacoesAutomaticas = {
       prioridade: 'Normal',
       destinatario_id: cliente.portal_usuario_id,
       entidade_relacionada: 'Entrega',
-      registro_id: entrega.id
+      registro_id: entrega.id,
+      empresa_id: entrega.empresa_id,
+      group_id: entrega.group_id
     });
 
     // NOVO: Enviar WhatsApp

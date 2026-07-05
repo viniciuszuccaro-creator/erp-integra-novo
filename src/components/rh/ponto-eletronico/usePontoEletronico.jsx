@@ -24,7 +24,7 @@ export default function usePontoEletronico() {
   const [cameraAtiva, setCameraAtiva] = useState(false);
   const [colaboradorSelecionado, setColaboradorSelecionado] = useState(null);
 
-  const { filterInContext, empresaAtual, grupoAtual, contexto } =
+  const { filterInContext, empresaAtual, grupoAtual, contexto, carimbarContexto } =
     useContextoVisual();
   const contextoKey = `${grupoAtual?.id || "sem-grupo"}-${
     empresaAtual?.id || "sem-empresa"
@@ -43,7 +43,7 @@ export default function usePontoEletronico() {
   });
 
   const registrarPontoMutation = useMutation({
-    mutationFn: (data) => base44.entities.Ponto.create(data),
+    mutationFn: (data) => base44.entities.Ponto.create(carimbarContexto(data, 'empresa_id')),
     onSuccess: () => {
       toast({
         title: "✅ Ponto registrado",

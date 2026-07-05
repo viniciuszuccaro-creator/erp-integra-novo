@@ -72,7 +72,11 @@ export default function CentralPerfisAcesso() {
       const perfilId = perfilAberto?.id;
       if (perfilId && !perfilAberto.novo)
         return base44.entities.PerfilAcesso.update(perfilId, data);
-      return base44.entities.PerfilAcesso.create(data);
+      return base44.entities.PerfilAcesso.create({
+        ...data,
+        group_id: grupoAtivoId,
+        empresa_id: empresaAtivaId,
+      });
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["perfis-acesso", scopeKey] });

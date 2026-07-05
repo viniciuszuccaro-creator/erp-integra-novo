@@ -6,10 +6,10 @@ Auditoria completa do ERP Zuccaro seguindo Regra-Mãe, executando as 5 prioridad
 
 ### MÉTRICAS CONSOLIDADAS (CICLO ATUALIZADO)
 - **Arquivos mapeados**: 1.602
-- **Arquivos grandes (>400 linhas)**: 32 (maioria libs/UI core)
+- **Arquivos grandes (>400 linhas)**: 27 (maioria libs/UI core)
 - **data-permission**: 667 → **687** (+20 neste ciclo)
-- **Creates com group_id**: 124/169 (73.4%) → **136/169 (80.5%)**
-- **Creates restantes**: 33 (maioria falsos positivos/utility hooks)
+- **Creates com group_id**: 124/169 (73.4%) → **142/169 (84.0%)**
+- **Creates restantes**: 27 (maioria falsos positivos/utility hooks genéricos)
 
 ---
 
@@ -256,3 +256,28 @@ Auditoria completa do ERP Zuccaro seguindo Regra-Mãe, executando as 5 prioridad
 ### P5 — Correções de Cadastros
 - `ConfiguracaoCobranca.jsx`: Corrigido bug de chave `group_id` duplicada no payload
 - `ConfiguracaoBoletosForm.jsx`: Mantido como sub-componente focado (231 linhas) — consolidação com ConfiguracaoCobranca (439 linhas) criaria arquivo 670+, violando Regra-Mãe #3
+
+---
+
+## CICLO ADICIONAL — REFINAMENTO E REFACTORY (05/07/2026 — TERCEIRA PASSAGEM)
+
+### P1 — Refatoração EnviarComunicacaoModal.jsx (445→~110 linhas)
+- Extraído `comunicacao/comunicacaoTemplates.jsx` — constantes + função `aplicarTemplateComunicacao`
+- Extraído `comunicacao/ComunicacaoWhatsAppTab.jsx` — aba WhatsApp (templates + textarea)
+- Extraído `comunicacao/ComunicacaoEmailTab.jsx` — aba E-mail (templates + assunto + anexos)
+- `EnviarComunicacaoModal.jsx` → wrapper fino (~110 linhas)
+
+### P2 — Creates Corrigidos Neste Ciclo
+| Arquivo | Entidade | Correção |
+|---------|---------|----------|
+| `FormularioInspecao.jsx` | InspecaoQualidade.create | +carimbarContexto |
+| `PontoTab.jsx` | Ponto.create | +carimbarContexto |
+| `usePontoEletronico.jsx` | Ponto.create | +carimbarContexto |
+| `CentralPerfisAcesso.jsx` | PerfilAcesso.create | +group_id, +empresa_id do scope |
+| `NotificacoesAutomaticas.jsx` | Notificacao.create (×3) | +empresa_id, +group_id de pedido/entrega |
+
+### Métricas Finais Consolidadas
+- **data-permission**: 687 atributos no sistema
+- **Creates com group_id**: 142/169 (**84.0%**)
+- **Creates restantes**: 27 (todos em utility hooks/lib genérico com ...ctx spread)
+- **Arquivos grandes (>400)**: 32 → **27** (5 refatorados neste ciclo total)

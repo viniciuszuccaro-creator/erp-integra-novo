@@ -10,12 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, AlertTriangle, Save } from "lucide-react";
 import { toast } from "sonner";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.1.2: Formulário de Inspeção de Qualidade - Adaptado para Window Mode
  */
 export default function FormularioInspecao({ op, item, onConcluido, windowMode = false }) {
   const queryClient = useQueryClient();
+  const { grupoAtual, empresaAtual, carimbarContexto } = useContextoVisual();
   
   const [formData, setFormData] = useState({
     op_id: op?.id || '',
@@ -38,7 +40,7 @@ export default function FormularioInspecao({ op, item, onConcluido, windowMode =
   });
 
   const criarInspecaoMutation = useMutation({
-    mutationFn: (data) => base44.entities.InspecaoQualidade.create(data),
+    mutationFn: (data) => base44.entities.InspecaoQualidade.create(carimbarContexto(data, 'empresa_id')),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ordens-producao'] });
       queryClient.invalidateQueries({ queryKey: ['inspecoes'] });

@@ -13,11 +13,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import PontoForm from "./PontoForm";
 import { useWindow } from "@/components/lib/useWindow";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
 
 export default function PontoTab({ pontos, colaboradores }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { openWindow } = useWindow();
+  const { grupoAtual, empresaAtual, carimbarContexto } = useContextoVisual();
   const [formData, setFormData] = useState({
     colaborador_id: "",
     colaborador_nome: "",
@@ -56,11 +58,11 @@ export default function PontoTab({ pontos, colaboradores }) {
 
       const { horas_trabalhadas, horas_extras } = calcularHoras();
 
-      return base44.entities.Ponto.create({
+      return base44.entities.Ponto.create(carimbarContexto({
         ...data,
         horas_trabalhadas,
         horas_extras
-      });
+      }, 'empresa_id'));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pontos'] });

@@ -21,6 +21,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useWindow } from "@/components/lib/useWindow";
 import AnalisePedidoAprovacao from "./AnalisePedidoAprovacao";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * 🔐 APROVAÇÃO DE DESCONTOS MANAGER V21.6 - DEPRECATED
@@ -51,12 +52,13 @@ function AprovacaoDescontosManager({ windowMode = false, empresaId = null }) {
   const { toast } = useToast();
   const { openWindow } = useWindow();
 
-  // V21.6: Multi-empresa
+  // V21.6: Multi-empresa — P2: usa filterInContext
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaId || empresaAtual?.id || 'sem-empresa'}`;
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos', empresaId],
-    queryFn: () => empresaId
-      ? base44.entities.Pedido.filter({ empresa_id: empresaId }, '-created_date')
-      : base44.entities.Pedido.list('-created_date'),
+    queryKey: ['pedidos', contextoKey],
+    queryFn: () => filterInContext('Pedido', empresaId ? { empresa_id: empresaId } : {}, '-created_date', 200),
+    enabled: !!contextoKey,
   });
 
   const { data: user } = useQuery({

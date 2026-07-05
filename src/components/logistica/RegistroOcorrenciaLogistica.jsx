@@ -8,10 +8,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertTriangle, Upload, Camera, CheckCircle2, X } from "lucide-react";
 import { toast } from "sonner";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * ⚠️ REGISTRO DE OCORRÊNCIAS LOGÍSTICAS V21.5
- * Atrasos, avarias, extravios e problemas
+ * P2: Multi-tenant — carimba group_id/empresa_id
  */
 export default function RegistroOcorrenciaLogistica({ pedido, entrega, onClose, windowMode = false }) {
   const [tipoOcorrencia, setTipoOcorrencia] = useState("Atraso");
@@ -21,6 +22,9 @@ export default function RegistroOcorrenciaLogistica({ pedido, entrega, onClose, 
   const [uploadando, setUploadando] = useState(false);
 
   const queryClient = useQueryClient();
+  const { carimbarContexto } = useContextoVisual();
+  const ctxEmpresaId = entrega?.empresa_id || pedido?.empresa_id;
+  const ctxGroupId = entrega?.group_id || pedido?.group_id;
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -57,20 +61,23 @@ export default function RegistroOcorrenciaLogistica({ pedido, entrega, onClose, 
       if (entrega) {
         const ocorrenciasAtuais = entrega.ocorrencias || [];
         await base44.entities.Entrega.update(entrega.id, {
+          group_id: entrega.group_id || ctxGroupId,
+          empresa_id: entrega.empresa_id || ctxEmpresaId,
           ocorrencias: [...ocorrenciasAtuais, novaOcorrencia]
         });
       } else {
         // Criar entrega se não existir
-        await base44.entities.Entrega.create({
+        await base44.entities.Entrega.create(carimbarContexto({
           pedido_id: pedido.id,
           numero_pedido: pedido.numero_pedido,
           cliente_id: pedido.cliente_id,
           cliente_nome: pedido.cliente_nome,
-          empresa_id: pedido.empresa_id,
+          empresa_id: pedido.empresa_id || ctxEmpresaId,
+          group_id: pedido.group_id || ctxGroupId,
           endereco_entrega_completo: pedido.endereco_entrega_principal,
           status: 'Em Trânsito',
           ocorrencias: [novaOcorrencia]
-        });
+        }, 'empresa_id'));
       }
 
       // Se for entrega frustrada, marcar no pedido

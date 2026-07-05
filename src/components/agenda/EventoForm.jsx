@@ -41,16 +41,19 @@ export default function EventoForm({ evento, onSubmit, windowMode = false }) {
     notificar_whatsapp: false
   });
 
-  const { filterInContext } = useContextoVisual();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes'],
+    queryKey: ['clientes', contextoKey],
     queryFn: () => filterInContext('Cliente', {}, '-created_date', 9999),
+    enabled: !!contextoKey,
   });
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos'],
+    queryKey: ['pedidos', contextoKey],
     queryFn: () => filterInContext('Pedido', {}, '-created_date', 9999),
+    enabled: !!contextoKey,
   });
 
   const schema = z.object({

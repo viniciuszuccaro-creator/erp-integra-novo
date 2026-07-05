@@ -10,23 +10,29 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { Truck, MessageCircle, Mail, MapPin, Settings } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Configuração de Integrações de Expedição
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function ConfiguracaoExpedicao({ empresaId }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const ctxEmpresaId = empresaId || empresaAtual?.id;
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${ctxEmpresaId || 'sem-empresa'}`;
 
   const { data: config } = useQuery({
-    queryKey: ['config-expedicao', empresaId],
+    queryKey: ['config-expedicao', contextoKey],
     queryFn: async () => {
-      const configs = await base44.entities.ConfiguracaoSistema.filter({
-        chave: `expedicao_${empresaId}`,
+      const configs = await filterInContext('ConfiguracaoSistema', {
+        chave: `expedicao_${ctxEmpresaId}`,
         categoria: "Integracoes"
-      });
+      }, '-updated_date', 50);
       return configs[0] || null;
     },
+    enabled: !!contextoKey,
   });
 
   const [configTransportadora, setConfigTransportadora] = useState({
@@ -58,8 +64,10 @@ export default function ConfiguracaoExpedicao({ empresaId }) {
   const salvarMutation = useMutation({
     mutationFn: async () => {
       const dadosConfig = {
-        chave: `expedicao_${empresaId}`,
+        chave: `expedicao_${ctxEmpresaId}`,
         categoria: "Integracoes",
+        empresa_id: ctxEmpresaId,
+        group_id: grupoAtual?.id,
         integracao_transportadoras: configTransportadora,
         integracao_whatsapp: configWhatsApp,
         configuracoes_email: configEmail
@@ -72,7 +80,7 @@ export default function ConfiguracaoExpedicao({ empresaId }) {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['config-expedicao'] });
+      queryClient.invalidateQueries({ queryKey: ['config-expedicao', contextoKey] });
       toast({ title: "✅ Configurações salvas!" });
     },
   });

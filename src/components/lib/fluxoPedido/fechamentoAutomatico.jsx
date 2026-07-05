@@ -227,9 +227,8 @@ export async function obterEstatisticasAutomacao(empresaId = null, diasRetroativ
   const dataLimite = new Date();
   dataLimite.setDate(dataLimite.getDate() - diasRetroativos);
 
-  const pedidos = empresaId
-    ? await base44.entities.Pedido.filter({ empresa_id: empresaId })
-    : await base44.entities.Pedido.list();
+  const filtro = empresaId ? { empresa_id: empresaId } : {};
+  const pedidos = await base44.entities.Pedido.filter(filtro);
 
   const pedidosRecentes = pedidos.filter(p => new Date(p.created_date) >= dataLimite);
   const pedidosFechados = pedidosRecentes.filter(p =>

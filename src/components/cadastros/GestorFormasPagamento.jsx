@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { useWindow } from '@/components/lib/useWindow';
 import useContextoVisual from '@/components/lib/useContextoVisual';
 import usePermissions from '@/components/lib/usePermissions';
-import { Plus, Edit, Trash2, CreditCard, DollarSign, Zap, CheckCircle2, XCircle, ArrowUpDown, TrendingUp, AlertTriangle, BarChart3, Sparkles } from 'lucide-react';
+import { Plus, CreditCard, DollarSign, Zap, CheckCircle2, BarChart3, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { useConfirm } from '@/components/ui/confirm-dialog';
 import FormaPagamentoFormCompleto from './FormaPagamentoFormCompleto';
 import GestorGatewaysPagamento from './GestorGatewaysPagamento';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import FormasPagamentoAnalyticsTab from './forma-pagamento/FormasPagamentoAnalyticsTab';
+import FormasPagamentoTabela from './forma-pagamento/FormasPagamentoTabela';
+import FormasPagamentoIntegracaoTab from './forma-pagamento/FormasPagamentoIntegracaoTab';
 
 export default function GestorFormasPagamento({ windowMode = false }) {
   const [busca, setBusca] = useState('');
@@ -259,262 +259,21 @@ export default function GestorFormasPagamento({ windowMode = false }) {
       </Card>
 
       {/* TABELA */}
-      <Card className="border-0 shadow-md">
-        <CardHeader className="bg-slate-50 border-b">
-          <CardTitle>Formas Cadastradas ({formasFiltradas.length})</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50">
-                <TableHead className="w-12">
-                  <ArrowUpDown className="w-4 h-4" />
-                </TableHead>
-                <TableHead>Forma</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Desconto</TableHead>
-                <TableHead>Acréscimo</TableHead>
-                <TableHead>Parcelamento</TableHead>
-                <TableHead>Disponibilidade</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-center">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {formasFiltradas.map((forma) => (
-                <TableRow key={forma.id}>
-                  <TableCell>
-                    <Badge variant="outline" className="text-xs">
-                      {forma.ordem_exibicao}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">{forma.icone}</span>
-                      <div>
-                        <p className="font-semibold">{forma.descricao}</p>
-                        <p className="text-xs text-slate-500">{forma.codigo}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{forma.tipo}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    {forma.aceita_desconto && forma.percentual_desconto_padrao > 0 ? (
-                      <Badge className="bg-green-100 text-green-700">
-                        -{forma.percentual_desconto_padrao}%
-                      </Badge>
-                    ) : (
-                      <span className="text-slate-400">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {forma.aplicar_acrescimo && forma.percentual_acrescimo_padrao > 0 ? (
-                      <Badge className="bg-orange-100 text-orange-700">
-                        +{forma.percentual_acrescimo_padrao}%
-                      </Badge>
-                    ) : (
-                      <span className="text-slate-400">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {forma.permite_parcelamento ? (
-                      <Badge className="bg-purple-100 text-purple-700">
-                        Até {forma.maximo_parcelas}x
-                      </Badge>
-                    ) : (
-                      <span className="text-slate-400">Não</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      {forma.disponivel_pdv && <Badge className="bg-blue-100 text-blue-700 text-xs">PDV</Badge>}
-                      {forma.disponivel_ecommerce && <Badge className="bg-green-100 text-green-700 text-xs">Web</Badge>}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <button
-                      data-permission="Cadastros.FormaPagamento.editar"
-                      onClick={() => toggleAtivaMutation.mutate({ id: forma.id, ativa: !forma.ativa })}
-                      disabled={!contextoValido || !podeEditar || toggleAtivaMutation.isPending}
-                      className="flex items-center gap-1"
-                    >
-                      {forma.ativa ? (
-                        <Badge className="bg-green-600 cursor-pointer hover:bg-green-700">
-                          <CheckCircle2 className="w-3 h-3 mr-1" />
-                          Ativa
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-red-600 cursor-pointer hover:bg-red-700">
-                          <XCircle className="w-3 h-3 mr-1" />
-                          Inativa
-                        </Badge>
-                      )}
-                    </button>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2 justify-center">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        data-permission="Cadastros.FormaPagamento.editar"
-                        onClick={() => handleEditar(forma)}
-                        disabled={!contextoValido || !podeEditar}
-                        title="Editar"
-                      >
-                        <Edit className="w-4 h-4 text-blue-600" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        data-permission="Cadastros.FormaPagamento.excluir"
-                        onClick={async () => {
-                           const ok = await confirm({ title: "Excluir Forma de Pagamento", description: `Excluir "${forma.descricao}"?`, variant: "danger", confirmText: "Excluir" });
-                           if (ok) deleteMutation.mutate(forma.id);
-                        }}
-                        disabled={!podeExcluir || deleteMutation.isPending}
-                        title="Excluir"
-                      >
-                        <Trash2 className="w-4 h-4 text-red-600" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          {formasFiltradas.length === 0 && (
-            <div className="text-center py-12 text-slate-500">
-              <CreditCard className="w-16 h-16 mx-auto mb-4 opacity-30" />
-              <p>Nenhuma forma de pagamento encontrada</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <FormasPagamentoTabela
+        formasFiltradas={formasFiltradas}
+        toggleAtivaMutation={toggleAtivaMutation}
+        handleEditar={handleEditar}
+        confirm={confirm}
+        deleteMutation={deleteMutation}
+        podeEditar={podeEditar}
+        podeExcluir={podeExcluir}
+        contextoValido={contextoValido}
+      />
         </TabsContent>
 
         {/* ABA: ANALYTICS */}
         <TabsContent value="analytics" className="space-y-6 mt-6">
-          <div className="grid grid-cols-2 gap-6">
-            {/* GRÁFICO DE USO POR FORMA */}
-            <Card>
-              <CardHeader className="bg-slate-50 border-b">
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-blue-600" />
-                  Uso por Forma de Pagamento
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={dadosAnalytics.slice(0, 8)}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="forma.descricao" angle={-45} textAnchor="end" height={100} />
-                    <YAxis />
-                    <RechartsTooltip />
-                    <Bar dataKey="total_usos" fill="#3b82f6" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            {/* GRÁFICO PIZZA - DISTRIBUIÇÃO */}
-            <Card>
-              <CardHeader className="bg-slate-50 border-b">
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-purple-600" />
-                  Distribuição de Uso
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={dadosAnalytics.slice(0, 6)}
-                      dataKey="total_usos"
-                      nameKey="forma.descricao"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      label
-                    >
-                      {dadosAnalytics.slice(0, 6).map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* TOP 5 MAIS USADAS */}
-          <Card className="border-green-200 bg-green-50">
-            <CardHeader className="bg-green-100 border-b border-green-200">
-              <CardTitle className="flex items-center gap-2 text-green-900">
-                <TrendingUp className="w-5 h-5" />
-                Top 5 Mais Utilizadas
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <div className="space-y-3">
-                {dadosAnalytics.slice(0, 5).map((item, index) => (
-                  <div key={item.forma.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200">
-                    <div className="flex items-center gap-3">
-                      <Badge className="bg-green-600 text-white">#{index + 1}</Badge>
-                      <span className="text-2xl">{item.forma.icone}</span>
-                      <div>
-                        <p className="font-semibold">{item.forma.descricao}</p>
-                        <p className="text-xs text-slate-500">
-                          {item.pedidos} pedidos • {item.contas} contas a receber
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-green-600">{item.total_usos}</p>
-                      <p className="text-xs text-slate-500">usos</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* ALERTAS E RECOMENDAÇÕES IA */}
-          <Card className="border-amber-200 bg-amber-50">
-            <CardHeader className="bg-amber-100 border-b border-amber-200">
-              <CardTitle className="flex items-center gap-2 text-amber-900">
-                <AlertTriangle className="w-5 h-5" />
-                Recomendações IA
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 space-y-3">
-              {dadosAnalytics.filter(d => d.total_usos === 0).length > 0 && (
-                <Alert className="border-orange-300 bg-orange-50">
-                  <AlertDescription className="text-sm">
-                    <strong>⚠️ Formas sem uso:</strong> {dadosAnalytics.filter(d => d.total_usos === 0).length} formas cadastradas não foram utilizadas ainda. Considere desativá-las.
-                  </AlertDescription>
-                </Alert>
-              )}
-              {formasPagamento.filter(f => f.tipo === 'PIX' && !f.gerar_cobranca_online).length > 0 && (
-                <Alert className="border-blue-300 bg-blue-50">
-                  <AlertDescription className="text-sm">
-                    <strong>💡 Dica:</strong> Você tem formas PIX sem cobrança online. Ative a integração para gerar QR Codes automaticamente.
-                  </AlertDescription>
-                </Alert>
-              )}
-              {formasPagamento.filter(f => f.disponivel_ecommerce && !f.gerar_cobranca_online).length > 0 && (
-                <Alert className="border-purple-300 bg-purple-50">
-                  <AlertDescription className="text-sm">
-                    <strong>🚀 Melhoria:</strong> Formas disponíveis no e-commerce sem cobrança online. Configure gateways de pagamento.
-                  </AlertDescription>
-                </Alert>
-              )}
-            </CardContent>
-          </Card>
+          <FormasPagamentoAnalyticsTab dadosAnalytics={dadosAnalytics} formasPagamento={formasPagamento} />
         </TabsContent>
 
         {/* ABA: GATEWAYS */}
@@ -524,67 +283,7 @@ export default function GestorFormasPagamento({ windowMode = false }) {
 
         {/* ABA: INTEGRAÇÃO */}
         <TabsContent value="integracao" className="space-y-6 mt-6">
-          <Card className="border-blue-200 bg-blue-50">
-            <CardHeader className="bg-blue-100 border-b border-blue-200">
-              <CardTitle className="text-blue-900">Status de Integração</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <div className="space-y-4">
-                {formasPagamento.filter(f => f.gerar_cobranca_online).map(forma => (
-                  <div key={forma.id} className="p-4 bg-white rounded-lg border">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{forma.icone}</span>
-                        <div>
-                          <p className="font-semibold">{forma.descricao}</p>
-                          <p className="text-xs text-slate-500">{forma.tipo}</p>
-                        </div>
-                      </div>
-                      {forma.integracao_obrigatoria ? (
-                        <Badge className="bg-green-600">
-                          <CheckCircle2 className="w-3 h-3 mr-1" />
-                          Integração Ativa
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-orange-600">
-                          <AlertTriangle className="w-3 h-3 mr-1" />
-                          Opcional
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                {formasPagamento.filter(f => f.gerar_cobranca_online).length === 0 && (
-                  <div className="text-center py-8 text-slate-500">
-                    <p>Nenhuma forma configurada para cobrança online</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* GUIA DE INTEGRAÇÃO */}
-          <Card className="border-purple-200">
-            <CardHeader className="bg-purple-50 border-b">
-              <CardTitle className="text-purple-900">Guia de Configuração</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <div className="space-y-3">
-                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="font-semibold text-sm mb-1">1️⃣ PIX</p>
-                  <p className="text-xs text-slate-600">Configure um banco com suporte a PIX e ative "Gerar Cobrança Online"</p>
-                </div>
-                <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                  <p className="font-semibold text-sm mb-1">2️⃣ Boleto</p>
-                  <p className="text-xs text-slate-600">Configure um banco com suporte a Boleto e vincule à forma de pagamento</p>
-                </div>
-                <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-                  <p className="font-semibold text-sm mb-1">3️⃣ Cartão</p>
-                  <p className="text-xs text-slate-600">Configure gateway de pagamento para processar cartões de crédito/débito</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <FormasPagamentoIntegracaoTab formasPagamento={formasPagamento} />
         </TabsContent>
       </Tabs>
     </div></div>

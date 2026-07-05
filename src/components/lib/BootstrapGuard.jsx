@@ -14,7 +14,7 @@ export default function BootstrapGuard({ children }) {
     queryKey: ["ia-config"],
     queryFn: async () => {
       try {
-        return await base44.entities.IAConfig.list();
+        return await base44.entities.IAConfig.filter({ ativo: true });
       } catch (e) {
         logUIIssue({ component: "BootstrapGuard", issue: "Falha ao carregar IAConfig", severity: "error", meta: { error: String(e?.message || e) } });
         return [];

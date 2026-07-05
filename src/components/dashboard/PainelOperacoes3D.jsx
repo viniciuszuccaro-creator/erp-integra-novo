@@ -15,31 +15,37 @@ import {
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Painel de Operações 3D - Comando Central
- * Visualização global do ecossistema em tempo real
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function PainelOperacoes3D({ empresaId, grupoId }) {
   const [atualizandoAoVivo, setAtualizandoAoVivo] = useState(false);
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoId || grupoAtual?.id || 'sem-grupo'}-${empresaId || empresaAtual?.id || 'sem-empresa'}`;
 
   // Queries com auto-refresh
   const { data: ops = [] } = useQuery({
-    queryKey: ['ops-tempo-real'],
-    queryFn: () => base44.entities.OrdemProducao.list('-updated_date', 50),
-    refetchInterval: 30000 // 30 segundos
+    queryKey: ['ops-tempo-real', contextoKey],
+    queryFn: () => filterInContext('OrdemProducao', {}, '-updated_date', 50),
+    refetchInterval: 30000,
+    enabled: !!contextoKey,
   });
 
   const { data: entregas = [] } = useQuery({
-    queryKey: ['entregas-tempo-real'],
-    queryFn: () => base44.entities.Entrega.list('-updated_date', 50),
-    refetchInterval: 30000
+    queryKey: ['entregas-tempo-real', contextoKey],
+    queryFn: () => filterInContext('Entrega', {}, '-updated_date', 50),
+    refetchInterval: 30000,
+    enabled: !!contextoKey,
   });
 
   const { data: posicoesVeiculos = [] } = useQuery({
-    queryKey: ['posicoes-veiculos'],
-    queryFn: () => base44.entities.PosicaoVeiculo.list('-data_hora', 100),
-    refetchInterval: 60000 // 1 minuto
+    queryKey: ['posicoes-veiculos', contextoKey],
+    queryFn: () => filterInContext('PosicaoVeiculo', {}, '-data_hora', 100),
+    refetchInterval: 60000,
+    enabled: !!contextoKey,
   });
 
   // KPIs em Tempo Real

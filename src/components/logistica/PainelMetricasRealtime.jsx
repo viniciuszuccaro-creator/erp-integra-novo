@@ -5,24 +5,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, Zap, Clock, Package, Truck, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * 📊 PAINEL DE MÉTRICAS EM TEMPO REAL V21.5
- * Atualiza a cada 30 segundos com refetch automático
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function PainelMetricasRealtime({ windowMode = false }) {
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState(new Date());
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: pedidos = [], refetch: refetchPedidos } = useQuery({
-    queryKey: ['pedidos'],
-    queryFn: () => base44.entities.Pedido.list('-created_date', 1000),
-    refetchInterval: 30000, // Atualiza a cada 30s
+    queryKey: ['pedidos', contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-created_date', 1000),
+    refetchInterval: 30000,
+    enabled: !!contextoKey,
   });
 
   const { data: entregas = [], refetch: refetchEntregas } = useQuery({
-    queryKey: ['entregas'],
-    queryFn: () => base44.entities.Entrega.list('-created_date', 1000),
+    queryKey: ['entregas', contextoKey],
+    queryFn: () => filterInContext('Entrega', {}, '-created_date', 1000),
     refetchInterval: 30000,
+    enabled: !!contextoKey,
   });
 
   useEffect(() => {

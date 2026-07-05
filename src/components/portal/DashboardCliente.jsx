@@ -10,15 +10,20 @@ import {
   MapPin, Loader2, Upload, MessageSquare, Download, AlertCircle
 } from "lucide-react";
 import { useUser } from "@/components/lib/UserContext";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { Link } from "react-router-dom";
 
 /**
  * Dashboard do Portal do Cliente
  * V12.0 - Completo e funcional
+ * P2: Multi-tenant — todas as queries incluem group_id/empresa_id
  */
 export default function DashboardCliente({ clienteId: propClienteId, adminMode = false }) {
   const { user } = useUser();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
   const [cliente, setCliente] = useState(null);
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+  const tenantFilter = cliente ? { group_id: cliente.group_id, empresa_id: cliente.empresa_id } : {};
 
   // Carrega cliente via prop (modo admin)
   useEffect(() => {
@@ -32,9 +37,9 @@ export default function DashboardCliente({ clienteId: propClienteId, adminMode =
   }, [propClienteId]);
 
   const { data: clientes = [] } = useQuery({
-    queryKey: ['meu-cliente', user?.id],
-    queryFn: () => base44.entities.Cliente.filter({ portal_usuario_id: user?.id }),
-    enabled: !propClienteId && !!user,
+    queryKey: ['meu-cliente', user?.id, contextoKey],
+    queryFn: () => filterInContext('Cliente', { portal_usuario_id: user?.id }),
+    enabled: !propClienteId && !!user && !!contextoKey,
     staleTime: Infinity,
   });
 
@@ -45,19 +50,21 @@ export default function DashboardCliente({ clienteId: propClienteId, adminMode =
   }, [clientes, propClienteId]);
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['meus-pedidos', cliente?.id],
-    queryFn: () => base44.entities.Pedido.filter({ 
+    queryKey: ['meus-pedidos', cliente?.id, contextoKey],
+    queryFn: () => filterInContext('Pedido', { 
       cliente_id: cliente?.id,
-      pode_ver_no_portal: true 
+      pode_ver_no_portal: true,
+      ...tenantFilter
     }, '-data_pedido', 50),
-    enabled: !!cliente
+    enabled: !!cliente && !!contextoKey
   });
 
   const { data: orcamentos = [] } = useQuery({
-    queryKey: ['meus-orcamentos', cliente?.id],
-    queryFn: () => base44.entities.OrcamentoCliente.filter({ 
+    queryKey: ['meus-orcamentos', cliente?.id, contextoKey],
+    queryFn: () => filterInContext('OrcamentoCliente', { 
       cliente_id: cliente?.id,
-      status: 'Pendente'
+      status: 'Pendente',
+      ...tenantFilter
     }),
     enabled: !!cliente
   });

@@ -11,53 +11,53 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/components/lib/UserContext";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { format } from "date-fns";
 
 /**
  * V21.5 - Dashboard Interativo COMPLETO com Tempo Real
- * ✅ Status de pedidos em tempo real (15s refresh)
- * ✅ Rastreamento de entregas atualizado (10s refresh)
- * ✅ Timeline de atividades
- * ✅ Métricas dinâmicas e KPIs visuais
- * ✅ Oportunidades em tempo real
- * ✅ Alertas inteligentes
- * ✅ 100% Responsivo w-full h-full
+ * P2: Multi-tenant — todas as queries incluem group_id/empresa_id
  */
 export default function DashboardClienteInterativo() {
   const { user } = useUser();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
   const [autoRefresh, setAutoRefresh] = React.useState(true);
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: cliente } = useQuery({
-    queryKey: ['cliente-portal', user?.id],
+    queryKey: ['cliente-portal', user?.id, contextoKey],
     queryFn: async () => {
-      const clientes = await base44.entities.Cliente.filter({ portal_usuario_id: user.id });
+      const clientes = await filterInContext('Cliente', { portal_usuario_id: user.id });
       return clientes[0];
     },
-    enabled: !!user?.id,
-    refetchInterval: 30000 // Atualiza a cada 30s
+    enabled: !!user?.id && !!contextoKey,
+    refetchInterval: 30000
   });
 
+  const tenantFilter = cliente ? { group_id: cliente.group_id, empresa_id: cliente.empresa_id } : {};
+
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos-dashboard', cliente?.id],
-    queryFn: () => base44.entities.Pedido.filter({ 
+    queryKey: ['pedidos-dashboard', cliente?.id, contextoKey],
+    queryFn: () => filterInContext('Pedido', { 
       cliente_id: cliente.id,
-      pode_ver_no_portal: true 
+      pode_ver_no_portal: true,
+      ...tenantFilter
     }, '-data_pedido', 50),
-    enabled: !!cliente?.id,
-    refetchInterval: 15000 // Tempo real
+    enabled: !!cliente?.id && !!contextoKey,
+    refetchInterval: 15000
   });
 
   const { data: entregas = [] } = useQuery({
-    queryKey: ['entregas-dashboard', cliente?.id],
-    queryFn: () => base44.entities.Entrega.filter({ cliente_id: cliente.id }, '-created_date', 20),
-    enabled: !!cliente?.id,
-    refetchInterval: 10000 // Tempo real
+    queryKey: ['entregas-dashboard', cliente?.id, contextoKey],
+    queryFn: () => filterInContext('Entrega', { cliente_id: cliente.id, ...tenantFilter }, '-created_date', 20),
+    enabled: !!cliente?.id && !!contextoKey,
+    refetchInterval: 10000
   });
 
   const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contas-dashboard', cliente?.id],
-    queryFn: () => base44.entities.ContaReceber.filter({ cliente_id: cliente.id }),
-    enabled: !!cliente?.id
+    queryKey: ['contas-dashboard', cliente?.id, contextoKey],
+    queryFn: () => filterInContext('ContaReceber', { cliente_id: cliente.id, ...tenantFilter }),
+    enabled: !!cliente?.id && !!contextoKey
   });
 
   const { data: orcamentos = [] } = useQuery({

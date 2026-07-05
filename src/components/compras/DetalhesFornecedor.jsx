@@ -26,11 +26,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import usePermissions from "@/components/lib/usePermissions";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.1.2 - WINDOW MODE READY
- * Convertido para suportar modo janela independente
- * SUB-DIALOGS internos mantidos para adicionar documentos (UX)
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function DetalhesFornecedor({ fornecedor, onClose, windowMode = false }) {
   const [activeTab, setActiveTab] = useState("historico");
@@ -44,27 +44,29 @@ export default function DetalhesFornecedor({ fornecedor, onClose, windowMode = f
 
   const queryClient = useQueryClient();
   const { canEdit } = usePermissions();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   // Buscar dados relacionados
   const { data: ordensCompra = [] } = useQuery({
-    queryKey: ['ordens-compra-fornecedor', fornecedor.id],
-    queryFn: () => base44.entities.OrdemCompra.filter({ fornecedor_id: fornecedor.id }),
-    enabled: !!fornecedor.id
+    queryKey: ['ordens-compra-fornecedor', fornecedor.id, contextoKey],
+    queryFn: () => filterInContext('OrdemCompra', { fornecedor_id: fornecedor.id }),
+    enabled: !!fornecedor.id && !!contextoKey
   });
 
   const { data: notasFiscais = [] } = useQuery({
-    queryKey: ['notas-entrada-fornecedor', fornecedor.id],
-    queryFn: () => base44.entities.NotaFiscal.filter({ 
+    queryKey: ['notas-entrada-fornecedor', fornecedor.id, contextoKey],
+    queryFn: () => filterInContext('NotaFiscal', { 
       cliente_fornecedor_id: fornecedor.id,
       tipo: 'NF-e (Entrada)'
     }),
-    enabled: !!fornecedor.id
+    enabled: !!fornecedor.id && !!contextoKey
   });
 
   const { data: contasPagar = [] } = useQuery({
-    queryKey: ['contas-pagar-fornecedor', fornecedor.id],
-    queryFn: () => base44.entities.ContaPagar.filter({ fornecedor_id: fornecedor.id }),
-    enabled: !!fornecedor.id
+    queryKey: ['contas-pagar-fornecedor', fornecedor.id, contextoKey],
+    queryFn: () => filterInContext('ContaPagar', { fornecedor_id: fornecedor.id }),
+    enabled: !!fornecedor.id && !!contextoKey
   });
 
   const updateFornecedorMutation = useMutation({

@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, Plus, TrendingUp, Brain } from 'lucide-react';
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Motor de Recomendação de Produtos
- * Sugere produtos baseado em histórico e padrões
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function MotorRecomendacao({ 
   clienteId, 
@@ -17,6 +18,7 @@ export default function MotorRecomendacao({
   const [recomendacoes, setRecomendacoes] = useState([]);
   const [carregando, setCarregando] = useState(false);
   const [totalPedidosAnteriores, setTotalPedidosAnteriores] = useState(0);
+  const { filterInContext } = useContextoVisual();
 
   useEffect(() => {
     if (clienteId) {
@@ -29,13 +31,13 @@ export default function MotorRecomendacao({
 
     try {
       // 1. Buscar histórico do cliente
-      const historico = await base44.entities.HistoricoCliente.filter({
+      const historico = await filterInContext('HistoricoCliente', {
         cliente_id: clienteId,
         modulo_origem: 'Comercial'
       }, '-data_evento', 50);
 
       // 2. Buscar pedidos anteriores
-      const pedidosAnteriores = await base44.entities.Pedido.filter({
+      const pedidosAnteriores = await filterInContext('Pedido', {
         cliente_id: clienteId,
         status: ['Aprovado', 'Faturado', 'Entregue']
       }, '-data_pedido', 10);

@@ -4,14 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, TrendingUp, AlertCircle, Target, Brain } from 'lucide-react';
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * IA de Upsell e Precificação Dinâmica
- * Analisa histórico e sugere produtos, ajustes de preço e reposições
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function IAUpsellPrecificacao({ clienteId, pedidoAtual }) {
   const [sugestoes, setSugestoes] = useState([]);
   const [analisando, setAnalisando] = useState(false);
+  const { filterInContext } = useContextoVisual();
 
   useEffect(() => {
     if (!clienteId) return;
@@ -22,12 +24,12 @@ export default function IAUpsellPrecificacao({ clienteId, pedidoAtual }) {
     setAnalisando(true);
     try {
       // Buscar histórico de compras
-      const historico = await base44.entities.HistoricoCliente.filter({
+      const historico = await filterInContext('HistoricoCliente', {
         cliente_id: clienteId,
         modulo_origem: 'Comercial'
       }, '-data_evento', 50);
 
-      const pedidosAnteriores = await base44.entities.Pedido.filter({
+      const pedidosAnteriores = await filterInContext('Pedido', {
         cliente_id: clienteId,
         status: 'Entregue'
       }, '-data_pedido', 20);

@@ -5,26 +5,27 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, FileText, Package, DollarSign, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.5 - Exportação de Dados
- * ✅ Export pedidos para Excel
- * ✅ Export documentos para PDF
- * ✅ Export histórico completo
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function ExportarDadosPortal({ clienteId }) {
   const [exportando, setExportando] = useState(null);
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['export-pedidos', clienteId],
-    queryFn: () => base44.entities.Pedido.filter({ cliente_id: clienteId }, '-data_pedido', 1000),
-    enabled: !!clienteId,
+    queryKey: ['export-pedidos', clienteId, contextoKey],
+    queryFn: () => filterInContext('Pedido', { cliente_id: clienteId }, '-data_pedido', 1000),
+    enabled: !!clienteId && !!contextoKey,
   });
 
   const { data: contasReceber = [] } = useQuery({
-    queryKey: ['export-contas', clienteId],
-    queryFn: () => base44.entities.ContaReceber.filter({ cliente_id: clienteId }, '-data_vencimento', 1000),
-    enabled: !!clienteId,
+    queryKey: ['export-contas', clienteId, contextoKey],
+    queryFn: () => filterInContext('ContaReceber', { cliente_id: clienteId }, '-data_vencimento', 1000),
+    enabled: !!clienteId && !!contextoKey,
   });
 
   const exportarParaCSV = (dados, nomeArquivo, colunas) => {

@@ -6,32 +6,35 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, Truck, Navigation, Clock } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Mapa de Rastreamento em Tempo Real
- * Mostra posições atualizadas dos veículos a cada 60s
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function MapaRastreamentoRealTime({ entregaId, empresaId }) {
   const [posicaoAtual, setPosicaoAtual] = useState(null);
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaId || empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: posicoes = [], refetch } = useQuery({
-    queryKey: ['posicoes-veiculo', entregaId],
-    queryFn: () => base44.entities.PosicaoVeiculo.filter(
+    queryKey: ['posicoes-veiculo', entregaId, contextoKey],
+    queryFn: () => filterInContext('PosicaoVeiculo',
       { entrega_id: entregaId },
       '-data_hora',
       100
     ),
-    refetchInterval: 60000, // Atualiza a cada 60 segundos
-    enabled: !!entregaId
+    refetchInterval: 60000,
+    enabled: !!entregaId && !!contextoKey
   });
 
   const { data: entrega } = useQuery({
-    queryKey: ['entrega', entregaId],
+    queryKey: ['entrega', entregaId, contextoKey],
     queryFn: async () => {
-      const entregas = await base44.entities.Entrega.filter({ id: entregaId });
+      const entregas = await filterInContext('Entrega', { id: entregaId });
       return entregas[0];
     },
-    enabled: !!entregaId
+    enabled: !!entregaId && !!contextoKey
   });
 
   useEffect(() => {

@@ -3,13 +3,15 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Sparkles, TrendingUp, CreditCard } from 'lucide-react';
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * IA de Atendimento Preditivo no Portal
- * Sugere ações baseadas no comportamento do cliente
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function IAAtendimentoPreditivo({ clienteId, comportamento }) {
   const [sugestoes, setSugestoes] = useState([]);
+  const { filterInContext } = useContextoVisual();
 
   useEffect(() => {
     if (!clienteId || !comportamento) return;
@@ -34,7 +36,7 @@ export default function IAAtendimentoPreditivo({ clienteId, comportamento }) {
 
     // SUGESTÃO 2: Visitando produtos sem cotar
     if (comportamento.visualizacoes_produtos >= 5 && !comportamento.orcamento_recente) {
-      const historico = await base44.entities.HistoricoCliente.filter({
+      const historico = await filterInContext('HistoricoCliente', {
         cliente_id: clienteId,
         modulo_origem: 'Comercial'
       }, '-data_evento', 10);

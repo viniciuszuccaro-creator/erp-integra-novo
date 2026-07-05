@@ -16,43 +16,41 @@ import {
   Phone
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.6 - CONSULTAR ENTREGAS NO CHAT
- * 
- * Permite ao atendente:
- * ✅ Ver entregas do cliente
- * ✅ Status em tempo real
- * ✅ Timeline de rastreamento
- * ✅ Link para acompanhamento
- * ✅ Contato do motorista
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function ConsultarEntregaChat({ clienteId, conversa }) {
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+
   // Buscar entregas do cliente
   const { data: entregas = [], isLoading } = useQuery({
-    queryKey: ['entregas-cliente', clienteId],
+    queryKey: ['entregas-cliente', clienteId, contextoKey],
     queryFn: async () => {
       if (!clienteId) return [];
-      return await base44.entities.Entrega.filter({
+      return await filterInContext('Entrega', {
         cliente_id: clienteId,
         status: { $nin: ['Entregue', 'Cancelado'] }
       }, '-data_previsao');
     },
-    enabled: !!clienteId
+    enabled: !!clienteId && !!contextoKey
   });
 
   // Buscar entregas recentes entregues
   const { data: entregasRecentes = [] } = useQuery({
-    queryKey: ['entregas-recentes', clienteId],
+    queryKey: ['entregas-recentes', clienteId, contextoKey],
     queryFn: async () => {
       if (!clienteId) return [];
-      const todas = await base44.entities.Entrega.filter({
+      const todas = await filterInContext('Entrega', {
         cliente_id: clienteId,
         status: 'Entregue'
       }, '-data_entrega', 5);
       return todas;
     },
-    enabled: !!clienteId
+    enabled: !!clienteId && !!contextoKey
   });
 
   const formatarData = (data) => {

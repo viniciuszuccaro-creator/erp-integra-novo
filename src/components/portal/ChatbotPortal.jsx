@@ -5,8 +5,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Bot, Send, Loader2 } from 'lucide-react';
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function ChatbotPortal({ cliente }) {
+  const { filterInContext } = useContextoVisual();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Olá! Posso abrir chamados e consultar o status dos seus pedidos. Como posso ajudar?' }
@@ -52,6 +54,8 @@ export default function ChatbotPortal({ cliente }) {
           titulo,
           descricao,
           cliente_id: cliente.id,
+          group_id: cliente.group_id,
+          empresa_id: cliente.empresa_id,
           cliente_nome: cliente.nome || cliente.nome_fantasia,
           origem: 'Portal/Chatbot',
           status: 'Aberto'

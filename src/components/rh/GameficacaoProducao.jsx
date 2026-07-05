@@ -4,25 +4,32 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Trophy, Medal, Award, Star, TrendingUp } from 'lucide-react';
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Gamificação e Ranking de Colaboradores
- * Top Operadores, Vendedores e Motoristas
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function GameficacaoProducao({ empresaId }) {
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+
   const { data: ops = [] } = useQuery({
-    queryKey: ['ordens-producao'],
-    queryFn: () => base44.entities.OrdemProducao.list('-created_date', 200),
+    queryKey: ['ordens-producao', contextoKey],
+    queryFn: () => filterInContext('OrdemProducao', {}, '-created_date', 200),
+    enabled: !!contextoKey,
   });
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos'],
-    queryFn: () => base44.entities.Pedido.list('-created_date', 200),
+    queryKey: ['pedidos', contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-created_date', 200),
+    enabled: !!contextoKey,
   });
 
   const { data: entregas = [] } = useQuery({
-    queryKey: ['entregas'],
-    queryFn: () => base44.entities.Entrega.list('-created_date', 200),
+    queryKey: ['entregas', contextoKey],
+    queryFn: () => filterInContext('Entrega', {}, '-created_date', 200),
+    enabled: !!contextoKey,
   });
 
   // Ranking de Operadores (menor refugo)

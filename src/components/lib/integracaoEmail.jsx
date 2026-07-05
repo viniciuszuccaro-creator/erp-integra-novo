@@ -8,10 +8,12 @@ import { base44 } from '@/api/base44Client';
 /**
  * Verifica configuração de email
  */
-async function verificarConfiguracao(empresaId) {
+async function verificarConfiguracao(empresaId, groupId) {
   const configs = await base44.entities.ConfiguracaoSistema.filter({
     categoria: 'Email',
-    chave: `email_${empresaId}`
+    chave: `email_${empresaId}`,
+    empresa_id: empresaId,
+    ...(groupId ? { group_id: groupId } : {})
   });
   
   if (!configs || configs.length === 0) {

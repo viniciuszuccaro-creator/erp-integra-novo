@@ -19,24 +19,28 @@ import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import usePermissions from "@/components/lib/usePermissions";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.1.2 - WINDOW MODE READY
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function PainelDinamicoTransportadora({ transportadora, isOpen, onClose, windowMode = false }) {
   const navigate = useNavigate();
   const { hasPermission } = usePermissions();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: entregas = [] } = useQuery({
-    queryKey: ['entregas-transportadora', transportadora?.id],
-    queryFn: () => base44.entities.Entrega.filter({ transportadora_id: transportadora.id }, '-data_saida'),
-    enabled: !!transportadora?.id,
+    queryKey: ['entregas-transportadora', transportadora?.id, contextoKey],
+    queryFn: () => filterInContext('Entrega', { transportadora_id: transportadora.id }, '-data_saida'),
+    enabled: !!transportadora?.id && !!contextoKey,
   });
 
   const { data: romaneios = [] } = useQuery({
-    queryKey: ['romaneios-transportadora', transportadora?.id],
-    queryFn: () => base44.entities.Romaneio.filter({ motorista: transportadora.nome }, '-data_romaneio'),
-    enabled: !!transportadora?.id,
+    queryKey: ['romaneios-transportadora', transportadora?.id, contextoKey],
+    queryFn: () => filterInContext('Romaneio', { motorista: transportadora.nome }, '-data_romaneio'),
+    enabled: !!transportadora?.id && !!contextoKey,
   });
 
   const podeEditar = hasPermission('cadastros', 'editar');

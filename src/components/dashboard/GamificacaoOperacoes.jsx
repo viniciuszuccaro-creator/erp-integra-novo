@@ -4,28 +4,35 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Trophy, TrendingUp, Star, Award } from 'lucide-react';
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Gamificação de Operações
- * Rankings de desempenho por função
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function GamificacaoOperacoes() {
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos-gamificacao'],
-    queryFn: () => base44.entities.Pedido.list('-data_pedido', 100),
+    queryKey: ['pedidos-gamificacao', contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-data_pedido', 100),
+    enabled: !!contextoKey,
   });
 
   const { data: apontamentos = [] } = useQuery({
-    queryKey: ['apontamentos-gamificacao'],
+    queryKey: ['apontamentos-gamificacao', contextoKey],
     queryFn: async () => {
-      const ops = await base44.entities.OrdemProducao.list('-data_emissao', 100);
+      const ops = await filterInContext('OrdemProducao', {}, '-data_emissao', 100);
       return ops.flatMap(op => op.apontamentos || []);
     },
+    enabled: !!contextoKey,
   });
 
   const { data: entregas = [] } = useQuery({
-    queryKey: ['entregas-gamificacao'],
-    queryFn: () => base44.entities.Entrega.list('-created_date', 100),
+    queryKey: ['entregas-gamificacao', contextoKey],
+    queryFn: () => filterInContext('Entrega', {}, '-created_date', 100),
+    enabled: !!contextoKey,
   });
 
   // Top 5 Vendedores

@@ -17,52 +17,52 @@ import {
   Plus,
   BarChart3
 } from 'lucide-react';
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.1.2-R1 - HISTÓRICO EXPANDIDO DO CLIENTE
- * ✅ Top 20 produtos mais comprados
- * ✅ Auditoria completa de entregas, NF-e, pagamentos
- * ✅ Timeline de relacionamento
- * ✅ Botão para adicionar produto novamente ao pedido
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function HistoricoClienteTab({ formData, setFormData, onAdicionarItemAoPedido }) {
   const [produtosFrequentes, setProdutosFrequentes] = useState([]);
   const [analisando, setAnalisando] = useState(false);
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   // Buscar pedidos anteriores do cliente
   const { data: pedidosAnteriores = [] } = useQuery({
-    queryKey: ['pedidos-cliente', formData.cliente_id],
+    queryKey: ['pedidos-cliente', formData.cliente_id, contextoKey],
     queryFn: () => formData.cliente_id 
-      ? base44.entities.Pedido.filter({ cliente_id: formData.cliente_id }, '-data_pedido', 50)
+      ? filterInContext('Pedido', { cliente_id: formData.cliente_id }, '-data_pedido', 50)
       : Promise.resolve([]),
-    enabled: !!formData.cliente_id
+    enabled: !!formData.cliente_id && !!contextoKey
   });
 
   // Buscar contas a receber do cliente
   const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contas-receber-cliente', formData.cliente_id],
+    queryKey: ['contas-receber-cliente', formData.cliente_id, contextoKey],
     queryFn: () => formData.cliente_id
-      ? base44.entities.ContaReceber.filter({ cliente_id: formData.cliente_id }, '-data_vencimento', 20)
+      ? filterInContext('ContaReceber', { cliente_id: formData.cliente_id }, '-data_vencimento', 20)
       : Promise.resolve([]),
-    enabled: !!formData.cliente_id
+    enabled: !!formData.cliente_id && !!contextoKey
   });
 
   // Buscar entregas do cliente
   const { data: entregas = [] } = useQuery({
-    queryKey: ['entregas-cliente', formData.cliente_id],
+    queryKey: ['entregas-cliente', formData.cliente_id, contextoKey],
     queryFn: () => formData.cliente_id
-      ? base44.entities.Entrega.filter({ cliente_id: formData.cliente_id }, '-created_date', 20)
+      ? filterInContext('Entrega', { cliente_id: formData.cliente_id }, '-created_date', 20)
       : Promise.resolve([]),
-    enabled: !!formData.cliente_id
+    enabled: !!formData.cliente_id && !!contextoKey
   });
 
   // Buscar notas fiscais do cliente
   const { data: notasFiscais = [] } = useQuery({
-    queryKey: ['nfe-cliente', formData.cliente_id],
+    queryKey: ['nfe-cliente', formData.cliente_id, contextoKey],
     queryFn: () => formData.cliente_id
-      ? base44.entities.NotaFiscal.filter({ cliente_fornecedor_id: formData.cliente_id }, '-data_emissao', 20)
+      ? filterInContext('NotaFiscal', { cliente_fornecedor_id: formData.cliente_id }, '-data_emissao', 20)
       : Promise.resolve([]),
-    enabled: !!formData.cliente_id
+    enabled: !!formData.cliente_id && !!contextoKey
   });
 
   // Analisar produtos mais comprados

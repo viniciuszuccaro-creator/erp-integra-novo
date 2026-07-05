@@ -13,37 +13,39 @@ import {
   Phone,
   User
 } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.5 - HISTÓRICO DO CLIENTE NO HUB
- * 
- * Painel lateral com informações contextuais do cliente
- * durante o atendimento
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function HistoricoClienteChat({ clienteId }) {
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+
   // Buscar dados do cliente
   const { data: cliente } = useQuery({
-    queryKey: ['cliente-chat', clienteId],
+    queryKey: ['cliente-chat', clienteId, contextoKey],
     queryFn: () => base44.entities.Cliente.get(clienteId),
-    enabled: !!clienteId
+    enabled: !!clienteId && !!contextoKey
   });
 
   // Buscar pedidos recentes
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos-cliente-chat', clienteId],
-    queryFn: () => base44.entities.Pedido.filter({ cliente_id: clienteId }, '-data_pedido', 5),
-    enabled: !!clienteId
+    queryKey: ['pedidos-cliente-chat', clienteId, contextoKey],
+    queryFn: () => filterInContext('Pedido', { cliente_id: clienteId }, '-data_pedido', 5),
+    enabled: !!clienteId && !!contextoKey
   });
 
   // Buscar conversas anteriores
   const { data: conversasAnteriores = [] } = useQuery({
-    queryKey: ['conversas-anteriores', clienteId],
-    queryFn: () => base44.entities.ConversaOmnicanal.filter(
+    queryKey: ['conversas-anteriores', clienteId, contextoKey],
+    queryFn: () => filterInContext('ConversaOmnicanal',
       { cliente_id: clienteId, status: 'Resolvida' },
       '-data_finalizacao',
       10
     ),
-    enabled: !!clienteId
+    enabled: !!clienteId && !!contextoKey
   });
 
   if (!clienteId || !cliente) {

@@ -8,9 +8,14 @@ import { base44 } from '@/api/base44Client';
 /**
  * Verifica configuração do WhatsApp
  */
-async function verificarConfiguracao(empresaId) {
+async function verificarConfiguracao(empresaId, groupId) {
   const chave = `integracoes_${empresaId}`;
-  const registros = await base44.entities.ConfiguracaoSistema.filter({ chave, categoria: 'Integracoes' }, undefined, 1);
+  const registros = await base44.entities.ConfiguracaoSistema.filter({ 
+    chave, 
+    categoria: 'Integracoes',
+    empresa_id: empresaId,
+    ...(groupId ? { group_id: groupId } : {})
+  }, undefined, 1);
   
   if (!registros || registros.length === 0) {
     return { configurado: false, erro: 'Configuração WhatsApp não encontrada' };

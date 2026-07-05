@@ -4,11 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Star, Save } from "lucide-react";
+import usePermissions from "@/components/lib/usePermissions";
 
 /**
  * V21.1.2: Avaliação Fornecedor - Window Mode
+ * P3: RBAC aplicado
  */
 export default function AvaliacaoFornecedorForm({ ordemCompra, onSubmit, windowMode = false }) {
+  const { hasPermission } = usePermissions();
+  const canAvaliar = hasPermission?.("Compras.Fornecedor.avaliar") ?? true;
   const [formData, setFormData] = useState({
     qualidade: 5,
     prazo: 5,

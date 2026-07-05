@@ -15,21 +15,25 @@ import {
   Upload
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Sincronização ATIVA de Marketplaces
- * Importação automática de pedidos do Mercado Livre, Shopee, Amazon, etc.
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function SincronizacaoMarketplacesAtiva() {
   const [sincronizando, setSincronizando] = useState(false);
   const queryClient = useQueryClient();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: pedidosExternos = [] } = useQuery({
-    queryKey: ['pedidos-externos-pendentes'],
-    queryFn: () => base44.entities.PedidoExterno.filter({
+    queryKey: ['pedidos-externos-pendentes', contextoKey],
+    queryFn: () => filterInContext('PedidoExterno', {
       status_importacao: ['A Validar', 'Em Revisão']
     }, '-created_date'),
-    refetchInterval: 30000 // Atualiza a cada 30s
+    refetchInterval: 30000,
+    enabled: !!contextoKey,
   });
 
   const importarPedidoMutation = useMutation({

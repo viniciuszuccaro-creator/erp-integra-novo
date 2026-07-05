@@ -1,32 +1,24 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 /**
  * V21.6 FINAL - Hook de Detecção AUTOMÁTICA e OBRIGATÓRIA de Origem
- * 
- * ⚡ Detecção 100% Automática - Campo SEMPRE bloqueado
- * 🔒 Bloqueio Total - Sem edição manual permitida
- * Rastreabilidade 100% - Todos pedidos rastreados
- * 
- * Detecta origem de onde o pedido está sendo criado:
- * - URL params (?origem=Site)
- * - Sessão (localStorage)
- * - Pathname (/portal, /site, /chatbot)
- * - Referrer (de onde veio)
- * - Padrão: Manual (ERP interno)
- * 
- * @returns {Object} { origemPedido, bloquearEdicao: true, parametro, parametros, isLoading }
+ * P2: Multi-tenant — usa filterInContext
  */
 export function useOrigemPedido() {
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   
   // Buscar parâmetros configurados (cache otimizado)
   const { data: parametros = [], isLoading } = useQuery({
-    queryKey: ['parametros-origem-pedido'],
-    queryFn: () => base44.entities.ParametroOrigemPedido.list(),
+    queryKey: ['parametros-origem-pedido', contextoKey],
+    queryFn: () => filterInContext('ParametroOrigemPedido', {}),
     initialData: [],
-    staleTime: 5 * 60 * 1000, // 5 minutos
-    cacheTime: 10 * 60 * 1000, // 10 minutos
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+    enabled: !!contextoKey,
   });
 
   // Detectar origem AUTOMATICAMENTE (performance < 50ms)

@@ -8,47 +8,52 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileText, Download, Search, CreditCard, Eye, Calendar } from 'lucide-react';
 import { toast } from "sonner";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.5 - Documentos & Boletos COMPLETO
- * ✅ NFes com XML/DANFE download
- * ✅ Boletos com PIX copia-cola
- * ✅ Links de pagamento
- * ✅ Alertas de vencimento
- * ✅ w-full h-full
+ * P2: Multi-tenant — todas as queries incluem group_id/empresa_id
  */
 export default function DocumentosCliente() {
   const [searchTerm, setSearchTerm] = useState('');
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: notasFiscais = [], isLoading: loadingNFe } = useQuery({
-    queryKey: ['minhas-nfes'],
+    queryKey: ['minhas-nfes', contextoKey],
     queryFn: async () => {
       const user = await base44.auth.me();
-      const clientes = await base44.entities.Cliente.filter({ portal_usuario_id: user.id });
+      const clientes = await filterInContext('Cliente', { portal_usuario_id: user.id });
       const cliente = clientes[0];
       
       if (!cliente) return [];
       
-      return await base44.entities.NotaFiscal.filter({ 
-        cliente_fornecedor_id: cliente.id 
+      return await filterInContext('NotaFiscal', { 
+        cliente_fornecedor_id: cliente.id,
+        group_id: cliente.group_id,
+        empresa_id: cliente.empresa_id
       }, '-data_emissao', 100);
     },
+    enabled: !!contextoKey,
   });
 
   const { data: contasReceber = [], isLoading: loadingBoletos } = useQuery({
-    queryKey: ['meus-boletos'],
+    queryKey: ['meus-boletos', contextoKey],
     queryFn: async () => {
       const user = await base44.auth.me();
-      const clientes = await base44.entities.Cliente.filter({ portal_usuario_id: user.id });
+      const clientes = await filterInContext('Cliente', { portal_usuario_id: user.id });
       const cliente = clientes[0];
       
       if (!cliente) return [];
       
-      return await base44.entities.ContaReceber.filter({ 
+      return await filterInContext('ContaReceber', { 
         cliente_id: cliente.id,
-        visivel_no_portal: true 
+        visivel_no_portal: true,
+        group_id: cliente.group_id,
+        empresa_id: cliente.empresa_id
       }, '-data_vencimento', 100);
     },
+    enabled: !!contextoKey,
   });
 
   const statusColorBoleto = {

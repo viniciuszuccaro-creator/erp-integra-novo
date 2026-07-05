@@ -12,42 +12,39 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { useUser } from "@/components/lib/UserContext";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
 
 /**
  * V21.5 - Chat Direto Cliente → Vendedor COMPLETO
- * ✅ Mensagens em tempo real (5s refresh)
- * ✅ Indicador de digitação
- * ✅ Histórico persistente
- * ✅ Notificação automática para vendedor
- * ✅ Contatos alternativos visíveis
- * ✅ Status online/offline do vendedor
- * ✅ 100% Responsivo w-full h-full
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function ChatVendedor({ clienteId }) {
   const { user } = useUser();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const queryClient = useQueryClient();
   const messagesEndRef = useRef(null);
   const [mensagem, setMensagem] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
   const { data: cliente } = useQuery({
-    queryKey: ['cliente', clienteId],
-    queryFn: () => base44.entities.Cliente.filter({ id: clienteId }).then(r => r[0]),
-    enabled: !!clienteId
+    queryKey: ['cliente', clienteId, contextoKey],
+    queryFn: () => filterInContext('Cliente', { id: clienteId }).then(r => r[0]),
+    enabled: !!clienteId && !!contextoKey
   });
 
   const { data: conversas = [], isLoading } = useQuery({
-    queryKey: ['chat-cliente', clienteId],
+    queryKey: ['chat-cliente', clienteId, contextoKey],
     queryFn: async () => {
-      const interacoes = await base44.entities.ChatbotInteracao.filter({
+      const interacoes = await filterInContext('ChatbotInteracao', {
         cliente_id: clienteId,
         canal: 'Portal'
       }, '-created_date');
       return interacoes;
     },
-    enabled: !!clienteId,
-    refetchInterval: 5000 // Atualiza a cada 5s
+    enabled: !!clienteId && !!contextoKey,
+    refetchInterval: 5000
   });
 
   const enviarMensagemMutation = useMutation({

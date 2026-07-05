@@ -4,12 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { base44 } from "@/api/base44Client";
+import usePermissions from "@/components/lib/usePermissions";
 
 const ALL_STATUSES = [
   'Aguardando Separação', 'Em Separação', 'Pronto para Expedir', 'Saiu para Entrega', 'Em Trânsito', 'Entregue', 'Entrega Frustrada'
 ];
 
 export default function ControlsBar({ filters, setFilters, rules, onSaveRules, loadingRules }) {
+  const { hasPermission } = usePermissions();
+  const canConfig = hasPermission?.("Expedicao.Configuracao.editar") ?? true;
   const [open, setOpen] = React.useState(false);
   const [local, setLocal] = React.useState(rules || {});
 
@@ -81,8 +84,8 @@ export default function ControlsBar({ filters, setFilters, rules, onSaveRules, l
       </div>
       <div className="ml-auto flex items-center gap-2">
         <Badge variant="outline" className="text-xs">Regras: atraso≥{local.minAtrasoHoras ?? 1}h • filaRota&gt;{local.maxFilaRota ?? 8} • trânsito≥{local.maxTransitoHoras ?? 6}h • esperaCD≥{local.maxEsperaCentroHoras ?? 4}h</Badge>
-        <Button variant="outline" onClick={() => setOpen(true)}>Configurar Regras</Button>
-        <Button onClick={() => setOpen('sim')}>Simular Cenário</Button>
+        <Button variant="outline" data-permission="Expedicao.Configuracao.editar" disabled={!canConfig} onClick={() => setOpen(true)}>Configurar Regras</Button>
+        <Button data-permission="Expedicao.Roteirizacao.simular" onClick={() => setOpen('sim')}>Simular Cenário</Button>
       </div>
 
       <Dialog open={open===true} onOpenChange={(v)=>setOpen(v?true:false)}>
@@ -106,7 +109,7 @@ export default function ControlsBar({ filters, setFilters, rules, onSaveRules, l
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-              <Button onClick={() => { onSaveRules?.(local); setOpen(false); }} disabled={loadingRules}>Salvar</Button>
+              <Button data-permission="Expedicao.Configuracao.editar" disabled={!canConfig || loadingRules} onClick={() => { onSaveRules?.(local); setOpen(false); }}>Salvar</Button>
             </div>
           </div>
         </DialogContent>

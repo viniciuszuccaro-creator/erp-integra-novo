@@ -1,33 +1,37 @@
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Hook centralizado para gerenciar formas de pagamento
- * Busca dados de FormaPagamento e Banco configurados em Cadastros Gerais
- * 
- * Usado em: PDV, Pedidos, Contas a Receber, Contas a Pagar, Portal, Site, Chatbot, etc.
+ * P2: Multi-tenant — usa filterInContext
  */
 export function useFormasPagamento(filtros = {}) {
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+
   // Buscar formas de pagamento ativas
   const { data: formasPagamento = [], isLoading: loadingFormas } = useQuery({
-    queryKey: ['formas-pagamento', filtros],
+    queryKey: ['formas-pagamento', filtros, contextoKey],
     queryFn: async () => {
-      const formas = await base44.entities.FormaPagamento.filter({
+      const formas = await filterInContext('FormaPagamento', {
         ativa: true,
         ...filtros
       });
       return formas.sort((a, b) => (a.ordem_exibicao || 0) - (b.ordem_exibicao || 0));
     },
-    staleTime: 300000, // 5 minutos
+    staleTime: 300000,
+    enabled: !!contextoKey,
   });
 
   // Buscar bancos cadastrados
   const { data: bancos = [], isLoading: loadingBancos } = useQuery({
-    queryKey: ['bancos'],
+    queryKey: ['bancos', contextoKey],
     queryFn: async () => {
-      return await base44.entities.Banco.filter({ ativo: true });
+      return await filterInContext('Banco', { ativo: true });
     },
     staleTime: 300000,
+    enabled: !!contextoKey,
   });
 
   // Filtrar formas disponíveis por contexto
@@ -54,11 +58,12 @@ export function useFormasPagamento(filtros = {}) {
 
   // Buscar gateways de pagamento
   const { data: gateways = [] } = useQuery({
-    queryKey: ['gateways-pagamento'],
+    queryKey: ['gateways-pagamento', contextoKey],
     queryFn: async () => {
-      return await base44.entities.GatewayPagamento.filter({ ativo: true });
+      return await filterInContext('GatewayPagamento', { ativo: true });
     },
     staleTime: 300000,
+    enabled: !!contextoKey,
   });
 
   // Obter configuração completa de uma forma de pagamento

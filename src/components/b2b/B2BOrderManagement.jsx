@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Search, Filter, Download } from 'lucide-react';
+import usePermissions from "@/components/lib/usePermissions";
 
 const PEDIDOS_B2B = [
   {
@@ -42,6 +43,9 @@ const PEDIDOS_B2B = [
 export default function B2BOrderManagement() {
   const [pedidos] = useState(PEDIDOS_B2B);
   const [filtro, setFiltro] = useState('todos');
+  const { hasPermission } = usePermissions();
+  const canCreate = hasPermission?.("Comercial.Pedido.criar") ?? true;
+  const canExport = hasPermission?.("Comercial.Pedido.exportar") ?? true;
 
   const getStatusColor = (status) => {
     const colors = {
@@ -67,7 +71,7 @@ export default function B2BOrderManagement() {
         <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-2">
           📦 Gerenciamento de Pedidos
         </h2>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2">
+        <Button data-permission="Comercial.Pedido.criar" disabled={!canCreate} className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2">
           <Plus className="w-4 h-4" />
           Novo Pedido
         </Button>

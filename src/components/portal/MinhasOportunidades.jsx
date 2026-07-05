@@ -5,38 +5,38 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Target, TrendingUp, Clock, DollarSign, Flame, Snowflake, ThermometerSun } from 'lucide-react';
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.5 - Minhas Oportunidades COMPLETO
- * ✅ Funil visual completo
- * ✅ KPIs de pipeline
- * ✅ Score e temperatura IA
- * ✅ Barra de progresso por etapa
- * ✅ w-full h-full responsivo
+ * P2: Multi-tenant — todas as queries incluem group_id/empresa_id
  */
 export default function MinhasOportunidades() {
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+
   const { data: oportunidades = [], isLoading } = useQuery({
-    queryKey: ['minhas-oportunidades'],
+    queryKey: ['minhas-oportunidades', contextoKey],
     queryFn: async () => {
       const user = await base44.auth.me();
-      const clientes = await base44.entities.Cliente.filter({ portal_usuario_id: user.id });
+      const clientes = await filterInContext('Cliente', { portal_usuario_id: user.id });
       const cliente = clientes[0];
       
       if (!cliente) {
-        // Buscar por email como fallback
-        return await base44.entities.Oportunidade.filter(
+        return await filterInContext('Oportunidade',
           { cliente_email: user.email },
           '-data_abertura',
           50
         );
       }
       
-      return await base44.entities.Oportunidade.filter(
-        { cliente_id: cliente.id },
+      return await filterInContext('Oportunidade',
+        { cliente_id: cliente.id, group_id: cliente.group_id, empresa_id: cliente.empresa_id },
         '-data_abertura',
         50
       );
     },
+    enabled: !!contextoKey,
   });
 
   const etapasFunil = [

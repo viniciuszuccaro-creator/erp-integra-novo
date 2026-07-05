@@ -6,33 +6,37 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, AlertTriangle, XCircle, DollarSign, TrendingUp } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Componente de validação de crédito em tempo real
- * Usado no pedido antes de aprovar
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function ValidacaoCredito({ clienteId, valorPedido, pedidoId }) {
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+
   const { data: cliente, isLoading } = useQuery({
-    queryKey: ['cliente-credito', clienteId],
+    queryKey: ['cliente-credito', clienteId, contextoKey],
     queryFn: async () => {
       if (!clienteId) return null;
-      const clientes = await base44.entities.Cliente.filter({ id: clienteId });
+      const clientes = await filterInContext('Cliente', { id: clienteId });
       return clientes[0] || null;
     },
-    enabled: !!clienteId,
+    enabled: !!clienteId && !!contextoKey,
   });
 
   const { data: pedidosPendentes = [] } = useQuery({
-    queryKey: ['pedidos-pendentes-cliente', clienteId],
+    queryKey: ['pedidos-pendentes-cliente', clienteId, contextoKey],
     queryFn: async () => {
       if (!clienteId) return [];
-      const pedidos = await base44.entities.Pedido.filter({ 
+      const pedidos = await filterInContext('Pedido', { 
         cliente_id: clienteId,
         status: { $in: ["Aprovado", "Em Produção", "Faturado"] }
       });
-      return pedidos.filter(p => p.id !== pedidoId); // Excluir pedido atual
+      return pedidos.filter(p => p.id !== pedidoId);
     },
-    enabled: !!clienteId,
+    enabled: !!clienteId && !!contextoKey,
   });
 
   if (isLoading) {

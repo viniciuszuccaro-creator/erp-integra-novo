@@ -26,7 +26,7 @@ export default function AdminCriticalCommandCenter() {
 
   const { data: auditLogs = [] } = useQuery({
     queryKey: ['admin-critical-audit', empresaId || 'sem-empresa', groupId || 'sem-grupo'],
-    queryFn: () => base44.entities.AuditLog.filter({ modulo: 'Sistema' }, '-data_hora', 50),
+    queryFn: () => base44.entities.AuditLog.filter(groupId ? { modulo: 'Sistema', group_id: groupId } : { modulo: 'Sistema' }, '-data_hora', 50),
     staleTime: 60000,
   });
 

@@ -83,7 +83,7 @@ export default function GestaoAcessosIndex() {
 
   const { data: auditoriasAcesso = [] } = useQuery({
     queryKey: ['auditoria-acessos', scopeKey],
-    queryFn: () => base44.entities.AuditLog.filter({ modulo: 'Sistema' }, '-data_hora', 30),
+    queryFn: () => base44.entities.AuditLog.filter(groupId ? { modulo: 'Sistema', group_id: groupId } : { modulo: 'Sistema' }, '-data_hora', 30),
     enabled: podeVer && !!scopeKey,
     staleTime: 60000,
   });

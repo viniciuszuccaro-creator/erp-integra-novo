@@ -90,7 +90,7 @@ export default function GerarOPStepConfig({ configGlobal, setConfigGlobal, confi
 
       <div className="flex justify-end gap-3 pt-4 border-t">
         <Button type="button" variant="outline" onClick={onVoltar}>Voltar</Button>
-        <Button type="button" onClick={onGerar} className="bg-green-600 hover:bg-green-700" disabled={isPending}>
+        <Button type="button" data-permission="Producao.OrdemProducao.criar" onClick={onGerar} className="bg-green-600 hover:bg-green-700" disabled={isPending}>
           <Factory className="w-4 h-4 mr-2" />
           Gerar Ordem de Produção Única
         </Button>

@@ -20,6 +20,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { obterEstatisticasAutomacao } from '@/components/lib/useFluxoPedido';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 /**
  * V21.6 - DASHBOARD DE FECHAMENTO AUTOMÁTICO
@@ -32,6 +33,7 @@ import { obterEstatisticasAutomacao } from '@/components/lib/useFluxoPedido';
  */
 export default function DashboardFechamentoPedidos({ windowMode = false, empresaId = null }) {
   // V21.6: Multi-empresa + IA Analytics
+  const { filterInContext } = useContextoVisual();
   const [estatisticasIA, setEstatisticasIA] = React.useState(null);
 
   // Carregar estatísticas via IA
@@ -43,33 +45,25 @@ export default function DashboardFechamentoPedidos({ windowMode = false, empresa
   
   const { data: pedidos = [] } = useQuery({
     queryKey: ['pedidos', empresaId],
-    queryFn: () => empresaId 
-      ? base44.entities.Pedido.filter({ empresa_id: empresaId }, '-created_date', 100)
-      : base44.entities.Pedido.list('-created_date', 100),
+    queryFn: () => filterInContext('Pedido', { ...(empresaId ? { empresa_id: empresaId } : {}) }, '-created_date', 100),
     initialData: [],
   });
 
   const { data: movimentacoes = [] } = useQuery({
     queryKey: ['movimentacoes', empresaId],
-    queryFn: () => empresaId
-      ? base44.entities.MovimentacaoEstoque.filter({ empresa_id: empresaId }, '-created_date', 100)
-      : base44.entities.MovimentacaoEstoque.list('-created_date', 100),
+    queryFn: () => filterInContext('MovimentacaoEstoque', { ...(empresaId ? { empresa_id: empresaId } : {}) }, '-created_date', 100),
     initialData: [],
   });
 
   const { data: contas = [] } = useQuery({
     queryKey: ['contas-receber', empresaId],
-    queryFn: () => empresaId
-      ? base44.entities.ContaReceber.filter({ empresa_id: empresaId }, '-created_date', 100)
-      : base44.entities.ContaReceber.list('-created_date', 100),
+    queryFn: () => filterInContext('ContaReceber', { ...(empresaId ? { empresa_id: empresaId } : {}) }, '-created_date', 100),
     initialData: [],
   });
 
   const { data: entregas = [] } = useQuery({
     queryKey: ['entregas', empresaId],
-    queryFn: () => empresaId
-      ? base44.entities.Entrega.filter({ empresa_id: empresaId }, '-created_date', 100)
-      : base44.entities.Entrega.list('-created_date', 100),
+    queryFn: () => filterInContext('Entrega', { ...(empresaId ? { empresa_id: empresaId } : {}) }, '-created_date', 100),
     initialData: [],
   });
 

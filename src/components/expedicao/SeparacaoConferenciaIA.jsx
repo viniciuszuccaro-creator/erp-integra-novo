@@ -361,11 +361,11 @@ Gere uma rota otimizada considerando:
               className="text-lg"
               autoFocus
             />
-            <Button onClick={handleScanCodigoBarras} className="bg-purple-600 hover:bg-purple-700">
+            <Button data-permission="Expedicao.Separacao.executar" onClick={handleScanCodigoBarras} className="bg-purple-600 hover:bg-purple-700">
               <Scan className="w-4 h-4 mr-2" />
               Escanear
             </Button>
-            <Button onClick={handleOtimizarRota} variant="outline">
+            <Button data-permission="Expedicao.Separacao.executar" onClick={handleOtimizarRota} variant="outline">
               <MapPin className="w-4 h-4 mr-2" />
               Otimizar Rota IA
             </Button>

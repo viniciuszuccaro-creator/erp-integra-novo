@@ -179,52 +179,33 @@ function DashboardProducaoRealtime({ empresaId, windowMode = false }) {
         </Card>
       </div>
 
-      {/* Gráficos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Distribuição por Status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={dadosProducaoPorStatus}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ status, qtd }) => `${status}: ${qtd}`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="qtd"
-                >
-                  {dadosProducaoPorStatus.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">OPs por Status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={dadosProducaoPorStatus}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="status" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="qtd" fill="#3b82f6" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Gráfico Consolidado */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Distribuição de OPs por Status</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={280}>
+            <PieChart>
+              <Pie
+                data={dadosProducaoPorStatus}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ status, qtd }) => `${status}: ${qtd}`}
+                outerRadius={100}
+                fill="#8884d8"
+                dataKey="qtd"
+              >
+                {dadosProducaoPorStatus.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
 
       {/* Alertas em tempo real */}
       <Card className="border-red-200">

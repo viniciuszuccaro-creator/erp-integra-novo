@@ -96,7 +96,7 @@ export default function IAContextualModulo({ modulo, contextoExtra = {}, compact
             {erro && (
               <div className="text-sm text-red-600 py-2 flex items-center justify-between gap-2">
                 <span>{erro}</span>
-                <Button size="sm" variant="ghost" onClick={buscarSugestoes}>Tentar novamente</Button>
+                <Button data-permission="Sistema.IA.visualizar" size="sm" variant="ghost" onClick={buscarSugestoes}>Tentar novamente</Button>
               </div>
             )}
             {!loading && sugestoes && (

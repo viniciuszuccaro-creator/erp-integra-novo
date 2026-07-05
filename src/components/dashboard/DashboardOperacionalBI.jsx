@@ -149,14 +149,24 @@ function DashboardOperacionalBI({ windowMode = false }) {
     .every(arr => (arr?.length || 0) === 0);
   const erroGeral = errPedidos || errOps || errEntregas || errCR || errProdutos || errClientes;
 
-  const dadosVendasMes = [
-    { mes: "Jan", valor: 45000 },
-    { mes: "Fev", valor: 52000 },
-    { mes: "Mar", valor: 48000 },
-    { mes: "Abr", valor: 61000 },
-    { mes: "Mai", valor: 55000 },
-    { mes: "Jun", valor: 67000 },
-  ];
+  // Dados reais de vendas por mês (derivados dos pedidos filtrados)
+  const mesesNomes = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+  const dadosVendasMes = mesesNomes.slice(0, 6).map((mes, idx) => {
+    const pedidosMes = pedidosFiltrados.filter(p => {
+      const d = new Date(p.data_pedido);
+      return d.getMonth() === idx;
+    });
+    return { mes, valor: pedidosMes.reduce((s, p) => s + (p.valor_total || 0), 0) };
+  });
+
+  // Dados reais de evoluução de OPs (derivados das OPs filtradas)
+  const dadosOpsEvolucao = mesesNomes.slice(0, 6).map((mes, idx) => {
+    const opsMes = opsFiltradas.filter(op => {
+      const d = new Date(op.data_emissao || op.created_date);
+      return d.getMonth() === idx;
+    });
+    return { mes, ops: opsMes.length };
+  });
 
   const containerClass = windowMode ? "w-full h-full flex flex-col overflow-auto" : "w-full space-y-6 p-6 bg-gradient-to-br from-slate-50 to-blue-50";
 
@@ -316,14 +326,7 @@ function DashboardOperacionalBI({ windowMode = false }) {
             </CardHeader>
             <CardContent className="h-[320px] md:h-[360px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={[
-                  { mes: "Jan", ops: 12 },
-                  { mes: "Fev", ops: 15 },
-                  { mes: "Mar", ops: 18 },
-                  { mes: "Abr", ops: 22 },
-                  { mes: "Mai", ops: 19 },
-                  { mes: "Jun", ops: 25 },
-                ]}>
+                <LineChart data={dadosOpsEvolucao}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="mes" />
                   <YAxis />

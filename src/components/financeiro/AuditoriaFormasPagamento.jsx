@@ -117,14 +117,16 @@ export default function AuditoriaFormasPagamento() {
       <Card className="border-0 shadow-sm">
         <CardContent className="p-4">
           <div className="flex gap-2">
-            <Button 
+            <Button
+              data-permission="Financeiro.FormasPagamento.visualizar"
               variant={filtroTipo === 'todas' ? 'default' : 'outline'}
               onClick={() => setFiltroTipo('todas')}
               size="sm"
             >
               Todas ({stats.total})
             </Button>
-            <Button 
+            <Button
+              data-permission="Financeiro.FormasPagamento.visualizar"
               variant={filtroTipo === 'create' ? 'default' : 'outline'}
               onClick={() => setFiltroTipo('create')}
               size="sm"
@@ -132,7 +134,8 @@ export default function AuditoriaFormasPagamento() {
             >
               Criações ({stats.criados})
             </Button>
-            <Button 
+            <Button
+              data-permission="Financeiro.FormasPagamento.visualizar"
               variant={filtroTipo === 'update' ? 'default' : 'outline'}
               onClick={() => setFiltroTipo('update')}
               size="sm"
@@ -140,7 +143,8 @@ export default function AuditoriaFormasPagamento() {
             >
               Atualizações ({stats.atualizados})
             </Button>
-            <Button 
+            <Button
+              data-permission="Financeiro.FormasPagamento.visualizar"
               variant={filtroTipo === 'delete' ? 'default' : 'outline'}
               onClick={() => setFiltroTipo('delete')}
               size="sm"

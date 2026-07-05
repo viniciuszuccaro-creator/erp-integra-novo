@@ -135,7 +135,7 @@ export default function InsightsPainel() {
                     </span>
                   </div>
 
-                  <Button className="text-xs bg-white/80 hover:bg-white text-slate-900 font-semibold">
+                  <Button data-permission="Sistema.IA.visualizar" className="text-xs bg-white/80 hover:bg-white text-slate-900 font-semibold">
                     {insight.acao}
                   </Button>
                 </div>
@@ -145,7 +145,7 @@ export default function InsightsPainel() {
         ))}
       </div>
 
-      <Button onClick={loadInsights} disabled={loading} className="w-full bg-amber-500 hover:bg-amber-600 text-white mt-auto">
+      <Button data-permission="Sistema.IA.executar" onClick={loadInsights} disabled={loading} className="w-full bg-amber-500 hover:bg-amber-600 text-white mt-auto">
         {loading ? 'Gerando insights...' : '🔄 Regenerar Insights (IA)'}
       </Button>
     </div>

@@ -142,7 +142,7 @@ export default function AutomationOrchestrator() {
                   </>
                 )}
               </Button>
-              <Button variant="outline" size="sm" className="flex-1">
+              <Button data-permission="Sistema.Automacao.visualizar" variant="outline" size="sm" className="flex-1">
                 <RefreshCw className="w-3 h-3 mr-1" />
                 Executar Agora
               </Button>

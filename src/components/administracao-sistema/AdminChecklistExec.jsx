@@ -119,7 +119,7 @@ export default function AdminChecklistExec() {
                     <p className="text-sm text-slate-600">
                       Status: {isCompleted ? '✅ Concluído' : '⏳ Aguardando Ação'}
                     </p>
-                    <button className="text-sm text-blue-600 hover:underline font-medium">
+                    <button data-permission="Sistema.Checklist.visualizar" className="text-sm text-blue-600 hover:underline font-medium">
                       {task.action}
                     </button>
                   </div>

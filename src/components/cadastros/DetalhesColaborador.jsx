@@ -31,11 +31,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import usePermissions from "@/components/lib/usePermissions";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.1.2 - WINDOW MODE READY
- * Convertido para suportar modo janela independente
- * SUB-DIALOGS internos mantidos para adicionar documentos (UX)
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function DetalhesColaborador({ colaborador, onClose, windowMode = false }) {
   const [activeTab, setActiveTab] = useState("historico");
@@ -56,24 +56,26 @@ export default function DetalhesColaborador({ colaborador, onClose, windowMode =
 
   const queryClient = useQueryClient();
   const { canEdit, isAdmin } = usePermissions();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
-  // Buscar dados relacionados
+  // P2: Buscar dados relacionados com contexto multi-tenant
   const { data: pontos = [] } = useQuery({
-    queryKey: ['pontos-colaborador', colaborador.id],
-    queryFn: () => base44.entities.Ponto.filter({ colaborador_id: colaborador.id }),
-    enabled: !!colaborador.id
+    queryKey: ['pontos-colaborador', colaborador.id, contextoKey],
+    queryFn: () => filterInContext('Ponto', { colaborador_id: colaborador.id }),
+    enabled: !!colaborador.id && !!contextoKey
   });
 
   const { data: ferias = [] } = useQuery({
-    queryKey: ['ferias-colaborador', colaborador.id],
-    queryFn: () => base44.entities.Ferias.filter({ colaborador_id: colaborador.id }),
-    enabled: !!colaborador.id
+    queryKey: ['ferias-colaborador', colaborador.id, contextoKey],
+    queryFn: () => filterInContext('Ferias', { colaborador_id: colaborador.id }),
+    enabled: !!colaborador.id && !!contextoKey
   });
 
   const { data: ordensProducao = [] } = useQuery({
-    queryKey: ['ops-colaborador', colaborador.id],
-    queryFn: () => base44.entities.OrdemProducao.filter({ responsavel: colaborador.nome_completo }),
-    enabled: !!colaborador.id
+    queryKey: ['ops-colaborador', colaborador.id, contextoKey],
+    queryFn: () => filterInContext('OrdemProducao', { responsavel: colaborador.nome_completo }),
+    enabled: !!colaborador.id && !!contextoKey
   });
 
   const updateColaboradorMutation = useMutation({

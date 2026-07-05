@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,30 +30,32 @@ import TimelineCliente, { ResumoHistorico } from "../cliente/TimelineCliente";
  */
 export default function DetalhesCadastro({ tipo, registro, onClose, onUpdate, windowMode = false }) {
   const [activeTab, setActiveTab] = useState("historico");
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
-  // Buscar dados relacionados
+  // P2: Buscar dados relacionados com contexto multi-tenant
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos-cliente', registro.id],
-    queryFn: () => base44.entities.Pedido.filter({ cliente_id: registro.id }, '-data_pedido', 20),
-    enabled: tipo === 'cliente'
+    queryKey: ['pedidos-cliente', registro.id, contextoKey],
+    queryFn: () => filterInContext('Pedido', { cliente_id: registro.id }, '-data_pedido', 20),
+    enabled: tipo === 'cliente' && !!contextoKey
   });
 
   const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contas-cliente', registro.id],
-    queryFn: () => base44.entities.ContaReceber.filter({ cliente_id: registro.id }, '-data_vencimento', 20),
-    enabled: tipo === 'cliente'
+    queryKey: ['contas-cliente', registro.id, contextoKey],
+    queryFn: () => filterInContext('ContaReceber', { cliente_id: registro.id }, '-data_vencimento', 20),
+    enabled: tipo === 'cliente' && !!contextoKey
   });
 
   const { data: entregas = [] } = useQuery({
-    queryKey: ['entregas-cliente', registro.id],
-    queryFn: () => base44.entities.Entrega.filter({ cliente_id: registro.id }, '-created_date', 20),
-    enabled: tipo === 'cliente'
+    queryKey: ['entregas-cliente', registro.id, contextoKey],
+    queryFn: () => filterInContext('Entrega', { cliente_id: registro.id }, '-created_date', 20),
+    enabled: tipo === 'cliente' && !!contextoKey
   });
 
   const { data: notasFiscais = [] } = useQuery({
-    queryKey: ['notas-cliente', registro.id],
-    queryFn: () => base44.entities.NotaFiscal.filter({ cliente_fornecedor_id: registro.id }, '-data_emissao', 20),
-    enabled: tipo === 'cliente'
+    queryKey: ['notas-cliente', registro.id, contextoKey],
+    queryFn: () => filterInContext('NotaFiscal', { cliente_fornecedor_id: registro.id }, '-data_emissao', 20),
+    enabled: tipo === 'cliente' && !!contextoKey
   });
 
   const totalVendas = pedidos.reduce((sum, p) => sum + (p.valor_total || 0), 0);

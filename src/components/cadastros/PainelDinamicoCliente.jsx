@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -27,6 +26,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import usePermissions from "@/components/lib/usePermissions";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import TimelineCliente, { ResumoHistorico } from "@/components/cliente/TimelineCliente";
 import Top10ProdutosCliente from "@/components/comercial/Top10ProdutosCliente";
 import HistoricoOrigemCliente from "@/components/comercial/HistoricoOrigemCliente";
@@ -37,29 +37,32 @@ import HistoricoProdutosCliente from "@/components/comercial/HistoricoProdutosCl
 
 /**
  * V21.1.2 - WINDOW MODE READY
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function PainelDinamicoCliente({ cliente, isOpen, onClose, windowMode = false }) {
   const [activeTab, setActiveTab] = useState("enderecos");
   const navigate = useNavigate();
   const { hasPermission } = usePermissions();
   const { openWindow } = useWindow();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos-cliente', cliente?.id],
-    queryFn: () => base44.entities.Pedido.filter({ cliente_id: cliente.id }, '-data_pedido', 10),
-    enabled: !!cliente?.id && isOpen,
+    queryKey: ['pedidos-cliente', cliente?.id, contextoKey],
+    queryFn: () => filterInContext('Pedido', { cliente_id: cliente.id }, '-data_pedido', 10),
+    enabled: !!cliente?.id && isOpen && !!contextoKey,
   });
 
   const { data: entregas = [] } = useQuery({
-    queryKey: ['entregas-cliente', cliente?.id],
-    queryFn: () => base44.entities.Entrega.filter({ cliente_id: cliente.id }, '-created_date', 5),
-    enabled: !!cliente?.id && isOpen,
+    queryKey: ['entregas-cliente', cliente?.id, contextoKey],
+    queryFn: () => filterInContext('Entrega', { cliente_id: cliente.id }, '-created_date', 5),
+    enabled: !!cliente?.id && isOpen && !!contextoKey,
   });
 
   const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contas-receber-cliente', cliente?.id],
-    queryFn: () => base44.entities.ContaReceber.filter({ cliente_id: cliente.id }, '-data_vencimento', 5),
-    enabled: !!cliente?.id && isOpen,
+    queryKey: ['contas-receber-cliente', cliente?.id, contextoKey],
+    queryFn: () => filterInContext('ContaReceber', { cliente_id: cliente.id }, '-data_vencimento', 5),
+    enabled: !!cliente?.id && isOpen && !!contextoKey,
   });
 
   if (!cliente) return null;

@@ -16,35 +16,38 @@ import {
   Award
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import usePermissions from "@/components/lib/usePermissions";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 /**
  * V21.1.2 - WINDOW MODE READY
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function PainelDinamicoColaborador({ colaborador, isOpen, onClose, windowMode = false }) {
   const navigate = useNavigate();
   const { hasPermission } = usePermissions();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: pontos = [] } = useQuery({
-    queryKey: ['pontos-colaborador', colaborador?.id],
-    queryFn: () => base44.entities.Ponto.filter({ colaborador_id: colaborador.id }, '-data'),
-    enabled: !!colaborador?.id,
+    queryKey: ['pontos-colaborador', colaborador?.id, contextoKey],
+    queryFn: () => filterInContext('Ponto', { colaborador_id: colaborador.id }, '-data'),
+    enabled: !!colaborador?.id && !!contextoKey,
   });
 
   const { data: ferias = [] } = useQuery({
-    queryKey: ['ferias-colaborador', colaborador?.id],
-    queryFn: () => base44.entities.Ferias.filter({ colaborador_id: colaborador.id }, '-data_solicitacao'),
-    enabled: !!colaborador?.id,
+    queryKey: ['ferias-colaborador', colaborador?.id, contextoKey],
+    queryFn: () => filterInContext('Ferias', { colaborador_id: colaborador.id }, '-data_solicitacao'),
+    enabled: !!colaborador?.id && !!contextoKey,
   });
 
   const { data: ordensProducao = [] } = useQuery({
-    queryKey: ['ops-colaborador', colaborador?.id],
-    queryFn: () => base44.entities.OrdemProducao.filter({ operador_responsavel_id: colaborador.id }, '-data_emissao'),
-    enabled: !!colaborador?.id,
+    queryKey: ['ops-colaborador', colaborador?.id, contextoKey],
+    queryFn: () => filterInContext('OrdemProducao', { operador_responsavel_id: colaborador.id }, '-data_emissao'),
+    enabled: !!colaborador?.id && !!contextoKey,
   });
 
   const podeEditar = hasPermission('cadastros', 'editar');

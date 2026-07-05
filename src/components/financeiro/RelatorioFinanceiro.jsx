@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -25,26 +24,32 @@ import {
   ResponsiveContainer
 } from "recharts";
 import { TrendingUp, TrendingDown, DollarSign, CreditCard, Download, Filter } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Relatórios Financeiros Avançados
+ * P2: Multi-tenant — usa filterInContext para garantir group_id/empresa_id
  */
 export default function RelatorioFinanceiro({ empresaId, windowMode = false }) {
   const [periodoInicio, setPeriodoInicio] = useState("");
   const [periodoFim, setPeriodoFim] = useState("");
   const [filtroCliente, setFiltroCliente] = useState("todos");
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contasReceber'],
-    queryFn: () => base44.entities.ContaReceber.list('-data_vencimento'),
+    queryKey: ['rel-fin-receber', contextoKey],
+    queryFn: () => filterInContext('ContaReceber', {}, '-data_vencimento', 9999),
+    enabled: !!contextoKey,
   });
 
   const { data: contasPagar = [] } = useQuery({
-    queryKey: ['contasPagar'],
-    queryFn: () => base44.entities.ContaPagar.list('-data_vencimento'),
+    queryKey: ['rel-fin-pagar', contextoKey],
+    queryFn: () => filterInContext('ContaPagar', {}, '-data_vencimento', 9999),
+    enabled: !!contextoKey,
   });
 
-  // Filtrar por empresa se necessário
+  // P2: filtro por empresaId opcional já vem do filterInContext, mas respeita override explícito
   const receberFiltradas = empresaId 
     ? contasReceber.filter(c => c.empresa_id === empresaId)
     : contasReceber;

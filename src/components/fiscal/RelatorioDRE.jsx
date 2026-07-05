@@ -8,29 +8,31 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { BarChart3, TrendingUp, TrendingDown, Download, RefreshCw } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Relatório de DRE (Demonstração do Resultado do Exercício)
+ * P2: Multi-tenant — usa filterInContext para LancamentoContabil e PlanoDeContas
  */
 export default function RelatorioDRE({ empresaId, tipoRelatorio = "Individual" }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const [periodo, setPeriodo] = useState(
     new Date().toISOString().substring(0, 7) // YYYY-MM
   );
 
   const { data: dre, isLoading } = useQuery({
-    queryKey: ['dre', empresaId, periodo, tipoRelatorio],
+    queryKey: ['dre', empresaId, periodo, tipoRelatorio, contextoKey],
     queryFn: async () => {
-      const query = tipoRelatorio === "Individual"
-        ? { empresa_id: empresaId, periodo }
-        : { tipo: "Consolidado", periodo };
-
-      const result = await base44.entities.DRE.filter(query);
+      const result = tipoRelatorio === "Individual"
+        ? await filterInContext('DRE', { empresa_id: empresaId, periodo })
+        : await filterInContext('DRE', { tipo: "Consolidado", periodo });
       return result[0] || null;
     },
-    enabled: !!periodo
+    enabled: !!periodo && !!contextoKey
   });
 
   const gerarDREMutation = useMutation({
@@ -39,7 +41,8 @@ export default function RelatorioDRE({ empresaId, tipoRelatorio = "Individual" }
       const dataInicio = `${periodo}-01`;
       const dataFim = new Date(periodo.split('-')[0], periodo.split('-')[1], 0).toISOString().split('T')[0];
 
-      const lancamentos = await base44.entities.LancamentoContabil.filter({
+      // P2: filterInContext garante contexto multi-tenant
+      const lancamentos = await filterInContext('LancamentoContabil', {
         empresa_id: empresaId,
         status: "Efetivado"
       });
@@ -50,7 +53,7 @@ export default function RelatorioDRE({ empresaId, tipoRelatorio = "Individual" }
       });
 
       // Buscar plano de contas
-      const contas = await base44.entities.PlanoDeContas.filter({ empresa_id: empresaId });
+      const contas = await filterInContext('PlanoDeContas', { empresa_id: empresaId });
 
       // Calcular por grupo DRE
       const calcular = (grupoDre) => {

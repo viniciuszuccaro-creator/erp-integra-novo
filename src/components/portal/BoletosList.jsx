@@ -4,14 +4,17 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Receipt, Clipboard } from 'lucide-react';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 export default function BoletosList({ cliente }) {
   const qc = useQueryClient();
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const { data: boletos = [] } = useQuery({
-    queryKey: ['portal-boletos', cliente?.id],
+    queryKey: ['portal-boletos', cliente?.id, contextoKey],
     enabled: !!cliente?.id,
     queryFn: async () => {
-      return base44.entities.ContaReceber.filter({ cliente_id: cliente.id, visivel_no_portal: true }, '-data_vencimento', 100);
+      return filterInContext('ContaReceber', { cliente_id: cliente.id, visivel_no_portal: true }, '-data_vencimento', 100);
     }
   });
 

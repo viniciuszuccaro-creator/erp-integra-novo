@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, AlertCircle, CheckCircle2, Clock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function PlanoMelhoriaDashboardFinal() {
   const [metricas, setMetricas] = useState({
@@ -13,13 +13,15 @@ export default function PlanoMelhoriaDashboardFinal() {
     acoesCriticas: 5,
     proximasAcoes: [],
   });
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
-  // Carrega dados em tempo real do PlanoMelhoriaItem
+  // Carrega dados em tempo real do PlanoMelhoriaItem com contexto multiempresa
   const { data: items = [] } = useQuery({
-    queryKey: ["planoMelhoria", "items"],
+    queryKey: ["planoMelhoria", "items", contextoKey],
     queryFn: async () => {
       try {
-        return await base44.entities.PlanoMelhoriaItem.list("-updated_date", 100);
+        return await filterInContext('PlanoMelhoriaItem', {}, "-updated_date", 100);
       } catch {
         return [];
       }

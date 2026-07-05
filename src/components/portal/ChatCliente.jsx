@@ -9,18 +9,21 @@ import { Avatar } from "@/components/ui/avatar";
 import { Copy, Zap, CheckCircle2, AlertCircle, Loader2, ChevronRight, Clock, User, MessageCircle, Send } from 'lucide-react';
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function ChatCliente({ clienteId, clienteNome }) {
   const [mensagem, setMensagem] = useState("");
   const [conversaAtiva, setConversaAtiva] = useState(null);
   const messagesEndRef = useRef(null);
   const queryClient = useQueryClient();
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: chamados = [] } = useQuery({
-    queryKey: ['chamados', clienteId],
+    queryKey: ['chamados', clienteId, contextoKey],
     queryFn: async () => {
       if (!clienteId) return [];
-      const todosChamados = await base44.entities.Chamado.list('-created_date');
+      const todosChamados = await filterInContext('Chamado', {}, '-created_date');
       return todosChamados.filter(c => c.cliente_id === clienteId);
     },
     enabled: !!clienteId

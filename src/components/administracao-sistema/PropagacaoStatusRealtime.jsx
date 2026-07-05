@@ -4,23 +4,25 @@
  * Ideal para widget de admin
  */
 import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
 import { ArrowDownUp, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function PropagacaoStatusRealtime() {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   useEffect(() => {
     checkPropagationStatus();
     const interval = setInterval(checkPropagationStatus, 30000); // a cada 30s
     return () => clearInterval(interval);
-  }, []);
+  }, [contextoKey]);
 
   const checkPropagationStatus = async () => {
     setLoading(true);
     try {
-      const logs = await base44.entities.AuditLog.filter(
+      const logs = await filterInContext('AuditLog',
         { entidade: 'PropagacaoGrupo' },
         '-data_hora',
         1

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import DescricaoAutomaticaArmado from "./DescricaoAutomaticaArmado";
 
 export const PESOS_BITOLA = {
@@ -56,10 +57,12 @@ export function useArmadoCalculo(itemInicial = null) {
   const [formData, setFormData] = useState(itemInicial || { ...ARMADO_DEFAULTS, identificador: `ARM-${Date.now()}` });
   const [resumo, setResumo] = useState(null);
 
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const { data: configuracoes } = useQuery({
-    queryKey: ['configProducao'],
+    queryKey: ['configProducao', contextoKey],
     queryFn: async () => {
-      const configs = await base44.entities.ConfiguracaoProducao.filter({ tipo: "Perda Aço" });
+      const configs = await filterInContext('ConfiguracaoProducao', { tipo: "Perda Aço" });
       return configs[0] || { perda_aco_percentual: 5, perda_arame_percentual: 10 };
     },
   });

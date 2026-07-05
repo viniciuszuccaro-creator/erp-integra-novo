@@ -3,13 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import {
   ShoppingCart, FileText, CreditCard, Package, MessageCircle,
   ChevronRight, Search, Clock, CheckCircle2, AlertCircle
 } from "lucide-react";
 import { createPageUrl } from "@/utils";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 const ATALHOS = [
   { icon: ShoppingCart, label: "Novo Pedido",        cor: "bg-blue-100 text-blue-700",    action: "novo_pedido" },
@@ -33,13 +33,15 @@ const STATUS_CLS = {
 
 export default function PortalSelfServiceB2B({ clienteId, onAction }) {
   const [busca, setBusca] = useState('');
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: pedidos = [], isLoading } = useQuery({
-    queryKey: ['portal-b2b-pedidos', clienteId],
+    queryKey: ['portal-b2b-pedidos', clienteId, contextoKey],
     enabled: !!clienteId,
     staleTime: 120000,
     queryFn: async () => {
-      const res = await base44.entities.Pedido.filter(
+      const res = await filterInContext('Pedido',
         { cliente_id: clienteId, pode_ver_no_portal: true },
         '-data_pedido', 10
       );

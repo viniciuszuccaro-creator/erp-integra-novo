@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Settings, Bell, Mail, MessageCircle, Save, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 /**
  * V21.5 - Configurações do Portal
@@ -19,6 +20,8 @@ import { toast } from 'sonner';
 export default function ConfiguracoesPortal() {
   const queryClient = useQueryClient();
   const [salvando, setSalvando] = useState(false);
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: user } = useQuery({
     queryKey: ['portal-user-config'],
@@ -26,9 +29,9 @@ export default function ConfiguracoesPortal() {
   });
 
   const { data: cliente } = useQuery({
-    queryKey: ['cliente-config', user?.id],
+    queryKey: ['cliente-config', user?.id, contextoKey],
     queryFn: async () => {
-      const clientes = await base44.entities.Cliente.filter({ portal_usuario_id: user.id });
+      const clientes = await filterInContext('Cliente', { portal_usuario_id: user.id });
       return clientes[0];
     },
     enabled: !!user?.id,

@@ -2,16 +2,18 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Circle, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { base44 } from '@/api/base44Client';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 export default function LiveMap({ posicao, entregaId, height = 340 }) {
   const [destino, setDestino] = useState(null);
   const [eta, setEta] = useState(null);
+  const { filterInContext } = useContextoVisual();
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       if (!entregaId) return;
-      const list = await base44.entities.Entrega.filter({ id: entregaId }, undefined, 1);
+      const list = await filterInContext('Entrega', { id: entregaId }, undefined, 1);
       const e = list?.[0];
       if (!e) return;
       const lat = e?.endereco_entrega_completo?.latitude;

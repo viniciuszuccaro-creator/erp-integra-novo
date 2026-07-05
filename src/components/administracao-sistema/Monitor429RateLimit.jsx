@@ -9,19 +9,21 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { AlertTriangle, CheckCircle2, Clock, Zap, TrendingDown } from 'lucide-react';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 export default function Monitor429RateLimit() {
   const [circuitState, setCircuitState] = useState('CLOSED');
   const [failureCount, setFailureCount] = useState(0);
   const [nextAttemptTime, setNextAttemptTime] = useState(null);
   const [countdown, setCountdown] = useState(0);
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
-  // Fetch histórico de 429s
+  // Fetch histórico de 429s com contexto multiempresa
   const { data: erros429 = [], refetch } = useQuery({
-    queryKey: ['429-errors'],
-    queryFn: () => base44.entities.AuditLog.filter(
+    queryKey: ['429-errors', contextoKey],
+    queryFn: () => filterInContext('AuditLog',
       { 
         entidade: 'RateLimitError',
         tipo_auditoria: 'erro'

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { TrendingUp, Package, DollarSign, Calendar } from 'lucide-react';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 /**
  * V21.5 - Analytics Portal Cliente
@@ -14,9 +14,11 @@ import { TrendingUp, Package, DollarSign, Calendar } from 'lucide-react';
  * ✅ 100% Responsivo
  */
 export default function AnalyticsPortalCliente({ clienteId }) {
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['analytics-pedidos', clienteId],
-    queryFn: () => base44.entities.Pedido.filter({ cliente_id: clienteId }, '-data_pedido', 100),
+    queryKey: ['analytics-pedidos', clienteId, contextoKey],
+    queryFn: () => filterInContext('Pedido', { cliente_id: clienteId }, '-data_pedido', 100),
     enabled: !!clienteId,
   });
 

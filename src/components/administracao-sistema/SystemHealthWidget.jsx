@@ -10,6 +10,7 @@ import { CheckCircle2, AlertCircle, Activity, Zap, ArrowDownUp, Clock, RefreshCw
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 function Metric({ icon: Icon, label, value, color = "text-slate-700", bg = "bg-slate-50" }) {
   return (
@@ -24,11 +25,13 @@ function Metric({ icon: Icon, label, value, color = "text-slate-700", bg = "bg-s
 }
 
 export default function SystemHealthWidget() {
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const { data: metrics, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ["system-health-widget"],
+    queryKey: ["system-health-widget", contextoKey],
     queryFn: async () => {
       const since24h = Date.now() - 24 * 60 * 60 * 1000;
-      const logs = await base44.entities.AuditLog.filter({}, "-data_hora", 300).catch(() => []);
+      const logs = await filterInContext('AuditLog', {}, "-data_hora", 300).catch(() => []);
       const recent = (logs || []).filter(l =>
         new Date(l?.data_hora || l?.created_date || 0).getTime() >= since24h
       );

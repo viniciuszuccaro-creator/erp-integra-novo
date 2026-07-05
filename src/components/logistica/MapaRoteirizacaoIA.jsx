@@ -15,6 +15,7 @@ import {
   Eye
 } from "lucide-react";
 import { toast } from "sonner";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * 🗺️ MAPA DE ROTEIRIZAÇÃO COM IA V21.5
@@ -23,10 +24,12 @@ import { toast } from "sonner";
 export default function MapaRoteirizacaoIA({ pedidosSelecionados = [], windowMode = false }) {
   const [rotaOtimizada, setRotaOtimizada] = useState(null);
   const [otimizando, setOtimizando] = useState(false);
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos'],
-    queryFn: () => base44.entities.Pedido.list('-created_date'),
+    queryKey: ['pedidos', contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-created_date'),
   });
 
   // Pedidos elegíveis para roteirização

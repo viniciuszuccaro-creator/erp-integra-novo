@@ -6,23 +6,26 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { MessageSquare, Send, Loader2 } from 'lucide-react';
 import ChatbotPortal from './ChatbotPortal';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 export default function ChamadosWidget({ cliente }) {
   const qc = useQueryClient();
   const [mensagem, setMensagem] = useState('');
+  const { filterInContext, createInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: chamados = [], isLoading } = useQuery({
-    queryKey: ['portal-chamados', cliente?.id],
+    queryKey: ['portal-chamados', cliente?.id, contextoKey],
     enabled: !!cliente?.id,
     queryFn: async () => {
-      return base44.entities.Chamado.filter({ cliente_id: cliente.id }, '-created_date', 50);
+      return filterInContext('Chamado', { cliente_id: cliente.id }, '-created_date', 50);
     }
   });
 
   const novaMut = useMutation({
     mutationFn: async () => {
       const titulo = mensagem.trim().slice(0, 80) || 'Chamado via Portal';
-      return base44.entities.Chamado.create({
+      return createInContext('Chamado', {
         titulo,
         descricao: mensagem,
         cliente_id: cliente.id,
@@ -33,7 +36,7 @@ export default function ChamadosWidget({ cliente }) {
     },
     onSuccess: () => {
       setMensagem('');
-      qc.invalidateQueries({ queryKey: ['portal-chamados', cliente?.id] });
+      qc.invalidateQueries({ queryKey: ['portal-chamados', cliente?.id, contextoKey] });
     }
   });
 

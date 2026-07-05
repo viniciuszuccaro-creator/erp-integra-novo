@@ -13,6 +13,7 @@ import {
   CheckCircle,
   Eye
 } from 'lucide-react';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 /**
  * Kanban de Produção
@@ -20,10 +21,12 @@ import {
  */
 export default function KanbanProducao({ onViewOP }) {
   const queryClient = useQueryClient();
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: ops = [] } = useQuery({
-    queryKey: ['ops-kanban'],
-    queryFn: () => base44.entities.OrdemProducao.list('-data_emissao'),
+    queryKey: ['ops-kanban', contextoKey],
+    queryFn: () => filterInContext('OrdemProducao', {}, '-data_emissao'),
   });
 
   const updateStatusMutation = useMutation({

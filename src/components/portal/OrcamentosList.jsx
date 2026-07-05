@@ -5,13 +5,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, XCircle } from 'lucide-react';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 export default function OrcamentosList({ cliente }) {
   const qc = useQueryClient();
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const { data: orcamentos = [] } = useQuery({
-    queryKey: ['portal-orcamentos', cliente?.id],
+    queryKey: ['portal-orcamentos', cliente?.id, contextoKey],
     enabled: !!cliente?.id,
-    queryFn: async () => base44.entities.Pedido.filter({ cliente_id: cliente.id, tipo: 'Orçamento' }, '-data_pedido', 50)
+    queryFn: async () => filterInContext('Pedido', { cliente_id: cliente.id, tipo: 'Orçamento' }, '-data_pedido', 50)
   });
 
   const aceitar = useMutation({

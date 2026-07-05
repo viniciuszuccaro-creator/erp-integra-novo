@@ -1,6 +1,4 @@
-
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,14 +9,17 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calculator, Package, Ruler, Layers, Grid3x3 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function FormularioBlocoCompleto({ onSalvar, onCancelar, blocoInicial = null }) {
   const { toast } = useToast();
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: configuracoes } = useQuery({
-    queryKey: ['configProducao'],
+    queryKey: ['configProducao', contextoKey],
     queryFn: async () => {
-      const configs = await base44.entities.ConfiguracaoProducao.filter({ tipo: "Perda Aço" });
+      const configs = await filterInContext('ConfiguracaoProducao', { tipo: "Perda Aço" });
       return configs[0] || { perda_aco_percentual: 5, perda_arame_percentual: 10 };
     },
   });

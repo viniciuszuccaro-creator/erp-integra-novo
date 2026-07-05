@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, Sparkles, TrendingDown, Loader2, Zap } from 'lucide-react';
 import { toast } from 'sonner';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 /**
  * V21.1 - IA de Detecção de Churn
@@ -16,6 +17,7 @@ export default function IAChurnDetection({ clientes = [] }) {
   const [executando, setExecutando] = useState(false);
   const [resultado, setResultado] = useState(null);
   const queryClient = useQueryClient();
+  const { filterInContext, createInContext } = useContextoVisual();
 
   const executarAnaliseChurn = async () => {
     setExecutando(true);
@@ -49,13 +51,13 @@ export default function IAChurnDetection({ clientes = [] }) {
 
       for (const cliente of clientesRisco.slice(0, 10)) { // Limitar a 10 por execução
         // Verificar se já existe oportunidade aberta
-        const oppExistente = await base44.entities.Oportunidade.filter({
+        const oppExistente = await filterInContext('Oportunidade', {
           cliente_id: cliente.id,
           status: { $in: ['Aberto', 'Em Andamento'] }
         });
 
         if (oppExistente.length === 0) {
-          const novaOpp = await base44.entities.Oportunidade.create({
+          const novaOpp = await createInContext('Oportunidade', {
             titulo: `⚠️ Risco Churn - ${cliente.nome_fantasia || cliente.nome}`,
             descricao: `Cliente classe ${cliente.classificacao_abc} sem comprar há ${cliente.dias_sem_comprar} dias. Valor histórico: R$ ${cliente.valor_compras_12meses.toLocaleString('pt-BR')}`,
             cliente_id: cliente.id,

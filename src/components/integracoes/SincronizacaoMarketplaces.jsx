@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { ShoppingCart, RefreshCw, CheckCircle, AlertCircle, Package } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 /**
  * Sincronização com Marketplaces
@@ -17,6 +18,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 export default function SincronizacaoMarketplaces({ empresaId }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [config, setConfig] = useState({
     mercado_livre: { ativo: false, token: '' },
     shopee: { ativo: false, token: '' },
@@ -24,8 +27,8 @@ export default function SincronizacaoMarketplaces({ empresaId }) {
   });
 
   const { data: pedidosExternos = [] } = useQuery({
-    queryKey: ['pedidos-externos-config'],
-    queryFn: () => base44.entities.PedidoExterno.list('-created_date'),
+    queryKey: ['pedidos-externos-config', contextoKey],
+    queryFn: () => filterInContext('PedidoExterno', {}, '-created_date'),
   });
 
   const sincronizarMutation = useMutation({

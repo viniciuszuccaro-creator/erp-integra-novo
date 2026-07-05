@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Upload, FileText, CheckCircle2, Clock, AlertCircle, Download } from "lucide-react";
 import { format } from "date-fns";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.5 - Upload de Projetos COMPLETO
@@ -27,12 +28,14 @@ export default function UploadProjetos({ clienteId, clienteNome }) {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: projetos = [] } = useQuery({
-    queryKey: ['projetosCliente', clienteId],
+    queryKey: ['projetosCliente', clienteId, contextoKey],
     queryFn: async () => {
       // Buscar pedidos do cliente que têm projetos anexados
-      const pedidos = await base44.entities.Pedido.filter({ cliente_id: clienteId }, '-created_date');
+      const pedidos = await filterInContext('Pedido', { cliente_id: clienteId }, '-created_date');
       
       const projetosCliente = [];
       pedidos.forEach(p => {

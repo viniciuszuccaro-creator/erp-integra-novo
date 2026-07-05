@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Truck, Navigation, Calendar, Clock, Package, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from "sonner";
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 /**
  * V21.5 - Rastreamento em Tempo Real COMPLETO
@@ -19,6 +20,8 @@ import { toast } from "sonner";
  */
 export default function RastreamentoRealtime() {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -28,10 +31,10 @@ export default function RastreamentoRealtime() {
   }, []);
 
   const { data: entregas = [], refetch } = useQuery({
-    queryKey: ['rastreamento-realtime', currentTime.getTime()],
+    queryKey: ['rastreamento-realtime', currentTime.getTime(), contextoKey],
     queryFn: async () => {
       const user = await base44.auth.me();
-      const entregasData = await base44.entities.Entrega.filter(
+      const entregasData = await filterInContext('Entrega',
         { cliente_nome: user.full_name },
         '-data_previsao',
         50

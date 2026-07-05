@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
 import { Calendar, Mail, Clock } from 'lucide-react';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 /**
  * Agendamento Inteligente de Relatórios
@@ -17,6 +18,7 @@ import { Calendar, Mail, Clock } from 'lucide-react';
 export default function AgendamentoRelatorios({ empresaId }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { filterInContext, createInContext } = useContextoVisual();
 
   const [agendamento, setAgendamento] = useState({
     ativo: false,
@@ -31,8 +33,8 @@ export default function AgendamentoRelatorios({ empresaId }) {
 
   const salvarMutation = useMutation({
     mutationFn: async (data) => {
-      // Salvar configuração
-      const configs = await base44.entities.ConfiguracaoSistema.filter({
+      // Salvar configuração com contexto multiempresa
+      const configs = await filterInContext('ConfiguracaoSistema', {
         chave: 'agendamento_relatorios'
       });
 
@@ -42,7 +44,7 @@ export default function AgendamentoRelatorios({ empresaId }) {
           configuracoes_sistema: data
         });
       } else {
-        return await base44.entities.ConfiguracaoSistema.create({
+        return await createInContext('ConfiguracaoSistema', {
           chave: 'agendamento_relatorios',
           categoria: 'Sistema',
           configuracoes_sistema: data

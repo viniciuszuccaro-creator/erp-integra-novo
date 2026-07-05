@@ -11,15 +11,18 @@ import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { TrendingUp, AlertCircle, CheckCircle2, Loader2, RefreshCw } from 'lucide-react';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 export default function DashboardPropagacaoMonitor() {
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [forceRefresh, setForceRefresh] = useState(0);
   const [executando, setExecutando] = useState(false);
 
-  // Fetch histórico de propagações
+  // Fetch histórico de propagações com contexto multiempresa
   const { data: propagacoes = [], refetch } = useQuery({
-    queryKey: ['propagacoes', forceRefresh],
-    queryFn: () => base44.entities.AuditLog.filter(
+    queryKey: ['propagacoes', forceRefresh, contextoKey],
+    queryFn: () => filterInContext('AuditLog', 
       { 
         entidade: 'PropagacaoAutomatica',
         tipo_auditoria: 'sincronizacao'

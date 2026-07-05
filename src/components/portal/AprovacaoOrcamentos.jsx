@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { CheckCircle, XCircle, FileText } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Aprovação de Orçamentos pelo Cliente
@@ -13,12 +14,14 @@ import { CheckCircle, XCircle, FileText } from "lucide-react";
 export default function AprovacaoOrcamentos({ clienteId }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: orcamentos = [] } = useQuery({
-    queryKey: ['orcamentos-cliente', clienteId],
+    queryKey: ['orcamentos-cliente', clienteId, contextoKey],
     queryFn: async () => {
       if (!clienteId) return [];
-      return base44.entities.OrcamentoCliente.filter({
+      return filterInContext('OrcamentoCliente', {
         cliente_id: clienteId,
         status: 'Pendente'
       });

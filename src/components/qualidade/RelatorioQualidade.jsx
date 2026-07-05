@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,11 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Download, CheckCircle, XCircle, AlertTriangle, TrendingUp } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Relatório de Qualidade
  */
 export default function RelatorioQualidade({ empresaId }) {
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [periodoInicio, setPeriodoInicio] = useState(
     new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0]
   );
@@ -22,9 +24,9 @@ export default function RelatorioQualidade({ empresaId }) {
   );
 
   const { data: inspecoes = [] } = useQuery({
-    queryKey: ['inspecoes', empresaId, periodoInicio, periodoFim],
+    queryKey: ['inspecoes', empresaId, periodoInicio, periodoFim, contextoKey],
     queryFn: async () => {
-      const todas = await base44.entities.InspecaoQualidade.list('-created_date');
+      const todas = await filterInContext('InspecaoQualidade', {}, '-created_date');
       return todas.filter(i => {
         const dataInsp = i.data_inspecao || i.created_date;
         return dataInsp >= periodoInicio && dataInsp <= periodoFim;

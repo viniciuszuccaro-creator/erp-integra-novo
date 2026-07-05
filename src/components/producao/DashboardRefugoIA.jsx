@@ -1,21 +1,22 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Sparkles, AlertTriangle, TrendingUp, User, Package } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 /**
  * Dashboard de Refugo com Análise IA
  * Analisa padrões de refugo e sugere melhorias
  */
 export default function DashboardRefugoIA({ empresaId }) {
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const { data: ops = [] } = useQuery({
-    queryKey: ['ordens-producao'],
-    queryFn: () => base44.entities.OrdemProducao.list('-created_date', 200),
+    queryKey: ['ordens-producao', contextoKey],
+    queryFn: () => filterInContext('OrdemProducao', {}, '-created_date', 200),
   });
 
   // Análise de Refugo por Operador

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
 import { useUser } from '@/components/lib/UserContext';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 /**
  * Guard que verifica se há empresas cadastradas.
@@ -12,13 +12,14 @@ export default function EmpresaOnboardingGuard({ children }) {
   const { user } = useUser();
   const navigate = useNavigate();
   const [checked, setChecked] = useState(false);
+  const { filterInContext } = useContextoVisual();
 
   useEffect(() => {
     if (!user?.id) { setChecked(true); return; }
     let cancelled = false;
     (async () => {
       try {
-        const res = await base44.entities.Empresa.list('-updated_date', 5);
+        const res = await filterInContext('Empresa', {}, '-updated_date', 5);
         if (!cancelled && (!res || res.length === 0)) {
           navigate('/EmpresaOnboarding');
         }

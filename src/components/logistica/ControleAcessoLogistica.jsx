@@ -1,22 +1,25 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * 🔒 CONTROLE DE ACESSO LOGÍSTICA V21.5
  * Hook para verificar permissões de logística
  */
 export function usePermissoesLogistica() {
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
 
   const { data: perfil } = useQuery({
-    queryKey: ['perfilAcesso', user?.perfil_acesso_id],
+    queryKey: ['perfilAcesso', user?.perfil_acesso_id, contextoKey],
     queryFn: async () => {
       if (!user?.perfil_acesso_id) return null;
-      const perfis = await base44.entities.PerfilAcesso.filter({ id: user.perfil_acesso_id });
+      const perfis = await filterInContext('PerfilAcesso', { id: user.perfil_acesso_id });
       return perfis[0] || null;
     },
     enabled: !!user?.perfil_acesso_id,

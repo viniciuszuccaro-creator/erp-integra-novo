@@ -1,16 +1,18 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Truck, ExternalLink } from 'lucide-react';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 export default function EntregasList({ cliente }) {
+  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const { data: entregas = [] } = useQuery({
-    queryKey: ['portal-entregas', cliente?.id],
+    queryKey: ['portal-entregas', cliente?.id, contextoKey],
     enabled: !!cliente?.id,
     queryFn: async () => {
-      return base44.entities.Entrega.filter({ cliente_id: cliente.id }, '-data_previsao', 50);
+      return filterInContext('Entrega', { cliente_id: cliente.id }, '-data_previsao', 50);
     }
   });
 

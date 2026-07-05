@@ -48,13 +48,14 @@ export default function ChatbotWidget({
   const [conversaAtiva, setConversaAtiva] = useState(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
-  const { empresaAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual, filterInContext } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   // Buscar configuração do canal
   const { data: configCanal } = useQuery({
-    queryKey: ['config-canal', canal],
+    queryKey: ['config-canal', canal, contextoKey],
     queryFn: async () => {
-      const configs = await base44.entities.ConfiguracaoCanal.filter({ 
+      const configs = await filterInContext('ConfiguracaoCanal', { 
         canal, 
         ativo: true 
       });

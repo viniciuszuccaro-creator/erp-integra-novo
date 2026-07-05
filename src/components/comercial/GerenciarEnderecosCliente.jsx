@@ -11,12 +11,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { MapPin, Plus, Edit, Trash2, Check, ExternalLink } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import BuscaCEP from "./BuscaCEP";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function GerenciarEnderecosCliente({ clienteId, onSelecionarEndereco }) {
   const [dialogAberto, setDialogAberto] = useState(false);
   const [enderecoEditando, setEnderecoEditando] = useState(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const [novoEndereco, setNovoEndereco] = useState({
     apelido: "",
@@ -36,13 +39,13 @@ export default function GerenciarEnderecosCliente({ clienteId, onSelecionarEnder
   });
 
   const { data: cliente } = useQuery({
-    queryKey: ['cliente', clienteId],
+    queryKey: ['cliente', clienteId, contextoKey],
     queryFn: async () => {
       if (!clienteId) return null;
-      const clientes = await base44.entities.Cliente.filter({ id: clienteId });
+      const clientes = await filterInContext('Cliente', { id: clienteId }, '-updated_date', 1);
       return clientes[0] || null;
     },
-    enabled: !!clienteId
+    enabled: !!clienteId && !!contextoKey
   });
 
   const updateClienteMutation = useMutation({

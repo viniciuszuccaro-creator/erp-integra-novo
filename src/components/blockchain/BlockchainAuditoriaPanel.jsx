@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Hash, CheckCircle2, AlertCircle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 export default function BlockchainAuditoriaPanel({ entity, entityId }) {
   const [registros, setRegistros] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   useEffect(() => {
     carregarRegistros();
-  }, [entity, entityId]);
+  }, [entity, entityId, contextoKey]);
 
   const carregarRegistros = async () => {
     setLoading(true);
     try {
-      const logs = await base44.entities.AuditLog.filter(
+      const logs = await filterInContext('AuditLog',
         { entidade: entity, registro_id: entityId },
         '-data_hora',
         50

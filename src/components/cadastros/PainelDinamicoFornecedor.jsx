@@ -19,19 +19,23 @@ import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import usePermissions from "@/components/lib/usePermissions";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 /**
  * V21.1.2 - WINDOW MODE READY
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function PainelDinamicoFornecedor({ fornecedor, isOpen, onClose, windowMode = false }) {
   const navigate = useNavigate();
   const { hasPermission } = usePermissions();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: ordensCompra = [] } = useQuery({
-    queryKey: ['ordens-compra-fornecedor', fornecedor?.id],
-    queryFn: () => base44.entities.OrdemCompra.filter({ fornecedor_id: fornecedor.id }, '-data_solicitacao'),
-    enabled: !!fornecedor?.id,
+    queryKey: ['ordens-compra-fornecedor', fornecedor?.id, contextoKey],
+    queryFn: () => filterInContext('OrdemCompra', { fornecedor_id: fornecedor.id }, '-data_solicitacao', 200),
+    enabled: !!fornecedor?.id && !!contextoKey,
   });
 
   const podeEditar = hasPermission('cadastros', 'editar');

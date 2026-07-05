@@ -15,17 +15,21 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import HistoricoOrigemCliente from "./HistoricoOrigemCliente";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.1.2 - WINDOW MODE READY
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function DetalhesCliente({ cliente, onClose, windowMode = false }) {
   const [activeTab, setActiveTab] = useState("historico");
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos-cliente', cliente.id],
-    queryFn: () => base44.entities.Pedido.filter({ cliente_id: cliente.id }),
-    enabled: !!cliente.id
+    queryKey: ['pedidos-cliente', cliente.id, contextoKey],
+    queryFn: () => filterInContext('Pedido', { cliente_id: cliente.id }, '-data_pedido', 200),
+    enabled: !!cliente.id && !!contextoKey
   });
 
   const totalCompras = pedidos

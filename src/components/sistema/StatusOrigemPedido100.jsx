@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { 
   CheckCircle, 
   XCircle, 
@@ -19,21 +20,25 @@ import {
 
 /**
  * V21.6 FINAL - Status Widget de Completude 100%
- * Valida e exibe status de todos componentes do sistema de origem
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function StatusOrigemPedido100({ windowMode = false }) {
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   
   // Validar dados
   const { data: parametros = [] } = useQuery({
-    queryKey: ['parametros-origem-pedido'],
-    queryFn: () => base44.entities.ParametroOrigemPedido.list(),
+    queryKey: ['parametros-origem-pedido', contextoKey],
+    queryFn: () => filterInContext('ParametroOrigemPedido', {}, '-updated_date', 100),
     initialData: [],
+    enabled: !!contextoKey,
   });
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos-validacao'],
-    queryFn: () => base44.entities.Pedido.list('-created_date', 100),
+    queryKey: ['pedidos-validacao', contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-created_date', 100),
     initialData: [],
+    enabled: !!contextoKey,
   });
 
   // Validações

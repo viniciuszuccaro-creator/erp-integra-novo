@@ -5,20 +5,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { History, Package, Plus, TrendingUp } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function HistoricoComprasCliente({ clienteId, onAdicionarProduto }) {
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidosCliente', clienteId],
+    queryKey: ['pedidosCliente', clienteId, contextoKey],
     queryFn: async () => {
       if (!clienteId) return [];
       try {
-        return await base44.entities.Pedido.filter({ cliente_id: clienteId });
+        return await filterInContext('Pedido', { cliente_id: clienteId }, '-data_pedido', 200);
       } catch (error) {
         console.error('Erro ao buscar pedidos:', error);
         return [];
       }
     },
-    enabled: !!clienteId
+    enabled: !!clienteId && !!contextoKey
   });
 
   if (!clienteId || pedidos.length === 0) {

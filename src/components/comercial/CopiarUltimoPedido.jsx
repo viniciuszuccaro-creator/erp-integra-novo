@@ -7,26 +7,29 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.1.2 - WINDOW MODE READY
- * Convertido para suportar window mode independente
+ * P2: Multi-tenant — usa filterInContext
  */
 export default function CopiarUltimoPedido({ clienteId, onCopiar, windowMode = false }) {
   const { toast } = useToast();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: ultimoPedido } = useQuery({
-    queryKey: ['ultimoPedidoCliente', clienteId],
+    queryKey: ['ultimoPedidoCliente', clienteId, contextoKey],
     queryFn: async () => {
       if (!clienteId) return null;
-      const pedidos = await base44.entities.Pedido.filter(
+      const pedidos = await filterInContext('Pedido',
         { cliente_id: clienteId, status: { $ne: 'Cancelado' } },
         '-data_pedido',
         1
       );
       return pedidos[0] || null;
     },
-    enabled: !!clienteId
+    enabled: !!clienteId && !!contextoKey
   });
 
   if (!ultimoPedido) return null;

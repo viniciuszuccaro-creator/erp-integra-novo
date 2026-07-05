@@ -10,9 +10,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, MessageCircle, Lock } from "lucide-react";
 import ChatbotIntentForm from "./ChatbotIntentForm";
 import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 // Adapter: mantém a API antiga mas grava/edita na entidade consolidada ChatbotIntent
 export default function ChatbotIntentsForm({ intent, onSubmit, isSubmitting }) {
+  const { filterInContext, carimbarContexto } = useContextoVisual();
   const toNew = (legacy) => {
     const prioridadeMap = { Baixa: 25, Normal: 50, Alta: 75, Urgente: 100 };
     return {
@@ -50,14 +52,14 @@ export default function ChatbotIntentsForm({ intent, onSubmit, isSubmitting }) {
     if (intent?.id && intent?.__entity === 'ChatbotIntent') {
       await base44.entities.ChatbotIntent.update(intent.id, data);
     } else if (intent?.id && intent?.__entity === 'ChatbotIntents') {
-      const existentes = await base44.entities.ChatbotIntent.filter({ nome_intent: intent.nome_intent }, undefined, 1);
+      const existentes = await filterInContext('ChatbotIntent', { nome_intent: intent.nome_intent }, '-updated_date', 1);
       if (existentes?.length) {
         await base44.entities.ChatbotIntent.update(existentes[0].id, data);
       } else {
-        await base44.entities.ChatbotIntent.create(data);
+        await base44.entities.ChatbotIntent.create(carimbarContexto(data, 'empresa_id'));
       }
     } else {
-      await base44.entities.ChatbotIntent.create(data);
+      await base44.entities.ChatbotIntent.create(carimbarContexto(data, 'empresa_id'));
     }
     if (typeof onSubmit === 'function') onSubmit(toLegacy(data));
   };

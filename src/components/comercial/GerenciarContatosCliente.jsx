@@ -10,12 +10,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Phone, Mail, Plus, Edit, Trash2, Check, MessageCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function GerenciarContatosCliente({ clienteId }) {
   const [dialogAberto, setDialogAberto] = useState(false);
   const [contatoEditando, setContatoEditando] = useState(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const [novoContato, setNovoContato] = useState({
     nome: "",
@@ -26,13 +29,13 @@ export default function GerenciarContatosCliente({ clienteId }) {
   });
 
   const { data: cliente } = useQuery({
-    queryKey: ['cliente', clienteId],
+    queryKey: ['cliente', clienteId, contextoKey],
     queryFn: async () => {
       if (!clienteId) return null;
-      const clientes = await base44.entities.Cliente.filter({ id: clienteId });
+      const clientes = await filterInContext('Cliente', { id: clienteId }, '-updated_date', 1);
       return clientes[0] || null;
     },
-    enabled: !!clienteId
+    enabled: !!clienteId && !!contextoKey
   });
 
   const updateClienteMutation = useMutation({

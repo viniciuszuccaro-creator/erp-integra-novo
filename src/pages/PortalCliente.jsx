@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Package, Truck, Receipt, MessageSquare, FileText, LayoutDashboard, Download } from 'lucide-react';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 import PortalHeader from '../components/portal/PortalHeader';
 import HeaderPortalCompacto from '../components/portal/portal-launchpad/HeaderPortalCompacto';
@@ -29,6 +30,7 @@ const TABS = [
 
 export default function PortalCliente() {
   const { isAuthenticated, isLoadingAuth, navigateToLogin } = useAuth();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('token');
 
@@ -56,15 +58,15 @@ export default function PortalCliente() {
     queryKey: ['cliente-portal', user?.id],
     enabled: !!user?.id && !isNonPortalRole,
     queryFn: async () => {
-      const list = await base44.entities.Cliente.filter({ portal_usuario_id: user.id }, '-updated_date', 1);
+      const list = await filterInContext('Cliente', { portal_usuario_id: user.id }, '-updated_date', 1);
       return list?.[0] || null;
     }
   });
 
   const { data: notasFiscais = [] } = useQuery({
-    queryKey: ['portal-nfs', cliente?.id],
+    queryKey: ['portal-nfs', cliente?.id, `${grupoAtual?.id||'g'}-${empresaAtual?.id||'e'}`],
     enabled: !!cliente?.id,
-    queryFn: async () => base44.entities.NotaFiscal.filter({ cliente_fornecedor_id: cliente.id }, '-data_emissao', 100)
+    queryFn: async () => filterInContext('NotaFiscal', { cliente_fornecedor_id: cliente.id }, '-data_emissao', 100)
   });
 
   const { data: spotlight } = useQuery({

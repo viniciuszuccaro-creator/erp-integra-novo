@@ -7,24 +7,25 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Sparkles, Zap, CheckCircle2, AlertTriangle, TrendingUp, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 export default function ConciliacaoAutomaticaIA({ empresaId }) {
   const queryClient = useQueryClient();
   const [processando, setProcessando] = useState(false);
   const [resultados, setResultados] = useState(null);
+  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaId || empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: extratos = [] } = useQuery({
-    queryKey: ['extratos-pendentes', empresaId],
-    queryFn: () => empresaId 
-      ? base44.entities.ExtratoBancario.filter({ empresa_id: empresaId, conciliado: false })
-      : base44.entities.ExtratoBancario.filter({ conciliado: false }),
+    queryKey: ['extratos-pendentes', contextoKey],
+    queryFn: () => filterInContext('ExtratoBancario', { conciliado: false }, '-created_date', 200),
+    enabled: !!contexto,
   });
 
   const { data: movimentos = [] } = useQuery({
-    queryKey: ['movimentos-nao-conciliados', empresaId],
-    queryFn: () => empresaId
-      ? base44.entities.CaixaMovimento.filter({ empresa_id: empresaId, conciliado: false })
-      : base44.entities.CaixaMovimento.filter({ conciliado: false }),
+    queryKey: ['movimentos-nao-conciliados', contextoKey],
+    queryFn: () => filterInContext('CaixaMovimento', { conciliado: false }, '-created_date', 200),
+    enabled: !!contexto,
   });
 
   const executarConciliacaoIA = async () => {
@@ -137,6 +138,7 @@ export default function ConciliacaoAutomaticaIA({ empresaId }) {
           </div>
 
           <Button 
+            data-permission="Financeiro.Conciliacao.executar"
             onClick={executarConciliacaoIA}
             disabled={processando || extratos.length === 0}
             className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
@@ -231,6 +233,7 @@ export default function ConciliacaoAutomaticaIA({ empresaId }) {
 
             {resultados.conciliados > 0 && (
               <Button
+                data-permission="Financeiro.Conciliacao.aplicar"
                 onClick={() => aplicarConciliacoes.mutate()}
                 disabled={aplicarConciliacoes.isPending}
                 className="w-full bg-green-600 hover:bg-green-700"

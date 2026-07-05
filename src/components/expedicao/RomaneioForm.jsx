@@ -12,11 +12,14 @@ import { useToast } from "@/components/ui/use-toast";
 import { FileText } from "lucide-react";
 import RomaneioChecklist from "./romaneio-form/RomaneioChecklist";
 import RomaneioEntregasTable from "./romaneio-form/RomaneioEntregasTable";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function RomaneioForm({ isOpen, onClose, empresaId, windowMode = false }) {
   const containerClass = windowMode ? "w-full h-full flex flex-col overflow-hidden" : "";
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaId || 'sem-empresa'}`;
 
   const [formData, setFormData] = useState({
     motorista: "", motorista_telefone: "", veiculo: "", placa: "",
@@ -28,12 +31,12 @@ export default function RomaneioForm({ isOpen, onClose, empresaId, windowMode = 
   });
 
   const { data: entregas = [] } = useQuery({
-    queryKey: ['entregas-para-romaneio', empresaId],
+    queryKey: ['entregas-para-romaneio', contextoKey],
     queryFn: async () => {
-      const todas = await base44.entities.Entrega.list('-created_date');
-      return todas.filter(e => e.empresa_id === empresaId && e.status === "Pronto para Expedir" && !e.romaneio_id);
+      const todas = await filterInContext('Entrega', { status: "Pronto para Expedir" }, '-created_date', 200);
+      return todas.filter(e => !e.romaneio_id);
     },
-    enabled: isOpen && !!empresaId,
+    enabled: isOpen && !!contexto,
   });
 
   const toggleEntrega = (entregaId) => {

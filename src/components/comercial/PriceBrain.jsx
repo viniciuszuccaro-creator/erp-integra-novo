@@ -5,10 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { TrendingDown, TrendingUp, Zap, Sparkles, Lightbulb, Brain } from 'lucide-react';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 export default function PriceBrain({ pedido, onSugestaoAplicada }) {
   const [analisando, setAnalisando] = useState(false);
   const [sugestao, setSugestao] = useState(null);
+  const { grupoAtual, empresaAtual } = useContextoVisual();
 
   useEffect(() => {
     if (pedido?.cliente_id && (pedido.itens_revenda?.length > 0 || pedido.itens_producao?.length > 0)) {
@@ -20,10 +22,13 @@ export default function PriceBrain({ pedido, onSugestaoAplicada }) {
     setAnalisando(true);
 
     try {
-      const pedidosCliente = await base44.entities.Pedido.filter({
+      const filtroPedido = {
         cliente_id: pedido.cliente_id,
         status: ['Aprovado', 'Faturado', 'Entregue']
-      }, '-data_pedido', 10);
+      };
+      if (pedido.group_id || grupoAtual?.id) filtroPedido.group_id = pedido.group_id || grupoAtual.id;
+      if (pedido.empresa_id || empresaAtual?.id) filtroPedido.empresa_id = pedido.empresa_id || empresaAtual.id;
+      const pedidosCliente = await base44.entities.Pedido.filter(filtroPedido, '-data_pedido', 10);
 
       const ticketMedioCliente = pedidosCliente.length > 0
         ? pedidosCliente.reduce((sum, p) => sum + (p.valor_total || 0), 0) / pedidosCliente.length
@@ -225,6 +230,7 @@ RETORNE em JSON:
 
         {sugestao.estrategia !== 'manter_preco' && (
           <Button
+            data-permission="Comercial.Pedido.aplicarPreco"
             onClick={aplicarSugestao}
             className="w-full bg-purple-600 hover:bg-purple-700"
           >

@@ -7,24 +7,30 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Zap, CheckCircle, AlertTriangle, FileText, Shield } from "lucide-react";
 import { toast } from "sonner";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function MotorFiscalInteligente({ windowMode = false }) {
   const queryClient = useQueryClient();
   const [pedidoValidacao, setPedidoValidacao] = useState(null);
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ["pedidos"],
-    queryFn: () => base44.entities.Pedido.list(),
+    queryKey: ["pedidos", contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-created_date', 999),
+    enabled: !!contexto,
   });
 
   const { data: empresas = [] } = useQuery({
-    queryKey: ["empresas"],
-    queryFn: () => base44.entities.Empresa.list(),
+    queryKey: ["empresas", contextoKey],
+    queryFn: () => filterInContext('Empresa', {}, 'nome_fantasia', 999),
+    enabled: !!contexto,
   });
 
   const { data: produtos = [] } = useQuery({
-    queryKey: ["produtos"],
-    queryFn: () => base44.entities.Produto.list(),
+    queryKey: ["produtos", contextoKey],
+    queryFn: () => filterInContext('Produto', {}, 'descricao', 999),
+    enabled: !!contexto,
   });
 
   const validarFiscalIAMutation = useMutation({

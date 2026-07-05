@@ -7,11 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { 
-  Scan, 
-  CheckCircle, 
-  XCircle, 
-  Package, 
+import {
+  Scan,
+  CheckCircle,
+  XCircle,
+  Package,
   Weight,
   AlertTriangle,
   Camera,
@@ -20,6 +20,7 @@ import {
   Zap,
   TrendingUp
 } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * ETAPA 6: SEPARAÇÃO E CONFERÊNCIA COM IA V21.4
@@ -40,6 +41,8 @@ import {
 export default function SeparacaoConferenciaIA({ pedidoId, onClose, windowMode = false }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   
   const [separacao, setSeparacao] = useState({
     pedido_id: pedidoId,
@@ -64,20 +67,23 @@ export default function SeparacaoConferenciaIA({ pedidoId, onClose, windowMode =
 
   // Fetch pedido
   const { data: pedido } = useQuery({
-    queryKey: ['pedido', pedidoId],
-    queryFn: () => base44.entities.Pedido.list().then(ps => ps.find(p => p.id === pedidoId))
+    queryKey: ['pedido', pedidoId, contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-created_date', 999).then(ps => ps.find(p => p.id === pedidoId)),
+    enabled: !!contexto && !!pedidoId,
   });
 
   // Fetch produtos para conferência
   const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos'],
-    queryFn: () => base44.entities.Produto.list()
+    queryKey: ['produtos', contextoKey],
+    queryFn: () => filterInContext('Produto', {}, 'descricao', 999),
+    enabled: !!contexto,
   });
 
   // Fetch colaboradores
   const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores'],
-    queryFn: () => base44.entities.Colaborador.list()
+    queryKey: ['colaboradores', contextoKey],
+    queryFn: () => filterInContext('Colaborador', {}, 'nome_completo', 999),
+    enabled: !!contexto,
   });
 
   // Mutation para IA de validação

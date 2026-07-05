@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import usePermissions from '@/components/lib/usePermissions';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 export default function TipoDespesaForm({ tipo, tipoDespesa, item, data, onSubmit, onSave, onClose, windowMode = false }) {
   const dadosIniciais = item || data || tipoDespesa || tipo;
@@ -33,15 +34,20 @@ export default function TipoDespesaForm({ tipo, tipoDespesa, item, data, onSubmi
     }
   }, [dadosIniciais?.id]);
 
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+
   const { data: contasContabeis = [] } = useQuery({
-    queryKey: ['plano-contas'],
-    queryFn: () => base44.entities.PlanoDeContas.list(),
+    queryKey: ['plano-contas', contextoKey],
+    queryFn: () => filterInContext('PlanoDeContas', {}, 'codigo', 999),
+    enabled: !!contexto,
     staleTime: 300000, refetchOnWindowFocus: false,
   });
 
   const { data: centrosResultado = [] } = useQuery({
-    queryKey: ['centros-resultado'],
-    queryFn: () => base44.entities.CentroResultado.list(),
+    queryKey: ['centros-resultado', contextoKey],
+    queryFn: () => filterInContext('CentroResultado', {}, 'codigo', 999),
+    enabled: !!contexto,
     staleTime: 300000, refetchOnWindowFocus: false,
   });
 

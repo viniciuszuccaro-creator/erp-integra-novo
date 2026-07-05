@@ -27,22 +27,26 @@ export default function RepresentantesTab() {
   const [selectedRepresentante, setSelectedRepresentante] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const queryClient = useQueryClient();
-  const { empresaAtual, estaNoGrupo, filtrarPorContexto } = useContextoVisual();
+  const { empresaAtual, estaNoGrupo, filtrarPorContexto, filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const { openWindow } = useWindow();
 
   const { data: representantes = [], isLoading } = useQuery({
-    queryKey: ['representantes', empresaAtual?.id, estaNoGrupo],
-    queryFn: () => base44.entities.Representante.list('-created_date'),
+    queryKey: ['representantes', contextoKey],
+    queryFn: () => filterInContext('Representante', {}, '-created_date', 999),
+    enabled: !!contexto,
   });
 
   const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes'],
-    queryFn: () => base44.entities.Cliente.list()
+    queryKey: ['clientes', contextoKey],
+    queryFn: () => filterInContext('Cliente', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos'],
-    queryFn: () => base44.entities.Pedido.list()
+    queryKey: ['pedidos', contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-created_date', 999),
+    enabled: !!contexto,
   });
 
   const representantesFiltrados = filtrarPorContexto(representantes, 'empresa_dona_id').filter(rep => {

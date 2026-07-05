@@ -7,29 +7,36 @@ import { Badge } from "@/components/ui/badge";
 import { Zap, Map, Truck, Navigation, TrendingDown } from "lucide-react";
 import { toast } from "sonner";
 import TesteGoogleMaps from "@/components/integracoes/TesteGoogleMaps";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function RoteirizacaoInteligente({ windowMode = false }) {
   const queryClient = useQueryClient();
   const [dataRota, setDataRota] = useState(new Date().toISOString().split('T')[0]);
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: entregas = [] } = useQuery({
-    queryKey: ["entregas"],
-    queryFn: () => base44.entities.Entrega.list(),
+    queryKey: ["entregas", contextoKey],
+    queryFn: () => filterInContext('Entrega', {}, '-created_date', 999),
+    enabled: !!contexto,
   });
 
   const { data: motoristas = [] } = useQuery({
-    queryKey: ["motoristas"],
-    queryFn: () => base44.entities.Motorista.list(),
+    queryKey: ["motoristas", contextoKey],
+    queryFn: () => filterInContext('Motorista', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const { data: veiculos = [] } = useQuery({
-    queryKey: ["veiculos"],
-    queryFn: () => base44.entities.Veiculo.list(),
+    queryKey: ["veiculos", contextoKey],
+    queryFn: () => filterInContext('Veiculo', {}, 'placa', 999),
+    enabled: !!contexto,
   });
 
   const { data: rotas = [] } = useQuery({
-    queryKey: ["roteirizacao-inteligente"],
-    queryFn: () => base44.entities.RoteirizacaoInteligente.list(),
+    queryKey: ["roteirizacao-inteligente", contextoKey],
+    queryFn: () => filterInContext('RoteirizacaoInteligente', {}, '-created_date', 999),
+    enabled: !!contexto,
   });
 
   const gerarRotaIAMutation = useMutation({

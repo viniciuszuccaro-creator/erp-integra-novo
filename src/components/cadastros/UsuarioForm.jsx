@@ -10,11 +10,14 @@ import FormWrapper from "@/components/common/FormWrapper";
 import { Loader2, User, Shield } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.1.2 - WINDOW MODE READY
  */
 export default function UsuarioForm({ usuario, onSubmit, isSubmitting, windowMode = false }) {
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [formData, setFormData] = useState(usuario || {
     full_name: '',
     email: '',
@@ -25,13 +28,15 @@ export default function UsuarioForm({ usuario, onSubmit, isSubmitting, windowMod
   });
 
   const { data: perfis = [] } = useQuery({
-    queryKey: ['perfis-acesso'],
-    queryFn: () => base44.entities.PerfilAcesso.list(),
+    queryKey: ['perfis-acesso', contextoKey],
+    queryFn: () => filterInContext('PerfilAcesso', {}, 'nome', 999),
+    enabled: !!contexto,
   });
 
   const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas'],
-    queryFn: () => base44.entities.Empresa.list(),
+    queryKey: ['empresas', contextoKey],
+    queryFn: () => filterInContext('Empresa', {}, 'nome_fantasia', 999),
+    enabled: !!contexto,
   });
 
   const schema = z.object({

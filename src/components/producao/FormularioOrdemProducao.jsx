@@ -12,6 +12,7 @@ import { Save, Zap, Package, AlertTriangle, Factory, CheckCircle2 } from "lucide
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import SeletorProdutosProducao from "./SeletorProdutosProducao";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.6 - FORMULÁRIO DE ORDEM DE PRODUÇÃO COMPLETO
@@ -22,6 +23,8 @@ import SeletorProdutosProducao from "./SeletorProdutosProducao";
  */
 export default function FormularioOrdemProducao({ op, onClose }) {
   const queryClient = useQueryClient();
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [formData, setFormData] = useState(op || {
     numero_op: "",
     tipo_producao: "Armado Padrão",
@@ -38,24 +41,27 @@ export default function FormularioOrdemProducao({ op, onClose }) {
   const [produtosInsuficientes, setProdutosInsuficientes] = useState([]);
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ["pedidos"],
-    queryFn: () => base44.entities.Pedido.list(),
+    queryKey: ["pedidos", contextoKey],
+    queryFn: () => filterInContext('Pedido', {}, '-created_date', 999),
+    enabled: !!contexto,
   });
 
   const { data: empresas = [] } = useQuery({
-    queryKey: ["empresas"],
-    queryFn: () => base44.entities.Empresa.list(),
+    queryKey: ["empresas", contextoKey],
+    queryFn: () => filterInContext('Empresa', {}, 'nome_fantasia', 999),
+    enabled: !!contexto,
   });
 
   const { data: produtosProducao = [] } = useQuery({
-    queryKey: ['produtos-producao'],
+    queryKey: ['produtos-producao', contextoKey],
     queryFn: async () => {
-      const all = await base44.entities.Produto.list();
-      return all.filter(p => 
-        p.tipo_item === 'Matéria-Prima Produção' && 
+      const all = await filterInContext('Produto', {}, 'descricao', 999);
+      return all.filter(p =>
+        p.tipo_item === 'Matéria-Prima Produção' &&
         p.status === 'Ativo'
       );
-    }
+    },
+    enabled: !!contexto,
   });
 
   const saveMutation = useMutation({

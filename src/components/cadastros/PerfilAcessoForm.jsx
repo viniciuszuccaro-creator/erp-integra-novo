@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Loader2, Shield, AlertTriangle, XCircle, Trash2, Power, PowerOff } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
@@ -112,14 +113,20 @@ export default function PerfilAcessoForm({ perfil, onSubmit, isSubmitting, windo
     onSubmit({ ...formData, nome_perfil: formData.nome_perfil || formData.nome || '' });
   };
 
-  const handleExcluir = () => {
+  const { confirm, ConfirmDialog: ConfirmExcluirDialog } = useConfirm();
+
+  const handleExcluir = async () => {
     if (!podeExcluir) {
       toast.error('Seu perfil nao permite excluir perfis de acesso.');
       return;
     }
-    if (!window.confirm(`Tem certeza que deseja excluir o perfil "${formData.nome}"? Esta ação não pode ser desfeita.`)) {
-      return;
-    }
+    const ok = await confirm({
+      title: 'Excluir Perfil de Acesso',
+      description: `Tem certeza que deseja excluir o perfil "${formData.nome}"? Esta ação não pode ser desfeita.`,
+      confirmText: 'Excluir',
+      variant: 'danger',
+    });
+    if (!ok) return;
     if (onSubmit) {
       onSubmit({ ...formData, _action: 'delete' });
     }
@@ -285,9 +292,15 @@ export default function PerfilAcessoForm({ perfil, onSubmit, isSubmitting, windo
           </h2>
         </div>
         {formContent}
+        <ConfirmExcluirDialog />
       </div>
     );
   }
 
-  return formContent;
+  return (
+    <>
+      {formContent}
+      <ConfirmExcluirDialog />
+    </>
+  );
 }

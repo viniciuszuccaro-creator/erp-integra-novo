@@ -13,6 +13,7 @@ import { MapPin, Truck, DollarSign, TrendingUp, X, Plus, Trash2 } from "lucide-r
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 const ESTADOS_BRASIL = [
   "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
@@ -54,14 +55,19 @@ export default function RegiaoAtendimentoForm({ regiaoId, regiaoAtendimento, ite
 
   const [novaCidade, setNovaCidade] = useState({ cidade: "", estado: "", cep_inicial: "", cep_final: "" });
 
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+
   const { data: vendedores = [] } = useQuery({
-    queryKey: ['colaboradores-vendedores'],
-    queryFn: () => base44.entities.Colaborador.list(),
+    queryKey: ['colaboradores-vendedores', contextoKey],
+    queryFn: () => filterInContext('Colaborador', {}, 'nome_completo', 999),
+    enabled: !!contexto,
   });
 
   const { data: transportadoras = [] } = useQuery({
-    queryKey: ['transportadoras'],
-    queryFn: () => base44.entities.Transportadora.list(),
+    queryKey: ['transportadoras', contextoKey],
+    queryFn: () => filterInContext('Transportadora', {}, 'nome_transportadora', 999),
+    enabled: !!contexto,
   });
 
   useEffect(() => {

@@ -230,43 +230,31 @@ export default function ChatbotDashboard() {
         </Card>
       </div>
 
-      {/* Gráficos */}
+      {/* Gráficos Consolidados */}
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Conversas por Canal */}
+        {/* Conversas & Intents Consolidados */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-blue-600" />
-              Conversas por Canal
+              Conversas por Canal & Intents
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
+          <CardContent className="space-y-4">
+            <ResponsiveContainer width="100%" height={180}>
               <BarChart data={dadosCanais}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="canal" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
+                <XAxis dataKey="canal" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip />
                 <Bar dataKey="total" fill="#3b82f6" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Intents Mais Comuns */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-purple-600" />
-              Intents Mais Comuns
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={180}>
               <BarChart data={dadosIntents} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis type="number" tick={{ fontSize: 12 }} />
-                <YAxis dataKey="intent" type="category" tick={{ fontSize: 11 }} width={120} />
+                <XAxis type="number" tick={{ fontSize: 11 }} />
+                <YAxis dataKey="intent" type="category" tick={{ fontSize: 10 }} width={100} />
                 <Tooltip />
                 <Bar dataKey="total" fill="#9333ea" radius={[0, 8, 8, 0]} />
               </BarChart>
@@ -274,16 +262,16 @@ export default function ChatbotDashboard() {
           </CardContent>
         </Card>
 
-        {/* Distribuição de Sentimentos */}
+        {/* Sentimento & Performance Bot */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Activity className="w-5 h-5 text-green-600" />
-              Análise de Sentimento
+              Sentimento & Resolução Bot
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex justify-center">
-            <ResponsiveContainer width="100%" height={250}>
+          <CardContent className="space-y-4">
+            <ResponsiveContainer width="100%" height={160}>
               <PieChart>
                 <Pie
                   data={dadosSentimentos}
@@ -291,7 +279,7 @@ export default function ChatbotDashboard() {
                   cy="50%"
                   labelLine={false}
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
+                  outerRadius={60}
                   fill="#8884d8"
                   dataKey="value"
                 >
@@ -302,58 +290,35 @@ export default function ChatbotDashboard() {
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Performance Bot vs Humano */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Bot className="w-5 h-5 text-indigo-600" />
-              Bot vs Humano
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600 flex items-center gap-2">
-                    <Bot className="w-4 h-4 text-green-600" />
-                    Resolvidas pelo Bot
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-slate-600 flex items-center gap-1">
+                    <Bot className="w-3 h-3 text-green-600" />
+                    Resolvidas Bot
                   </span>
-                  <span className="text-sm font-bold text-green-600">{metricas.taxaResolucaoBot}%</span>
+                  <span className="text-xs font-bold text-green-600">{metricas.taxaResolucaoBot}%</span>
                 </div>
-                <div className="w-full bg-slate-200 rounded-full h-3">
+                <div className="w-full bg-slate-200 rounded-full h-2">
                   <div
-                    className="bg-gradient-to-r from-green-500 to-green-600 h-3 rounded-full transition-all"
+                    className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all"
                     style={{ width: `${metricas.taxaResolucaoBot}%` }}
                   />
                 </div>
               </div>
-
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-600 flex items-center gap-2">
-                    <User className="w-4 h-4 text-orange-600" />
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-slate-600 flex items-center gap-1">
+                    <User className="w-3 h-3 text-orange-600" />
                     Transbordo Humano
                   </span>
-                  <span className="text-sm font-bold text-orange-600">{metricas.taxaTransbordo}%</span>
+                  <span className="text-xs font-bold text-orange-600">{metricas.taxaTransbordo}%</span>
                 </div>
-                <div className="w-full bg-slate-200 rounded-full h-3">
+                <div className="w-full bg-slate-200 rounded-full h-2">
                   <div
-                    className="bg-gradient-to-r from-orange-500 to-orange-600 h-3 rounded-full transition-all"
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 h-2 rounded-full transition-all"
                     style={{ width: `${metricas.taxaTransbordo}%` }}
                   />
-                </div>
-              </div>
-
-              <div className="pt-4 border-t mt-4">
-                <p className="text-xs text-slate-500 mb-2">Eficiência Geral</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-slate-900">
-                    {((metricas.resolvidasBot / metricas.totalConversas) * 100 || 0).toFixed(0)}%
-                  </span>
-                  <span className="text-sm text-slate-600">de economia operacional</span>
                 </div>
               </div>
             </div>

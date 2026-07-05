@@ -227,6 +227,7 @@ export default function WizardPedidoLateral({
 
             {etapaAtual < 4 ? (
               <Button
+                data-permission="Comercial.Pedido.editar"
                 onClick={handleProximo}
                 disabled={!podeAvancar}
                 className="bg-blue-600 hover:bg-blue-700"
@@ -236,6 +237,7 @@ export default function WizardPedidoLateral({
               </Button>
             ) : (
               <Button
+                data-permission="Comercial.Pedido.criar"
                 onClick={handleFinalizar}
                 disabled={!podeAvancar}
                 className="bg-green-600 hover:bg-green-700"

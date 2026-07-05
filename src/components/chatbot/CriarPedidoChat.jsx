@@ -249,6 +249,7 @@ export default function CriarPedidoChat({ conversa, clienteId, onPedidoCriado })
                 
                 <div className="flex items-center gap-1">
                   <Button
+                    data-permission="Comercial.Pedido.editar"
                     size="icon"
                     variant="outline"
                     className="h-7 w-7"
@@ -258,6 +259,7 @@ export default function CriarPedidoChat({ conversa, clienteId, onPedidoCriado })
                   </Button>
                   <span className="w-8 text-center font-bold">{item.quantidade}</span>
                   <Button
+                    data-permission="Comercial.Pedido.editar"
                     size="icon"
                     variant="outline"
                     className="h-7 w-7"
@@ -272,6 +274,7 @@ export default function CriarPedidoChat({ conversa, clienteId, onPedidoCriado })
                 </p>
 
                 <Button
+                  data-permission="Comercial.Pedido.editar"
                   size="icon"
                   variant="ghost"
                   className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50"
@@ -292,6 +295,7 @@ export default function CriarPedidoChat({ conversa, clienteId, onPedidoCriado })
 
             {/* Botão Criar */}
             <Button
+              data-permission="Comercial.Pedido.criar"
               onClick={() => criarPedidoMutation.mutate()}
               disabled={criarPedidoMutation.isPending}
               className="w-full bg-green-600 hover:bg-green-700"

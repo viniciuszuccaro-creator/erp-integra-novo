@@ -102,8 +102,8 @@ function DashboardRHRealtime({ empresaId, windowMode = false }) {
   return (
     <div className={containerClass}>
       <div className={windowMode ? "p-6 space-y-6 flex-1 overflow-auto" : "space-y-6"}>
-      {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+      {/* KPIs Essenciais */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-slate-600">Colaboradores</CardTitle>
@@ -118,24 +118,13 @@ function DashboardRHRealtime({ empresaId, windowMode = false }) {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-slate-600">Presentes Hoje</CardTitle>
+            <CardTitle className="text-sm font-medium text-slate-600">Presença Hoje</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <UserCheck className="w-5 h-5 text-green-600" />
               <span className="text-2xl font-bold text-green-600">{metricas.presentesHoje}</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-slate-600">Ausentes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <UserX className="w-5 h-5 text-red-600" />
-              <span className="text-2xl font-bold text-red-600">{metricas.ausentesHoje}</span>
+              <span className="text-xs text-red-500">/{metricas.ausentesHoje} aus.</span>
             </div>
           </CardContent>
         </Card>

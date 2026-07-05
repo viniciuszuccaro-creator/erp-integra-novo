@@ -256,17 +256,17 @@ export default function RelatorioPersonalizado() {
           <div className="flex items-center justify-between">
             <CardTitle>Relatório Personalizado</CardTitle>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setShowConfig(!showConfig)}>
+              <Button data-permission="Relatorios.Personalizado.configurar" variant="outline" size="sm" onClick={() => setShowConfig(!showConfig)}>
                 <Filter className="w-4 h-4 mr-2" />
                 {showConfig ? 'Ocultar' : 'Mostrar'} Configurações
               </Button>
               {!showConfig && (
                 <>
-                  <Button variant="outline" size="sm" onClick={handleExportarCSV}>
+                  <Button data-permission="Relatorios.Personalizado.exportar" variant="outline" size="sm" onClick={handleExportarCSV}>
                     <Download className="w-4 h-4 mr-2" />
                     CSV
                   </Button>
-                  <Button variant="outline" size="sm" onClick={handleExportarExcel}>
+                  <Button data-permission="Relatorios.Personalizado.exportar" variant="outline" size="sm" onClick={handleExportarExcel}>
                     <FileText className="w-4 h-4 mr-2" />
                     Excel
                   </Button>

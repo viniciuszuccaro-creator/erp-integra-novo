@@ -198,7 +198,7 @@ export default function SecurityMetricsPanel() {
           <h3 className="font-semibold text-slate-800">Segurança em Tempo Real</h3>
           {lastRun && <span className="text-xs text-slate-400">Atualizado: {lastRun}</span>}
         </div>
-        <Button variant="outline" size="sm" onClick={loadMetrics} disabled={loading}>
+        <Button data-permission="Sistema.Seguranca.visualizar" variant="outline" size="sm" onClick={loadMetrics} disabled={loading}>
           <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} /> Analisar
         </Button>
       </div>
@@ -268,7 +268,7 @@ export default function SecurityMetricsPanel() {
               <CardTitle className="text-sm">
                 {sodPerfis.length === 0 ? "Nenhum conflito SoD detectado" : `${sodPerfis.length} perfil(is) com conflito`}
               </CardTitle>
-              <Button variant="outline" size="sm" onClick={forceSodScan} disabled={sodLoading}>
+              <Button data-permission="Sistema.Seguranca.executar" variant="outline" size="sm" onClick={forceSodScan} disabled={sodLoading}>
                 <Search className={`w-3.5 h-3.5 mr-1.5 ${sodLoading ? "animate-pulse" : ""}`} /> Forçar Scan
               </Button>
             </CardHeader>
@@ -285,7 +285,7 @@ export default function SecurityMetricsPanel() {
           <Card className="h-full">
             <CardHeader className="pb-2 pt-3 px-4 flex flex-row items-center justify-between">
               <CardTitle className="text-sm">Últimos 50 eventos de segurança</CardTitle>
-              <Button variant="ghost" size="sm" onClick={loadHistorico}>
+              <Button data-permission="Sistema.Seguranca.visualizar" variant="ghost" size="sm" onClick={loadHistorico}>
                 <RefreshCw className="w-3.5 h-3.5" />
               </Button>
             </CardHeader>

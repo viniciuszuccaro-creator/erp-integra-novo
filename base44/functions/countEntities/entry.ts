@@ -108,6 +108,12 @@ async function countOne(base44, payload) {
   const { entityName, filter = {} } = payload || {};
   if (!entityName) return { entityName, count: 0 };
 
+  // Se o filtro já contém $or ou $and (filtro de contexto complexo do frontend),
+  // usa-o diretamente sem reconstruir — garante que contagem bate com a tabela
+  if (filter.$or || filter.$and) {
+    return { entityName, count: await fastCount(base44, entityName, filter) };
+  }
+
   // Catálogos puros — sem escopo, sempre global
   if (PURE_CATALOG.has(entityName)) {
     return { entityName, count: await fastCount(base44, entityName, {}) };

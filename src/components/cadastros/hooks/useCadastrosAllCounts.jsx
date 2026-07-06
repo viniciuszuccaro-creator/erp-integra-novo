@@ -22,27 +22,11 @@ export const BLOCOS_ENTITIES = {
 
 const ALL_ENTITIES = Object.values(BLOCOS_ENTITIES).flat();
 
-// Snapshot das contagens REAIS verificadas
-// TOTAIS CORRETOS VALIDADOS: Bloco1=8 · Bloco2=965 · Bloco3=85 · Bloco4=22 · Bloco5=22 · Bloco6=33
-const SNAPSHOT = {
-  // Bloco 1 — Pessoas & Parceiros (Total: 8)
-  Cliente: 1, Fornecedor: 2, Transportadora: 1, Colaborador: 1,
-  Representante: 1, ContatoB2B: 1, SegmentoCliente: 1, RegiaoAtendimento: 0,
-  // Bloco 2 — Produtos & Serviços (Total: 965 = 828 Produtos importados + 137 outros)
-  Produto: 828, Servico: 20, SetorAtividade: 10, GrupoProduto: 50,
-  Marca: 15, TabelaPreco: 2, KitProduto: 10, CatalogoWeb: 20, UnidadeMedida: 10,
-  // Bloco 3 — Financeiro & Fiscal (Total: 85)
-  Banco: 8, FormaPagamento: 6, PlanoDeContas: 20, CentroCusto: 12,
-  CentroResultado: 5, TipoDespesa: 8, MoedaIndice: 4, OperadorCaixa: 3,
-  ConfiguracaoDespesaRecorrente: 5, TabelaFiscal: 10, CondicaoComercial: 4,
-  // Bloco 4 — Logística, Frota & Almoxarifado (Total: 22)
-  Veiculo: 4, Motorista: 4, TipoFrete: 3, LocalEstoque: 4, RotaPadrao: 4, ModeloDocumento: 3,
-  // Bloco 5 — Estrutura Organizacional (Total: 22)
-  Empresa: 3, GrupoEmpresarial: 1, Departamento: 6, Cargo: 5, Turno: 3, PerfilAcesso: 4,
-  // Bloco 6 — Tecnologia, IA & Parâmetros (Total: 33)
-  ApiExterna: 3, ChatbotCanal: 4, ChatbotIntent: 8, JobAgendado: 6,
-  Webhook: 3, ConfiguracaoNFe: 3, GatewayPagamento: 4, EventoNotificacao: 2,
-};
+// Snapshot vazio — contagens reais carregadas via countEntities com filtro de contexto.
+// Não usar números hardcoded (causa divergência entre badge e tabela).
+const SNAPSHOT = {};
+// Inicializa todas as entidades com 0
+ALL_ENTITIES.forEach(e => { SNAPSHOT[e] = 0; });
 
 // Conta entidade via backend countEntities (retorna número exato sem trazer registros)
 async function countEntity(entityName, filter) {
@@ -97,7 +81,7 @@ export default function useCadastrosAllCounts() {
     },
     staleTime: 5 * 60_000,
     gcTime: 30 * 60_000,
-    placeholderData: SNAPSHOT,
+    placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     retry: 0,
@@ -117,6 +101,7 @@ export default function useCadastrosAllCounts() {
   }, [groupId, empresaId, queryClient]);
 
   const counts = data || SNAPSHOT;
+  const isLoadingCount = !data;
 
   const totals = Object.fromEntries(
     Object.entries(BLOCOS_ENTITIES).map(([bloco, entities]) => [
@@ -125,5 +110,5 @@ export default function useCadastrosAllCounts() {
     ])
   );
 
-  return { counts, totals, isLoading: false };
+  return { counts, totals, isLoading: isLoadingCount };
 }

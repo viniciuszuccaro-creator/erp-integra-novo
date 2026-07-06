@@ -9,12 +9,12 @@
  * - VisualizadorModal       → modal de formulário
  */
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
 import { useUser } from "@/components/lib/UserContext";
-import useEntityCounts, { SIMPLE_CATALOG } from "@/components/lib/useEntityCounts";
+import { SIMPLE_CATALOG } from "@/components/lib/useEntityCounts";
 import { AlertCircle } from "lucide-react";
 import useVisualizadorState from "@/components/cadastros/hooks/useVisualizadorState";
 import useVisualizadorQuery from "@/components/cadastros/hooks/useVisualizadorQuery";
@@ -132,9 +132,34 @@ export default function VisualizadorUniversalEntidadeV24({
     setIsSaving, readFilter, setNextCode,
   });
 
-  // ── Contagem ──────────────────────────────────────────────────────────────────
-  const { counts, isLoading: countsLoading } = useEntityCounts(ENTITY ? [ENTITY] : []);
-  const totalCount = Number(counts?.[ENTITY] || 0);
+  // ── Contagem — usa o MESMO readFilter da tabela para garantir que bate ──────
+  const readFilterKey = useMemo(() => JSON.stringify(readFilter), [readFilter]);
+  const { data: accurateCount, isLoading: countsLoading } = useQuery({
+    queryKey: ['viz-count-v2', ENTITY, readFilterKey],
+    queryFn: async () => {
+      if (!ENTITY || !contextoValido) return 0;
+      try {
+        const res = await base44.functions.invoke("countEntities", {
+          entityName: ENTITY,
+          filter: readFilter,
+        });
+        const n = res?.data?.count ?? res?.data?.total ?? res?.data;
+        return typeof n === 'number' ? n : 0;
+      } catch (_) {
+        // Fallback: SDK direto com o mesmo readFilter
+        try {
+          const items = await base44.entities[ENTITY].filter(readFilter, '-created_date', 9999);
+          return Array.isArray(items) ? items.length : 0;
+        } catch { return 0; }
+      }
+    },
+    staleTime: 60_000,
+    gcTime: 300_000,
+    refetchOnWindowFocus: false,
+    retry: 1,
+    enabled: !!ENTITY && contextoValido && canViewCadastro,
+  });
+  const totalCount = Number(accurateCount || 0);
 
   // Efeitos
   useEffect(() => { resetCache(); }, [ENTITY, empresaId, groupId, debouncedSearch]);

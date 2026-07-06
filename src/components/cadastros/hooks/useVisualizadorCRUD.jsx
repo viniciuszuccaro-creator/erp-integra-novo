@@ -143,8 +143,36 @@ export default function useVisualizadorCRUD({
       } catch { /* não bloqueia */ }
     }
 
-    const cnpjClean = formData.cnpj ? String(formData.cnpj).replace(/\D/g,'') : '';
-    const cpfClean  = formData.cpf  ? String(formData.cpf).replace(/\D/g,'')  : '';
+    // P3 (item 3): verificar duplicidade por NOME/DESCRIÇÃO no mesmo escopo
+    // Só verifica nome quando a entidade NÃO tem CNPJ/CPF (nome é o identificador principal)
+    const _cnpjRaw = formData.cnpj ? String(formData.cnpj).replace(/\D/g,'') : '';
+    const _cpfRaw  = formData.cpf  ? String(formData.cpf).replace(/\D/g,'')  : '';
+    const descInfo = getDescricaoField(formData, ENTITY);
+    if (descInfo && !_cnpjRaw && !_cpfRaw) {
+      const nomeLimpo = descInfo.value.toLowerCase().trim();
+      if (nomeLimpo.length >= 2 && !INVALID_DESC_VALUES.has(nomeLimpo)) {
+        const scopeConds2 = [];
+        if (empresaId) scopeConds2.push({ empresa_id: empresaId });
+        if (groupId) scopeConds2.push({ group_id: groupId });
+        const nameFilter = scopeConds2.length
+          ? { $and: [{ [descInfo.field]: { $regex: `^${nomeLimpo}$`, $options: 'i' } }, { $or: scopeConds2 }] }
+          : { [descInfo.field]: { $regex: `^${nomeLimpo}$`, $options: 'i' } };
+        try {
+          const res2 = await base44.functions.invoke("entityListSorted", {
+            entityName: ENTITY, filter: nameFilter,
+            sortField: "created_date", sortDirection: "asc", limit: 5, skip: 0,
+          });
+          const conflito2 = (Array.isArray(res2?.data) ? res2.data : []).find(r => r.id !== currentId);
+          if (conflito2) {
+            const label2 = conflito2.nome || conflito2.razao_social || conflito2.descricao || conflito2.sigla || conflito2.id;
+            return `⚠️ Já existe um registro com o nome "${label2}" no mesmo escopo (empresa/grupo). Não é permitido duplicar.`;
+          }
+        } catch { /* não bloqueia */ }
+      }
+    }
+
+    const cnpjClean = _cnpjRaw;
+    const cpfClean  = _cpfRaw;
     const fiscalOr  = [];
     if (cnpjClean.length >= 14) fiscalOr.push({ cnpj: formData.cnpj });
     if (cpfClean.length  >= 11) fiscalOr.push({ cpf: formData.cpf });
@@ -163,7 +191,7 @@ export default function useVisualizadorCRUD({
       } catch { /* não bloqueia */ }
     }
     return null;
-  }, [ENTITY]);
+  }, [ENTITY, empresaId, groupId]);
 
   const fetchNextCode = useCallback(async (rf) => {
     const codeField = ENTITY_CODE_FIELD[ENTITY];

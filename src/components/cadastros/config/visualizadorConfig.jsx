@@ -30,6 +30,8 @@ export const SELF_MANAGED_NAMES = new Set([
 
 export const FORM_ALIASES = [
   "item","data","initialData","defaultValues","record","entity","value",
+  "editingItem","selectedItem","currentItem","formData","initialValues","values",
+  "registro","entidadeData","row","rowData","selectedRow","current",
   "cliente","fornecedor","colaborador","transportadora","representante",
   "contato","contatoB2B","segmento","segmentoCliente","regiao","regiaoAtendimento",
   "produto","servico","banco","conta","formaPagamento","centroCusto","planoContas",
@@ -43,6 +45,7 @@ export const FORM_ALIASES = [
   "perfilAcesso","perfil","modeloDocumento","apiExterna",
   "webhook","chatbotIntent","chatbotCanal","jobAgendado","eventoNotificacao",
   "evento","tabela","condicao","apiExternaForm","webhookForm",
+  "configuracaoNFe","configNFe","eventoNotificacaoForm",
 ];
 
 export const ENTITY_CONTEXT_FIELD = {

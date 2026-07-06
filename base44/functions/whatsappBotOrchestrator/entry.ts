@@ -7,7 +7,14 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { message, phone_number, empresa_id, group_id } = await req.json();
+    const body = await req.json();
+    const { message, phone_number, empresa_id, group_id } = body;
+
+    // Se não é chamada de automação, exige auth
+    if (!body?.event && !body?.automation) {
+      const user = await base44.auth.me();
+      if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     if (!message || !phone_number) {
       return Response.json({ error: 'Missing params' }, { status: 400 });

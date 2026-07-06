@@ -167,7 +167,7 @@ export default function CalculadoraImpostos({
             </Label>
           </div>
 
-          <Button onClick={handleCalcular} className="w-full bg-blue-600 hover:bg-blue-700">
+          <Button data-permission="Fiscal.Imposto.calcular" onClick={handleCalcular} className="w-full bg-blue-600 hover:bg-blue-700">
             <Calculator className="w-4 h-4 mr-2" />
             Calcular Impostos
           </Button>

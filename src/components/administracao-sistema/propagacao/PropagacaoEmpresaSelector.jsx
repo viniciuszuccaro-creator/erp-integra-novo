@@ -57,6 +57,7 @@ export default function PropagacaoEmpresaSelector({ entityName, onResult }) {
       <Button
         size="sm"
         variant="outline"
+        data-permission="Administracao.Propagacao.sincronizar"
         disabled={!selectedEmpresa || loading}
         onClick={handleSync}
         className="text-xs gap-1 border-blue-300 text-blue-700 hover:bg-blue-50"

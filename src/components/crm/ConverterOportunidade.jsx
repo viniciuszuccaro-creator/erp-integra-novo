@@ -97,7 +97,8 @@ export default function ConverterOportunidade({ oportunidade, open, onClose, onC
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
-            <Button 
+            <Button
+              data-permission="CRM.Oportunidade.converter"
               onClick={handleConverter}
               className="bg-green-600 hover:bg-green-700"
             >

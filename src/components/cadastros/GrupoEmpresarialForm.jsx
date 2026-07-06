@@ -194,6 +194,7 @@ export default function GrupoEmpresarialForm({ grupo, onSubmit, isSubmitting, wi
             <Button
               type="button"
               variant="outline"
+              data-permission="Cadastros.GrupoEmpresarial.alternarStatus"
               onClick={handleAlternarStatus}
               className={formData.status === 'Ativo' ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}
             >

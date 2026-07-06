@@ -112,6 +112,7 @@ export default function DepartamentoForm({ departamento, item, data, initialData
             <Button
               type="button"
               variant="outline"
+              data-permission="Cadastros.Departamento.alternarStatus"
               onClick={handleAlternarStatus}
               className={formData.ativo ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}
             >

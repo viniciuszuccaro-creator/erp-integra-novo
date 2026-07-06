@@ -128,6 +128,7 @@ export default function DashboardPropagacaoMonitor() {
         </CardHeader>
         <CardContent>
           <Button
+            data-permission="Administracao.Propagacao.sincronizar"
             onClick={handleForceSyncAll}
             disabled={executando}
             className="bg-blue-600 hover:bg-blue-700 text-white gap-2"

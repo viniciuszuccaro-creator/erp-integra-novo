@@ -291,6 +291,7 @@ Responda com:
             <div className="flex gap-2">
               <Button
                 type="button"
+                data-permission="Cadastros.TabelaPreco.aplicarRegra"
                 onClick={handleAplicarRegra}
                 disabled={aplicando || tabelasSelecionadas.length === 0}
                 className="flex-1 bg-blue-600 hover:bg-blue-700"
@@ -305,6 +306,7 @@ Responda com:
 
               <Button
                 type="button"
+                data-permission="Cadastros.TabelaPreco.aplicarIAGlobal"
                 onClick={handleAplicarIAGlobal}
                 disabled={aplicando || tabelasSelecionadas.length === 0}
                 className="flex-1 bg-purple-600 hover:bg-purple-700"

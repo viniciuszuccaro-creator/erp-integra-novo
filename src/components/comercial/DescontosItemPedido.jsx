@@ -105,7 +105,8 @@ export default function DescontosItemPedido({ item, onAtualizarItem }) {
         </div>
       </div>
 
-      <Button 
+      <Button
+        data-permission="Comercial.Pedido.aplicarDesconto"
         onClick={handleAplicarDesconto}
         className="w-full bg-blue-600 hover:bg-blue-700"
       >

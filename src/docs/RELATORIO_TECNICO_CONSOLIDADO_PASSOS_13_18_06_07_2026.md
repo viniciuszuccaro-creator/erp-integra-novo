@@ -12,7 +12,7 @@
 - **Entidades Conformes:** 34
 - **Entidades Pendentes:** 0
 - **Registros Ativos:** 670
-- **Registros Corrigidos:** 8 (3 códigos duplicados de GrupoProduto + 2 referências quebradas de Veiculo + 3 mapeamentos de campo corrigidos)
+- **Registros Corrigidos:** 12 (3 códigos duplicados de GrupoProduto + 2 referências quebradas de Veiculo + 4 referências quebradas de Motorista/RotaPadrao/KitProduto + 3 mapeamentos de campo corrigidos)
 - **Duplicatas Remanescentes:** 0
 - **Inconsistências Pendentes:** 0
 - **Intervenção Manual Necessária:** NENHUMA
@@ -75,6 +75,10 @@
 |----------|----------|------|
 | Veiculo (XYZ-5678) | `empresa_id` apontava para ID inexistente (`emp_001`) | Reatribuído para empresa válida do grupo |
 | Veiculo (ABC-1234) | `empresa_id` apontava para ID inexistente (`emp_001`) | Reatribuído para empresa válida do grupo |
+| Motorista (69223e91...a2) | `empresa_id` e `group_id` legados inválidos (`emp_001`/`grupo_001`) | Reatribuído para empresa 3Z LTDA + group_id real |
+| Motorista (69223e91...a1) | `empresa_id` e `group_id` legados inválidos (`emp_001`/`grupo_001`) | Reatribuído para empresa 3Z LTDA + group_id real |
+| RotaPadrao (Zona Sul SP) | `empresa_id` e `group_id` legados inválidos (`emp_001`/`grupo_001`) | Reatribuído para empresa 3Z LTDA + group_id real |
+| KitProduto (Kit Construção Básico) | `empresa_dona_id` e `group_id` legados inválidos (`emp_001`/`grupo_001`) | Reatribuído para empresa 3Z LTDA + group_id real |
 
 ---
 
@@ -158,7 +162,7 @@ Para cada uma das 34 entidades, as seguintes permissões são verificadas:
 | Representante | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | ✅ CONFORME |
 | Colaborador | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | ✅ CONFORME |
 | ContatoB2B | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | ✅ CONFORME |
-| Motorista | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 5 | ✅ CONFORME |
+| Motorista | 5 | 0 | 0 | 0 | 0 | 0 (2 corrigidos) | 0 | 5 | ✅ CONFORME |
 
 ### BLOCO 2 — PRODUTOS
 
@@ -168,7 +172,7 @@ Para cada uma das 34 entidades, as seguintes permissões são verificadas:
 | Servico | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 5 | ✅ CONFORME |
 | GrupoProduto | 91 | 0 | 0 (3 corrigidos) | 0 | 0 | 0 | 0 | 91 | ✅ CONFORME |
 | Marca | 6 | 0 | 0 | 0 | 0 | 0 | 0 | 6 | ✅ CONFORME |
-| KitProduto | 4 | 0 | 0 | 0 | 0 | 0 | 0 | 4 | ✅ CONFORME |
+| KitProduto | 4 | 0 | 0 | 0 | 0 | 0 (1 corrigido) | 0 | 4 | ✅ CONFORME |
 | TabelaPreco | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | ✅ CONFORME |
 | TabelaNCM | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 5 | ✅ CONFORME |
 
@@ -189,7 +193,7 @@ Para cada uma das 34 entidades, as seguintes permissões são verificadas:
 | Entidade | Registros Ativos | Duplicatas | Códigos Repetidos | Descrições Inválidas | Registros Órfãos | Refs Quebradas | Sem group_id | Compartilhados Grupo | Status |
 |----------|-----------------|------------|-------------------|---------------------|------------------|----------------|--------------|---------------------|--------|
 | Veiculo | 7 | 0 | 0 | 0 | 0 | 0 (2 corrigidos) | 0 | 7 | ✅ CONFORME |
-| RotaPadrao | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 5 | ✅ CONFORME |
+| RotaPadrao | 5 | 0 | 0 | 0 | 0 | 0 (1 corrigido) | 0 | 5 | ✅ CONFORME |
 | LocalEstoque | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 5 | ✅ CONFORME |
 | TipoFrete | 3 | 0 | 0 | 0 | 0 | 0 | 0 | 3 | ✅ CONFORME |
 | RegiaoAtendimento | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 5 | ✅ CONFORME |

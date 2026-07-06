@@ -26,7 +26,7 @@ export default function RomaneioImpressao({ romaneio, entregas, empresa }) {
           <Download className="w-4 h-4 mr-2" />
           Baixar PDF
         </Button>
-        <Button onClick={handleImprimir} className="bg-blue-600">
+        <Button data-permission="Expedicao.Romaneio.imprimir" onClick={handleImprimir} className="bg-blue-600">
           <Printer className="w-4 h-4 mr-2" />
           Imprimir
         </Button>

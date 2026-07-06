@@ -15,7 +15,7 @@ export default function PosicoesTable({ itens, onRemover, onConsolidar, onSeleci
           <CardTitle className="text-base flex items-center justify-between">
             <span>Planilha de Posições ({count})</span>
             {count > 0 && (
-              <Button onClick={onConsolidar} size="sm" variant="outline" className="border-purple-300 text-purple-600">
+              <Button data-permission="Comercial.CorteDobra.consolidar" onClick={onConsolidar} size="sm" variant="outline" className="border-purple-300 text-purple-600">
                 <Layers className="w-3 h-3 mr-2" />
                 Consolidar
               </Button>

@@ -141,7 +141,7 @@ export default function ParametrosOrigemPedidoTab() {
                   className="pl-10"
                 />
               </div>
-              <Button onClick={handleNovo}>
+              <Button data-permission="Cadastros.ParametroOrigemPedido.criar" onClick={handleNovo}>
                 <Plus className="w-4 h-4 mr-2" />
                 Novo Canal
               </Button>

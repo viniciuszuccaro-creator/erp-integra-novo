@@ -65,7 +65,7 @@ export default function FiltrosPagar({
                 </Button>
               </ProtectedAction>
 
-              <Button variant="outline" size="sm" onClick={onEnviarCaixa} disabled={enviarPending} className="bg-red-50">
+              <Button data-permission="Financeiro.ContaPagar.enviarCaixa" variant="outline" size="sm" onClick={onEnviarCaixa} disabled={enviarPending} className="bg-red-50">
                 <Send className="w-3 h-3 mr-1" /> Enviar Caixa
               </Button>
             </>

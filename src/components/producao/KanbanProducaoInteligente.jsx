@@ -124,7 +124,7 @@ export default function KanbanProducaoInteligente({ windowMode = false }) {
               ))}
             </select>
 
-            <Button onClick={handleNovaOP} className="bg-blue-600 hover:bg-blue-700">
+            <Button data-permission="Producao.OrdemProducao.criar" onClick={handleNovaOP} className="bg-blue-600 hover:bg-blue-700">
               <Plus className="w-4 h-4 mr-2" />
               Nova OP
             </Button>

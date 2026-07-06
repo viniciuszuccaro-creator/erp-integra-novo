@@ -63,7 +63,7 @@ export default function FiltrosReceber({
                 </Button>
               </ProtectedAction>
 
-              <Button variant="outline" size="sm" onClick={onEnviarCaixa} disabled={enviarPending} className="bg-emerald-50">
+              <Button data-permission="Financeiro.ContaReceber.enviarCaixa" variant="outline" size="sm" onClick={onEnviarCaixa} disabled={enviarPending} className="bg-emerald-50">
                 <Send className="w-3 h-3 mr-1" /> Enviar Caixa
               </Button>
             </>

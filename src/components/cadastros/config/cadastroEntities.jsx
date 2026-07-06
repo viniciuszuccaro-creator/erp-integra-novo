@@ -166,7 +166,7 @@ export const CADASTROS_ENTITIES = {
     label: "Plano de Contas", group: "Financeiro & Fiscal", icon: DollarSign,
     columns: [
       { field: "codigo", label: "Código", searchable: true, sortable: true, numeric: true },
-      { field: "nome", label: "Nome", searchable: true },
+      { field: "nome_conta", label: "Nome", searchable: true },
       { field: "tipo", label: "Tipo", searchable: true },
     ],
   },
@@ -304,7 +304,7 @@ export const CADASTROS_ENTITIES = {
   Cargo: {
     label: "Cargos", group: "Estrutura Organizacional", icon: Building2,
     columns: [
-      { field: "nome", label: "Nome", searchable: true, sortable: true },
+      { field: "nome_cargo", label: "Nome", searchable: true, sortable: true },
       { field: "descricao", label: "Descrição", searchable: true },
     ],
   },

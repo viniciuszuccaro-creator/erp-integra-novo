@@ -50,6 +50,7 @@ function getNome(rec) {
     rec.nome_perfil || rec.nome_rota || rec.nome_banco || rec.nome_kit ||
     rec.nome_grupo || rec.nome_setor || rec.nome_canal || rec.nome_intent ||
     rec.nome_job || rec.nome_webhook || rec.nome_api || rec.nome_gateway ||
+    rec.nome_conta || rec.nome_cargo || rec.nome_modelo ||
     rec.titulo || rec.label || ''
   ).toString().toLowerCase().trim();
 }

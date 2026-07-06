@@ -20,6 +20,7 @@ const DEFAULT_SORTS = {
   ContaPagar: { field: 'data_vencimento', direction: 'asc' }, ContaReceber: { field: 'data_vencimento', direction: 'asc' },
   OrdemCompra: { field: 'data_solicitacao', direction: 'desc' }, CentroCusto: { field: 'codigo', direction: 'asc' },
   PlanoDeContas: { field: 'codigo', direction: 'asc' }, PlanoContas: { field: 'codigo', direction: 'asc' },
+  Cargo: { field: 'nome_cargo', direction: 'asc' },
   User: { field: 'full_name', direction: 'asc' }, Departamento: { field: 'nome', direction: 'asc' },
   Cargo: { field: 'nome', direction: 'asc' }, Turno: { field: 'nome', direction: 'asc' },
   Veiculo: { field: 'placa', direction: 'asc' }, Motorista: { field: 'nome', direction: 'asc' },
@@ -54,7 +55,7 @@ const SEARCH_FIELDS = {
   UnidadeMedida: ['sigla', 'nome', 'descricao'],
   CentroCusto: ['codigo', 'descricao', 'nome'],
   CentroResultado: ['codigo', 'descricao', 'nome'],
-  PlanoDeContas: ['codigo', 'descricao', 'nome'],
+  PlanoDeContas: ['codigo', 'nome_conta', 'descricao', 'nome'],
   TipoDespesa: ['nome', 'codigo', 'descricao'],
   MoedaIndice: ['moeda', 'indice', 'descricao', 'nome'],
   GrupoEmpresarial: ['nome', 'cnpj', 'razao_social'],
@@ -79,7 +80,7 @@ const SEARCH_FIELDS = {
   EventoNotificacao: ['nome', 'descricao', 'tipo'],
   PerfilAcesso: ['nome_perfil', 'nome', 'descricao'],
   ConfiguracaoDespesaRecorrente: ['descricao', 'nome'],
-  default: ['nome', 'descricao', 'codigo', 'razao_social', 'nome_completo', 'nome_grupo', 'nome_segmento', 'nome_regiao', 'nome_banco', 'nome_fantasia', 'sigla']
+  default: ['nome', 'descricao', 'codigo', 'razao_social', 'nome_completo', 'nome_grupo', 'nome_segmento', 'nome_regiao', 'nome_banco', 'nome_fantasia', 'nome_conta', 'nome_cargo', 'nome_modelo', 'sigla']
 };
 
 // Entidades que não precisam de filtro empresa/grupo

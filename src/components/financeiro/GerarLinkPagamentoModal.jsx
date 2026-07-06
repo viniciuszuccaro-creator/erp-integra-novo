@@ -116,7 +116,7 @@ export default function GerarLinkPagamentoModal({ isOpen, onClose, contaReceber 
                     readOnly
                     className="font-mono text-sm"
                   />
-                  <Button onClick={copiarLink} variant="outline">
+                  <Button data-permission="Financeiro.GerarLinkPagamento.copiar" onClick={copiarLink} variant="outline">
                     <Copy className="w-4 h-4" />
                   </Button>
                 </div>

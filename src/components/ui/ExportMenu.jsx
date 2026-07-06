@@ -129,7 +129,7 @@ export default function ExportMenu({ data, fileName = "relatorio", title = "Rela
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button data-permission="Sistema.ExportMenu.exportar" variant="outline" size="sm">
           <Download className="w-4 h-4 mr-2" />
           Exportar
         </Button>

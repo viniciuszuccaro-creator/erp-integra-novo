@@ -202,7 +202,7 @@ export default function AnalyticsDashboard() {
         </Card>
       </div>
 
-      <Button onClick={loadAnalytics} disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
+      <Button data-permission="Sistema.AnalyticsDashboard.atualizar" onClick={loadAnalytics} disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
         {loading ? 'Atualizando...' : '🔄 Atualizar Analytics'}
       </Button>
     </div>

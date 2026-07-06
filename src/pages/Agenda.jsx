@@ -214,8 +214,8 @@ function Agenda() {
               <DialogHeader><DialogTitle>Confirmar Exclusão</DialogTitle></DialogHeader>
               <p className="text-slate-600 text-sm">Tem certeza que deseja deletar este evento? Esta ação não pode ser desfeita.</p>
               <div className="flex justify-end gap-3 pt-4">
-                <Button variant="outline" onClick={() => setConfirmDeleteOpen(false)}>Cancelar</Button>
-                <Button className="bg-red-600 hover:bg-red-700" onClick={confirmarDeleteEvento} disabled={deleteEventoMutation.isPending}>
+                <Button data-permission="Sistema.Agenda.cancelar" variant="outline" onClick={() => setConfirmDeleteOpen(false)}>Cancelar</Button>
+                <Button data-permission="Sistema.Agenda.excluir" className="bg-red-600 hover:bg-red-700" onClick={confirmarDeleteEvento} disabled={deleteEventoMutation.isPending}>
                   {deleteEventoMutation.isPending ? 'Excluindo...' : 'Excluir'}
                 </Button>
               </div>

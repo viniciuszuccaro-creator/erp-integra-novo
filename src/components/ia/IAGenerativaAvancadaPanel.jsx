@@ -43,7 +43,7 @@ export default function IAGenerativaAvancadaPanel({ modulo, contexto }) {
 
       <div className="space-y-2">
         <textarea value={input} onChange={(e) => setInput(e.target.value)} placeholder="Descreva o que você precisa..." className="w-full h-20 p-2 border rounded text-sm" />
-        <Button onClick={gerar} disabled={loading || !input} className="w-full gap-2">
+        <Button data-permission="Sistema.IAGenerativaAvancada.gerar" onClick={gerar} disabled={loading || !input} className="w-full gap-2">
           {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           {loading ? 'Gerando...' : 'Gerar'}
         </Button>
@@ -52,7 +52,7 @@ export default function IAGenerativaAvancadaPanel({ modulo, contexto }) {
       {output && (
         <div className="bg-white rounded p-3 max-h-48 overflow-auto text-sm space-y-2">
           <pre className="text-xs whitespace-pre-wrap font-sans">{output}</pre>
-          <Button size="sm" variant="ghost" onClick={() => navigator.clipboard.writeText(output)} className="gap-1">
+          <Button data-permission="Sistema.IAGenerativaAvancada.copiar" size="sm" variant="ghost" onClick={() => navigator.clipboard.writeText(output)} className="gap-1">
             <Copy className="w-3 h-3" /> Copiar
           </Button>
         </div>

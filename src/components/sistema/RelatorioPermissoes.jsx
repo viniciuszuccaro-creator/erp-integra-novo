@@ -163,7 +163,7 @@ export default function RelatorioPermissoes({ perfis = [], usuarios = [], empres
         </div>
 
         <div className="space-y-2">
-          <Button
+          <Button data-permission="Sistema.RelatorioPermissoes.gerar"
             onClick={gerarRelatorio}
             className="w-full justify-start"
             variant="outline"
@@ -174,7 +174,7 @@ export default function RelatorioPermissoes({ perfis = [], usuarios = [], empres
             Exportar Relatório Completo (JSON)
           </Button>
           
-          <Button
+          <Button data-permission="Sistema.RelatorioPermissoes.gerar"
             onClick={gerarRelatorioSimplificado}
             className="w-full justify-start"
             variant="outline"

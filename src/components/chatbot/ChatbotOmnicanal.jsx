@@ -69,7 +69,7 @@ export default function ChatbotOmnicanal() {
 
       <div className="border-t p-3 flex gap-2">
         <input value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && enviar()} placeholder="Escreva sua mensagem..." className="flex-1 px-3 py-2 border rounded text-sm" />
-        <Button onClick={enviar} disabled={loading || !input.trim()} className="gap-1">
+        <Button data-permission="Chatbot.ChatbotOmnicanal.enviar" onClick={enviar} disabled={loading || !input.trim()} className="gap-1">
           <Send className="w-4 h-4" />
         </Button>
       </div>

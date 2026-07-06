@@ -48,7 +48,7 @@ export default function CotacoesTab({ windowMode = false }) {
           <p className="text-sm text-slate-600">Cote com múltiplos fornecedores e escolha a melhor proposta</p>
         </div>
         {hasPermission("Compras", "Cotacao", "criar") && (
-          <Button className="bg-cyan-600 hover:bg-cyan-700" onClick={() => openWindow(CotacaoForm, {
+          <Button data-permission="Compras.Cotacoes.criar" className="bg-cyan-600 hover:bg-cyan-700" onClick={() => openWindow(CotacaoForm, {
             windowMode: true,
             onSubmit: async (data) => {
               try { await criarCotacaoMutation.mutateAsync(data); sonnerToast.success("✅ Cotação criada e enviada!"); }

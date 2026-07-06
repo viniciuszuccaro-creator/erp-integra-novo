@@ -40,11 +40,11 @@ export default function BoletosList({ cliente }) {
                   <a className="text-xs underline" href={b.url_boleto_pdf} target="_blank" rel="noreferrer">Baixar Boleto (PDF)</a>
                 )}
                 {b.pix_copia_cola && (
-                  <Button variant="outline" size="sm" onClick={() => navigator.clipboard.writeText(b.pix_copia_cola)} className="h-8">
+                  <Button data-permission="Portal.Boletos.emitir" variant="outline" size="sm" onClick={() => navigator.clipboard.writeText(b.pix_copia_cola)} className="h-8">
                     <Clipboard className="w-3.5 h-3.5" /> Copiar PIX
                   </Button>
                 )}
-                <Button
+                <Button data-permission="Portal.Boletos.emitir"
                   size="sm"
                   onClick={() => emitir.mutate(b.id)}
                   disabled={emitir.isPending}

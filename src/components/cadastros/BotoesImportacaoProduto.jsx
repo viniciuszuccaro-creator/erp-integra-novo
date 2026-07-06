@@ -15,7 +15,7 @@ export default function BotoesImportacaoProduto({ onProdutosCriados }) {
   return (
     <>
       <div className="flex gap-2 flex-wrap">
-        <Button
+        <Button data-permission="Cadastros.BotoesImportacaoProduto.importar"
           variant="outline"
           onClick={() => openWindow(
             ImportacaoProdutoNFe,

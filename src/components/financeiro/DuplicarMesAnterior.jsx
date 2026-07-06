@@ -112,7 +112,7 @@ export default function DuplicarMesAnterior({ empresaId }) {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
+        <Button data-permission="Financeiro.DuplicarMesAnterior.duplicar" variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
           <Copy className="w-4 h-4 mr-2" />
           Duplicar Mês Anterior
         </Button>
@@ -235,7 +235,7 @@ export default function DuplicarMesAnterior({ empresaId }) {
           <Button variant="outline" onClick={() => setDialogOpen(false)}>
             Cancelar
           </Button>
-          <Button
+          <Button data-permission="Financeiro.DuplicarMesAnterior.duplicar"
             onClick={() => duplicarMutation.mutate()}
             disabled={contasSelecionadas.length === 0 || duplicarMutation.isPending}
             className="bg-purple-600 hover:bg-purple-700"

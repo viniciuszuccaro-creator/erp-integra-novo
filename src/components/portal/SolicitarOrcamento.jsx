@@ -240,7 +240,7 @@ export default function SolicitarOrcamento() {
           </div>
 
           <div className="flex gap-3">
-            <Button
+            <Button data-permission="Portal.SolicitarOrcamento.criar"
               type="submit"
               disabled={criarOportunidadeMutation.isPending}
               className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"

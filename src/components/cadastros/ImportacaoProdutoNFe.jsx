@@ -205,7 +205,7 @@ export default function ImportacaoProdutoNFe({ onProdutosCriados }) {
             id="nfe-upload"
           />
           <label htmlFor="nfe-upload">
-            <Button variant="outline" className="w-full" asChild disabled={processando}>
+            <Button data-permission="Cadastros.ImportacaoProdutoNFe.exportar" variant="outline" className="w-full" asChild disabled={processando}>
               <span>
                 <Upload className="w-4 h-4 mr-2" />
                 {arquivo ? arquivo.name : 'Selecionar XML ou PDF da NF-e'}
@@ -283,7 +283,7 @@ export default function ImportacaoProdutoNFe({ onProdutosCriados }) {
                 ))}
               </div>
 
-              <Button
+              <Button data-permission="Cadastros.ImportacaoProdutoNFe.importar"
                 onClick={importarProdutos}
                 className="w-full bg-green-600 hover:bg-green-700"
                 disabled={resultado.produtos.every(p => p.duplicado)}

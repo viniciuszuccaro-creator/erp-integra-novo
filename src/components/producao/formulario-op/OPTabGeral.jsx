@@ -69,7 +69,7 @@ export default function OPTabGeral({
         <Card>
           <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Zap className="w-4 h-4" />Otimização com IA</CardTitle></CardHeader>
           <CardContent>
-            <Button type="button" onClick={onGerarIA} variant="outline" className="w-full">🤖 Gerar Sugestões de Produção com IA</Button>
+            <Button data-permission="Producao.OPGeral.gerar" type="button" onClick={onGerarIA} variant="outline" className="w-full">🤖 Gerar Sugestões de Produção com IA</Button>
           </CardContent>
         </Card>
       )}

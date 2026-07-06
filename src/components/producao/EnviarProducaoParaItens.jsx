@@ -182,7 +182,7 @@ export default function EnviarProducaoParaItens({ itensProducao, onEnviar }) {
           </div>
 
           <div className="flex flex-col gap-3">
-            <Button
+            <Button data-permission="Producao.EnviarProducaoParaItens.enviar"
               onClick={handleEnviar}
               disabled={enviando || totais.total_kg === 0}
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 min-w-[200px]"

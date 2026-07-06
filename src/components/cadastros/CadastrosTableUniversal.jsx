@@ -219,6 +219,7 @@ export default function CadastrosTableUniversal({
                             <Button
                               size="sm"
                               variant="ghost"
+                              data-permission="Cadastros.Visualizador.excluir"
                               onClick={async () => {
                                 const ok = await confirmDel({ title: 'Confirmar Exclusão', description: `Regra-Mae: confirma excluir este registro de ${entityName}? Esta ação será auditada.`, confirmText: 'Excluir' });
                                 if (ok) onDelete(item);

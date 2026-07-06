@@ -113,7 +113,7 @@ export default function SystemCheckupPanel() {
           <Database className="w-4 h-4 text-blue-600" />
           Diagnóstico do Sistema
         </h3>
-        <Button
+        <Button data-permission="Sistema.SystemCheckup.atualizar"
           variant="outline"
           size="sm"
           onClick={() => setRefreshKey(k => k + 1)}

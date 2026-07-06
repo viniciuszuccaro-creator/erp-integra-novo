@@ -15,13 +15,13 @@ export default function TemplateCard({ template, onCopiar, onEditar, onExcluir, 
               <Badge className="mt-1 text-xs">{template.categoria}</Badge>
             </div>
             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onCopiar(template.conteudo)}>
+              <Button data-permission="Chatbot.Template.excluir" variant="ghost" size="icon" className="h-7 w-7" onClick={() => onCopiar(template.conteudo)}>
                 <Copy className="w-3 h-3" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEditar(template)}>
+              <Button data-permission="Chatbot.Template.excluir" variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEditar(template)}>
                 <Edit2 className="w-3 h-3" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7 text-red-600" onClick={onExcluir}>
+              <Button data-permission="Chatbot.Template.excluir" variant="ghost" size="icon" className="h-7 w-7 text-red-600" onClick={onExcluir}>
                 <Trash2 className="w-3 h-3" />
               </Button>
             </div>

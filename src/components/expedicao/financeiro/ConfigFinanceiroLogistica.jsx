@@ -109,7 +109,7 @@ export default function ConfigFinanceiroLogistica({ empresaId }) {
           </div>
         </div>
         <div className="flex justify-end">
-          <Button onClick={() => saveMutation.mutate(form)} disabled={saveMutation.isPending}>Salvar Configuração</Button>
+          <Button data-permission="Expedicao.ConfigFinanceiroLogistica.salvar" onClick={() => saveMutation.mutate(form)} disabled={saveMutation.isPending}>Salvar Configuração</Button>
         </div>
       </CardContent>
     </Card>

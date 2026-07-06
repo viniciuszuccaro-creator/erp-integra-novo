@@ -101,7 +101,7 @@ export default function TabelaReceber({
                   </>
                 )}
                 {r.boleto_url && (
-                  <Button variant="ghost" size="sm" onClick={() => onVerBoleto(r)} className="justify-start h-6 px-2 text-xs">
+                  <Button data-permission="Financeiro.elaReceber.copiar" variant="ghost" size="sm" onClick={() => onVerBoleto(r)} className="justify-start h-6 px-2 text-xs">
                     <FileText className="w-3 h-3 mr-1" /> Boleto
                   </Button>
                 )}

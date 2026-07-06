@@ -252,7 +252,7 @@ export default function CriarEtapaEntregaModal({ open, onClose, pedidoData, onCr
           <Button variant="outline" onClick={onClose}>
             Cancelar
           </Button>
-          <Button 
+          <Button data-permission="Comercial.CriarEtapaEntrega.criar" 
             onClick={handleCriar}
             className="bg-green-600 hover:bg-green-700"
             disabled={!etapaForm.nome_etapa || etapaForm.itens_selecionados.length === 0}

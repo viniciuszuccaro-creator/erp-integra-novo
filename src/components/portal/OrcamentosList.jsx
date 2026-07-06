@@ -56,8 +56,8 @@ export default function OrcamentosList({ cliente }) {
                 <label className="text-xs font-medium text-muted-foreground">Descreva o que deseja revisar (opcional):</label>
                 <Textarea value={revisaoComentario} onChange={(e) => setRevisaoComentario(e.target.value)} placeholder="Ex: Alterar quantidade do item 2..." className="text-sm" rows={2} />
                 <div className="flex gap-2 justify-end">
-                  <Button variant="ghost" size="sm" onClick={() => setRevisaoPedido(null)}>Cancelar</Button>
-                  <Button size="sm" onClick={() => { solicitarRevisao.mutate({ p, comment: revisaoComentario }); setRevisaoPedido(null); }} disabled={solicitarRevisao.isPending}>
+                  <Button data-permission="Portal.Orcamentos.cancelar" variant="ghost" size="sm" onClick={() => setRevisaoPedido(null)}>Cancelar</Button>
+                  <Button data-permission="Portal.Orcamentos.confirmar" size="sm" onClick={() => { solicitarRevisao.mutate({ p, comment: revisaoComentario }); setRevisaoPedido(null); }} disabled={solicitarRevisao.isPending}>
                     {solicitarRevisao.isPending ? 'Enviando...' : 'Confirmar Revisão'}
                   </Button>
                 </div>

@@ -301,7 +301,7 @@ export default function EnviarProducaoParaItensButton({
               >
                 Cancelar
               </Button>
-              <Button
+              <Button data-permission="Comercial.EnviarProducaoParaItens.enviar"
                 type="button"
                 onClick={handleEnviarSelecionados}
                 disabled={itensSelecionados.length === 0 || precoPorKgCustom <= 0}

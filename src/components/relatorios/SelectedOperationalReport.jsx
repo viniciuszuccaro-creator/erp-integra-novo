@@ -21,7 +21,7 @@ export default function SelectedOperationalReport({ selectedReport, filtros, onE
             </p>
           </div>
           <div className="flex gap-2">
-            <Button
+            <Button data-permission="Relatorios.SelectedOperationalReport.exportar"
               variant="outline"
               size="sm"
               onClick={() => {

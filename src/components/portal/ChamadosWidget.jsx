@@ -53,7 +53,7 @@ export default function ChamadosWidget({ cliente }) {
             <Textarea value={mensagem} onChange={(e) => setMensagem(e.target.value)} placeholder="Descreva seu problema ou dúvida..." className="min-h-[80px]" />
           </div>
           <div className="flex justify-end">
-            <Button onClick={() => novaMut.mutate()} disabled={!mensagem.trim() || novaMut.isPending} className="gap-2">
+            <Button data-permission="Portal.ChamadosWidget.enviar" onClick={() => novaMut.mutate()} disabled={!mensagem.trim() || novaMut.isPending} className="gap-2">
               {novaMut.isPending && <Loader2 className="w-4 h-4 animate-spin" />}<Send className="w-4 h-4" /> Enviar
             </Button>
           </div>

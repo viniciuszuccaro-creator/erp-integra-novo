@@ -337,7 +337,7 @@ export default function GerarCobrancaModal({ isOpen, onClose, contaReceber }) {
                         </Button>
                       </div>
                     </div>
-                    <Button
+                    <Button data-permission="Financeiro.GerarCobranca.exportar"
                       onClick={() => window.open(cobrancaGerada.dados.bankSlipUrl, '_blank')}
                       variant="outline"
                       className="w-full"

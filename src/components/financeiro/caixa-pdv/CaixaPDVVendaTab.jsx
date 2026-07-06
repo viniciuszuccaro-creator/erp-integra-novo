@@ -131,10 +131,10 @@ export default function CaixaPDVVendaTab({
                   <Truck className="w-4 h-4" /> Tipo de Entrega
                 </Label>
                 <div className="grid grid-cols-2 gap-2">
-                  <Button type="button" variant={tipoEntrega === "Retirada" ? "default" : "outline"} onClick={() => setTipoEntrega("Retirada")} className={`h-16 flex-col gap-1 ${tipoEntrega === "Retirada" ? "bg-blue-600 hover:bg-blue-700" : ""}`}>
+                  <Button data-permission="Financeiro.CaixaPDVVenda.criar" type="button" variant={tipoEntrega === "Retirada" ? "default" : "outline"} onClick={() => setTipoEntrega("Retirada")} className={`h-16 flex-col gap-1 ${tipoEntrega === "Retirada" ? "bg-blue-600 hover:bg-blue-700" : ""}`}>
                     <Store className="w-6 h-6" /><span className="text-xs font-semibold">RETIRADA</span>
                   </Button>
-                  <Button type="button" variant={tipoEntrega === "Entrega" ? "default" : "outline"} onClick={() => setTipoEntrega("Entrega")} className={`h-16 flex-col gap-1 ${tipoEntrega === "Entrega" ? "bg-blue-600 hover:bg-blue-700" : ""}`}>
+                  <Button data-permission="Financeiro.CaixaPDVVenda.criar" type="button" variant={tipoEntrega === "Entrega" ? "default" : "outline"} onClick={() => setTipoEntrega("Entrega")} className={`h-16 flex-col gap-1 ${tipoEntrega === "Entrega" ? "bg-blue-600 hover:bg-blue-700" : ""}`}>
                     <Truck className="w-6 h-6" /><span className="text-xs font-semibold">ENTREGA</span>
                   </Button>
                 </div>

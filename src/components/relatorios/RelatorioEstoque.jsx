@@ -99,7 +99,7 @@ export default function RelatorioEstoque() {
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <CardTitle className="text-base">Movimentações por Mês (Entradas × Saídas)</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => exportarCSV(movMensais, 'movimentacoes_mensais')}>
+              <Button data-permission="Relatorios.RelatorioEstoque.exportar" size="sm" variant="outline" onClick={() => exportarCSV(movMensais, 'movimentacoes_mensais')}>
                 <Download className="w-3 h-3 mr-1" /> CSV
               </Button>
             </div>
@@ -123,7 +123,7 @@ export default function RelatorioEstoque() {
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <CardTitle className="text-base">Valor em Estoque por Grupo</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => exportarCSV(porGrupo, 'estoque_por_grupo')}>
+              <Button data-permission="Relatorios.RelatorioEstoque.exportar" size="sm" variant="outline" onClick={() => exportarCSV(porGrupo, 'estoque_por_grupo')}>
                 <Download className="w-3 h-3 mr-1" /> CSV
               </Button>
             </div>

@@ -28,7 +28,7 @@ export default function FiltrosPagar({
       <CardContent className="p-3">
         <div className="flex gap-2">
           <ProtectedAction permission="financeiro_pagar_exportar">
-            <Button variant="outline" size="sm" onClick={onExportar}>
+            <Button data-permission="Financeiro.FiltrosPagar.exportar" variant="outline" size="sm" onClick={onExportar}>
               <Download className="w-3 h-3 mr-1" /> CSV
             </Button>
           </ProtectedAction>

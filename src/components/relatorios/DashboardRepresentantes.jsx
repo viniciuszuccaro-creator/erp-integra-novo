@@ -146,7 +146,7 @@ export default function DashboardRepresentantes() {
             </SelectContent>
           </Select>
 
-          <Button variant="outline">
+          <Button data-permission="Relatorios.DashboardRepresentantes.exportar" variant="outline">
             <Download className="w-4 h-4 mr-2" />
             Exportar
           </Button>

@@ -22,7 +22,7 @@ export default function RomaneioImpressao({ romaneio, entregas, empresa }) {
     <div className="bg-white">
       {/* Botões (não imprimem) */}
       <div className="flex justify-end gap-3 mb-4 print:hidden">
-        <Button variant="outline" onClick={handlePDF}>
+        <Button data-permission="Expedicao.RomaneioImpressao.baixar" variant="outline" onClick={handlePDF}>
           <Download className="w-4 h-4 mr-2" />
           Baixar PDF
         </Button>

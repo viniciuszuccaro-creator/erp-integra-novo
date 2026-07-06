@@ -179,7 +179,7 @@ export default function TesteBoletos({ configuracao, windowMode = false }) {
                       {resultado.boleto.linha_digitavel}
                     </p>
                   </div>
-                  <Button size="sm" variant="outline" className="w-full">
+                  <Button data-permission="Integracoes.TesteBoletos.exportar" size="sm" variant="outline" className="w-full">
                     <Eye className="w-4 h-4 mr-1" />
                     Ver Boleto PDF
                   </Button>
@@ -208,7 +208,7 @@ export default function TesteBoletos({ configuracao, windowMode = false }) {
                     {resultado.pix.copia_cola}
                   </div>
 
-                  <Button 
+                  <Button data-permission="Integracoes.TesteBoletos.copiar" 
                     size="sm" 
                     onClick={copiarCodigoPix}
                     className="w-full bg-green-600 hover:bg-green-700"

@@ -120,7 +120,7 @@ export default function FormularioCorteDobraCompleto({ onSalvar, onCancelar, ite
 
       <div className="flex justify-end gap-3 pt-4 border-t">
         <Button type="button" variant="outline" onClick={onCancelar}>Cancelar</Button>
-        <Button type="button" onClick={handleSalvar} className="bg-blue-600 hover:bg-blue-700"><Save className="w-4 h-4 mr-2" />Adicionar Item</Button>
+        <Button data-permission="Producao.ularioCorteDobra.salvar" type="button" onClick={handleSalvar} className="bg-blue-600 hover:bg-blue-700"><Save className="w-4 h-4 mr-2" />Adicionar Item</Button>
       </div>
     </div>
   );

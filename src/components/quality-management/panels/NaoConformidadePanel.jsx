@@ -112,7 +112,7 @@ export default function NaoConformidadePanel() {
               <Progress value={ncr.progresso} className="h-2" />
             </div>
 
-            <Button variant="outline" size="sm" className="w-full">
+            <Button data-permission="Sistema.NaoConformidade.atualizar" variant="outline" size="sm" className="w-full">
               <Zap className="w-3 h-3 mr-1" />
               Atualizar Progresso
             </Button>

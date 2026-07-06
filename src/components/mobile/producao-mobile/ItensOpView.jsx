@@ -86,7 +86,7 @@ export default function ItensOpView({ opSelecionada, onSelectItem, onVoltar, onF
         </div>
 
         {opSelecionada.percentual_conclusao === 100 && podeExpedir && (
-          <Button
+          <Button data-permission="Mobile.ItensOpView.enviar"
             className="w-full h-16 bg-green-600 hover:bg-green-700 text-lg"
             onClick={onFinalizar}
             disabled={isEnviando}

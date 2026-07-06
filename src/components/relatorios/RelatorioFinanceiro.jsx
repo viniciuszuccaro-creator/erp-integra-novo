@@ -94,7 +94,7 @@ export default function RelatorioFinanceiro() {
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <CardTitle className="text-base">Fluxo de Caixa Mensal (Receitas × Despesas)</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => exportarCSV(fluxoMensal, 'fluxo_mensal')}>
+              <Button data-permission="Relatorios.RelatorioFinanceiro.exportar" size="sm" variant="outline" onClick={() => exportarCSV(fluxoMensal, 'fluxo_mensal')}>
                 <Download className="w-3 h-3 mr-1" /> CSV
               </Button>
             </div>
@@ -120,7 +120,7 @@ export default function RelatorioFinanceiro() {
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <CardTitle className="text-base">Contas a Receber por Status</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => exportarCSV(statusReceber, 'status_receber')}>
+              <Button data-permission="Relatorios.RelatorioFinanceiro.exportar" size="sm" variant="outline" onClick={() => exportarCSV(statusReceber, 'status_receber')}>
                 <Download className="w-3 h-3 mr-1" /> CSV
               </Button>
             </div>

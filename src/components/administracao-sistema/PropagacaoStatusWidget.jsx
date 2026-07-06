@@ -85,7 +85,7 @@ export default function PropagacaoStatusWidget() {
         </>
       )}
 
-      <Button
+      <Button data-permission="Sistema.PropagacaoStatusWidget.atualizar"
         variant="ghost"
         size="sm"
         className="h-5 w-5 p-0 ml-auto"

@@ -26,7 +26,7 @@ export default function FiltrosReceber({
       <CardContent className="p-3">
         <div className="flex flex-wrap items-center gap-2">
           <ProtectedAction permission="financeiro_receber_exportar">
-            <Button variant="outline" size="sm" onClick={onExportar}>
+            <Button data-permission="Financeiro.FiltrosReceber.exportar" variant="outline" size="sm" onClick={onExportar}>
               <Download className="w-3 h-3 mr-1" /> CSV
             </Button>
           </ProtectedAction>

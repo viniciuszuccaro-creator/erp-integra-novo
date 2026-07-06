@@ -62,7 +62,7 @@ export default function CRMPage() {
 
   if (loadingPermissions) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="w-full h-full flex flex-col">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );

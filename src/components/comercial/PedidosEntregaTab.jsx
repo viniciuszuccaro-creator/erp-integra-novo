@@ -187,7 +187,7 @@ export default function PedidosEntregaTab({ windowMode = false }) {
                             <Bell className="w-4 h-4 mr-1" /> Notificar
                           </Button>
                           {pedido.status === 'Em Trânsito' && permissoes.podeConfirmarEntrega && (
-                            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white"
+                            <Button data-permission="Comercial.PedidosEntrega.confirmar" size="sm" className="bg-green-600 hover:bg-green-700 text-white"
                               onClick={() => { setEntregaSelecionada({ pedido, entrega }); setComprovanteOpen(true); }}>
                               <CheckCircle2 className="w-4 h-4 mr-1" /> Confirmar
                             </Button>

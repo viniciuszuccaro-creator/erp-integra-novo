@@ -130,7 +130,7 @@ export default function RelatorioQualidade({ empresaId }) {
                 onChange={(e) => setPeriodoFim(e.target.value)}
               />
             </div>
-            <Button variant="outline" onClick={exportarExcel}>
+            <Button data-permission="Qualidade.RelatorioQualidade.exportar" variant="outline" onClick={exportarExcel}>
               <Download className="w-4 h-4 mr-2" />
               Excel
             </Button>

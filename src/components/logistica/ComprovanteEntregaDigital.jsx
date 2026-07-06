@@ -163,7 +163,7 @@ export default function ComprovanteEntregaDigital({ pedido, entrega, onSuccess, 
           <CardContent className="p-4">
             <Label className="text-sm font-semibold mb-2 block">📷 Foto do Comprovante *</Label>
             <div className="flex gap-3">
-              <Button
+              <Button data-permission="Logistica.ComprovanteEntregaDigital.enviar"
                 variant="outline"
                 className="flex-1"
                 onClick={() => document.getElementById('foto-input').click()}
@@ -286,7 +286,7 @@ export default function ComprovanteEntregaDigital({ pedido, entrega, onSuccess, 
         )}
 
         {/* Botão de Confirmação */}
-        <Button
+        <Button data-permission="Logistica.ComprovanteEntregaDigital.baixar"
           onClick={() => confirmarEntregaMutation.mutate()}
           disabled={!podeConfirmar || confirmarEntregaMutation.isPending}
           className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"

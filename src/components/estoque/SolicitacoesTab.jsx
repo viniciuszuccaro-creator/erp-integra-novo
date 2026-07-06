@@ -128,7 +128,7 @@ export default function SolicitacoesTab({ solicitacoes, produtos }) {
             className="pl-9"
           />
         </div>
-        <Button 
+        <Button data-permission="Estoque.Solicitacoes.criar" 
           className="bg-indigo-600 hover:bg-indigo-700"
           disabled={!contextoValido || !podeCriarSolicitacao}
           onClick={() => openWindow(SolicitacaoCompraForm, {

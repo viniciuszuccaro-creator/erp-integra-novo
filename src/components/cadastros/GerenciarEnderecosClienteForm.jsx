@@ -29,7 +29,7 @@ export default function GerenciarEnderecosClienteForm({ enderecos = [], onChange
 
       {enderecos.length === 0 && (
         <div className="text-center">
-          <Button onClick={abrirNovo} variant="outline" size="sm" className="mt-3">
+          <Button data-permission="Cadastros.GerenciarEnderecosCliente.salvar" onClick={abrirNovo} variant="outline" size="sm" className="mt-3">
             <Plus className="w-4 h-4 mr-2" />Adicionar Primeiro Endereço
           </Button>
         </div>

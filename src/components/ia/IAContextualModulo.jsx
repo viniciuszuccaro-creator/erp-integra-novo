@@ -112,7 +112,7 @@ export default function IAContextualModulo({ modulo, contextoExtra = {}, compact
                     </div>
                   ))
                 }
-                <Button
+                <Button data-permission="Sistema.IAContextualModulo.atualizar"
                   size="sm"
                   variant="outline"
                   className="mt-2 border-purple-200 text-purple-700"

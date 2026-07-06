@@ -88,7 +88,7 @@ export default function RastreamentoRealtime() {
                 Última atualização: {currentTime.toLocaleTimeString('pt-BR')}
               </p>
             </div>
-            <Button
+            <Button data-permission="Portal.RastreamentoRealtime.atualizar"
               onClick={() => refetch()}
               variant="secondary"
               size="sm"
@@ -209,7 +209,7 @@ export default function RastreamentoRealtime() {
                     </Button>
                   )}
                   {entrega.link_publico_rastreamento && (
-                    <Button
+                    <Button data-permission="Portal.RastreamentoRealtime.copiar"
                       variant="outline"
                       className="flex-1"
                       onClick={() => {

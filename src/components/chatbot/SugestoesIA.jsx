@@ -219,7 +219,7 @@ Também sugira 2 ações que o atendente deve considerar.`,
         )}
 
         {/* Botão Atualizar */}
-        <Button
+        <Button data-permission="Chatbot.SugestoesIA.atualizar"
           variant="ghost"
           size="sm"
           onClick={() => refetch()}

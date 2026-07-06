@@ -198,7 +198,7 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
               <AlertDescription className="flex items-center justify-between">
                 <div className="text-blue-900 font-semibold">{selectedSolicitacoes.length} solicitacao(oes) selecionada(s)</div>
                 <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => exportarSolicitacoesCSV(solList.filter(s => selectedSolicitacoes.includes(s.id)))}>
+                  <Button data-permission="Compras.SolicitacoesCompra.exportar" variant="outline" onClick={() => exportarSolicitacoesCSV(solList.filter(s => selectedSolicitacoes.includes(s.id)))}>
                     <Download className="w-4 h-4 mr-2" /> Exportar CSV
                   </Button>
                   <Button variant="ghost" onClick={() => setSelectedSolicitacoes([])}>Limpar Selecao</Button>

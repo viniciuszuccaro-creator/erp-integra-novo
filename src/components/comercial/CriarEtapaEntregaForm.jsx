@@ -238,7 +238,7 @@ export default function CriarEtapaEntregaForm({ pedidoData, onCriarEtapa, window
       )}
 
       <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
-        <Button 
+        <Button data-permission="Comercial.CriarEtapaEntrega.criar" 
           onClick={handleCriar}
           className="bg-green-600 hover:bg-green-700"
           disabled={!etapaForm.nome_etapa || etapaForm.itens_selecionados.length === 0}

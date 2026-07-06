@@ -161,7 +161,7 @@ export default function ExportarConversas() {
 
         {/* Botões de Exportação */}
         <div className="grid grid-cols-2 gap-2">
-          <Button
+          <Button data-permission="Chatbot.ExportarConversas.exportar"
             variant="outline"
             onClick={exportarCSV}
             disabled={exportando}
@@ -170,7 +170,7 @@ export default function ExportarConversas() {
             <Table className="w-4 h-4" />
             CSV
           </Button>
-          <Button
+          <Button data-permission="Chatbot.ExportarConversas.exportar"
             variant="outline"
             onClick={exportarJSON}
             disabled={exportando}

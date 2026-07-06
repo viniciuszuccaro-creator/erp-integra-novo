@@ -99,7 +99,7 @@ export default function ValidarPedidosExternos({ windowMode = true }) {
             {externos.filter(e => e.status_importacao === "A Validar").length} pendente(s) para validar
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+            <Button data-permission="Comercial.ValidarPedidosExternos.atualizar" variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
               <RefreshCw className={`w-4 h-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} /> Atualizar
             </Button>
           </div>
@@ -147,7 +147,7 @@ export default function ValidarPedidosExternos({ windowMode = true }) {
                       <TableCell className="font-bold text-green-600">R$ {(ext.valor_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
-                          <Button
+                          <Button data-permission="Comercial.ValidarPedidosExternos.importar"
                             size="sm"
                             variant="ghost"
                             onClick={() => importarComoPedido.mutate(ext)}

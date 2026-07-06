@@ -283,7 +283,7 @@ export default function UploadProjetos({ clienteId, clienteNome }) {
                       </div>
                     </div>
 
-                    <Button
+                    <Button data-permission="Portal.UploadProjetos.baixar"
                       variant="outline"
                       size="sm"
                       onClick={() => window.open(proj.arquivo_url, '_blank')}

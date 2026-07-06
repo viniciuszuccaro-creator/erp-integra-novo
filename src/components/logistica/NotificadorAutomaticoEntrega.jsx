@@ -149,7 +149,7 @@ export default function NotificadorAutomaticoEntrega({ pedido, entrega, onClose,
           <Button variant="outline" onClick={onClose}>
             Cancelar
           </Button>
-          <Button
+          <Button data-permission="Logistica.NotificadorAutomaticoEntrega.enviar"
             onClick={() => enviarNotificacaoMutation.mutate()}
             disabled={enviarNotificacaoMutation.isPending}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"

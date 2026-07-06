@@ -61,7 +61,7 @@ export default function PerformanceReportDialog({ open, onOpenChange, entregas =
             <div className="flex items-center justify-between mb-1">
               <h4 className="font-medium">Por Motorista</h4>
               {porMotorista.length>0 && (
-                <Button size="sm" variant="outline" onClick={()=>exportCSV(porMotorista, 'performance_motorista.csv')}>Exportar CSV</Button>
+                <Button data-permission="Expedicao.PerformanceReport.exportar" size="sm" variant="outline" onClick={()=>exportCSV(porMotorista, 'performance_motorista.csv')}>Exportar CSV</Button>
               )}
             </div>
             <div className="border rounded">
@@ -96,7 +96,7 @@ export default function PerformanceReportDialog({ open, onOpenChange, entregas =
             <div className="flex items-center justify-between mb-1">
               <h4 className="font-medium">Por Rota</h4>
               {porRota.length>0 && (
-                <Button size="sm" variant="outline" onClick={()=>exportCSV(porRota, 'performance_rota.csv')}>Exportar CSV</Button>
+                <Button data-permission="Expedicao.PerformanceReport.exportar" size="sm" variant="outline" onClick={()=>exportCSV(porRota, 'performance_rota.csv')}>Exportar CSV</Button>
               )}
             </div>
             <div className="border rounded">

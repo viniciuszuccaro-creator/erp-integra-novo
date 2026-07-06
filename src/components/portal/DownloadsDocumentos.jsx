@@ -95,7 +95,7 @@ export default function DownloadsDocumentos({ clienteId, notasFiscais = [] }) {
                   <TableCell>
                     <div className="flex gap-2 justify-center">
                       {nf.xml_nfe && (
-                        <Button
+                        <Button data-permission="Portal.DownloadsDocumentos.exportar"
                           size="sm"
                           variant="outline"
                           onClick={() => window.open(nf.xml_nfe, '_blank')}
@@ -105,7 +105,7 @@ export default function DownloadsDocumentos({ clienteId, notasFiscais = [] }) {
                         </Button>
                       )}
                       {nf.pdf_danfe && (
-                        <Button
+                        <Button data-permission="Portal.DownloadsDocumentos.exportar"
                           size="sm"
                           variant="outline"
                           onClick={() => window.open(nf.pdf_danfe, '_blank')}

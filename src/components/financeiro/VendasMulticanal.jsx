@@ -292,7 +292,7 @@ export default function VendasMulticanal({ windowMode = false }) {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      <Button size="sm" variant="outline" title="Ver Detalhes">
+                      <Button data-permission="Financeiro.VendasMulticanal.faturar" size="sm" variant="outline" title="Ver Detalhes">
                         <Eye className="w-4 h-4" />
                       </Button>
                       {['Aprovado', 'Pronto para Faturar'].includes(pedido.status) && (

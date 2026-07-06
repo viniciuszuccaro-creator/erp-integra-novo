@@ -281,7 +281,7 @@ export default function AssinaturaDigitalEntrega({ onAssinaturaConcluida, isLoad
       </Card>
 
       {/* Botão Confirmar */}
-      <Button
+      <Button data-permission="Expedicao.AssinaturaDigitalEntrega.confirmar"
         onClick={handleConfirmar}
         disabled={!dados.nome_recebedor || !assinado || isLoading}
         className="w-full h-14 text-lg bg-green-600 hover:bg-green-700"

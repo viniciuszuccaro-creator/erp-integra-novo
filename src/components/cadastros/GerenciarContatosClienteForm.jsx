@@ -122,7 +122,7 @@ export default function GerenciarContatosClienteForm({ contatos = [], onChange }
                   </div>
                 </div>
                 <div className="flex gap-1">
-                  <Button
+                  <Button data-permission="Cadastros.GerenciarContatosCliente.editar"
                     variant="ghost"
                     size="icon"
                     onClick={() => handleEditarContato(idx)}

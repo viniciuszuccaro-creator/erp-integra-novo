@@ -129,7 +129,7 @@ export default function ScannerQRCode({
               className="text-lg font-mono"
               autoFocus
             />
-            <Button 
+            <Button data-permission="Expedicao.ScannerQRCode.confirmar" 
               onClick={handleScanManual}
               disabled={!codigoManual.trim()}
               className="bg-blue-600 hover:bg-blue-700"

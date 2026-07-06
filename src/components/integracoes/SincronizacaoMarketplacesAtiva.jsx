@@ -273,7 +273,7 @@ export default function SincronizacaoMarketplacesAtiva() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2 justify-center">
-                        <Button
+                        <Button data-permission="Integracoes.SincronizacaoMarketplacesAtiva.importar"
                           size="sm"
                           onClick={() => importarPedidoMutation.mutate(pe)}
                           disabled={importarPedidoMutation.isPending}

@@ -242,7 +242,7 @@ export default function SolicitarCompraRapidoModal({ produto, isOpen, onClose, w
             Cancelar
           </Button>
         )}
-        <Button 
+        <Button data-permission="Compras.SolicitarCompraRapido.criar" 
           type="submit" 
           disabled={controlesDesabilitados}
           className="bg-orange-600 hover:bg-orange-700"

@@ -103,7 +103,7 @@ export default function RelatorioProducao() {
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <CardTitle className="text-base">OPs por Mês (Total × Concluídas)</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => exportarCSV(producaoMensal, 'producao_mensal')}>
+              <Button data-permission="Relatorios.RelatorioProducao.exportar" size="sm" variant="outline" onClick={() => exportarCSV(producaoMensal, 'producao_mensal')}>
                 <Download className="w-3 h-3 mr-1" /> CSV
               </Button>
             </div>
@@ -144,7 +144,7 @@ export default function RelatorioProducao() {
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <CardTitle className="text-base">Top 10 Produtos Produzidos</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => exportarCSV(porProduto, 'top_produtos_producao')}>
+              <Button data-permission="Relatorios.RelatorioProducao.exportar" size="sm" variant="outline" onClick={() => exportarCSV(porProduto, 'top_produtos_producao')}>
                 <Download className="w-3 h-3 mr-1" /> CSV
               </Button>
             </div>

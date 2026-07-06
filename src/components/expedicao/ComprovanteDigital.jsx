@@ -267,7 +267,7 @@ export default function ComprovanteDigital({ entrega, isOpen, onClose, windowMod
             <Button type="button" variant="outline" onClick={onClose} disabled={uploading}>
               Cancelar
             </Button>
-            <Button 
+            <Button data-permission="Expedicao.ComprovanteDigital.salvar" 
               type="submit" 
               disabled={uploading || !formData.nome_recebedor}
               className="bg-green-600 hover:bg-green-700"

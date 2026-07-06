@@ -283,13 +283,13 @@ export default function EventosNFe({ nfe }) {
 
       {/* Downloads */}
       {nfe.xml_nfe && (
-        <Button variant="outline" className="w-full">
+        <Button data-permission="Fiscal.EventosNFe.exportar" variant="outline" className="w-full">
           <Download className="w-4 h-4 mr-2" />
           Download XML
         </Button>
       )}
       {nfe.pdf_danfe && (
-        <Button variant="outline" className="w-full">
+        <Button data-permission="Fiscal.EventosNFe.exportar" variant="outline" className="w-full">
           <Download className="w-4 h-4 mr-2" />
           Download DANFE
         </Button>

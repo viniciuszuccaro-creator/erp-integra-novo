@@ -89,7 +89,7 @@ export default function ConfiguracaoProducao({ empresaId }) {
       )}
 
       <div className="flex justify-end">
-        <Button onClick={handleSalvar} disabled={isDisabled || saveMutation.isPending} className="bg-green-600 hover:bg-green-700 min-w-[200px]">
+        <Button data-permission="Producao.ConfiguracaoProducao.salvar" onClick={handleSalvar} disabled={isDisabled || saveMutation.isPending} className="bg-green-600 hover:bg-green-700 min-w-[200px]">
           <Save className="w-4 h-4 mr-2" />{saveMutation.isPending ? "Salvando..." : "Salvar Configurações"}
         </Button>
       </div>

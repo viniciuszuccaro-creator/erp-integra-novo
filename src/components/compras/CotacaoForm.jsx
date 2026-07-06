@@ -243,7 +243,7 @@ export default function CotacaoForm({ cotacao, onSubmit, windowMode = false }) {
       </Card>
 
       <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
-        <Button 
+        <Button data-permission="Compras.Cotacao.criar" 
           type="submit" 
           className="bg-cyan-600 hover:bg-cyan-700"
           disabled={selecionados.length < 2}

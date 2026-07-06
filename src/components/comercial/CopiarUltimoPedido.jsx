@@ -226,11 +226,11 @@ export default function CopiarUltimoPedido({ clienteId, onCopiar, windowMode = f
                 {/* Botões */}
                 <div className="flex justify-end gap-3 pt-4">
                   <DialogTrigger asChild>
-                    <Button type="button" variant="outline">
+                    <Button data-permission="Comercial.CopiarUltimoPedido.cancelar" type="button" variant="outline">
                       Cancelar
                     </Button>
                   </DialogTrigger>
-                  <Button
+                  <Button data-permission="Comercial.CopiarUltimoPedido.confirmar"
                     type="button"
                     onClick={copiarPedido}
                     className="bg-blue-600 hover:bg-blue-700"

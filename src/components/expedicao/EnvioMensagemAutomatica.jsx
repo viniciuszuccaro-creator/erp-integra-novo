@@ -157,7 +157,7 @@ export default function EnvioMensagemAutomatica({ entrega, tipo = "saida_entrega
             <div>
               <Label>Templates Prontos</Label>
               <div className="grid grid-cols-3 gap-2 mt-2">
-                <Button
+                <Button data-permission="Expedicao.EnvioMensagemAutomatica.enviar"
                   size="sm"
                   variant="outline"
                   onClick={() => handleEnviar(templates.confirmacao_pedido)}
@@ -165,7 +165,7 @@ export default function EnvioMensagemAutomatica({ entrega, tipo = "saida_entrega
                 >
                   Confirmação
                 </Button>
-                <Button
+                <Button data-permission="Expedicao.EnvioMensagemAutomatica.enviar"
                   size="sm"
                   variant="outline"
                   onClick={() => handleEnviar(templates.saida_entrega)}
@@ -173,7 +173,7 @@ export default function EnvioMensagemAutomatica({ entrega, tipo = "saida_entrega
                 >
                   Saída
                 </Button>
-                <Button
+                <Button data-permission="Expedicao.EnvioMensagemAutomatica.enviar"
                   size="sm"
                   variant="outline"
                   onClick={() => handleEnviar(templates.entrega_realizada)}
@@ -195,7 +195,7 @@ export default function EnvioMensagemAutomatica({ entrega, tipo = "saida_entrega
               />
             </div>
 
-            <Button
+            <Button data-permission="Expedicao.EnvioMensagemAutomatica.enviar"
               onClick={() => handleEnviar(null)}
               disabled={enviando || !mensagemCustom}
               className="w-full bg-green-600 hover:bg-green-700"

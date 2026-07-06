@@ -68,7 +68,7 @@ export default function HubAtendimento() {
 
   if (!podeAtenderTransbordo) {
     return (
-      <div className="p-6">
+      <div className="w-full h-full p-6 overflow-auto">
         <Alert className="border-red-300 bg-red-50">
           <AlertCircle className="w-5 h-5 text-red-600" />
           <AlertDescription className="text-red-900">

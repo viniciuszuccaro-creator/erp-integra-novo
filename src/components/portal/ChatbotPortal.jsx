@@ -116,7 +116,7 @@ export default function ChatbotPortal({ cliente }) {
         </div>
         <div className="flex gap-2">
           <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Digite sua pergunta..." onKeyDown={(e) => e.key==='Enter' ? onSend() : null} />
-          <Button onClick={onSend} className="gap-2"><Send className="w-4 h-4" /> Enviar</Button>
+          <Button data-permission="Portal.ChatbotPortal.enviar" onClick={onSend} className="gap-2"><Send className="w-4 h-4" /> Enviar</Button>
         </div>
       </CardContent>
     </Card>

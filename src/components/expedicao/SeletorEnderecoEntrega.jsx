@@ -274,7 +274,7 @@ export default function SeletorEnderecoEntrega({ cliente, onEnderecoSelecionado 
 
       {/* Botão Confirmar */}
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button
+        <Button data-permission="Expedicao.SeletorEnderecoEntrega.salvar"
           onClick={handleConfirmar}
           disabled={
             (modo === "selecionar" && !enderecoSelecionado) ||

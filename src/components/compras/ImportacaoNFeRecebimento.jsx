@@ -314,10 +314,10 @@ export default function ImportacaoNFeRecebimento({ windowMode = false }) {
             )}
 
             <div className="flex justify-end gap-3 pt-3 border-t">
-              <Button variant="outline" onClick={() => setResultado(null)}>
+              <Button data-permission="Compras.ImportacaoNFeRecebimento.cancelar" variant="outline" onClick={() => setResultado(null)}>
                 Cancelar
               </Button>
-              <Button
+              <Button data-permission="Compras.ImportacaoNFeRecebimento.confirmar"
                 className="bg-green-600 hover:bg-green-700"
                 onClick={() => confirmarRecebimentoMutation.mutate(resultado)}
                 disabled={confirmarRecebimentoMutation.isPending}

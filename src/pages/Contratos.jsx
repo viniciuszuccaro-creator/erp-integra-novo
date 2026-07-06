@@ -344,8 +344,8 @@ export default function ContratosPage() {
             Deseja realmente excluir o contrato <strong>{contratoParaExcluir?.numero_contrato}</strong>? Esta ação não pode ser desfeita.
           </p>
           <div className="flex justify-end gap-3 pt-4">
-            <Button variant="outline" onClick={() => setContratoParaExcluir(null)}>Cancelar</Button>
-            <Button className="bg-red-600 hover:bg-red-700" onClick={confirmarExclusao} disabled={deleteMutation.isPending}>
+            <Button data-permission="Sistema.Contratos.cancelar" variant="outline" onClick={() => setContratoParaExcluir(null)}>Cancelar</Button>
+            <Button data-permission="Sistema.Contratos.excluir" className="bg-red-600 hover:bg-red-700" onClick={confirmarExclusao} disabled={deleteMutation.isPending}>
               {deleteMutation.isPending ? 'Excluindo...' : 'Excluir'}
             </Button>
           </div>

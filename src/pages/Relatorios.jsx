@@ -60,7 +60,7 @@ export default function Relatorios() {
     const dados = relatorio.getData();
     if (!dados || Array.isArray(dados) && dados.length === 0) {
       return (
-        <div className="text-center py-12 text-slate-500">
+        <div className="w-full h-full flex flex-col items-center justify-center text-slate-500">
           <FileText className="w-16 h-16 mx-auto mb-4 opacity-30" />
           <p>Sem dados para exibir no período selecionado</p>
         </div>

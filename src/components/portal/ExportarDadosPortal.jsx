@@ -88,7 +88,7 @@ export default function ExportarDadosPortal({ clienteId }) {
       </CardHeader>
       <CardContent className="p-6 w-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Button
+          <Button data-permission="Portal.ExportarDadosPortal.exportar"
             onClick={handleExportPedidos}
             disabled={exportando === 'Meus_Pedidos' || pedidos.length === 0}
             variant="outline"
@@ -105,7 +105,7 @@ export default function ExportarDadosPortal({ clienteId }) {
             </div>
           </Button>
 
-          <Button
+          <Button data-permission="Portal.ExportarDadosPortal.exportar"
             onClick={handleExportBoletos}
             disabled={exportando === 'Minhas_Financas' || contasReceber.length === 0}
             variant="outline"

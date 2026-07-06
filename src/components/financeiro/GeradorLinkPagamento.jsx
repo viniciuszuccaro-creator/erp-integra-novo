@@ -209,7 +209,7 @@ export default function GeradorLinkPagamento({
                 {linkGerado}
               </div>
 
-              <Button 
+              <Button data-permission="Financeiro.GeradorLinkPagamento.copiar" 
                 onClick={copiarLink}
                 variant="outline"
                 className="w-full"

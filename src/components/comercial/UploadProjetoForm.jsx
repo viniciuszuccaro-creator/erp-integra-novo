@@ -263,10 +263,10 @@ export default function UploadProjetoForm({ onPecasExtraidas, windowMode = false
       <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
         {resultado ? (
           <>
-            <Button type="button" variant="outline" onClick={resetar}>
+            <Button data-permission="Comercial.UploadProjeto.importar" type="button" variant="outline" onClick={resetar}>
               Analisar Outro Projeto
             </Button>
-            <Button type="button" onClick={confirmarPecas} className="bg-green-600 hover:bg-green-700">
+            <Button data-permission="Comercial.UploadProjeto.importar" type="button" onClick={confirmarPecas} className="bg-green-600 hover:bg-green-700">
               <CheckCircle className="w-4 h-4 mr-2" />
               Confirmar e Importar Peças
             </Button>

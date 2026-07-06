@@ -192,7 +192,7 @@ export default function RoteamentoInteligente({ canalConfig }) {
             />
           </div>
 
-          <Button
+          <Button data-permission="Chatbot.RoteamentoInteligente.salvar"
             onClick={() => salvarRegrasMutation.mutate()}
             disabled={salvarRegrasMutation.isPending}
             className="w-full bg-blue-600 hover:bg-blue-700"

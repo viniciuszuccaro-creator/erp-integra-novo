@@ -153,6 +153,7 @@ export default function IAPrevisaoLogistica({ windowMode = false }) {
           </div>
 
           <Button
+            data-permission="Integracoes.IAPrevisao.gerar"
             onClick={gerarPrevisao}
             disabled={analisando}
             className="w-full bg-indigo-600 hover:bg-indigo-700"

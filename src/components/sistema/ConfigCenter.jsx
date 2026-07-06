@@ -85,7 +85,7 @@ export default function ConfigCenter({ empresaId: empresaIdProp }) {
       </Card>
 
       <div className="flex justify-end">
-        <Button variant="outline" size="sm" disabled={isFetching || !canLoad} onClick={() => { queryClient.invalidateQueries({ queryKey: ['config-center-v2'] }); refetch(); }} data-action="ConfigCenter.atualizar">
+        <Button data-permission="Sistema.ConfigCenter.atualizar" variant="outline" size="sm" disabled={isFetching || !canLoad} onClick={() => { queryClient.invalidateQueries({ queryKey: ['config-center-v2'] }); refetch(); }} data-action="ConfigCenter.atualizar">
           🔄 Atualizar
         </Button>
       </div>

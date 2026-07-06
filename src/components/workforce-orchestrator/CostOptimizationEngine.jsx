@@ -134,7 +134,7 @@ export default function CostOptimizationEngine() {
                     </div>
                   </div>
                   {opt.status === 'Recomendado' && (
-                    <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white flex-shrink-0 mt-1">
+                    <Button data-permission="Sistema.CostOptimizationEngine.aprovar" size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white flex-shrink-0 mt-1">
                       <Check className="w-3 h-3 mr-1" />
                       Aprovar
                     </Button>

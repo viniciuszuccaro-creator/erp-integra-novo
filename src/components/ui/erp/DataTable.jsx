@@ -229,12 +229,12 @@ export default function ERPDataTable({
           <div className="text-sm font-medium">{selectedSet.size} selecionado(s)</div>
           <div className="flex items-center gap-2">
             {audited.onBulkExportSelected && (
-              <Button variant="outline" size="sm" onClick={() => audited.onBulkExportSelected && audited.onBulkExportSelected(Array.from(selectedSet))}>
+              <Button data-permission="Sistema.Datale.excluir" variant="outline" size="sm" onClick={() => audited.onBulkExportSelected && audited.onBulkExportSelected(Array.from(selectedSet))}>
                 Exportar selecionados
               </Button>
             )}
             {audited.onBulkDeleteSelected && (
-              <Button variant="destructive" size="sm" onClick={() => audited.onBulkDeleteSelected && audited.onBulkDeleteSelected(Array.from(selectedSet))}>
+              <Button data-permission="Sistema.Datale.excluir" variant="destructive" size="sm" onClick={() => audited.onBulkDeleteSelected && audited.onBulkDeleteSelected(Array.from(selectedSet))}>
                 Excluir selecionados
               </Button>
             )}

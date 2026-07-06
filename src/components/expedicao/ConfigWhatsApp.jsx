@@ -324,7 +324,7 @@ export default function ConfigWhatsApp() {
               </div>
             </div>
             <div className="flex justify-end mt-4">
-              <Button
+              <Button data-permission="Expedicao.ConfigWhatsApp.enviar"
                 type="button"
                 variant="outline"
                 onClick={handleTestar}
@@ -338,7 +338,7 @@ export default function ConfigWhatsApp() {
 
         {/* Botões */}
         <div className="flex justify-end gap-3">
-          <Button
+          <Button data-permission="Expedicao.ConfigWhatsApp.salvar"
             type="submit"
             disabled={salvarConfigMutation.isPending}
             className="bg-purple-600 hover:bg-purple-700"

@@ -76,7 +76,7 @@ export default function ImportarExportarPerfis({ perfis, onImportar }) {
         </Alert>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Button
+          <Button data-permission="Sistema.ImportarExportarPerfis.exportar"
             onClick={exportarPerfis}
             className="w-full justify-start bg-blue-600 hover:bg-blue-700"
             disabled={perfis.length === 0}
@@ -86,7 +86,7 @@ export default function ImportarExportarPerfis({ perfis, onImportar }) {
             Exportar {perfis.length} Perfis
           </Button>
 
-          <Button
+          <Button data-permission="Sistema.ImportarExportarPerfis.importar"
             onClick={() => fileInputRef.current?.click()}
             variant="outline"
             className="w-full justify-start"

@@ -10,7 +10,7 @@ export default function OCSelecionadasBar({ selectedCount, onExportCSV, onClear 
       <AlertDescription className="flex items-center justify-between text-xs">
         <div className="text-blue-900 font-semibold">{selectedCount} OC selecionada(s)</div>
         <div className="flex gap-1">
-          <Button variant="outline" size="sm" onClick={onExportCSV}>
+          <Button data-permission="Compras.OCSelecionadasBar.exportar" variant="outline" size="sm" onClick={onExportCSV}>
             <Download className="w-3 h-3 mr-1" /> CSV
           </Button>
           <Button variant="ghost" size="sm" onClick={onClear}>Limpar</Button>

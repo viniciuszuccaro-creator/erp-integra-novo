@@ -121,7 +121,7 @@ export default function TesteWhatsApp({ configuracao, windowMode = false }) {
             </div>
           </div>
 
-          <Button
+          <Button data-permission="Integracoes.TesteWhatsApp.enviar"
             onClick={enviarMensagem}
             disabled={testando || !telefone || !mensagem}
             className="w-full bg-green-600 hover:bg-green-700"

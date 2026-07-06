@@ -76,11 +76,11 @@ export default function SharedDocumentsPanel() {
 
             {/* Ações */}
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1">
+              <Button data-permission="Sistema.SharedDocuments.baixar" variant="outline" size="sm" className="flex-1">
                 <Eye className="w-3 h-3 mr-1" />
                 Visualizar
               </Button>
-              <Button variant="outline" size="sm" className="flex-1">
+              <Button data-permission="Sistema.SharedDocuments.baixar" variant="outline" size="sm" className="flex-1">
                 <Download className="w-3 h-3 mr-1" />
                 Baixar
               </Button>

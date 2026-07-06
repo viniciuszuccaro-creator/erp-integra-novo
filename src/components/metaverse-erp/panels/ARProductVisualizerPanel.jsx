@@ -133,12 +133,12 @@ export default function ARProductVisualizerPanel() {
                   Visualizar em AR
                 </Button>
               ) : produto.modelo_3d ? (
-                <Button size="sm" variant="outline" className="flex-1">
+                <Button data-permission="Sistema.ARProductVisualizer.gerar" size="sm" variant="outline" className="flex-1">
                   <Layers className="w-3 h-3 mr-1" />
                   Ver 3D
                 </Button>
               ) : (
-                <Button size="sm" variant="outline" className="flex-1 text-slate-400">
+                <Button data-permission="Sistema.ARProductVisualizer.gerar" size="sm" variant="outline" className="flex-1 text-slate-400">
                   <Zap className="w-3 h-3 mr-1" />
                   Gerar Modelo IA
                 </Button>

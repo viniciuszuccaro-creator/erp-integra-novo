@@ -37,7 +37,7 @@ export default function PlanoMelhoria() {
   const total = cicloAtualItems.length;
 
   return (
-    <div className="flex h-full w-full flex-col gap-4">
+    <div className="w-full h-full flex flex-col gap-4">
       {/* Header compacto */}
       <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-gradient-to-r from-blue-900 via-indigo-900 to-violet-900 p-5 text-white">
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">

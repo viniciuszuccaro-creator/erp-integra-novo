@@ -295,6 +295,7 @@ export default function AdicionarMovimentoForm({ initialData = {}, onSubmit, onC
         </Button>
         <Button 
           type="button"
+          data-permission="Financeiro.CaixaMovimento.criar"
           onClick={handleAdicionarMovimento}
           disabled={controlesDesabilitados}
           className={formMovimento.tipo === 'entrada' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}

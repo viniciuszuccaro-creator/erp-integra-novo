@@ -115,6 +115,12 @@ Deno.serve(async (req) => {
     let payload = {};
     try { if (req.method !== 'GET') payload = await req.json(); } catch { payload = {}; }
 
+    // Se não é chamada de automação (sem event), exige auth
+    if (!payload?.event && !payload?.automation) {
+      const user = await base44.auth.me();
+      if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     // Escopo multiempresa (herdável)
     const empresaId = payload?.empresa_id || payload?.empresaId || null;
     const groupId = payload?.group_id || payload?.groupId || null;

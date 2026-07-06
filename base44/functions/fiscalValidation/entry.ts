@@ -11,6 +11,12 @@ Deno.serve(async (req) => {
 
     const event = payload?.event || null;
     const dataIn = payload?.data || null;
+
+    // Se chamada direta (sem event de automação), exige autenticação
+    if (!event) {
+      const user = await base44.auth.me();
+      if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const entityName = event?.entity_name || payload?.entity_name;
     const entityId = event?.entity_id || payload?.entity_id;
 

@@ -330,7 +330,13 @@ export function useContextoVisual() {
             CentroCusto: { field: 'codigo', direction: 'asc' },
             PlanoDeContas: { field: 'codigo', direction: 'asc' },
             PlanoContas: { field: 'codigo', direction: 'asc' },
-            User: { field: 'full_name', direction: 'asc' }
+            User: { field: 'full_name', direction: 'asc' },
+            CondicaoComercial: { field: 'nome_condicao', direction: 'asc' },
+            Departamento: { field: 'nome_departamento', direction: 'asc' },
+            Turno: { field: 'nome_turno', direction: 'asc' },
+            Marca: { field: 'nome_marca', direction: 'asc' },
+            GrupoProduto: { field: 'nome_grupo', direction: 'asc' },
+            SetorAtividade: { field: 'nome_setor', direction: 'asc' },
           };
 
           const normalizeSortField = (entityName, field) => {
@@ -341,6 +347,12 @@ export function useContextoVisual() {
               if (f === 'tipo' || f === 'tipoitem' || f === 'tipo_item') return 'tipo_item';
               if (f === 'descrição' || f === 'descricao') return 'descricao';
             }
+            if (entityName === 'CondicaoComercial' && (f === 'nome' || f === 'name')) return 'nome_condicao';
+            if (entityName === 'Departamento' && (f === 'nome' || f === 'name')) return 'nome_departamento';
+            if (entityName === 'Turno' && (f === 'nome' || f === 'name')) return 'nome_turno';
+            if (entityName === 'Marca' && (f === 'nome' || f === 'name')) return 'nome_marca';
+            if (entityName === 'GrupoProduto' && (f === 'nome' || f === 'name')) return 'nome_grupo';
+            if (entityName === 'SetorAtividade' && (f === 'nome' || f === 'name')) return 'nome_setor';
             return field;
           };
           const getLastSort = (entityName) => {

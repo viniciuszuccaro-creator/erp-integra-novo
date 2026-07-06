@@ -15,6 +15,9 @@ export default function ProducaoMobile() {
   const { toast } = useToast();
   const h = useProducaoMobile();
 
+  // Early return wrapper com w-full h-full para conformidade P4
+  const wrap = (children) => <div className="w-full h-full overflow-auto">{children}</div>;
+
   const handleEscanearQR = () => {
     toast({
       title: "📷 Escaneamento QR",
@@ -24,11 +27,11 @@ export default function ProducaoMobile() {
   };
 
   if (!h.opSelecionada) {
-    return <OpListView user={h.user} ops={h.ops} isLoading={h.isLoading} onSelectOp={h.setOpSelecionada} onEscanearQR={handleEscanearQR} />;
+    return wrap(<OpListView user={h.user} ops={h.ops} isLoading={h.isLoading} onSelectOp={h.setOpSelecionada} onEscanearQR={handleEscanearQR} />);
   }
 
   if (h.opSelecionada && !h.itemSelecionado) {
-    return (
+    return wrap(
       <ItensOpView
         opSelecionada={h.opSelecionada}
         onSelectItem={h.setItemSelecionado}
@@ -40,7 +43,7 @@ export default function ProducaoMobile() {
     );
   }
 
-  return (
+  return wrap(
     <ApontamentoFormView
       opSelecionada={h.opSelecionada}
       itemSelecionado={h.itemSelecionado}

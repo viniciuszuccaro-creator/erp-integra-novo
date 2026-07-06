@@ -2,6 +2,10 @@
   "name": "TabelaNCM",
   "type": "object",
   "properties": {
+    "group_id": {
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
     "ncm": {
       "type": "string",
       "description": "C\u00f3digo NCM (8 d\u00edgitos)"

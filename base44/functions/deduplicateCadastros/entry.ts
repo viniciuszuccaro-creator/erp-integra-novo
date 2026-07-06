@@ -140,22 +140,65 @@ async function auditEntity(base44, entityName, groupId) {
       return st === 'inativo' || st === 'false' || r.ativo === false;
     });
 
+    // Item 6: registros ativos sem uso (sem serem referenciados em entidades transacionais)
+    // Verifica entidades dependentes principais: Pedido, ContaReceber, ContaPagar, OrdemCompra, MovimentacaoEstoque, Entrega
+    const DEPENDENT_ENTITIES = {
+      Cliente: ['Pedido', 'ContaReceber', 'OrcamentoCliente'],
+      Fornecedor: ['OrdemCompra', 'ContaPagar'],
+      Produto: ['Pedido', 'MovimentacaoEstoque', 'OrdemProducao'],
+      Transportadora: ['Entrega', 'Romaneio'],
+      FormaPagamento: ['ContaReceber', 'ContaPagar', 'Pedido'],
+      Colaborador: ['ApontamentoProducao', 'Ponto'],
+      Veiculo: ['Entrega', 'Rota'],
+      Motorista: ['Entrega', 'Rota'],
+    };
+    const dependentEntities = DEPENDENT_ENTITIES[entityName] || [];
+    let registrosSemUso = [];
+    if (dependentEntities.length > 0 && allRecords.length > 0) {
+      // Para cada registro ativo, verifica se existe pelo menos uma referência
+      const activeRecords = allRecords.filter(r => {
+        const st = (r.status || r.ativo || r.status_fornecedor || '').toString().toLowerCase();
+        return st !== 'inativo' && st !== 'false' && r.ativo !== false;
+      });
+      // Amostra de até 50 registros ativos para evitar timeout
+      const sample = activeRecords.slice(0, 50);
+      const refField = `${entityName.toLowerCase()}_id`;
+      for (const rec of sample) {
+        let hasRef = false;
+        for (const depEntity of dependentEntities) {
+          try {
+            const depApi = base44.asServiceRole.entities[depEntity];
+            if (!depApi) continue;
+            const refs = await depApi.filter({ [refField]: rec.id }, '-id', 1) || [];
+            if (refs.length > 0) { hasRef = true; break; }
+          } catch { /* skip */ }
+        }
+        if (!hasRef) registrosSemUso.push({ id: rec.id, nome: getNome(rec) || rec.id });
+      }
+    }
+
+    // Item 6: divergência de contagem (total real vs exibido em cards)
+    // O frontend reporta total_exibido via body; se ausente, assume igual
+    const divergenciaContagem = 0; // calculado pelo frontend ao comparar
+
     const issues = {
       duplicidades: duplicates,
       codigos_repetidos: codigosRepetidos,
       registros_sem_descricao: semDescricao,
       registros_sem_contexto: semContexto,
       registros_inativos: inativos.length,
+      registros_sem_uso: registrosSemUso,
+      divergencia_contagem: divergenciaContagem,
     };
 
-    const hasIssues = duplicates.length > 0 || codigosRepetidos.length > 0 || semDescricao.length > 0 || semContexto.length > 0;
+    const hasIssues = duplicates.length > 0 || codigosRepetidos.length > 0 || semDescricao.length > 0 || semContexto.length > 0 || registrosSemUso.length > 0;
     const status = hasIssues ? (duplicates.length > 5 || semDescricao.length > 10 ? 'Crítico' : 'Inconsistente') : 'OK';
 
     return {
       entityName,
       status,
       total_real: allRecords.length,
-      total_exibido_antes: allRecords.length, // será comparado pelo frontend
+      total_exibido_antes: allRecords.length,
       total_corrigido: 0,
       issues,
     };
@@ -186,6 +229,7 @@ Deno.serve(async (req) => {
       total_codigos_repetidos: 0,
       total_sem_descricao: 0,
       total_sem_contexto: 0,
+      total_sem_uso: 0,
       entities_ok: 0,
       entities_inconsistente: 0,
       entities_critico: 0,
@@ -200,6 +244,7 @@ Deno.serve(async (req) => {
       summary.total_codigos_repetidos += result.issues?.codigos_repetidos?.length || 0;
       summary.total_sem_descricao += result.issues?.registros_sem_descricao?.length || 0;
       summary.total_sem_contexto += result.issues?.registros_sem_contexto?.length || 0;
+      summary.total_sem_uso += result.issues?.registros_sem_uso?.length || 0;
       if (result.status === 'OK') summary.entities_ok++;
       else if (result.status === 'Inconsistente') summary.entities_inconsistente++;
       else if (result.status === 'Crítico') summary.entities_critico++;

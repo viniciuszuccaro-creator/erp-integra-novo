@@ -121,15 +121,15 @@ export default function useVisualizadorCRUD({
 
     if (codeValue && String(codeValue).trim()) {
       // P3 (item 4): uniqueness de código por escopo empresa/grupo
-      const codeFilter = { [codeField]: String(codeValue).trim() };
-      // Adiciona contexto para garantir uniqueness no escopo correto
-      const scopeConds = [{ [codeField]: String(codeValue).trim() }];
+      const codeStr = String(codeValue).trim();
+      // Monta condições de escopo: mesma empresa OU mesmo grupo (registros herdados)
+      const scopeConds = [];
       if (empresaId) scopeConds.push({ empresa_id: empresaId });
       if (groupId) scopeConds.push({ group_id: groupId });
-      // Busca com $or para cobrir registros herdados (grupo) e locais (empresa)
-      const scopedFilter = (empresaId || groupId)
-        ? { $and: [{ [codeField]: String(codeValue).trim() }, { $or: scopeConds }] }
-        : codeFilter;
+      // Busca registros com mesmo código dentro do mesmo escopo
+      const scopedFilter = scopeConds.length
+        ? { $and: [{ [codeField]: codeStr }, { $or: scopeConds }] }
+        : { [codeField]: codeStr };
       try {
         const res = await base44.functions.invoke("entityListSorted", {
           entityName: ENTITY, filter: scopedFilter,

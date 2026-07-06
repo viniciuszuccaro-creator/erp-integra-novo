@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const LIST_CACHE = new Map();
 const LIST_CACHE_TTL_MS = 5 * 60 * 1000;

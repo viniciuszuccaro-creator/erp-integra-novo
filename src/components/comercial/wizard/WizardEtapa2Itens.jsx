@@ -73,10 +73,11 @@ export default function WizardEtapa2Itens({ dados, onChange }) {
                         R$ {item.valor_item?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </p>
                       <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-600"
-                        onClick={() => removerItemRevenda(idx)}
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-red-600"
+                      data-permission="Comercial.Pedido.editar"
+                      onClick={() => removerItemRevenda(idx)}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -113,10 +114,11 @@ export default function WizardEtapa2Itens({ dados, onChange }) {
                         R$ {item.preco_venda_total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </p>
                       <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-600"
-                        onClick={() => removerItemProducao(idx)}
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-red-600"
+                      data-permission="Comercial.Pedido.editar"
+                      onClick={() => removerItemProducao(idx)}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

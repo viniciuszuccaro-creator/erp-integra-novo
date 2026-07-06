@@ -122,6 +122,7 @@ export default function VisualizadorToolbar({
         <Button
           size="sm"
           variant="destructive"
+          data-permission="Cadastros.Visualizador.excluir"
           onClick={onDeleteSelected}
           data-permission="Cadastros.excluir"
           className="h-9 rounded-sm gap-1 shrink-0"

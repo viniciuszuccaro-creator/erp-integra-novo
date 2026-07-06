@@ -44,7 +44,7 @@ export default function PedidoFooterAcoes({
         </div>
 
         <div className="flex gap-3">
-          <Button variant="outline" onClick={onCancelar}>Cancelar</Button>
+          <Button variant="outline" data-permission="Comercial.Pedido.cancelar" onClick={onCancelar}>Cancelar</Button>
 
           {canSalvarRascunho && (
             <Button variant="outline" data-permission="Comercial.Pedido.salvarRascunho" data-sensitive onClick={onSalvarRascunho} disabled={salvando}>

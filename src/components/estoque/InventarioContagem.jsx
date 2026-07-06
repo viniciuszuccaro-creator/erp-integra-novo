@@ -34,7 +34,7 @@ export default function InventarioContagem({ itens = [], onChange, disabled = fa
           <Input className="col-span-2" type="number" value={it.contagem} disabled={disabled} onChange={(e)=>atualizar(idx,{ contagem: Number(e.target.value||0) })} />
           <Input className="col-span-2" type="number" value={Number(it.contagem||0)-Number(it.saldo_sistema||0)} readOnly />
           <div className="col-span-1 flex justify-end">
-            <Button size="icon" variant="ghost" disabled={disabled} onClick={()=>remover(idx)}><Trash2 className="w-4 h-4"/></Button>
+            <Button size="icon" variant="ghost" data-permission="Estoque.Inventario.editar" disabled={disabled} onClick={()=>remover(idx)}><Trash2 className="w-4 h-4"/></Button>
           </div>
         </div>
       ))}

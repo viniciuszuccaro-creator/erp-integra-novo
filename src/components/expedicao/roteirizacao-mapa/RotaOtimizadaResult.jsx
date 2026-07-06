@@ -65,6 +65,7 @@ export default function RotaOtimizadaResult({
         </div>
 
         <Button
+          data-permission="Expedicao.Romaneio.gerar"
           onClick={onGerarRomaneio}
           disabled={!motoristaSelecionado || !veiculoSelecionado}
           className="w-full mt-4 bg-blue-600 hover:bg-blue-700"

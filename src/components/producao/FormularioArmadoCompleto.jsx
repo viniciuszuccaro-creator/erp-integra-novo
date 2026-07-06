@@ -374,7 +374,7 @@ export default function FormularioArmadoCompleto({ onSalvar, onCancelar, itemIni
       )}
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="button" variant="outline" onClick={onCancelar}>
+        <Button type="button" variant="outline" data-permission="Producao.Armado.cancelar" onClick={onCancelar}>
           Cancelar
         </Button>
         <Button type="button" onClick={handleSalvar} disabled={!resumo} data-permission="Producao.ItemProducao.criar" className="bg-blue-600 hover:bg-blue-700">

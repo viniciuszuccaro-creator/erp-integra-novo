@@ -321,10 +321,11 @@ export default function PrincipalTab({
                 <Label className="text-sm">Principal</Label>
                 {formData.contatos.length > 1 && (
                   <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removerContato(index)}
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  data-permission="Cadastros.Cliente.editar"
+                  onClick={() => removerContato(index)}
                   >
                     <Trash2 className="w-4 h-4 text-red-500" />
                   </Button>

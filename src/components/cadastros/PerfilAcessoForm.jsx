@@ -258,6 +258,7 @@ export default function PerfilAcessoForm({ perfil, onSubmit, isSubmitting, windo
             <Button
               type="button"
               variant="destructive"
+              data-permission="Administracao.PerfilAcesso.excluir"
               onClick={handleExcluir}
               disabled={!podeExcluir}
               data-permission="Cadastros.PerfilAcesso.excluir"

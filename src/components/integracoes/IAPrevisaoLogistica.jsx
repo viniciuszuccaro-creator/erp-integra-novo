@@ -246,6 +246,7 @@ export default function IAPrevisaoLogistica({ windowMode = false }) {
                             <Button
                               size="sm"
                               variant="outline"
+                              data-permission="Integracoes.IA.aplicar"
                               onClick={() => aplicarOtimizacao(alerta)}
                             >
                               {alerta.acao}

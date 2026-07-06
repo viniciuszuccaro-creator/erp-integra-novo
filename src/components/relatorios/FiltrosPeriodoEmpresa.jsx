@@ -55,7 +55,7 @@ export default function FiltrosPeriodoEmpresa({ filtros, setFiltros }) {
             </div>
             <div className="flex gap-1 flex-wrap">
               {PERIODOS.map(p => (
-                <Button key={p.label} size="sm" variant="outline" className="h-8 text-xs" onClick={() => aplicarPeriodo(p)}>
+                <Button key={p.label} size="sm" variant="outline" data-permission="Relatorios.Filtro.aplicar" className="h-8 text-xs" onClick={() => aplicarPeriodo(p)}>
                   {p.label}
                 </Button>
               ))}

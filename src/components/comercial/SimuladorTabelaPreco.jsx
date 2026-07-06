@@ -154,7 +154,8 @@ export default function SimuladorTabelaPreco({ itens = [], onAplicarTabela, tabe
               </CardContent>
             </Card>
 
-            <Button 
+            <Button
+              data-permission="Comercial.TabelaPreco.aplicar"
               onClick={handleAplicar}
               disabled={tabelaSelecionada === tabelaAtual}
               className={`w-full h-12 text-lg ${

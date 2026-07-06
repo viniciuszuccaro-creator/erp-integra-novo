@@ -227,6 +227,7 @@ export default function CentroCustoForm({ centroCusto, item, data, initialData, 
             <Button
               type="button"
               variant="destructive"
+              data-permission="Financeiro.CentroCusto.excluir"
               onClick={handleExcluir}
               disabled={!podeExcluir}
               data-permission="Cadastros.CentroCusto.excluir"

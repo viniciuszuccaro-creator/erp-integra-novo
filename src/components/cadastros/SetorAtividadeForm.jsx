@@ -184,6 +184,7 @@ export default function SetorAtividadeForm({ setor, setorAtividade, item, data, 
             <Button
               type="button"
               variant="destructive"
+              data-permission="Cadastros.SetorAtividade.excluir"
               onClick={handleExcluir}
               disabled={!podeExcluir}
               data-permission="Cadastros.SetorAtividade.excluir"

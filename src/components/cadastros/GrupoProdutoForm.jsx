@@ -172,6 +172,7 @@ export default function GrupoProdutoForm({ grupo, grupoProduto, item, data, init
             <Button
               type="button"
               variant="destructive"
+              data-permission="Cadastros.GrupoProduto.excluir"
               onClick={handleExcluir}
               disabled={!podeExcluir}
               data-permission="Cadastros.GrupoProduto.excluir"

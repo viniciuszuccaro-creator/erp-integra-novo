@@ -133,10 +133,11 @@ export default function KitProdutoForm({ kit, kitProduto, onSubmit, windowMode =
                 />
               </div>
               <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => removerItem(idx)}
+              type="button"
+              size="sm"
+              variant="ghost"
+              data-permission="Cadastros.KitProduto.editar"
+              onClick={() => removerItem(idx)}
                 disabled={!podeSalvar}
                 data-permission="Cadastros.KitProduto.editar"
                 data-sensitive="true"

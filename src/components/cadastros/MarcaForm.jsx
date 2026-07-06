@@ -195,6 +195,7 @@ export default function MarcaForm({ marca, item, data, initialData, defaultValue
             <Button
               type="button"
               variant="destructive"
+              data-permission="Cadastros.Marca.excluir"
               onClick={handleExcluir}
               disabled={!podeExcluir}
               data-permission="Cadastros.Marca.excluir"

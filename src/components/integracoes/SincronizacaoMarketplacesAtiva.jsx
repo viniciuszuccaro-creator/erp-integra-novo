@@ -200,8 +200,9 @@ export default function SincronizacaoMarketplacesAtiva() {
               Sincronização de Marketplaces
             </CardTitle>
             <Button
-              onClick={sincronizarTodos}
-              disabled={sincronizando}
+            data-permission="Integracoes.Marketplace.sincronizar"
+            onClick={sincronizarTodos}
+            disabled={sincronizando}
               size="sm"
               className="bg-blue-600 hover:bg-blue-700"
             >

@@ -198,6 +198,7 @@ export default function FormaPagamentoForm({ forma, onSubmit, isSubmitting, wind
             <Button
               type="button"
               variant="destructive"
+              data-permission="Cadastros.FormaPagamento.excluir"
               onClick={handleExcluir}
               disabled={!podeExcluir}
               data-permission="Cadastros.FormaPagamento.excluir"

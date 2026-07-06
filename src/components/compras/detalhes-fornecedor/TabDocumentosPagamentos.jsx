@@ -113,7 +113,7 @@ export default function TabDocumentosPagamentos({
                     {doc.observacao && <p className="text-xs text-slate-500 mt-1">{doc.observacao}</p>}
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="ghost" title="Download"><Download className="w-4 h-4" /></Button>
+                    <Button size="sm" variant="ghost" data-permission="Compras.Fornecedor.baixar" title="Download"><Download className="w-4 h-4" /></Button>
                     {canEdit('compras', 'fornecedores') && (
                       <Button size="sm" variant="ghost" onClick={() => onRemoverDocumento(index)} data-permission="Compras.Fornecedor.excluir" data-action="Compras.Fornecedor.removerDocumento">
                         <Trash2 className="w-4 h-4 text-red-500" />

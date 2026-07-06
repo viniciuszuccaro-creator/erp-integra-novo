@@ -70,6 +70,7 @@ export default function PerfilCard({
               size="sm"
               variant="destructive"
               className="h-7 px-2"
+              data-permission="Administracao.PerfilAcesso.excluir"
               disabled={!canDelete || usuariosCount > 0}
               onClick={onDelete}
               data-action="RBAC.Perfil.excluir"

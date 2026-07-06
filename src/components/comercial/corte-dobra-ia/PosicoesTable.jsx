@@ -67,10 +67,11 @@ export default function PosicoesTable({ itens, onRemover, onConsolidar, onSeleci
                       <TableCell className="font-semibold">{pos.peso_kg?.toFixed(2)} kg</TableCell>
                       <TableCell>
                         <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => { e.stopPropagation(); onRemover(index); }}
-                          className="text-red-600"
+                        variant="ghost"
+                        size="icon"
+                        data-permission="Comercial.CorteDobra.editar"
+                        onClick={(e) => { e.stopPropagation(); onRemover(index); }}
+                        className="text-red-600"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>

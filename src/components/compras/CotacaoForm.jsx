@@ -191,6 +191,7 @@ export default function CotacaoForm({ cotacao, onSubmit, windowMode = false }) {
                       type="button"
                       variant="ghost"
                       size="icon"
+                      data-permission="Compras.Cotacao.editar"
                       onClick={() => removerItem(idx)}
                     >
                       <Trash2 className="w-4 h-4 text-red-600" />

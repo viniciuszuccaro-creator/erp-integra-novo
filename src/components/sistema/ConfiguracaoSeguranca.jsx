@@ -197,6 +197,7 @@ export default function ConfiguracaoSeguranca({ empresaId, grupoId }) {
 
       <div className="flex justify-end gap-3">
         <Button
+          data-permission="Sistema.Seguranca.salvar"
           onClick={handleSalvar}
           disabled={salvando || salvarMutation.isPending || controlesDesabilitados}
           className="bg-blue-600 hover:bg-blue-700"

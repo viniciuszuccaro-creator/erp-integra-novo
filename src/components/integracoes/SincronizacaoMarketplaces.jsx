@@ -125,10 +125,11 @@ export default function SincronizacaoMarketplaces({ empresaId }) {
 
                     {ativo && (
                       <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => sincronizarMutation.mutate(mp.nome)}
-                        disabled={sincronizarMutation.isPending}
+                      size="sm"
+                      variant="outline"
+                      data-permission="Integracoes.Marketplace.sincronizar"
+                      onClick={() => sincronizarMutation.mutate(mp.nome)}
+                      disabled={sincronizarMutation.isPending}
                       >
                         <RefreshCw className={`w-4 h-4 mr-1 ${sincronizarMutation.isPending ? 'animate-spin' : ''}`} />
                         Sincronizar Agora

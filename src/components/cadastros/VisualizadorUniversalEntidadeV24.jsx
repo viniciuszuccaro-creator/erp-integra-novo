@@ -85,7 +85,10 @@ export default function VisualizadorUniversalEntidadeV24({
   } = state;
 
   // ── Filtro multiempresa ────────────────────────────────────────────────────────
+  // PURE_CATALOG: catálogos globais sem escopo (Banco, UnidadeMedida, etc.) — não filtram
+  const PURE_CATALOG = isSimple && (ENTITY === 'Banco' || ENTITY === 'FormaPagamento' || ENTITY === 'TipoDespesa' || ENTITY === 'MoedaIndice' || ENTITY === 'TipoFrete' || ENTITY === 'UnidadeMedida' || ENTITY === 'TabelaFiscal' || ENTITY === 'CentroOperacao');
   const readFilter = useMemo(() => {
+    if (PURE_CATALOG) return {};
     if (isSimple && !groupId && !empresaId) return {};
     const ctxCampo = ENTITY_CONTEXT_FIELD[ENTITY] || "empresa_id";
     const orConds = [];
@@ -107,7 +110,7 @@ export default function VisualizadorUniversalEntidadeV24({
       }
     }
     return orConds.length ? { $or: orConds } : {};
-  }, [ENTITY, isSimple, empresaId, groupId, empresasDoGrupo]);
+  }, [ENTITY, isSimple, PURE_CATALOG, empresaId, groupId, empresasDoGrupo]);
 
   // ── Query principal ───────────────────────────────────────────────────────────
   const { items, isFetching, isError } = useVisualizadorQuery({

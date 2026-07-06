@@ -120,25 +120,20 @@ export default function useVisualizadorCRUD({
     const codeValue = formData[codeField] || formData.codigo || formData.sigla || formData.codigo_banco || null;
 
     if (codeValue && String(codeValue).trim()) {
-      // P3 (item 4): uniqueness de código por escopo empresa/grupo
+      // P3 (item 4): uniqueness de código — busca GLOBAL (sem restrição de escopo)
+      // Duplicatas podem existir em registros legados sem empresa_id/group_id
       const codeStr = String(codeValue).trim();
-      // Monta condições de escopo: mesma empresa OU mesmo grupo (registros herdados)
-      const scopeConds = [];
-      if (empresaId) scopeConds.push({ empresa_id: empresaId });
-      if (groupId) scopeConds.push({ group_id: groupId });
-      // Busca registros com mesmo código dentro do mesmo escopo
-      const scopedFilter = scopeConds.length
-        ? { $and: [{ [codeField]: codeStr }, { $or: scopeConds }] }
-        : { [codeField]: codeStr };
+      const codeFilter = { [codeField]: codeStr };
       try {
         const res = await base44.functions.invoke("entityListSorted", {
-          entityName: ENTITY, filter: scopedFilter,
-          sortField: "created_date", sortDirection: "asc", limit: 5, skip: 0,
+          entityName: ENTITY, filter: codeFilter,
+          sortField: "created_date", sortDirection: "asc", limit: 10, skip: 0,
         });
-        const conflito = (Array.isArray(res?.data) ? res.data : []).find(r => r.id !== currentId);
-        if (conflito) {
+        const conflitos = (Array.isArray(res?.data) ? res.data : []).filter(r => r.id !== currentId);
+        if (conflitos.length > 0) {
+          const conflito = conflitos[0];
           const label = conflito.nome || conflito.razao_social || conflito.descricao || conflito.sigla || conflito.id;
-          return `⚠️ Código "${codeValue}" já está em uso pelo registro "${label}" no mesmo escopo (empresa/grupo). Altere o código antes de salvar.`;
+          return `⚠️ Código "${codeValue}" já está em uso pelo registro "${label}". Não é permitido duplicar códigos.`;
         }
       } catch { /* não bloqueia */ }
     }
@@ -151,21 +146,17 @@ export default function useVisualizadorCRUD({
     if (descInfo && !_cnpjRaw && !_cpfRaw) {
       const nomeLimpo = descInfo.value.toLowerCase().trim();
       if (nomeLimpo.length >= 2 && !INVALID_DESC_VALUES.has(nomeLimpo)) {
-        const scopeConds2 = [];
-        if (empresaId) scopeConds2.push({ empresa_id: empresaId });
-        if (groupId) scopeConds2.push({ group_id: groupId });
-        const nameFilter = scopeConds2.length
-          ? { $and: [{ [descInfo.field]: { $regex: `^${nomeLimpo}$`, $options: 'i' } }, { $or: scopeConds2 }] }
-          : { [descInfo.field]: { $regex: `^${nomeLimpo}$`, $options: 'i' } };
+        // Busca GLOBAL (sem restrição de escopo) — duplicatas podem existir em qualquer escopo
+        const nameFilter = { [descInfo.field]: { $regex: `^${nomeLimpo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' } };
         try {
           const res2 = await base44.functions.invoke("entityListSorted", {
             entityName: ENTITY, filter: nameFilter,
-            sortField: "created_date", sortDirection: "asc", limit: 5, skip: 0,
+            sortField: "created_date", sortDirection: "asc", limit: 10, skip: 0,
           });
-          const conflito2 = (Array.isArray(res2?.data) ? res2.data : []).find(r => r.id !== currentId);
-          if (conflito2) {
-            const label2 = conflito2.nome || conflito2.razao_social || conflito2.descricao || conflito2.sigla || conflito2.id;
-            return `⚠️ Já existe um registro com o nome "${label2}" no mesmo escopo (empresa/grupo). Não é permitido duplicar.`;
+          const conflitos2 = (Array.isArray(res2?.data) ? res2.data : []).filter(r => r.id !== currentId);
+          if (conflitos2.length > 0) {
+            const label2 = conflitos2[0].nome || conflitos2[0].razao_social || conflitos2[0].descricao || conflitos2[0].sigla || conflitos2[0].id;
+            return `⚠️ Já existe um registro com o nome "${label2}". Não é permitido duplicar nomes/descrições.`;
           }
         } catch { /* não bloqueia */ }
       }

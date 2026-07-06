@@ -27,6 +27,20 @@ const PURE_CATALOG = new Set([
   'UnidadeMedida', 'TabelaFiscal', 'TabelaPrecoItem', 'CentroOperacao',
 ]);
 
+// Catálogos simples (podem ter empresa_id/group_id mas também podem ser globais)
+const SIMPLE_CATALOG = new Set([
+  'Departamento', 'Cargo', 'Turno', 'GrupoProduto', 'Marca',
+  'SetorAtividade', 'LocalEstoque', 'CentroResultado',
+  'OperadorCaixa', 'RotaPadrao', 'ModeloDocumento', 'KitProduto', 'CatalogoWeb',
+  'Servico', 'CondicaoComercial', 'TabelaPreco', 'PerfilAcesso',
+  'ConfiguracaoNFe', 'ConfiguracaoBoletos', 'ConfiguracaoWhatsApp',
+  'GatewayPagamento', 'ApiExterna', 'Webhook', 'ChatbotIntent', 'ChatbotCanal',
+  'JobAgendado', 'EventoNotificacao', 'SegmentoCliente', 'RegiaoAtendimento',
+  'ContatoB2B', 'CentroCusto', 'PlanoDeContas', 'PlanoContas',
+  'Veiculo', 'Motorista', 'Representante', 'GrupoEmpresarial', 'Empresa',
+  'ConfiguracaoDespesaRecorrente',
+]);
+
 // Cache TTL
 const COUNT_CACHE = new Map();
 const TTL = 30_000;
@@ -116,6 +130,11 @@ async function countOne(base44, payload) {
 
   // Catálogos puros — sem escopo, sempre global
   if (PURE_CATALOG.has(entityName)) {
+    return { entityName, count: await fastCount(base44, entityName, {}) };
+  }
+
+  // Catálogos simples sem filtro explícito — conta global
+  if (SIMPLE_CATALOG.has(entityName) && !filter.empresa_id && !filter.group_id) {
     return { entityName, count: await fastCount(base44, entityName, {}) };
   }
 

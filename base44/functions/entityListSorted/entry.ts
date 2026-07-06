@@ -22,7 +22,7 @@ const DEFAULT_SORTS = {
   PlanoDeContas: { field: 'codigo', direction: 'asc' }, PlanoContas: { field: 'codigo', direction: 'asc' },
   Cargo: { field: 'nome_cargo', direction: 'asc' },
   User: { field: 'full_name', direction: 'asc' }, Departamento: { field: 'nome', direction: 'asc' },
-  Cargo: { field: 'nome', direction: 'asc' }, Turno: { field: 'nome', direction: 'asc' },
+  Turno: { field: 'nome', direction: 'asc' },
   Veiculo: { field: 'placa', direction: 'asc' }, Motorista: { field: 'nome', direction: 'asc' },
   Servico: { field: 'nome', direction: 'asc' }, GrupoProduto: { field: 'nome', direction: 'asc' },
   Marca: { field: 'nome', direction: 'asc' }, Representante: { field: 'nome', direction: 'asc' },
@@ -113,7 +113,8 @@ function normalizeSortField(entityName, requested) {
 
 // Campos que devem ser ordenados numericamente (item 11: código numérico, não texto)
 const NUMERIC_SORT_FIELDS = new Set([
-  'codigo', 'codigo_banco', 'matricula', 'numero',
+  'codigo', 'codigo_banco', 'matricula', 'numero', 'codigo_interno',
+  'codigo_auxiliar', 'sequencia', 'ordem', 'nivel',
 ]);
 
 function sanitizeVal(v) {
@@ -176,7 +177,7 @@ async function expandGroupFilter(base44, entityName, f) {
   if (f?.empresa_id && !f?.$or && !f?.group_id) {
     const { empresa_id, ...rest } = f;
     const orConds = [{ empresa_id }, { empresa_dona_id: empresa_id }];
-    if (entityName !== 'Produto') orConds.push({ empresa_id: null }); // legados (não para Produto)
+    // NÃO incluir { empresa_id: null } — isso infla a lista com registros de outros escopos
     if (EXPAND_SET.has(entityName)) {
       orConds.push({ empresas_compartilhadas_ids: { $in: [empresa_id] } });
     }
@@ -202,7 +203,7 @@ async function expandGroupFilter(base44, entityName, f) {
         { empresa_dona_id: { $in: empresasIds } },
         { group_id: groupId },
       ];
-      if (entityName !== 'Produto') orConds.push({ empresa_id: null }); // legados
+      // NÃO incluir { empresa_id: null } — isso infla a lista com registros de outros escopos
       if (EXPAND_SET.has(entityName)) {
         orConds.push({ empresas_compartilhadas_ids: { $in: empresasIds } });
       }

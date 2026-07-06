@@ -99,6 +99,9 @@ export default function VisualizadorUniversalEntidadeV24({
     }
     if (groupId) {
       orConds.push({ group_id: groupId });
+      // Inclui registros órfãos (sem empresa_id E sem group_id) no contexto de grupo
+      // Estes são registros legados criados antes da implementação multiempresa
+      orConds.push({ empresa_id: null, group_id: null });
       if (!empresaId && Array.isArray(empresasDoGrupo) && empresasDoGrupo.length) {
         const ids = empresasDoGrupo.map(e => e.id).filter(Boolean);
         if (ids.length) {

@@ -294,19 +294,23 @@ async function listOne(base44, user, q) {
       await new Promise(r => setTimeout(r, waitMs));
     }
     LIST_LAST_CALL_AT = Date.now();
-    const items = await base44.asServiceRole.entities[entityName].filter(finalFilter, orderHint, limit, skip) || [];
 
-    // P3 (item 11): ordenação numérica para campos de código
-    let finalItems = items;
-    if (NUMERIC_SORT_FIELDS.has(sortField) && items.length > 1) {
-      finalItems = [...items].sort((a, b) => {
+    // Ordenação numérica: busca TODOS os registros, ordena em memória, depois pagina
+    // Necessário porque o BD ordena códigos como TEXTO (10 vem antes de 2)
+    if (NUMERIC_SORT_FIELDS.has(sortField)) {
+      const allItems = await base44.asServiceRole.entities[entityName].filter(finalFilter, '-created_date', 2000, 0) || [];
+      const sorted = [...allItems].sort((a, b) => {
         const diff = toNum(a[sortField]) - toNum(b[sortField]);
         return sortDir === 'asc' ? diff : -diff;
       });
+      const paged = sorted.slice(skip, skip + limit);
+      LIST_CACHE.set(cacheKey, { items: paged, ts: Date.now() });
+      return { entityName, items: paged };
     }
 
-    LIST_CACHE.set(cacheKey, { items: finalItems, ts: Date.now() });
-    return { entityName, items: finalItems };
+    const items = await base44.asServiceRole.entities[entityName].filter(finalFilter, orderHint, limit, skip) || [];
+    LIST_CACHE.set(cacheKey, { items, ts: Date.now() });
+    return { entityName, items };
   } catch (err) {
     const status = err?.status || err?.response?.status;
     if (status === 429 || status === 502 || (typeof status === 'number' && status >= 500)) {

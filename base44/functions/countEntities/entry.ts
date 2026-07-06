@@ -93,21 +93,21 @@ async function buildFilter(base44, entityName, rawFilter) {
     return { [campo]: empresaId };
   }
 
-  // Contexto de grupo — expande para todas as empresas do grupo
+  // Contexto de grupo — expande para todas as empresas do grupo + órfãos
   if (groupId && !empresaId) {
     try {
       const empresas = await base44.asServiceRole.entities.Empresa.filter({ group_id: groupId }, '-id', 200);
       const ids = (empresas || []).map(e => e.id).filter(Boolean);
 
       if (EXPAND_SET.has(entityName)) {
-        const conds = [{ group_id: groupId }];
+        const conds = [{ group_id: groupId }, { empresa_id: null, group_id: null }];
         if (ids.length > 0) conds.push({ [campo]: { $in: ids } });
         if (campo !== 'empresa_id' && ids.length > 0) conds.push({ empresa_id: { $in: ids } });
         return { $or: conds };
       }
 
-      // Demais entidades: filtra pelo group_id direto ou empresa dentro do grupo
-      const conds = [{ group_id: groupId }];
+      // Demais entidades: filtra pelo group_id direto, empresa dentro do grupo, ou órfãos
+      const conds = [{ group_id: groupId }, { empresa_id: null, group_id: null }];
       if (ids.length > 0) conds.push({ [campo]: { $in: ids } });
       return { $or: conds };
     } catch (_) {

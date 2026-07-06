@@ -224,9 +224,78 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json().catch(() => ({}));
+    const action = body.action || 'report'; // 'report' | 'merge'
     const targetEntities = body.entities
       ? (Array.isArray(body.entities) ? body.entities : [body.entities])
       : ALL_ENTITIES;
+
+    // MODO MERGE: mescla duplicatas mantendo o registro mais antigo
+    // Atualiza referências em entidades dependentes e inativa o duplicado
+    if (action === 'merge' && body.duplicates) {
+      const merged = [];
+      const errors = [];
+      for (const dup of body.duplicates) {
+        try {
+          const api = base44.asServiceRole.entities[dup.entityName];
+          if (!api) { errors.push({ ...dup, error: 'Entity not found' }); continue; }
+
+          // keep_id = registro mais antigo (criado primeiro)
+          const keepId = dup.keep_id;
+          const removeId = dup.remove_id;
+
+          if (!keepId || !removeId) { errors.push({ ...dup, error: 'Missing IDs' }); continue; }
+
+          // Atualiza referências em entidades dependentes
+          const REF_FIELDS = {
+            Cliente: [{ entity: 'Pedido', field: 'cliente_id' }, { entity: 'ContaReceber', field: 'cliente_id' }],
+            Fornecedor: [{ entity: 'OrdemCompra', field: 'fornecedor_id' }, { entity: 'ContaPagar', field: 'fornecedor_id' }],
+            Produto: [{ entity: 'Pedido', field: 'produto_id' }, { entity: 'MovimentacaoEstoque', field: 'produto_id' }],
+            Transportadora: [{ entity: 'Entrega', field: 'transportadora_id' }],
+            Colaborador: [{ entity: 'ApontamentoProducao', field: 'colaborador_id' }],
+            Veiculo: [{ entity: 'Entrega', field: 'veiculo_id' }],
+            Motorista: [{ entity: 'Entrega', field: 'motorista_id' }],
+            FormaPagamento: [{ entity: 'ContaReceber', field: 'forma_pagamento_id' }, { entity: 'ContaPagar', field: 'forma_pagamento_id' }],
+          };
+          const refFields = REF_FIELDS[dup.entityName] || [];
+          let refsUpdated = 0;
+          for (const ref of refFields) {
+            try {
+              const refApi = base44.asServiceRole.entities[ref.entity];
+              if (!refApi) continue;
+              // Busca registros que referenciam o duplicado
+              const refs = await refApi.filter({ [ref.field]: removeId }, '-id', 500) || [];
+              for (const r of refs) {
+                try { await refApi.update(r.id, { [ref.field]: keepId }); refsUpdated++; } catch {}
+              }
+            } catch {}
+          }
+
+          // Inativa o duplicado (não exclui — Regra-Mãe §4 + item 13)
+          try {
+            await api.update(removeId, { ativo: false, status: 'Inativo', _merged_into: keepId });
+          } catch {}
+
+          // Auditoria da mesclagem
+          try {
+            await base44.asServiceRole.entities.AuditLog.create({
+              acao: 'Edição', modulo: 'Cadastros', tipo_auditoria: 'entidade',
+              entidade: dup.entityName, registro_id: removeId,
+              descricao: `Mesclagem de duplicata: registro ${removeId} mesclado em ${keepId}. ${refsUpdated} referências atualizadas.`,
+              usuario: user.full_name || user.email,
+              usuario_id: user.id,
+              dados_anteriores: { id: removeId, merged_into: keepId },
+              dados_novos: { id: keepId, refs_updated: refsUpdated },
+              data_hora: new Date().toISOString(),
+            });
+          } catch {}
+
+          merged.push({ ...dup, refs_updated: refsUpdated });
+        } catch (error) {
+          errors.push({ ...dup, error: error.message });
+        }
+      }
+      return Response.json({ ok: true, action: 'merge', merged, errors, total_merged: merged.length });
+    }
 
     const results = {};
     const summary = {

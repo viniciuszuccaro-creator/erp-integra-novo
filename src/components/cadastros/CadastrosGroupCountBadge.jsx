@@ -1,28 +1,21 @@
 /**
- * CadastrosGroupCountBadge — contagem de grupo com soma automática
- * Soma todas as entidades internas (ex: Pessoas & Parceiros = Clientes + Fornecedores + Colaboradores + Representantes + Motoristas)
+ * CadastrosGroupCountBadge — contagem de grupo usando fonte única de verdade
+ * Usa getGroupEntities de CadastrosConfig (Regra-Mãe: não duplicar configuração)
  */
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
-
-// Configuração de grupos e suas entidades internas
-const GROUP_ENTITIES = {
-  "Pessoas & Parceiros": ["Cliente", "Fornecedor", "Transportadora", "Colaborador", "Representante", "ContatoB2B", "Motorista"],
-  "Produtos & Serviços": ["Produto", "Servico", "GrupoProduto", "Marca", "KitProduto", "CatalogoWeb"],
-  "Financeiro & Fiscal": ["ContaPagar", "ContaReceber", "FormaPagamento", "PlanoDeContas", "CentroCusto", "NotaFiscal"],
-  "Logística, Frotas & Almoxarifado": ["Entrega", "Romaneio", "Veiculo", "Motorista", "LocalEstoque", "MovimentacaoEstoque"],
-  "Estrutura Organizacional": ["Empresa", "GrupoEmpresarial", "Departamento", "Cargo", "Turno", "CentroCusto"],
-  "Tecnologia, IA & Parâmetros": ["ConfiguracaoSistema", "JobAgendado", "Webhook", "ApiExterna", "ChatbotIntent"],
-};
+import { getGroupEntities } from "./CadastrosConfig";
 
 function buildFilter(entityName, empresaId, groupId, empresasDoGrupo) {
   const CAMPO_MAP = {
     Fornecedor: "empresa_dona_id",
     Transportadora: "empresa_dona_id",
     Colaborador: "empresa_alocada_id",
+    NotaFiscal: "empresa_faturamento_id",
+    TransferenciaFilial: "empresa_origem_id",
   };
   const SHARED = new Set(["Cliente", "Fornecedor", "Transportadora", "Servico"]);
   const campo = CAMPO_MAP[entityName] || "empresa_id";
@@ -50,16 +43,14 @@ export default function CadastrosGroupCountBadge({ groupName }) {
   const { empresaAtual, grupoAtual, empresasDoGrupo } = useContextoVisual();
   const empresaId = empresaAtual?.id;
   const groupId = grupoAtual?.id;
-  const entityList = GROUP_ENTITIES[groupName] || [];
+  const entityList = getGroupEntities(groupName);
   const grupoEmpIds = (empresasDoGrupo || []).map(e => e.id).filter(Boolean).sort().join(",");
 
   const { data: totalCount = 0, isLoading } = useQuery({
-    queryKey: ["CadastrosGroupCountBadge", groupName, empresaId || null, groupId || null, grupoEmpIds],
+    queryKey: ["CadastrosGroupCountBadge", groupName, empresaId || null, groupId || null, grupoEmpIds, entityList.join(",")],
     queryFn: async () => {
       if (!empresaId && !groupId) return 0;
       if (entityList.length === 0) return 0;
-
-      // Batch fetch all entity counts
       try {
         const res = await base44.functions.invoke("countEntities", {
           entities: entityList.map(eName => ({
@@ -76,7 +67,7 @@ export default function CadastrosGroupCountBadge({ groupName }) {
     staleTime: 180_000,
     gcTime: 300_000,
     refetchOnWindowFocus: false,
-    refetchOnMount: 'stale',  // Refetch apenas se stale (evita loops)
+    refetchOnMount: 'stale',
     retry: 1,
     enabled: !!(empresaId || groupId) && entityList.length > 0,
   });

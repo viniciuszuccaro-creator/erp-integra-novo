@@ -110,10 +110,23 @@ function normalizeSortField(entityName, requested) {
   return requested;
 }
 
+// Campos que devem ser ordenados numericamente (item 11: código numérico, não texto)
+const NUMERIC_SORT_FIELDS = new Set([
+  'codigo', 'codigo_banco', 'matricula', 'numero',
+]);
+
 function sanitizeVal(v) {
   return typeof v === 'string'
     ? v.replace(/<\s*script[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi, '').replace(/javascript:\s*/gi, '')
     : v;
+}
+
+// Converte valor para número para ordenação (fallback 0 se não-numérico)
+function toNum(v) {
+  if (v === null || v === undefined) return 0;
+  if (typeof v === 'number') return v;
+  const n = parseFloat(String(v).replace(/[^\d.-]/g, ''));
+  return isNaN(n) ? 0 : n;
 }
 
 function sanitizeFilter(f) {
@@ -280,8 +293,18 @@ async function listOne(base44, user, q) {
     }
     LIST_LAST_CALL_AT = Date.now();
     const items = await base44.asServiceRole.entities[entityName].filter(finalFilter, orderHint, limit, skip) || [];
-    LIST_CACHE.set(cacheKey, { items, ts: Date.now() });
-    return { entityName, items };
+
+    // P3 (item 11): ordenação numérica para campos de código
+    let finalItems = items;
+    if (NUMERIC_SORT_FIELDS.has(sortField) && items.length > 1) {
+      finalItems = [...items].sort((a, b) => {
+        const diff = toNum(a[sortField]) - toNum(b[sortField]);
+        return sortDir === 'asc' ? diff : -diff;
+      });
+    }
+
+    LIST_CACHE.set(cacheKey, { items: finalItems, ts: Date.now() });
+    return { entityName, items: finalItems };
   } catch (err) {
     const status = err?.status || err?.response?.status;
     if (status === 429 || status === 502 || (typeof status === 'number' && status >= 500)) {

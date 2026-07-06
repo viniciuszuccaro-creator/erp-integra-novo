@@ -6,6 +6,82 @@ import { sanitizeOnWrite } from "@/components/lib/sanitizeOnWrite";
 // Re-exporta para compatibilidade com importadores existentes
 export { ENTITY_CODE_FIELD };
 
+// P3 (item 3): valores inválidos para descrição/nome
+const INVALID_DESC_VALUES = new Set([
+  '', ' ', '  ', '.', '-', '_', 'teste', 'test', 'sem nome', 'sem descricao',
+  'novo', 'nova', 'n/a', 'na', 'null', 'undefined', 'xxx', '...',
+  'novo registro', 'novo cadastro', 'sem descricao',
+]);
+
+// P3 (item 3): extrai o melhor campo de descrição/nome da entidade
+function getDescricaoField(formData, ENTITY) {
+  const DESC_FIELDS_BY_ENTITY = {
+    Produto: ['descricao', 'descricao_completa'],
+    Servico: ['descricao'],
+    TabelaPreco: ['nome', 'descricao'],
+    UnidadeMedida: ['sigla', 'descricao'],
+    PlanoDeContas: ['nome', 'codigo'],
+    CentroCusto: ['descricao', 'codigo'],
+    Banco: ['nome_banco', 'codigo_banco'],
+    Veiculo: ['placa'],
+    ModeloDocumento: ['nome_modelo', 'tipo_documento'],
+    Marca: ['nome_marca'],
+    SegmentoCliente: ['nome_segmento', 'descricao'],
+    RegiaoAtendimento: ['nome_regiao', 'descricao'],
+    GrupoProduto: ['nome', 'descricao'],
+    KitProduto: ['nome_kit', 'descricao'],
+    SetorAtividade: ['nome_setor', 'descricao'],
+    PerfilAcesso: ['nome_perfil', 'descricao'],
+    Cargo: ['nome', 'descricao'],
+    Departamento: ['nome', 'descricao'],
+    Turno: ['nome'],
+    Empresa: ['razao_social', 'nome_fantasia'],
+    GrupoEmpresarial: ['nome', 'descricao'],
+    TipoFrete: ['descricao', 'codigo'],
+    LocalEstoque: ['nome', 'descricao'],
+    RotaPadrao: ['nome_rota', 'descricao'],
+    TipoDespesa: ['nome', 'descricao'],
+    MoedaIndice: ['sigla', 'descricao'],
+    OperadorCaixa: ['nome', 'descricao'],
+    FormaPagamento: ['nome', 'descricao'],
+    CondicaoComercial: ['nome', 'descricao'],
+    TabelaFiscal: ['nome', 'descricao'],
+    CentroResultado: ['descricao', 'codigo'],
+    ConfiguracaoDespesaRecorrente: ['nome', 'descricao'],
+    ApiExterna: ['nome_api', 'descricao'],
+    ChatbotCanal: ['nome_canal', 'descricao'],
+    ChatbotIntent: ['nome_intent', 'descricao'],
+    JobAgendado: ['nome_job', 'descricao'],
+    Webhook: ['nome_webhook', 'descricao'],
+    GatewayPagamento: ['nome_gateway', 'descricao'],
+    EventoNotificacao: ['nome', 'descricao'],
+    ConfiguracaoNFe: ['descricao'],
+    CatalogoWeb: ['nome', 'descricao'],
+    Representante: ['nome'],
+    ContatoB2B: ['nome'],
+    Motorista: ['nome'],
+    Transportadora: ['razao_social'],
+    Fornecedor: ['nome', 'razao_social'],
+    Cliente: ['nome', 'razao_social'],
+    Colaborador: ['nome_completo'],
+  };
+  const fields = DESC_FIELDS_BY_ENTITY[ENTITY] || ['nome', 'razao_social', 'descricao', 'nome_marca', 'nome_segmento', 'nome_regiao', 'nome_perfil', 'nome_banco', 'nome_rota', 'nome_kit', 'nome_setor', 'nome_canal', 'nome_intent', 'nome_job', 'nome_webhook', 'nome_api', 'nome_gateway', 'sigla', 'titulo', 'placa', 'codigo'];
+  for (const f of fields) {
+    if (formData[f] && String(formData[f]).trim()) return { field: f, value: String(formData[f]).trim() };
+  }
+  return null;
+}
+
+// P3 (item 3): valida se a descrição é válida (não vazia, não genérica)
+function validarDescricao(formData, ENTITY) {
+  const desc = getDescricaoField(formData, ENTITY);
+  if (!desc) return '⚠️ Descrição/Nome é obrigatória. Preencha um nome ou descrição válida antes de salvar.';
+  const normalized = desc.value.toLowerCase().trim();
+  if (INVALID_DESC_VALUES.has(normalized)) return `⚠️ O valor "${desc.value}" não é uma descrição válida. Use um nome real e significativo.`;
+  if (normalized.length < 2) return '⚠️ A descrição deve ter pelo menos 2 caracteres válidos.';
+  return null;
+}
+
 // P3: auditoria silenciosa (não bloqueia)
 async function auditarAcao({ acao, ENTITY, registroId, empresaId, groupId, dadosAntes, dadosDepois, descricao }) {
   try {
@@ -36,20 +112,33 @@ export default function useVisualizadorCRUD({
   readFilter, setNextCode,
 }) {
   const checkDuplicate = useCallback(async (formData, isEdit, currentId) => {
+    // P3 (item 3): validar descrição antes de tudo
+    const erroDesc = validarDescricao(formData, ENTITY);
+    if (erroDesc) return erroDesc;
+
     const codeField = ENTITY_CODE_FIELD[ENTITY] || 'codigo';
     const codeValue = formData[codeField] || formData.codigo || formData.sigla || formData.codigo_banco || null;
 
     if (codeValue && String(codeValue).trim()) {
+      // P3 (item 4): uniqueness de código por escopo empresa/grupo
       const codeFilter = { [codeField]: String(codeValue).trim() };
+      // Adiciona contexto para garantir uniqueness no escopo correto
+      const scopeConds = [{ [codeField]: String(codeValue).trim() }];
+      if (empresaId) scopeConds.push({ empresa_id: empresaId });
+      if (groupId) scopeConds.push({ group_id: groupId });
+      // Busca com $or para cobrir registros herdados (grupo) e locais (empresa)
+      const scopedFilter = (empresaId || groupId)
+        ? { $and: [{ [codeField]: String(codeValue).trim() }, { $or: scopeConds }] }
+        : codeFilter;
       try {
         const res = await base44.functions.invoke("entityListSorted", {
-          entityName: ENTITY, filter: codeFilter,
+          entityName: ENTITY, filter: scopedFilter,
           sortField: "created_date", sortDirection: "asc", limit: 5, skip: 0,
         });
         const conflito = (Array.isArray(res?.data) ? res.data : []).find(r => r.id !== currentId);
         if (conflito) {
           const label = conflito.nome || conflito.razao_social || conflito.descricao || conflito.sigla || conflito.id;
-          return `⚠️ Código "${codeValue}" já está em uso pelo registro "${label}". Altere o código antes de salvar.`;
+          return `⚠️ Código "${codeValue}" já está em uso pelo registro "${label}" no mesmo escopo (empresa/grupo). Altere o código antes de salvar.`;
         }
       } catch { /* não bloqueia */ }
     }

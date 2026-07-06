@@ -156,26 +156,32 @@ async function auditEntity(base44, entityName, groupId) {
     const dependentEntities = DEPENDENT_ENTITIES[entityName] || [];
     let registrosSemUso = [];
     if (dependentEntities.length > 0 && allRecords.length > 0) {
-      // Para cada registro ativo, verifica se existe pelo menos uma referência
       const activeRecords = allRecords.filter(r => {
         const st = (r.status || r.ativo || r.status_fornecedor || '').toString().toLowerCase();
         return st !== 'inativo' && st !== 'false' && r.ativo !== false;
       });
-      // Amostra de até 50 registros ativos para evitar timeout
       const sample = activeRecords.slice(0, 50);
       const refField = `${entityName.toLowerCase()}_id`;
-      for (const rec of sample) {
-        let hasRef = false;
-        for (const depEntity of dependentEntities) {
-          try {
-            const depApi = base44.asServiceRole.entities[depEntity];
-            if (!depApi) continue;
-            const refs = await depApi.filter({ [refField]: rec.id }, '-id', 1) || [];
-            if (refs.length > 0) { hasRef = true; break; }
-          } catch { /* skip */ }
-        }
-        if (!hasRef) registrosSemUso.push({ id: rec.id, nome: getNome(rec) || rec.id });
+      const allIds = sample.map(r => r.id);
+      // Batch: query each dependent entity ONCE with $in to get all referenced IDs
+      const referencedIds = new Set();
+      for (const depEntity of dependentEntities) {
+        try {
+          const depApi = base44.asServiceRole.entities[depEntity];
+          if (!depApi) continue;
+          // Fetch in chunks of 50 to stay within $in limits
+          for (let i = 0; i < allIds.length; i += 50) {
+            const chunk = allIds.slice(i, i + 50);
+            const refs = await depApi.filter({ [refField]: { $in: chunk } }, '-id', 500) || [];
+            for (const ref of refs) {
+              if (ref[refField]) referencedIds.add(ref[refField]);
+            }
+          }
+        } catch { /* skip dependent */ }
       }
+      registrosSemUso = sample
+        .filter(r => !referencedIds.has(r.id))
+        .map(r => ({ id: r.id, nome: getNome(r) || r.id }));
     }
 
     // Item 6: divergência de contagem (total real vs exibido em cards)

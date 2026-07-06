@@ -336,7 +336,16 @@ export function useContextoVisual() {
             Turno: { field: 'nome_turno', direction: 'asc' },
             Marca: { field: 'nome_marca', direction: 'asc' },
             GrupoProduto: { field: 'nome_grupo', direction: 'asc' },
-            SetorAtividade: { field: 'nome_setor', direction: 'asc' },
+            SetorAtividade: { field: 'nome', direction: 'asc' },
+            RotaPadrao: { field: 'nome_rota', direction: 'asc' },
+            TabelaNCM: { field: 'ncm', direction: 'asc' },
+            KitProduto: { field: 'nome_kit', direction: 'asc' },
+            TipoDespesa: { field: 'nome', direction: 'asc' },
+            MoedaIndice: { field: 'nome', direction: 'asc' },
+            CentroResultado: { field: 'nome', direction: 'asc' },
+            CentroOperacao: { field: 'nome', direction: 'asc' },
+            LocalEstoque: { field: 'nome', direction: 'asc' },
+            TipoFrete: { field: 'nome', direction: 'asc' },
           };
 
           const normalizeSortField = (entityName, field) => {
@@ -352,7 +361,7 @@ export function useContextoVisual() {
             if (entityName === 'Turno' && (f === 'nome' || f === 'name')) return 'nome_turno';
             if (entityName === 'Marca' && (f === 'nome' || f === 'name')) return 'nome_marca';
             if (entityName === 'GrupoProduto' && (f === 'nome' || f === 'name')) return 'nome_grupo';
-            if (entityName === 'SetorAtividade' && (f === 'nome' || f === 'name')) return 'nome_setor';
+            if (entityName === 'SetorAtividade' && (f === 'name')) return 'nome';
             return field;
           };
           const getLastSort = (entityName) => {

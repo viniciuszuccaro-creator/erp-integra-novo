@@ -27,6 +27,13 @@ const DEFAULT_SORTS = {
   Servico: { field: 'nome', direction: 'asc' }, GrupoProduto: { field: 'nome_grupo', direction: 'asc' },
   Marca: { field: 'nome_marca', direction: 'asc' }, Representante: { field: 'nome', direction: 'asc' },
   SegmentoCliente: { field: 'nome_segmento', direction: 'asc' }, RegiaoAtendimento: { field: 'nome_regiao', direction: 'asc' },
+  SetorAtividade: { field: 'nome', direction: 'asc' }, RotaPadrao: { field: 'nome_rota', direction: 'asc' },
+  TabelaNCM: { field: 'ncm', direction: 'asc' }, KitProduto: { field: 'nome_kit', direction: 'asc' },
+  TipoDespesa: { field: 'nome', direction: 'asc' }, MoedaIndice: { field: 'nome', direction: 'asc' },
+  CentroResultado: { field: 'nome', direction: 'asc' }, CentroOperacao: { field: 'nome', direction: 'asc' },
+  CondicaoComercial: { field: 'nome_condicao', direction: 'asc' }, LocalEstoque: { field: 'nome', direction: 'asc' },
+  TipoFrete: { field: 'nome', direction: 'asc' }, ContatoB2B: { field: 'nome_completo', direction: 'asc' },
+  PlanoDeContas: { field: 'codigo', direction: 'asc' },
 };
 
 const SEARCH_FIELDS = {

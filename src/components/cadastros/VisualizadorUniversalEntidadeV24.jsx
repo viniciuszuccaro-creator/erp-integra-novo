@@ -267,7 +267,7 @@ export default function VisualizadorUniversalEntidadeV24({
   }, [crossPageAll, allPageSelected, items]);
 
   const formProps = useMemo(() => {
-    const base = { onClose: handleCloseForm, onSave: handleCloseForm, onSuccess: handleCloseForm, onOpenChange: v => { if (!v) handleCloseForm(false); }, isOpen: showForm, open: showForm, windowMode: true, onSubmit: isSelfManaged ? handleCloseForm : handlePersistSubmit };
+    const base = { onClose: handleCloseForm, onSave: isSelfManaged ? handleCloseForm : (data) => { if (data && typeof data === 'object' && !data.type) return handlePersistSubmit(data); handleCloseForm(false); }, onSuccess: handleCloseForm, onOpenChange: v => { if (!v) handleCloseForm(false); }, isOpen: showForm, open: showForm, windowMode: true, onSubmit: isSelfManaged ? handleCloseForm : handlePersistSubmit };
     const defaultValues = (!editItem && nextCode && ENTITY_CODE_FIELD[ENTITY]) ? { [ENTITY_CODE_FIELD[ENTITY]]: nextCode, codigo: nextCode } : {};
     if (!editItem) return { ...base, ...defaultValues, defaultValues };
     const aliases = {};

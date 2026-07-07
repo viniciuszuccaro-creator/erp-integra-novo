@@ -21,7 +21,7 @@ const DEFAULT_SORTS = {
   OrdemCompra: { field: 'data_solicitacao', direction: 'desc' }, CentroCusto: { field: 'codigo', direction: 'asc' },
   PlanoDeContas: { field: 'codigo', direction: 'asc' }, PlanoContas: { field: 'codigo', direction: 'asc' },
   Cargo: { field: 'nome_cargo', direction: 'asc' },
-  User: { field: 'full_name', direction: 'asc' }, Departamento: { field: 'nome', direction: 'asc' },
+  User: { field: 'full_name', direction: 'asc' }, Departamento: { field: 'nome_departamento', direction: 'asc' },
   Turno: { field: 'nome_turno', direction: 'asc' },
   Veiculo: { field: 'placa', direction: 'asc' }, Motorista: { field: 'nome', direction: 'asc' },
   Servico: { field: 'nome', direction: 'asc' }, GrupoProduto: { field: 'nome_grupo', direction: 'asc' },

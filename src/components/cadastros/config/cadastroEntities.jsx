@@ -97,15 +97,15 @@ export const CADASTROS_ENTITIES = {
   SetorAtividade: {
     label: "Setores de Atividade", group: "Produtos & Serviços", icon: Package,
     columns: [
-      { field: "nome_setor", label: "Nome", searchable: true, sortable: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "nome", label: "Nome", searchable: true, sortable: true },
+      { field: "tipo_operacao", label: "Tipo", searchable: true },
     ],
   },
   GrupoProduto: {
     label: "Grupos de Produtos", group: "Produtos & Serviços", icon: Package,
     columns: [
-      { field: "nome", label: "Nome", searchable: true, sortable: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "nome_grupo", label: "Nome", searchable: true, sortable: true },
+      { field: "natureza", label: "Natureza", searchable: true },
     ],
   },
   Marca: {
@@ -139,8 +139,8 @@ export const CADASTROS_ENTITIES = {
   UnidadeMedida: {
     label: "Unidades de Medida", group: "Produtos & Serviços", icon: Package,
     columns: [
-      { field: "sigla", label: "Sigla", searchable: true, sortable: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "codigo", label: "Código", searchable: true, sortable: true },
+      { field: "nome", label: "Nome", searchable: true, sortable: true },
     ],
   },
 
@@ -182,21 +182,21 @@ export const CADASTROS_ENTITIES = {
     label: "Centros de Resultado", group: "Financeiro & Fiscal", icon: DollarSign,
     columns: [
       { field: "codigo", label: "Código", searchable: true, sortable: true, numeric: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "nome", label: "Nome", searchable: true, sortable: true },
     ],
   },
   TipoDespesa: {
     label: "Tipos de Despesa", group: "Financeiro & Fiscal", icon: DollarSign,
     columns: [
       { field: "nome", label: "Nome", searchable: true, sortable: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "categoria", label: "Categoria", searchable: true },
     ],
   },
   MoedaIndice: {
     label: "Moedas e Índices", group: "Financeiro & Fiscal", icon: DollarSign,
     columns: [
-      { field: "sigla", label: "Sigla", searchable: true, sortable: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "codigo", label: "Código", searchable: true, sortable: true },
+      { field: "nome", label: "Nome", searchable: true, sortable: true },
     ],
   },
   OperadorCaixa: {
@@ -223,8 +223,8 @@ export const CADASTROS_ENTITIES = {
   CondicaoComercial: {
     label: "Condições Comerciais", group: "Financeiro & Fiscal", icon: DollarSign,
     columns: [
-      { field: "nome", label: "Nome", searchable: true, sortable: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "nome_condicao", label: "Nome", searchable: true, sortable: true },
+      { field: "tipo_condicao", label: "Tipo", searchable: true },
     ],
   },
 
@@ -250,7 +250,7 @@ export const CADASTROS_ENTITIES = {
   TipoFrete: {
     label: "Tipos de Frete", group: "Logística, Frotas & Almoxarifado", icon: Truck,
     columns: [
-      { field: "descricao", label: "Descrição", searchable: true, sortable: true },
+      { field: "nome", label: "Nome", searchable: true, sortable: true },
       { field: "codigo", label: "Código", searchable: true, numeric: true },
     ],
   },
@@ -258,7 +258,7 @@ export const CADASTROS_ENTITIES = {
     label: "Locais de Estoque", group: "Logística, Frotas & Almoxarifado", icon: Truck,
     columns: [
       { field: "nome", label: "Nome", searchable: true, sortable: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "tipo", label: "Tipo", searchable: true },
     ],
   },
   RotaPadrao: {
@@ -297,21 +297,21 @@ export const CADASTROS_ENTITIES = {
   Departamento: {
     label: "Departamentos", group: "Estrutura Organizacional", icon: Building2,
     columns: [
-      { field: "nome", label: "Nome", searchable: true, sortable: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "nome_departamento", label: "Nome", searchable: true, sortable: true },
+      { field: "tipo_departamento", label: "Tipo", searchable: true },
     ],
   },
   Cargo: {
     label: "Cargos", group: "Estrutura Organizacional", icon: Building2,
     columns: [
       { field: "nome_cargo", label: "Nome", searchable: true, sortable: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "nivel_hierarquico", label: "Nível", searchable: true },
     ],
   },
   Turno: {
     label: "Turnos", group: "Estrutura Organizacional", icon: Building2,
     columns: [
-      { field: "nome", label: "Nome", searchable: true, sortable: true },
+      { field: "nome_turno", label: "Nome", searchable: true, sortable: true },
       { field: "horario_inicio", label: "Início", searchable: false },
       { field: "horario_fim", label: "Fim", searchable: false },
     ],

@@ -28,10 +28,73 @@ const SNAPSHOT = {};
 // Inicializa todas as entidades com 0
 ALL_ENTITIES.forEach(e => { SNAPSHOT[e] = 0; });
 
+// Catálogos puros sem escopo de empresa (contam global — são dados de referência)
+const PURE_CATALOG = new Set([
+  'Banco', 'FormaPagamento', 'TipoDespesa', 'MoedaIndice', 'TipoFrete',
+  'UnidadeMedida', 'TabelaFiscal', 'CentroOperacao',
+]);
+
+// Campo de empresa por entidade (igual ao VisualizadorUniversalEntidadeV24)
+const ENTITY_CONTEXT_FIELD = {
+  Fornecedor: 'empresa_dona_id',
+  Transportadora: 'empresa_dona_id',
+  Colaborador: 'empresa_alocada_id',
+};
+const SHARED_ENTITIES = new Set(['Cliente', 'Fornecedor', 'Transportadora']);
+
 // Conta entidade via backend countEntities (retorna número exato sem trazer registros)
-async function countEntity(entityName, filter) {
+// Usa o MESMO filtro $or da tabela para garantir que contagem bate com exibição
+async function countEntity(entityName, filter, empresasDoGrupo) {
   try {
-    const res = await base44.functions.invoke("countEntities", { entityName, filter });
+    // Catálogos puros — contam global
+    if (PURE_CATALOG.has(entityName)) {
+      const res = await base44.functions.invoke("countEntities", { entityName, filter: {} });
+      const n = res?.data?.count ?? res?.data?.total ?? res?.data;
+      return typeof n === "number" ? n : 0;
+    }
+
+    // Se o filtro já tem $or (passado pelo caller), usa direto
+    if (filter.$or || filter.$and) {
+      const res = await base44.functions.invoke("countEntities", { entityName, filter });
+      const n = res?.data?.count ?? res?.data?.total ?? res?.data;
+      return typeof n === "number" ? n : 0;
+    }
+
+    // Constrói o mesmo $or que a tabela usa
+    const groupId = filter.group_id || null;
+    const empresaId = filter.empresa_id || filter.empresa_dona_id || filter.empresa_alocada_id || null;
+    const ctxCampo = ENTITY_CONTEXT_FIELD[entityName] || 'empresa_id';
+    const orConds = [];
+
+    if (empresaId) {
+      orConds.push({ [ctxCampo]: empresaId });
+      if (entityName === 'Cliente') {
+        orConds.push({ empresa_dona_id: empresaId }, { empresas_compartilhadas_ids: { $in: [empresaId] } });
+      } else if (SHARED_ENTITIES.has(entityName)) {
+        orConds.push({ empresas_compartilhadas_ids: { $in: [empresaId] } });
+      }
+    }
+    if (groupId) {
+      orConds.push({ group_id: groupId });
+      orConds.push({ empresa_id: null, group_id: null });
+      if (!empresaId && Array.isArray(empresasDoGrupo) && empresasDoGrupo.length) {
+        const ids = empresasDoGrupo.map(e => e.id).filter(Boolean);
+        if (ids.length) {
+          if (entityName === 'Cliente') {
+            orConds.push({ empresa_id: { $in: ids } }, { empresa_dona_id: { $in: ids } }, { empresas_compartilhadas_ids: { $in: ids } });
+          } else if (entityName === 'Fornecedor' || entityName === 'Transportadora') {
+            orConds.push({ empresa_dona_id: { $in: ids } }, { empresas_compartilhadas_ids: { $in: ids } });
+          } else if (entityName === 'Colaborador') {
+            orConds.push({ empresa_alocada_id: { $in: ids } });
+          } else {
+            orConds.push({ [ctxCampo]: { $in: ids } });
+          }
+        }
+      }
+    }
+
+    const finalFilter = orConds.length ? { $or: orConds } : {};
+    const res = await base44.functions.invoke("countEntities", { entityName, filter: finalFilter });
     const n = res?.data?.count ?? res?.data?.total ?? res?.data;
     return typeof n === "number" ? n : 0;
   } catch (_) {
@@ -40,39 +103,33 @@ async function countEntity(entityName, filter) {
 }
 
 export default function useCadastrosAllCounts() {
-  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual, empresasDoGrupo } = useContextoVisual();
   const empresaId = empresaAtual?.id || null;
   const groupId   = grupoAtual?.id   || null;
   const queryClient = useQueryClient();
 
   // Contagem precisa: valida TODAS as entidades respeitando contexto + força refetch se contexto muda
   const { data } = useQuery({
-    queryKey: ["cadastros-all-counts-v7", groupId, empresaId],
+    queryKey: ["cadastros-all-counts-v7", groupId, empresaId, empresasDoGrupo?.length],
     queryFn: async () => {
-      // Se sem contexto ativo, retorna snapshot sem contar
-      if (!groupId && !empresaId) return SNAPSHOT;
-
+      // Se sem contexto ativo, conta globalmente (catálogos puros)
       const result = { ...SNAPSHOT };
       await Promise.allSettled(
         ALL_ENTITIES.map(async (entityName) => {
           try {
             let filter = {};
-            // Determina field e valor baseado no contexto
             if (groupId) {
               filter.group_id = groupId;
             } else if (empresaId) {
-              // Algumas entidades têm campo diferente
               if (["Fornecedor","Transportadora"].includes(entityName)) {
                 filter.empresa_dona_id = empresaId;
-              } else if (["Cliente"].includes(entityName)) {
-                filter.empresa_id = empresaId;
               } else if (["Colaborador"].includes(entityName)) {
                 filter.empresa_alocada_id = empresaId;
               } else {
                 filter.empresa_id = empresaId;
               }
             }
-            const n = await countEntity(entityName, filter);
+            const n = await countEntity(entityName, filter, empresasDoGrupo);
             result[entityName] = Math.max(0, n);
           } catch (_) { /* mantém snapshot */ }
         })

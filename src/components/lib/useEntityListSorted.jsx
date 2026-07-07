@@ -146,7 +146,7 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
       return undefined;
     },
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnReconnect: false,
     retry: 0,
     enabled: enabledFlag,

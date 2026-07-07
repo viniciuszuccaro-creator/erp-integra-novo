@@ -111,6 +111,10 @@ function LayoutContent({ children, currentPageName }) {
     'Evento', 'Ferias', 'Ponto', 'Contrato', 'SolicitacaoCompra',
     'OrdemProducao', 'ApontamentoProducao', 'Romaneio', 'Inventario',
     'TransferenciaFilial', 'CatalogoWeb', 'OperadorCaixa', 'TabelaFiscal',
+    'ConfiguracaoSistema', 'IAConfig', 'AuditLog', 'Notificacao',
+    'ApiExterna', 'ChatbotCanal', 'ChatbotIntent', 'ChatbotIntents',
+    'JobAgendado', 'Webhook', 'EventoNotificacao', 'ModeloDocumento',
+    'PerfilAcesso', 'GrupoEmpresarial',
   ], { enabled: true });
   useNavHistory();
   usePredictivePrefetch();

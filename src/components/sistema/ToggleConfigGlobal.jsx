@@ -36,7 +36,7 @@ export default function ToggleConfigGlobal({
         {(saving || isFetching) && <Loader2 className="w-3 h-3 animate-spin text-slate-400" />}
         <Switch
           checked={checked}
-          onCheckedChange={() => onToggle && onToggle(chave, !checked, categoria)}
+          onCheckedChange={() => onToggle && onToggle(chave, categoria, !checked)}
           disabled={disabled || saving}
           data-permission="Sistema.Configuracao.editar"
         />

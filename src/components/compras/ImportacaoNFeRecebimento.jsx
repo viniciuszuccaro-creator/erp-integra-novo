@@ -19,7 +19,7 @@ export default function ImportacaoNFeRecebimento({ windowMode = false }) {
   const [resultado, setResultado] = useState(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual, filterInContext, updateInContext } = useContextoVisual();
 
   const processarXMLMutation = useMutation({
     mutationFn: async (file) => {
@@ -122,10 +122,10 @@ export default function ImportacaoNFeRecebimento({ windowMode = false }) {
           });
 
           // Atualizar estoque do produto
-          const produto = await base44.entities.Produto.filter({ id: item.produto_id });
+          const produto = await filterInContext('Produto', { id: item.produto_id });
           if (produto && produto.length > 0) {
             const produtoAtual = produto[0];
-            await base44.entities.Produto.update(item.produto_id, {
+            await updateInContext('Produto', item.produto_id, {
               estoque_atual: (produtoAtual.estoque_atual || 0) + item.quantidade,
               ultimo_preco_compra: item.valor_unitario,
               ultima_compra: dados.nfe.data_emissao

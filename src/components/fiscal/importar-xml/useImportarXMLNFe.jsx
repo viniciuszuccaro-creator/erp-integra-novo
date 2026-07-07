@@ -10,7 +10,7 @@ import { toast } from 'sonner';
  */
 export function useImportarXMLNFe({ arquivo, dadosNFe, opcoes, empresaId }) {
   const queryClient = useQueryClient();
-  const { carimbarContexto, createInContext } = useContextoVisual();
+  const { carimbarContexto, createInContext, filterInContext, updateInContext } = useContextoVisual();
 
   const importarMutation = useMutation({
     mutationFn: async () => {
@@ -102,11 +102,11 @@ export function useImportarXMLNFe({ arquivo, dadosNFe, opcoes, empresaId }) {
       if (opcoes.darEntradaEstoque) {
         for (const item of dadosNFe.itensMapeados) {
           if (!item.produto_id_mapeado) continue;
-          const produtoAtual = await base44.entities.Produto.filter({ id: item.produto_id_mapeado });
+          const produtoAtual = await filterInContext('Produto', { id: item.produto_id_mapeado });
           if (produtoAtual.length === 0) continue;
           const produto = produtoAtual[0];
           const novoEstoque = (produto.estoque_atual || 0) + item.quantidade;
-          await base44.entities.Produto.update(produto.id, {
+          await updateInContext('Produto', produto.id, {
             estoque_atual: novoEstoque,
             ultima_compra: dadosNFe.dataEmissao,
             ultimo_preco_compra: item.valor_unitario

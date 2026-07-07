@@ -9,7 +9,7 @@ import { base44 } from "@/api/base44Client";
  * Todas as mutations de OC: criar, atualizar, aprovar, enviar, receber, avaliar.
  */
 export default function useOrdensCompraActions({ fornecedores, authUser }) {
-  const { createInContext, updateInContext } = useContextoVisual();
+  const { createInContext, updateInContext, filterInContext } = useContextoVisual();
   const [ocSelecionada, setOcSelecionada] = useState(null);
 
   const createMutation = useMutation({ mutationFn: (data) => createInContext('OrdemCompra', data) });
@@ -71,8 +71,8 @@ export default function useOrdensCompraActions({ fornecedores, authUser }) {
         for (const item of oc.itens) {
           await createInContext('MovimentacaoEstoque', { produto_id: item.produto_id, produto_descricao: item.descricao, tipo_movimentacao: 'Entrada', quantidade: item.quantidade_solicitada, data_movimentacao: dados.data_entrega_real, documento: `OC-${oc.numero_oc}`, motivo: `Recebimento de Ordem de Compra`, valor_unitario: item.valor_unitario, valor_total: item.valor_total, responsavel: 'Sistema', observacoes: dados.observacoes });
           if (item.produto_id) {
-            const produto = await base44.entities.Produto.filter({ id: item.produto_id });
-            if (produto && produto.length > 0) { const produtoAtual = produto[0]; await base44.entities.Produto.update(item.produto_id, { estoque_atual: (produtoAtual.estoque_atual || 0) + item.quantidade_solicitada }); }
+            const produto = await filterInContext('Produto', { id: item.produto_id });
+            if (produto && produto.length > 0) { const produtoAtual = produto[0]; await updateInContext('Produto', item.produto_id, { estoque_atual: (produtoAtual.estoque_atual || 0) + item.quantidade_solicitada }); }
           }
         }
       }

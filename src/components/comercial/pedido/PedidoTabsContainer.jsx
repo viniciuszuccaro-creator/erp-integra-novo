@@ -3,6 +3,7 @@ import { Tabs, TabsContent } from '@/components/ui/tabs';
 import PedidoTabsNav from './PedidoTabsNav';
 import ProtectedSection from '@/components/security/ProtectedSection';
 import { base44 } from '@/api/base44Client';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import { toast } from 'sonner';
 
 // Lazy-loaded tabs (keep same split as original)
@@ -40,6 +41,7 @@ export default function PedidoTabsContainer({
   ];
 
   const [conformidade, setConformidade] = useState({ ok: false, motivos: [] });
+  const { filterInContext } = useContextoVisual();
 
   useEffect(() => {
     let cancel = false;
@@ -48,13 +50,13 @@ export default function PedidoTabsContainer({
       const motivos = [];
       try {
         if (formData?.cliente_id) {
-          const cli = await base44.entities.Cliente.filter({ id: formData.cliente_id });
+          const cli = await filterInContext('Cliente', { id: formData.cliente_id });
           const c = Array.isArray(cli) ? cli[0] : null;
           const limite = c?.condicao_comercial?.limite_credito || 0;
           if (limite > 0 && (Number(formData?.valor_total) || 0) > limite) {
             ok = false; motivos.push('Estouro de limite de crédito');
           }
-          const atrasados = await base44.entities.ContaReceber.filter({ cliente_id: formData.cliente_id, status: 'Atrasado' });
+          const atrasados = await filterInContext('ContaReceber', { cliente_id: formData.cliente_id, status: 'Atrasado' });
           if (Array.isArray(atrasados) && atrasados.length > 0) {
             ok = false; motivos.push('Cliente com títulos em atraso');
           }

@@ -8,12 +8,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Camera, Upload, CheckCircle2, AlertCircle, User, FileText, MapPin } from "lucide-react";
 import { toast } from "sonner";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * 📸 COMPROVANTE DIGITAL DE ENTREGA V21.5
  * Upload de foto, assinatura digital e geolocalização
  */
 export default function ComprovanteEntregaDigital({ pedido, entrega, onSuccess, windowMode = false }) {
+  const { filterInContext, createInContext, updateInContext } = useContextoVisual();
   const [nomeRecebedor, setNomeRecebedor] = useState("");
   const [documentoRecebedor, setDocumentoRecebedor] = useState("");
   const [cargoRecebedor, setCargoRecebedor] = useState("");
@@ -63,7 +65,7 @@ export default function ComprovanteEntregaDigital({ pedido, entrega, onSuccess, 
       if (pedido.itens_revenda?.length > 0) {
         for (const item of pedido.itens_revenda) {
           if (item.produto_id) {
-            const produtos = await base44.entities.Produto.filter({ 
+            const produtos = await filterInContext('Produto', { 
               id: item.produto_id,
               empresa_id: pedido.empresa_id 
             });
@@ -72,7 +74,7 @@ export default function ComprovanteEntregaDigital({ pedido, entrega, onSuccess, 
             if (produto && (produto.estoque_atual || 0) >= (item.quantidade || 0)) {
               const novoEstoque = (produto.estoque_atual || 0) - (item.quantidade || 0);
               
-              await base44.entities.MovimentacaoEstoque.create({
+              await createInContext('MovimentacaoEstoque', {
                 empresa_id: pedido.empresa_id,
                 group_id: pedido.group_id,
                 tipo_movimento: "saida",
@@ -91,7 +93,7 @@ export default function ComprovanteEntregaDigital({ pedido, entrega, onSuccess, 
                 aprovado: true
               });
               
-              await base44.entities.Produto.update(item.produto_id, {
+              await updateInContext('Produto', item.produto_id, {
                 estoque_atual: novoEstoque
               });
             }

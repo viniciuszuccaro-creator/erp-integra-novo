@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
 
 /**
@@ -11,6 +12,7 @@ import { toast } from "sonner";
  */
 export default function useAprovacaoOrcamento({ clienteId }) {
   const queryClient = useQueryClient();
+  const { filterInContext } = useContextoVisual();
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [assinaturaModal, setAssinaturaModal] = useState(false);
@@ -23,7 +25,7 @@ export default function useAprovacaoOrcamento({ clienteId }) {
     queryKey: ['orcamentos-aprovacao', clienteId],
     queryFn: async () => {
       if (!clienteId) return [];
-      return base44.entities.OrcamentoCliente.filter({
+      return filterInContext('OrcamentoCliente', {
         cliente_id: clienteId,
         status: 'Pendente'
       }, '-created_date');

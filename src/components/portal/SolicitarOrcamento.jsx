@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { z } from 'zod';
 import FormWrapper from '@/components/common/FormWrapper';
@@ -33,6 +34,7 @@ export default function SolicitarOrcamento() {
   const [success, setSuccess] = useState(false);
 
   const queryClient = useQueryClient();
+  const { filterInContext, createInContext } = useContextoVisual();
 
   const criarOportunidadeMutation = useMutation({
     mutationFn: async (data) => {
@@ -40,10 +42,10 @@ export default function SolicitarOrcamento() {
       // Resolver contexto multiempresa a partir do cliente vinculado ao usuário do portal
       let empresaId = null, groupId = null;
       try {
-        const c = await base44.entities.Cliente.filter({ portal_usuario_id: user.id }, undefined, 1);
+        const c = await filterInContext('Cliente', { portal_usuario_id: user.id }, undefined, 1);
         if (Array.isArray(c) && c[0]) { empresaId = c[0].empresa_id || null; groupId = c[0].group_id || null; }
       } catch {}
-      return await base44.entities.Oportunidade.create({
+      return await createInContext('Oportunidade', {
         titulo: data.titulo,
         descricao: data.descricao,
         cliente_nome: user.full_name,

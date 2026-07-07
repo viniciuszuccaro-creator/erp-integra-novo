@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useUser } from '@/components/lib/UserContext';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,16 +24,17 @@ export default function PedidosCliente() {
   const [selectedPedido, setSelectedPedido] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
+  const { filterInContext } = useContextoVisual();
   const { data: pedidos = [], isLoading } = useQuery({
     queryKey: ['meus-pedidos', user?.id],
     queryFn: async () => {
-      const user = await base44.auth.me();
-      const clientes = await base44.entities.Cliente.filter({ portal_usuario_id: user.id });
+      const me = await base44.auth.me();
+      const clientes = await filterInContext('Cliente', { portal_usuario_id: me.id });
       const cliente = clientes[0];
       
       if (!cliente) return [];
       
-      return await base44.entities.Pedido.filter({ 
+      return await filterInContext('Pedido', { 
         cliente_id: cliente.id,
         pode_ver_no_portal: true,
         empresa_id: cliente.empresa_id || undefined,
@@ -44,13 +46,13 @@ export default function PedidosCliente() {
   const { data: entregas = [] } = useQuery({
     queryKey: ['minhas-entregas', user?.id],
     queryFn: async () => {
-      const user = await base44.auth.me();
-      const clientes = await base44.entities.Cliente.filter({ portal_usuario_id: user.id });
+      const me = await base44.auth.me();
+      const clientes = await filterInContext('Cliente', { portal_usuario_id: me.id });
       const cliente = clientes[0];
       
       if (!cliente) return [];
       
-      return await base44.entities.Entrega.filter({ cliente_id: cliente.id, empresa_id: cliente.empresa_id || undefined, group_id: cliente.group_id || undefined }, '-data_previsao', 50);
+      return await filterInContext('Entrega', { cliente_id: cliente.id, empresa_id: cliente.empresa_id || undefined, group_id: cliente.group_id || undefined }, '-data_previsao', 50);
     },
   });
 

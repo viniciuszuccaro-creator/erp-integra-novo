@@ -41,7 +41,7 @@ export default function CriarPedidoChat({ conversa, clienteId, onPedidoCriado })
     queryKey: ['cliente-chat', clienteId],
     queryFn: async () => {
       if (!clienteId) return null;
-      const clientes = await base44.entities.Cliente.filter({ id: clienteId });
+      const clientes = await filterInContext('Cliente', { id: clienteId });
       return clientes[0];
     },
     enabled: !!clienteId

@@ -29,12 +29,12 @@ export default function DashboardCliente({ clienteId: propClienteId, adminMode =
   useEffect(() => {
     const loadCliente = async () => {
       if (propClienteId) {
-        const res = await base44.entities.Cliente.filter({ id: propClienteId });
+        const res = await filterInContext('Cliente', { id: propClienteId });
         setCliente(res[0] || null);
       }
     };
     loadCliente();
-  }, [propClienteId]);
+  }, [propClienteId, filterInContext]);
 
   const { data: clientes = [] } = useQuery({
     queryKey: ['meu-cliente', user?.id, contextoKey],

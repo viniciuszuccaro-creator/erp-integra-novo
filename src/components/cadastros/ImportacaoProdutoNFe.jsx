@@ -17,7 +17,7 @@ import { toast } from "sonner";
  * ✅ Criação automática de produtos
  */
 export default function ImportacaoProdutoNFe({ onProdutosCriados }) {
-  const { empresaAtual } = useContextoVisual();
+  const { empresaAtual, filterInContext, createInContext } = useContextoVisual();
   const [arquivo, setArquivo] = useState(null);
   const [processando, setProcessando] = useState(false);
   const [resultado, setResultado] = useState(null);
@@ -97,7 +97,7 @@ export default function ImportacaoProdutoNFe({ onProdutosCriados }) {
       });
 
       // 3. Verificar duplicidade
-      const produtosExistentes = await base44.entities.Produto.filter({ empresa_id: empresaAtual.id });
+      const produtosExistentes = await filterInContext('Produto', { empresa_id: empresaAtual.id });
       const produtosComStatus = dadosExtraidos.produtos.map(prod => {
         const duplicado = produtosExistentes.find(p => 
           p.ncm === prod.ncm && 

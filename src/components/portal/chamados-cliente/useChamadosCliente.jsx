@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { useToast } from "@/components/ui/use-toast";
 
 const STATUS_CORES = {
@@ -31,12 +32,13 @@ export default function useChamadosCliente(clienteId, clienteNome) {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { filterInContext, createInContext } = useContextoVisual();
 
   const { data: clienteData } = useQuery({
     queryKey: ["cliente-portal-by-id", clienteId],
     enabled: !!clienteId,
     queryFn: async () => {
-      const rows = await base44.entities.Cliente.filter({ id: clienteId });
+      const rows = await filterInContext("Cliente", { id: clienteId });
       return rows?.[0] || null;
     },
   });
@@ -51,14 +53,14 @@ export default function useChamadosCliente(clienteId, clienteNome) {
         ...(clienteData?.empresa_id ? { empresa_id: clienteData.empresa_id } : {}),
         ...(clienteData?.group_id ? { group_id: clienteData.group_id } : {}),
       };
-      return await base44.entities.Chamado.filter(filtros, "-created_date");
+      return await filterInContext("Chamado", filtros, "-created_date");
     },
   });
 
   const criarChamadoMutation = useMutation({
     mutationFn: async (data) => {
-      const cli = clienteData || (await base44.entities.Cliente.filter({ id: clienteId }).then((r) => r?.[0]));
-      return base44.entities.Chamado.create({
+      const cli = clienteData || (await filterInContext("Cliente", { id: clienteId }).then((r) => r?.[0]));
+      return createInContext("Chamado", {
         ...data,
         cliente_id: clienteId,
         cliente_nome: clienteNome,

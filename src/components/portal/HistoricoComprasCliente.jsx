@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Package, TrendingUp, Award } from 'lucide-react';
@@ -14,15 +15,16 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
  * ✅ Fidelidade e cashback
  */
 export default function HistoricoComprasCliente({ clienteId }) {
+  const { filterInContext } = useContextoVisual();
   const { data: cliente } = useQuery({
     queryKey: ['cliente-historico', clienteId],
-    queryFn: () => base44.entities.Cliente.filter({ id: clienteId }).then(r => r[0]),
+    queryFn: () => filterInContext('Cliente', { id: clienteId }).then(r => r[0]),
     enabled: !!clienteId,
   });
 
   const { data: pedidos = [] } = useQuery({
     queryKey: ['historico-pedidos', clienteId, cliente?.empresa_id, cliente?.group_id],
-    queryFn: () => base44.entities.Pedido.filter({ cliente_id: clienteId, empresa_id: cliente?.empresa_id || undefined, group_id: cliente?.group_id || undefined }, '-data_pedido', 100),
+    queryFn: () => filterInContext('Pedido', { cliente_id: clienteId, empresa_id: cliente?.empresa_id || undefined, group_id: cliente?.group_id || undefined }, '-data_pedido', 100),
     enabled: !!clienteId,
   });
 

@@ -5,7 +5,7 @@ import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
 
 export default function usePedidosRetirada() {
-  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const { filterInContext, createInContext, updateInContext, empresaAtual, grupoAtual } = useContextoVisual();
   const [busca, setBusca] = useState("");
   const [statusFiltro, setStatusFiltro] = useState("todos");
   const [detalhesOpen, setDetalhesOpen] = useState(false);
@@ -54,7 +54,7 @@ export default function usePedidosRetirada() {
   const retirados = pedidos.filter((p) => p.status === "Entregue" && p.tipo_frete === "Retirada").length;
 
   const atualizarStatusMutation = useMutation({
-    mutationFn: ({ pedidoId, novoStatus }) => base44.entities.Pedido.update(pedidoId, { status: novoStatus }),
+    mutationFn: ({ pedidoId, novoStatus }) => updateInContext("Pedido", pedidoId, { status: novoStatus }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pedidos-retirada"] });
       toast.success("✅ Status atualizado!");
@@ -68,11 +68,11 @@ export default function usePedidosRetirada() {
       if (pedido.itens_revenda?.length > 0) {
         for (const item of pedido.itens_revenda) {
           if (item.produto_id) {
-            const produtos = await base44.entities.Produto.filter({ id: item.produto_id, ...ctx });
+            const produtos = await filterInContext("Produto", { id: item.produto_id });
             const produto = produtos[0];
             if (produto && (produto.estoque_atual || 0) >= (item.quantidade || 0)) {
               const novoEstoque = (produto.estoque_atual || 0) - (item.quantidade || 0);
-              await base44.entities.MovimentacaoEstoque.create({
+              await createInContext("MovimentacaoEstoque", {
                 ...ctx,
                 tipo_movimento: "saida",
                 origem_movimento: "pedido",
@@ -89,13 +89,13 @@ export default function usePedidosRetirada() {
                 responsavel: user?.full_name || "Sistema",
                 aprovado: true,
               });
-              await base44.entities.Produto.update(item.produto_id, { estoque_atual: novoEstoque });
+              await updateInContext("Produto", item.produto_id, { estoque_atual: novoEstoque });
             }
           }
         }
       }
 
-      await base44.entities.Pedido.update(pedido.id, {
+      await updateInContext("Pedido", pedido.id, {
         status: "Entregue",
         data_entrega_real: new Date().toISOString(),
       });

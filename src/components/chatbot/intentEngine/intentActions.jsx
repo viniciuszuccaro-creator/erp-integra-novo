@@ -88,7 +88,10 @@ async function criarPedido(clienteId, entidades, contexto) {
   const dataIso = new Date().toISOString().slice(0, 10);
   let clienteNome = 'Cliente';
   try {
-    const c = await base44.entities.Cliente.filter({ id: clienteId });
+    const clienteFiltro = { id: clienteId };
+    if (contexto?.groupId) clienteFiltro.group_id = contexto.groupId;
+    if (contexto?.empresaId) clienteFiltro.empresa_id = contexto.empresaId;
+    const c = await base44.entities.Cliente.filter(clienteFiltro);
     if (c?.[0]?.nome) clienteNome = c[0].nome;
   } catch {}
 

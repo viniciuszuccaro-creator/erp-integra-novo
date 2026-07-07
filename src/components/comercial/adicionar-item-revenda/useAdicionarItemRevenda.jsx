@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import { calcularPrecoItem } from "../CalculadorPrecoItem";
 
 export default function useAdicionarItemRevenda({
@@ -19,14 +19,9 @@ export default function useAdicionarItemRevenda({
   const [searchTerm, setSearchTerm] = useState("");
   const [mostrarSugestoes, setMostrarSugestoes] = useState(true);
 
-  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
-  const contextoKey = `${grupoAtual?.id || "sem-grupo"}-${empresaAtual?.id || "sem-empresa"}`;
+  const { contexto } = useContextoVisual();
 
-  const { data: produtos = [] } = useQuery({
-    queryKey: ["produtos", contextoKey],
-    queryFn: () => filterInContext("Produto", {}, "descricao", 999),
-    enabled: !!contexto,
-  });
+  const { data: produtos = [] } = useRLSQuery("Produto", {}, "descricao", 999);
 
   const produtosAtivos = produtos.filter(
     (p) =>

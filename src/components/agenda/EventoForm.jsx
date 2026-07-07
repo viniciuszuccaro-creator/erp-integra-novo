@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import { z } from "zod";
 import FormWrapper from "@/components/common/FormWrapper";
 import { Save, Calendar, Video, Bell, Mail, MessageSquare } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 /**
  * V21.1.2: Evento Form - Adaptado para Window Mode
@@ -42,19 +42,9 @@ export default function EventoForm({ evento, onSubmit, windowMode = false }) {
   });
 
   const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
-  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
-  const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes', contextoKey],
-    queryFn: () => filterInContext('Cliente', {}, '-created_date', 9999),
-    enabled: !!contextoKey,
-  });
-
-  const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos', contextoKey],
-    queryFn: () => filterInContext('Pedido', {}, '-created_date', 9999),
-    enabled: !!contextoKey,
-  });
+  const { data: clientes = [] } = useRLSQuery('Cliente', {}, '-created_date', 9999);
+  const { data: pedidos = [] } = useRLSQuery('Pedido', {}, '-created_date', 9999);
 
   const schema = z.object({
     titulo: z.string().min(1, 'Título é obrigatório'),

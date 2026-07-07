@@ -1,6 +1,5 @@
 import React from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Badge } from "@/components/ui/badge";
 import FormWrapper from "@/components/common/FormWrapper";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import FormErrorSummary from "@/components/common/FormErrorSummary";
 
 /**
@@ -62,15 +62,8 @@ export default function CotacaoForm({ cotacao, onSubmit, windowMode = false }) {
     setValue('fornecedores_selecionados', novaLista, { shouldValidate: true });
   };
 
-  const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos', empresaAtual?.id],
-    queryFn: () => filterInContext('Produto', {}, '-updated_date', 9999),
-  });
-
-  const { data: fornecedores = [] } = useQuery({
-    queryKey: ['fornecedores', empresaAtual?.id],
-    queryFn: () => filterInContext('Fornecedor', {}, '-updated_date', 9999),
-  });
+  const { data: produtos = [] } = useRLSQuery('Produto', {}, '-updated_date', 9999);
+  const { data: fornecedores = [] } = useRLSQuery('Fornecedor', {}, '-updated_date', 9999);
 
 
   const onValid = (data) => {

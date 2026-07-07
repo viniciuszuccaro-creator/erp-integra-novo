@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,17 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Package, CheckCircle, AlertTriangle } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 export default function SelecionarProdutoModal({ isOpen, onClose, onSelect }) {
   const [searchTerm, setSearchTerm] = useState("");
-  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
-  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+  const { contexto } = useContextoVisual();
 
-  const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos', contextoKey],
-    queryFn: () => filterInContext('Produto', {}, 'descricao', 999),
-    enabled: !!contexto,
-  });
+  const { data: produtos = [] } = useRLSQuery('Produto', {}, 'descricao', 999);
 
   const produtosFiltrados = produtos.filter(p => 
     p.descricao?.toLowerCase().includes(searchTerm.toLowerCase()) ||

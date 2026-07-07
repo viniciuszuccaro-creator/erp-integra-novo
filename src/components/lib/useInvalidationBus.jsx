@@ -9,24 +9,66 @@ import { useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
 // Mapa: entidade → query keys a invalidar no React Query
+// Cada entidade inclui [entityName] como prefixo para invalidar useRLSQuery keys
+// (formato: ['EntityName', scopeKey, criteriosKey, order, limit])
 const ENTITY_QUERY_KEYS = {
-  Cliente:             [['entityListSorted', 'Cliente'], ['Cliente', 'count']],
-  Fornecedor:          [['entityListSorted', 'Fornecedor'], ['Fornecedor', 'count']],
-  Transportadora:      [['entityListSorted', 'Transportadora'], ['Transportadora', 'count']],
-  Colaborador:         [['entityListSorted', 'Colaborador'], ['Colaborador', 'count']],
-  Produto:             [['entityListSorted', 'Produto'], ['Produto', 'count']],
-  Pedido:              [['entityListSorted', 'Pedido'], ['Pedido', 'count'], ['pedidos']],
-  ContaReceber:        [['entityListSorted', 'ContaReceber'], ['ContaReceber', 'count'], ['contasReceber']],
-  ContaPagar:          [['entityListSorted', 'ContaPagar'], ['ContaPagar', 'count'], ['contasPagar']],
-  Entrega:             [['entityListSorted', 'Entrega'], ['Entrega', 'count'], ['entregas']],
-  NotaFiscal:          [['entityListSorted', 'NotaFiscal'], ['NotaFiscal', 'count']],
-  OrdemCompra:         [['entityListSorted', 'OrdemCompra'], ['OrdemCompra', 'count']],
-  MovimentacaoEstoque: [['entityListSorted', 'MovimentacaoEstoque'], ['MovimentacaoEstoque', 'count']],
-  Oportunidade:        [['entityListSorted', 'Oportunidade'], ['Oportunidade', 'count']],
-  Representante:       [['entityListSorted', 'Representante'], ['Representante', 'count']],
-  ContatoB2B:          [['entityListSorted', 'ContatoB2B'], ['ContatoB2B', 'count']],
-  SegmentoCliente:     [['entityListSorted', 'SegmentoCliente'], ['SegmentoCliente', 'count']],
-  RegiaoAtendimento:   [['entityListSorted', 'RegiaoAtendimento'], ['RegiaoAtendimento', 'count']],
+  Cliente:             [['Cliente'], ['entityListSorted', 'Cliente'], ['Cliente', 'count']],
+  Fornecedor:          [['Fornecedor'], ['entityListSorted', 'Fornecedor'], ['Fornecedor', 'count']],
+  Transportadora:      [['Transportadora'], ['entityListSorted', 'Transportadora'], ['Transportadora', 'count']],
+  Colaborador:         [['Colaborador'], ['entityListSorted', 'Colaborador'], ['Colaborador', 'count']],
+  Produto:             [['Produto'], ['entityListSorted', 'Produto'], ['Produto', 'count']],
+  Pedido:              [['Pedido'], ['entityListSorted', 'Pedido'], ['Pedido', 'count'], ['pedidos']],
+  ContaReceber:        [['ContaReceber'], ['entityListSorted', 'ContaReceber'], ['ContaReceber', 'count'], ['contasReceber']],
+  ContaPagar:          [['ContaPagar'], ['entityListSorted', 'ContaPagar'], ['ContaPagar', 'count'], ['contasPagar']],
+  Entrega:             [['Entrega'], ['entityListSorted', 'Entrega'], ['Entrega', 'count'], ['entregas']],
+  NotaFiscal:          [['NotaFiscal'], ['entityListSorted', 'NotaFiscal'], ['NotaFiscal', 'count']],
+  OrdemCompra:         [['OrdemCompra'], ['entityListSorted', 'OrdemCompra'], ['OrdemCompra', 'count']],
+  MovimentacaoEstoque: [['MovimentacaoEstoque'], ['entityListSorted', 'MovimentacaoEstoque'], ['MovimentacaoEstoque', 'count']],
+  Oportunidade:        [['Oportunidade'], ['entityListSorted', 'Oportunidade'], ['Oportunidade', 'count']],
+  Representante:       [['Representante'], ['entityListSorted', 'Representante'], ['Representante', 'count']],
+  ContatoB2B:          [['ContatoB2B'], ['entityListSorted', 'ContatoB2B'], ['ContatoB2B', 'count']],
+  SegmentoCliente:     [['SegmentoCliente'], ['entityListSorted', 'SegmentoCliente'], ['SegmentoCliente', 'count']],
+  RegiaoAtendimento:   [['RegiaoAtendimento'], ['entityListSorted', 'RegiaoAtendimento'], ['RegiaoAtendimento', 'count']],
+  CentroCusto:         [['CentroCusto'], ['entityListSorted', 'CentroCusto'], ['CentroCusto', 'count']],
+  PlanoDeContas:       [['PlanoDeContas'], ['entityListSorted', 'PlanoDeContas'], ['PlanoDeContas', 'count']],
+  FormaPagamento:      [['FormaPagamento'], ['entityListSorted', 'FormaPagamento'], ['FormaPagamento', 'count']],
+  Banco:               [['Banco'], ['entityListSorted', 'Banco'], ['Banco', 'count']],
+  GatewayPagamento:    [['GatewayPagamento'], ['entityListSorted', 'GatewayPagamento'], ['GatewayPagamento', 'count']],
+  Marca:               [['Marca'], ['entityListSorted', 'Marca'], ['Marca', 'count']],
+  GrupoProduto:        [['GrupoProduto'], ['entityListSorted', 'GrupoProduto'], ['GrupoProduto', 'count']],
+  UnidadeMedida:       [['UnidadeMedida'], ['entityListSorted', 'UnidadeMedida'], ['UnidadeMedida', 'count']],
+  TabelaNCM:           [['TabelaNCM'], ['entityListSorted', 'TabelaNCM'], ['TabelaNCM', 'count']],
+  TabelaPreco:         [['TabelaPreco'], ['entityListSorted', 'TabelaPreco'], ['TabelaPreco', 'count']],
+  CondicaoComercial:   [['CondicaoComercial'], ['entityListSorted', 'CondicaoComercial'], ['CondicaoComercial', 'count']],
+  SetorAtividade:      [['SetorAtividade'], ['entityListSorted', 'SetorAtividade'], ['SetorAtividade', 'count']],
+  Cargo:               [['Cargo'], ['entityListSorted', 'Cargo'], ['Cargo', 'count']],
+  Departamento:        [['Departamento'], ['entityListSorted', 'Departamento'], ['Departamento', 'count']],
+  Turno:               [['Turno'], ['entityListSorted', 'Turno'], ['Turno', 'count']],
+  Veiculo:             [['Veiculo'], ['entityListSorted', 'Veiculo'], ['Veiculo', 'count']],
+  Motorista:           [['Motorista'], ['entityListSorted', 'Motorista'], ['Motorista', 'count']],
+  RotaPadrao:          [['RotaPadrao'], ['entityListSorted', 'RotaPadrao'], ['RotaPadrao', 'count']],
+  TipoFrete:           [['TipoFrete'], ['entityListSorted', 'TipoFrete'], ['TipoFrete', 'count']],
+  LocalEstoque:        [['LocalEstoque'], ['entityListSorted', 'LocalEstoque'], ['LocalEstoque', 'count']],
+  Servico:             [['Servico'], ['entityListSorted', 'Servico'], ['Servico', 'count']],
+  KitProduto:          [['KitProduto'], ['entityListSorted', 'KitProduto'], ['KitProduto', 'count']],
+  MoedaIndice:         [['MoedaIndice'], ['entityListSorted', 'MoedaIndice'], ['MoedaIndice', 'count']],
+  CentroResultado:     [['CentroResultado'], ['entityListSorted', 'CentroResultado'], ['CentroResultado', 'count']],
+  CentroOperacao:      [['CentroOperacao'], ['entityListSorted', 'CentroOperacao'], ['CentroOperacao', 'count']],
+  Evento:              [['Evento'], ['entityListSorted', 'Evento'], ['Evento', 'count']],
+  Ferias:              [['Ferias'], ['entityListSorted', 'Ferias'], ['Ferias', 'count']],
+  Ponto:               [['Ponto'], ['entityListSorted', 'Ponto'], ['Ponto', 'count']],
+  Contrato:            [['Contrato'], ['entityListSorted', 'Contrato'], ['Contrato', 'count']],
+  SolicitacaoCompra:   [['SolicitacaoCompra'], ['entityListSorted', 'SolicitacaoCompra'], ['SolicitacaoCompra', 'count']],
+  OrdemProducao:       [['OrdemProducao'], ['entityListSorted', 'OrdemProducao'], ['OrdemProducao', 'count']],
+  ApontamentoProducao: [['ApontamentoProducao'], ['entityListSorted', 'ApontamentoProducao'], ['ApontamentoProducao', 'count']],
+  Romaneio:            [['Romaneio'], ['entityListSorted', 'Romaneio'], ['Romaneio', 'count']],
+  Inventario:          [['Inventario'], ['entityListSorted', 'Inventario'], ['Inventario', 'count']],
+  TransferenciaFilial: [['TransferenciaFilial'], ['entityListSorted', 'TransferenciaFilial'], ['TransferenciaFilial', 'count']],
+  CatalogoWeb:         [['CatalogoWeb'], ['entityListSorted', 'CatalogoWeb'], ['CatalogoWeb', 'count']],
+  OperadorCaixa:       [['OperadorCaixa'], ['entityListSorted', 'OperadorCaixa'], ['OperadorCaixa', 'count']],
+  TabelaFiscal:        [['TabelaFiscal'], ['entityListSorted', 'TabelaFiscal'], ['TabelaFiscal', 'count']],
+  Empresa:             [['Empresa'], ['entityListSorted', 'Empresa'], ['Empresa', 'count'], ['empresas']],
+  ConfiguracaoSistema: [['ConfiguracaoSistema'], ['configuracaoSistema'], ['config-sistema']],
 };
 
 // Throttle de invalidação por entidade (evita flood de invalidações em eventos rápidos)
@@ -57,7 +99,7 @@ export function useInvalidationBus(entities = [], options = {}) {
         if (now - last < INVALIDATE_THROTTLE_MS) return;
         lastInvalidateRef.current[entityName] = now;
 
-        const keys = ENTITY_QUERY_KEYS[entityName] || [['entityListSorted', entityName]];
+        const keys = ENTITY_QUERY_KEYS[entityName] || [[entityName], ['entityListSorted', entityName]];
         // Invalidação assíncrona para não bloquear o handler
         setTimeout(() => {
           keys.forEach((qk) => {

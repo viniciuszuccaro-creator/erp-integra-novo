@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
 import FormWrapper from "@/components/common/FormWrapper";
 import { Input } from "@/components/ui/input";
 import movimentacaoSchema from "@/components/estoque/movimentacaoSchema";
@@ -12,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Save, ArrowDown, ArrowUp } from "lucide-react";
 import { useUser } from "@/components/lib/UserContext";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 /**
  * V21.1.2: Movimentação Form - Adaptado para Window Mode
@@ -47,10 +47,7 @@ export default function MovimentacaoForm({ movimentacao, onSubmit, windowMode = 
     }));
   }, [authUser?.id, defaultEmpresaId]);
 
-  const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos', empresaAtual?.id],
-    queryFn: () => filterInContext('Produto', {}, '-updated_date', 9999),
-  });
+  const { data: produtos = [] } = useRLSQuery('Produto', {}, '-updated_date', 9999);
 
   const handleProdutoChange = (produtoId) => {
     const produto = produtos.find(p => p.id === produtoId);

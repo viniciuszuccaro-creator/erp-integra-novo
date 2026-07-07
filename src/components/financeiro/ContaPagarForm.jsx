@@ -11,7 +11,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { SelectWithAudit } from "@/components/ui/SelectWithAudit";
 import { DollarSign, Calendar, FileText, Building2, Package, Loader2, TrendingDown } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import FormWrapper from "@/components/common/FormWrapper";
@@ -22,6 +21,7 @@ import ContaPagarFinanceiroSection from "@/components/financeiro/ContaPagarFinan
 import ContaPagarVinculosSection from "@/components/financeiro/ContaPagarVinculosSection";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import { useUser } from "@/components/lib/UserContext";
 
 export default function ContaPagarForm({ conta, onSubmit, isSubmitting, windowMode = false }) {
@@ -56,30 +56,11 @@ export default function ContaPagarForm({ conta, onSubmit, isSubmitting, windowMo
 
   const { formasPagamento } = useFormasPagamento({ empresa_id: formData.empresa_id });
 
-  const { data: fornecedores = [] } = useQuery({
-    queryKey: ['fornecedores', empresaAtual?.id],
-    queryFn: () => filterInContext('Fornecedor', {}, '-updated_date', 9999),
-  });
-
-  const { data: ordensCompra = [] } = useQuery({
-    queryKey: ['ordens-compra', empresaAtual?.id],
-    queryFn: () => filterInContext('OrdemCompra', {}, '-updated_date', 9999),
-  });
-
-  const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas', empresaAtual?.id],
-    queryFn: () => filterInContext('Empresa', {}, '-updated_date', 9999),
-  });
-
-  const { data: centrosCusto = [] } = useQuery({
-    queryKey: ['centrosCusto', empresaAtual?.id],
-    queryFn: () => filterInContext('CentroCusto', {}, '-updated_date', 9999),
-  });
-
-  const { data: planosContas = [] } = useQuery({
-    queryKey: ['planosContas', empresaAtual?.id],
-    queryFn: () => filterInContext('PlanoDeContas', {}, '-updated_date', 9999),
-  });
+  const { data: fornecedores = [] } = useRLSQuery('Fornecedor', {}, '-updated_date', 9999);
+  const { data: ordensCompra = [] } = useRLSQuery('OrdemCompra', {}, '-updated_date', 9999);
+  const { data: empresas = [] } = useRLSQuery('Empresa', {}, '-updated_date', 9999);
+  const { data: centrosCusto = [] } = useRLSQuery('CentroCusto', {}, '-updated_date', 9999);
+  const { data: planosContas = [] } = useRLSQuery('PlanoDeContas', {}, '-updated_date', 9999);
 
   // Recebe payload já validado e carimbado pelo FormWrapper quando externalData é usado
   const handleSubmit = async (payload) => {

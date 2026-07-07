@@ -103,6 +103,14 @@ function LayoutContent({ children, currentPageName }) {
     'Pedido', 'ContaReceber', 'ContaPagar', 'Entrega', 'NotaFiscal',
     'OrdemCompra', 'MovimentacaoEstoque', 'Oportunidade', 'Representante',
     'ContatoB2B', 'SegmentoCliente', 'RegiaoAtendimento',
+    'CentroCusto', 'PlanoDeContas', 'FormaPagamento', 'Banco', 'GatewayPagamento',
+    'Marca', 'GrupoProduto', 'UnidadeMedida', 'TabelaNCM', 'TabelaPreco',
+    'CondicaoComercial', 'SetorAtividade', 'Cargo', 'Departamento', 'Turno',
+    'Veiculo', 'Motorista', 'RotaPadrao', 'TipoFrete', 'LocalEstoque',
+    'Servico', 'KitProduto', 'MoedaIndice', 'CentroResultado', 'CentroOperacao',
+    'Evento', 'Ferias', 'Ponto', 'Contrato', 'SolicitacaoCompra',
+    'OrdemProducao', 'ApontamentoProducao', 'Romaneio', 'Inventario',
+    'TransferenciaFilial', 'CatalogoWeb', 'OperadorCaixa', 'TabelaFiscal',
   ], { enabled: true });
   useNavHistory();
   usePredictivePrefetch();

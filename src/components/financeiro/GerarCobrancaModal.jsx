@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import GeradorLinkPagamento from "./GeradorLinkPagamento";
 import WizardGatewayPagamento from "./WizardGatewayPagamento";
 import useContextoVisual from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
 
 /**
@@ -42,11 +43,10 @@ export default function GerarCobrancaModal({ isOpen, onClose, contaReceber }) {
     canEdit("Financeiro", "Contas a Receber") ||
     hasPermission("Financeiro", null, "gerenciar");
 
-  const { data: configsCobranca = [] } = useQuery({
-    queryKey: ['configs-cobranca', contextKey],
-    queryFn: () => filterInContext('ConfiguracaoCobrancaEmpresa', {}, '-created_date', 50),
-    enabled: contextoValido,
-  });
+  const { data: configsCobranca = [] } = useRLSQuery(
+    'ConfiguracaoCobrancaEmpresa', {}, '-created_date', 50,
+    { enabled: contextoValido }
+  );
 
   const config = configsCobranca.find(c => c.empresa_id === contaReceber?.empresa_id);
 

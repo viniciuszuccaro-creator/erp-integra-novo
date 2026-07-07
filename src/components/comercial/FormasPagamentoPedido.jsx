@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,13 +34,9 @@ export default function FormasPagamentoPedido({
 }) {
   const [numeroParcelas, setNumeroParcelas] = useState(1);
   const [percentualAcrescimo, setPercentualAcrescimo] = useState(acrescimo || 0);
-  const { filterInContext, empresaAtual, estaNoGrupo, grupoAtual } = useContextoVisual();
+  const { empresaAtual } = useContextoVisual();
 
-  const { data: formasPagamento = [], isLoading: loadingFormas } = useQuery({
-    queryKey: ['formas-pagamento', empresaAtual?.id, estaNoGrupo, grupoAtual?.id],
-    queryFn: () => filterInContext('FormaPagamento', { ativa: true }),
-    staleTime: 120000,
-  });
+  const { formasPagamento = [], isLoading: loadingFormas } = useFormasPagamento({ empresa_id: empresaAtual?.id });
 
   const formasAtivas = (formasPagamento.length > 0)
     ? formasPagamento.filter(f => f.ativa !== false)

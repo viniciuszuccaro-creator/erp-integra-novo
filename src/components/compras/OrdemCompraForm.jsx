@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
 import { useForm, Controller } from "react-hook-form";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,15 +50,8 @@ export default function OrdemCompraForm({ ordemCompra, onSubmit, windowMode = fa
 
   // Zod schema (mantido)
 
-  const { data: fornecedores = [] } = useQuery({
-    queryKey: ['fornecedores', empresaAtual?.id],
-    queryFn: () => filterInContext('Fornecedor', {}, '-updated_date', 9999),
-  });
-
-  const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos', empresaAtual?.id],
-    queryFn: () => filterInContext('Produto', {}, '-updated_date', 9999),
-  });
+  const { data: fornecedores = [] } = useRLSQuery('Fornecedor', {}, '-updated_date', 9999);
+  const { data: produtos = [] } = useRLSQuery('Produto', {}, '-updated_date', 9999);
 
   const handleAddItem = () => {
     if (!novoItem.produto_id) return;

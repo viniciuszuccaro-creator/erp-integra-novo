@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 /**
  * countEntities V6 — CORREÇÃO DEFINITIVA DE CONTAGEM INFLADA
@@ -100,14 +100,14 @@ async function buildFilter(base44, entityName, rawFilter) {
       const ids = (empresas || []).map(e => e.id).filter(Boolean);
 
       if (EXPAND_SET.has(entityName)) {
-        const conds = [{ group_id: groupId }, { empresa_id: null, group_id: null }];
+        const conds = [{ group_id: groupId }];
         if (ids.length > 0) conds.push({ [campo]: { $in: ids } });
         if (campo !== 'empresa_id' && ids.length > 0) conds.push({ empresa_id: { $in: ids } });
         return { $or: conds };
       }
 
-      // Demais entidades: filtra pelo group_id direto, empresa dentro do grupo, ou órfãos
-      const conds = [{ group_id: groupId }, { empresa_id: null, group_id: null }];
+      // Demais entidades: filtra pelo group_id direto ou empresa dentro do grupo
+      const conds = [{ group_id: groupId }];
       if (ids.length > 0) conds.push({ [campo]: { $in: ids } });
       return { $or: conds };
     } catch (_) {

@@ -35,9 +35,9 @@ export default function ConfigCenter({ empresaId: empresaIdProp }) {
       return loadScopedConfiguracaoSistema({ empresaId: eId, grupoId: gId, limit: 200 });
     },
     enabled: canLoad,
-    staleTime: 0,
-    gcTime: 30000,
-    refetchOnMount: 'always',
+    staleTime: 30000,
+    gcTime: 300000,
+    refetchOnMount: true,
   });
 
   // Subscription em tempo real — invalida cache quando ConfiguracaoSistema muda

@@ -20,6 +20,8 @@ export default function ToggleRow({
   disabled = false,
 }) {
   const checked = getToggleValue ? getToggleValue(configs, chave) : false;
+  // saving pode ser um objeto { [chave]: boolean } ou um boolean
+  const isSaving = saving && typeof saving === 'object' ? !!saving[chave] : !!saving;
   const accentMap = {
     blue: "text-blue-600",
     purple: "text-purple-600",
@@ -33,11 +35,11 @@ export default function ToggleRow({
         {desc && <p className="text-xs text-slate-500 mt-0.5">{desc}</p>}
       </div>
       <div className="flex items-center gap-2">
-        {(saving || isFetching) && <Loader2 className="w-3 h-3 animate-spin text-slate-400" />}
+        {(isSaving || isFetching) && <Loader2 className="w-3 h-3 animate-spin text-slate-400" />}
         <Switch
           checked={checked}
           onCheckedChange={() => onToggle && onToggle(chave, categoria, !checked)}
-          disabled={disabled || saving}
+          disabled={disabled || isSaving}
           data-permission="Sistema.Configuracao.editar"
         />
       </div>

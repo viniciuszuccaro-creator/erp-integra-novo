@@ -32,12 +32,12 @@ export default function useVisualizadorQuery({
       });
       return Array.isArray(res?.data) ? res.data : [];
     },
-    staleTime: 15000,
+    staleTime: 30000,
     gcTime: 300000,
     retry: 1,
     retryDelay: (attempt) => Math.min(800 * (attempt + 1), 3000),
     refetchOnWindowFocus: false,
-    refetchOnMount: 'always',
+    refetchOnMount: true,
     placeholderData: (prev) => prev !== undefined ? prev : [],
     // P2: só executa quando há contexto multiempresa válido E permissão
     enabled: !!ENTITY && contextoValido && canViewCadastro,

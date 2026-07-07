@@ -4,10 +4,10 @@ export const COMERCIAL_EXTERNAL_LIMIT = 30;
 export const COMERCIAL_COMPANY_LIMIT = 9999;
 
 export const comercialQueryDefaults = {
-  staleTime: 120000,
-  gcTime: 600000,
+  staleTime: 30000,
+  gcTime: 300000,
   refetchOnWindowFocus: false,
   refetchOnReconnect: false,
-  retry: false,
+  retry: 1,
   initialData: [],
 };

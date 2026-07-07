@@ -44,7 +44,7 @@ export function useRLSQuery(
     enabled: queryOptions.enabled !== undefined
       ? queryOptions.enabled
       : !!(empresaAtual?.id || grupoAtual?.id || contexto === 'grupo'),
-    retry: 0,
+    retry: 1,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     ...queryOptions,

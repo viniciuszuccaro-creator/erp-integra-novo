@@ -41,9 +41,9 @@ export default function ConfigGlobal({ empresaId, grupoId }) {
       return loadScopedConfiguracaoSistema({ empresaId: eId, grupoId: gId, limit: 500, includeGlobal: true });
     },
     enabled: hasValidScope,
-    staleTime: 0,
-    gcTime: 30000,
-    refetchOnMount: 'always',
+    staleTime: 30000,
+    gcTime: 300000,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
     retry: 1,
   });
@@ -54,7 +54,7 @@ export default function ConfigGlobal({ empresaId, grupoId }) {
       if (evt.type === 'create' || evt.type === 'update') {
         const d = evt.data || {};
         const relevante = (eId && d.empresa_id === eId) || (gId && d.group_id === gId) || (!d.empresa_id && !d.group_id);
-        if (relevante) queryClient.invalidateQueries({ queryKey, exact: true });
+        if (relevante) queryClient.invalidateQueries({ queryKey, exact: false });
       }
     });
     return () => { if (typeof unsub === 'function') unsub(); };
@@ -89,7 +89,7 @@ export default function ConfigGlobal({ empresaId, grupoId }) {
     try {
       const scope = { ...(gId && { group_id: gId }), ...(eId && { empresa_id: eId }) };
       await base44.functions.invoke('upsertConfig', { chave, data: { chave, categoria, ...dados }, scope });
-      await queryClient.invalidateQueries({ queryKey, exact: true });
+      await queryClient.invalidateQueries({ queryKey, exact: false });
       await refetch();
       toast.success('✅ Configuração salva!');
     } catch (err) {

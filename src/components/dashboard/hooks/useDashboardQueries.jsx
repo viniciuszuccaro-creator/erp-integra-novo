@@ -23,7 +23,7 @@ export function useDashboardQueries({ canSeeFinanceiro, canSeeCRM, canSeeComerci
   const { data: produtos = [] } = useRLSQuery('Produto', {}, '-created_date', DASHBOARD_LIST_LIMIT, { enabled: Boolean(canSeeEstoque && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval });
   const { data: clientes = [] } = useRLSQuery('Cliente', {}, '-created_date', DASHBOARD_LIST_LIMIT, { enabled: Boolean(canSeeCRM && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval });
   const { data: ordensProducao = [] } = useRLSQuery('OrdemProducao', {}, '-data_emissao', DASHBOARD_LIST_LIMIT, { enabled: Boolean(canSeeProducao && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval });
-  const { data: notasFiscais = [] } = useRLSQuery('NotaFiscal', {}, '-created_date', DASHBOARD_LIST_LIMIT, { enabled: Boolean((canSeeFinanceiro || canSeeFiscal || canSeeComercial) && hasContextoAtivo), staleTime: 120000, refetchOnWindowFocus: false, refetchOnReconnect: false, retry: false, refetchInterval });
+  const { data: notasFiscais = [] } = useRLSQuery('NotaFiscal', {}, '-created_date', DASHBOARD_LIST_LIMIT, { enabled: Boolean((canSeeFinanceiro || canSeeFiscal || canSeeComercial) && hasContextoAtivo), staleTime: 30000, refetchOnWindowFocus: false, refetchOnReconnect: false, retry: 1, refetchInterval });
 
   const { data: iaConsolidado = {}, isLoading: loadingAnomIA } = useQuery({
     queryKey: ['iaConsolidado', empresaAtual?.id, grupoAtual?.id],
@@ -74,15 +74,15 @@ export function useDashboardQueries({ canSeeFinanceiro, canSeeCRM, canSeeComerci
   useEffect(() => {
     if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return;
     const subs = [];
-    const add = (api, key) => { if (!api?.subscribe) return; const un = api.subscribe(() => { try { queryClient.invalidateQueries({ queryKey: [key] }); } catch (_) {} }); subs.push(un); };
-    add(base44.entities?.Pedido, 'pedidos');
-    add(base44.entities?.ContaReceber, 'contasReceber');
-    add(base44.entities?.ContaPagar, 'contasPagar');
-    add(base44.entities?.Entrega, 'entregas');
-    add(base44.entities?.Produto, 'produtos');
-    add(base44.entities?.Cliente, 'clientes');
-    add(base44.entities?.OrdemProducao, 'ordensProducao');
-    add(base44.entities?.NotaFiscal, 'notasFiscais');
+    const add = (api, key) => { if (!api?.subscribe) return; const un = api.subscribe(() => { try { queryClient.invalidateQueries({ queryKey: [key], exact: false }); } catch (_) {} }); subs.push(un); };
+    add(base44.entities?.Pedido, 'Pedido');
+    add(base44.entities?.ContaReceber, 'ContaReceber');
+    add(base44.entities?.ContaPagar, 'ContaPagar');
+    add(base44.entities?.Entrega, 'Entrega');
+    add(base44.entities?.Produto, 'Produto');
+    add(base44.entities?.Cliente, 'Cliente');
+    add(base44.entities?.OrdemProducao, 'OrdemProducao');
+    add(base44.entities?.NotaFiscal, 'NotaFiscal');
     return () => { subs.forEach(u => { try { u && u(); } catch (_) {} }); };
   }, [empresaAtual?.id, grupoAtual?.id, estaNoGrupo]);
 

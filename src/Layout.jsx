@@ -101,6 +101,21 @@ function LayoutContent({ children, currentPageName }) {
     'ApiExterna', 'ChatbotCanal', 'ChatbotIntent', 'ChatbotIntents',
     'JobAgendado', 'Webhook', 'EventoNotificacao', 'ModeloDocumento',
     'PerfilAcesso', 'GrupoEmpresarial',
+    'ChatbotInteracao', 'ImportacaoXMLNFe', 'SolicitacaoAprovacao',
+    'SeparacaoConferencia', 'ConciliacaoPedido', 'RateioFinanceiro',
+    'ConciliacaoBancaria', 'ExtratoBancario', 'CaixaMovimento',
+    'MovimentoCartao', 'CaixaOrdemLiquidacao', 'LancamentoContabil',
+    'DRE', 'SPEDFiscal', 'LogFiscal', 'MonitoramentoSistema',
+    'AlertaPerformance', 'LogPerformance', 'BackupAutomatico',
+    'ConfiguracaoBackup', 'ConfiguracaoMonitoramento', 'ConfiguracaoSeguranca',
+    'GovernancaEmpresa', 'AuditoriaGlobal', 'AuditoriaAcesso',
+    'AuditoriaGPS', 'AuditoriaIA', 'LogsIA', 'LogCobranca',
+    'PlanoMelhoriaItem', 'TabelaDIFAL', 'ConversaOmnicanal',
+    'MensagemOmnicanal', 'PagamentoOmnichannel', 'SessaoUsuario',
+    'TokenRefresh', 'ConfiguracaoIntegracaoMarketplace', 'DocumentoTecnica',
+    'ParametroOrigemPedido', 'ConfigFiscalEmpresa', 'PermissaoEmpresaModulo',
+    'SolicitacaoAprovacao', 'MonitoramentoRH', 'InspecaoQualidade',
+    'TabelaPrecoItem', 'PedidoEtapa', 'EntregaItens', 'PedidoExterno',
   ], { enabled: true });
   useNavHistory();
   usePredictivePrefetch();

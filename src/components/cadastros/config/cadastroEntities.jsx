@@ -133,8 +133,9 @@ export const CADASTROS_ENTITIES = {
   CatalogoWeb: {
     label: "Catálogos Web", group: "Produtos & Serviços", icon: Package,
     columns: [
-      { field: "nome", label: "Nome", searchable: true, sortable: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "produto_id", label: "Produto", searchable: true, sortable: true },
+      { field: "categoria_navegacao", label: "Categoria", searchable: true },
+      { field: "exibir_no_app", label: "No App", type: "boolean" },
     ],
   },
   UnidadeMedida: {
@@ -203,8 +204,9 @@ export const CADASTROS_ENTITIES = {
   OperadorCaixa: {
     label: "Operadores de Caixa", group: "Financeiro & Fiscal", icon: DollarSign,
     columns: [
-      { field: "nome", label: "Nome", searchable: true, sortable: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "usuario_nome", label: "Nome", searchable: true, sortable: true },
+      { field: "codigo_operador", label: "Código", searchable: true, numeric: true },
+      { field: "status_caixa", label: "Status", searchable: true },
     ],
   },
   ConfiguracaoDespesaRecorrente: {
@@ -217,8 +219,9 @@ export const CADASTROS_ENTITIES = {
   TabelaFiscal: {
     label: "Tabelas Fiscais", group: "Financeiro & Fiscal", icon: DollarSign,
     columns: [
-      { field: "nome", label: "Nome", searchable: true, sortable: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "nome_regra", label: "Nome da Regra", searchable: true, sortable: true },
+      { field: "cenario_operacao", label: "Cenário", searchable: true },
+      { field: "cfop", label: "CFOP", searchable: true },
     ],
   },
   CondicaoComercial: {
@@ -291,8 +294,9 @@ export const CADASTROS_ENTITIES = {
   GrupoEmpresarial: {
     label: "Grupos Empresariais", group: "Estrutura Organizacional", icon: Building2,
     columns: [
-      { field: "nome", label: "Nome", searchable: true, sortable: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "nome_do_grupo", label: "Nome do Grupo", searchable: true, sortable: true },
+      { field: "razao_social_grupo", label: "Razão Social", searchable: true },
+      { field: "cnpj_grupo", label: "CNPJ", searchable: true },
     ],
   },
   Departamento: {

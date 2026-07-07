@@ -350,6 +350,21 @@ export function useContextoVisual() {
             Servico: { field: 'descricao', direction: 'asc' },
             FormaPagamento: { field: 'descricao', direction: 'asc' },
             ContatoB2B: { field: 'nome_completo', direction: 'asc' },
+            CatalogoWeb: { field: 'produto_id', direction: 'asc' },
+            OperadorCaixa: { field: 'usuario_nome', direction: 'asc' },
+            TabelaFiscal: { field: 'nome_regra', direction: 'asc' },
+            GrupoEmpresarial: { field: 'nome_do_grupo', direction: 'asc' },
+            TabelaPreco: { field: 'nome', direction: 'asc' },
+            ConfiguracaoDespesaRecorrente: { field: 'nome', direction: 'asc' },
+            ConfiguracaoNFe: { field: 'descricao', direction: 'asc' },
+            EventoNotificacao: { field: 'nome', direction: 'asc' },
+            ApiExterna: { field: 'nome_api', direction: 'asc' },
+            ChatbotCanal: { field: 'nome_canal', direction: 'asc' },
+            ChatbotIntent: { field: 'nome_intent', direction: 'asc' },
+            JobAgendado: { field: 'nome_job', direction: 'asc' },
+            Webhook: { field: 'nome_webhook', direction: 'asc' },
+            GatewayPagamento: { field: 'nome_gateway', direction: 'asc' },
+            ModeloDocumento: { field: 'nome_modelo', direction: 'asc' },
           };
 
           const normalizeSortField = (entityName, field) => {
@@ -366,6 +381,10 @@ export function useContextoVisual() {
             if (entityName === 'Marca' && (f === 'nome' || f === 'name')) return 'nome_marca';
             if (entityName === 'GrupoProduto' && (f === 'nome' || f === 'name')) return 'nome_grupo';
             if (entityName === 'SetorAtividade' && (f === 'name')) return 'nome';
+            if (entityName === 'CatalogoWeb' && (f === 'nome' || f === 'name')) return 'produto_id';
+            if (entityName === 'OperadorCaixa' && (f === 'nome' || f === 'name')) return 'usuario_nome';
+            if (entityName === 'TabelaFiscal' && (f === 'nome' || f === 'name')) return 'nome_regra';
+            if (entityName === 'GrupoEmpresarial' && (f === 'nome' || f === 'name')) return 'nome_do_grupo';
             return field;
           };
           const getLastSort = (entityName) => {

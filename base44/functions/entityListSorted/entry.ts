@@ -34,6 +34,21 @@ const DEFAULT_SORTS = {
   CondicaoComercial: { field: 'nome_condicao', direction: 'asc' }, LocalEstoque: { field: 'nome', direction: 'asc' },
   TipoFrete: { field: 'nome', direction: 'asc' }, ContatoB2B: { field: 'nome_completo', direction: 'asc' },
   PlanoDeContas: { field: 'codigo', direction: 'asc' },
+  CatalogoWeb: { field: 'produto_id', direction: 'asc' },
+  OperadorCaixa: { field: 'usuario_nome', direction: 'asc' },
+  TabelaFiscal: { field: 'nome_regra', direction: 'asc' },
+  GrupoEmpresarial: { field: 'nome_do_grupo', direction: 'asc' },
+  TabelaPreco: { field: 'nome', direction: 'asc' },
+  ConfiguracaoDespesaRecorrente: { field: 'nome', direction: 'asc' },
+  ConfiguracaoNFe: { field: 'descricao', direction: 'asc' },
+  EventoNotificacao: { field: 'nome', direction: 'asc' },
+  ApiExterna: { field: 'nome_api', direction: 'asc' },
+  ChatbotCanal: { field: 'nome_canal', direction: 'asc' },
+  ChatbotIntent: { field: 'nome_intent', direction: 'asc' },
+  JobAgendado: { field: 'nome_job', direction: 'asc' },
+  Webhook: { field: 'nome_webhook', direction: 'asc' },
+  GatewayPagamento: { field: 'nome_gateway', direction: 'asc' },
+  ModeloDocumento: { field: 'nome_modelo', direction: 'asc' },
 };
 
 const SEARCH_FIELDS = {
@@ -65,18 +80,18 @@ const SEARCH_FIELDS = {
   PlanoDeContas: ['codigo', 'nome_conta', 'tipo'],
   TipoDespesa: ['nome', 'codigo', 'categoria'],
   MoedaIndice: ['codigo', 'nome', 'simbolo'],
-  GrupoEmpresarial: ['nome', 'cnpj', 'razao_social'],
+  GrupoEmpresarial: ['nome_do_grupo', 'razao_social_grupo', 'cnpj_grupo'],
   Empresa: ['razao_social', 'nome_fantasia', 'cnpj'],
   ContatoB2B: ['nome_completo', 'cargo', 'tipo_vinculo'],
   KitProduto: ['nome_kit', 'codigo', 'descricao'],
-  CatalogoWeb: ['nome', 'codigo', 'descricao'],
+  CatalogoWeb: ['produto_id', 'categoria_navegacao', 'slug_url', 'titulo_seo'],
   CondicaoComercial: ['nome_condicao', 'codigo', 'tipo_condicao'],
-  TabelaFiscal: ['nome', 'descricao', 'uf'],
+  TabelaFiscal: ['nome_regra', 'cenario_operacao', 'cfop', 'ncm'],
   LocalEstoque: ['nome', 'codigo', 'tipo'],
   RotaPadrao: ['nome_rota', 'codigo', 'descricao'],
   ModeloDocumento: ['nome_modelo', 'tipo_documento', 'descricao'],
   TipoFrete: ['nome', 'codigo', 'tipo'],
-  OperadorCaixa: ['nome', 'codigo'],
+  OperadorCaixa: ['usuario_nome', 'codigo_operador', 'nome_caixa'],
   GatewayPagamento: ['nome_gateway', 'descricao'],
   ApiExterna: ['nome_api', 'descricao'],
   ChatbotCanal: ['nome_canal', 'descricao'],
@@ -119,7 +134,7 @@ function normalizeSortField(entityName, requested) {
 // Campos que devem ser ordenados numericamente (item 11: código numérico, não texto)
 const NUMERIC_SORT_FIELDS = new Set([
   'codigo', 'codigo_banco', 'matricula', 'numero', 'codigo_interno',
-  'codigo_auxiliar', 'sequencia', 'ordem', 'nivel',
+  'codigo_auxiliar', 'sequencia', 'ordem', 'nivel', 'codigo_operador', 'codigo_servico',
 ]);
 
 function sanitizeVal(v) {

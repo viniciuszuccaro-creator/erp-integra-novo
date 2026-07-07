@@ -209,6 +209,7 @@ export function useContextoGrupoEmpresa() {
       setUser((prev) => prev ? { ...prev, contexto_atual: 'grupo', grupo_atual_id: grupo?.id || prev.grupo_atual_id } : prev);
       try { localStorage.setItem('contexto_atual', 'grupo'); } catch {}
       try { if (grupo?.id) localStorage.setItem('group_atual_id', grupo.id); } catch {}
+      try { sessionStorage.removeItem(CONTEXTO_CACHE_KEY); } catch {}
       queryClient.invalidateQueries();
       // Evitar reload completo; atualizar queries e deixar GuardRails liberar
     },
@@ -260,6 +261,7 @@ export function useContextoGrupoEmpresa() {
       setUser((prev) => prev ? { ...prev, contexto_atual: 'empresa', empresa_atual_id: empresa?.id || prev.empresa_atual_id } : prev);
       try { localStorage.setItem('contexto_atual', 'empresa'); } catch {}
       try { if (empresa?.id) localStorage.setItem('empresa_atual_id', empresa.id); } catch {}
+      try { sessionStorage.removeItem(CONTEXTO_CACHE_KEY); } catch {}
       queryClient.invalidateQueries();
       // Sem reload completo
     },

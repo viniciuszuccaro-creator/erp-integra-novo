@@ -8,22 +8,70 @@ import { useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
-// Mapa: título da sidebar → entidades para prefetch (limite leve, sem sobrecarregar)
+// Mapa: título da sidebar → entidades para prefetch (inclui Cadastro Gerais relevantes)
 const MODULE_PREFETCH = {
-  'CRM - Relacionamento':      [{ e: 'Cliente',        s: 'nome',         d: 'asc'  },
-                                { e: 'Oportunidade',   s: 'updated_date', d: 'desc' }],
-  'Comercial e Vendas':        [{ e: 'Pedido',         s: 'data_pedido',  d: 'desc' }],
-  'Estoque e Almoxarifado':    [{ e: 'Produto',        s: 'descricao',    d: 'asc'  }],
-  'Compras e Suprimentos':     [{ e: 'OrdemCompra',    s: 'data_solicitacao', d: 'desc' },
-                                { e: 'Fornecedor',     s: 'nome',         d: 'asc'  }],
-  'Financeiro e Contábil':     [{ e: 'ContaReceber',   s: 'data_vencimento', d: 'asc' },
-                                { e: 'ContaPagar',     s: 'data_vencimento', d: 'asc' }],
-  'Expedição e Logística':     [{ e: 'Entrega',        s: 'updated_date', d: 'desc' }],
-  'Cadastros Gerais':          [{ e: 'Cliente',        s: 'nome',         d: 'asc'  },
-                                { e: 'Produto',        s: 'descricao',    d: 'asc'  },
-                                { e: 'Fornecedor',     s: 'nome',         d: 'asc'  }],
-  'Fiscal e Tributário':       [{ e: 'NotaFiscal',     s: 'data_emissao', d: 'desc' }],
-  'Recursos Humanos':          [{ e: 'Colaborador',    s: 'nome_completo', d: 'asc' }],
+  'CRM - Relacionamento':      [{ e: 'Cliente',           s: 'nome',          d: 'asc'  },
+                                { e: 'Oportunidade',     s: 'updated_date',  d: 'desc' },
+                                { e: 'SegmentoCliente',   s: 'updated_date',  d: 'desc' },
+                                { e: 'RegiaoAtendimento', s: 'updated_date',  d: 'desc' },
+                                { e: 'Representante',     s: 'updated_date',  d: 'desc' },
+                                { e: 'ContatoB2B',        s: 'updated_date',  d: 'desc' }],
+  'Comercial e Vendas':        [{ e: 'Pedido',            s: 'data_pedido',   d: 'desc' },
+                                { e: 'Cliente',           s: 'nome',          d: 'asc'  },
+                                { e: 'Produto',           s: 'descricao',     d: 'asc'  },
+                                { e: 'FormaPagamento',    s: 'descricao',     d: 'asc'  },
+                                { e: 'CondicaoComercial', s: 'nome_condicao', d: 'asc'  },
+                                { e: 'Transportadora',    s: 'updated_date',  d: 'desc' },
+                                { e: 'TabelaPreco',       s: 'nome',          d: 'asc'  },
+                                { e: 'Representante',     s: 'updated_date',  d: 'desc' }],
+  'Estoque e Almoxarifado':    [{ e: 'Produto',           s: 'descricao',     d: 'asc'  },
+                                { e: 'LocalEstoque',      s: 'nome',          d: 'asc'  },
+                                { e: 'UnidadeMedida',     s: 'sigla',         d: 'asc'  },
+                                { e: 'GrupoProduto',      s: 'nome_grupo',    d: 'asc'  },
+                                { e: 'Marca',             s: 'nome_marca',    d: 'asc'  },
+                                { e: 'Fornecedor',        s: 'nome',          d: 'asc'  },
+                                { e: 'MovimentacaoEstoque', s: 'updated_date', d: 'desc' }],
+  'Compras e Suprimentos':     [{ e: 'OrdemCompra',       s: 'data_solicitacao', d: 'desc' },
+                                { e: 'Fornecedor',        s: 'nome',          d: 'asc'  },
+                                { e: 'Produto',           s: 'descricao',     d: 'asc'  },
+                                { e: 'CondicaoComercial', s: 'nome_condicao', d: 'asc'  },
+                                { e: 'SolicitacaoCompra', s: 'updated_date',  d: 'desc' }],
+  'Financeiro e Contábil':     [{ e: 'ContaReceber',     s: 'data_vencimento', d: 'asc'  },
+                                { e: 'ContaPagar',       s: 'data_vencimento', d: 'asc'  },
+                                { e: 'Banco',             s: 'codigo_banco',  d: 'asc'  },
+                                { e: 'FormaPagamento',    s: 'descricao',     d: 'asc'  },
+                                { e: 'PlanoDeContas',     s: 'codigo',        d: 'asc'  },
+                                { e: 'CentroCusto',       s: 'codigo',        d: 'asc'  },
+                                { e: 'CentroResultado',   s: 'nome',          d: 'asc'  },
+                                { e: 'TipoDespesa',       s: 'nome',          d: 'asc'  },
+                                { e: 'MoedaIndice',       s: 'codigo',        d: 'asc'  }],
+  'Expedição e Logística':     [{ e: 'Entrega',          s: 'updated_date',  d: 'desc' },
+                                { e: 'Veiculo',          s: 'placa',         d: 'asc'  },
+                                { e: 'Motorista',        s: 'nome_completo', d: 'asc'  },
+                                { e: 'Transportadora',    s: 'updated_date',  d: 'desc' },
+                                { e: 'RotaPadrao',       s: 'nome_rota',     d: 'asc'  },
+                                { e: 'TipoFrete',        s: 'nome',          d: 'asc'  }],
+  'Cadastros Gerais':          [{ e: 'Cliente',           s: 'nome',          d: 'asc'  },
+                                { e: 'Produto',           s: 'descricao',     d: 'asc'  },
+                                { e: 'Fornecedor',        s: 'nome',          d: 'asc'  },
+                                { e: 'Transportadora',    s: 'updated_date',  d: 'desc' },
+                                { e: 'Banco',             s: 'codigo_banco',  d: 'asc'  },
+                                { e: 'FormaPagamento',    s: 'descricao',     d: 'asc'  },
+                                { e: 'UnidadeMedida',     s: 'sigla',         d: 'asc'  },
+                                { e: 'CondicaoComercial', s: 'nome_condicao', d: 'asc'  }],
+  'Fiscal e Tributário':       [{ e: 'NotaFiscal',       s: 'data_emissao',  d: 'desc' },
+                                { e: 'TabelaFiscal',      s: 'nome_regra',    d: 'asc'  },
+                                { e: 'ConfiguracaoNFe',   s: 'provedor',      d: 'asc'  }],
+  'Recursos Humanos':          [{ e: 'Colaborador',      s: 'nome_completo', d: 'asc'  },
+                                { e: 'Cargo',            s: 'nome_cargo',    d: 'asc'  },
+                                { e: 'Departamento',     s: 'nome_departamento', d: 'asc' },
+                                { e: 'Turno',            s: 'nome_turno',    d: 'asc'  }],
+  'Produção e Manufatura':     [{ e: 'OrdemProducao',    s: 'data_emissao',  d: 'desc' },
+                                { e: 'Produto',          s: 'descricao',     d: 'asc'  },
+                                { e: 'Colaborador',       s: 'nome_completo', d: 'asc'  }],
+  'Gestão de Contratos':       [{ e: 'Contrato',         s: 'updated_date',  d: 'desc' },
+                                { e: 'Cliente',          s: 'nome',          d: 'asc'  },
+                                { e: 'Fornecedor',       s: 'nome',          d: 'asc'  }],
 };
 
 // TTL do prefetch: não refaz se dado tiver menos de 60s
@@ -33,7 +81,7 @@ const PREFETCH_LIMIT = 20;
 
 export function usePrefetchModuleData() {
   const queryClient = useQueryClient();
-  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual, contexto, filterInContext } = useContextoVisual();
 
   const prefetch = useCallback((moduleTitle) => {
     const specs = MODULE_PREFETCH[moduleTitle];
@@ -41,19 +89,15 @@ export function usePrefetchModuleData() {
 
     const empresaId = empresaAtual?.id;
     const groupId = grupoAtual?.id;
-    if (!empresaId && !groupId) return;
+    if (!empresaId && !groupId && contexto !== 'grupo') return;
 
-    // Monta filtro de contexto
-    const ctxFilter = {};
-    if (groupId) ctxFilter.group_id = groupId;
-    else if (empresaId) ctxFilter.empresa_id = empresaId;
+    const scopeKey = `${empresaId || 'all'}:${groupId || 'nogroup'}:${contexto}`;
 
     specs.forEach(({ e: entityName, s: sortField, d: sortDirection }) => {
-      const qKey = ['entityListSorted', entityName,
-        JSON.stringify(ctxFilter), sortField, sortDirection,
-        PREFETCH_LIMIT, 1, PREFETCH_LIMIT];
+      const order = `${sortDirection === 'desc' ? '-' : ''}${sortField}`;
+      // Query key IGUAL ao useRLSQuery para compartilhar cache
+      const qKey = [entityName, scopeKey, '{}', order, PREFETCH_LIMIT];
 
-      // Só prefetch se não houver dado fresco
       const existing = queryClient.getQueryState(qKey);
       if (existing?.dataUpdatedAt && Date.now() - existing.dataUpdatedAt < PREFETCH_STALE_MS) return;
 
@@ -61,17 +105,14 @@ export function usePrefetchModuleData() {
         queryKey: qKey,
         queryFn: async () => {
           try {
-            const api = base44.entities?.[entityName];
-            if (!api?.filter) return [];
-            const sortPrefix = sortDirection === 'asc' ? '' : '-';
-            const rows = await api.filter(ctxFilter, `${sortPrefix}${sortField}`, PREFETCH_LIMIT);
+            const rows = await filterInContext(entityName, {}, order, PREFETCH_LIMIT);
             return Array.isArray(rows) ? rows : [];
           } catch (_) { return []; }
         },
         staleTime: PREFETCH_STALE_MS,
       });
     });
-  }, [queryClient, empresaAtual?.id, grupoAtual?.id]);
+  }, [queryClient, empresaAtual?.id, grupoAtual?.id, contexto, filterInContext]);
 
   return { prefetch };
 }

@@ -18,7 +18,7 @@ import { base44 } from '@/api/base44Client';
 import { useUser } from '@/components/lib/UserContext';
 import usePermissions from '@/components/lib/usePermissions';
 
-export default function LayoutSidebar({ navigationItems, groupedItems }) {
+export default function LayoutSidebar({ navigationItems, groupedItems, onHoverItem }) {
   const location = useLocation();
   const { user } = useUser();
   const { hasPermission } = usePermissions();
@@ -70,7 +70,7 @@ export default function LayoutSidebar({ navigationItems, groupedItems }) {
                   {items.map((item) => {
                     const isActive = location.pathname === item.url;
                     return (
-                      <SidebarMenuItem key={item.title}>
+                      <SidebarMenuItem key={item.title} onMouseEnter={() => onHoverItem?.(item.title)}>
                         <SidebarMenuButton
                           asChild
                           className={`transition-all duration-200 rounded-lg mb-1 ${

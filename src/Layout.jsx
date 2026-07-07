@@ -7,7 +7,6 @@ import {
         MessageCircle, Building2,
       } from "lucide-react";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { base44 } from "@/api/base44Client";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import usePermissions from "@/components/lib/usePermissions";
 import { UserProvider, useUser } from "@/components/lib/UserContext";
@@ -21,6 +20,7 @@ import BootstrapGuard from "@/components/lib/BootstrapGuard";
 import GlobalNetworkErrorHandler from "@/components/lib/GlobalNetworkErrorHandler";
 import GlobalContextStamp from "@/components/lib/GlobalContextStamp";
 import { usePrefetchModuleData } from "@/components/lib/usePrefetchModuleData";
+import { usePrefetchCadastrosData } from "@/components/cadastros/hooks/useCadastrosData";
 import { useInvalidationBus } from "@/components/lib/useInvalidationBus";
 import { useNavHistory } from "@/components/lib/useNavHistory";
 import { usePredictivePrefetch } from "@/components/lib/usePredictivePrefetch";
@@ -92,6 +92,7 @@ function LayoutContent({ children, currentPageName }) {
   const [isOffline, setIsOffline] = useState(typeof navigator !== 'undefined' ? !navigator.onLine : false);
   const [integracoesOk, setIntegracoesOk] = useState(true);
   const { prefetch: prefetchModule } = usePrefetchModuleData();
+  const prefetchCadastros = usePrefetchCadastrosData();
   const queryClient = useQueryClient();
   const contextRef = useRef({ user, empresaAtual, grupoAtual, contexto, moduleName });
   contextRef.current = { user, empresaAtual, grupoAtual, contexto, moduleName };
@@ -106,41 +107,16 @@ function LayoutContent({ children, currentPageName }) {
   useNavHistory();
   usePredictivePrefetch();
 
-  // Prefetch ao passar o mouse em itens do menu
+  // Prefetch ao passar o mouse em itens do menu — delega para usePrefetchModuleData
+  // (chaves de query alinhadas com useRLSQuery para compartilhar cache)
   const prefetchForItem = (title) => {
     try {
       if ('requestIdleCallback' in window) {
         window.requestIdleCallback(() => {
-          try {
-            switch (title) {
-              case 'Dashboard':
-                queryClient.prefetchQuery({ queryKey: ['dash', 'kpis'], queryFn: () => base44.entities.AuditLog.filter(grupoAtual?.id ? { group_id: grupoAtual.id } : {}, '-data_hora', 5) });
-                queryClient.prefetchQuery({ queryKey: ['dash', 'groupConsolidation', empresaAtual?.id, grupoAtual?.id, contexto], queryFn: async () => (await base44.functions.invoke('groupConsolidation', { filtros: {} }))?.data });
-                break;
-              case 'CRM - Relacionamento':
-                queryClient.prefetchQuery({ queryKey: ['crm', 'clientes'], queryFn: () => filterInContext('Cliente', {}, '-updated_date', 10) });
-                queryClient.prefetchQuery({ queryKey: ['crm', 'oportunidades'], queryFn: () => filterInContext('Oportunidade', {}, '-updated_date', 10) });
-                break;
-              case 'Comercial e Vendas':
-                queryClient.prefetchQuery({ queryKey: ['comercial', 'pedidos'], queryFn: () => filterInContext('Pedido', {}, '-updated_date', 10) });
-                break;
-              case 'Estoque e Almoxarifado':
-                queryClient.prefetchQuery({ queryKey: ['estoque', 'produtos'], queryFn: () => filterInContext('Produto', {}, '-updated_date', 10) });
-                break;
-              case 'Compras e Suprimentos':
-                queryClient.prefetchQuery({ queryKey: ['compras', 'ocs'], queryFn: () => filterInContext('OrdemCompra', {}, '-updated_date', 10) });
-                break;
-              case 'Financeiro e Contábil':
-                queryClient.prefetchQuery({ queryKey: ['fin', 'pagar'], queryFn: () => filterInContext('ContaPagar', {}, '-updated_date', 10) });
-                queryClient.prefetchQuery({ queryKey: ['fin', 'receber'], queryFn: () => filterInContext('ContaReceber', {}, '-updated_date', 10) });
-                break;
-              case 'Expedição e Logística':
-                queryClient.prefetchQuery({ queryKey: ['log', 'entregas'], queryFn: () => filterInContext('Entrega', {}, '-updated_date', 10) });
-                break;
-              default: break;
-            }
-          } catch (_) {}
+          try { prefetchModule(title); } catch (_) {}
         }, { timeout: 3000 });
+      } else {
+        setTimeout(() => { try { prefetchModule(title); } catch (_) {} }, 200);
       }
     } catch (_) {}
   };
@@ -157,7 +133,7 @@ function LayoutContent({ children, currentPageName }) {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Idle prefetch common datasets (multiempresa-aware)
+  // Idle prefetch common datasets (multiempresa-aware) + Cadastro Gerais
   useEffect(() => {
     const can = (contexto === 'grupo') || !!empresaAtual?.id;
     if (!can) return;
@@ -166,10 +142,21 @@ function LayoutContent({ children, currentPageName }) {
         if (hasPermission('Comercial', null, 'ver')) queryClient.prefetchQuery({ queryKey: ['pedidos', empresaAtual?.id, grupoAtual?.id, contexto], queryFn: () => filterInContext('Pedido', {}, '-updated_date', 20) });
         if (hasPermission('Financeiro', null, 'ver')) queryClient.prefetchQuery({ queryKey: ['contasReceber', empresaAtual?.id, grupoAtual?.id, contexto], queryFn: () => filterInContext('ContaReceber', {}, '-data_vencimento', 20) });
         if (hasPermission('Estoque', null, 'ver')) queryClient.prefetchQuery({ queryKey: ['produtos', empresaAtual?.id, grupoAtual?.id, contexto], queryFn: () => filterInContext('Produto', {}, '-updated_date', 20) });
+        // Ramificação de Cadastro Gerais: camada core imediata
+        prefetchCadastros('core');
       } catch (_) {}
     };
-    if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 2000 });
-    else setTimeout(run, 1500);
+    const runRef = () => {
+      try { prefetchCadastros('ref'); } catch (_) {}
+    };
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(run, { timeout: 2000 });
+      // Camada de referência após core (prioridade menor)
+      window.requestIdleCallback(runRef, { timeout: 5000 });
+    } else {
+      setTimeout(run, 1500);
+      setTimeout(runRef, 3000);
+    }
   }, [empresaAtual?.id, grupoAtual?.id, contexto]);
 
   const isMobilePage = false;
@@ -206,7 +193,7 @@ function LayoutContent({ children, currentPageName }) {
       <div className="w-full h-full min-h-screen" style={{ display: isMobilePage ? undefined : 'none' }}>{children}</div>
 
       <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-blue-50" style={{ display: isMobilePage ? 'none' : undefined }}>
-        <LayoutSidebar navigationItems={navigationItems} groupedItems={groupedItems} />
+        <LayoutSidebar navigationItems={navigationItems} groupedItems={groupedItems} onHoverItem={prefetchForItem} />
 
         <main className="flex-1 flex flex-col">
           <LayoutHeaderBar

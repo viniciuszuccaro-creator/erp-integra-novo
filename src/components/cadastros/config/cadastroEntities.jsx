@@ -55,9 +55,9 @@ export const CADASTROS_ENTITIES = {
   ContatoB2B: {
     label: "Contatos B2B", group: "Pessoas & Parceiros", icon: Users,
     columns: [
-      { field: "nome", label: "Nome", searchable: true, sortable: true },
+      { field: "nome_completo", label: "Nome", searchable: true, sortable: true },
       { field: "cargo", label: "Cargo", searchable: true },
-      { field: "email", label: "E-mail", searchable: true },
+      { field: "tipo_vinculo", label: "Vínculo", searchable: true },
     ],
   },
   SegmentoCliente: {
@@ -91,7 +91,8 @@ export const CADASTROS_ENTITIES = {
     label: "Serviços", group: "Produtos & Serviços", icon: Package,
     columns: [
       { field: "descricao", label: "Descrição", searchable: true, sortable: true },
-      { field: "codigo", label: "Código", searchable: true, numeric: true },
+      { field: "codigo_servico", label: "Código", searchable: true, numeric: true },
+      { field: "tipo_servico", label: "Tipo", searchable: true },
     ],
   },
   SetorAtividade: {
@@ -157,7 +158,7 @@ export const CADASTROS_ENTITIES = {
   FormaPagamento: {
     label: "Formas de Pagamento", group: "Financeiro & Fiscal", icon: DollarSign,
     columns: [
-      { field: "nome", label: "Nome", searchable: true, sortable: true },
+      { field: "descricao", label: "Nome", searchable: true, sortable: true },
       { field: "tipo", label: "Tipo", searchable: true },
       { field: "ativa", label: "Ativa", type: "boolean" },
     ],
@@ -242,7 +243,7 @@ export const CADASTROS_ENTITIES = {
   Motorista: {
     label: "Motoristas", group: "Logística, Frotas & Almoxarifado", icon: Truck,
     columns: [
-      { field: "nome", label: "Nome", searchable: true, sortable: true },
+      { field: "nome_completo", label: "Nome", searchable: true, sortable: true },
       { field: "cpf", label: "CPF", searchable: true },
       { field: "status", label: "Status", searchable: true },
     ],

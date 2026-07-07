@@ -346,6 +346,10 @@ export function useContextoVisual() {
             CentroOperacao: { field: 'nome', direction: 'asc' },
             LocalEstoque: { field: 'nome', direction: 'asc' },
             TipoFrete: { field: 'nome', direction: 'asc' },
+            Motorista: { field: 'nome_completo', direction: 'asc' },
+            Servico: { field: 'descricao', direction: 'asc' },
+            FormaPagamento: { field: 'descricao', direction: 'asc' },
+            ContatoB2B: { field: 'nome_completo', direction: 'asc' },
           };
 
           const normalizeSortField = (entityName, field) => {

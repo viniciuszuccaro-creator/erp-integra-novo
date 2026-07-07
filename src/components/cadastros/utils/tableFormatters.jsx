@@ -32,8 +32,10 @@ export const MONEY_FIELDS = new Set([
 
 export const LABEL_FALLBACKS = [
   'nome','nome_completo','razao_social','nome_fantasia','nome_banco','nome_cargo','nome_turno',
-  'nome_grupo','nome_marca','nome_rota','nome_segmento','nome_regiao','nome_perfil',
-  'descricao','titulo','sigla','codigo','codigo_banco','matricula','placa','cpf','cnpj',
+  'nome_departamento','nome_grupo','nome_marca','nome_rota','nome_segmento','nome_regiao','nome_perfil',
+  'nome_condicao','nome_kit','nome_modelo','nome_conta','nome_api','nome_canal','nome_intent',
+  'nome_job','nome_webhook','nome_gateway',
+  'descricao','titulo','sigla','codigo','codigo_banco','codigo_servico','matricula','placa','cpf','cnpj',
 ];
 
 export function getDisplayValue(item, col, isFirstCol) {

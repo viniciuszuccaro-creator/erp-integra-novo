@@ -141,8 +141,9 @@ export const CADASTROS_ENTITIES = {
   UnidadeMedida: {
     label: "Unidades de Medida", group: "Produtos & Serviços", icon: Package,
     columns: [
-      { field: "codigo", label: "Código", searchable: true, sortable: true },
-      { field: "nome", label: "Nome", searchable: true, sortable: true },
+      { field: "nome_completo", label: "Nome", searchable: true, sortable: true },
+      { field: "sigla", label: "Sigla", searchable: true, sortable: true },
+      { field: "codigo", label: "Código", searchable: true, sortable: true, numeric: true },
     ],
   },
 
@@ -212,8 +213,9 @@ export const CADASTROS_ENTITIES = {
   ConfiguracaoDespesaRecorrente: {
     label: "Despesas Recorrentes", group: "Financeiro & Fiscal", icon: DollarSign,
     columns: [
-      { field: "nome", label: "Nome", searchable: true, sortable: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "descricao", label: "Descrição", searchable: true, sortable: true },
+      { field: "periodicidade", label: "Periodicidade", searchable: true },
+      { field: "valor_base", label: "Valor", type: "currency" },
     ],
   },
   TabelaFiscal: {
@@ -377,8 +379,9 @@ export const CADASTROS_ENTITIES = {
   GatewayPagamento: {
     label: "Gateways de Pagamento", group: "Tecnologia, IA & Parâmetros", icon: Zap,
     columns: [
-      { field: "nome_gateway", label: "Nome", searchable: true, sortable: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "provedor", label: "Provedor", searchable: true, sortable: true },
+      { field: "ambiente", label: "Ambiente", searchable: true },
+      { field: "ativo", label: "Ativo", type: "boolean" },
     ],
   },
   EventoNotificacao: {

@@ -16,7 +16,7 @@ export default function VisualizadorModal({
   // Reseta o erro inline ao abrir um novo form
   useEffect(() => { setInlineError(null); }, [formKey]);
 
-  // P3: wrapper do onSubmit que captura exceções e exibe inline
+  // P3: wrapper do onSubmit/onSave que captura exceções e exibe inline
   const wrappedOnSubmit = useCallback(async (data) => {
     setInlineError(null);
     try {
@@ -25,6 +25,19 @@ export default function VisualizadorModal({
       setInlineError(e?.message || "Erro ao salvar. Tente novamente.");
     }
   }, [formProps?.onSubmit]); // eslint-disable-line
+
+  const wrappedOnSave = useCallback(async (data) => {
+    setInlineError(null);
+    if (data && typeof data === 'object' && !data.target && !data.preventDefault && !data.nativeEvent) {
+      try {
+        if (formProps?.onSave) await formProps.onSave(data);
+      } catch (e) {
+        setInlineError(e?.message || "Erro ao salvar. Tente novamente.");
+      }
+      return;
+    }
+    if (formProps?.onSave) await formProps.onSave(data);
+  }, [formProps?.onSave]); // eslint-disable-line
 
   // P4: fechar com Escape
   useEffect(() => {
@@ -41,6 +54,7 @@ export default function VisualizadorModal({
   const enhancedFormProps = {
     ...formProps,
     onSubmit: wrappedOnSubmit,
+    onSave: wrappedOnSave,
   };
 
   return (

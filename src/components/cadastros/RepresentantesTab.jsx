@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import {
 import RepresentanteFormCompleto from "./RepresentanteFormCompleto";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useContextoVisual from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import { useWindow } from "@/components/lib/useWindow";
 
 export default function RepresentantesTab() {
@@ -31,23 +32,9 @@ export default function RepresentantesTab() {
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const { openWindow } = useWindow();
 
-  const { data: representantes = [], isLoading } = useQuery({
-    queryKey: ['representantes', contextoKey],
-    queryFn: () => filterInContext('Representante', {}, '-created_date', 999),
-    enabled: !!contexto,
-  });
-
-  const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes', contextoKey],
-    queryFn: () => filterInContext('Cliente', {}, 'nome', 999),
-    enabled: !!contexto,
-  });
-
-  const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos', contextoKey],
-    queryFn: () => filterInContext('Pedido', {}, '-created_date', 999),
-    enabled: !!contexto,
-  });
+  const { data: representantes = [], isLoading } = useRLSQuery('Representante', {}, '-created_date', 999, { enabled: !!contexto });
+  const { data: clientes = [] } = useRLSQuery('Cliente', {}, 'nome', 999, { enabled: !!contexto });
+  const { data: pedidos = [] } = useRLSQuery('Pedido', {}, '-created_date', 999, { enabled: !!contexto });
 
   const representantesFiltrados = filtrarPorContexto(representantes, 'empresa_dona_id').filter(rep => {
     const matchSearch = !search || 

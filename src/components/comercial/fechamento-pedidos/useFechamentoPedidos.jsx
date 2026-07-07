@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import useRLSQuery from '@/components/lib/useRLSQuery';
 import { obterEstatisticasAutomacao } from '@/components/lib/useFluxoPedido';
 
 export function useFechamentoPedidos(empresaId) {
@@ -11,29 +11,10 @@ export function useFechamentoPedidos(empresaId) {
     obterEstatisticasAutomacao(empresaId, 7).then(stats => setEstatisticasIA(stats));
   }, [empresaId]);
 
-  const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos', empresaId],
-    queryFn: () => filterInContext('Pedido', { ...(empresaId ? { empresa_id: empresaId } : {}) }, '-created_date', 100),
-    initialData: [],
-  });
-
-  const { data: movimentacoes = [] } = useQuery({
-    queryKey: ['movimentacoes', empresaId],
-    queryFn: () => filterInContext('MovimentacaoEstoque', { ...(empresaId ? { empresa_id: empresaId } : {}) }, '-created_date', 100),
-    initialData: [],
-  });
-
-  const { data: contas = [] } = useQuery({
-    queryKey: ['contas-receber', empresaId],
-    queryFn: () => filterInContext('ContaReceber', { ...(empresaId ? { empresa_id: empresaId } : {}) }, '-created_date', 100),
-    initialData: [],
-  });
-
-  const { data: entregas = [] } = useQuery({
-    queryKey: ['entregas', empresaId],
-    queryFn: () => filterInContext('Entrega', { ...(empresaId ? { empresa_id: empresaId } : {}) }, '-created_date', 100),
-    initialData: [],
-  });
+  const { data: pedidos = [] } = useRLSQuery('Pedido', empresaId ? { empresa_id: empresaId } : {}, '-created_date', 100, { initialData: [] });
+  const { data: movimentacoes = [] } = useRLSQuery('MovimentacaoEstoque', empresaId ? { empresa_id: empresaId } : {}, '-created_date', 100, { initialData: [] });
+  const { data: contas = [] } = useRLSQuery('ContaReceber', empresaId ? { empresa_id: empresaId } : {}, '-created_date', 100, { initialData: [] });
+  const { data: entregas = [] } = useRLSQuery('Entrega', empresaId ? { empresa_id: empresaId } : {}, '-created_date', 100, { initialData: [] });
 
   const dataLimite = new Date();
   dataLimite.setDate(dataLimite.getDate() - 7);

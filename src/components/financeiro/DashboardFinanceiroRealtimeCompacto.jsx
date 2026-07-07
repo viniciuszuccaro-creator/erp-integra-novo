@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Activity } from "lucide-react";
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import useRLSQuery from '@/components/lib/useRLSQuery';
 import KPIsRealtime from './dashboard-realtime/KPIsRealtime';
 import GraficoFluxo7Dias from './dashboard-realtime/GraficoFluxo7Dias';
 
@@ -24,30 +24,11 @@ export default function DashboardFinanceiroRealtimeCompacto({ empresaId, windowM
     divergenciasBancarias: 0
   });
 
-  const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contas-receber-rt'],
-    queryFn: () => filterInContext('ContaReceber', {})
-  });
-
-  const { data: contasPagar = [] } = useQuery({
-    queryKey: ['contas-pagar-rt'],
-    queryFn: () => filterInContext('ContaPagar', {})
-  });
-
-  const { data: movimentosCartao = [] } = useQuery({
-    queryKey: ['movimentos-cartao-rt'],
-    queryFn: () => filterInContext('MovimentoCartao', {})
-  });
-
-  const { data: conciliacoes = [] } = useQuery({
-    queryKey: ['conciliacoes-bancarias-rt'],
-    queryFn: () => filterInContext('ConciliacaoBancaria', {})
-  });
-
-  const { data: caixaMovimentos = [] } = useQuery({
-    queryKey: ['caixa-movimentos-rt'],
-    queryFn: () => filterInContext('CaixaMovimento', {})
-  });
+  const { data: contasReceber = [] } = useRLSQuery('ContaReceber');
+  const { data: contasPagar = [] } = useRLSQuery('ContaPagar');
+  const { data: movimentosCartao = [] } = useRLSQuery('MovimentoCartao');
+  const { data: conciliacoes = [] } = useRLSQuery('ConciliacaoBancaria');
+  const { data: caixaMovimentos = [] } = useRLSQuery('CaixaMovimento');
 
   useEffect(() => {
     const hoje = new Date().toISOString().split('T')[0];

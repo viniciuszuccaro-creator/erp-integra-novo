@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 /**
  * Hook extraído do PainelDinamicoCliente (Regra-Mãe P1).
@@ -10,23 +10,9 @@ export default function usePainelDinamicoCliente(cliente, isOpen) {
   const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
-  const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos-cliente', cliente?.id, contextoKey],
-    queryFn: () => filterInContext('Pedido', { cliente_id: cliente.id }, '-data_pedido', 10),
-    enabled: !!cliente?.id && isOpen && !!contextoKey && !!grupoAtual?.id,
-  });
-
-  const { data: entregas = [] } = useQuery({
-    queryKey: ['entregas-cliente', cliente?.id, contextoKey],
-    queryFn: () => filterInContext('Entrega', { cliente_id: cliente.id }, '-created_date', 5),
-    enabled: !!cliente?.id && isOpen && !!contextoKey && !!grupoAtual?.id,
-  });
-
-  const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contas-receber-cliente', cliente?.id, contextoKey],
-    queryFn: () => filterInContext('ContaReceber', { cliente_id: cliente.id }, '-data_vencimento', 5),
-    enabled: !!cliente?.id && isOpen && !!contextoKey && !!grupoAtual?.id,
-  });
+  const { data: pedidos = [] } = useRLSQuery('Pedido', { cliente_id: cliente?.id }, '-data_pedido', 10, { enabled: !!cliente?.id && isOpen });
+  const { data: entregas = [] } = useRLSQuery('Entrega', { cliente_id: cliente?.id }, '-created_date', 5, { enabled: !!cliente?.id && isOpen });
+  const { data: contasReceber = [] } = useRLSQuery('ContaReceber', { cliente_id: cliente?.id }, '-data_vencimento', 5, { enabled: !!cliente?.id && isOpen });
 
   const totalEmAberto = contasReceber
     .filter(c => c.status === 'Pendente' || c.status === 'Atrasado')

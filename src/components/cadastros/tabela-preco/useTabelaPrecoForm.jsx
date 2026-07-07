@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import useContextoVisual from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
@@ -41,11 +42,11 @@ export default function useTabelaPrecoForm({ tabela, onSubmit }) {
   const [filtroLote, setFiltroLote] = useState({ setor_id: '', grupo_id: '', marca_id: '', ncm: '', curva_abc: '', eh_bitola: '' });
   const [regraCalculo, setRegraCalculo] = useState({ base: 'custo_medio', tipo: 'markup', valor: 30, aplicar_por_setor: false, markup_por_setor: {} });
 
-  const { data: produtos = [] } = useQuery({ queryKey: ['produtos', contextKey], queryFn: () => filterInContext('Produto', {}, 'descricao', 500), enabled: contextoValido });
-  const { data: setoresAtividade = [] } = useQuery({ queryKey: ['setores-atividade', contextKey], queryFn: () => filterInContext('SetorAtividade', {}, 'nome', 200), enabled: contextoValido });
-  const { data: gruposProduto = [] } = useQuery({ queryKey: ['grupos-produto', contextKey], queryFn: () => filterInContext('GrupoProduto', {}, 'nome', 200), enabled: contextoValido });
-  const { data: marcas = [] } = useQuery({ queryKey: ['marcas', contextKey], queryFn: () => filterInContext('Marca', {}, 'nome', 200), enabled: contextoValido });
-  const { data: itensExistentes = [] } = useQuery({ queryKey: ['tabela-preco-itens', tabela?.id, contextKey], queryFn: () => tabela?.id ? filterInContext('TabelaPrecoItem', { tabela_preco_id: tabela.id }, 'produto_descricao', 1000) : Promise.resolve([]), enabled: !!tabela?.id && contextoValido });
+  const { data: produtos = [] } = useRLSQuery('Produto', {}, 'descricao', 500, { enabled: contextoValido });
+  const { data: setoresAtividade = [] } = useRLSQuery('SetorAtividade', {}, 'nome', 200, { enabled: contextoValido });
+  const { data: gruposProduto = [] } = useRLSQuery('GrupoProduto', {}, 'nome', 200, { enabled: contextoValido });
+  const { data: marcas = [] } = useRLSQuery('Marca', {}, 'nome', 200, { enabled: contextoValido });
+  const { data: itensExistentes = [] } = useRLSQuery('TabelaPrecoItem', { tabela_preco_id: tabela?.id }, 'produto_descricao', 1000, { enabled: !!tabela?.id && contextoValido });
 
   useEffect(() => { if (itensExistentes.length > 0) setItensTabela(itensExistentes); }, [itensExistentes]);
 

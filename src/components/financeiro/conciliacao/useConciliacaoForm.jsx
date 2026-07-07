@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useUser } from "@/components/lib/UserContext";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
 import { toast } from "sonner";
 
@@ -31,29 +32,10 @@ export default function useConciliacaoForm() {
   // Multi-tenant: usa filterInContext que injeta group_id/empresa_id automaticamente
   const queryFilter = empresaSelecionada ? { empresa_id: empresaSelecionada } : {};
 
-  const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas', contextoKey],
-    queryFn: () => filterInContext('Empresa', {}, 'nome_fantasia', 999),
-    enabled: contextoValido,
-  });
-
-  const { data: extratos = [] } = useQuery({
-    queryKey: ['extratos-bancarios', contextoKey, empresaSelecionada],
-    queryFn: () => filterInContext('ExtratoBancario', queryFilter, '-data_movimento', 500),
-    enabled: contextoValido,
-  });
-
-  const { data: conciliacoes = [] } = useQuery({
-    queryKey: ['conciliacoes-bancarias', contextoKey, empresaSelecionada],
-    queryFn: () => filterInContext('ConciliacaoBancaria', queryFilter, '-created_date', 500),
-    enabled: contextoValido,
-  });
-
-  const { data: movimentos = [] } = useQuery({
-    queryKey: ['caixa-movimentos', contextoKey, empresaSelecionada],
-    queryFn: () => filterInContext('CaixaMovimento', queryFilter, '-data_movimento', 500),
-    enabled: contextoValido,
-  });
+  const { data: empresas = [] } = useRLSQuery('Empresa', {}, 'nome_fantasia', 999, { enabled: contextoValido });
+  const { data: extratos = [] } = useRLSQuery('ExtratoBancario', queryFilter, '-data_movimento', 500, { enabled: contextoValido });
+  const { data: conciliacoes = [] } = useRLSQuery('ConciliacaoBancaria', queryFilter, '-created_date', 500, { enabled: contextoValido });
+  const { data: movimentos = [] } = useRLSQuery('CaixaMovimento', queryFilter, '-data_movimento', 500, { enabled: contextoValido });
 
   const conciliar = useMutation({
     mutationFn: async ({ lancamentoBanco, movimento }) => {

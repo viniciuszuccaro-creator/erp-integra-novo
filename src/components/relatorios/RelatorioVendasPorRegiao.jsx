@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { MapPin, Award, FileDown } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import useRLSQuery from '@/components/lib/useRLSQuery';
 import { useVendasPorRegiao } from './vendas-por-regiao/useVendasPorRegiao';
 import RegiaoKPIs from './vendas-por-regiao/RegiaoKPIs';
 import RegiaoDetalheCard from './vendas-por-regiao/RegiaoDetalheCard';
@@ -19,29 +19,10 @@ export default function RelatorioVendasPorRegiao() {
   const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
-  const { data: regioes = [] } = useQuery({
-    queryKey: ['regioes-atendimento', contextoKey],
-    queryFn: () => filterInContext('RegiaoAtendimento', {}, 'nome', 999),
-    enabled: !!contexto,
-  });
-
-  const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos', contextoKey],
-    queryFn: () => filterInContext('Pedido', {}, '-data_pedido', 999),
-    enabled: !!contexto,
-  });
-
-  const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes', contextoKey],
-    queryFn: () => filterInContext('Cliente', {}, 'nome', 999),
-    enabled: !!contexto,
-  });
-
-  const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores', contextoKey],
-    queryFn: () => filterInContext('Colaborador', { departamento: 'Comercial' }, 'nome', 999),
-    enabled: !!contexto,
-  });
+  const { data: regioes = [] } = useRLSQuery('RegiaoAtendimento', {}, 'nome', 999, { enabled: !!contexto });
+  const { data: pedidos = [] } = useRLSQuery('Pedido', {}, '-data_pedido', 999, { enabled: !!contexto });
+  const { data: clientes = [] } = useRLSQuery('Cliente', {}, 'nome', 999, { enabled: !!contexto });
+  const { data: colaboradores = [] } = useRLSQuery('Colaborador', { departamento: 'Comercial' }, 'nome', 999, { enabled: !!contexto });
 
   const { dadosPorRegiao, totaisGerais } = useVendasPorRegiao(regioes, pedidos, clientes, periodoSelecionado, vendedorSelecionado);
 

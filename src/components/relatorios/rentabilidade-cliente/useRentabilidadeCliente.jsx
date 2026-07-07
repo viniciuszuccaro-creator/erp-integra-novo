@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 /**
  * Hook: cálculo de rentabilidade por cliente
@@ -10,23 +10,9 @@ export default function useRentabilidadeCliente({ empresaId, periodo = 12 }) {
   const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
-  const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes', contextoKey],
-    queryFn: () => filterInContext('Cliente', {}, 'nome', 999),
-    enabled: !!contexto,
-  });
-
-  const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos', contextoKey],
-    queryFn: () => filterInContext('Pedido', {}, '-data_pedido', 999),
-    enabled: !!contexto,
-  });
-
-  const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contasReceber', contextoKey],
-    queryFn: () => filterInContext('ContaReceber', {}, '-created_date', 999),
-    enabled: !!contexto,
-  });
+  const { data: clientes = [] } = useRLSQuery('Cliente', {}, 'nome', 999, { enabled: !!contexto });
+  const { data: pedidos = [] } = useRLSQuery('Pedido', {}, '-data_pedido', 999, { enabled: !!contexto });
+  const { data: contasReceber = [] } = useRLSQuery('ContaReceber', {}, '-created_date', 999, { enabled: !!contexto });
 
   const calcularRentabilidade = () => {
     const hoje = new Date();

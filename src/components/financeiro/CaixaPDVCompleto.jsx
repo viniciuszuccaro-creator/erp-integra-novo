@@ -54,12 +54,12 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
   const formasPDV = obterFormasPorContexto('pdv');
 
   const { data: user } = useQuery({ queryKey: ['user'], queryFn: () => base44.auth.me() });
-  const { data: produtos = [] } = useQuery({ queryKey: ['produtos', contextKey], queryFn: () => filterInContext('Produto', {}, 'descricao', 200), enabled: contextoValido });
-  const { data: clientes = [] } = useQuery({ queryKey: ['clientes', contextKey], queryFn: () => filterInContext('Cliente', {}, 'nome', 200), enabled: contextoValido });
-  const { data: contasReceber = [] } = useQuery({ queryKey: ['contasReceber', contextKey], queryFn: () => filterInContext('ContaReceber', {}, 'data_vencimento', 200), enabled: contextoValido });
-  const { data: contasPagar = [] } = useQuery({ queryKey: ['contasPagar', contextKey], queryFn: () => filterInContext('ContaPagar', {}, 'data_vencimento', 200), enabled: contextoValido });
-  const { data: pedidos = [] } = useQuery({ queryKey: ['pedidos', contextKey], queryFn: () => filterInContext('Pedido', {}, '-data_pedido', 200), enabled: contextoValido });
-  const { data: movimentos = [] } = useQuery({ queryKey: ['movimentos-caixa', contextKey], queryFn: () => filterInContext('CaixaMovimento', {}, '-data_movimento', 200), enabled: caixaAberto && contextoValido, refetchInterval: 10000 });
+  const { data: produtos = [] } = useRLSQuery('Produto', {}, 'descricao', 200, { enabled: contextoValido });
+  const { data: clientes = [] } = useRLSQuery('Cliente', {}, 'nome', 200, { enabled: contextoValido });
+  const { data: contasReceber = [] } = useRLSQuery('ContaReceber', {}, 'data_vencimento', 200, { enabled: contextoValido });
+  const { data: contasPagar = [] } = useRLSQuery('ContaPagar', {}, 'data_vencimento', 200, { enabled: contextoValido });
+  const { data: pedidos = [] } = useRLSQuery('Pedido', {}, '-data_pedido', 200, { enabled: contextoValido });
+  const { data: movimentos = [] } = useRLSQuery('CaixaMovimento', {}, '-data_movimento', 200, { enabled: caixaAberto && contextoValido, refetchInterval: 10000 });
 
   const hoje = new Date().toISOString().split('T')[0];
   const movimentosHoje = movimentos.filter(m => new Date(m.data_movimento).toISOString().split('T')[0] === hoje && !m.cancelado);

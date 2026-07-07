@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,23 +34,9 @@ export default function DashboardRepresentantes() {
   const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
-  const { data: representantes = [] } = useQuery({
-    queryKey: ['representantes', contextoKey],
-    queryFn: () => filterInContext('Representante', { status: 'Ativo' }, 'nome', 999),
-    enabled: !!contexto,
-  });
-
-  const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes', contextoKey],
-    queryFn: () => filterInContext('Cliente', {}, 'nome', 999),
-    enabled: !!contexto,
-  });
-
-  const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos', contextoKey],
-    queryFn: () => filterInContext('Pedido', {}, '-created_date', 999),
-    enabled: !!contexto,
-  });
+  const { data: representantes = [] } = useRLSQuery('Representante', { status: 'Ativo' }, 'nome', 999, { enabled: !!contexto });
+  const { data: clientes = [] } = useRLSQuery('Cliente', {}, 'nome', 999, { enabled: !!contexto });
+  const { data: pedidos = [] } = useRLSQuery('Pedido', {}, '-created_date', 999, { enabled: !!contexto });
 
   const calcularMetricasGerais = () => {
     const clientesComIndicador = clientes.filter(c => c.indicador_id);

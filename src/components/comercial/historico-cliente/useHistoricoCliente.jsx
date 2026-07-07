@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import useRLSQuery from '@/components/lib/useRLSQuery';
 
 export function useHistoricoCliente(formData) {
   const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
@@ -8,37 +8,10 @@ export function useHistoricoCliente(formData) {
   const [analisando, setAnalisando] = useState(false);
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
-  const { data: pedidosAnteriores = [] } = useQuery({
-    queryKey: ['pedidos-cliente', formData.cliente_id, contextoKey],
-    queryFn: () => formData.cliente_id
-      ? filterInContext('Pedido', { cliente_id: formData.cliente_id }, '-data_pedido', 50)
-      : Promise.resolve([]),
-    enabled: !!formData.cliente_id && !!contextoKey,
-  });
-
-  const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contas-receber-cliente', formData.cliente_id, contextoKey],
-    queryFn: () => formData.cliente_id
-      ? filterInContext('ContaReceber', { cliente_id: formData.cliente_id }, '-data_vencimento', 20)
-      : Promise.resolve([]),
-    enabled: !!formData.cliente_id && !!contextoKey,
-  });
-
-  const { data: entregas = [] } = useQuery({
-    queryKey: ['entregas-cliente', formData.cliente_id, contextoKey],
-    queryFn: () => formData.cliente_id
-      ? filterInContext('Entrega', { cliente_id: formData.cliente_id }, '-created_date', 20)
-      : Promise.resolve([]),
-    enabled: !!formData.cliente_id && !!contextoKey,
-  });
-
-  const { data: notasFiscais = [] } = useQuery({
-    queryKey: ['nfe-cliente', formData.cliente_id, contextoKey],
-    queryFn: () => formData.cliente_id
-      ? filterInContext('NotaFiscal', { cliente_fornecedor_id: formData.cliente_id }, '-data_emissao', 20)
-      : Promise.resolve([]),
-    enabled: !!formData.cliente_id && !!contextoKey,
-  });
+  const { data: pedidosAnteriores = [] } = useRLSQuery('Pedido', { cliente_id: formData.cliente_id }, '-data_pedido', 50, { enabled: !!formData.cliente_id });
+  const { data: contasReceber = [] } = useRLSQuery('ContaReceber', { cliente_id: formData.cliente_id }, '-data_vencimento', 20, { enabled: !!formData.cliente_id });
+  const { data: entregas = [] } = useRLSQuery('Entrega', { cliente_id: formData.cliente_id }, '-created_date', 20, { enabled: !!formData.cliente_id });
+  const { data: notasFiscais = [] } = useRLSQuery('NotaFiscal', { cliente_fornecedor_id: formData.cliente_id }, '-data_emissao', 20, { enabled: !!formData.cliente_id });
 
   useEffect(() => {
     if (pedidosAnteriores.length === 0) return;

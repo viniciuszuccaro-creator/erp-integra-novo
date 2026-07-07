@@ -1,7 +1,8 @@
 import React from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,26 +51,11 @@ export default function OrcamentoSite() {
   }, [itensTabela]);
 
   // Produtos da filial (somente exibíveis no site)
-  const { data: produtos = [], isLoading } = useQuery({
-    queryKey: ["produtos-site", empresaAtual?.id],
-    queryFn: async () => {
-      const list = await filterInContext("Produto", { exibir_no_site: true }, "-updated_date", 400);
-      return list;
-    },
-    enabled: !!empresaAtual?.id,
-    staleTime: 30000,
-  });
+  const { data: produtos = [], isLoading } = useRLSQuery("Produto", { exibir_no_site: true }, "-updated_date", 400, { enabled: !!empresaAtual?.id, staleTime: 30000 });
 
   // Configuração do gateway da filial
-  const { data: cfgGateway } = useQuery({
-    queryKey: ["cfg-gateway", empresaAtual?.id],
-    queryFn: async () => {
-      const cfgs = await filterInContext("ConfiguracaoGatewayPagamento", { ativo: true }, undefined, 1);
-      return cfgs?.[0] || null;
-    },
-    enabled: !!empresaAtual?.id,
-    staleTime: 120000,
-  });
+  const { data: cfgGatewayRows = [] } = useRLSQuery("ConfiguracaoGatewayPagamento", { ativo: true }, undefined, 1, { enabled: !!empresaAtual?.id });
+  const cfgGateway = cfgGatewayRows?.[0] || null;
 
   const addToCart = (produto, qty = 1) => {
     const id = produto.id;

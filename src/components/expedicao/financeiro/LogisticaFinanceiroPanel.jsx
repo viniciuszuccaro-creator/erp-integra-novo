@@ -1,7 +1,8 @@
 import React from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,29 +25,15 @@ export default function LogisticaFinanceiroPanel({ empresaId }) {
 
   // Config
   const cfgKey = React.useMemo(() => empresaId ? `log_finance_cfg_${empresaId}` : `log_finance_cfg_global`, [empresaId]);
-  const { data: cfg } = useQuery({
-    queryKey: ['log-fin-cfg', cfgKey],
-    queryFn: async () => {
-      const rows = await filterInContext('ConfiguracaoSistema', { chave: cfgKey }, undefined, 1);
-      return rows?.[0]?.valor_json || {};
-    }
-  });
+  const { data: cfgRows = [] } = useRLSQuery('ConfiguracaoSistema', { chave: cfgKey }, undefined, 1);
+  const cfg = React.useMemo(() => cfgRows?.[0]?.valor_json || {}, [cfgRows]);
 
   // Entregas recentes
-  const { data: entregas = [] } = useQuery({
-    queryKey: ['log-entregas-fin', empresaId],
-    queryFn: async () => await filterInContext('Entrega', {}, '-updated_date', 300)
-  });
+  const { data: entregas = [] } = useRLSQuery('Entrega', {}, '-updated_date', 300);
 
   // Contas CR/CP recentes (filtra localmente por [LOG])
-  const { data: contasReceber = [] } = useQuery({
-    queryKey: ['log-cr'],
-    queryFn: async () => await filterInContext('ContaReceber', {}, '-updated_date', 400)
-  });
-  const { data: contasPagar = [] } = useQuery({
-    queryKey: ['log-cp'],
-    queryFn: async () => await filterInContext('ContaPagar', {}, '-updated_date', 400)
-  });
+  const { data: contasReceber = [] } = useRLSQuery('ContaReceber', {}, '-updated_date', 400);
+  const { data: contasPagar = [] } = useRLSQuery('ContaPagar', {}, '-updated_date', 400);
 
   const crLog = React.useMemo(() => (contasReceber || []).filter(c => (c.descricao||'').includes('[LOG]')), [contasReceber]);
   const cpLog = React.useMemo(() => (contasPagar || []).filter(c => (c.descricao||'').includes('[LOG]')), [contasPagar]);

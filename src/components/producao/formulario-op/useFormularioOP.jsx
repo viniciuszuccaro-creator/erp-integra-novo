@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 /**
  * Hook: estado, queries, mutations, IA e validação de estoque para OP
@@ -20,26 +21,10 @@ export default function useFormularioOP(op, onClose) {
   const [seletorProdutoAberto, setSeletorProdutoAberto] = useState(false);
   const [produtosInsuficientes, setProdutosInsuficientes] = useState([]);
 
-  const { data: pedidos = [] } = useQuery({
-    queryKey: ["pedidos", contextoKey],
-    queryFn: () => filterInContext('Pedido', {}, '-created_date', 999),
-    enabled: !!contexto,
-  });
-
-  const { data: empresas = [] } = useQuery({
-    queryKey: ["empresas", contextoKey],
-    queryFn: () => filterInContext('Empresa', {}, 'nome_fantasia', 999),
-    enabled: !!contexto,
-  });
-
-  const { data: produtosProducao = [] } = useQuery({
-    queryKey: ['produtos-producao', contextoKey],
-    queryFn: async () => {
-      const all = await filterInContext('Produto', {}, 'descricao', 999);
-      return all.filter(p => p.tipo_item === 'Matéria-Prima Produção' && p.status === 'Ativo');
-    },
-    enabled: !!contexto,
-  });
+  const { data: pedidos = [] } = useRLSQuery('Pedido', {}, '-created_date', 999, { enabled: !!contexto });
+  const { data: empresas = [] } = useRLSQuery('Empresa', {}, 'nome_fantasia', 999, { enabled: !!contexto });
+  const { data: produtosProducaoRaw = [] } = useRLSQuery('Produto', {}, 'descricao', 999, { enabled: !!contexto });
+  const produtosProducao = React.useMemo(() => produtosProducaoRaw.filter(p => p.tipo_item === 'Matéria-Prima Produção' && p.status === 'Ativo'), [produtosProducaoRaw]);
 
   const saveMutation = useMutation({
     mutationFn: (data) => {

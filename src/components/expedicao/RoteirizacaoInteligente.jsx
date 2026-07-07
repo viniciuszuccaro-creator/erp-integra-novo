@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Zap, Map, Truck, Navigation, TrendingDown } from "lucide-react";
 import { toast } from "sonner";
 import TesteGoogleMaps from "@/components/integracoes/TesteGoogleMaps";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 export default function RoteirizacaoInteligente({ windowMode = false }) {
   const queryClient = useQueryClient();
@@ -15,29 +16,10 @@ export default function RoteirizacaoInteligente({ windowMode = false }) {
   const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
-  const { data: entregas = [] } = useQuery({
-    queryKey: ["entregas", contextoKey],
-    queryFn: () => filterInContext('Entrega', {}, '-created_date', 999),
-    enabled: !!contexto,
-  });
-
-  const { data: motoristas = [] } = useQuery({
-    queryKey: ["motoristas", contextoKey],
-    queryFn: () => filterInContext('Motorista', {}, 'nome', 999),
-    enabled: !!contexto,
-  });
-
-  const { data: veiculos = [] } = useQuery({
-    queryKey: ["veiculos", contextoKey],
-    queryFn: () => filterInContext('Veiculo', {}, 'placa', 999),
-    enabled: !!contexto,
-  });
-
-  const { data: rotas = [] } = useQuery({
-    queryKey: ["roteirizacao-inteligente", contextoKey],
-    queryFn: () => filterInContext('RoteirizacaoInteligente', {}, '-created_date', 999),
-    enabled: !!contexto,
-  });
+  const { data: entregas = [] } = useRLSQuery('Entrega', {}, '-created_date', 999, { enabled: !!contexto });
+  const { data: motoristas = [] } = useRLSQuery('Motorista', {}, 'nome', 999, { enabled: !!contexto });
+  const { data: veiculos = [] } = useRLSQuery('Veiculo', {}, 'placa', 999, { enabled: !!contexto });
+  const { data: rotas = [] } = useRLSQuery('RoteirizacaoInteligente', {}, '-created_date', 999, { enabled: !!contexto });
 
   const gerarRotaIAMutation = useMutation({
     mutationFn: async ({ entregasIds, motoristaId, veiculoId }) => {

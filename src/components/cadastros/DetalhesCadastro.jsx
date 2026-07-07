@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,29 +34,10 @@ export default function DetalhesCadastro({ tipo, registro, onClose, onUpdate, wi
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   // P2: Buscar dados relacionados com contexto multi-tenant
-  const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos-cliente', registro.id, contextoKey],
-    queryFn: () => filterInContext('Pedido', { cliente_id: registro.id }, '-data_pedido', 20),
-    enabled: tipo === 'cliente' && !!contextoKey
-  });
-
-  const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contas-cliente', registro.id, contextoKey],
-    queryFn: () => filterInContext('ContaReceber', { cliente_id: registro.id }, '-data_vencimento', 20),
-    enabled: tipo === 'cliente' && !!contextoKey
-  });
-
-  const { data: entregas = [] } = useQuery({
-    queryKey: ['entregas-cliente', registro.id, contextoKey],
-    queryFn: () => filterInContext('Entrega', { cliente_id: registro.id }, '-created_date', 20),
-    enabled: tipo === 'cliente' && !!contextoKey
-  });
-
-  const { data: notasFiscais = [] } = useQuery({
-    queryKey: ['notas-cliente', registro.id, contextoKey],
-    queryFn: () => filterInContext('NotaFiscal', { cliente_fornecedor_id: registro.id }, '-data_emissao', 20),
-    enabled: tipo === 'cliente' && !!contextoKey
-  });
+  const { data: pedidos = [] } = useRLSQuery('Pedido', { cliente_id: registro.id }, '-data_pedido', 20, { enabled: tipo === 'cliente' });
+  const { data: contasReceber = [] } = useRLSQuery('ContaReceber', { cliente_id: registro.id }, '-data_vencimento', 20, { enabled: tipo === 'cliente' });
+  const { data: entregas = [] } = useRLSQuery('Entrega', { cliente_id: registro.id }, '-created_date', 20, { enabled: tipo === 'cliente' });
+  const { data: notasFiscais = [] } = useRLSQuery('NotaFiscal', { cliente_fornecedor_id: registro.id }, '-data_emissao', 20, { enabled: tipo === 'cliente' });
 
   const totalVendas = pedidos.reduce((sum, p) => sum + (p.valor_total || 0), 0);
   const totalReceber = contasReceber.filter(c => c.status === 'Pendente').reduce((sum, c) => sum + (c.valor || 0), 0);

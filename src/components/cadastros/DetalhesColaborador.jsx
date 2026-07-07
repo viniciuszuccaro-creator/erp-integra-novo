@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +32,7 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -60,23 +61,9 @@ export default function DetalhesColaborador({ colaborador, onClose, windowMode =
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   // P2: Buscar dados relacionados com contexto multi-tenant
-  const { data: pontos = [] } = useQuery({
-    queryKey: ['pontos-colaborador', colaborador.id, contextoKey],
-    queryFn: () => filterInContext('Ponto', { colaborador_id: colaborador.id }),
-    enabled: !!colaborador.id && !!contextoKey
-  });
-
-  const { data: ferias = [] } = useQuery({
-    queryKey: ['ferias-colaborador', colaborador.id, contextoKey],
-    queryFn: () => filterInContext('Ferias', { colaborador_id: colaborador.id }),
-    enabled: !!colaborador.id && !!contextoKey
-  });
-
-  const { data: ordensProducao = [] } = useQuery({
-    queryKey: ['ops-colaborador', colaborador.id, contextoKey],
-    queryFn: () => filterInContext('OrdemProducao', { responsavel: colaborador.nome_completo }),
-    enabled: !!colaborador.id && !!contextoKey
-  });
+  const { data: pontos = [] } = useRLSQuery('Ponto', { colaborador_id: colaborador.id }, undefined, 100, { enabled: !!colaborador.id });
+  const { data: ferias = [] } = useRLSQuery('Ferias', { colaborador_id: colaborador.id }, undefined, 100, { enabled: !!colaborador.id });
+  const { data: ordensProducao = [] } = useRLSQuery('OrdemProducao', { responsavel: colaborador.nome_completo }, undefined, 100, { enabled: !!colaborador.id });
 
   const updateColaboradorMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Colaborador.update(id, data),

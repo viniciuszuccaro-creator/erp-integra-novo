@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 export default function useDetalhesFornecedor({ fornecedor }) {
   const [activeTab, setActiveTab] = useState("historico");
@@ -20,26 +21,9 @@ export default function useDetalhesFornecedor({ fornecedor }) {
   const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
-  const { data: ordensCompra = [] } = useQuery({
-    queryKey: ['ordens-compra-fornecedor', fornecedor.id, contextoKey],
-    queryFn: () => filterInContext('OrdemCompra', { fornecedor_id: fornecedor.id }),
-    enabled: !!fornecedor.id && !!contextoKey && contextoKey !== 'sem-grupo-sem-empresa'
-  });
-
-  const { data: notasFiscais = [] } = useQuery({
-    queryKey: ['notas-entrada-fornecedor', fornecedor.id, contextoKey],
-    queryFn: () => filterInContext('NotaFiscal', {
-      cliente_fornecedor_id: fornecedor.id,
-      tipo: 'NF-e (Entrada)'
-    }),
-    enabled: !!fornecedor.id && !!contextoKey && contextoKey !== 'sem-grupo-sem-empresa'
-  });
-
-  const { data: contasPagar = [] } = useQuery({
-    queryKey: ['contas-pagar-fornecedor', fornecedor.id, contextoKey],
-    queryFn: () => filterInContext('ContaPagar', { fornecedor_id: fornecedor.id }),
-    enabled: !!fornecedor.id && !!contextoKey && contextoKey !== 'sem-grupo-sem-empresa'
-  });
+  const { data: ordensCompra = [] } = useRLSQuery('OrdemCompra', { fornecedor_id: fornecedor.id }, undefined, 100, { enabled: !!fornecedor.id });
+  const { data: notasFiscais = [] } = useRLSQuery('NotaFiscal', { cliente_fornecedor_id: fornecedor.id, tipo: 'NF-e (Entrada)' }, undefined, 100, { enabled: !!fornecedor.id });
+  const { data: contasPagar = [] } = useRLSQuery('ContaPagar', { fornecedor_id: fornecedor.id }, undefined, 100, { enabled: !!fornecedor.id });
 
   const updateFornecedorMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Fornecedor.update(id, data),

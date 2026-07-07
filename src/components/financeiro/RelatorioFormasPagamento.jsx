@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, Download, Calendar, DollarSign, Filter } from 'lucide-react';
@@ -19,41 +18,17 @@ export default function RelatorioFormasPagamento() {
   const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   
-  const { data: formasPagamento = [] } = useQuery({
-    queryKey: ['formas-pagamento', contextoKey],
-    queryFn: () => filterInContext('FormaPagamento', {}, '-updated_date', 999),
-    enabled: !!contexto,
-  });
+  const { data: formasPagamento = [] } = useRLSQuery('FormaPagamento', {}, '-updated_date', 999, { enabled: !!contexto });
 
-  const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos-relatorio', periodo, contextoKey],
-    queryFn: async () => {
-      const dataInicio = subDays(new Date(), periodo);
-      const todos = await filterInContext('Pedido', {}, '-created_date', 2000);
-      return todos.filter(p => new Date(p.data_pedido) >= dataInicio);
-    },
-    enabled: !!contexto,
-  });
+  const { data: pedidosRaw = [] } = useRLSQuery('Pedido', {}, '-created_date', 2000, { enabled: !!contexto });
+  const dataInicio = useMemo(() => subDays(new Date(), periodo), [periodo]);
+  const pedidos = useMemo(() => pedidosRaw.filter(p => new Date(p.data_pedido) >= dataInicio), [pedidosRaw, dataInicio]);
 
-  const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contas-receber-relatorio', periodo, contextoKey],
-    queryFn: async () => {
-      const dataInicio = subDays(new Date(), periodo);
-      const todas = await filterInContext('ContaReceber', {}, '-created_date', 2000);
-      return todas.filter(c => new Date(c.data_emissao) >= dataInicio);
-    },
-    enabled: !!contexto,
-  });
+  const { data: contasReceberRaw = [] } = useRLSQuery('ContaReceber', {}, '-created_date', 2000, { enabled: !!contexto });
+  const contasReceber = useMemo(() => contasReceberRaw.filter(c => new Date(c.data_emissao) >= dataInicio), [contasReceberRaw, dataInicio]);
 
-  const { data: movimentosCaixa = [] } = useQuery({
-    queryKey: ['movimentos-caixa-relatorio', periodo, contextoKey],
-    queryFn: async () => {
-      const dataInicio = subDays(new Date(), periodo);
-      const todos = await filterInContext('CaixaMovimento', {}, '-data_movimento', 2000);
-      return todos.filter(m => new Date(m.data_movimento) >= dataInicio);
-    },
-    enabled: !!contexto,
-  });
+  const { data: movimentosCaixaRaw = [] } = useRLSQuery('CaixaMovimento', {}, '-data_movimento', 2000, { enabled: !!contexto });
+  const movimentosCaixa = useMemo(() => movimentosCaixaRaw.filter(m => new Date(m.data_movimento) >= dataInicio), [movimentosCaixaRaw, dataInicio]);
 
   // ANALYTICS TEMPORAL
   const gerarDadosTemporal = () => {

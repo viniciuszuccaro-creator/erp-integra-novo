@@ -1,7 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { TrendingUp, DollarSign, Zap, AlertTriangle } from 'lucide-react';
@@ -15,29 +14,10 @@ export default function DashboardFormasPagamento({ windowMode = false }) {
   const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
-  const { data: formasPagamento = [] } = useQuery({
-    queryKey: ['formas-pagamento', contextoKey],
-    queryFn: () => filterInContext('FormaPagamento', {}, '-updated_date', 999),
-    enabled: !!contexto,
-  });
-
-  const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos-analytics-formas', contextoKey],
-    queryFn: () => filterInContext('Pedido', {}, '-created_date', 1000),
-    enabled: !!contexto,
-  });
-
-  const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contas-receber-analytics-formas', contextoKey],
-    queryFn: () => filterInContext('ContaReceber', {}, '-created_date', 1000),
-    enabled: !!contexto,
-  });
-
-  const { data: movimentosCaixa = [] } = useQuery({
-    queryKey: ['movimentos-caixa-analytics', contextoKey],
-    queryFn: () => filterInContext('CaixaMovimento', {}, '-data_movimento', 1000),
-    enabled: !!contexto,
-  });
+  const { data: formasPagamento = [] } = useRLSQuery('FormaPagamento', {}, '-updated_date', 999, { enabled: !!contexto });
+  const { data: pedidos = [] } = useRLSQuery('Pedido', {}, '-created_date', 1000, { enabled: !!contexto });
+  const { data: contasReceber = [] } = useRLSQuery('ContaReceber', {}, '-created_date', 1000, { enabled: !!contexto });
+  const { data: movimentosCaixa = [] } = useRLSQuery('CaixaMovimento', {}, '-data_movimento', 1000, { enabled: !!contexto });
 
   const analisarUso = () => {
     const usoPorForma = {};

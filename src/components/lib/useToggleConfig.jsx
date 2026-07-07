@@ -33,21 +33,32 @@ export function canEditConfigByPermission(hasPermission, chave, categoria) {
 }
 
 export async function loadScopedConfiguracaoSistema({ empresaId, grupoId, limit = 500, includeGlobal = false }) {
+  // Usa entityListSorted (service-role) para garantir que os registros salvos por upsertConfig
+  // (que também usa service-role) sejam visíveis na leitura.
+  // Queries user-scoped (base44.entities.filter) podem falhar dependendo do contexto de auth.
   const queries = [];
 
+  const invokeSorted = (filter) =>
+    base44.functions.invoke('entityListSorted', {
+      entityName: 'ConfiguracaoSistema',
+      filter,
+      sortField: 'updated_date',
+      sortDirection: 'desc',
+      limit,
+    }).then(res => Array.isArray(res?.data) ? res.data : []).catch(() => []);
+
   if (grupoId && empresaId) {
-    queries.push(base44.entities.ConfiguracaoSistema.filter({ group_id: grupoId, empresa_id: empresaId }, '-updated_date', limit));
+    queries.push(invokeSorted({ group_id: grupoId, empresa_id: empresaId }));
   }
   if (empresaId) {
-    queries.push(base44.entities.ConfiguracaoSistema.filter({ empresa_id: empresaId }, '-updated_date', limit));
+    queries.push(invokeSorted({ empresa_id: empresaId }));
   }
   if (grupoId) {
-    queries.push(base44.entities.ConfiguracaoSistema.filter({ group_id: grupoId }, '-updated_date', limit));
+    queries.push(invokeSorted({ group_id: grupoId }));
   }
   if (includeGlobal) {
     // Busca configs globais (sem empresa_id e sem group_id)
-    // Não podemos passar null no filtro pois o SDK ignora — buscamos todos e filtramos no cliente
-    queries.push(base44.entities.ConfiguracaoSistema.filter({}, '-updated_date', limit));
+    queries.push(invokeSorted({}));
   }
 
   const results = await Promise.allSettled(queries);
@@ -57,8 +68,15 @@ export async function loadScopedConfiguracaoSistema({ empresaId, grupoId, limit 
   for (const result of results) {
     if (result.status !== 'fulfilled' || !Array.isArray(result.value)) continue;
     for (const item of result.value) {
-      // Se includeGlobal, filtra apenas configs sem empresa_id e sem group_id
-      if (includeGlobal && (item.empresa_id || item.group_id)) continue;
+      // Se includeGlobal, filtra apenas configs sem empresa_id e sem group_id (apenas da última query)
+      if (includeGlobal && (item.empresa_id || item.group_id)) {
+        // Apenas inclui globais se vieram da query de includeGlobal
+        // Mas registros com scope já foram incluídos pelas queries anteriores
+        const key = item?.id || `${item?.chave}:${item?.empresa_id || ''}:${item?.group_id || ''}`;
+        if (seen.has(key)) continue;
+        // Skip — já foi incluído por query scoped se tem empresa_id/group_id
+        continue;
+      }
       const key = item?.id || `${item?.chave}:${item?.empresa_id || ''}:${item?.group_id || ''}:${item?.updated_date || ''}`;
       if (seen.has(key)) continue;
       seen.add(key);
@@ -131,8 +149,16 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
   }, [empresaId, grupoId]);
 
   const saveDirectConfig = useCallback(async (chave, categoria, ativa, scope) => {
+    // Usa entityListSorted (service-role) para leitura, garantindo visibilidade
     const filter = { chave, ...scope };
-    const existentes = await base44.entities.ConfiguracaoSistema.filter(filter, '-updated_date', 20);
+    const res = await base44.functions.invoke('entityListSorted', {
+      entityName: 'ConfiguracaoSistema',
+      filter,
+      sortField: 'updated_date',
+      sortDirection: 'desc',
+      limit: 20,
+    });
+    const existentes = Array.isArray(res?.data) ? res.data : [];
     const latest = findMatchingRecord(existentes, chave);
     const payload = {
       chave,

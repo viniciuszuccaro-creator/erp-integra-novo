@@ -17,8 +17,17 @@ export default function useConfiguracaoSistema({ categoria, chave } = {}) {
       const filtro = {};
       if (categoria) filtro.categoria = categoria;
       if (chave) filtro.chave = chave;
-      const list = await base44.entities.ConfiguracaoSistema.filter(filtro, "-updated_date", 1);
-      return Array.isArray(list) && list.length ? list[0] : null;
+      // Usa entityListSorted (service-role) para garantir visibilidade dos registros
+      // salvos por upsertConfig (que também usa service-role)
+      const res = await base44.functions.invoke('entityListSorted', {
+        entityName: 'ConfiguracaoSistema',
+        filter: filtro,
+        sortField: 'updated_date',
+        sortDirection: 'desc',
+        limit: 1,
+      });
+      const list = Array.isArray(res?.data) ? res.data : [];
+      return list.length ? list[0] : null;
     },
     staleTime: 15_000,
   });

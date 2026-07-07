@@ -53,7 +53,7 @@ export default function ContratosPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { openWindow } = useWindow();
-  const { empresaAtual, filterInContext, grupoAtual } = useContextoVisual();
+  const { empresaAtual, filterInContext, grupoAtual, createInContext, updateInContext } = useContextoVisual();
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
   const contextoValido = !!(empresaAtual?.id || groupId);
 
@@ -187,7 +187,7 @@ export default function ContratosPage() {
                 const proximaCobranca = new Date(data.data_inicio);
                 proximaCobranca.setMonth(proximaCobranca.getMonth() + 1);
                 proximaCobranca.setDate(data.dia_vencimento || 1);
-                await base44.entities.Contrato.create({
+                await createInContext('Contrato', {
                   ...data,
                   empresa_id: data.empresa_id || empresaAtual?.id,
                   group_id: data.group_id || groupId,
@@ -282,7 +282,7 @@ export default function ContratosPage() {
                               contrato, windowMode: true, clientes, fornecedores,
                               onSubmit: async (data) => {
                                 try {
-                                  await base44.entities.Contrato.update(contrato.id, {
+                                  await updateInContext('Contrato', contrato.id, {
                                     ...data, empresa_id: data.empresa_id || empresaAtual?.id, group_id: data.group_id || groupId,
                                   });
                                   queryClient.invalidateQueries({ queryKey: ['contratos'] });

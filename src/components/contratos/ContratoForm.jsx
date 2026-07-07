@@ -9,12 +9,14 @@ import { FileText, Zap } from "lucide-react";
 import { z } from "zod";
 import FormWrapper from "@/components/common/FormWrapper";
 import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 /**
  * V21.1.2 - WINDOW MODE READY
  */
 export default function ContratoForm({ contrato, onSubmit, clientes = [], fornecedores = [], windowMode = false }) {
   const { formasPagamento, isLoading: loadingFormas } = useFormasPagamento();
+  const { data: indicesReajuste = [] } = useRLSQuery('MoedaIndice', {}, 'nome', 100, { staleTime: 60000 });
   const [formData, setFormData] = useState(contrato || {
     numero_contrato: "",
     tipo: "Cliente",
@@ -183,12 +185,12 @@ export default function ContratoForm({ contrato, onSubmit, clientes = [], fornec
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="IPCA">IPCA</SelectItem>
-              <SelectItem value="IGPM">IGPM</SelectItem>
-              <SelectItem value="INPC">INPC</SelectItem>
-              <SelectItem value="CDI">CDI</SelectItem>
-              <SelectItem value="Fixo">Fixo</SelectItem>
-              <SelectItem value="Outro">Outro</SelectItem>
+              {indicesReajuste.length === 0 && <SelectItem value="_empty" disabled>Nenhum índice cadastrado</SelectItem>}
+              {indicesReajuste.map((m) => (
+                <SelectItem key={m.id} value={m.sigla || m.nome}>
+                  {m.sigla ? `${m.sigla} - ${m.nome}` : m.nome}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

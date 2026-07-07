@@ -35,7 +35,7 @@ function Agenda() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { filterInContext, carimbarContexto, updateInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const { filterInContext, carimbarContexto, createInContext, updateInContext, deleteInContext, empresaAtual, grupoAtual } = useContextoVisual();
   const groupId = grupoAtual?.id || empresaAtual?.group_id || null;
   const contextoValido = !!(empresaAtual?.id || groupId);
 
@@ -82,15 +82,13 @@ function Agenda() {
       const dataInicio = `${data.data_inicio}T${data.hora_inicio || "00:00"}:00`;
       const dataFim = `${data.data_fim}T${data.hora_fim || "23:59"}:00`;
 
-      return await base44.entities.Evento.create(
-        carimbarContexto({
+      return await createInContext('Evento', {
           ...data,
           data_inicio: dataInicio,
           data_fim: dataFim,
           responsavel: user?.full_name || "Usuário",
           responsavel_id: user?.id,
-        })
-      );
+        });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["eventos"] });
@@ -103,7 +101,7 @@ function Agenda() {
       const dataInicio = `${data.data_inicio}T${data.hora_inicio || "00:00"}:00`;
       const dataFim = `${data.data_fim}T${data.hora_fim || "23:59"}:00`;
 
-      return await base44.entities.Evento.update(data.id, {
+      return await updateInContext('Evento', data.id, {
         ...data,
         data_inicio: dataInicio,
         data_fim: dataFim,
@@ -117,7 +115,7 @@ function Agenda() {
 
   const deleteEventoMutation = useMutation({
     mutationFn: async (id) => {
-      return await base44.entities.Evento.delete(id);
+      return await deleteInContext('Evento', id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["eventos"] });

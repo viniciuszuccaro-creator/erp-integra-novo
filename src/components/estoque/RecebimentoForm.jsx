@@ -12,12 +12,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import FormWrapper from "@/components/common/FormWrapper";
 import { z } from 'zod';
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 /**
  * V21.1.2: Recebimento Form - Adaptado para Window Mode
  */
 export default function RecebimentoForm({ recebimento, onSubmit, windowMode = false }) {
   const { carimbarContexto, filterInContext, empresaAtual } = useContextoVisual();
+
+  const { data: transportadoras = [] } = useRLSQuery('Transportadora', {}, '-created_date', 100, { staleTime: 60000 });
   const schema = z.object({
     ordem_compra_id: z.string().min(1, 'OC é obrigatória'),
     data_recebimento: z.string().min(8, 'Data obrigatória'),
@@ -132,10 +135,22 @@ export default function RecebimentoForm({ recebimento, onSubmit, windowMode = fa
 
             <div>
               <Label>Transportadora</Label>
-              <Input
+              <Select
                 value={formData.transportadora}
-                onChange={(e) => setFormData({ ...formData, transportadora: e.target.value })}
-              />
+                onValueChange={(v) => setFormData({ ...formData, transportadora: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={null}>Sem transportadora</SelectItem>
+                  {transportadoras.filter(t => t.ativo !== false).map(t => (
+                    <SelectItem key={t.id} value={t.nome_fantasia || t.razao_social || t.nome}>
+                      {t.nome_fantasia || t.razao_social || t.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>

@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 /**
  * Hook extraído do ChatbotAtendimento.jsx
@@ -18,10 +19,7 @@ export default function useChatbotAtendimento() {
   const queryClient = useQueryClient();
   const { empresaAtual } = useContextoVisual();
 
-  const { data: intentsConfig = [] } = useQuery({
-    queryKey: ['chatbot-intents'],
-    queryFn: () => base44.entities.ChatbotIntents.filter({ ativo: true }),
-  });
+  const { data: intentsConfig = [] } = useRLSQuery('ChatbotIntents', { ativo: true });
 
   const { data: interacoes = [] } = useQuery({
     queryKey: ['chatbot-interacoes', sessaoAtual],

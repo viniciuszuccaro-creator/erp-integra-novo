@@ -8,11 +8,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Mail } from "lucide-react";
 import { z } from "zod";
 import FormWrapper from "@/components/common/FormWrapper";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 /**
  * V21.1.2 - WINDOW MODE READY
  */
 export default function CampanhaForm({ campanha, onSubmit, windowMode = false }) {
+  const { carimbarContexto } = useContextoVisual();
+  const { data: representantes = [] } = useRLSQuery('Representante', {}, '-updated_date', 9999);
+  const { data: segmentos = [] } = useRLSQuery('SegmentoCliente', { ativo: true }, '-updated_date', 100);
+
   const [formData, setFormData] = useState(campanha || {
     nome: "",
     descricao: "",
@@ -32,10 +38,10 @@ export default function CampanhaForm({ campanha, onSubmit, windowMode = false })
   });
 
   const handleSubmit = async () => {
-    const data = {
+    const data = carimbarContexto({
       ...formData,
       orcamento: parseFloat(formData.orcamento) || 0
-    };
+    }, 'empresa_id');
     onSubmit(data);
   };
 
@@ -88,14 +94,16 @@ export default function CampanhaForm({ campanha, onSubmit, windowMode = false })
             onValueChange={(value) => setFormData({ ...formData, publico_alvo: value })}
           >
             <SelectTrigger>
-              <SelectValue />
+              <SelectValue placeholder="Selecione..." />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="Todos os Clientes">Todos os Clientes</SelectItem>
               <SelectItem value="Clientes Ativos">Clientes Ativos</SelectItem>
               <SelectItem value="Prospects">Prospects</SelectItem>
               <SelectItem value="Inativos">Inativos</SelectItem>
-              <SelectItem value="Segmento Específico">Segmento Específico</SelectItem>
+              {segmentos.map(s => (
+                <SelectItem key={s.id} value={s.nome_segmento}>{s.nome_segmento}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -119,11 +127,20 @@ export default function CampanhaForm({ campanha, onSubmit, windowMode = false })
         </div>
         <div>
           <Label htmlFor="responsavel_camp">Responsável</Label>
-          <Input
-            id="responsavel_camp"
-            value={formData.responsavel}
-            onChange={(e) => setFormData({ ...formData, responsavel: e.target.value })}
-          />
+          <Select
+            value={formData.responsavel_id || ''}
+            onValueChange={(v) => {
+              const rep = representantes.find(r => r.id === v);
+              setFormData({ ...formData, responsavel_id: v, responsavel: rep?.nome || rep?.nome_completo || '' });
+            }}
+          >
+            <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+            <SelectContent>
+              {representantes.map(r => (
+                <SelectItem key={r.id} value={r.id}>{r.nome || r.nome_completo || r.codigo}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label htmlFor="orcamento_camp">Orçamento</Label>

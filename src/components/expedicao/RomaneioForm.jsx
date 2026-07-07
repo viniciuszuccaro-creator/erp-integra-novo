@@ -8,17 +8,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { FileText } from "lucide-react";
 import RomaneioChecklist from "./romaneio-form/RomaneioChecklist";
 import RomaneioEntregasTable from "./romaneio-form/RomaneioEntregasTable";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 export default function RomaneioForm({ isOpen, onClose, empresaId, windowMode = false }) {
   const containerClass = windowMode ? "w-full h-full flex flex-col overflow-hidden" : "";
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const { filterInContext, grupoAtual, contexto, createInContext, updateInContext } = useContextoVisual();
+
+  const { data: motoristas = [] } = useRLSQuery('Motorista', { ativo: true }, '-updated_date', 999);
+  const { data: veiculos = [] } = useRLSQuery('Veiculo', { ativo: true }, '-updated_date', 999);
+
+  const veic_label = (ve) => {
+    const parts = [];
+    if (ve.modelo) parts.push(ve.modelo);
+    if (ve.placa) parts.push(ve.placa);
+    if (ve.tipo) parts.push(ve.tipo);
+    return parts.join(' - ') || ve.id;
+  };
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaId || 'sem-empresa'}`;
 
   const [formData, setFormData] = useState({
@@ -65,7 +78,7 @@ export default function RomaneioForm({ isOpen, onClose, empresaId, windowMode = 
       const valorTotal = entregasSelecionadas.reduce((sum, e) => sum + (e.valor_mercadoria || 0), 0);
       const numeroRomaneio = `ROM-${Date.now()}`;
 
-      const romaneio = await base44.entities.Romaneio.create({
+      const romaneio = await createInContext('Romaneio', {
         group_id: entregasSelecionadas[0].group_id,
         empresa_id: empresaId,
         numero_romaneio: numeroRomaneio,
@@ -89,7 +102,7 @@ export default function RomaneioForm({ isOpen, onClose, empresaId, windowMode = 
       });
 
       for (const entrega of entregasSelecionadas) {
-        await base44.entities.Entrega.update(entrega.id, {
+        await updateInContext('Entrega', entrega.id, {
           romaneio_id: romaneio.id,
           status: "Saiu para Entrega",
           data_saida: new Date().toISOString(),
@@ -129,7 +142,20 @@ export default function RomaneioForm({ isOpen, onClose, empresaId, windowMode = 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Motorista *</Label>
-                <Input value={formData.motorista} onChange={(e) => setFormData({ ...formData, motorista: e.target.value })} required className="mt-2" />
+                <Select
+                  value={formData.motorista_id || ''}
+                  onValueChange={(v) => {
+                    const m = motoristas.find(m => m.id === v);
+                    setFormData({ ...formData, motorista_id: v, motorista: m?.nome_completo || '', motorista_telefone: m?.telefone || m?.celular || '' });
+                  }}
+                >
+                  <SelectTrigger className="mt-2"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                  <SelectContent>
+                    {motoristas.map(m => (
+                      <SelectItem key={m.id} value={m.id}>{m.nome_completo}{m.cnh_categoria ? ` - CNH ${m.cnh_categoria}` : ''}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label>Telefone Motorista</Label>
@@ -137,7 +163,20 @@ export default function RomaneioForm({ isOpen, onClose, empresaId, windowMode = 
               </div>
               <div>
                 <Label>Veículo</Label>
-                <Input value={formData.veiculo} onChange={(e) => setFormData({ ...formData, veiculo: e.target.value })} placeholder="Ex: Caminhão Iveco" className="mt-2" />
+                <Select
+                  value={formData.veiculo_id || ''}
+                  onValueChange={(v) => {
+                    const veic = veiculos.find(ve => ve.id === v);
+                    setFormData({ ...formData, veiculo_id: v, veiculo: veic?.modelo || veic?.descricao || '', placa: veic?.placa || '', tipo_veiculo: veic?.tipo || 'Caminhão' });
+                  }}
+                >
+                  <SelectTrigger className="mt-2"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                  <SelectContent>
+                    {veiculos.map(ve => (
+                      <SelectItem key={ve.id} value={ve.id}>{veic_label(ve)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label>Placa</Label>

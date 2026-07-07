@@ -9,11 +9,13 @@ import { z } from "zod";
 import FormWrapper from "@/components/common/FormWrapper";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.1.2 - WINDOW MODE READY
  */
 export default function FeriasForm({ ferias, colaboradores = [], onSubmit, windowMode = false }) {
+  const { carimbarContexto } = useContextoVisual();
   const [formData, setFormData] = useState(ferias || {
     colaborador_id: "",
     tipo: "Férias",
@@ -45,10 +47,10 @@ export default function FeriasForm({ ferias, colaboradores = [], onSubmit, windo
 
   const handleSubmit = async () => {
     const colaborador = colaboradores.find(c => c.id === formData.colaborador_id);
-    const data = {
+    const data = carimbarContexto({
       ...formData,
       colaborador_nome: colaborador?.nome_completo
-    };
+    }, 'empresa_id');
     onSubmit(data);
   };
 

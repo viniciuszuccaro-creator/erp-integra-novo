@@ -9,11 +9,18 @@ import { Save, Target, TrendingUp } from "lucide-react";
 import { z } from "zod";
 import FormWrapper from "@/components/common/FormWrapper";
 import { Badge } from "@/components/ui/badge";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 /**
  * V21.1.2: Oportunidade Form - Adaptado para Window Mode
  */
 export default function OportunidadeForm({ oportunidade, onSubmit, windowMode = false }) {
+  const { carimbarContexto } = useContextoVisual();
+  const { data: clientes = [] } = useRLSQuery('Cliente', {}, '-created_date', 9999);
+  const { data: origens = [] } = useRLSQuery('ParametroOrigemPedido', { ativo: true }, '-updated_date', 100);
+  const { data: representantes = [] } = useRLSQuery('Representante', {}, '-updated_date', 9999);
+
   const [formData, setFormData] = useState(oportunidade || {
     titulo: '',
     descricao: '',
@@ -43,7 +50,7 @@ export default function OportunidadeForm({ oportunidade, onSubmit, windowMode = 
   });
 
   const handleSubmit = async () => {
-    onSubmit(formData);
+    onSubmit(carimbarContexto(formData, 'empresa_id'));
   };
 
   const content = (
@@ -76,11 +83,20 @@ export default function OportunidadeForm({ oportunidade, onSubmit, windowMode = 
 
             <div>
               <Label>Cliente *</Label>
-              <Input
-                value={formData.cliente_nome}
-                onChange={(e) => setFormData({ ...formData, cliente_nome: e.target.value })}
-                required
-              />
+              <Select
+                value={formData.cliente_id || ''}
+                onValueChange={(v) => {
+                  const cli = clientes.find(c => c.id === v);
+                  setFormData({ ...formData, cliente_id: v, cliente_nome: cli?.nome || cli?.razao_social || '' });
+                }}
+              >
+                <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectContent>
+                  {clientes.map(c => (
+                    <SelectItem key={c.id} value={c.id}>{c.nome || c.razao_social}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -104,26 +120,34 @@ export default function OportunidadeForm({ oportunidade, onSubmit, windowMode = 
               <Label>Origem</Label>
               <Select value={formData.origem} onValueChange={(v) => setFormData({ ...formData, origem: v })}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Selecione..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Indicação">Indicação</SelectItem>
-                  <SelectItem value="Site">Site</SelectItem>
-                  <SelectItem value="Telefone">Telefone</SelectItem>
-                  <SelectItem value="E-mail">E-mail</SelectItem>
-                  <SelectItem value="Visita">Visita</SelectItem>
-                  <SelectItem value="Evento">Evento</SelectItem>
-                  <SelectItem value="Rede Social">Rede Social</SelectItem>
+                  {origens.length > 0 ? origens.map(o => (
+                    <SelectItem key={o.id} value={o.nome}>{o.nome}</SelectItem>
+                  )) : (
+                    <SelectItem value="Indicação" disabled>Nenhum canal cadastrado</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
 
             <div>
               <Label>Responsável</Label>
-              <Input
-                value={formData.responsavel}
-                onChange={(e) => setFormData({ ...formData, responsavel: e.target.value })}
-              />
+              <Select
+                value={formData.responsavel_id || ''}
+                onValueChange={(v) => {
+                  const rep = representantes.find(r => r.id === v);
+                  setFormData({ ...formData, responsavel_id: v, responsavel: rep?.nome || rep?.nome_completo || '' });
+                }}
+              >
+                <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectContent>
+                  {representantes.map(r => (
+                    <SelectItem key={r.id} value={r.id}>{r.nome || r.nome_completo || r.codigo}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>

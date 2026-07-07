@@ -7,11 +7,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MessageSquare } from "lucide-react";
 import { z } from "zod";
 import FormWrapper from "@/components/common/FormWrapper";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 /**
  * V21.1.2 - WINDOW MODE READY
  */
 export default function InteracaoForm({ interacao, onSubmit, windowMode = false }) {
+  const { carimbarContexto } = useContextoVisual();
+  const { data: clientes = [] } = useRLSQuery('Cliente', {}, '-created_date', 9999);
+  const { data: representantes = [] } = useRLSQuery('Representante', {}, '-updated_date', 9999);
+
   const [formData, setFormData] = useState(interacao || {
     tipo: "Ligação",
     titulo: "",
@@ -33,7 +39,7 @@ export default function InteracaoForm({ interacao, onSubmit, windowMode = false 
   });
 
   const handleSubmit = async () => {
-    const data = { ...formData, duracao: parseFloat(formData.duracao) || null };
+    const data = carimbarContexto({ ...formData, duracao: parseFloat(formData.duracao) || null }, 'empresa_id');
     onSubmit(data);
   };
 
@@ -62,12 +68,20 @@ export default function InteracaoForm({ interacao, onSubmit, windowMode = false 
         </div>
         <div>
           <Label htmlFor="cliente_nome_int">Cliente *</Label>
-          <Input
-            id="cliente_nome_int"
-            value={formData.cliente_nome}
-            onChange={(e) => setFormData({ ...formData, cliente_nome: e.target.value })}
-            required
-          />
+          <Select
+            value={formData.cliente_id || ''}
+            onValueChange={(v) => {
+              const cli = clientes.find(c => c.id === v);
+              setFormData({ ...formData, cliente_id: v, cliente_nome: cli?.nome || cli?.razao_social || '' });
+            }}
+          >
+            <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+            <SelectContent>
+              {clientes.map(c => (
+                <SelectItem key={c.id} value={c.id}>{c.nome || c.razao_social}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="col-span-2">
           <Label htmlFor="titulo_int">Título *</Label>
@@ -107,11 +121,20 @@ export default function InteracaoForm({ interacao, onSubmit, windowMode = false 
         </div>
         <div>
           <Label htmlFor="responsavel_int">Responsável</Label>
-          <Input
-            id="responsavel_int"
-            value={formData.responsavel}
-            onChange={(e) => setFormData({ ...formData, responsavel: e.target.value })}
-          />
+          <Select
+            value={formData.responsavel_id || ''}
+            onValueChange={(v) => {
+              const rep = representantes.find(r => r.id === v);
+              setFormData({ ...formData, responsavel_id: v, responsavel: rep?.nome || rep?.nome_completo || '' });
+            }}
+          >
+            <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+            <SelectContent>
+              {representantes.map(r => (
+                <SelectItem key={r.id} value={r.id}>{r.nome || r.nome_completo || r.codigo}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label htmlFor="resultado">Resultado</Label>

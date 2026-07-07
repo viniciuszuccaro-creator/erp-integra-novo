@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useWindow } from '@/components/lib/useWindow';
 import useContextoVisual from '@/components/lib/useContextoVisual';
+import useRLSQuery from '@/components/lib/useRLSQuery';
 import usePermissions from '@/components/lib/usePermissions';
 import { Plus, CreditCard, DollarSign, Zap, CheckCircle2, BarChart3, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
@@ -34,11 +35,7 @@ export default function GestorFormasPagamento({ windowMode = false }) {
   const podeEditar = canEdit('Cadastros', 'FormaPagamento') || canEdit('Cadastros', null);
   const podeExcluir = canDelete('Cadastros', 'FormaPagamento') || canDelete('Cadastros', null);
 
-  const { data: formasPagamento = [], isLoading } = useQuery({
-    queryKey: ['formas-pagamento', contextKey],
-    queryFn: () => filterInContext('FormaPagamento', {}, 'ordem_exibicao', 200),
-    enabled: contextoValido,
-  });
+  const { data: formasPagamento = [], isLoading } = useRLSQuery('FormaPagamento', {}, 'ordem_exibicao', 200, { enabled: contextoValido });
 
   // Buscar dados para analytics
   const { data: pedidos = [] } = useQuery({

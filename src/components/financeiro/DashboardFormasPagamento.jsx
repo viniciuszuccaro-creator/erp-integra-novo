@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import HeaderFormasCompacto from './formas-pagamento/HeaderFormasCompacto';
 import KPIsFormas from './formas-pagamento/KPIsFormas';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import useRLSQuery from '@/components/lib/useRLSQuery';
 
 export default function DashboardFormasPagamento({ windowMode = false }) {
   const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();

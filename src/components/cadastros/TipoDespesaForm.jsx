@@ -6,11 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Receipt } from 'lucide-react';
-import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import usePermissions from '@/components/lib/usePermissions';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 export default function TipoDespesaForm({ tipo, tipoDespesa, item, data, onSubmit, onSave, onClose, windowMode = false }) {
   const dadosIniciais = item || data || tipoDespesa || tipo;
@@ -37,19 +37,8 @@ export default function TipoDespesaForm({ tipo, tipoDespesa, item, data, onSubmi
   const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
-  const { data: contasContabeis = [] } = useQuery({
-    queryKey: ['plano-contas', contextoKey],
-    queryFn: () => filterInContext('PlanoDeContas', {}, 'codigo', 999),
-    enabled: !!contexto,
-    staleTime: 300000, refetchOnWindowFocus: false,
-  });
-
-  const { data: centrosResultado = [] } = useQuery({
-    queryKey: ['centros-resultado', contextoKey],
-    queryFn: () => filterInContext('CentroResultado', {}, 'codigo', 999),
-    enabled: !!contexto,
-    staleTime: 300000, refetchOnWindowFocus: false,
-  });
+  const { data: contasContabeis = [] } = useRLSQuery('PlanoDeContas', {}, 'codigo', 999, { staleTime: 300000, enabled: !!contexto });
+  const { data: centrosResultado = [] } = useRLSQuery('CentroResultado', {}, 'codigo', 999, { staleTime: 300000, enabled: !!contexto });
 
   const handleSubmit = (e) => {
     e.preventDefault();

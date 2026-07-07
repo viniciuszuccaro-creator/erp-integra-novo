@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Wallet, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
 
 export default function OperadorCaixaForm({ operador, item, data, initialData, defaultValues, onSubmit, onSave, onClose, onCancel, windowMode = false }) {
@@ -51,23 +51,9 @@ export default function OperadorCaixaForm({ operador, item, data, initialData, d
     }
   }, [dadosIniciais?.id]);
 
-  const { data: colaboradores = [] } = useQuery({
-    queryKey: ['colaboradores', contextKey],
-    queryFn: () => filterInContext('Colaborador', {}, 'nome_completo', 500),
-    enabled: contextoValido,
-  });
-
-  const { data: turnos = [] } = useQuery({
-    queryKey: ['turnos', contextKey],
-    queryFn: () => filterInContext('Turno', {}, 'nome', 200),
-    enabled: contextoValido,
-  });
-
-  const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas', contextKey],
-    queryFn: () => filterInContext('Empresa', {}, 'nome_fantasia', 200, 'id'),
-    enabled: contextoValido,
-  });
+  const { data: colaboradores = [] } = useRLSQuery('Colaborador', {}, 'nome_completo', 500, { enabled: contextoValido });
+  const { data: turnos = [] } = useRLSQuery('Turno', {}, 'nome', 200, { enabled: contextoValido });
+  const { data: empresas = [] } = useRLSQuery('Empresa', {}, 'nome_fantasia', 200, { enabled: contextoValido });
 
   // prevIdRef já cobre a sincronização acima
 

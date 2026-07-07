@@ -8,6 +8,7 @@ import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, L
 import { TrendingUp, Download, Calendar, DollarSign, Filter } from 'lucide-react';
 import { format, subDays } from 'date-fns';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import useRLSQuery from '@/components/lib/useRLSQuery';
 
 /**
  * RELATÓRIO AVANÇADO DE FORMAS DE PAGAMENTO V21.8

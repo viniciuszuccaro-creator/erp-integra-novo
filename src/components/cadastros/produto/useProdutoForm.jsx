@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import useContextoVisual from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
 import { buildInitialFormData } from "./useProdutoFormState";
 import useProdutoIA from "./useProdutoIA";
@@ -39,12 +39,12 @@ export default function useProdutoForm({ produto, onSubmit, onSuccess, closeSelf
 
   const { iaSugestao, setIaSugestao, processandoIA, sugestoesIA, setSugestoesIA, gerandoDescricaoSEO, gerandoImagem, analisarDescricaoIA, aplicarSugestaoIA, gerarDescricaoSEO, gerarImagemIA } = useProdutoIA({ formData, setFormData });
 
-  const { data: todosProdutos = [] } = useQuery({ queryKey: ['produtos-codes-sample', contextKey], queryFn: () => filterInContext('Produto', {}, '-created_date', 100), staleTime: 300000, keepPreviousData: true, refetchOnWindowFocus: false, enabled: !produto && abaAtiva === 'dados-gerais' && contextoValido });
-  const { data: setores = [] } = useQuery({ queryKey: ['setores-atividade', contextKey], queryFn: () => filterInContext('SetorAtividade', {}, 'nome', 200), staleTime: 300000, keepPreviousData: true, refetchOnWindowFocus: false, enabled: abaAtiva === 'dados-gerais' && contextoValido });
-  const { data: grupos = [] } = useQuery({ queryKey: ['grupos-produto', contextKey], queryFn: () => filterInContext('GrupoProduto', {}, 'nome', 200), staleTime: 300000, keepPreviousData: true, refetchOnWindowFocus: false, enabled: abaAtiva === 'dados-gerais' && contextoValido });
-  const { data: marcas = [] } = useQuery({ queryKey: ['marcas', contextKey], queryFn: () => filterInContext('Marca', {}, 'nome', 200), staleTime: 300000, keepPreviousData: true, refetchOnWindowFocus: false, enabled: abaAtiva === 'dados-gerais' && contextoValido });
-  const { data: locaisEstoque = [] } = useQuery({ queryKey: ['locais-estoque', contextKey], queryFn: () => filterInContext('LocalEstoque', {}, 'nome', 200), staleTime: 300000, keepPreviousData: true, refetchOnWindowFocus: false, enabled: abaAtiva === 'estoque-avancado' && contextoValido });
-  const { data: planoContas = [] } = useQuery({ queryKey: ['plano-contas', contextKey], queryFn: () => filterInContext('PlanoDeContas', {}, 'codigo', 500), staleTime: 300000, keepPreviousData: true, refetchOnWindowFocus: false, enabled: abaAtiva === 'fiscal-contabil' && contextoValido });
+  const { data: todosProdutos = [] } = useRLSQuery('Produto', {}, '-created_date', 100, { staleTime: 300000, enabled: !produto && abaAtiva === 'dados-gerais' && contextoValido });
+  const { data: setores = [] } = useRLSQuery('SetorAtividade', {}, 'nome', 200, { staleTime: 300000, enabled: abaAtiva === 'dados-gerais' && contextoValido });
+  const { data: grupos = [] } = useRLSQuery('GrupoProduto', {}, 'nome', 200, { staleTime: 300000, enabled: abaAtiva === 'dados-gerais' && contextoValido });
+  const { data: marcas = [] } = useRLSQuery('Marca', {}, 'nome', 200, { staleTime: 300000, enabled: abaAtiva === 'dados-gerais' && contextoValido });
+  const { data: locaisEstoque = [] } = useRLSQuery('LocalEstoque', {}, 'nome', 200, { staleTime: 300000, enabled: abaAtiva === 'estoque-avancado' && contextoValido });
+  const { data: planoContas = [] } = useRLSQuery('PlanoDeContas', {}, 'codigo', 500, { staleTime: 300000, enabled: abaAtiva === 'fiscal-contabil' && contextoValido });
 
   useEffect(() => {
     if (!produto && !formData.codigo && Array.isArray(todosProdutos)) {

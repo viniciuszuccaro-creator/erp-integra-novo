@@ -14,6 +14,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import useContextoVisual from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
 import GerenciarContatosClienteForm from "./GerenciarContatosClienteForm";
 import GerenciarEnderecosClienteForm from "./GerenciarEnderecosClienteForm";
@@ -53,11 +54,11 @@ export default function CadastroClienteCompleto({ cliente: clienteProp, item, da
     empresa_id: empresaAtual?.id, group_id: groupId
   });
 
-  const { data: tabelasPreco = [] } = useQuery({ queryKey: ['tabelas-preco', contextKey], queryFn: () => filterInContext('TabelaPreco', {}, 'nome', 200), enabled: contextoValido });
-  const { data: formasPagamento = [] } = useQuery({ queryKey: ['formas-pagamento', contextKey], queryFn: () => filterInContext('FormaPagamento', {}, 'nome', 200), enabled: contextoValido });
-  const { data: colaboradores = [] } = useQuery({ queryKey: ['colaboradores', contextKey], queryFn: () => filterInContext('Colaborador', { status: 'Ativo' }, 'nome_completo', 200), enabled: contextoValido });
-  const { data: regioes = [] } = useQuery({ queryKey: ['regioes', contextKey], queryFn: () => filterInContext('RegiaoAtendimento', {}, 'nome', 200), enabled: contextoValido });
-  const { data: representantes = [] } = useQuery({ queryKey: ['representantes', contextKey], queryFn: () => filterInContext('Representante', { status: 'Ativo' }, 'nome', 200), enabled: contextoValido });
+  const { data: tabelasPreco = [] } = useRLSQuery('TabelaPreco', {}, 'nome', 200, { enabled: contextoValido });
+  const { data: formasPagamento = [] } = useRLSQuery('FormaPagamento', {}, 'nome', 200, { enabled: contextoValido });
+  const { data: colaboradores = [] } = useRLSQuery('Colaborador', { status: 'Ativo' }, 'nome_completo', 200, { enabled: contextoValido });
+  const { data: regioes = [] } = useRLSQuery('RegiaoAtendimento', {}, 'nome', 200, { enabled: contextoValido });
+  const { data: representantes = [] } = useRLSQuery('Representante', { status: 'Ativo' }, 'nome', 200, { enabled: contextoValido });
 
   const [usuarioLogado, setUsuarioLogado] = useState(null);
 

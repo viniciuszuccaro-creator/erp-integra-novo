@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import useRLSQuery from '@/components/lib/useRLSQuery';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import usePermissions from "@/components/lib/usePermissions";
 import { toast } from 'sonner';
@@ -30,8 +30,8 @@ export default function useFormaPagamentoForm({ formaPagamento, item, data, onSu
   const podeEditar = hasPermission?.("Cadastros.FormaPagamento.editar") || hasPermission?.("Financeiro.FormaPagamento.editar");
   const podeSalvar = formaPagamentoNorm?.id ? podeEditar : podeCriar;
 
-  const { data: bancos = [] } = useQuery({ queryKey: ['bancos', groupId, empresaAtual?.id], queryFn: () => filterInContext('Banco', {}, 'nome_banco', 200), enabled: contextoValido });
-  const { data: gateways = [] } = useQuery({ queryKey: ['gateways-pagamento', groupId, empresaAtual?.id], queryFn: () => filterInContext('GatewayPagamento', { ativo: true }, 'nome', 200), enabled: contextoValido });
+  const { data: bancos = [] } = useRLSQuery('Banco', {}, 'nome_banco', 200, { enabled: contextoValido });
+  const { data: gateways = [] } = useRLSQuery('GatewayPagamento', { ativo: true }, 'nome', 200, { enabled: contextoValido });
 
   const [formData, setFormData] = useState(() => formaPagamentoNorm || {
     group_id: contextoAtual === 'grupo' ? empresaAtual?.group_id : undefined,

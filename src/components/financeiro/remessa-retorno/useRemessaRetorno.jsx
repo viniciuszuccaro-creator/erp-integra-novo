@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import useContextoVisual from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
 import { toast } from "sonner";
@@ -25,11 +26,7 @@ export default function useRemessaRetorno() {
   const [dialogRemessa, setDialogRemessa] = useState(false);
   const [processandoRetorno, setProcessandoRetorno] = useState(false);
 
-  const { data: bancos = [] } = useQuery({
-    queryKey: ['bancos', contextKey],
-    queryFn: () => filterInContext('Banco', {}, 'nome', 100),
-    enabled: contextoValido,
-  });
+  const { data: bancos = [] } = useRLSQuery('Banco', {}, 'nome', 100, { enabled: contextoValido });
 
   const { data: contasReceber = [] } = useQuery({
     queryKey: ['contasReceber', contextKey],

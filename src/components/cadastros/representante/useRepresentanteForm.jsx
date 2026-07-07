@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
 import { useToast } from "@/components/ui/use-toast";
 import { useConfirm } from "@/components/ui/confirm-dialog";
@@ -37,14 +38,8 @@ export default function useRepresentanteForm({ representante: representanteProp,
     empresa_id: empresaAtual?.id, group_id: groupId
   });
 
-  const { data: regioes = [] } = useQuery({
-    queryKey: ['regioes', contextKey], queryFn: () => filterInContext('RegiaoAtendimento', {}, 'nome', 200), enabled: contextoValido
-  });
-  const { data: clientesIndicados = [] } = useQuery({
-    queryKey: ['clientes-indicados', representante?.id, contextKey],
-    queryFn: () => filterInContext('Cliente', { indicador_id: representante.id }, 'nome', 200),
-    enabled: !!representante?.id && contextoValido
-  });
+  const { data: regioes = [] } = useRLSQuery('RegiaoAtendimento', {}, 'nome', 200, { enabled: contextoValido });
+  const { data: clientesIndicados = [] } = useRLSQuery('Cliente', { indicador_id: representante?.id }, 'nome', 200, { enabled: !!representante?.id && contextoValido });
   const { data: pedidosIndicados = [] } = useQuery({
     queryKey: ['pedidos-indicados', representante?.id, contextKey],
     queryFn: () => filterInContext('Pedido', { indicador_id: representante.id }, '-created_date', 200),

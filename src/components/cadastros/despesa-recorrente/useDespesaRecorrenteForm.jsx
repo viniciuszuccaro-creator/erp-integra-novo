@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
 
@@ -49,46 +49,24 @@ export const MESES_ANO = [
 
 export default function useDespesaRecorrenteForm(config, onSubmit) {
   const [formData, setFormData] = useState(config || DEFAULT_FORM);
-  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
-  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
-  const enabled = !!contexto;
+  const { empresaAtual, grupoAtual, contexto } = useContextoVisual();
+
+  const fornecedoresQ = useRLSQuery('Fornecedor', {}, 'nome_fantasia', 999);
+  const centrosCustoQ = useRLSQuery('CentroCusto', {}, 'nome', 999);
+  const formasPagamentoQ = useRLSQuery('FormaPagamento', {}, 'nome', 999);
+  const empresasQ = useRLSQuery('Empresa', {}, 'nome_fantasia', 999);
+  const tiposDespesaQ = useRLSQuery('TipoDespesa', { pode_ser_recorrente: true, ativo: true }, 'nome', 999);
+  const planoContasQ = useRLSQuery('PlanoDeContas', {}, 'codigo', 999);
+  const centrosResultadoQ = useRLSQuery('CentroResultado', {}, 'nome', 999);
 
   const queries = {
-    fornecedores: useQuery({
-      queryKey: ['fornecedores', contextoKey],
-      queryFn: () => filterInContext('Fornecedor', {}, 'nome_fantasia', 999),
-      enabled,
-    }),
-    centrosCusto: useQuery({
-      queryKey: ['centros-custo', contextoKey],
-      queryFn: () => filterInContext('CentroCusto', {}, 'nome', 999),
-      enabled,
-    }),
-    formasPagamento: useQuery({
-      queryKey: ['formas-pagamento', contextoKey],
-      queryFn: () => filterInContext('FormaPagamento', {}, 'nome', 999),
-      enabled,
-    }),
-    empresas: useQuery({
-      queryKey: ['empresas', contextoKey],
-      queryFn: () => filterInContext('Empresa', {}, 'nome_fantasia', 999),
-      enabled,
-    }),
-    tiposDespesa: useQuery({
-      queryKey: ['tipos-despesa', contextoKey],
-      queryFn: () => filterInContext('TipoDespesa', { pode_ser_recorrente: true, ativo: true }, 'nome', 999),
-      enabled,
-    }),
-    planoContas: useQuery({
-      queryKey: ['plano-contas', contextoKey],
-      queryFn: () => filterInContext('PlanoDeContas', {}, 'codigo', 999),
-      enabled,
-    }),
-    centrosResultado: useQuery({
-      queryKey: ['centros-resultado', contextoKey],
-      queryFn: () => filterInContext('CentroResultado', {}, 'nome', 999),
-      enabled,
-    }),
+    fornecedores: fornecedoresQ,
+    centrosCusto: centrosCustoQ,
+    formasPagamento: formasPagamentoQ,
+    empresas: empresasQ,
+    tiposDespesa: tiposDespesaQ,
+    planoContas: planoContasQ,
+    centrosResultado: centrosResultadoQ,
   };
 
   const update = (patch) => setFormData(prev => ({ ...prev, ...patch }));

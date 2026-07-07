@@ -13,6 +13,7 @@ import { Wallet, CheckCircle2 } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
 import useContextoVisual from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
 import CaixaPDVVendaTab from "./caixa-pdv/CaixaPDVVendaTab";
 import CaixaPDVTitulosTab from "./caixa-pdv/CaixaPDVTitulosTab";

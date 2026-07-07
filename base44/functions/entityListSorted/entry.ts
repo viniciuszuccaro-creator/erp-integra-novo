@@ -210,31 +210,10 @@ async function expandGroupFilter(base44, entityName, f) {
     return { ...rest, $or: orConds };
   }
 
-  // Apenas group_id → expande para todas as empresas do grupo
+  // Apenas group_id → uso direto (group_id é indexado e suficiente para contexto de grupo)
+  // Não expandir para empresa_id/empresa_dona_id com $in — causa timeout no MongoDB
   if (f?.group_id && !f?.$or && !f?.empresa_id && !f?.empresa_dona_id && !f?.empresa_alocada_id) {
-    try {
-      const groupId = f.group_id;
-      const empresas = await base44.asServiceRole.entities.Empresa.filter({ group_id: groupId }, '-id', 200);
-      const empresasIds = (empresas || []).map(e => e.id).filter(Boolean);
-      const rest = { ...f };
-      delete rest.group_id;
-      const orConds = [
-        { empresa_id: { $in: empresasIds } },
-        { empresa_dona_id: { $in: empresasIds } },
-        { group_id: groupId },
-      ];
-      // NÃO incluir { empresa_id: null } — isso infla a lista com registros de outros escopos
-      if (EXPAND_SET.has(entityName)) {
-        orConds.push({ empresas_compartilhadas_ids: { $in: empresasIds } });
-      }
-      if (entityName === 'Colaborador') {
-        orConds.push({ empresa_alocada_id: { $in: empresasIds } });
-      }
-      if (entityName === 'Produto') {
-        orConds.push({ compartilhado_grupo: true }); // produtos compartilhados do grupo
-      }
-      return { ...rest, $or: orConds };
-    } catch (_) { /* fallback: usa group_id direto */ }
+    return f; // { group_id: groupId } é suficiente — todos os registros do grupo têm group_id
   }
 
   // $or existente + group_id residual

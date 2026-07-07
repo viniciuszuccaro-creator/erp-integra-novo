@@ -424,8 +424,42 @@ export function useContextoVisual() {
                    if (!groupId && !empresaId && !noContext) return [];
 
                    const rest = { ...criterios };
-                   const orConds = [];
 
+                   // Contexto de GRUPO (sem empresa específica): filtro simples por group_id (indexado e rápido)
+                   // O backend expandGroupFilter retorna { group_id } diretamente, sem $or/$in complexo
+                   if (groupId && !empresaId) {
+                     const filtro = noContext ? { ...rest } : { ...rest, group_id: groupId };
+                     if (entityName === 'PerfilAcesso') {
+                       filtro.$or = [{ group_id: groupId }, { grupo_id: groupId }];
+                       delete filtro.group_id;
+                     }
+                     // TransferenciaFilial precisa de empresa_origem/destino (backend não expande)
+                     if (entityName === 'TransferenciaFilial' && Array.isArray(empresasDoGrupo) && empresasDoGrupo.length) {
+                       const empresasIds = empresasDoGrupo.map(e => e.id).filter(Boolean);
+                       filtro.$or = [{ group_id: groupId }, { empresa_origem_id: { $in: empresasIds } }, { empresa_destino_id: { $in: empresasIds } }];
+                       delete filtro.group_id;
+                     }
+                     // seguir para sort + invoke abaixo
+                     return (async () => {
+                       let sortField2, sortDirection2;
+                       if (typeof order === 'string' && order.length) {
+                         sortDirection2 = order.startsWith('-') ? 'desc' : 'asc';
+                         sortField2 = normalizeSortField(entityName, order.replace(/^-/, ''));
+                         setLastSort(entityName, { sortField: sortField2, sortDirection: sortDirection2 });
+                       } else {
+                         const last = getLastSort(entityName);
+                         sortField2 = normalizeSortField(entityName, last?.sortField || DEFAULT_SORTS[entityName]?.field || 'updated_date');
+                         sortDirection2 = last?.sortDirection || DEFAULT_SORTS[entityName]?.direction || 'desc';
+                       }
+                       const res = await base44.functions.invoke('entityListSorted', {
+                         entityName, filter: filtro, sortField: sortField2, sortDirection: sortDirection2, limit: limit || 100,
+                       });
+                       return Array.isArray(res?.data) ? res.data : [];
+                     })();
+                   }
+
+                   // Contexto de EMPRESA: $or mínimo com empresaId + shared (para entidades compartilhadas)
+                   const orConds = [];
                    if (empresaId) {
                      if (entityName === 'Cliente') {
                        orConds.push(
@@ -439,51 +473,6 @@ export function useContextoVisual() {
                          orConds.push({ empresas_compartilhadas_ids: { $in: [empresaId] } });
                        }
                      }
-                   }
-                   if (groupId) {
-                     orConds.push({ group_id: groupId });
-                     if (entityName === 'PerfilAcesso') {
-                       orConds.push(
-                         { grupo_id: groupId },
-                         { group_id: null },
-                         { grupo_id: null },
-                         { group_id: '' },
-                         { grupo_id: '' },
-                         { group_id: 'grupo_001' },
-                         { grupo_id: 'grupo_001' }
-                       );
-                     }
-                     // Contexto do grupo sem empresa explícita → incluir todas empresas do grupo
-                     if (!empresaId && Array.isArray(empresasDoGrupo) && empresasDoGrupo.length) {
-                       const empresasIds = empresasDoGrupo.map(e => e.id).filter(Boolean);
-                       if (empresasIds.length) {
-                         if (entityName === 'Cliente') {
-                           orConds.push(
-                             { empresa_id: { $in: empresasIds } },
-                             { empresa_dona_id: { $in: empresasIds } },
-                             { empresas_compartilhadas_ids: { $in: empresasIds } }
-                           );
-                         } else if (entityName === 'Fornecedor' || entityName === 'Transportadora') {
-                           orConds.push(
-                             { empresa_dona_id: { $in: empresasIds } },
-                             { empresas_compartilhadas_ids: { $in: empresasIds } }
-                           );
-                         } else if (entityName === 'Colaborador') {
-                           orConds.push({ empresa_alocada_id: { $in: empresasIds } });
-                         } else if (entityName === 'TransferenciaFilial') {
-                           orConds.push({ empresa_origem_id: { $in: empresasIds } }, { empresa_destino_id: { $in: empresasIds } });
-                         } else {
-                           orConds.push({ [ctxCampo]: { $in: empresasIds } });
-                         }
-                       }
-                     }
-                   }
-
-                   // Inclui registros órfãos (sem group_id e sem empresa_id) quando no contexto de grupo
-                   // Estes registros foram criados antes da implementação multi-tenant
-                   if (groupId && hasGroupField && hasCtxField) {
-                     orConds.push({ group_id: null, [ctxCampo]: null });
-                     orConds.push({ group_id: '', [ctxCampo]: '' });
                    }
 
                    const filtro = noContext ? { ...rest } : { ...rest, ...(orConds.length ? { $or: orConds } : {}) };

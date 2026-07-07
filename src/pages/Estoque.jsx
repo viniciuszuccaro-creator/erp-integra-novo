@@ -43,7 +43,7 @@ export default function Estoque() {
   const contextoValido = !!(empresaAtual?.id || groupId);
 
   const { data: produtosParaKPIs = [], refetch: refetchContagens } = useRLSQuery(
-    'Produto', {}, undefined, ESTOQUE_PRODUCTS_LIMIT,
+    'Produto', { status: 'Ativo' }, undefined, ESTOQUE_PRODUCTS_LIMIT,
     { staleTime: 300000, enabled: contextoValido }
   );
 
@@ -51,7 +51,7 @@ export default function Estoque() {
     total: produtosParaKPIs.length,
     revenda: produtosParaKPIs.filter(p => p.tipo_item === 'Revenda').length,
     producao: produtosParaKPIs.filter(p => p.tipo_item === 'Matéria-Prima Produção').length,
-    estoqueBaixo: produtosParaKPIs.filter(isProdutoEstoqueBaixo).length,
+    estoqueBaixo: produtosParaKPIs.filter(p => p.tipo_item === 'Revenda' && isProdutoEstoqueBaixo(p)).length,
   }), [produtosParaKPIs]);
 
   const { data: movimentacoes = [] } = useRLSQuery(

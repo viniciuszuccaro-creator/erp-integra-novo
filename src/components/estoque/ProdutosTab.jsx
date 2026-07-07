@@ -33,7 +33,7 @@ export default function ProdutosTab(props) {
     const total = produtosRLS.filter(p => p.status === 'Ativo').length;
     const revenda = produtosRLS.filter(p => p.tipo_item === 'Revenda').length;
     const producao = produtosRLS.filter(p => p.tipo_item === 'Matéria-Prima Produção').length;
-    const estoqueBaixo = produtosRLS.filter(p => (p.estoque_disponivel || 0) <= (p.estoque_minimo || 0)).length;
+    const estoqueBaixo = produtosRLS.filter(p => p.tipo_item === 'Revenda' && (p.estoque_disponivel || 0) <= (p.estoque_minimo || 0)).length;
     return { total, revenda, producao, estoqueBaixo };
   }, [produtosRLS]);
 

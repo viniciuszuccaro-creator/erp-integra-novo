@@ -58,9 +58,9 @@ export default function useDashboardDerivedData({ pedidos = [], contasReceber = 
 
   const produtosBaixoEstoque = produtos.filter((p) => {
     if (p.status !== "Ativo") return false;
-    const estoqueDisponivel = getProdutoEstoqueDisponivel(p);
     const estoqueMinimo = safeNumber(p.estoque_minimo);
-    return estoqueDisponivel <= estoqueMinimo;
+    if (estoqueMinimo <= 0) return false;
+    return getProdutoEstoqueDisponivel(p) <= estoqueMinimo;
   }).length;
 
   const colaboradoresAtivos = colaboradores.filter((c) => (c.status || 'Ativo') !== 'Inativo' && (c.status || 'Ativo') !== 'Afastado').length;

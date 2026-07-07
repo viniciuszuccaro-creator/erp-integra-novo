@@ -140,7 +140,7 @@ function LayoutContent({ children, currentPageName }) {
       try {
         queryClient.invalidateQueries({ refetchType: 'active' });
       } catch (_) {}
-    }, 20000);
+    }, 45000);
     return () => clearInterval(iv);
   }, [queryClient]);
 

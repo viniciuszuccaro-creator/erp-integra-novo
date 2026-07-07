@@ -1,5 +1,6 @@
 import { safeArray, safeNumber, safeDate, safeDateKey, isBefore, isBeforeOrEqual } from "@/components/dashboard/utils/dashboardSafeData";
 import { getPedidoItens } from "@/components/dashboard/utils/dashboardOrderItems";
+import { getProdutoEstoqueDisponivel } from "@/components/estoque/utils/estoqueSafeData";
 
 export default function useDashboardDerivedData({ pedidos = [], contasReceber = [], contasPagar = [], entregas = [], ordensProducao = [], colaboradores = [], clientes = [], produtos = [], periodo = "mes" }) {
   pedidos = safeArray(pedidos);
@@ -57,9 +58,7 @@ export default function useDashboardDerivedData({ pedidos = [], contasReceber = 
 
   const produtosBaixoEstoque = produtos.filter((p) => {
     if (p.status !== "Ativo") return false;
-    const estoqueDisponivel = safeNumber(p.estoque_disponivel) !== 0
-      ? safeNumber(p.estoque_disponivel)
-      : safeNumber(p.estoque_atual) - safeNumber(p.estoque_reservado);
+    const estoqueDisponivel = getProdutoEstoqueDisponivel(p);
     const estoqueMinimo = safeNumber(p.estoque_minimo);
     return estoqueDisponivel <= estoqueMinimo;
   }).length;

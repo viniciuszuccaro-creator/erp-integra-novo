@@ -45,7 +45,9 @@ export async function loadScopedConfiguracaoSistema({ empresaId, grupoId, limit 
     queries.push(base44.entities.ConfiguracaoSistema.filter({ group_id: grupoId }, '-updated_date', limit));
   }
   if (includeGlobal) {
-    queries.push(base44.entities.ConfiguracaoSistema.filter({ empresa_id: null, group_id: null }, '-updated_date', limit));
+    // Busca configs globais (sem empresa_id e sem group_id)
+    // Não podemos passar null no filtro pois o SDK ignora — buscamos todos e filtramos no cliente
+    queries.push(base44.entities.ConfiguracaoSistema.filter({}, '-updated_date', limit));
   }
 
   const results = await Promise.allSettled(queries);
@@ -55,6 +57,8 @@ export async function loadScopedConfiguracaoSistema({ empresaId, grupoId, limit 
   for (const result of results) {
     if (result.status !== 'fulfilled' || !Array.isArray(result.value)) continue;
     for (const item of result.value) {
+      // Se includeGlobal, filtra apenas configs sem empresa_id e sem group_id
+      if (includeGlobal && (item.empresa_id || item.group_id)) continue;
       const key = item?.id || `${item?.chave}:${item?.empresa_id || ''}:${item?.group_id || ''}:${item?.updated_date || ''}`;
       if (seen.has(key)) continue;
       seen.add(key);

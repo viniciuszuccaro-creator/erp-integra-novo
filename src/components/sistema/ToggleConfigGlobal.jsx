@@ -34,7 +34,9 @@ export default function ToggleConfigGlobal({
   // Modo auto-gerenciado: se não recebeu onToggle/getToggleValue, usa useToggleConfig
   const { empresaAtual, grupoAtual } = useContextoVisual();
   const eId = empresaAtual?.id;
-  const gId = grupoAtual?.id || empresaAtual?.group_id;
+  const gId = grupoAtual?.id || empresaAtual?.group_id || (() => {
+    try { return localStorage.getItem('group_atual_id'); } catch { return null; }
+  })();
   const queryKeySelf = ['toggle-self', eId ?? 'sem', gId ?? 'sem'];
   const { saving: savingSelf, handleToggle: handleToggleSelf, getToggleValue: getToggleValueSelf } = useToggleConfig(eId, gId, queryKeySelf);
 

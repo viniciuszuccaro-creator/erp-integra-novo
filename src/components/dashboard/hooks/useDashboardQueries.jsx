@@ -23,7 +23,7 @@ export function useDashboardQueries({ canSeeFinanceiro, canSeeCRM, canSeeComerci
   const { data: produtos = [] } = useRLSQuery('Produto', {}, '-created_date', DASHBOARD_LIST_LIMIT, { enabled: Boolean(canSeeEstoque && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval });
   const { data: clientes = [] } = useRLSQuery('Cliente', {}, '-created_date', DASHBOARD_LIST_LIMIT, { enabled: Boolean(canSeeCRM && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval });
   const { data: ordensProducao = [] } = useRLSQuery('OrdemProducao', {}, '-data_emissao', DASHBOARD_LIST_LIMIT, { enabled: Boolean(canSeeProducao && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval });
-  const { data: notasFiscais = [] } = useRLSQuery('NotaFiscal', {}, '-created_date', DASHBOARD_LIST_LIMIT, { enabled: Boolean((canSeeFinanceiro || canSeeFiscal || canSeeComercial) && hasContextoAtivo), staleTime: 30000, refetchOnWindowFocus: false, refetchOnReconnect: false, retry: 1, refetchInterval });
+  const { data: notasFiscais = [] } = useRLSQuery('NotaFiscal', {}, '-created_date', DASHBOARD_LIST_LIMIT, { enabled: Boolean((canSeeFinanceiro || canSeeFiscal || canSeeComercial) && hasContextoAtivo), staleTime: 15000, refetchOnWindowFocus: false, refetchOnReconnect: false, retry: 1, refetchInterval });
 
   const { data: iaConsolidado = {}, isLoading: loadingAnomIA } = useQuery({
     queryKey: ['iaConsolidado', empresaAtual?.id, grupoAtual?.id],

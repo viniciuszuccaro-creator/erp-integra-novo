@@ -35,7 +35,7 @@ export default function ConfigCenter({ empresaId: empresaIdProp }) {
       return loadScopedConfiguracaoSistema({ empresaId: eId, grupoId: gId, limit: 200, includeGlobal: true });
     },
     enabled: canLoad,
-    staleTime: 30000,
+    staleTime: 15000,
     gcTime: 300000,
     refetchOnMount: true,
   });

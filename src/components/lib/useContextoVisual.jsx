@@ -479,6 +479,13 @@ export function useContextoVisual() {
                      }
                    }
 
+                   // Inclui registros órfãos (sem group_id e sem empresa_id) quando no contexto de grupo
+                   // Estes registros foram criados antes da implementação multi-tenant
+                   if (groupId && hasGroupField && hasCtxField) {
+                     orConds.push({ group_id: null, [ctxCampo]: null });
+                     orConds.push({ group_id: '', [ctxCampo]: '' });
+                   }
+
                    const filtro = noContext ? { ...rest } : { ...rest, ...(orConds.length ? { $or: orConds } : {}) };
 
                    // Derivar sort

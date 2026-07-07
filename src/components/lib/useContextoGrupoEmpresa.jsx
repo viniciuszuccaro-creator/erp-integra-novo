@@ -289,8 +289,8 @@ export function useContextoGrupoEmpresa() {
       }
     },
     enabled: !!grupoAtual && contexto === 'grupo',
-    staleTime: 300000,
-    gcTime: 900000,
+    staleTime: 15000,
+    gcTime: 300000,
     retry: 0,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,

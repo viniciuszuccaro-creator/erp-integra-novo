@@ -57,7 +57,7 @@ async function fastCount(base44, entityName, filter) {
 
   let count = 0;
   try {
-    const rows = await base44.asServiceRole.entities[entityName].filter(filter || {}, '-id', 2000, 0);
+    const rows = await base44.asServiceRole.entities[entityName].filter(filter || {}, '-id', 9999, 0);
     count = Array.isArray(rows) ? rows.length : 0;
   } catch (err) {
     const status = err?.status || err?.response?.status;

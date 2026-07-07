@@ -76,7 +76,7 @@ async function countEntity(entityName, filter, empresasDoGrupo) {
     }
     if (groupId) {
       orConds.push({ group_id: groupId });
-      orConds.push({ empresa_id: null, group_id: null });
+      // NÃO incluir { empresa_id: null, group_id: null } — diverge da tabela (entityListSorted não inclui)
       if (!empresaId && Array.isArray(empresasDoGrupo) && empresasDoGrupo.length) {
         const ids = empresasDoGrupo.map(e => e.id).filter(Boolean);
         if (ids.length) {

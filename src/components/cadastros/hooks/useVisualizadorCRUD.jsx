@@ -234,10 +234,20 @@ export default function useVisualizadorCRUD({
         throw new Error(erroDuplicata);
       }
       if (editItem?.id) {
-        await updateInContext(ENTITY, editItem.id, clean, "empresa_id");
+        // Catálogos simples sem contexto: usa update direto (não exige group_id/empresa_id)
+        if (isSimple && !groupId && !empresaId) {
+          await base44.entities[ENTITY].update(editItem.id, clean);
+        } else {
+          await updateInContext(ENTITY, editItem.id, clean, "empresa_id");
+        }
         auditarAcao({ acao: 'Edição', ENTITY, registroId: editItem.id, empresaId, groupId, dadosAntes: editItem, dadosDepois: clean });
       } else {
-        const criado = await createInContext(ENTITY, clean, "empresa_id");
+        let criado;
+        if (isSimple && !groupId && !empresaId) {
+          criado = await base44.entities[ENTITY].create(clean);
+        } else {
+          criado = await createInContext(ENTITY, clean, "empresa_id");
+        }
         auditarAcao({ acao: 'Criação', ENTITY, registroId: criado?.id, empresaId, groupId, dadosDepois: clean });
       }
       handleCloseForm(true);

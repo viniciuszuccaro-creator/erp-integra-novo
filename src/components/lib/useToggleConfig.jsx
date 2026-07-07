@@ -103,6 +103,8 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
   const [confirmedMap, setConfirmedMap] = useState({});
   const queryClient = useQueryClient();
   const pendingRef = useRef({});
+  const confirmedTimeoutsRef = useRef({});
+  const invalidationTimeoutsRef = useRef({});
   const { hasPermission } = usePermissions();
 
   // Reset ao trocar empresa/grupo
@@ -110,6 +112,11 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
     setOptimisticMap({});
     setConfirmedMap({});
     pendingRef.current = {};
+    // Limpa timeouts pendentes para evitar confirmedMap stale após troca de contexto
+    Object.values(confirmedTimeoutsRef.current).forEach(id => clearTimeout(id));
+    Object.values(invalidationTimeoutsRef.current).forEach(id => clearTimeout(id));
+    confirmedTimeoutsRef.current = {};
+    invalidationTimeoutsRef.current = {};
   }, [empresaId, grupoId]);
 
   const getScope = useCallback(() => {
@@ -242,13 +249,35 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
           const withoutOldScope = list.filter(item => !isSameScope(item));
           return [savedRecord, ...withoutOldScope];
         });
-        // Invalidação ampla: invalida a queryKey específica E todas as queries relacionadas a config
-        queryClient.invalidateQueries({ queryKey, exact: false });
-        queryClient.invalidateQueries({ queryKey: ['configuracaoSistema'], exact: false });
-        queryClient.invalidateQueries({ queryKey: ['config-sistema'], exact: false });
-        queryClient.invalidateQueries({ queryKey: ['config-center-v2'], exact: false });
-        queryClient.invalidateQueries({ queryKey: ['config-global'], exact: false });
-        queryClient.invalidateQueries({ queryKey: ['configs-ia-geral'], exact: false });
+
+        // Limpa timeouts anteriores para esta chave (evita race condition em toggles rápidos)
+        if (invalidationTimeoutsRef.current[chave]) clearTimeout(invalidationTimeoutsRef.current[chave]);
+        if (confirmedTimeoutsRef.current[chave]) clearTimeout(confirmedTimeoutsRef.current[chave]);
+
+        // Atrasa invalidação para o cache do entityListSorted (TTL 2s) expirar,
+        // garantindo que o refetch retorne dados atualizados e não sobrescreva
+        // o setQueryData com dados stale.
+        invalidationTimeoutsRef.current[chave] = setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey, exact: false });
+          queryClient.invalidateQueries({ queryKey: ['configuracaoSistema'], exact: false });
+          queryClient.invalidateQueries({ queryKey: ['config-sistema'], exact: false });
+          queryClient.invalidateQueries({ queryKey: ['config-center-v2'], exact: false });
+          queryClient.invalidateQueries({ queryKey: ['config-global'], exact: false });
+          queryClient.invalidateQueries({ queryKey: ['configs-ia-geral'], exact: false });
+          delete invalidationTimeoutsRef.current[chave];
+        }, 2500);
+
+        // Limpa confirmedMap após 5s (após refetch com dados frescos) para que
+        // o query data passe a ser a fonte de verdade, permitindo sincronização
+        // com mudanças feitas por outros usuários.
+        confirmedTimeoutsRef.current[chave] = setTimeout(() => {
+          setConfirmedMap(prev => {
+            const next = { ...prev };
+            delete next[chave];
+            return next;
+          });
+          delete confirmedTimeoutsRef.current[chave];
+        }, 5000);
       }
 
       try {

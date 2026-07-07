@@ -12,7 +12,7 @@ export default function SelecionarProdutoModal({ isOpen, onClose, onSelect }) {
   const [searchTerm, setSearchTerm] = useState("");
   const { contexto } = useContextoVisual();
 
-  const { data: produtos = [] } = useRLSQuery('Produto', {}, 'descricao', 999);
+  const { data: produtos = [] } = useRLSQuery('Produto', { tipo_item: 'Revenda', status: 'Ativo' }, 'descricao', 999);
 
   const produtosFiltrados = produtos.filter(p => 
     p.descricao?.toLowerCase().includes(searchTerm.toLowerCase()) ||

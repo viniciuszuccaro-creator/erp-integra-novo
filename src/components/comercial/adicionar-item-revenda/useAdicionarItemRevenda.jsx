@@ -21,12 +21,10 @@ export default function useAdicionarItemRevenda({
 
   const { contexto } = useContextoVisual();
 
-  const { data: produtos = [] } = useRLSQuery("Produto", {}, "descricao", 999);
+  const { data: produtos = [] } = useRLSQuery("Produto", { tipo_item: 'Revenda', status: 'Ativo' }, "descricao", 999);
 
   const produtosAtivos = produtos.filter(
-    (p) =>
-      p.status === "Ativo" &&
-      (p.tipo_item === "Revenda" || p.tipo_item === "Produto Acabado")
+    (p) => p.status === "Ativo" && p.tipo_item === "Revenda"
   );
 
   const produtosFiltrados = produtosAtivos.filter(

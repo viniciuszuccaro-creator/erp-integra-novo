@@ -1,25 +1,19 @@
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import useRLSQuery from '@/components/lib/useRLSQuery';
 
 /**
  * V21.6 FINAL - Hook de Detecção AUTOMÁTICA e OBRIGATÓRIA de Origem
- * P2: Multi-tenant — usa filterInContext
+ * P2: Multi-tenant — usa useRLSQuery (compartilha cache com todos os módulos)
  */
 export function useOrigemPedido() {
-  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
-  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   
-  // Buscar parâmetros configurados (cache otimizado)
-  const { data: parametros = [], isLoading } = useQuery({
-    queryKey: ['parametros-origem-pedido', contextoKey],
-    queryFn: () => filterInContext('ParametroOrigemPedido', {}),
-    initialData: [],
-    staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
-    enabled: !!contextoKey,
-  });
+  // Buscar parâmetros configurados via useRLSQuery — compartilha cache
+  const { data: parametros = [], isLoading } = useRLSQuery(
+    'ParametroOrigemPedido', {}, '-created_date', 100,
+    { staleTime: 5 * 60 * 1000, enabled: !!(empresaAtual?.id || grupoAtual?.id) }
+  );
 
   // Detectar origem AUTOMATICAMENTE (performance < 50ms)
   const origemPedido = useMemo(() => {
@@ -101,11 +95,13 @@ export function useOrigemPedido() {
  * @param {string} canal - Nome do canal: 'ERP', 'Site', 'Chatbot', etc.
  */
 export function useParametroOrigem(canal) {
-  const { data: parametros, isLoading } = useQuery({
-    queryKey: ['parametros-origem-pedido', canal],
-    queryFn: () => base44.entities.ParametroOrigemPedido.filter({ canal, ativo: true }),
-    initialData: [],
-  });
+  const { data: allParametros = [], isLoading } = useRLSQuery(
+    'ParametroOrigemPedido', {}, '-created_date', 100,
+    { staleTime: 5 * 60 * 1000 }
+  );
+  const parametros = useMemo(() => {
+    return allParametros.filter(p => p.canal === canal && p.ativo !== false);
+  }, [allParametros, canal]);
 
   return {
     parametro: parametros?.[0] || null,

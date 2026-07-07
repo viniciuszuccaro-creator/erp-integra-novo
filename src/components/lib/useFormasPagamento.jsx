@@ -1,38 +1,41 @@
-import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { useMemo } from "react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 /**
  * Hook centralizado para gerenciar formas de pagamento
- * P2: Multi-tenant — usa filterInContext
+ * P2: Multi-tenant — usa useRLSQuery (compartilha cache com todos os módulos)
  */
 export function useFormasPagamento(filtros = {}) {
-  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
-  const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+  const { empresaAtual, grupoAtual } = useContextoVisual();
 
-  // Buscar formas de pagamento ativas
-  const { data: formasPagamento = [], isLoading: loadingFormas } = useQuery({
-    queryKey: ['formas-pagamento', filtros, contextoKey],
-    queryFn: async () => {
-      const formas = await filterInContext('FormaPagamento', {
-        ativa: true,
-        ...filtros
-      });
-      return formas.sort((a, b) => (a.ordem_exibicao || 0) - (b.ordem_exibicao || 0));
-    },
-    staleTime: 300000,
-    enabled: !!contextoKey,
-  });
+  // Buscar todas as formas de pagamento via useRLSQuery — compartilha cache com prefetch e módulos
+  const { data: allFormas = [], isLoading: loadingFormas } = useRLSQuery(
+    'FormaPagamento', {}, 'descricao', 100,
+    { staleTime: 300000, enabled: !!(empresaAtual?.id || grupoAtual?.id) }
+  );
 
-  // Buscar bancos cadastrados
-  const { data: bancos = [], isLoading: loadingBancos } = useQuery({
-    queryKey: ['bancos', contextoKey],
-    queryFn: async () => {
-      return await filterInContext('Banco', { ativo: true });
-    },
-    staleTime: 300000,
-    enabled: !!contextoKey,
-  });
+  // Buscar todos os bancos via useRLSQuery — compartilha cache
+  const { data: allBancos = [], isLoading: loadingBancos } = useRLSQuery(
+    'Banco', {}, 'codigo_banco', 100,
+    { staleTime: 300000, enabled: !!(empresaAtual?.id || grupoAtual?.id) }
+  );
+
+  // Filtrar formas ativas + aplicar filtros extras + ordenar (client-side)
+  const formasPagamento = useMemo(() => {
+    return allFormas
+      .filter(f => f.ativa !== false)
+      .filter(f => {
+        if (!filtros || Object.keys(filtros).length === 0) return true;
+        return Object.entries(filtros).every(([k, v]) => f[k] === v);
+      })
+      .sort((a, b) => (a.ordem_exibicao || 0) - (b.ordem_exibicao || 0));
+  }, [allFormas, filtros]);
+
+  // Filtrar bancos ativos (client-side)
+  const bancos = useMemo(() => {
+    return allBancos.filter(b => b.ativo !== false);
+  }, [allBancos]);
 
   // Filtrar formas disponíveis por contexto
   const obterFormasPorContexto = (contexto = 'pdv') => {
@@ -56,15 +59,15 @@ export function useFormasPagamento(filtros = {}) {
     return null;
   };
 
-  // Buscar gateways de pagamento
-  const { data: gateways = [] } = useQuery({
-    queryKey: ['gateways-pagamento', contextoKey],
-    queryFn: async () => {
-      return await filterInContext('GatewayPagamento', { ativo: true });
-    },
-    staleTime: 300000,
-    enabled: !!contextoKey,
-  });
+  // Buscar gateways de pagamento via useRLSQuery — compartilha cache
+  const { data: allGateways = [] } = useRLSQuery(
+    'GatewayPagamento', {}, 'nome', 20,
+    { staleTime: 300000, enabled: !!(empresaAtual?.id || grupoAtual?.id) }
+  );
+
+  const gateways = useMemo(() => {
+    return allGateways.filter(g => g.ativo !== false);
+  }, [allGateways]);
 
   // Obter configuração completa de uma forma de pagamento
   const obterConfiguracao = (formaPagamentoId) => {

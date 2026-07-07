@@ -2,8 +2,9 @@
  * useCadastrosData — Hook centralizado que ramifica TODAS as entidades
  * de Cadastro Gerais para qualquer módulo do sistema.
  *
- * Usa uma única useQuery que busca todas as entidades solicitadas em paralelo
- * via filterInContext (RLS multiempresa + cache compartilhado TanStack Query).
+ * Usa useQueries do TanStack Query com UMA query por entidade, usando a
+ * MESMA queryKey do useRLSQuery — garantindo compartilhamento de cache
+ * entre módulos, prefetch e queries independentes.
  *
  * Estratégia em 3 camadas:
  *   1. CORE_ENTITIES   — entidades de uso frequente (Cliente, Produto, Fornecedor, etc.)
@@ -13,7 +14,7 @@
  * Cada camada pode ser habilitada individualmente para evitar queries desnecessárias.
  */
 import { useCallback, useMemo } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 // ── Camada 1: Entidades centrais (uso frequente em vários módulos) ──
@@ -90,6 +91,9 @@ const ALL_LOOKUP = [...CORE_ENTITIES, ...REF_ENTITIES, ...AUX_ENTITIES];
 /**
  * Hook principal: retorna dados de Cadastro Gerais ramificados para qualquer módulo.
  *
+ * Usa useQueries com queryKey IGUAL ao useRLSQuery — compartilha cache com
+ * todas as queries independentes e com o prefetch do Layout.
+ *
  * @param {object} options
  * @param {boolean} options.core — carrega entidades centrais (default: true)
  * @param {boolean} options.ref  — carrega catálogos de referência (default: false)
@@ -100,6 +104,8 @@ const ALL_LOOKUP = [...CORE_ENTITIES, ...REF_ENTITIES, ...AUX_ENTITIES];
 export function useCadastrosData({ core = true, ref = false, aux = false, only = null } = {}) {
   const { empresaAtual, grupoAtual, contexto, filterInContext } = useContextoVisual();
   const hasContext = Boolean(empresaAtual?.id || grupoAtual?.id || contexto === 'grupo');
+
+  const scopeKey = `${empresaAtual?.id || 'all'}:${grupoAtual?.id || 'nogroup'}:${contexto}`;
 
   // Determina entidades fixas (não muda entre renders para mesmas options)
   const entities = useMemo(() => {
@@ -113,44 +119,45 @@ export function useCadastrosData({ core = true, ref = false, aux = false, only =
     return list;
   }, [core, ref, aux, only?.join(',')]);
 
-  const scopeKey = `${empresaAtual?.id || 'all'}:${grupoAtual?.id || 'nogroup'}:${contexto}`;
-  const entityKey = entities.map(e => `${e.name}:${e.sort}:${e.limit}`).join('|');
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['cadastros-data', scopeKey, entityKey],
-    queryFn: async () => {
-      if (!hasContext) return {};
-      const results = await Promise.allSettled(
-        entities.map(async ({ name, sort, limit }) => {
-          try {
-            const rows = await filterInContext(name, {}, sort, limit);
-            return [name, Array.isArray(rows) ? rows : []];
-          } catch {
-            return [name, []];
-          }
-        })
-      );
-      const map = {};
-      for (const r of results) {
-        if (r.status === 'fulfilled' && r.value) {
-          map[r.value[0]] = r.value[1];
+  // Uma query por entidade — queryKey IGUAL ao useRLSQuery para compartilhar cache
+  const queries = useQueries({
+    queries: entities.map(({ name, sort, limit }) => ({
+      queryKey: [name, scopeKey, '{}', sort, limit],
+      queryFn: async () => {
+        try {
+          const rows = await filterInContext(name, {}, sort, limit);
+          return Array.isArray(rows) ? rows : [];
+        } catch {
+          return [];
         }
-      }
-      return map;
-    },
-    enabled: hasContext,
-    staleTime: 120_000,
-    gcTime: 600_000,
-    retry: 0,
-    refetchOnWindowFocus: false,
+      },
+      enabled: hasContext,
+      staleTime: 120_000,
+      gcTime: 600_000,
+      retry: 0,
+      refetchOnWindowFocus: false,
+    })),
   });
 
-  return { data: data || {}, isLoading };
+  // Monta o mapa entityName → array a partir dos resultados
+  const data = useMemo(() => {
+    const map = {};
+    entities.forEach((spec, idx) => {
+      const result = queries[idx];
+      map[spec.name] = (result?.data && Array.isArray(result.data)) ? result.data : [];
+    });
+    return map;
+  }, [entities, queries]);
+
+  const isLoading = queries.some(q => q.isLoading);
+
+  return { data, isLoading };
 }
 
 /**
  * Prefetch de entidades de Cadastro Gerais para pré-popular o cache.
  * Chamado no Layout (idle) ou antes de abrir um módulo.
+ * Usa a MESMA queryKey do useRLSQuery para compartilhar cache.
  */
 export function usePrefetchCadastrosData() {
   const queryClient = useQueryClient();
@@ -164,6 +171,7 @@ export function usePrefetchCadastrosData() {
     const scopeKey = `${empresaAtual?.id || 'all'}:${grupoAtual?.id || 'nogroup'}:${contexto}`;
 
     for (const { name, sort, limit } of specs) {
+      // queryKey IGUAL ao useRLSQuery — compartilha cache
       const qKey = [name, scopeKey, '{}', sort, limit];
       const existing = queryClient.getQueryState(qKey);
       if (existing?.dataUpdatedAt && Date.now() - existing.dataUpdatedAt < 60_000) continue;

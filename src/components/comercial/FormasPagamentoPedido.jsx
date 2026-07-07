@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
+import { useCondicaoComercial } from "@/components/lib/useCondicaoComercial";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +38,7 @@ export default function FormasPagamentoPedido({
   const { empresaAtual } = useContextoVisual();
 
   const { formasPagamento = [], isLoading: loadingFormas } = useFormasPagamento({ empresa_id: empresaAtual?.id });
+  const { condicoesPagamento = [], isLoading: loadingCondicoes } = useCondicaoComercial({ tipo_condicao: 'Pagamento' });
 
   const formasAtivas = (formasPagamento.length > 0)
     ? formasPagamento.filter(f => f.ativa !== false)
@@ -139,13 +141,13 @@ export default function FormasPagamentoPedido({
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="À Vista">À Vista</SelectItem>
-                <SelectItem value="7 dias">7 dias</SelectItem>
-                <SelectItem value="15 dias">15 dias</SelectItem>
-                <SelectItem value="30 dias">30 dias</SelectItem>
-                <SelectItem value="45 dias">45 dias</SelectItem>
-                <SelectItem value="60 dias">60 dias</SelectItem>
-                <SelectItem value="Parcelado">Parcelado</SelectItem>
+                {loadingCondicoes && <SelectItem value="_loading_cond" disabled>Carregando...</SelectItem>}
+                {condicoesPagamento.length === 0 && !loadingCondicoes && <SelectItem value="_empty_cond" disabled>Nenhuma condição cadastrada</SelectItem>}
+                {condicoesPagamento.map(cond => (
+                  <SelectItem key={cond.id || cond.nome_condicao} value={cond.nome_condicao}>
+                    {cond.nome_condicao}{cond.prazo_pagamento_dias ? ` (${cond.prazo_pagamento_dias} dias)` : ''}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

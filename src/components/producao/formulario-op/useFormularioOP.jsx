@@ -11,7 +11,7 @@ import useRLSQuery from "@/components/lib/useRLSQuery";
  */
 export default function useFormularioOP(op, onClose) {
   const queryClient = useQueryClient();
-  const { filterInContext, empresaAtual, grupoAtual, contexto, carimbarContexto } = useContextoVisual();
+  const { filterInContext, empresaAtual, grupoAtual, contexto, carimbarContexto, createInContext, updateInContext } = useContextoVisual();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const [formData, setFormData] = useState(op || {
@@ -29,8 +29,8 @@ export default function useFormularioOP(op, onClose) {
   const saveMutation = useMutation({
     mutationFn: (data) => {
       const stamped = carimbarContexto(data, 'empresa_id');
-      if (op?.id) return base44.entities.OrdemProducao.update(op.id, stamped);
-      return base44.entities.OrdemProducao.create(stamped);
+      if (op?.id) return updateInContext('OrdemProducao', op.id, stamped);
+      return createInContext('OrdemProducao', stamped);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["ordens-producao"]);

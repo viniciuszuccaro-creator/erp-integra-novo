@@ -9,7 +9,7 @@ export function safeNumber(value, fallback = 0) {
 
 export function getProdutoEstoqueDisponivel(produto) {
   const estoqueDisponivel = produto?.estoque_disponivel;
-  if (estoqueDisponivel !== undefined && estoqueDisponivel !== null) return safeNumber(estoqueDisponivel);
+  if (estoqueDisponivel !== undefined && estoqueDisponivel !== null && estoqueDisponivel !== '') return safeNumber(estoqueDisponivel);
   return safeNumber(produto?.estoque_atual) - safeNumber(produto?.estoque_reservado);
 }
 

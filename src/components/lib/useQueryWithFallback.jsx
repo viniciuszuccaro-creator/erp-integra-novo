@@ -21,7 +21,7 @@ export function useQueryWithFallback(storageKey, queryOptions, emptyValue = []) 
     : undefined;
 
   const result = useQuery({
-    staleTime: 90_000,
+    staleTime: 30_000,
     gcTime: 300_000,
     refetchOnWindowFocus: false,
     refetchOnMount: true,

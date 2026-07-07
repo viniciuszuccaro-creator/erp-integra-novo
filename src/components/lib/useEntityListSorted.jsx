@@ -137,8 +137,8 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
       __elsInflight.set(key, p);
       return p;
     },
-    staleTime: 120_000,
-    gcTime: 600_000,
+    staleTime: 30_000,
+    gcTime: 300_000,
     placeholderData: (prev) => {
       if (prev !== undefined) return prev;
       if (__elsCache.has(cacheKey)) return __elsCache.get(cacheKey);

@@ -153,7 +153,7 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
         scope,
       });
       const record = res?.data?.record;
-      if (record && typeof record.ativa === 'boolean' && record.ativa === newValue) {
+      if (record?.id) {
         return record;
       }
     } catch (_) {

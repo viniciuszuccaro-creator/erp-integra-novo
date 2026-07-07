@@ -7,7 +7,7 @@ import {
         MessageCircle, Building2,
       } from "lucide-react";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import usePermissions from "@/components/lib/usePermissions";
 import { UserProvider, useUser } from "@/components/lib/UserContext";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
@@ -50,20 +50,6 @@ const navigationItems = [
     { title: "Administração do Sistema", url: "/AdministracaoSistema?tab=integracoes", icon: Settings, group: "sistema" },
     { title: "Hub de Atendimento", url: "/HubAtendimento", icon: MessageCircle, group: "principal" },
   ];
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 300000,
-      gcTime: 900000,
-      retry: 0,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
-      refetchOnMount: true,
-    },
-    mutations: { retry: 0 }
-  }
-});
 
 const titleToModule = {
   "CRM - Relacionamento": "CRM",
@@ -132,6 +118,16 @@ function LayoutContent({ children, currentPageName }) {
       }
     } catch (_) {}
   };
+
+  // Safety-net: refetch periódico de queries ativas a cada 45s (caso WebSocket falhe)
+  useEffect(() => {
+    const iv = setInterval(() => {
+      try {
+        queryClient.invalidateQueries({ refetchType: 'active' });
+      } catch (_) {}
+    }, 45000);
+    return () => clearInterval(iv);
+  }, [queryClient]);
 
   // Atalhos de teclado (Ctrl+K = pesquisa, Ctrl+Shift+D = dashboard, Ctrl+Shift+C = comercial)
   useEffect(() => {
@@ -229,16 +225,14 @@ function LayoutContent({ children, currentPageName }) {
 
 export default function Layout({ children, currentPageName }) {
   return (
-    <QueryClientProvider client={queryClient}>
-      <UserProvider>
-        <WindowProvider>
-          <ZIndexGuard>
-            <GlobalNetworkErrorHandler />
-            <GlobalContextStamp />
-            <LayoutContent children={children} currentPageName={currentPageName} />
-          </ZIndexGuard>
-        </WindowProvider>
-      </UserProvider>
-    </QueryClientProvider>
+    <UserProvider>
+      <WindowProvider>
+        <ZIndexGuard>
+          <GlobalNetworkErrorHandler />
+          <GlobalContextStamp />
+          <LayoutContent children={children} currentPageName={currentPageName} />
+        </ZIndexGuard>
+      </WindowProvider>
+    </UserProvider>
   );
 }

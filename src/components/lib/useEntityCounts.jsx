@@ -114,7 +114,7 @@ export function useEntityCounts(entities = []) {
       );
       return result;
     },
-    staleTime: 60_000,      // 60s — mais conservador para evitar invalidação frequente
+    staleTime: 30_000,      // 30s — balanceia frescor e performance
     gcTime: 300_000,
     placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,

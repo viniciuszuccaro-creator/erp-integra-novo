@@ -5,6 +5,7 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { useRLSQuery } from "@/components/lib/useRLSQuery";
 import { CheckCircle2, AlertCircle, Loader2, ArrowDownUp, Users, Building2 } from "lucide-react";
 
 export default function AdminSaudeBar() {
@@ -12,19 +13,24 @@ export default function AdminSaudeBar() {
   const [stats, setStats] = useState({ usuarios: 0, perfis: 0, loading: true, error: false });
   const [propStatus, setPropStatus] = useState("idle"); // idle | ok | warn
 
+  // Perfis via useRLSQuery (cache compartilhado)
+  const { data: perfisCache = [] } = useRLSQuery(
+    'PerfilAcesso', { ativo: true }, '-updated_date', 1,
+    { enabled: !!grupoAtual?.id }
+  );
+
   useEffect(() => {
     let alive = true;
     const load = async () => {
       try {
-        const [usersRes, perfisRes, cfgRes] = await Promise.allSettled([
+        const [usersRes, cfgRes] = await Promise.allSettled([
           base44.entities.User.list("-created_date", 1),
-          base44.entities.PerfilAcesso.filter({ ativo: true }, null, 1),
           base44.entities.ConfiguracaoSistema.filter({ chave: "propagacao_grupo_empresas_ativa" }, null, 1),
         ]);
         if (!alive) return;
 
         const usuarios = usersRes.status === "fulfilled" ? (Array.isArray(usersRes.value) ? usersRes.value.length : 0) : 0;
-        const perfis = perfisRes.status === "fulfilled" ? (Array.isArray(perfisRes.value) ? perfisRes.value.length : 0) : 0;
+        const perfis = perfisCache?.length || 0;
         const cfgData = cfgRes.status === "fulfilled" ? (Array.isArray(cfgRes.value) ? cfgRes.value : []) : [];
         const propagacaoAtiva = cfgData.some(c => c.ativa === true);
         setPropStatus(propagacaoAtiva ? "ok" : "warn");
@@ -35,7 +41,7 @@ export default function AdminSaudeBar() {
     };
     load();
     return () => { alive = false; };
-  }, [grupoAtual?.id]);
+  }, [grupoAtual?.id, perfisCache?.length]);
 
   if (stats.loading) {
     return (

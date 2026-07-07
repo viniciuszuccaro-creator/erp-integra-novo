@@ -137,14 +137,20 @@ async function gerarBoleto(clienteId, entidades, contexto) {
 
   let centroId, planoId;
   try {
-    const centros = await base44.entities.CentroCusto.filter({ empresa_id: contexto?.empresaId, status: 'Ativo' }, '-updated_date', 1);
-    centroId = centros?.[0]?.id;
+    const centros = await base44.functions.invoke('entityListSorted', {
+      entityName: 'CentroCusto',
+      filter: { empresa_id: contexto?.empresaId, status: 'Ativo', group_id: contexto?.groupId },
+      sortField: 'updated_date', sortDirection: 'desc', limit: 1,
+    });
+    centroId = centros?.data?.[0]?.id || centros?.[0]?.id;
   } catch {}
   try {
-    const planos = base44.entities.PlanoDeContas
-      ? await base44.entities.PlanoDeContas.filter({ empresa_id: contexto?.empresaId, group_id: contexto?.groupId })
-      : [];
-    planoId = planos?.[0]?.id;
+    const planos = await base44.functions.invoke('entityListSorted', {
+      entityName: 'PlanoDeContas',
+      filter: { empresa_id: contexto?.empresaId, group_id: contexto?.groupId },
+      sortField: 'updated_date', sortDirection: 'desc', limit: 5,
+    });
+    planoId = planos?.data?.[0]?.id || planos?.[0]?.id;
   } catch {}
 
   if (!centroId || !planoId) {

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { useRLSQuery } from "@/components/lib/useRLSQuery";
 import { useUser } from "@/components/lib/UserContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -42,15 +43,10 @@ export default function UsuariosTab() {
     enabled: contextoValido,
   });
 
-  const { data: perfis = [] } = useQuery({
-    queryKey: ["perfis-acesso-tab", scopeKey],
-    queryFn: async () => {
-      const scoped = contextoValido ? await filterInContext("PerfilAcesso", {}, "-updated_date", 500) : [];
-      if (scoped.length) return scoped;
-      return base44.entities.PerfilAcesso.list("-updated_date", 500);
-    },
-    enabled: true,
-  });
+  const { data: perfis = [] } = useRLSQuery(
+    'PerfilAcesso', {}, '-updated_date', 500,
+    { enabled: true }
+  );
 
   const { data: empresas = [] } = useQuery({
     queryKey: ["empresas-gestao", scopeKey],

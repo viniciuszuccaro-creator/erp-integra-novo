@@ -14,6 +14,7 @@ import { Building2, Users, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import useContextoGrupoEmpresa from "@/components/lib/useContextoGrupoEmpresa";
+import { useRLSQuery } from "@/components/lib/useRLSQuery";
 
 /**
  * Componente seletor de contexto: GRUPO ou EMPRESA
@@ -36,13 +37,13 @@ export default function EmpresaSwitcher() {
   const [open, setOpen] = useState(false);
   const [termo, setTermo] = useState("");
 
-  // Buscar grupos disponíveis para o usuário
+  // Buscar grupos disponíveis para o usuário (cache compartilhado via useRLSQuery)
+  const { data: gruposCache = [] } = useRLSQuery('GrupoEmpresarial', {}, '-nome_do_grupo', 200, { enabled: !!user });
   const { data: gruposDisponiveis = [] } = useQuery({
     queryKey: ['grupos-usuario', user?.id],
     queryFn: async () => {
       if (isApiKeyMode || user?.role === 'admin') {
-        const grupos = await base44.entities.GrupoEmpresarial.list();
-        return grupos.filter(g => !g.status || g.status === 'Ativo');
+        return (gruposCache || []).filter(g => !g.status || g.status === 'Ativo');
       }
 
       if (!user?.grupos_vinculados || user.grupos_vinculados.length === 0) {
@@ -52,15 +53,15 @@ export default function EmpresaSwitcher() {
       const grupos = [];
       for (const vinculo of user.grupos_vinculados) {
         if (vinculo.ativo) {
-          const grupo = await base44.entities.GrupoEmpresarial.get(vinculo.grupo_id);
-          if (grupo && grupo.status === 'Ativo') {
+          const grupo = (gruposCache || []).find(g => g.id === vinculo.grupo_id);
+          if (grupo && (!grupo.status || grupo.status === 'Ativo')) {
             grupos.push(grupo);
           }
         }
       }
       return grupos;
     },
-    enabled: !!user,
+    enabled: !!user && !!gruposCache?.length,
   });
 
   // V21.7 FIX: Buscar empresas disponíveis para o usuário - com tratamento robusto

@@ -35,11 +35,17 @@ const IntentEngine = {
       }
     }
 
-    // 2. Detecção dinâmica via entidade ChatbotIntent (multiempresa)
+    // 2. Detecção dinâmica via entidade ChatbotIntent (multiempresa, cache compartilhado)
     try {
       const filtro = { ativo: true };
       if (contexto?.empresaId) filtro.empresa_id = contexto.empresaId;
-      const intentsDinamicas = await base44.entities.ChatbotIntent.filter(filtro, '-updated_date', 50);
+      if (contexto?.groupId) filtro.group_id = contexto.groupId;
+      const res = await base44.functions.invoke('entityListSorted', {
+        entityName: 'ChatbotIntent',
+        filter: filtro,
+        sortField: 'updated_date', sortDirection: 'desc', limit: 50,
+      });
+      const intentsDinamicas = res?.data || res || [];
       for (const dyn of intentsDinamicas || []) {
         const palavras = Array.isArray(dyn.palavras_chave) ? dyn.palavras_chave : String(dyn.palavras_chave || '').split(',');
         const matchesDyn = palavras.filter(p => p && mensagemLower.includes(String(p).trim().toLowerCase()));

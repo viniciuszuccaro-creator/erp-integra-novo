@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Shield, Search, Plus } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { useRLSQuery } from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
 import { getAccessScope, isUserInAccessScope, buildAccessAudit } from "@/components/administracao-sistema/gestao-acessos/accessScope";
 import PerfilCard from "@/components/administracao-sistema/gestao-acessos/PerfilCard";
@@ -42,17 +43,10 @@ export default function CentralPerfisAcesso() {
   const podeExcluirPerfil = isAdmin() || hasPermission("Sistema", ["Controle de Acesso"], "excluir");
   const canManageOpenProfile = perfilAberto?.novo ? podeCriarPerfil : podeEditarPerfil;
 
-  const { data: perfis = [] } = useQuery({
-    queryKey: ["perfis-acesso", scopeKey],
-    queryFn: async () => {
-      const scoped = contextoValido
-        ? await filterInContext("PerfilAcesso", {}, "-updated_date", 500)
-        : [];
-      if (scoped.length) return scoped;
-      return base44.entities.PerfilAcesso.list("-updated_date", 500);
-    },
-    enabled: true,
-  });
+  const { data: perfis = [] } = useRLSQuery(
+    'PerfilAcesso', {}, '-updated_date', 500,
+    { enabled: true }
+  );
 
   const { data: usuarios = [] } = useQuery({
     queryKey: ["usuarios", scopeKey],

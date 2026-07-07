@@ -7,6 +7,7 @@ import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { useUser } from "@/components/lib/UserContext";
 import { useQuery } from "@tanstack/react-query";
+import { useRLSQuery } from "@/components/lib/useRLSQuery";
 import SoDChecker from "@/components/administracao-sistema/gestao-acessos/SoDChecker";
 import UsuariosTab from "@/components/administracao-sistema/gestao-acessos/UsuariosTab";
 import AccessGovernancePanel from "@/components/administracao-sistema/gestao-acessos/AccessGovernancePanel";
@@ -56,15 +57,10 @@ export default function GestaoAcessosIndex() {
   };
 
   // Hooks SEMPRE antes de qualquer return condicional
-  const { data: perfis = [] } = useQuery({
-    queryKey: ['perfis-acesso', scopeKey],
-    queryFn: async () => {
-      const scoped = await filterInContext('PerfilAcesso', {}, '-updated_date', 500);
-      if (scoped.length) return scoped;
-      return base44.entities.PerfilAcesso.list('-updated_date', 500);
-    },
-    enabled: podeVer,
-  });
+  const { data: perfis = [] } = useRLSQuery(
+    'PerfilAcesso', {}, '-updated_date', 500,
+    { enabled: podeVer }
+  );
 
   const { data: usuarios = [] } = useQuery({
     queryKey: ['usuarios', scopeKey],

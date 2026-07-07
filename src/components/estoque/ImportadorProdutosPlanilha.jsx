@@ -8,6 +8,7 @@ import { Upload, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { useRLSQuery } from "@/components/lib/useRLSQuery";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -44,7 +45,7 @@ export default function ImportadorProdutosPlanilha({ onConcluido, closeSelf }) {
   const [ncmSuggestions, setNcmSuggestions] = useState({});
   const [suggesting, setSuggesting] = useState(false);
 
-  const { data: grupos = [] } = useQuery({ queryKey: ['grupos-empresariais'], queryFn: () => base44.entities.GrupoEmpresarial.list(), staleTime: 300000 });
+  const { data: grupos = [] } = useRLSQuery('GrupoEmpresarial', {}, '-nome_do_grupo', 200, {});
   const { data: empresas = [] } = useQuery({
     queryKey: ['empresas-por-grupo', grupoId],
     queryFn: async () => {

@@ -36,9 +36,24 @@ export default function ConfigCenter({ empresaId: empresaIdProp }) {
     },
     enabled: canLoad,
     staleTime: 0,
-    gcTime: 0,
+    gcTime: 30000,
     refetchOnMount: 'always',
   });
+
+  // Subscription em tempo real — invalida cache quando ConfiguracaoSistema muda
+  useEffect(() => {
+    const unsub = base44.entities.ConfiguracaoSistema.subscribe((evt) => {
+      if (evt.type === 'create' || evt.type === 'update') {
+        const d = evt.data || {};
+        const relevante = (eId && d.empresa_id === eId) || (gId && d.group_id === gId) || (!d.empresa_id && !d.group_id);
+        if (relevante) {
+          queryClient.invalidateQueries({ queryKey, exact: false });
+          queryClient.invalidateQueries({ queryKey: ['config-center-v2'], exact: false });
+        }
+      }
+    });
+    return () => { if (typeof unsub === 'function') unsub(); };
+  }, [eId, gId]);
 
   // IA configs para listagem
   const { data: configsIA = [] } = useQuery({
@@ -179,4 +194,3 @@ export default function ConfigCenter({ empresaId: empresaIdProp }) {
     </div>
   );
 }
-

@@ -85,7 +85,7 @@ const ENTITY_QUERY_KEYS = {
 };
 
 // Throttle de invalidação por entidade (evita flood de invalidações em eventos rápidos)
-const INVALIDATE_THROTTLE_MS = 800;
+const INVALIDATE_THROTTLE_MS = 300;
 
 /**
  * Hook que assina eventos real-time de uma lista de entidades e
@@ -114,7 +114,24 @@ export function useInvalidationBus(entities = [], options = {}) {
 
         const baseKeys = ENTITY_QUERY_KEYS[entityName] || [[entityName], ['entityListSorted', entityName]];
         // Sempre inclui as query keys do VisualizadorUniversal (tabela de Cadastros) e contagens
-        const keys = [...baseKeys, ['viz-v33', entityName], ['entityCounts_v5']];
+        // + chaves de módulos consumidores para propagação cross-module em tempo real
+        const keys = [
+          ...baseKeys,
+          ['viz-v33', entityName],
+          ['entityCounts_v5'],
+          ['dashboard'],
+          ['crm'],
+          ['comercial'],
+          ['estoque'],
+          ['financeiro'],
+          ['compras'],
+          ['expedicao'],
+          ['producao'],
+          ['rh'],
+          ['fiscal'],
+          ['relatorios'],
+          ['cadastros'],
+        ];
         // Invalidação assíncrona para não bloquear o handler
         setTimeout(() => {
           keys.forEach((qk) => {
@@ -122,7 +139,7 @@ export function useInvalidationBus(entities = [], options = {}) {
               queryClient.invalidateQueries({ queryKey: qk, exact: false });
             } catch (_) {}
           });
-        }, 50);
+        }, 0);
       });
     }).filter(Boolean);
 

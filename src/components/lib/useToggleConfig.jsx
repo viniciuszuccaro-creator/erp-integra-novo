@@ -211,7 +211,13 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
           const withoutOldScope = list.filter(item => !isSameScope(item));
           return [savedRecord, ...withoutOldScope];
         });
-        await queryClient.invalidateQueries({ queryKey, exact: true });
+        // Invalidação ampla: invalida a queryKey específica E todas as queries relacionadas a config
+        queryClient.invalidateQueries({ queryKey, exact: false });
+        queryClient.invalidateQueries({ queryKey: ['configuracaoSistema'], exact: false });
+        queryClient.invalidateQueries({ queryKey: ['config-sistema'], exact: false });
+        queryClient.invalidateQueries({ queryKey: ['config-center-v2'], exact: false });
+        queryClient.invalidateQueries({ queryKey: ['config-global'], exact: false });
+        queryClient.invalidateQueries({ queryKey: ['configs-ia-geral'], exact: false });
       }
 
       try {

@@ -136,12 +136,12 @@ export default function useCadastrosAllCounts() {
       );
       return result;
     },
-    staleTime: 5 * 60_000,
-    gcTime: 30 * 60_000,
+    staleTime: 30_000,
+    gcTime: 300_000,
     placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    retry: 0,
+    refetchOnMount: true,
+    retry: 1,
   });
 
   // Real-time: incrementa/decrementa sem refetch completo

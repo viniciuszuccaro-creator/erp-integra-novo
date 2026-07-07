@@ -20,7 +20,7 @@ export default function useConfiguracaoSistema({ categoria, chave } = {}) {
       const list = await base44.entities.ConfiguracaoSistema.filter(filtro, "-updated_date", 1);
       return Array.isArray(list) && list.length ? list[0] : null;
     },
-    staleTime: 60_000,
+    staleTime: 30_000,
   });
 
   const setMutation = useMutation({
@@ -43,6 +43,9 @@ export default function useConfiguracaoSistema({ categoria, chave } = {}) {
       // Invalida todos os consumidores conhecidos
       queryClient.invalidateQueries({ queryKey: ["configuracaoSistema"] });
       queryClient.invalidateQueries({ queryKey: ["config-sistema"] });
+      queryClient.invalidateQueries({ queryKey: ["config-center-v2"] });
+      queryClient.invalidateQueries({ queryKey: ["config-global"] });
+      queryClient.invalidateQueries({ queryKey: ["configs-ia-geral"] });
       // Auditoria detalhada (quem, parâmetro, antes/depois)
       try {
         const me = await base44.auth.me();

@@ -125,7 +125,7 @@ function LayoutContent({ children, currentPageName }) {
       try {
         queryClient.invalidateQueries({ refetchType: 'active' });
       } catch (_) {}
-    }, 45000);
+    }, 30000);
     return () => clearInterval(iv);
   }, [queryClient]);
 

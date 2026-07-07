@@ -14,6 +14,5 @@ export function getProdutoEstoqueDisponivel(produto) {
 }
 
 export function isProdutoEstoqueBaixo(produto) {
-  const estoqueMinimo = safeNumber(produto?.estoque_minimo);
-  return produto?.status === 'Ativo' && estoqueMinimo > 0 && getProdutoEstoqueDisponivel(produto) <= estoqueMinimo;
+  return produto?.status === 'Ativo' && getProdutoEstoqueDisponivel(produto) <= safeNumber(produto?.estoque_minimo);
 }

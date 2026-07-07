@@ -37,6 +37,7 @@ export const LABEL_FALLBACKS = [
   'nome_job','nome_webhook','nome_gateway','nome_do_grupo','nome_regra','usuario_nome','codigo_operador',
   'razao_social_grupo','nome_cargo','nome_turno','nome_departamento','nome_banco','nome_marca',
   'descricao','titulo','sigla','codigo','codigo_banco','codigo_servico','matricula','placa','cpf','cnpj',
+  'nome_evento','provedor','nome_caixa','razao_social_grupo',
 ];
 
 export function getDisplayValue(item, col, isFirstCol) {

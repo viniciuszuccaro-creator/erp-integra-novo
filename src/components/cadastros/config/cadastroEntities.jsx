@@ -370,7 +370,8 @@ export const CADASTROS_ENTITIES = {
   ConfiguracaoNFe: {
     label: "Configurações NF-e", group: "Tecnologia, IA & Parâmetros", icon: Zap,
     columns: [
-      { field: "descricao", label: "Descrição", searchable: true, sortable: true },
+      { field: "provedor", label: "Provedor", searchable: true, sortable: true },
+      { field: "ambiente", label: "Ambiente", searchable: true },
     ],
   },
   GatewayPagamento: {
@@ -383,8 +384,8 @@ export const CADASTROS_ENTITIES = {
   EventoNotificacao: {
     label: "Eventos de Notificação", group: "Tecnologia, IA & Parâmetros", icon: Zap,
     columns: [
-      { field: "nome", label: "Nome", searchable: true, sortable: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "nome_evento", label: "Nome", searchable: true, sortable: true },
+      { field: "tipo_evento", label: "Tipo", searchable: true },
     ],
   },
 };

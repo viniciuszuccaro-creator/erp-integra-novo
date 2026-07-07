@@ -40,8 +40,8 @@ const DEFAULT_SORTS = {
   GrupoEmpresarial: { field: 'nome_do_grupo', direction: 'asc' },
   TabelaPreco: { field: 'nome', direction: 'asc' },
   ConfiguracaoDespesaRecorrente: { field: 'nome', direction: 'asc' },
-  ConfiguracaoNFe: { field: 'descricao', direction: 'asc' },
-  EventoNotificacao: { field: 'nome', direction: 'asc' },
+  ConfiguracaoNFe: { field: 'provedor', direction: 'asc' },
+  EventoNotificacao: { field: 'nome_evento', direction: 'asc' },
   ApiExterna: { field: 'nome_api', direction: 'asc' },
   ChatbotCanal: { field: 'nome_canal', direction: 'asc' },
   ChatbotIntent: { field: 'nome_intent', direction: 'asc' },
@@ -98,8 +98,8 @@ const SEARCH_FIELDS = {
   ChatbotIntent: ['nome_intent', 'descricao'],
   Webhook: ['nome_webhook', 'url', 'descricao'],
   JobAgendado: ['nome_job', 'descricao'],
-  ConfiguracaoNFe: ['descricao', 'ambiente'],
-  EventoNotificacao: ['nome', 'descricao', 'tipo'],
+  ConfiguracaoNFe: ['provedor', 'ambiente', 'descricao', 'observacoes'],
+  EventoNotificacao: ['nome_evento', 'descricao', 'tipo_evento'],
   default: ['nome', 'descricao', 'codigo', 'razao_social', 'nome_completo', 'nome_grupo', 'nome_segmento', 'nome_regiao', 'nome_banco', 'nome_fantasia', 'nome_conta', 'nome_cargo', 'nome_turno', 'nome_departamento', 'nome_condicao', 'nome_kit', 'nome_rota', 'nome_marca', 'nome_modelo', 'nome_api', 'nome_canal', 'nome_intent', 'nome_job', 'nome_webhook', 'nome_gateway', 'nome_perfil', 'codigo_servico', 'sigla', 'titulo', 'placa']
 };
 

@@ -18,6 +18,6 @@ export const ENTITY_CODE_FIELD = {
   Departamento: 'codigo', Cargo: 'codigo', Turno: 'codigo',
   PerfilAcesso: 'nome_perfil', ApiExterna: 'nome_api', ChatbotCanal: 'nome_canal',
   ChatbotIntent: 'nome_intent', JobAgendado: 'nome_job', Webhook: 'nome_webhook',
-  ConfiguracaoNFe: 'descricao', GatewayPagamento: 'nome_gateway', EventoNotificacao: 'nome',
+  ConfiguracaoNFe: 'provedor', GatewayPagamento: 'nome_gateway', EventoNotificacao: 'nome_evento',
   Banco: 'codigo_banco', UnidadeMedida: 'codigo', Veiculo: 'codigo', Motorista: 'codigo',
 };

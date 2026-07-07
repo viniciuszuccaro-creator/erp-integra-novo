@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Building2, Users, Settings, AlertCircle, ArrowDownUp, CheckCircle2 } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { useRLSQuery } from "@/components/lib/useRLSQuery";
 
 function KPIItem({ icon: Icon, label, value, color = "text-blue-600", bg = "bg-blue-50" }) {
   return (
@@ -23,17 +24,22 @@ function KPIItem({ icon: Icon, label, value, color = "text-blue-600", bg = "bg-b
 export default function AdminKPIBar() {
   const { grupoAtual } = useContextoVisual();
 
+  // Empresas via useRLSQuery (cache compartilhado)
+  const { data: empresasCache = [] } = useRLSQuery(
+    'Empresa', {}, '-created_date', 100,
+    { enabled: !!grupoAtual?.id }
+  );
+
   const { data } = useQuery({
     queryKey: ["admin-kpi-bar", grupoAtual?.id],
     queryFn: async () => {
-      const [empresas, users, configs, logs] = await Promise.allSettled([
-        base44.entities.Empresa.filter(grupoAtual?.id ? { group_id: grupoAtual.id } : {}, null, 100),
+      const [users, configs, logs] = await Promise.allSettled([
         base44.entities.User.list(null, 200),
         base44.entities.ConfiguracaoSistema.filter(grupoAtual?.id ? { group_id: grupoAtual.id } : {}, null, 200),
         base44.entities.AuditLog.filter(grupoAtual?.id ? { group_id: grupoAtual.id } : {}, "-created_date", 100),
       ]);
 
-      const empresasList = empresas.status === "fulfilled" ? empresas.value : [];
+      const empresasList = empresasCache || [];
       const usersList = users.status === "fulfilled" ? users.value : [];
       const configsList = configs.status === "fulfilled" ? configs.value : [];
       const logsList = logs.status === "fulfilled" ? logs.value : [];

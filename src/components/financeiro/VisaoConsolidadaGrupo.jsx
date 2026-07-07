@@ -1,25 +1,24 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { useRLSQuery } from '@/components/lib/useRLSQuery';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Building2, TrendingUp, TrendingDown, DollarSign, AlertTriangle } from 'lucide-react';
 
 export default function VisaoConsolidadaGrupo({ groupId, windowMode = false }) {
-  const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas-grupo', groupId],
-    queryFn: () => base44.entities.Empresa.filter({ group_id: groupId }),
-  });
+  const { data: empresas = [] } = useRLSQuery(
+    'Empresa', {}, '-created_date', 50,
+    { enabled: !!groupId }
+  );
 
-  const { data: contasPagar = [] } = useQuery({
-    queryKey: ['contas-pagar-grupo', groupId],
-    queryFn: () => base44.entities.ContaPagar.filter({ group_id: groupId }),
-  });
+  const { data: contasPagar = [] } = useRLSQuery(
+    'ContaPagar', {}, '-data_vencimento', 200,
+    { enabled: !!groupId }
+  );
 
-  const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contas-receber-grupo', groupId],
-    queryFn: () => base44.entities.ContaReceber.filter({ group_id: groupId }),
-  });
+  const { data: contasReceber = [] } = useRLSQuery(
+    'ContaReceber', {}, '-data_vencimento', 200,
+    { enabled: !!groupId }
+  );
 
   const totalPagar = contasPagar.filter(c => c.status === 'Pendente').reduce((acc, c) => acc + (c.valor || 0), 0);
   const totalReceber = contasReceber.filter(c => c.status === 'Pendente').reduce((acc, c) => acc + (c.valor || 0), 0);

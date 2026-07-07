@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRLSQuery } from "@/components/lib/useRLSQuery";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,11 +15,10 @@ export default function PlanoDeContasTree({ empresaId }) {
   const [expandido, setExpandido] = useState({});
   const [search, setSearch] = useState("");
 
-  const { data: contas = [] } = useQuery({
-    queryKey: ['plano-contas', empresaId],
-    queryFn: () => base44.entities.PlanoDeContas.filter({ empresa_id: empresaId }),
-    enabled: !!empresaId
-  });
+  const { data: contas = [] } = useRLSQuery(
+    'PlanoDeContas', {}, 'codigo', 200,
+    { enabled: !!empresaId }
+  );
 
   const toggleExpand = (contaId) => {
     setExpandido(prev => ({ ...prev, [contaId]: !prev[contaId] }));

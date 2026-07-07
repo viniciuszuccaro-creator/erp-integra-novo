@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useRLSQuery } from "@/components/lib/useRLSQuery";
 import { toast } from "sonner";
 import { converterUnidade } from "@/components/lib/CalculadoraUnidades";
 
@@ -15,17 +15,10 @@ export function useItensRevenda({ formData, setFormData }) {
   const [unidadeVenda, setUnidadeVenda] = useState('UN');
   const [descontoItem, setDescontoItem] = useState(0);
 
-  const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos-revenda', formData?.empresa_id, formData?.group_id],
-    queryFn: async () => {
-      const filter = { tipo_item: 'Revenda', status: 'Ativo' };
-      if (formData?.empresa_id) filter.empresa_id = formData.empresa_id;
-      if (formData?.group_id) filter.group_id = formData.group_id;
-      if (!filter.empresa_id && !filter.group_id) return [];
-      return await base44.entities.Produto.filter(filter);
-    },
-    enabled: true
-  });
+  const { data: produtos = [] } = useRLSQuery(
+    'Produto', { tipo_item: 'Revenda', status: 'Ativo' }, '-descricao', 500,
+    { enabled: !!(formData?.empresa_id || formData?.group_id) }
+  );
 
   const produtosFiltrados = produtos.filter(p =>
     p.descricao?.toLowerCase().includes(search.toLowerCase()) ||

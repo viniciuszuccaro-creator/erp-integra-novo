@@ -3,9 +3,8 @@
  * Permite trocar rapidamente entre empresas do grupo sem sair da tela.
  */
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { useRLSQuery } from "@/components/lib/useRLSQuery";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Building2, Layers, ChevronRight } from "lucide-react";
@@ -16,12 +15,10 @@ export default function DashboardMultiempresaBar() {
   const { empresaAtual, grupoAtual, estaNoGrupo, selecionarEmpresa, alternarContexto } = useContextoVisual();
   const gId = grupoAtual?.id;
 
-  const { data: empresas = [] } = useQuery({
-    queryKey: ["empresas-grupo-bar", gId],
-    queryFn: () => base44.entities.Empresa.filter({ group_id: gId }, "-razao_social", 20),
-    enabled: !!gId,
-    staleTime: 300_000,
-  });
+  const { data: empresas = [] } = useRLSQuery(
+    'Empresa', {}, "-razao_social", 20,
+    { staleTime: 300_000, enabled: !!gId }
+  );
 
   // Não mostra se não há grupo ou empresas múltiplas — return empty fragment to keep stable fiber
   if (!gId || empresas.length <= 1) return <></>;

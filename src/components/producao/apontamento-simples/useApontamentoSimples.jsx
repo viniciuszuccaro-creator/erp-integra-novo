@@ -3,6 +3,7 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { useRLSQuery } from "@/components/lib/useRLSQuery";
 import { useUser } from "@/components/lib/UserContext";
 
 export default function useApontamentoSimples(opId, op, onApontamentoSalvo) {
@@ -11,11 +12,10 @@ export default function useApontamentoSimples(opId, op, onApontamentoSalvo) {
   const { getFiltroContexto } = useContextoVisual();
   const { user: authUser } = useUser();
 
-  const { data: colaboradores = [] } = useQuery({
-    queryKey: ["colaboradores", getFiltroContexto("empresa_id")],
-    queryFn: () => base44.entities.Colaborador.filter(getFiltroContexto("empresa_id")),
-    enabled: !!getFiltroContexto("empresa_id"),
-  });
+  const { data: colaboradores = [] } = useRLSQuery(
+    'Colaborador', {}, '-created_date', 200,
+    { enabled: !!getFiltroContexto("empresa_id") }
+  );
 
   const operador = authUser || null;
   const fallbackColab = colaboradores[0];

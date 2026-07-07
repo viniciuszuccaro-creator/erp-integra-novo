@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { useUser } from "@/components/lib/UserContext";
+import { useRLSQuery } from "@/components/lib/useRLSQuery";
 
 /**
  * Hook extraído de GerarOPModal.jsx
@@ -33,15 +34,11 @@ export function useGerarOPLogic({ isOpen, onClose, pedido }) {
 
   const [configProducao, setConfigProducao] = useState(null);
 
-  // Fetch produtos para lookup de bitolas
-  const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos-op', pedido?.empresa_id],
-    queryFn: async () => {
-      if (!pedido?.empresa_id) return [];
-      return base44.entities.Produto.filter({ empresa_id: pedido.empresa_id, status: "Ativo" });
-    },
-    enabled: !!pedido?.empresa_id && isOpen,
-  });
+  // Fetch produtos para lookup de bitolas — via useRLSQuery (cache compartilhado)
+  const { data: produtos = [] } = useRLSQuery(
+    'Produto', { status: "Ativo" }, '-descricao', 500,
+    { enabled: !!pedido?.empresa_id && isOpen }
+  );
 
   // Carregar configuração de produção da empresa
   useEffect(() => {

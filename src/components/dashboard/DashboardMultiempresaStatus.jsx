@@ -2,6 +2,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { useRLSQuery } from "@/components/lib/useRLSQuery";
 import {
   Building2, ArrowDownUp, CheckCircle2, AlertCircle,
   TrendingUp, RefreshCw, Zap, Users
@@ -16,6 +17,12 @@ import { Card, CardContent } from "@/components/ui/card";
 export default function DashboardMultiempresaStatus() {
   const { grupoAtual, empresasDoGrupo, estaNoGrupo } = useContextoVisual();
 
+  // Empresas via useRLSQuery (cache compartilhado com todos os módulos)
+  const { data: empresasCache = [] } = useRLSQuery(
+    'Empresa', {}, "-created_date", 50,
+    { enabled: !!grupoAtual?.id }
+  );
+
   const { data: stats = null, isFetching, refetch } = useQuery({
     queryKey: ["multiempresa-status-v2", grupoAtual?.id],
     queryFn: async () => {
@@ -24,7 +31,7 @@ export default function DashboardMultiempresaStatus() {
 
       const [logs, empresas] = await Promise.allSettled([
         base44.entities.AuditLog.filter({ group_id: grupoAtual.id }, "-data_hora", 100),
-        base44.entities.Empresa.filter({ group_id: grupoAtual.id }, "-created_date", 50),
+        Promise.resolve(empresasCache),
       ]);
 
       const allLogs   = logs.status    === 'fulfilled' ? (logs.value    || []) : [];

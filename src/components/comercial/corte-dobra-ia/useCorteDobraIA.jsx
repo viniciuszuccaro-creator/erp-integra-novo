@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useRLSQuery } from "@/components/lib/useRLSQuery";
 import { toast } from "sonner";
 
 export const FORMATOS_DISPONIVEIS = [
@@ -33,19 +33,10 @@ export default function useCorteDobraIA(formData, setFormData, empresaId) {
   const [editando, setEditando] = useState(null);
   const [processandoIA, setProcessandoIA] = useState(false);
 
-  const { data: bitolas = [] } = useQuery({
-    queryKey: ['bitolas-corte-dobra', empresaId || formData?.empresa_id],
-    queryFn: async () => {
-      const empId = empresaId || formData?.empresa_id;
-      const grpId = formData?.group_id;
-      const filter = { eh_bitola: true, status: 'Ativo' };
-      if (empId) filter.empresa_id = empId;
-      if (grpId) filter.group_id = grpId;
-      if (!empId && !grpId) return [];
-      return await base44.entities.Produto.filter(filter);
-    },
-    enabled: true
-  });
+  const { data: bitolas = [] } = useRLSQuery(
+    'Produto', { eh_bitola: true, status: 'Ativo' }, '-descricao', 200,
+    { enabled: !!(empresaId || formData?.empresa_id || formData?.group_id) }
+  );
 
   const handleUploadIA = async (event) => {
     const file = event.target.files[0];

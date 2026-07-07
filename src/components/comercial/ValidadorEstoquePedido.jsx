@@ -1,6 +1,5 @@
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { useRLSQuery } from "@/components/lib/useRLSQuery";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle2, Box, Package } from "lucide-react";
@@ -14,11 +13,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
  * Calcula previsão de quando terá estoque (IA)
  */
 export default function ValidadorEstoquePedido({ pedido, empresaId }) {
-  const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos', empresaId],
-    queryFn: () => base44.entities.Produto.filter({ empresa_id: empresaId }),
-    enabled: !!empresaId
-  });
+  const { data: produtos = [] } = useRLSQuery(
+    'Produto', {}, '-descricao', 500,
+    { enabled: !!empresaId }
+  );
 
   const itensRevenda = pedido?.itens_revenda || [];
   

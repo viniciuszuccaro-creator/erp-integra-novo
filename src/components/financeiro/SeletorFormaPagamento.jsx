@@ -1,21 +1,37 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
-import { CreditCard, Wallet, Building2, Smartphone } from 'lucide-react';
+import { CreditCard, Wallet, Building2, Smartphone, Loader2 } from 'lucide-react';
+import { useFormasPagamento } from '@/components/lib/useFormasPagamento';
+
+const ICONE_POR_TIPO = {
+  'PIX': Smartphone, 'Dinheiro': Wallet, 'Boleto': Building2,
+  'Cartão Crédito': CreditCard, 'Cartão de Crédito': CreditCard,
+  'Cartão Débito': CreditCard, 'Cartão de Débito': CreditCard,
+  'Transferência': Building2, 'Transferencia': Building2,
+  'Cheque': Building2,
+};
+const COR_POR_TIPO = {
+  'PIX': 'text-cyan-600', 'Dinheiro': 'text-green-600',
+  'Cartão Crédito': 'text-blue-600', 'Cartão de Crédito': 'text-blue-600',
+  'Cartão Débito': 'text-purple-600', 'Cartão de Débito': 'text-purple-600',
+  'Boleto': 'text-orange-600', 'Transferência': 'text-indigo-600',
+  'Cheque': 'text-slate-600',
+};
 
 /**
  * V22.0 ETAPA 4 - Seletor de Forma de Pagamento Reutilizável
  * Componente modular para seleção de forma de pagamento com ícones
+ * Busca formas reais de Cadastros Gerais via useFormasPagamento
  */
 export default function SeletorFormaPagamento({ value, onChange, label = "Forma de Pagamento", required = false }) {
-  const formas = [
-    { value: 'PIX', label: 'PIX', icon: Smartphone, cor: 'text-cyan-600' },
-    { value: 'Dinheiro', label: 'Dinheiro', icon: Wallet, cor: 'text-green-600' },
-    { value: 'Cartão Crédito', label: 'Cartão Crédito', icon: CreditCard, cor: 'text-blue-600' },
-    { value: 'Cartão Débito', label: 'Cartão Débito', icon: CreditCard, cor: 'text-purple-600' },
-    { value: 'Boleto', label: 'Boleto', icon: Building2, cor: 'text-orange-600' },
-    { value: 'Transferência', label: 'Transferência', icon: Building2, cor: 'text-indigo-600' },
-    { value: 'Cheque', label: 'Cheque', icon: Building2, cor: 'text-slate-600' },
-  ];
+  const { formasPagamento = [], isLoading } = useFormasPagamento();
+
+  const formas = formasPagamento.map(f => ({
+    value: f.tipo || f.descricao,
+    label: f.descricao || f.tipo,
+    icon: ICONE_POR_TIPO[f.tipo] || Building2,
+    cor: COR_POR_TIPO[f.tipo] || 'text-slate-600',
+  }));
 
   return (
     <div className="w-full">

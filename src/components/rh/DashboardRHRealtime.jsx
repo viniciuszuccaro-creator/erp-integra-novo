@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import useRLSQuery from '@/components/lib/useRLSQuery';
 
 /**
  * ETAPA 7: DASHBOARD RH TEMPO REAL V21.4
@@ -22,7 +23,7 @@ import { useContextoVisual } from '@/components/lib/useContextoVisual';
  */
 
 function DashboardRHRealtime({ empresaId, windowMode = false }) {
-  const { filterInContext } = useContextoVisual();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
   const [metricas, setMetricas] = useState({
     colaboradoresAtivos: 0,
     presentesHoje: 0,
@@ -87,13 +88,17 @@ function DashboardRHRealtime({ empresaId, windowMode = false }) {
     }
   }, [colaboradores, pontos, monitoramento]);
 
-  const dadosPorDepartamento = [
-    { dept: 'Produção', qtd: colaboradores.filter(c => c.departamento === 'Operacional').length },
-    { dept: 'Comercial', qtd: colaboradores.filter(c => c.departamento === 'Comercial').length },
-    { dept: 'Financeiro', qtd: colaboradores.filter(c => c.departamento === 'Financeiro').length },
-    { dept: 'Logística', qtd: colaboradores.filter(c => c.departamento === 'Logística').length },
-    { dept: 'Administrativo', qtd: colaboradores.filter(c => c.departamento === 'Administrativo').length }
-  ].filter(d => d.qtd > 0);
+  const { data: departamentosData = [] } = useRLSQuery('Departamento', {}, 'nome_departamento', 50, {
+    staleTime: 300000, enabled: !!(empresaAtual?.id || grupoAtual?.id)
+  });
+
+  const dadosPorDepartamento = departamentosData
+    .filter(d => d.ativo !== false)
+    .map(d => ({
+      dept: d.nome_departamento,
+      qtd: colaboradores.filter(c => c.departamento === d.nome_departamento || c.departamento === d.id).length
+    }))
+    .filter(d => d.qtd > 0);
 
   const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'];
 

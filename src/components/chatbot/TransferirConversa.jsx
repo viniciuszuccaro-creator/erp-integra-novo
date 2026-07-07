@@ -16,6 +16,7 @@ import {
 import { toast } from 'sonner';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import usePermissions from '@/components/lib/usePermissions';
+import useRLSQuery from '@/components/lib/useRLSQuery';
 
 /**
  * V21.6 - TRANSFERIR CONVERSA
@@ -31,7 +32,7 @@ export default function TransferirConversa({ conversa, onTransferido }) {
   const [destinoId, setDestinoId] = useState('');
   const [nota, setNota] = useState('');
   const queryClient = useQueryClient();
-  const { empresaAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const { user } = usePermissions();
 
   // Buscar atendentes disponíveis
@@ -43,13 +44,12 @@ export default function TransferirConversa({ conversa, onTransferido }) {
     }
   });
 
-  const departamentos = [
-    { id: 'Comercial', nome: 'Comercial', icone: '💼' },
-    { id: 'Financeiro', nome: 'Financeiro', icone: '💰' },
-    { id: 'Suporte', nome: 'Suporte Técnico', icone: '🔧' },
-    { id: 'Logística', nome: 'Logística', icone: '🚚' },
-    { id: 'Técnico', nome: 'Técnico', icone: '⚙️' }
-  ];
+  const { data: departamentosData = [] } = useRLSQuery('Departamento', {}, 'nome_departamento', 50, {
+    staleTime: 300000, enabled: !!(empresaAtual?.id || grupoAtual?.id)
+  });
+  const departamentos = departamentosData
+    .filter(d => d.ativo !== false)
+    .map(d => ({ id: d.nome_departamento, nome: d.nome_departamento, icone: '🏢' }));
 
   const transferirMutation = useMutation({
     mutationFn: async () => {

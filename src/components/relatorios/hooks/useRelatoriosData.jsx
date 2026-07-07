@@ -1,47 +1,45 @@
 import { useMemo } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import { useToast } from "@/components/ui/use-toast";
 
 /**
  * Hook extraído de Relatorios.jsx (Regra-Mãe regra 3).
  * Centraliza queries multiempresa, filtragem por período, exportação CSV e agendamento.
+ * Usa useRLSQuery para compartilhar cache com todos os módulos do sistema.
  */
 export function useRelatoriosData(filtros, setAgendarEmailDialogOpen) {
   const { toast } = useToast();
-  const { empresaAtual, grupoAtual, filterInContext } = useContextoVisual();
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
   const contextoValido = !!(empresaAtual?.id || groupId);
 
-  const { data: clientes = [] } = useQuery({
-    queryKey: ['clientes', empresaAtual?.id, groupId],
-    queryFn: () => filterInContext('Cliente', {}, '-created_date', 9999),
-    enabled: contextoValido,
-  });
+  // Usa useRLSQuery — compartilha cache com Dashboard, Comercial, Financeiro, etc.
+  const { data: clientes = [] } = useRLSQuery(
+    'Cliente', {}, '-created_date', 9999,
+    { enabled: contextoValido, staleTime: 60000 }
+  );
 
-  const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos', empresaAtual?.id, groupId],
-    queryFn: () => filterInContext('Pedido', {}, '-data_pedido', 9999),
-    enabled: contextoValido,
-  });
+  const { data: pedidos = [] } = useRLSQuery(
+    'Pedido', {}, '-data_pedido', 9999,
+    { enabled: contextoValido, staleTime: 60000 }
+  );
 
-  const { data: produtos = [] } = useQuery({
-    queryKey: ['produtos', empresaAtual?.id, groupId],
-    queryFn: () => filterInContext('Produto', {}, '-created_date', 9999),
-    enabled: contextoValido,
-  });
+  const { data: produtos = [] } = useRLSQuery(
+    'Produto', {}, '-created_date', 9999,
+    { enabled: contextoValido, staleTime: 60000 }
+  );
 
-  const { data: contasReceber = [] } = useQuery({
-    queryKey: ['contasReceber', empresaAtual?.id, groupId],
-    queryFn: () => filterInContext('ContaReceber', {}, '-data_vencimento', 9999),
-    enabled: contextoValido,
-  });
+  const { data: contasReceber = [] } = useRLSQuery(
+    'ContaReceber', {}, '-data_vencimento', 9999,
+    { enabled: contextoValido, staleTime: 60000 }
+  );
 
-  const { data: contasPagar = [] } = useQuery({
-    queryKey: ['contasPagar', empresaAtual?.id, groupId],
-    queryFn: () => filterInContext('ContaPagar', {}, '-data_vencimento', 9999),
-    enabled: contextoValido,
-  });
+  const { data: contasPagar = [] } = useRLSQuery(
+    'ContaPagar', {}, '-data_vencimento', 9999,
+    { enabled: contextoValido, staleTime: 60000 }
+  );
 
   const filtrarPorPeriodo = (data, campo = 'created_date') => {
     const inicio = new Date(filtros.data_inicio);

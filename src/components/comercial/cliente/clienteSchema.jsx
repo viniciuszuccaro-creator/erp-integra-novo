@@ -9,6 +9,6 @@ export const clienteSchema = z.object({
   whatsapp: z.string().optional(),
   cep: z.string().optional(),
   limite_credito: z.preprocess((v) => (v === '' || v === null || v === undefined) ? 0 : Number(v), z.number().min(0, 'Limite inválido')),
-  condicao_pagamento: z.enum(['À Vista','7 dias','15 dias','30 dias','45 dias','60 dias','Parcelado']).optional(),
+  condicao_pagamento: z.string().optional(),
   status: z.enum(['Prospect','Ativo','Inativo','Bloqueado']).optional(),
 });

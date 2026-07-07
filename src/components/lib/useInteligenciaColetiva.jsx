@@ -9,7 +9,7 @@ import { base44 } from '@/api/base44Client';
 import { useContextoVisual } from './useContextoVisual';
 
 export default function useInteligenciaColetiva() {
-  const { empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const { empresaAtual, grupoAtual, contexto, filterInContext } = useContextoVisual();
   const [insights, setInsights] = useState([]);
   const [benchmarks, setBenchmarks] = useState({});
   const [bestPractices, setBestPractices] = useState([]);

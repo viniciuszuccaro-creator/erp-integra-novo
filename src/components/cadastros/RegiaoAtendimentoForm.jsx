@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapPin, Truck, DollarSign, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { DEFAULT_FORM } from "./regiao/regiaoConstants";
 import RegiaoTabGeral from "./regiao/RegiaoTabGeral";
@@ -22,8 +22,8 @@ export default function RegiaoAtendimentoForm({ regiaoId, regiaoAtendimento, ite
   const contextoKey = `${grupoAtual?.id || "sem-grupo"}-${empresaAtual?.id || "sem-empresa"}`;
   const { confirm, ConfirmDialog: ConfirmExcluirDialog } = useConfirm();
 
-  const { data: vendedores = [] } = useQuery({ queryKey: ["colaboradores-vendedores", contextoKey], queryFn: () => filterInContext("Colaborador", {}, "nome_completo", 999), enabled: !!contexto });
-  const { data: transportadoras = [] } = useQuery({ queryKey: ["transportadoras", contextoKey], queryFn: () => filterInContext("Transportadora", {}, "nome_transportadora", 999), enabled: !!contexto });
+  const { data: vendedores = [] } = useRLSQuery("Colaborador", {}, "nome_completo", 999, { enabled: !!contexto });
+  const { data: transportadoras = [] } = useRLSQuery("Transportadora", {}, "nome_transportadora", 999, { enabled: !!contexto });
 
   useEffect(() => {
     if (dadosIniciaisProps && (open || windowMode)) { setFormData(dadosIniciaisProps); }

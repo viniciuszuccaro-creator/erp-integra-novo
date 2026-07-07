@@ -70,28 +70,31 @@ export default function DashboardCliente({ clienteId: propClienteId, adminMode =
   });
 
   const { data: entregas = [] } = useQuery({
-    queryKey: ['minhas-entregas', cliente?.id],
-    queryFn: () => base44.entities.Entrega.filter({ 
-      cliente_id: cliente?.id 
+    queryKey: ['minhas-entregas', cliente?.id, contextoKey],
+    queryFn: () => filterInContext('Entrega', { 
+      cliente_id: cliente?.id,
+      ...tenantFilter
     }, '-created_date', 20),
-    enabled: !!cliente
+    enabled: !!cliente && !!contextoKey
   });
 
   const { data: contasReceber = [] } = useQuery({
-    queryKey: ['minhas-contas', cliente?.id],
-    queryFn: () => base44.entities.ContaReceber.filter({ 
-      cliente_id: cliente?.id 
+    queryKey: ['minhas-contas', cliente?.id, contextoKey],
+    queryFn: () => filterInContext('ContaReceber', { 
+      cliente_id: cliente?.id,
+      ...tenantFilter
     }, '-data_vencimento', 50),
-    enabled: !!cliente
+    enabled: !!cliente && !!contextoKey
   });
 
 
   const { data: chamados = [] } = useQuery({
-    queryKey: ['meus-chamados', cliente?.id],
-    queryFn: () => base44.entities.Chamado.filter({ 
-      cliente_id: cliente?.id 
+    queryKey: ['meus-chamados', cliente?.id, contextoKey],
+    queryFn: () => filterInContext('Chamado', { 
+      cliente_id: cliente?.id,
+      ...tenantFilter
     }, '-created_date'),
-    enabled: !!cliente
+    enabled: !!cliente && !!contextoKey
   });
 
   const pedidosAbertos = pedidos.filter(p => 

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useUser } from "@/components/lib/UserContext";
 import { useToast } from "@/components/ui/use-toast";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 /**
  * Hook extraído de ConfigFiscalAutomatica.jsx
@@ -13,8 +14,8 @@ export default function useConfigFiscal({ empresaId, groupId }) {
   const queryClient = useQueryClient();
   const { user } = useUser();
 
-  const { data: empresa } = useQuery({ queryKey: ['empresa', empresaId], queryFn: async () => await base44.entities.Empresa.get(empresaId), enabled: !!empresaId });
-  const { data: config } = useQuery({ queryKey: ['config-fiscal', empresaId], queryFn: async () => { const configs = await base44.entities.ConfigFiscalEmpresa.filter({ empresa_id: empresaId }); return configs[0] || null; }, enabled: !!empresaId });
+  const { data: empresa } = useRLSQuery("Empresa", { id: empresaId }, undefined, 1, { enabled: !!empresaId, select: (list) => (Array.isArray(list) ? list[0] : null) });
+  const { data: config } = useRLSQuery("ConfigFiscalEmpresa", { empresa_id: empresaId }, undefined, 1, { enabled: !!empresaId, select: (list) => (Array.isArray(list) ? list[0] || null : null) });
 
   const [formData, setFormData] = useState({
     ambiente_nfe: "Homologação", provedor_nf: "Nenhum", api_url: "", api_key: "",

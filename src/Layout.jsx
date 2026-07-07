@@ -59,7 +59,7 @@ const queryClient = new QueryClient({
       retry: 0,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
-      refetchOnMount: false,
+      refetchOnMount: true,
     },
     mutations: { retry: 0 }
   }

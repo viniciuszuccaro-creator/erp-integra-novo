@@ -118,7 +118,7 @@ export function useEntityCounts(entities = []) {
     gcTime: 300_000,
     placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,  // Desabilita refetch ao montar (evita HMR loops)
+    refetchOnMount: true,
     retry: 1,
     enabled: canFetch,
   });

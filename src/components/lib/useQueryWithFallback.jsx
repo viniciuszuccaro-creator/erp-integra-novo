@@ -24,7 +24,7 @@ export function useQueryWithFallback(storageKey, queryOptions, emptyValue = []) 
     staleTime: 90_000,
     gcTime: 300_000,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnReconnect: false,
     ...queryOptions,
     placeholderData: (prev) => {

@@ -45,6 +45,7 @@ export function useRLSQuery(
       ? queryOptions.enabled
       : !!(empresaAtual?.id || grupoAtual?.id || contexto === 'grupo'),
     retry: 0,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
     ...queryOptions,
   });

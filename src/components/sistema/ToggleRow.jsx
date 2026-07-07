@@ -19,7 +19,7 @@ export default function ToggleRow({
   accentColor = "blue",
   disabled = false,
 }) {
-  const checked = getToggleValue ? getToggleValue(chave, configs) : false;
+  const checked = getToggleValue ? getToggleValue(configs, chave) : false;
   const accentMap = {
     blue: "text-blue-600",
     purple: "text-purple-600",

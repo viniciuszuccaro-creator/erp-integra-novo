@@ -68,7 +68,20 @@ const ENTITY_QUERY_KEYS = {
   OperadorCaixa:       [['OperadorCaixa'], ['entityListSorted', 'OperadorCaixa'], ['OperadorCaixa', 'count']],
   TabelaFiscal:        [['TabelaFiscal'], ['entityListSorted', 'TabelaFiscal'], ['TabelaFiscal', 'count']],
   Empresa:             [['Empresa'], ['entityListSorted', 'Empresa'], ['Empresa', 'count'], ['empresas']],
-  ConfiguracaoSistema: [['ConfiguracaoSistema'], ['configuracaoSistema'], ['config-sistema']],
+  ConfiguracaoSistema: [['ConfiguracaoSistema'], ['entityListSorted', 'ConfiguracaoSistema'], ['configuracaoSistema'], ['config-sistema'], ['config-center-v2'], ['config-global'], ['configs-ia-geral']],
+  IAConfig:            [['IAConfig'], ['entityListSorted', 'IAConfig'], ['configs-ia-geral']],
+  AuditLog:            [['AuditLog'], ['entityListSorted', 'AuditLog']],
+  Notificacao:         [['Notificacao'], ['entityListSorted', 'Notificacao']],
+  PerfilAcesso:        [['PerfilAcesso'], ['entityListSorted', 'PerfilAcesso']],
+  GrupoEmpresarial:    [['GrupoEmpresarial'], ['entityListSorted', 'GrupoEmpresarial'], ['empresas']],
+  ApiExterna:          [['ApiExterna'], ['entityListSorted', 'ApiExterna']],
+  ChatbotCanal:        [['ChatbotCanal'], ['entityListSorted', 'ChatbotCanal']],
+  ChatbotIntent:       [['ChatbotIntent'], ['entityListSorted', 'ChatbotIntent']],
+  ChatbotIntents:      [['ChatbotIntents'], ['entityListSorted', 'ChatbotIntents']],
+  JobAgendado:         [['JobAgendado'], ['entityListSorted', 'JobAgendado']],
+  Webhook:             [['Webhook'], ['entityListSorted', 'Webhook']],
+  EventoNotificacao:   [['EventoNotificacao'], ['entityListSorted', 'EventoNotificacao']],
+  ModeloDocumento:     [['ModeloDocumento'], ['entityListSorted', 'ModeloDocumento']],
 };
 
 // Throttle de invalidação por entidade (evita flood de invalidações em eventos rápidos)
@@ -99,7 +112,9 @@ export function useInvalidationBus(entities = [], options = {}) {
         if (now - last < INVALIDATE_THROTTLE_MS) return;
         lastInvalidateRef.current[entityName] = now;
 
-        const keys = ENTITY_QUERY_KEYS[entityName] || [[entityName], ['entityListSorted', entityName]];
+        const baseKeys = ENTITY_QUERY_KEYS[entityName] || [[entityName], ['entityListSorted', entityName]];
+        // Sempre inclui as query keys do VisualizadorUniversal (tabela de Cadastros) e contagens
+        const keys = [...baseKeys, ['viz-v33', entityName], ['entityCounts_v5']];
         // Invalidação assíncrona para não bloquear o handler
         setTimeout(() => {
           keys.forEach((qk) => {

@@ -37,10 +37,19 @@ export default function useCountEntitiesWithCircuitBreaker() {
   const debounceRef = useRef(null);
   const circuitRef = useRef({ state: 'CLOSED', failureCount: 0, nextAttempt: null });
 
-  // Sync do circuit state (a cada 1s)
+  // Sync do circuit state (a cada 1s) + auto-reset se timeout expirou
   useEffect(() => {
     const sync = () => {
       const stored = readCBState();
+      // Auto-reset: se OPEN mas o timeout já passou, volta para CLOSED
+      if (stored.state === 'OPEN' && stored.nextAttempt && Date.now() >= stored.nextAttempt) {
+        const next = { state: 'CLOSED', failureCount: 0, nextAttempt: null };
+        circuitRef.current = next;
+        writeCBState('CLOSED', 0, null);
+        setCircuitState('CLOSED');
+        setFailureCount(0);
+        return;
+      }
       if (stored.state && stored.state !== circuitRef.current.state) {
         circuitRef.current = stored;
         setCircuitState(stored.state || 'CLOSED');

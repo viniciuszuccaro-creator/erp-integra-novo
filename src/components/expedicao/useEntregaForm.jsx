@@ -62,7 +62,7 @@ export default function useEntregaForm({ formData, setFormData, onCancel, isEdit
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Entrega.update(id, data),
+    mutationFn: ({ id, data }) => updateInContext('Entrega', id, data),
     onSuccess: async (entregaAtualizada) => {
       queryClient.invalidateQueries({ queryKey: ['entregas'] });
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });

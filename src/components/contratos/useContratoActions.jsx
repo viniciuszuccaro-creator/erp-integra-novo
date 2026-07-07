@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Hook extraído de Contratos.jsx (Regra-Mãe regra 3).
@@ -10,11 +11,12 @@ import { useToast } from "@/components/ui/use-toast";
 export function useContratoActions({ contratos, empresaAtual, groupId, user }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { createInContext, updateInContext, deleteInContext } = useContextoVisual();
 
   // ---- Alertas automáticos de vencimento e reajuste ----
   const enviarAlerta = async (contrato, tipo, dias) => {
     try {
-      await base44.entities.Notificacao.create({
+      await createInContext('Notificacao', {
         titulo: `⚠️ Contrato Vencendo: ${contrato.numero_contrato}`,
         mensagem: `O contrato "${contrato.objeto}" com ${contrato.parte_contratante} vence em ${dias} dias.\n\nData de vencimento: ${new Date(contrato.data_fim).toLocaleDateString('pt-BR')}\n\n${contrato.renovacao_automatica ? '✓ Renovação automática ativada' : '⚠️ Renovação manual necessária'}`,
         tipo: dias <= 7 ? 'urgente' : 'aviso',
@@ -37,7 +39,7 @@ export function useContratoActions({ contratos, empresaAtual, groupId, user }) {
         alertas_enviados: [...(contrato.alertas_enviados || []), { tipo, data_envio: new Date().toISOString(), destinatario: user?.email, enviado: true }]
       };
 
-      await base44.entities.Contrato.update(contrato.id, updatedContrato);
+      await updateInContext('Contrato', contrato.id, updatedContrato);
       queryClient.setQueryData(['contratos'], (old) => old?.map(c => c.id === contrato.id ? updatedContrato : c) || []);
       toast({ title: "🔔 Alerta Automático", description: `Contrato ${contrato.numero_contrato} vence em ${dias} dias` });
     } catch (error) {
@@ -48,7 +50,7 @@ export function useContratoActions({ contratos, empresaAtual, groupId, user }) {
 
   const enviarAlertaReajuste = async (contrato, dias) => {
     try {
-      await base44.entities.Notificacao.create({
+      await createInContext('Notificacao', {
         titulo: `📈 Reajuste de Contrato: ${contrato.numero_contrato}`,
         mensagem: `O contrato "${contrato.objeto}" com ${contrato.parte_contratante} tem reajuste programado em ${dias} dias.\n\nData do reajuste: ${new Date(contrato.data_proximo_reajuste).toLocaleDateString('pt-BR')}\nÍndice: ${contrato.indice_reajuste}\nValor atual: R$ ${contrato.valor_mensal?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
         tipo: 'info', categoria: 'Sistema', prioridade: 'Normal',
@@ -68,7 +70,7 @@ export function useContratoActions({ contratos, empresaAtual, groupId, user }) {
         alertas_enviados: [...(contrato.alertas_enviados || []), { tipo: 'Reajuste', data_envio: new Date().toISOString(), destinatario: user?.email, enviado: true }]
       };
 
-      await base44.entities.Contrato.update(contrato.id, updatedContrato);
+      await updateInContext('Contrato', contrato.id, updatedContrato);
       queryClient.setQueryData(['contratos'], (old) => old?.map(c => c.id === contrato.id ? updatedContrato : c) || []);
       toast({ title: "🔔 Alerta de Reajuste", description: `Contrato ${contrato.numero_contrato} terá reajuste em ${dias} dias` });
     } catch (error) {
@@ -136,7 +138,7 @@ export function useContratoActions({ contratos, empresaAtual, groupId, user }) {
         return { gerado: false, motivo: 'Ainda não é o dia de vencimento para gerar a cobrança' };
       }
 
-      const contaReceber = await base44.entities.ContaReceber.create({
+      const contaReceber = await createInContext('ContaReceber', {
         descricao: `Mensalidade ${contrato.objeto} - ${contrato.numero_contrato}`,
         cliente: contrato.parte_contratante,
         empresa_id: contrato.empresa_id || empresaAtual?.id,
@@ -157,7 +159,7 @@ export function useContratoActions({ contratos, empresaAtual, groupId, user }) {
         proxima_cobranca: proximaCobrancaCalculated.toISOString().split('T')[0],
         contas_geradas_ids: [...(contrato.contas_geradas_ids || []), contaReceber.id]
       };
-      await base44.entities.Contrato.update(contrato.id, updatedContrato);
+      await updateInContext('Contrato', contrato.id, updatedContrato);
       queryClient.setQueryData(['contratos'], (old) => old?.map(c => c.id === contrato.id ? updatedContrato : c) || []);
       return { gerado: true, conta: contaReceber };
     },
@@ -214,7 +216,7 @@ export function useContratoActions({ contratos, empresaAtual, groupId, user }) {
         proximo_alerta_vencimento: null, proximo_alerta_reajuste: null,
         ultima_cobranca_gerada: null, proxima_cobranca: null,
       };
-      await base44.entities.Contrato.update(contrato.id, updatedContrato);
+      await updateInContext('Contrato', contrato.id, updatedContrato);
       queryClient.setQueryData(['contratos'], (old) => old?.map(c => c.id === contrato.id ? updatedContrato : c) || []);
       return { contrato, novoValorMensal, percentualReajusteAplicado };
     },
@@ -235,7 +237,7 @@ export function useContratoActions({ contratos, empresaAtual, groupId, user }) {
 
   // ---- Exclusão ----
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Contrato.delete(id),
+    mutationFn: (id) => deleteInContext('Contrato', id),
     onSuccess: async (_res, id) => {
       await base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário', usuario_id: user?.id,

@@ -6,6 +6,7 @@ import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePersistedSort from "@/components/lib/usePersistedSort";
 import useBackendPagination from "@/components/lib/useBackendPagination";
 import usePermissions from "@/components/lib/usePermissions";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { useToast } from "@/components/ui/use-toast";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 
@@ -15,6 +16,7 @@ import { useConfirm } from "@/components/ui/confirm-dialog";
  */
 export default function usePedidosTab({ pedidos, empresaId }) {
   const { canEdit, canCreate, canApprove, canDelete } = usePermissions();
+  const { deleteInContext } = useContextoVisual();
   const { page, setPage, pageSize, setPageSize } = useBackendPagination('Pedido', 20);
   const [sortField, setSortField, sortDirection, setSortDirection] = usePersistedSort('Pedido', 'data_pedido', 'desc');
   const { data: pedidosBackend = [] } = useRLSQuery('Pedido', {}, `-${sortField}`, pageSize, { staleTime: 120000 });
@@ -41,11 +43,10 @@ export default function usePedidosTab({ pedidos, empresaId }) {
   };
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Pedido.delete(id),
+    mutationFn: (id) => deleteInContext('Pedido', id),
     onSuccess: async (_data, id) => {
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
       toast({ title: "✅ Pedido excluído!" });
-      try { await base44.entities.AuditLog.create({ acao: 'Exclusão', modulo: 'Comercial', entidade: 'Pedido', registro_id: id, descricao: 'Pedido excluído', data_hora: new Date().toISOString() }); } catch (_) { }
     },
   });
 

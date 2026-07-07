@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import useRLSQuery from "@/components/lib/useRLSQuery";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { DASHBOARD_LIST_LIMIT, DASHBOARD_REFETCH_INTERVAL_MS, dashboardQueryDefaults } from "@/components/dashboard/config/dashboardQueryConfig";
 
 /**
@@ -10,6 +11,7 @@ import { DASHBOARD_LIST_LIMIT, DASHBOARD_REFETCH_INTERVAL_MS, dashboardQueryDefa
  */
 export function useDashboardQueries({ canSeeFinanceiro, canSeeCRM, canSeeComercial, canSeeEstoque, canSeeExpedicao, canSeeRH, canSeeProducao, canSeeFiscal, periodo, autoRefresh, empresaAtual, estaNoGrupo, grupoAtual, getFiltroContexto }) {
   const queryClient = useQueryClient();
+  const { filterInContext } = useContextoVisual();
   const hasContextoAtivo = Boolean(empresaAtual?.id || estaNoGrupo || grupoAtual?.id);
   const refetchInterval = (empresaAtual?.id || estaNoGrupo) ? (autoRefresh ? DASHBOARD_REFETCH_INTERVAL_MS : false) : false;
 
@@ -40,8 +42,7 @@ export function useDashboardQueries({ canSeeFinanceiro, canSeeCRM, canSeeComerci
     queryKey: ['command-center', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
     queryFn: async () => {
       const since = Date.now() - 24 * 60 * 60 * 1000;
-      const filtro = empresaAtual?.id ? { empresa_id: empresaAtual.id } : grupoAtual?.id ? { group_id: grupoAtual.id } : {};
-      const logs = await base44.entities.AuditLog.filter(filtro, '-data_hora', 200);
+      const logs = await filterInContext('AuditLog', {}, '-data_hora', 200);
       const within = (logs || []).filter(l => new Date(l?.data_hora || l?.created_date || 0).getTime() >= since);
       const str = (l) => `${l?.descricao || ''} ${l?.mensagem_erro || ''} ${l?.acao || ''}`;
       return {
@@ -58,8 +59,7 @@ export function useDashboardQueries({ canSeeFinanceiro, canSeeCRM, canSeeComerci
     queryKey: ['bot-metrics-24h', empresaAtual?.id, grupoAtual?.id],
     queryFn: async () => {
       const since = Date.now() - 24 * 60 * 60 * 1000;
-      const filtro = empresaAtual?.id ? { empresa_id: empresaAtual.id } : grupoAtual?.id ? { group_id: grupoAtual.id } : {};
-      const items = await base44.entities.ChatbotInteracao.filter(filtro, '-created_date', 200);
+      const items = await filterInContext('ChatbotInteracao', {}, '-created_date', 200);
       const within = (items || []).filter(i => new Date(i?.created_date || 0).getTime() >= since);
       const sla = within.reduce((acc, i) => {
         const ms = Number(i?.tempo_primeira_resposta_ms || 0);

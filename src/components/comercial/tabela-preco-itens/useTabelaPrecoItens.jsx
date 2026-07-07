@@ -11,7 +11,7 @@ export default function useTabelaPrecoItens(tabela) {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const { filterInContext, grupoAtual, empresaAtual, contexto, createInContext, updateInContext, deleteInContext } = useContextoVisual();
   const contextoKey = `${grupoAtual?.id || "sem-grupo"}-${empresaAtual?.id || "sem-empresa"}`;
 
   const [formItem, setFormItem] = useState({
@@ -25,9 +25,9 @@ export default function useTabelaPrecoItens(tabela) {
   });
 
   const { data: itens = [] } = useQuery({
-    queryKey: ["tabela-preco-itens", tabela?.id],
-    queryFn: () => base44.entities.TabelaPrecoItem.filter({ tabela_preco_id: tabela.id }),
-    enabled: !!tabela?.id,
+    queryKey: ["tabela-preco-itens", tabela?.id, contextoKey],
+    queryFn: () => filterInContext("TabelaPrecoItem", { tabela_preco_id: tabela.id }, undefined, 999),
+    enabled: !!tabela?.id && !!contexto,
   });
 
   const { data: produtos = [] } = useQuery({
@@ -40,7 +40,7 @@ export default function useTabelaPrecoItens(tabela) {
     mutationFn: (data) => {
       const produto = produtos.find((p) => p.id === data.produto_id);
       const precoComDesconto = data.preco_base * (1 - data.percentual_desconto / 100);
-      return base44.entities.TabelaPrecoItem.create({
+      return createInContext('TabelaPrecoItem', {
         ...data,
         tabela_preco_id: tabela.id,
         tabela_preco_nome: tabela.nome,
@@ -63,7 +63,7 @@ export default function useTabelaPrecoItens(tabela) {
   const updateItemMutation = useMutation({
     mutationFn: ({ id, data }) => {
       const precoComDesconto = data.preco_base * (1 - data.percentual_desconto / 100);
-      return base44.entities.TabelaPrecoItem.update(id, { ...data, preco_com_desconto: precoComDesconto });
+      return updateInContext('TabelaPrecoItem', id, { ...data, preco_com_desconto: precoComDesconto });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tabela-preco-itens"] });
@@ -74,7 +74,7 @@ export default function useTabelaPrecoItens(tabela) {
   });
 
   const deleteItemMutation = useMutation({
-    mutationFn: (id) => base44.entities.TabelaPrecoItem.delete(id),
+    mutationFn: (id) => deleteInContext('TabelaPrecoItem', id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tabela-preco-itens"] });
       toast({ title: "✅ Item removido!" });

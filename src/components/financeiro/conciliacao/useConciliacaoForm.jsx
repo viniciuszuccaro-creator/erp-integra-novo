@@ -14,7 +14,7 @@ import { toast } from "sonner";
 export default function useConciliacaoForm() {
   const { user } = useUser();
   const queryClient = useQueryClient();
-  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const { filterInContext, grupoAtual, empresaAtual, contexto, updateInContext } = useContextoVisual();
   const { canEdit, canCreate } = usePermissions();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const contextoValido = !!contexto && contextoKey !== 'sem-grupo-sem-empresa';
@@ -42,28 +42,11 @@ export default function useConciliacaoForm() {
       if (!podeEditar) throw new Error("Sem permissão para conciliar");
 
       if (movimento.tipo === "pagamento_omnichannel") {
-        await base44.entities.PagamentoOmnichannel.update(movimento.id, {
+        await updateInContext('PagamentoOmnichannel', movimento.id, {
           status_conferencia: "Conciliado",
           data_credito_efetiva: lancamentoBanco.data
         });
       }
-
-      await base44.entities.AuditLog.create({
-        group_id: movimento.group_id || grupoAtual?.id,
-        empresa_id: movimento.empresa_id || empresaAtual?.id,
-        usuario: user?.full_name || 'Sistema',
-        usuario_id: user?.id,
-        acao: "Conciliação Bancária",
-        modulo: "Financeiro",
-        tipo_auditoria: "entidade",
-        entidade: "ConciliacaoBancaria",
-        registro_id: movimento.id,
-        descricao: `Conciliação manual: ${movimento.cliente_nome || 'N/A'}`,
-        dados_anteriores: { status_conferencia: movimento.status_conferencia || 'Pendente' },
-        dados_novos: { status_conferencia: "Conciliado", data_credito: lancamentoBanco.data },
-        data_hora: new Date().toISOString(),
-        sucesso: true
-      });
 
       return true;
     },

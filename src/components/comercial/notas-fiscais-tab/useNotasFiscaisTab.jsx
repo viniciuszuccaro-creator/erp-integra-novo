@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { mockCancelarNFe } from "@/components/integracoes/MockIntegracoes";
 import useRLS from "@/components/lib/useRLS";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { sanitizeOnWrite } from "@/components/lib/sanitizeOnWrite";
 
 const EMPTY_FORM = {
@@ -20,6 +21,7 @@ export default function useNotasFiscaisTab() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { create: createRLS, update: updateRLS, empresaAtual } = useRLS();
+  const { updateInContext, createInContext } = useContextoVisual();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedNF, setSelectedNF] = useState(null);
@@ -47,13 +49,13 @@ export default function useNotasFiscaisTab() {
   const cancelarNFeMutation = useMutation({
     mutationFn: async ({ nfe, motivo }) => {
       const resultado = await mockCancelarNFe({ nfe_id: nfe.id, chave_acesso: nfe.chave_acesso, motivo });
-      await base44.entities.NotaFiscal.update(nfe.id, {
+      await updateInContext('NotaFiscal', nfe.id, {
         status: "Cancelada",
         cancelamento: { data_cancelamento: resultado.data_cancelamento, protocolo_cancelamento: resultado.protocolo_cancelamento, motivo, justificativa: motivo, usuario: "Sistema" },
         xml_cancelamento: resultado.xml_cancelamento_url,
         historico: [...(nfe.historico || []), { data_hora: new Date().toISOString(), evento: "NF-e Cancelada (Simulação)", usuario: "Sistema", detalhes: motivo }]
       });
-      await base44.entities.LogFiscal.create({
+      await createInContext('LogFiscal', {
         empresa_id: nfe.empresa_id || empresaAtual?.id,
         group_id: nfe.group_id || empresaAtual?.group_id || null,
         nfe_id: nfe.id, numero_nfe: nfe.numero, chave_acesso: nfe.chave_acesso,

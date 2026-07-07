@@ -5,6 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import useRLS from "@/components/lib/useRLS";
 import { useUser } from "@/components/lib/UserContext";
 import usePermissions from "@/components/lib/usePermissions";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * Hook extraído de ContasReceberTab.jsx
@@ -16,6 +17,7 @@ export default function useContasReceber({ contasList, queryClient: extQueryClie
   const { toast } = useToast();
   const { user: authUser } = useUser();
   const { hasPermission } = usePermissions();
+  const { createInContext } = useContextoVisual();
 
   const [gerarCobrancaDialogOpen, setGerarCobrancaDialogOpen] = useState(false);
   const [simularPagamentoDialogOpen, setSimularPagamentoDialogOpen] = useState(false);
@@ -34,7 +36,7 @@ export default function useContasReceber({ contasList, queryClient: extQueryClie
   const enviarParaCaixaMutation = useMutation({
     mutationFn: async (titulos) => {
       const ordens = await Promise.all(titulos.map(async (titulo) => {
-        return await base44.entities.CaixaOrdemLiquidacao.create({
+        return await createInContext('CaixaOrdemLiquidacao', {
           group_id: titulo.group_id, empresa_id: titulo.empresa_id,
           tipo_operacao: 'Recebimento', origem: 'Contas a Receber', valor_total: titulo.valor,
           forma_pagamento_pretendida: 'PIX', status: 'Pendente',
@@ -45,12 +47,6 @@ export default function useContasReceber({ contasList, queryClient: extQueryClie
       return ordens;
     },
     onSuccess: async (ordens) => {
-      await base44.entities.AuditLog.create({
-        group_id: ordens[0]?.group_id, empresa_id: ordens[0]?.empresa_id,
-        acao: 'Criação', modulo: 'Financeiro', entidade: 'CaixaOrdemLiquidacao',
-        descricao: `${ordens.length} título(s) enviados para o Caixa (Receber)`,
-        data_hora: new Date().toISOString()
-      });
       queryClient.invalidateQueries({ queryKey: ['caixa-ordens-liquidacao'] });
       toast({ title: `✅ ${ordens.length} título(s) enviado(s) para o Caixa!` });
       setContasSelecionadas([]);

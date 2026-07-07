@@ -1,11 +1,11 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const LIST_CACHE = new Map();
-const LIST_CACHE_TTL_MS = 5 * 1000;
+const LIST_CACHE_TTL_MS = 2 * 1000;
 let LIST_LAST_CALL_AT = 0;
 let LIST_BACKEND_PAUSED_UNTIL = 0;
-const LIST_MIN_GAP_MS = 500;
-const LIST_BACKEND_PAUSE_MS = 30 * 1000;
+const LIST_MIN_GAP_MS = 200;
+const LIST_BACKEND_PAUSE_MS = 10 * 1000;
 
 function stableListKey(value) {
   try { return JSON.stringify(value || {}, Object.keys(value || {}).sort()); }

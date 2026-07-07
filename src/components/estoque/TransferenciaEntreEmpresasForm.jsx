@@ -11,6 +11,7 @@ import { ArrowLeftRight, Save, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import usePermissions from "@/components/lib/usePermissions";
 import ProtectedField from "@/components/security/ProtectedField";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -24,6 +25,7 @@ export default function TransferenciaEntreEmpresasForm({
 }) {
   const queryClient = useQueryClient();
   const { canCreate } = usePermissions();
+  const { createInContext } = useContextoVisual();
 
   const [formData, setFormData] = useState({
     empresa_origem_id: "",
@@ -43,7 +45,7 @@ export default function TransferenciaEntreEmpresasForm({
       const empresaDestino = empresasDoGrupo.find(e => e.id === data.empresa_destino_id);
 
       // Criar registro de transferência
-      const transferencia = await base44.entities.TransferenciaFilial.create({
+      const transferencia = await createInContext('TransferenciaFilial', {
         group_id: empresaOrigem.group_id,
         empresa_origem_id: data.empresa_origem_id,
         empresa_destino_id: data.empresa_destino_id,
@@ -58,10 +60,10 @@ export default function TransferenciaEntreEmpresasForm({
         status: "Aprovada",
         data_solicitacao: new Date().toISOString(),
         gerar_cobranca_interna: data.gerar_financeiro
-      });
+      }, 'empresa_origem_id');
 
       // Criar movimentações de estoque
-      await base44.entities.MovimentacaoEstoque.create({
+      await createInContext('MovimentacaoEstoque', {
         empresa_id: data.empresa_origem_id,
         group_id: empresaOrigem.group_id,
         produto_id: data.produto_id,
@@ -73,7 +75,7 @@ export default function TransferenciaEntreEmpresasForm({
         data_movimentacao: new Date().toISOString()
       });
 
-      await base44.entities.MovimentacaoEstoque.create({
+      await createInContext('MovimentacaoEstoque', {
         empresa_id: data.empresa_destino_id,
         group_id: empresaDestino.group_id,
         produto_id: data.produto_id,

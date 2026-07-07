@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from "@/api/base44Client";
 import { useUser } from "@/components/lib/UserContext";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { useToast } from '@/components/ui/use-toast';
 import { toast as sonnerToast } from "sonner";
 
@@ -15,6 +16,7 @@ export default function useEntregaForm({ formData, setFormData, onCancel, isEdit
   const queryClient = useQueryClient();
   const { toast: toastHook } = useToast();
   const { user: authUser } = useUser();
+  const { createInContext, updateInContext } = useContextoVisual();
 
   const calcularPrevisaoEntrega = async () => {
     if (!formData.endereco_entrega_completo?.cidade) { sonnerToast.error("❌ Preencha o endereço primeiro"); return; }

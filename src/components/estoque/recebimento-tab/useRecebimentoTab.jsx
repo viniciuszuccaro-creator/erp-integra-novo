@@ -14,7 +14,7 @@ const STATUS_COLORS = {
 export default function useRecebimentoTab(recebimentos, ordensCompra, produtos) {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewingRecebimento, setViewingRecebimento] = useState(null);
-  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual, createInContext, updateInContext } = useContextoVisual();
   const queryClient = useQueryClient();
 
   const createMutation = useMutation({
@@ -22,7 +22,7 @@ export default function useRecebimentoTab(recebimentos, ordensCompra, produtos) 
       const user = await base44.auth.me();
       const ctx = { empresa_id: empresaAtual?.id, group_id: grupoAtual?.id || empresaAtual?.group_id };
 
-      await base44.entities.MovimentacaoEstoque.create({
+      await createInContext('MovimentacaoEstoque', {
         ...ctx,
         tipo_movimentacao: "Entrada",
         data_movimentacao: data.data_recebimento,
@@ -36,10 +36,10 @@ export default function useRecebimentoTab(recebimentos, ordensCompra, produtos) 
         if (item.quantidade_recebida > 0) {
           const produto = produtos.find((p) => p.id === item.produto_id);
           if (produto) {
-            await base44.entities.Produto.update(produto.id, {
+            await updateInContext('Produto', produto.id, {
               estoque_atual: (produto.estoque_atual || 0) + item.quantidade_recebida,
             });
-            await base44.entities.MovimentacaoEstoque.create({
+            await createInContext('MovimentacaoEstoque', {
               ...ctx,
               produto_id: item.produto_id,
               produto_descricao: item.produto_descricao,

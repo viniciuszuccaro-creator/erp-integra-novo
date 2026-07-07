@@ -13,7 +13,7 @@ import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import usePermissions from '@/components/lib/usePermissions';
 
 export default function InventarioForm({ windowMode = true }) { // w-full/h-full garantidos no container pai
-  const { carimbarContexto, empresaAtual, grupoAtual } = useContextoVisual();
+  const { carimbarContexto, empresaAtual, grupoAtual, createInContext, updateInContext } = useContextoVisual();
   const { canCreate, canEdit, canApprove } = usePermissions();
   const [inv, setInv] = useState({ descricao: '', data_referencia: new Date().toISOString().slice(0,10), status: 'Aberto', itens: [] });
   const [salvando, setSalvando] = useState(false);
@@ -34,18 +34,18 @@ export default function InventarioForm({ windowMode = true }) { // w-full/h-full
     if (!podeSalvar) return toast.error('Sem permissao para salvar inventario.');
     setSalvando(true);
     try {
-      const payload = carimbarContexto({ ...inv, status }, 'empresa_id');
+      const payload = { ...inv, status };
       let res;
-      if (inv.id) res = await base44.entities.Inventario.update(inv.id, payload);
-      else res = await base44.entities.Inventario.create(payload);
+      if (inv.id) res = await updateInContext('Inventario', inv.id, payload, 'empresa_id');
+      else res = await createInContext('Inventario', payload, 'empresa_id');
       try {
         await base44.entities.AuditLog.create({
           acao: inv.id ? 'Edicao' : 'Criacao',
           modulo: 'Estoque',
           entidade: 'Inventario',
           registro_id: res?.id || inv.id || null,
-          empresa_id: payload.empresa_id || null,
-          group_id: payload.group_id || null,
+          empresa_id: res?.empresa_id || payload.empresa_id || null,
+          group_id: res?.group_id || payload.group_id || null,
           descricao: `Inventario ${status}`,
           dados_novos: res || payload,
           sucesso: true,

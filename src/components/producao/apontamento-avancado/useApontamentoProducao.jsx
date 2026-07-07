@@ -9,7 +9,7 @@ import { useUser } from "@/components/lib/UserContext";
 export default function useApontamentoProducao(opId, opNumero, onClose) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { getFiltroContexto } = useContextoVisual();
+  const { getFiltroContexto, filterInContext } = useContextoVisual();
   const { user: authUser } = useUser();
 
   const [apontamento, setApontamento] = useState({
@@ -46,8 +46,10 @@ export default function useApontamentoProducao(opId, opNumero, onClose) {
 
   const { data: op } = useQuery({
     queryKey: ["ordem-producao", opId, getFiltroContexto("empresa_id")],
-    queryFn: () =>
-      base44.entities.OrdemProducao.filter({ ...getFiltroContexto("empresa_id"), id: opId }).then((res) => res[0]),
+    queryFn: async () => {
+      const res = await filterInContext('OrdemProducao', { id: opId }, undefined, 1);
+      return res?.[0] || null;
+    },
     enabled: !!opId,
   });
 

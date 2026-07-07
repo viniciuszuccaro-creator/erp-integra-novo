@@ -24,7 +24,7 @@ import { useContextoVisual } from "@/components/lib/useContextoVisual";
 export default function SincronizacaoMarketplacesAtiva() {
   const [sincronizando, setSincronizando] = useState(false);
   const queryClient = useQueryClient();
-  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const { filterInContext, createInContext, empresaAtual, grupoAtual } = useContextoVisual();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: pedidosExternos = [] } = useQuery({
@@ -46,13 +46,13 @@ export default function SincronizacaoMarketplacesAtiva() {
           cnpj: pedidoExterno.cliente_cpf_cnpj,
         };
         if (pedidoExterno.group_id) clienteFilter.group_id = pedidoExterno.group_id;
-        const clientesExistentes = await base44.entities.Cliente.filter(clienteFilter);
+        const clientesExistentes = await filterInContext('Cliente', clienteFilter);
 
         if (clientesExistentes.length > 0) {
           clienteId = clientesExistentes[0].id;
         } else {
           // Criar cliente novo
-          const novoCliente = await base44.entities.Cliente.create({
+          const novoCliente = await createInContext('Cliente', {
             tipo: pedidoExterno.cliente_cpf_cnpj?.length === 14 ? 'Pessoa Física' : 'Pessoa Jurídica',
             status: 'Ativo',
             nome: pedidoExterno.cliente_nome,

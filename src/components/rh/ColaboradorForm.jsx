@@ -12,10 +12,12 @@ import { z } from "zod";
 import FormWrapper from "@/components/common/FormWrapper";
 import { Save, User, Trash2, Power, PowerOff } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 /**
  * V21.1.2: Colaborador Form - Adaptado para Window Mode
  * Suporte para Dialog (fallback) e Window Mode (multitarefa)
+ * V22.1: Departamento e Cargo agora buscam dados reais de Cadastros Gerais via useRLSQuery
  */
 function ColaboradorForm({ colaborador: colaboradorProp, item, data, onSubmit, onSave, onClose, windowMode = false }) {
   const colaborador = colaboradorProp || item || data || null;
@@ -23,6 +25,10 @@ function ColaboradorForm({ colaborador: colaboradorProp, item, data, onSubmit, o
   // Sync form when editing existing record
   const [_syncKey, _setSyncKey] = React.useState(colaborador?.id || 'new');
   const { carimbarContexto } = useContextoVisual();
+
+  // Busca dados reais de Cadastros Gerais
+  const { data: departamentos = [] } = useRLSQuery('Departamento', {}, 'nome_departamento', 999);
+  const { data: cargos = [] } = useRLSQuery('Cargo', {}, 'nome_cargo', 999);
   const [formData, setFormData] = useState(colaborador || {
     nome_completo: '',
     cpf: '',
@@ -171,30 +177,52 @@ function ColaboradorForm({ colaborador: colaboradorProp, item, data, onSubmit, o
 
               <div>
                 <Label>Cargo *</Label>
-                <Input
-                  value={formData.cargo}
-                  onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
-                  required
-                />
+                <Select value={formData.cargo} onValueChange={(v) => setFormData({ ...formData, cargo: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o cargo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cargos.map((c) => (
+                      <SelectItem key={c.id} value={c.nome_cargo || c.nome || ''}>
+                        {c.nome_cargo || c.nome || ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {!cargos.length && (
+                  <Input
+                    value={formData.cargo}
+                    onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
+                    placeholder="Digite o cargo"
+                    className="mt-1"
+                    required
+                  />
+                )}
               </div>
 
               <div>
                 <Label>Departamento *</Label>
                 <Select value={formData.departamento} onValueChange={(v) => setFormData({ ...formData, departamento: v })}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Selecione o departamento" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Administrativo">Administrativo</SelectItem>
-                    <SelectItem value="Comercial">Comercial</SelectItem>
-                    <SelectItem value="Financeiro">Financeiro</SelectItem>
-                    <SelectItem value="RH">RH</SelectItem>
-                    <SelectItem value="Operacional">Operacional</SelectItem>
-                    <SelectItem value="TI">TI</SelectItem>
-                    <SelectItem value="Logística">Logística</SelectItem>
-                    <SelectItem value="Compras">Compras</SelectItem>
+                    {departamentos.map((d) => (
+                      <SelectItem key={d.id} value={d.nome_departamento || d.nome || ''}>
+                        {d.nome_departamento || d.nome || ''}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+                {!departamentos.length && (
+                  <Input
+                    value={formData.departamento}
+                    onChange={(e) => setFormData({ ...formData, departamento: e.target.value })}
+                    placeholder="Digite o departamento"
+                    className="mt-1"
+                    required
+                  />
+                )}
               </div>
 
               <div>

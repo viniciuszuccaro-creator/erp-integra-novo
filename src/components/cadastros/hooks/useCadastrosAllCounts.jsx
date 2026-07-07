@@ -136,7 +136,7 @@ export default function useCadastrosAllCounts() {
       );
       return result;
     },
-    staleTime: 30_000,
+    staleTime: 15_000,
     gcTime: 300_000,
     placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,

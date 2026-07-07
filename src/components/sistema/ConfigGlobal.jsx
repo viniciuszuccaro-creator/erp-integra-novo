@@ -41,7 +41,7 @@ export default function ConfigGlobal({ empresaId, grupoId }) {
       return loadScopedConfiguracaoSistema({ empresaId: eId, grupoId: gId, limit: 500, includeGlobal: true });
     },
     enabled: hasValidScope,
-    staleTime: 30000,
+    staleTime: 15000,
     gcTime: 300000,
     refetchOnMount: true,
     refetchOnWindowFocus: false,

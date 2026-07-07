@@ -32,7 +32,7 @@ export default function ConfigCenter({ empresaId: empresaIdProp }) {
   const { data: configs = [], refetch, isFetching } = useQuery({
     queryKey,
     queryFn: async () => {
-      return loadScopedConfiguracaoSistema({ empresaId: eId, grupoId: gId, limit: 200 });
+      return loadScopedConfiguracaoSistema({ empresaId: eId, grupoId: gId, limit: 200, includeGlobal: true });
     },
     enabled: canLoad,
     staleTime: 30000,

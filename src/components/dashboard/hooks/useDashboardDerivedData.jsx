@@ -56,9 +56,12 @@ export default function useDashboardDerivedData({ pedidos = [], contasReceber = 
   const fluxoCaixa = receitasPendentes - despesasPendentes;
 
   const produtosBaixoEstoque = produtos.filter((p) => {
-    const estoqueAtual = safeNumber(p.estoque_atual);
+    if (p.status !== "Ativo") return false;
+    const estoqueDisponivel = safeNumber(p.estoque_disponivel) !== 0
+      ? safeNumber(p.estoque_disponivel)
+      : safeNumber(p.estoque_atual) - safeNumber(p.estoque_reservado);
     const estoqueMinimo = safeNumber(p.estoque_minimo);
-    return estoqueMinimo > 0 && estoqueAtual <= estoqueMinimo && p.status === "Ativo";
+    return estoqueDisponivel <= estoqueMinimo;
   }).length;
 
   const colaboradoresAtivos = colaboradores.filter((c) => (c.status || 'Ativo') !== 'Inativo' && (c.status || 'Ativo') !== 'Afastado').length;

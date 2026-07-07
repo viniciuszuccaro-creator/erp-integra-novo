@@ -30,7 +30,7 @@ export default function usePermissions() {
       }
     },
     enabled: !!(user?.perfil_acesso_id && user.perfil_acesso_id !== ""),
-    staleTime: 300000,
+    staleTime: 150000,
     gcTime: 600000,
     retry: 0, // CRÍTICO: sem retry para evitar loop infinito de 404
     });

@@ -31,7 +31,7 @@ export function useContextoVisual() {
   const { data: empresas = [], isLoading: loadingEmpresas } = useQuery({
     queryKey: ['empresas'],
     queryFn: () => base44.entities.Empresa.list(),
-    staleTime: 300000,
+    staleTime: 15000,
   });
 
   const [empresaAtualId, setEmpresaAtualId] = useState(null);

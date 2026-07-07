@@ -132,7 +132,7 @@ const ENTITY_QUERY_KEYS = {
 };
 
 // Throttle de invalidação por entidade (evita flood de invalidações em eventos rápidos)
-const INVALIDATE_THROTTLE_MS = 300;
+const INVALIDATE_THROTTLE_MS = 150;
 
 /**
  * Hook que assina eventos real-time de uma lista de entidades e

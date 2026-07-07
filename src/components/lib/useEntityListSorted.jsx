@@ -137,7 +137,7 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
       __elsInflight.set(key, p);
       return p;
     },
-    staleTime: 30_000,
+    staleTime: 15_000,
     gcTime: 300_000,
     placeholderData: (prev) => {
       if (prev !== undefined) return prev;

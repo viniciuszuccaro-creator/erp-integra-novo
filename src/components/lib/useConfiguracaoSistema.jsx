@@ -20,7 +20,7 @@ export default function useConfiguracaoSistema({ categoria, chave } = {}) {
       const list = await base44.entities.ConfiguracaoSistema.filter(filtro, "-updated_date", 1);
       return Array.isArray(list) && list.length ? list[0] : null;
     },
-    staleTime: 30_000,
+    staleTime: 15_000,
   });
 
   const setMutation = useMutation({

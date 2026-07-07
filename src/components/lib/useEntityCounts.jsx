@@ -114,7 +114,7 @@ export function useEntityCounts(entities = []) {
       );
       return result;
     },
-    staleTime: 30_000,      // 30s — balanceia frescor e performance
+    staleTime: 15_000,      // 30s — balanceia frescor e performance
     gcTime: 300_000,
     placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,

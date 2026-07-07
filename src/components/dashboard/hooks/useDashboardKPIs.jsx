@@ -29,19 +29,19 @@ export function useDashboardKPIs({
       drillDown: () => handleDrillDown("/financeiro")
     },
     {
-      title: "Contas Receber Vencidas",
-      value: receitasPendentes,
-      subtitle: `R$ ${(contasReceber || []).filter(c => c?.status === 'Vencido').reduce((s, c) => s + (Number(c?.valor) || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-      icon: AlertCircle, color: receitasPendentes > 0 ? "from-red-500 to-red-600" : "from-green-500 to-green-600",
-      bgColor: receitasPendentes > 0 ? "bg-red-50" : "bg-green-50", textColor: receitasPendentes > 0 ? "text-red-600" : "text-green-600",
+      title: "Contas a Receber Pendentes",
+      value: `R$ ${receitasPendentes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      subtitle: `${(contasReceber || []).filter(c => c?.status === 'Pendente').length} títulos pendentes`,
+      icon: AlertCircle, color: receitasPendentes > 0 ? "from-orange-500 to-orange-600" : "from-green-500 to-green-600",
+      bgColor: receitasPendentes > 0 ? "bg-orange-50" : "bg-green-50", textColor: receitasPendentes > 0 ? "text-orange-600" : "text-green-600",
       drillDown: () => handleDrillDown("/financeiro")
     },
     {
-      title: "Contas Pagar Vencidas",
-      value: despesasPendentes,
-      subtitle: `R$ ${(contasPagar || []).filter(c => c?.status === 'Vencido').reduce((s, c) => s + (Number(c?.valor) || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-      icon: AlertCircle, color: despesasPendentes > 0 ? "from-red-500 to-red-600" : "from-green-500 to-green-600",
-      bgColor: despesasPendentes > 0 ? "bg-red-50" : "bg-green-50", textColor: despesasPendentes > 0 ? "text-red-600" : "text-green-600",
+      title: "Contas a Pagar Pendentes",
+      value: `R$ ${despesasPendentes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      subtitle: `${(contasPagar || []).filter(c => c?.status === 'Pendente').length} títulos pendentes`,
+      icon: AlertCircle, color: despesasPendentes > 0 ? "from-orange-500 to-orange-600" : "from-green-500 to-green-600",
+      bgColor: despesasPendentes > 0 ? "bg-orange-50" : "bg-green-50", textColor: despesasPendentes > 0 ? "text-orange-600" : "text-green-600",
       drillDown: () => handleDrillDown("/financeiro")
     },
     {

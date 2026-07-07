@@ -152,7 +152,8 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
         data: { chave, categoria: categoria || 'Sistema', ativa: newValue },
         scope,
       });
-      const record = res?.data?.record;
+      // Suporta ambos formatos: Axios response ({data: {record}}) ou direto ({record})
+      const record = res?.data?.record || res?.record;
       if (record?.id) {
         return record;
       }

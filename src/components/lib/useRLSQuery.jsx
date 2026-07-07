@@ -39,7 +39,7 @@ export function useRLSQuery(
   return useQuery({
     queryKey: [entityName, scopeKey, criteriosKey, order, limit],
     queryFn: () => filterInContext(entityName, criterios, order, limit),
-    staleTime: queryOptions.staleTime ?? 30_000,
+    staleTime: queryOptions.staleTime ?? 15_000,
     gcTime: queryOptions.gcTime ?? 300_000,
     enabled: queryOptions.enabled !== undefined
       ? queryOptions.enabled

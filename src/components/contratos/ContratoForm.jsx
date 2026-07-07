@@ -8,11 +8,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { FileText, Zap } from "lucide-react";
 import { z } from "zod";
 import FormWrapper from "@/components/common/FormWrapper";
+import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
 
 /**
  * V21.1.2 - WINDOW MODE READY
  */
 export default function ContratoForm({ contrato, onSubmit, clientes = [], fornecedores = [], windowMode = false }) {
+  const { formasPagamento, isLoading: loadingFormas } = useFormasPagamento();
   const [formData, setFormData] = useState(contrato || {
     numero_contrato: "",
     tipo: "Cliente",
@@ -212,11 +214,13 @@ export default function ContratoForm({ contrato, onSubmit, clientes = [], fornec
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Boleto">Boleto</SelectItem>
-              <SelectItem value="Transferência">Transferência</SelectItem>
-              <SelectItem value="Cartão">Cartão</SelectItem>
-              <SelectItem value="PIX">PIX</SelectItem>
-              <SelectItem value="Cheque">Cheque</SelectItem>
+              {loadingFormas && <SelectItem value="_loading" disabled>Carregando...</SelectItem>}
+              {!loadingFormas && formasPagamento.length === 0 && <SelectItem value="_empty" disabled>Nenhuma forma cadastrada</SelectItem>}
+              {formasPagamento.map((f) => (
+                <SelectItem key={f.id} value={f.descricao || f.tipo}>
+                  {f.descricao || f.tipo}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

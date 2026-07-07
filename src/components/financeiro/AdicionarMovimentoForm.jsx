@@ -10,8 +10,10 @@ import { ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import useContextoVisual from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
+import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
 
 export default function AdicionarMovimentoForm({ initialData = {}, onSubmit, onCancel, empresaAtual }) {
+  const { formasPagamento, isLoading: loadingFormas } = useFormasPagamento();
   const [formMovimento, setFormMovimento] = useState({
     tipo: initialData.tipo || 'entrada',
     valor: initialData.valor || 0,
@@ -187,11 +189,11 @@ export default function AdicionarMovimentoForm({ initialData = {}, onSubmit, onC
             >
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="Dinheiro">💵 Dinheiro</SelectItem>
-                <SelectItem value="PIX">🔷 PIX</SelectItem>
-                <SelectItem value="Cartão Débito">💳 Cartão Débito</SelectItem>
-                <SelectItem value="Cartão Crédito">💳 Cartão Crédito</SelectItem>
-                <SelectItem value="Transferência">🏦 Transferência</SelectItem>
+                {loadingFormas && <SelectItem value="_loading" disabled>Carregando...</SelectItem>}
+                {!loadingFormas && formasPagamento.length === 0 && <SelectItem value="_empty" disabled>Nenhuma forma cadastrada</SelectItem>}
+                {formasPagamento.map((f) => (
+                  <SelectItem key={f.id} value={f.descricao || f.tipo}>{f.descricao || f.tipo}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

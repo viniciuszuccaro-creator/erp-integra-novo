@@ -4,8 +4,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { ShieldAlert } from "lucide-react";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 export default function ComercialTab({ formData, setFormData }) {
+  const { data: tabelasPreco = [], isLoading: loadingTabelas } = useRLSQuery('TabelaPreco', {}, 'nome', 50);
+  const { data: condicoesComerciais = [], isLoading: loadingCondicoes } = useRLSQuery('CondicaoComercial', {}, 'nome_condicao', 100);
+
   if (!formData) return null;
   return (
     <>
@@ -23,10 +27,11 @@ export default function ComercialTab({ formData, setFormData }) {
           >
             <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="Tabela Padrão">Tabela Padrão</SelectItem>
-              <SelectItem value="Tabela VIP">Tabela VIP</SelectItem>
-              <SelectItem value="Tabela Atacado">Tabela Atacado</SelectItem>
-              <SelectItem value="Tabela Governo">Tabela Governo</SelectItem>
+              {loadingTabelas && <SelectItem value="_loading" disabled>Carregando...</SelectItem>}
+              {!loadingTabelas && tabelasPreco.length === 0 && <SelectItem value="_empty" disabled>Nenhuma tabela cadastrada</SelectItem>}
+              {tabelasPreco.map((t) => (
+                <SelectItem key={t.id} value={t.nome}>{t.nome}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -77,13 +82,11 @@ export default function ComercialTab({ formData, setFormData }) {
           >
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="À Vista">À Vista</SelectItem>
-              <SelectItem value="7 dias">7 dias</SelectItem>
-              <SelectItem value="15 dias">15 dias</SelectItem>
-              <SelectItem value="30 dias">30 dias</SelectItem>
-              <SelectItem value="45 dias">45 dias</SelectItem>
-              <SelectItem value="60 dias">60 dias</SelectItem>
-              <SelectItem value="Parcelado">Parcelado</SelectItem>
+              {loadingCondicoes && <SelectItem value="_loading" disabled>Carregando...</SelectItem>}
+              {!loadingCondicoes && condicoesComerciais.length === 0 && <SelectItem value="_empty" disabled>Nenhuma condição cadastrada</SelectItem>}
+              {condicoesComerciais.map((c) => (
+                <SelectItem key={c.id} value={c.nome_condicao || c.descricao}>{c.nome_condicao || c.descricao}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

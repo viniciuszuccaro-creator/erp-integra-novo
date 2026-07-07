@@ -11,6 +11,7 @@ import { Zap, CheckCircle2, X, CreditCard, QrCode } from "lucide-react";
 import { useUser } from "@/components/lib/UserContext";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
 
 /**
  * ETAPA 4 - Simulador de Pagamento
@@ -18,6 +19,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
  */
 export default function SimularPagamentoModal({ isOpen, onClose, contaReceber }) {
   const { user } = useUser();
+  const { formasPagamento, isLoading: loadingFormas } = useFormasPagamento();
   const queryClient = useQueryClient();
   const [processando, setProcessando] = useState(false);
   const [pago, setPago] = useState(false);
@@ -216,10 +218,11 @@ export default function SimularPagamentoModal({ isOpen, onClose, contaReceber })
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="PIX">PIX</SelectItem>
-                        <SelectItem value="Boleto">Boleto</SelectItem>
-                        <SelectItem value="Cartão Crédito">Cartão Crédito</SelectItem>
-                        <SelectItem value="Cartão Débito">Cartão Débito</SelectItem>
+                        {loadingFormas && <SelectItem value="_loading" disabled>Carregando...</SelectItem>}
+                        {!loadingFormas && formasPagamento.length === 0 && <SelectItem value="_empty" disabled>Nenhuma forma cadastrada</SelectItem>}
+                        {formasPagamento.map((f) => (
+                          <SelectItem key={f.id} value={f.descricao || f.tipo}>{f.descricao || f.tipo}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>

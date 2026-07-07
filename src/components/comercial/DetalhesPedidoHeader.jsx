@@ -3,8 +3,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Controller } from "react-hook-form";
+import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
 
 export default function DetalhesPedidoHeader({ control, register, setValue, errors, clientes }) {
+  const { formasPagamento, isLoading: loadingFormas } = useFormasPagamento();
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <div>
@@ -87,11 +90,13 @@ export default function DetalhesPedidoHeader({ control, register, setValue, erro
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="À Vista">À Vista</SelectItem>
-                <SelectItem value="Cartão de Crédito">Cartão de Crédito</SelectItem>
-                <SelectItem value="Boleto">Boleto</SelectItem>
-                <SelectItem value="Parcelado">Parcelado</SelectItem>
-                <SelectItem value="PIX">PIX</SelectItem>
+                {loadingFormas && <SelectItem value="_loading" disabled>Carregando...</SelectItem>}
+                {!loadingFormas && formasPagamento.length === 0 && <SelectItem value="_empty" disabled>Nenhuma forma cadastrada</SelectItem>}
+                {formasPagamento.map((f) => (
+                  <SelectItem key={f.id} value={f.descricao || f.tipo}>
+                    {f.descricao || f.tipo}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           )}

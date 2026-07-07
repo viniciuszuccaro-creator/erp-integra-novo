@@ -2,8 +2,11 @@ import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 export default function TransporteTab({ formData, setFormData }) {
+  const { data: tiposFrete = [], isLoading: loadingTipos } = useRLSQuery('TipoFrete', {}, 'nome', 50);
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
@@ -20,10 +23,11 @@ export default function TransporteTab({ formData, setFormData }) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="CIF">CIF - Por conta do emitente</SelectItem>
-              <SelectItem value="FOB">FOB - Por conta do destinatário</SelectItem>
-              <SelectItem value="Sem Frete">Sem Frete</SelectItem>
-              <SelectItem value="Próprio">Próprio</SelectItem>
+              {loadingTipos && <SelectItem value="_loading" disabled>Carregando...</SelectItem>}
+              {!loadingTipos && tiposFrete.length === 0 && <SelectItem value="_empty" disabled>Nenhum tipo cadastrado</SelectItem>}
+              {tiposFrete.map((t) => (
+                <SelectItem key={t.id} value={t.nome || t.codigo || t.descricao}>{t.nome || t.codigo || t.descricao}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DollarSign, CheckCircle2 } from "lucide-react";
+import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
 
 export default function LiquidacaoModal({
   open, onClose, onConfirm,
@@ -13,6 +14,8 @@ export default function LiquidacaoModal({
   valorOriginal, valorLiquido,
   contextoValido, podeLiquidar, isPending,
 }) {
+  const { formasPagamento, isLoading: loadingFormas } = useFormasPagamento();
+
   if (!open) return null;
 
   return (
@@ -35,13 +38,11 @@ export default function LiquidacaoModal({
               >
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Dinheiro">Dinheiro</SelectItem>
-                  <SelectItem value="Cartão Crédito">Cartão Crédito</SelectItem>
-                  <SelectItem value="Cartão Débito">Cartão Débito</SelectItem>
-                  <SelectItem value="PIX">PIX</SelectItem>
-                  <SelectItem value="Boleto">Boleto</SelectItem>
-                  <SelectItem value="Transferência">Transferência</SelectItem>
-                  <SelectItem value="Cheque">Cheque</SelectItem>
+                  {loadingFormas && <SelectItem value="_loading" disabled>Carregando...</SelectItem>}
+                  {!loadingFormas && formasPagamento.length === 0 && <SelectItem value="_empty" disabled>Nenhuma forma cadastrada</SelectItem>}
+                  {formasPagamento.map((f) => (
+                    <SelectItem key={f.id} value={f.descricao || f.tipo}>{f.descricao || f.tipo}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

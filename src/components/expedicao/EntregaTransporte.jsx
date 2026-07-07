@@ -2,12 +2,16 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 /**
  * Sub-componente extraído de FormularioEntrega.jsx
  * Seção: Transporte — frete, transportadora, motorista, volumes, peso.
  */
 export default function EntregaTransporte({ formData, setFormData }) {
+  const { data: tiposFrete = [], isLoading: loadingTipos } = useRLSQuery('TipoFrete', {}, 'nome', 50);
+  const { data: transportadoras = [], isLoading: loadingTransp } = useRLSQuery('Transportadora', {}, '-updated_date', 100);
+
   return (
     <div className="space-y-4">
       <h3 className="font-semibold text-slate-900 border-b pb-2">Transporte</h3>
@@ -15,10 +19,30 @@ export default function EntregaTransporte({ formData, setFormData }) {
         <div><Label>Tipo de Frete</Label>
           <Select value={formData.tipo_frete} onValueChange={(v) => setFormData({ ...formData, tipo_frete: v })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent><SelectItem value="CIF">CIF (Pagamos)</SelectItem><SelectItem value="FOB">FOB (Cliente Paga)</SelectItem><SelectItem value="Retira">Cliente Retira</SelectItem><SelectItem value="Outro">Outro</SelectItem></SelectContent>
+            <SelectContent>
+              {loadingTipos && <SelectItem value="_loading" disabled>Carregando...</SelectItem>}
+              {!loadingTipos && tiposFrete.length === 0 && <SelectItem value="_empty" disabled>Nenhum tipo cadastrado</SelectItem>}
+              {tiposFrete.map((t) => (
+                <SelectItem key={t.id} value={t.nome || t.codigo || t.descricao}>{t.nome || t.codigo || t.descricao}</SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
-        <div><Label>Transportadora</Label><Input value={formData.transportadora} onChange={(e) => setFormData({ ...formData, transportadora: e.target.value })} /></div>
+        <div><Label>Transportadora</Label>
+          <Select value={formData.transportadora_id || formData.transportadora || ""} onValueChange={(v) => {
+            const t = transportadoras.find((x) => x.id === v);
+            setFormData({ ...formData, transportadora_id: v, transportadora: t?.nome_fantasia || t?.razao_social || t?.nome || "" });
+          }}>
+            <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+            <SelectContent>
+              {loadingTransp && <SelectItem value="_loading" disabled>Carregando...</SelectItem>}
+              {!loadingTransp && transportadoras.length === 0 && <SelectItem value="_empty" disabled>Nenhuma transportadora</SelectItem>}
+              {transportadoras.map((t) => (
+                <SelectItem key={t.id} value={t.id}>{t.nome_fantasia || t.razao_social || t.nome}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <div className="grid grid-cols-3 gap-4">
         <div><Label>Motorista</Label><Input value={formData.motorista} onChange={(e) => setFormData({ ...formData, motorista: e.target.value })} /></div>

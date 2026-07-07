@@ -11,12 +11,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import useContextoVisual from '@/components/lib/useContextoVisual';
 import usePermissions from '@/components/lib/usePermissions';
+import { useFormasPagamento } from '@/components/lib/useFormasPagamento';
 import { useToast } from '@/components/ui/use-toast';
 import { Clock, TrendingUp, TrendingDown, CheckCircle2, XCircle, Wallet } from 'lucide-react';
 
 export default function OrdensLiquidacaoPendentes() {
   const { filterInContext, empresaAtual, grupoAtual, updateInContext } = useContextoVisual();
   const { canEdit, hasPermission } = usePermissions();
+  const { formasPagamento, isLoading: loadingFormas } = useFormasPagamento();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [liquidacaoDialogOpen, setLiquidacaoDialogOpen] = useState(false);
@@ -266,12 +268,11 @@ export default function OrdensLiquidacaoPendentes() {
                   <Select value={formaPagamentoLiquidacao} onValueChange={setFormaPagamentoLiquidacao} disabled={!contextoValido || !podeLiquidar || liquidarOrdemMutation.isPending}>
                     <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Dinheiro">💵 Dinheiro</SelectItem>
-                      <SelectItem value="Cartão Crédito">💳 Cartão Crédito</SelectItem>
-                      <SelectItem value="Cartão Débito">💳 Cartão Débito</SelectItem>
-                      <SelectItem value="PIX">⚡ PIX</SelectItem>
-                      <SelectItem value="Boleto">📄 Boleto</SelectItem>
-                      <SelectItem value="Transferência">🏦 Transferência</SelectItem>
+                      {loadingFormas && <SelectItem value="_loading" disabled>Carregando...</SelectItem>}
+                      {!loadingFormas && formasPagamento.length === 0 && <SelectItem value="_empty" disabled>Nenhuma forma cadastrada</SelectItem>}
+                      {formasPagamento.map((f) => (
+                        <SelectItem key={f.id} value={f.descricao || f.tipo}>{f.descricao || f.tipo}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

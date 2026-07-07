@@ -52,6 +52,7 @@ export default function OrdemCompraForm({ ordemCompra, onSubmit, windowMode = fa
 
   const { data: fornecedores = [] } = useRLSQuery('Fornecedor', {}, '-updated_date', 9999);
   const { data: produtos = [] } = useRLSQuery('Produto', {}, '-updated_date', 9999);
+  const { data: condicoesComerciais = [], isLoading: loadingCondicoes } = useRLSQuery('CondicaoComercial', {}, 'nome_condicao', 100);
 
   const handleAddItem = () => {
     if (!novoItem.produto_id) return;
@@ -211,10 +212,11 @@ export default function OrdemCompraForm({ ordemCompra, onSubmit, windowMode = fa
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="À Vista">À Vista</SelectItem>
-                      <SelectItem value="30 dias">30 dias</SelectItem>
-                      <SelectItem value="60 dias">60 dias</SelectItem>
-                      <SelectItem value="90 dias">90 dias</SelectItem>
+                      {loadingCondicoes && <SelectItem value="_loading" disabled>Carregando...</SelectItem>}
+                      {!loadingCondicoes && condicoesComerciais.length === 0 && <SelectItem value="_empty" disabled>Nenhuma condição cadastrada</SelectItem>}
+                      {condicoesComerciais.map((c) => (
+                        <SelectItem key={c.id} value={c.nome_condicao || c.descricao}>{c.nome_condicao || c.descricao}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 )}

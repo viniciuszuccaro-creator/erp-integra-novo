@@ -64,6 +64,7 @@ export default function CotacaoForm({ cotacao, onSubmit, windowMode = false }) {
 
   const { data: produtos = [] } = useRLSQuery('Produto', {}, '-updated_date', 9999);
   const { data: fornecedores = [] } = useRLSQuery('Fornecedor', {}, '-updated_date', 9999);
+  const { data: unidadesMedida = [], isLoading: loadingUnidades } = useRLSQuery('UnidadeMedida', {}, 'sigla', 100);
 
 
   const onValid = (data) => {
@@ -163,10 +164,13 @@ export default function CotacaoForm({ cotacao, onSubmit, windowMode = false }) {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="UN">UN</SelectItem>
-                          <SelectItem value="KG">KG</SelectItem>
-                          <SelectItem value="MT">MT</SelectItem>
-                          <SelectItem value="LT">LT</SelectItem>
+                          {loadingUnidades && <SelectItem value="_loading" disabled>Carregando...</SelectItem>}
+                          {!loadingUnidades && unidadesMedida.length === 0 && <SelectItem value="_empty" disabled>Nenhuma unidade cadastrada</SelectItem>}
+                          {unidadesMedida.map((u) => (
+                            <SelectItem key={u.id} value={u.sigla || u.nome}>
+                              {u.sigla ? `${u.sigla}${u.nome ? ' - ' + u.nome : ''}` : u.nome}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     )}

@@ -5,8 +5,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { DollarSign, CreditCard, Calendar } from 'lucide-react';
 import PriceBrain from '../PriceBrain';
+import { useFormasPagamento } from '@/components/lib/useFormasPagamento';
+import useRLSQuery from '@/components/lib/useRLSQuery';
 
 export default function WizardEtapa3Financeiro({ dados, onChange }) {
+  const { formasPagamento, isLoading: loadingFormas } = useFormasPagamento();
+  const { data: condicoesComerciais = [], isLoading: loadingCondicoes } = useRLSQuery('CondicaoComercial', {}, 'nome_condicao', 100);
+
   const calcularTotal = () => {
     const totalRevenda = (dados.itens_revenda || []).reduce((sum, i) => sum + (i.valor_item || 0), 0);
     const totalProducao = (dados.itens_producao || []).reduce((sum, i) => sum + (i.preco_venda_total || 0), 0);
@@ -45,13 +50,13 @@ export default function WizardEtapa3Financeiro({ dados, onChange }) {
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="À Vista">À Vista</SelectItem>
-                <SelectItem value="PIX">PIX</SelectItem>
-                <SelectItem value="Boleto">Boleto</SelectItem>
-                <SelectItem value="Cartão de Crédito">Cartão de Crédito</SelectItem>
-                <SelectItem value="Cartão de Débito">Cartão de Débito</SelectItem>
-                <SelectItem value="Parcelado">Parcelado</SelectItem>
-                <SelectItem value="Transferência">Transferência</SelectItem>
+                {loadingFormas && <SelectItem value="_loading" disabled>Carregando...</SelectItem>}
+                {!loadingFormas && formasPagamento.length === 0 && <SelectItem value="_empty" disabled>Nenhuma forma cadastrada</SelectItem>}
+                {formasPagamento.map((f) => (
+                  <SelectItem key={f.id} value={f.descricao || f.tipo}>
+                    {f.descricao || f.tipo}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -66,13 +71,13 @@ export default function WizardEtapa3Financeiro({ dados, onChange }) {
                 <SelectValue placeholder="Selecione..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="À Vista">À Vista</SelectItem>
-                <SelectItem value="7 dias">7 dias</SelectItem>
-                <SelectItem value="15 dias">15 dias</SelectItem>
-                <SelectItem value="30 dias">30 dias</SelectItem>
-                <SelectItem value="45 dias">45 dias</SelectItem>
-                <SelectItem value="60 dias">60 dias</SelectItem>
-                <SelectItem value="Parcelado">Parcelado</SelectItem>
+                {loadingCondicoes && <SelectItem value="_loading" disabled>Carregando...</SelectItem>}
+                {!loadingCondicoes && condicoesComerciais.length === 0 && <SelectItem value="_empty" disabled>Nenhuma condição cadastrada</SelectItem>}
+                {condicoesComerciais.map((c) => (
+                  <SelectItem key={c.id} value={c.nome_condicao || c.descricao}>
+                    {c.nome_condicao || c.descricao}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

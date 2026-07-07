@@ -8,12 +8,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Send, AlertCircle, Award } from "lucide-react";
+import useRLSQuery from "@/components/lib/useRLSQuery";
 
 export default function CotacaoFormDialog({
   dialogOpen, setDialogOpen, formCotacao, setFormCotacao,
   handleSubmit, adicionarItem, removerItem, toggleFornecedor,
   produtos, fornecedores, criarCotacaoMutation,
 }) {
+  const { data: unidadesMedida = [], isLoading: loadingUnidades } = useRLSQuery('UnidadeMedida', {}, 'sigla', 100);
+
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -58,8 +61,11 @@ export default function CotacaoFormDialog({
                     }}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="UN">UN</SelectItem><SelectItem value="KG">KG</SelectItem>
-                        <SelectItem value="MT">MT</SelectItem><SelectItem value="LT">LT</SelectItem><SelectItem value="CX">CX</SelectItem>
+                        {loadingUnidades && <SelectItem value="_loading" disabled>Carregando...</SelectItem>}
+                        {!loadingUnidades && unidadesMedida.length === 0 && <SelectItem value="_empty" disabled>Nenhuma unidade</SelectItem>}
+                        {unidadesMedida.map((u) => (
+                          <SelectItem key={u.id} value={u.sigla || u.nome}>{u.sigla ? `${u.sigla}${u.nome ? ' - ' + u.nome : ''}` : u.nome}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>

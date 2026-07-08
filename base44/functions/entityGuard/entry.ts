@@ -23,7 +23,10 @@ Deno.serve(async (req) => {
     }
 
     if (Date.now() < __BACKEND_PAUSED_UNTIL) {
-      return Response.json({ allowed: true, _fallback: true, reason: 'entityGuard em cooldown por rate-limit' });
+      // Fail-open apenas para leitura; fail-closed para escrita durante cooldown
+      const fallbackAction = normalize(body?.action || 'visualizar');
+      const isRead = ['visualizar', 'ver', 'view', 'read', 'listar', 'consultar'].includes(fallbackAction);
+      return Response.json({ allowed: isRead, _fallback: true, reason: 'entityGuard em cooldown por rate-limit' });
     }
 
     // Rate limit por IP
@@ -65,6 +68,25 @@ Deno.serve(async (req) => {
     // Admin sempre tem acesso
     if (user?.role === 'admin') {
       return Response.json({ allowed: true });
+    }
+
+    // Módulo Sistema é exclusivo de admin para ações de escrita/configuração
+    if (moduleName === 'Sistema' && !['visualizar', 'ver'].includes(desired)) {
+      try {
+        await base44.asServiceRole.entities.AuditLog.create({
+          usuario: user.full_name || user.email || 'Usuário',
+          usuario_id: user.id,
+          acao: 'Bloqueio',
+          modulo: 'Sistema',
+          tipo_auditoria: 'seguranca',
+          entidade: body?.entity_name || section || 'Sistema',
+          descricao: `RBAC: não-admin tentou ${desired} no módulo Sistema`,
+          empresa_id: body?.empresa_id || null,
+          group_id: body?.group_id || null,
+          data_hora: new Date().toISOString(),
+        });
+      } catch {}
+      return Response.json({ allowed: false, reason: 'Módulo Sistema requer perfil admin' }, { status: 403 });
     }
 
     const normalize = (a) => {
@@ -153,7 +175,8 @@ Deno.serve(async (req) => {
       return Response.json({ allowed: false, reason: `${targetEntity} requer perfil admin` }, { status: 403 });
     }
 
-    // Verifica perfil de acesso (sem chamada extra se não tiver perfil)
+    // Verifica perfil de acesso (fail-closed para escrita sem perfil)
+    const isReadOnly = ['visualizar', 'ver', 'view', 'read', 'listar', 'consultar'].includes(desired);
     let allowed = false;
     try {
       if (user?.perfil_acesso_id) {
@@ -164,20 +187,20 @@ Deno.serve(async (req) => {
           if (modNode) {
             if (!section) {
               allowed = Object.values(modNode).some((node) => {
-                if (Array.isArray(node)) return node.includes(desired) || node.includes('visualizar');
-                if (node && typeof node === 'object') return Object.values(node).some((v) => Array.isArray(v) && (v.includes(desired) || v.includes('visualizar')));
+                if (Array.isArray(node)) return node.includes(desired) || (isReadOnly && node.includes('visualizar'));
+                if (node && typeof node === 'object') return Object.values(node).some((v) => Array.isArray(v) && (v.includes(desired) || (isReadOnly && v.includes('visualizar'))));
                 return false;
               });
             } else {
               const path = Array.isArray(section) ? section : String(section).split('.').filter(Boolean);
               let cursor = modNode;
               for (const seg of path) { if (!cursor) break; cursor = findNode(cursor, seg); }
-              if (Array.isArray(cursor)) allowed = cursor.includes(desired) || cursor.includes('visualizar');
+              if (Array.isArray(cursor)) allowed = cursor.includes(desired) || (isReadOnly && cursor.includes('visualizar'));
               else if (cursor && typeof cursor === 'object') {
                 const stack = [cursor];
                 while (stack.length && !allowed) {
                   const node = stack.pop();
-                  if (Array.isArray(node)) { if (node.includes(desired) || node.includes('visualizar')) allowed = true; }
+                  if (Array.isArray(node)) { if (node.includes(desired) || (isReadOnly && node.includes('visualizar'))) allowed = true; }
                   else if (node && typeof node === 'object') Object.values(node).forEach(v => stack.push(v));
                 }
               }
@@ -185,12 +208,12 @@ Deno.serve(async (req) => {
           }
         }
       } else {
-        // Sem perfil configurado → permite (usuário sem restrições explícitas)
-        allowed = true;
+        // Sem perfil configurado: fail-open apenas para leitura, fail-closed para escrita
+        allowed = isReadOnly;
       }
     } catch {
-      // Em caso de erro ao buscar perfil, permite para não bloquear o usuário
-      allowed = true;
+      // Erro ao buscar perfil: fail-open apenas para leitura, fail-closed para escrita
+      allowed = isReadOnly;
     }
 
     // RLS de escopo multiempresa: se a action é escrita sensível e há empresa_id/group_id no payload,
@@ -235,6 +258,9 @@ Deno.serve(async (req) => {
       __BACKEND_PAUSED_UNTIL = Date.now() + 120000;
       globalThis.__egBackendPausedUntil = __BACKEND_PAUSED_UNTIL;
     }
-    return Response.json({ allowed: true, _fallback: true });
+    // Fail-closed para escrita em exceções; fail-open apenas para leitura
+    const fallbackAction = normalize(body?.action || 'visualizar');
+    const isRead = ['visualizar', 'ver', 'view', 'read', 'listar', 'consultar'].includes(fallbackAction);
+    return Response.json({ allowed: isRead, _fallback: true });
   }
 });

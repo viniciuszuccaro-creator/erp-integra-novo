@@ -183,8 +183,11 @@ export default function usePermissions() {
     if (!user) return false;
     if (user.role === "admin") return true;
     const perms = perfilAcesso?.permissoes;
-    // Se perfil não carregado ainda (loading) ou usuário sem perfil definido: fail-open (permite acesso)
-    if (!perms) return true;
+    // Fail-open apenas para leitura enquanto perfil carrega; fail-closed para escrita/ações sensíveis
+    if (!perms) {
+      const readOnlyActions = ['ver', 'visualizar', 'view', 'read', 'listar', 'consultar', 'status'];
+      return readOnlyActions.includes(String(action || '').toLowerCase());
+    }
     if (!section && typeof module === "string" && module.includes(".")) {
       const parsed = parsePermissionKey(module, action);
       module = parsed.module;

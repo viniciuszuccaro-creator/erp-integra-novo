@@ -195,8 +195,9 @@ Deno.serve(async (req) => {
         });
       } catch (_) {}
 
-      // ─── AUTO-PROPAGAÇÃO: config de grupo → todas as empresas ───
-      if (gId && !eId && data?.ativa !== undefined) {
+      // ─── AUTO-PROPAGAÇÃO: config de grupo → todas as empresas (SEMPRE ATIVA) ───
+      // Propaga TODAS as mudanças de grupo para empresas, não só ativa
+      if (gId && !eId) {
         try {
           const empresas = await base44.asServiceRole.entities.Empresa
             .filter({ group_id: gId }, undefined, 500).catch(() => []);
@@ -206,12 +207,24 @@ Deno.serve(async (req) => {
               const exist = await api.filter({ chave, empresa_id: emp.id, group_id: gId }, '-updated_date', 1).catch(() => []);
               const existRec = Array.isArray(exist) ? exist[0] : null;
               if (existRec?.id) {
-                toSync.push({ id: existRec.id, ativa: data.ativa, chave, categoria: data.categoria || match.categoria, group_id: gId, empresa_id: emp.id });
+                // Merge: copia campos do updatePayload (exceto id/sistema), mantém empresa_id
+                const empPayload = {};
+                const SYS = new Set(['id','created_date','updated_date','created_by','created_by_id','is_sample']);
+                for (const [k, v] of Object.entries(updatePayload)) {
+                  if (!SYS.has(k)) empPayload[k] = v;
+                }
+                empPayload.id = existRec.id;
+                empPayload.empresa_id = emp.id;
+                empPayload.group_id = gId;
+                toSync.push(empPayload);
               } else {
-                toSync.push({ chave, ativa: data.ativa, categoria: data.categoria || 'Sistema', group_id: gId, empresa_id: emp.id });
+                const createPayload = { ...updatePayload };
+                createPayload.chave = chave;
+                createPayload.empresa_id = emp.id;
+                createPayload.group_id = gId;
+                toSync.push(createPayload);
               }
             }
-            // Bulk update existing, bulk create missing
             const toUpdate = toSync.filter(r => r.id);
             const toCreate = toSync.filter(r => !r.id);
             if (toUpdate.length) {
@@ -255,16 +268,19 @@ Deno.serve(async (req) => {
         });
       } catch (_) {}
 
-      // ─── AUTO-PROPAGAÇÃO: config de grupo criada → propaga para empresas ───
-      if (gId && !eId && data?.ativa !== undefined) {
+      // ─── AUTO-PROPAGAÇÃO: config de grupo criada → propaga para empresas (SEMPRE ATIVA) ───
+      if (gId && !eId) {
         try {
           const empresas = await base44.asServiceRole.entities.Empresa
             .filter({ group_id: gId }, undefined, 500).catch(() => []);
           if (Array.isArray(empresas) && empresas.length) {
             const toCreate = empresas.map(emp => ({
-              chave, ativa: data.ativa, categoria: data.categoria || 'Sistema',
-              group_id: gId, empresa_id: emp.id,
+              ...createPayload,
+              empresa_id: emp.id,
+              group_id: gId,
             }));
+            // Remove id se copiado de createPayload
+            toCreate.forEach(r => { delete r.id; });
             for (let i = 0; i < toCreate.length; i += 100) {
               try { await api.bulkCreate(toCreate.slice(i, i + 100)); } catch (_) {}
             }

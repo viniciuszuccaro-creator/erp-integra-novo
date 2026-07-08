@@ -33,8 +33,9 @@ export function canEditConfigByPermission(hasPermission, chave, categoria) {
 }
 
 export async function loadScopedConfiguracaoSistema({ empresaId, grupoId, limit = 500, includeGlobal = false }) {
-  // USA BACKEND upsertConfig operation: 'list' — via asServiceRole (bypass RLS)
-  // Garante que registros criados pelo service role sejam visíveis no frontend
+  // SEMPRE usa backend upsertConfig operation: 'list' — via asServiceRole (bypass RLS)
+  // Registros criados pelo service role NÃO são visíveis via SDK user-scoped (RLS)
+  // NÃO há fallback para SDK user-scoped — isso causava os toggles reverterem
   try {
     const res = await base44.functions.invoke('upsertConfig', {
       operation: 'list',
@@ -43,40 +44,11 @@ export async function loadScopedConfiguracaoSistema({ empresaId, grupoId, limit 
       limit,
     });
     const records = res?.data?.records || res?.records || [];
-    if (Array.isArray(records) && records.length) return records;
-  } catch (_) {}
-  // Fallback: SDK direto user-scoped (pode não ver registros do service role via RLS)
-  const orConds = [];
-  if (grupoId) {
-    orConds.push({ group_id: grupoId });
+    return Array.isArray(records) ? records : [];
+  } catch (_) {
+    // Se o backend falhar, retorna array vazio — confirmedMap (localStorage) mantém o estado
+    return [];
   }
-  if (empresaId && grupoId) {
-    orConds.push({ empresa_id: empresaId, group_id: grupoId });
-    orConds.push({ empresa_id: empresaId, group_id: null });
-  }
-  if (empresaId && !grupoId) {
-    orConds.push({ empresa_id: empresaId });
-  }
-  if (includeGlobal) {
-    orConds.push({ group_id: null, empresa_id: null });
-  }
-
-  const filter = orConds.length > 1 ? { $or: orConds } : (orConds[0] || {});
-
-  const items = await base44.entities.ConfiguracaoSistema.filter(filter, '-updated_date', limit);
-  const list = Array.isArray(items) ? items : [];
-  // Deduplica por ID
-  const seen = new Set();
-  return list.filter(item => {
-    const key = item?.id || `${item?.chave}:${item?.empresa_id || ''}:${item?.group_id || ''}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  }).sort((a, b) => {
-    const dateA = new Date(a?.updated_date || a?.created_date || 0).getTime();
-    const dateB = new Date(b?.updated_date || b?.created_date || 0).getTime();
-    return dateB - dateA;
-  });
 }
 
 /**

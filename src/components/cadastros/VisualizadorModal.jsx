@@ -20,7 +20,7 @@ export default function VisualizadorModal({
   const wrappedOnSubmit = useCallback(async (data) => {
     setInlineError(null);
     try {
-      if (formProps?.onSubmit) await formProps.onSubmit(data);
+      if (formProps?.onSubmit) return await formProps.onSubmit(data);
     } catch (e) {
       setInlineError(e?.message || "Erro ao salvar. Tente novamente.");
     }

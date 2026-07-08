@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Network, CheckCircle2, Trash2, Power, PowerOff, AlertTriangle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -37,28 +36,102 @@ export default function GrupoEmpresarialForm({ grupo, onSubmit, isSubmitting, wi
     score_integracao_erp: 0
   });
 
-  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
-  const { data: empresas = [] } = useQuery({
-    queryKey: ['empresas', grupoAtual?.id, empresaAtual?.id],
-    queryFn: () => filterInContext('Empresa', {}, 'nome_fantasia', 999),
-    enabled: !!contexto,
+  // Carrega TODAS as empresas globalmente (não filtradas por contexto)
+  // Necessário porque o admin precisa ver empresas sem grupo para vinculá-las
+  const { data: todasEmpresas = [] } = useQuery({
+    queryKey: ['empresas-grupo-vinculo', grupo?.id || 'novo'],
+    queryFn: async () => {
+      const res = await base44.functions.invoke("entityListSorted", {
+        entityName: 'Empresa', filter: {},
+        sortField: 'nome_fantasia', sortDirection: 'asc', limit: 500,
+      });
+      return Array.isArray(res?.data) ? res.data : [];
+    },
   });
 
-  const handleSubmit = (e) => {
+  // Quando editando, pré-popula empresas_ids com as empresas já vinculadas a este grupo
+  useEffect(() => {
+    if (!grupo?.id || !todasEmpresas.length) return;
+    const vinculadas = todasEmpresas
+      .filter(e => e.group_id === grupo.id)
+      .map(e => e.id);
+    if (vinculadas.length && (!formData.empresas_ids || formData.empresas_ids.length === 0)) {
+      setFormData(prev => ({ ...prev, empresas_ids: vinculadas }));
+    }
+  }, [grupo?.id, todasEmpresas]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nome) {
       toast.error('Preencha o nome do grupo');
       return;
     }
     // Mapeia campos do formulário para o schema da entidade GrupoEmpresarial
+    // Remove empresas_ids (não faz parte do schema — o vínculo é feito via Empresa.group_id)
+    const { empresas_ids, ...restData } = formData;
     const mapped = {
-      ...formData,
+      ...restData,
       nome_do_grupo: formData.nome_do_grupo || formData.nome,
       cnpj_grupo: formData.cnpj_grupo || formData.cnpj,
       razao_social_grupo: formData.razao_social_grupo || formData.razao_social || formData.nome,
       status: formData.status || 'Ativo',
     };
-    onSubmit(mapped);
+    // Salva o grupo e obtém a entidade criada/atualizada (com ID)
+    const savedGrupo = await onSubmit(mapped);
+    const grupoId = savedGrupo?.id || grupo?.id;
+    if (!grupoId) return;
+
+    // Sincroniza vínculo de empresas: atualiza Empresa.group_id para cada empresa selecionada
+    const selectedIds = empresas_ids || [];
+    try {
+      // Empresas que agora devem ter group_id = grupoId
+      const toLink = todasEmpresas
+        .filter(e => selectedIds.includes(e.id) && e.group_id !== grupoId)
+        .map(e => e.id);
+      // Empresas que tinham este grupo mas foram desmarcadas
+      const toUnlink = todasEmpresas
+        .filter(e => !selectedIds.includes(e.id) && e.group_id === grupoId)
+        .map(e => e.id);
+
+      // Atualiza em lotes — usa bulkUpdate para performance
+      if (toLink.length) {
+        await base44.entities.Empresa.bulkUpdate(
+          toLink.map(id => ({ id, group_id: grupoId }))
+        );
+      }
+      if (toUnlink.length) {
+        await base44.entities.Empresa.bulkUpdate(
+          toUnlink.map(id => ({ id, group_id: null }))
+        );
+      }
+
+      // Auditoria do vínculo
+      if (toLink.length || toUnlink.length) {
+        try {
+          const user = await base44.auth.me().catch(() => null);
+          await base44.entities.AuditLog.create({
+            acao: 'Edição',
+            modulo: 'Cadastros',
+            tipo_auditoria: 'entidade',
+            entidade: 'GrupoEmpresarial',
+            registro_id: grupoId,
+            descricao: `Vínculo de empresas: ${toLink.length} vinculada(s), ${toUnlink.length} desvinculada(s)`,
+            usuario: user?.full_name || user?.email || 'Usuário',
+            usuario_id: user?.id || null,
+            group_id: grupoId,
+            dados_novos: { vinculadas: toLink, desvinculadas: toUnlink },
+            data_hora: new Date().toISOString(),
+          });
+        } catch { /* auditoria não bloqueia */ }
+      }
+
+      if (toLink.length || toUnlink.length) {
+        toast.success(`${toLink.length} empresa(s) vinculada(s), ${toUnlink.length} desvinculada(s)`);
+      }
+    } catch (err) {
+      console.error('Erro ao vincular empresas:', err);
+      toast.error('Grupo salvo, mas houve erro ao vincular empresas. Verifique manualmente.');
+    }
   };
 
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
@@ -138,7 +211,7 @@ export default function GrupoEmpresarialForm({ grupo, onSubmit, isSubmitting, wi
         <Label>Empresas Vinculadas ({(formData.empresas_ids || []).length})</Label>
         <Card className="border">
           <CardContent className="p-4 max-h-60 overflow-y-auto space-y-2">
-            {empresas.map(empresa => (
+            {todasEmpresas.map(empresa => (
               <div key={empresa.id} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded">
                 <div className="flex items-center gap-2">
                   <input
@@ -158,7 +231,7 @@ export default function GrupoEmpresarialForm({ grupo, onSubmit, isSubmitting, wi
               </div>
             ))}
             
-            {empresas.length === 0 && (
+            {todasEmpresas.length === 0 && (
               <p className="text-sm text-slate-500 text-center py-4">
                 Nenhuma empresa cadastrada
               </p>

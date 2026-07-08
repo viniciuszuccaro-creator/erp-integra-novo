@@ -253,27 +253,28 @@ export default function useVisualizadorCRUD({
         setIsSaving(false);
         throw new Error(erroDuplicata);
       }
+      let savedEntity;
       if (editItem?.id) {
         // SIMPLE_CATALOG: update direto (evita createInContext carimbar group_id em entidades sem esse campo)
         if (isSimple) {
           // Carimba group_id apenas se a entidade suporta (GrupoEmpresarial e catálogos puros não têm)
           if (groupId && !NO_SCOPE_STAMP.has(ENTITY) && !clean.group_id) clean.group_id = groupId;
-          await base44.entities[ENTITY].update(editItem.id, clean);
+          savedEntity = await base44.entities[ENTITY].update(editItem.id, clean);
         } else {
-          await updateInContext(ENTITY, editItem.id, clean, "empresa_id");
+          savedEntity = await updateInContext(ENTITY, editItem.id, clean, "empresa_id");
         }
         auditarAcao({ acao: 'Edição', ENTITY, registroId: editItem.id, empresaId, groupId, dadosAntes: editItem, dadosDepois: clean });
       } else {
-        let criado;
         if (isSimple) {
           if (groupId && !NO_SCOPE_STAMP.has(ENTITY) && !clean.group_id) clean.group_id = groupId;
-          criado = await base44.entities[ENTITY].create(clean);
+          savedEntity = await base44.entities[ENTITY].create(clean);
         } else {
-          criado = await createInContext(ENTITY, clean, "empresa_id");
+          savedEntity = await createInContext(ENTITY, clean, "empresa_id");
         }
-        auditarAcao({ acao: 'Criação', ENTITY, registroId: criado?.id, empresaId, groupId, dadosDepois: clean });
+        auditarAcao({ acao: 'Criação', ENTITY, registroId: savedEntity?.id, empresaId, groupId, dadosDepois: clean });
       }
       handleCloseForm(true);
+      return savedEntity;
     } catch (e) {
       // Relança para que o formulário possa exibir o erro inline
       throw e;

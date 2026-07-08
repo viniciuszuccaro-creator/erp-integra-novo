@@ -22,9 +22,10 @@ const EMPRESA_CAMPO = {
 const getCampo = (name) => EMPRESA_CAMPO[name] || 'empresa_id';
 
 // Catálogos puros sem group_id no schema (verdadeiramente globais)
-// Apenas MoedaIndice (catálogo de referência sem group_id)
+// MoedaIndice: catálogo de referência (BRL, USD, etc.) sem group_id
+// GrupoEmpresarial: é o próprio grupo — não se filtra por group_id
 const PURE_CATALOG = new Set([
-  'MoedaIndice',
+  'MoedaIndice', 'GrupoEmpresarial',
 ]);
 
 // Catálogos simples (podem ter empresa_id/group_id mas também podem ser globais)

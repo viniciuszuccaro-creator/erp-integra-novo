@@ -38,14 +38,24 @@ export async function loadScopedConfiguracaoSistema({ empresaId, grupoId, limit 
   // Queries user-scoped (base44.entities.filter) podem falhar dependendo do contexto de auth.
   const queries = [];
 
-  const invokeSorted = (filter) =>
-    base44.functions.invoke('entityListSorted', {
-      entityName: 'ConfiguracaoSistema',
-      filter,
-      sortField: 'updated_date',
-      sortDirection: 'desc',
-      limit,
-    }).then(res => Array.isArray(res?.data) ? res.data : []).catch(() => []);
+  let anySuccess = false;
+  let lastError = null;
+  const invokeSorted = async (filter) => {
+    try {
+      const res = await base44.functions.invoke('entityListSorted', {
+        entityName: 'ConfiguracaoSistema',
+        filter,
+        sortField: 'updated_date',
+        sortDirection: 'desc',
+        limit,
+      });
+      anySuccess = true;
+      return Array.isArray(res?.data) ? res.data : [];
+    } catch (e) {
+      lastError = e;
+      return [];
+    }
+  };
 
   if (grupoId && empresaId) {
     queries.push(invokeSorted({ group_id: grupoId, empresa_id: empresaId }));
@@ -62,6 +72,14 @@ export async function loadScopedConfiguracaoSistema({ empresaId, grupoId, limit 
   }
 
   const results = await Promise.allSettled(queries);
+
+  // Se TODAS as queries falharam (ex: 429 rate limit), lança erro
+  // para que React Query mantenha os dados anteriores (previous data)
+  // e os toggles não revertam para false.
+  if (!anySuccess && results.length > 0) {
+    throw lastError || new Error('Falha ao carregar configurações');
+  }
+
   const merged = [];
   const seen = new Set();
 
@@ -267,17 +285,10 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
           delete invalidationTimeoutsRef.current[chave];
         }, 2500);
 
-        // Limpa confirmedMap após 5s (após refetch com dados frescos) para que
-        // o query data passe a ser a fonte de verdade, permitindo sincronização
-        // com mudanças feitas por outros usuários.
-        confirmedTimeoutsRef.current[chave] = setTimeout(() => {
-          setConfirmedMap(prev => {
-            const next = { ...prev };
-            delete next[chave];
-            return next;
-          });
-          delete confirmedTimeoutsRef.current[chave];
-        }, 5000);
+        // confirmedMap é STICK: não expira automaticamente.
+        // Só é sobrescrito quando getToggleValue encontra dados frescos da query
+        // (Prioridade 2) — o que acontece após o refetch trazer o registro salvo.
+        // Isso previne que o toggle reverta para false quando o refetch falha (429).
       }
 
       try {
@@ -321,11 +332,12 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
   const getToggleValue = useCallback((configs, chave) => {
     // Prioridade 1: valor otimístico local (clique imediato)
     if (chave in optimisticMap) return optimisticMap[chave];
-    // Prioridade 2: valor confirmado pelo backend (após salvar, antes do refetch)
-    if (chave in confirmedMap) return confirmedMap[chave];
-    // Prioridade 3: valor da query (banco)
+    // Prioridade 2: valor da query (banco) — se fresh e contém a chave, usa-o
     const match = findMatchingRecord(configs, chave);
     if (match && typeof match.ativa === 'boolean') return match.ativa;
+    // Prioridade 3: valor confirmado pelo backend (stick — não expira automaticamente)
+    // Só é sobrescrito quando a query retorna dados frescos com a chave (Prioridade 2)
+    if (chave in confirmedMap) return confirmedMap[chave];
     // Prioridade 4: fallback global
     if (Array.isArray(configs)) {
       const global = configs.find(c => c.chave === chave && !c.empresa_id && !c.group_id);

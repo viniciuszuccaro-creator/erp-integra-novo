@@ -97,6 +97,10 @@ Deno.serve(async (req) => {
     if (!match && eId && gId) {
       match = await tryFind({ chave, empresa_id: eId, group_id: gId });
     }
+    // 1b) Legacy: chave + empresa + group_id null (registros antigos sem group_id)
+    if (!match && eId && gId) {
+      match = await tryFind({ chave, empresa_id: eId, group_id: null });
+    }
     // 2) Chave + só empresa — apenas quando o escopo NÃO tem grupo
     if (!match && eId && !gId) {
       match = await tryFind({ chave, empresa_id: eId });

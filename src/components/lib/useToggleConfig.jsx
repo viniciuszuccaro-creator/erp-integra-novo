@@ -41,8 +41,10 @@ export async function loadScopedConfiguracaoSistema({ empresaId, grupoId, limit 
     orConds.push({ group_id: grupoId });
   }
   if (empresaId && grupoId) {
-    // Quando ambos estão presentes, busca também por empresa_id+group_id (escopo exato)
+    // Escopo exato: empresa + grupo
     orConds.push({ empresa_id: empresaId, group_id: grupoId });
+    // Legacy: registros antigos sem group_id mas com empresa_id correto
+    orConds.push({ empresa_id: empresaId, group_id: null });
   }
   if (empresaId && !grupoId) {
     orConds.push({ empresa_id: empresaId });

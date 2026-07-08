@@ -218,7 +218,7 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     Agenda: ["ver", "criar", "editar", "excluir"],
     Contratos: ["ver", "criar", "editar", "excluir", "assinar", "renovar"],
     HubAtendimento: ["ver", "criar", "editar", "excluir", "responder"],
-    Sistema: ["ver", "configurar", "auditar", "backup", "seguranca"]
+    Sistema: ["ver", "editar", "configurar", "auditar", "backup", "seguranca", "executar", "testar", "exportar"]
   },
   operacional: {
     Dashboard: ["ver", "exportar"],
@@ -253,7 +253,7 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     Agenda: ["ver", "criar", "editar", "excluir"],
     Contratos: ["ver", "criar", "editar", "excluir", "assinar", "renovar", "exportar"],
     HubAtendimento: ["ver", "criar", "editar", "excluir", "responder"],
-    Sistema: ["ver", "configurar", "auditar", "backup", "seguranca"]
+    Sistema: ["ver", "editar", "configurar", "auditar", "backup", "seguranca", "executar", "testar", "exportar"]
   },
   financeiro: {
     Dashboard: ["ver", "exportar"],

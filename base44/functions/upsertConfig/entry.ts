@@ -146,13 +146,11 @@ Deno.serve(async (req) => {
     if (!match && eId && !gId) {
       match = await tryFind({ chave, empresa_id: eId });
     }
-    // 3) Chave + grupo + empresa_id null — REGISTRO DE NÍVEL DE GRUPO (não matchear registros de empresa)
+    // 3) Chave + grupo + empresa_id null — REGISTRO DE NÍVEL DE GRUPO
+    // NÃO faz fallback para registros de empresa no contexto de grupo — se não existe
+    // registro de nível de grupo, CRIA um novo (em vez de atualizar o de empresa)
     if (!match && gId && !eId) {
       match = await tryFind({ chave, group_id: gId, empresa_id: null });
-    }
-    // 3b) Fallback grupo: chave + grupo (pode incluir empresa_id) — apenas se 3 não achou
-    if (!match && gId && !eId) {
-      match = await tryFind({ chave, group_id: gId });
     }
     // 4) Fallback: qualquer registro com essa chave (apenas quando sem scope)
     if (!match && !eId && !gId) {
@@ -211,7 +209,6 @@ Deno.serve(async (req) => {
               const exist = await api.filter({ chave, empresa_id: emp.id, group_id: gId }, '-updated_date', 1).catch(() => []);
               const existRec = Array.isArray(exist) ? exist[0] : null;
               if (existRec?.id) {
-                // Merge: copia campos do updatePayload (exceto id/sistema), mantém empresa_id
                 const empPayload = {};
                 const SYS = new Set(['id','created_date','updated_date','created_by','created_by_id','is_sample']);
                 for (const [k, v] of Object.entries(updatePayload)) {
@@ -245,7 +242,39 @@ Deno.serve(async (req) => {
         } catch (_) {}
       }
 
-      return Response.json({ record: updated, id: updated.id || match.id, mode: 'update', propagated: !!(gId && !eId), _ts: Date.now() });
+      // ─── PROPAGAÇÃO REVERSA: empresa → grupo (Regra-Mãe 9) ───
+      // Quando uma empresa altera uma config, cria/atualiza o registro de nível de grupo
+      // para que a mudança seja refletida no grupo (cadastro único)
+      if (eId && gId) {
+        try {
+          const groupExist = await api.filter({ chave, group_id: gId, empresa_id: null }, '-updated_date', 1).catch(() => []);
+          const groupRec = Array.isArray(groupExist) ? groupExist[0] : null;
+          const SYS = new Set(['id','created_date','updated_date','created_by','created_by_id','is_sample']);
+          if (groupRec?.id) {
+            // Atualiza o registro de grupo com os mesmos dados (exceto empresa_id)
+            const groupPayload = {};
+            for (const [k, v] of Object.entries(updatePayload)) {
+              if (!SYS.has(k) && k !== 'empresa_id') groupPayload[k] = v;
+            }
+            groupPayload.id = groupRec.id;
+            groupPayload.empresa_id = null;
+            groupPayload.group_id = gId;
+            try { await api.update(groupRec.id, groupPayload); } catch (_) {}
+          } else {
+            // Cria registro de nível de grupo
+            const groupCreate = {};
+            for (const [k, v] of Object.entries(updatePayload)) {
+              if (!SYS.has(k) && k !== 'empresa_id') groupCreate[k] = v;
+            }
+            groupCreate.chave = chave;
+            groupCreate.empresa_id = null;
+            groupCreate.group_id = gId;
+            try { await api.create(groupCreate); } catch (_) {}
+          }
+        } catch (_) {}
+      }
+
+      return Response.json({ record: updated, id: updated.id || match.id, mode: 'update', propagated: !!(gId && !eId), reversePropagated: !!(eId && gId), _ts: Date.now() });
     } else {
       // CRIA novo registro
       const createPayload = { chave, ...data };
@@ -278,21 +307,35 @@ Deno.serve(async (req) => {
           const empresas = await base44.asServiceRole.entities.Empresa
             .filter({ group_id: gId }, undefined, 500).catch(() => []);
           if (Array.isArray(empresas) && empresas.length) {
-            const toCreate = empresas.map(emp => ({
+            const toCreateEmp = empresas.map(emp => ({
               ...createPayload,
               empresa_id: emp.id,
               group_id: gId,
             }));
-            // Remove id se copiado de createPayload
-            toCreate.forEach(r => { delete r.id; });
-            for (let i = 0; i < toCreate.length; i += 100) {
-              try { await api.bulkCreate(toCreate.slice(i, i + 100)); } catch (_) {}
+            toCreateEmp.forEach(r => { delete r.id; });
+            for (let i = 0; i < toCreateEmp.length; i += 100) {
+              try { await api.bulkCreate(toCreateEmp.slice(i, i + 100)); } catch (_) {}
             }
           }
         } catch (_) {}
       }
 
-      return Response.json({ record: created, id: created.id, mode: 'create', propagated: !!(gId && !eId), _ts: Date.now() });
+      // ─── PROPAGAÇÃO REVERSA: empresa criou config → cria no nível de grupo (Regra-Mãe 9) ───
+      if (eId && gId) {
+        try {
+          const groupExist = await api.filter({ chave, group_id: gId, empresa_id: null }, '-updated_date', 1).catch(() => []);
+          const groupRec = Array.isArray(groupExist) ? groupExist[0] : null;
+          if (!groupRec?.id) {
+            const groupCreate = { ...createPayload };
+            delete groupCreate.id;
+            groupCreate.empresa_id = null;
+            groupCreate.group_id = gId;
+            try { await api.create(groupCreate); } catch (_) {}
+          }
+        } catch (_) {}
+      }
+
+      return Response.json({ record: created, id: created.id, mode: 'create', propagated: !!(gId && !eId), reversePropagated: !!(eId && gId), _ts: Date.now() });
     }
 
   } catch (err) {

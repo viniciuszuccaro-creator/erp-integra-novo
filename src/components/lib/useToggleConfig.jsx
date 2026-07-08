@@ -178,24 +178,35 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
   }, [findMatchingRecord]);
 
   const persistToggle = useCallback(async (chave, categoria, newValue, scope) => {
-    // Tenta upsertConfig primeiro; só cai no fallback se houver erro real
-    const res = await base44.functions.invoke('upsertConfig', {
-      chave,
-      data: { chave, categoria: categoria || 'Sistema', ativa: newValue },
-      scope,
-    });
-    const record = res?.data?.record || res?.record;
-    if (record?.id) {
-      return record;
+    // Retry com backoff exponencial para lidar com 429 rate limit transitório
+    let lastErr;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const res = await base44.functions.invoke('upsertConfig', {
+          chave,
+          data: { chave, categoria: categoria || 'Sistema', ativa: newValue },
+          scope,
+        });
+        const record = res?.data?.record || res?.record;
+        if (record?.id) return record;
+        return {
+          chave,
+          categoria: categoria || 'Sistema',
+          ativa: newValue,
+          ...scope,
+          updated_date: new Date().toISOString(),
+        };
+      } catch (err) {
+        lastErr = err;
+        const is429 = String(err?.message || err || '').includes('429') || String(err?.message || err || '').toLowerCase().includes('rate limit');
+        if (attempt < 2 && is429) {
+          await new Promise(r => setTimeout(r, 1500 * (attempt + 1)));
+          continue;
+        }
+        throw err;
+      }
     }
-    // upsertConfig respondeu mas sem record — retorna valor sintético confirmado
-    return {
-      chave,
-      categoria: categoria || 'Sistema',
-      ativa: newValue,
-      ...scope,
-      updated_date: new Date().toISOString(),
-    };
+    throw lastErr;
   }, []);
 
   const handleToggle = useCallback(async (chave, categoria, newValue) => {

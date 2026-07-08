@@ -166,4 +166,24 @@ export const ESTRUTURA_SISTEMA = {
       seguranca: { nome: "Segurança & Compliance", abas: ["politicas", "logs", "auditoria", "certificados", "2fa"] },
     },
   },
+  contratos: {
+    nome: "Gestão de Contratos",
+    icone: "FileText",
+    cor: "sky",
+    secoes: {
+      contratos: { nome: "Contratos", abas: ["lista", "novo", "edicao", "vigencia", "encerramento"] },
+      aditivos: { nome: "Aditivos & Renovações", abas: ["lista", "novo", "aprovacao", "historico"] },
+      auditoria: { nome: "Auditoria & Compliance", abas: ["logs", "alertas", "vencimentos", "multas"] },
+    },
+  },
+  hubatendimento: {
+    nome: "Hub de Atendimento",
+    icone: "MessageCircle",
+    cor: "teal",
+    secoes: {
+      conversas: { nome: "Conversas", abas: ["fila", "andamento", "encerradas", "transferidas"] },
+      atendimentos: { nome: "Atendimentos", abas: ["chat", "whatsapp", "historico", "avaliacoes"] },
+      automacoes: { nome: "Automações & IA", abas: ["intents", "respostas", "roteamento", "ia_panel"] },
+    },
+  },
 };

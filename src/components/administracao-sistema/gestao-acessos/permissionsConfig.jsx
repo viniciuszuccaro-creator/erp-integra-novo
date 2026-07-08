@@ -68,7 +68,7 @@ export const MATRIZ_PERMISSOES_PADRAO = {
     todos: ["visualizar", "criar", "editar", "excluir", "aprovar", "configurar"],
   },
   gerencial: {
-    todos: ["visualizar", "criar", "editar", "aprovar"],
+    todos: ["visualizar", "criar", "editar", "excluir", "aprovar"],
     sistema: ["visualizar", "consultar"],
   },
   operacional: {

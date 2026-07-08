@@ -28,10 +28,11 @@ const SNAPSHOT = {};
 // Inicializa todas as entidades com 0
 ALL_ENTITIES.forEach(e => { SNAPSHOT[e] = 0; });
 
-// Catálogos puros sem escopo de empresa (contam global — são dados de referência)
+// Catálogos puros sem escopo de empresa (apenas entidades SEM group_id no schema)
+// MoedaIndice: não tem group_id — catálogo de referência global
+// GrupoEmpresarial: é o próprio grupo — não se filtra por group_id
 const PURE_CATALOG = new Set([
-  'Banco', 'FormaPagamento', 'TipoDespesa', 'MoedaIndice', 'TipoFrete',
-  'UnidadeMedida', 'TabelaFiscal', 'CentroOperacao', 'GrupoEmpresarial',
+  'MoedaIndice', 'GrupoEmpresarial',
 ]);
 
 // Campo de empresa por entidade (igual ao VisualizadorUniversalEntidadeV24)

@@ -86,8 +86,10 @@ export default function VisualizadorUniversalEntidadeV24({
   } = state;
 
   // ── Filtro multiempresa ────────────────────────────────────────────────────────
-  // PURE_CATALOG: catálogos globais sem escopo (Banco, UnidadeMedida, etc.) — não filtram
-  const PURE_CATALOG = isSimple && (ENTITY === 'Banco' || ENTITY === 'FormaPagamento' || ENTITY === 'TipoDespesa' || ENTITY === 'MoedaIndice' || ENTITY === 'TipoFrete' || ENTITY === 'UnidadeMedida' || ENTITY === 'TabelaFiscal' || ENTITY === 'CentroOperacao' || ENTITY === 'GrupoEmpresarial');
+  // PURE_CATALOG: apenas entidades SEM group_id no schema (verdadeiramente globais)
+  // MoedaIndice: não tem group_id — catálogo de referência global
+  // GrupoEmpresarial: é o próprio grupo — não filtra por group_id
+  const PURE_CATALOG = isSimple && (ENTITY === 'MoedaIndice' || ENTITY === 'GrupoEmpresarial');
   const readFilter = useMemo(() => {
     // Exclui registros mesclados (duplicatas desativadas) de todas as consultas e contagens
     const excludeMerged = { _merged: { $ne: true } };

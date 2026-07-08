@@ -10,7 +10,8 @@ import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { useMemo, useEffect } from "react";
 
-// Entidades que NÃO precisam de filtro de empresa/grupo (catálogos globais)
+// Entidades que NÃO precisam de empresa_id para serem visualizadas (catálogos de grupo)
+// Têm group_id no schema — filtram por group_id no contexto de grupo
 export const SIMPLE_CATALOG = new Set([
   'Banco','FormaPagamento','TipoDespesa','MoedaIndice','TipoFrete',
   'UnidadeMedida','Departamento','Cargo','Turno','GrupoProduto','Marca',
@@ -25,6 +26,11 @@ export const SIMPLE_CATALOG = new Set([
   'ConfiguracaoDespesaRecorrente',
 ]);
 
+// Entidades SEM group_id no schema — verdadeiramente globais (não filtram por nada)
+// MoedaIndice: catálogo de referência (BRL, USD, etc.) sem group_id
+// GrupoEmpresarial: é o próprio grupo — não se filtra por group_id
+const TRULY_GLOBAL = new Set(['MoedaIndice', 'GrupoEmpresarial']);
+
 const CAMPO_CTX = {
   Fornecedor: 'empresa_dona_id',
   Transportadora: 'empresa_dona_id',
@@ -38,10 +44,14 @@ const SHARED = new Set(['Cliente', 'Fornecedor', 'Transportadora']);
  * Internamente o hook agora usa filtro simples (o backend expande).
  */
 export function buildContextFilter(entityName, empresaId, groupId, empresasDoGrupo) {
-  if (SIMPLE_CATALOG.has(entityName)) return {};
-  // Filtro simples: o backend (countEntities / entityListSorted) já expande
-  // empresa_id → empresa_dona_id, empresa_alocada_id, empresas_compartilhadas_ids
-  // group_id  → todas as empresas do grupo
+  // Verdadeiramente globais (sem group_id no schema) — não filtram
+  if (TRULY_GLOBAL.has(entityName)) return {};
+  // SIMPLE_CATALOG com group_id: filtra por group_id no contexto de grupo
+  if (SIMPLE_CATALOG.has(entityName)) {
+    if (groupId) return { group_id: groupId };
+    return {};
+  }
+  // Entidades operacionais: filtro normal por empresa/grupo
   if (groupId && !empresaId) return { group_id: groupId };
   if (empresaId) return { empresa_id: empresaId };
   return {};

@@ -7,10 +7,9 @@ import { sanitizeOnWrite } from "@/components/lib/sanitizeOnWrite";
 export { ENTITY_CODE_FIELD };
 
 // Entidades que NÃO devem receber group_id (não têm o campo no schema)
-// GrupoEmpresarial É o grupo; catálogos puros são globais sem escopo
+// Apenas MoedaIndice (catálogo global sem group_id) e GrupoEmpresarial (é o próprio grupo)
 const NO_SCOPE_STAMP = new Set([
-  'GrupoEmpresarial', 'Banco', 'FormaPagamento', 'TipoDespesa', 'MoedaIndice',
-  'TipoFrete', 'UnidadeMedida', 'TabelaFiscal', 'CentroOperacao',
+  'GrupoEmpresarial', 'MoedaIndice',
 ]);
 
 // P3 (item 3): valores inválidos para descrição/nome

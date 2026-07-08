@@ -38,6 +38,7 @@ export default function ConfigCenter({ empresaId: empresaIdProp }) {
     staleTime: 15000,
     gcTime: 300000,
     refetchOnMount: true,
+    placeholderData: (prev) => prev, // Mantém dados anteriores durante refetch — impede reset para false
   });
 
   // Subscription em tempo real — invalida cache quando ConfiguracaoSistema muda

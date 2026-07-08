@@ -50,9 +50,14 @@ const expectedModules = [
 const expectedActions = ["visualizar", "criar", "editar", "excluir", "aprovar", "exportar"];
 
 export default function AccessCoverageMap({ perfis = [] }) {
-  // Se não há perfis no DB, usa os perfis padrão do initializeRBACProfiles como baseline
-  // (eles representam a cobertura esperada do sistema)
-  const effectivePerfis = safeArray(perfis).length > 0 ? perfis : buildDefaultProfiles();
+  // Mescla perfis do DB com os perfis padrão do sistema (rbacModuleMap / initializeRBACProfiles).
+  // Garante que o perfil Administrador (com wildcard) sempre esteja presente na análise,
+  // mesmo que não tenha sido criado no DB ainda.
+  const dbPerfis = safeArray(perfis);
+  const defaults = buildDefaultProfiles();
+  const dbNames = new Set(dbPerfis.map(p => normalize(p?.nome_perfil)));
+  const missingDefaults = defaults.filter(d => !dbNames.has(normalize(d?.nome_perfil)));
+  const effectivePerfis = [...dbPerfis, ...missingDefaults];
 
   const moduleCoverage = expectedModules.map((moduleName) => {
     const profilesWithModule = safeArray(effectivePerfis).filter((perfil) => {

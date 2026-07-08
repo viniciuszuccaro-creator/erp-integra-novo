@@ -21,15 +21,18 @@ export default function PropagacaoEmpresaSelector({ entityName, onResult }) {
     }
     setLoading(true);
     try {
-      const res = await base44.functions.invoke("syncBidirectional", {
-        entityName,
-        groupId: grupoAtual.id,
-        empresa_id: selectedEmpresa,
-        direction: "down",
+      const res = await base44.functions.invoke("propagateGroupConfigs", {
+        group_id: grupoAtual.id,
+        direction: "grupo_to_empresas",
+        entidades: [entityName],
+        strategy: "merge",
+        empresas_ids: [selectedEmpresa],
       });
-      const total = res?.data?.total_processados ?? 0;
+      const results = Array.isArray(res?.data?.results) ? res.data.results : [];
+      const entityResult = results.find(r => r.entity === entityName) || {};
+      const total = (entityResult.created || 0) + (entityResult.updated || 0) + (entityResult.skipped || 0);
       toast.success(`${total} registro(s) sincronizados para a empresa selecionada.`);
-      if (onResult) onResult(res?.data);
+      if (onResult) onResult({ total_processados: total, ...entityResult });
     } catch (e) {
       toast.error(e?.message || "Erro ao sincronizar.");
     } finally {

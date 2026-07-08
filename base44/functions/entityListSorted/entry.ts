@@ -296,8 +296,10 @@ async function listOne(base44, user, q) {
     return { entityName, items: cached.items };
   }
   // Durante pause de 429: retorna dados em cache (mesmo que stale) para evitar
-  // que toggles e configs revertem para valores padrão (false/vazio).
-  if (Date.now() < LIST_BACKEND_PAUSED_UNTIL && !skipCache) {
+  // que listas fiquem vazias. EXCETO para entidades com TTL=0 (ex: ConfiguracaoSistema)
+  // — essas precisam de dados sempre frescos; esperar o pause terminar é melhor
+  // que retornar cache stale com toggles em estado anterior (false).
+  if (Date.now() < LIST_BACKEND_PAUSED_UNTIL && !skipCache && ttl > 0) {
     return { entityName, items: cached?.items || [] };
   }
 

@@ -83,6 +83,13 @@ export default function PropagacaoIndex() {
   const addLog = (msg, type = "info") =>
     setLogs(prev => [{ msg, type, ts: new Date().toLocaleTimeString("pt-BR") }, ...prev].slice(0, 100));
 
+  // Mapa de direção UI → backend propagateGroupConfigs
+  const mapDirection = (dir) => {
+    if (dir === "down") return "grupo_to_empresas";
+    if (dir === "up") return "empresa_to_grupo";
+    return "ambos"; // "both"
+  };
+
   const runPropagation = useCallback(async (entityName, direction = "down") => {
     if (!grupoAtual?.id) { toast.error("Selecione um grupo antes de sincronizar."); return; }
 
@@ -92,14 +99,26 @@ export default function PropagacaoIndex() {
     }));
 
     try {
-      const res = await base44.functions.invoke("syncBidirectional", {
-        entityName,
-        groupId: grupoAtual.id,
-        direction,
-      });
+      const payload = {
+        group_id: grupoAtual.id,
+        direction: mapDirection(direction),
+        entidades: [entityName],
+        strategy: "merge",
+      };
+      // UP e AMBOS precisam de empresas_ids para saber quais empresas sincronizar
+      if (direction === "up" || direction === "both") {
+        payload.empresas_ids = empresasDoGrupo.map(e => e.id).filter(Boolean);
+      }
 
-      const total = res?.data?.total_processados ?? res?.data?.synced ?? res?.data?.results?.length ?? 0;
-      const msg = total > 0 ? `${total} registro(s) sincronizado(s)` : "Nenhum registro para sincronizar";
+      const res = await base44.functions.invoke("propagateGroupConfigs", payload);
+
+      // Extrai total de registros processados do resultado
+      const results = Array.isArray(res?.data?.results) ? res.data.results : [];
+      const entityResult = results.find(r => r.entity === entityName) || {};
+      const total = (entityResult.created || 0) + (entityResult.updated || 0) + (entityResult.skipped || 0);
+      const msg = total > 0
+        ? `${total} registro(s) processado(s) — ${entityResult.created || 0} criados, ${entityResult.updated || 0} atualizados`
+        : "Nenhum registro para sincronizar";
 
       setStatus(prev => ({
         ...prev,
@@ -115,7 +134,7 @@ export default function PropagacaoIndex() {
       addLog(`❌ ${entityName} [${direction}]: ${errMsg}`, "error");
       toast.error(`Erro ao sincronizar ${entityName}`);
     }
-  }, [grupoAtual?.id]);
+  }, [grupoAtual?.id, empresasDoGrupo]);
 
   const runAll = useCallback(async (direction = "down") => {
     if (!grupoAtual?.id) { toast.error("Selecione um grupo."); return; }

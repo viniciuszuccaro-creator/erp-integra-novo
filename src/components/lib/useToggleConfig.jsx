@@ -304,12 +304,13 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
   const getToggleValue = useCallback((configs, chave) => {
     // Prioridade 1: valor otimístico local (clique imediato)
     if (chave in optimisticMap) return optimisticMap[chave];
-    // Prioridade 2: valor da query (banco) — se fresh e contém a chave, usa-o
+    // Prioridade 2: valor confirmado pelo backend (stick — tem prioridade sobre a query
+    // porque a query pode retornar cache stale do entityListSorted durante 429 rate limit,
+    // o que faria o toggle reverter para o valor anterior)
+    if (chave in confirmedMap) return confirmedMap[chave];
+    // Prioridade 3: valor da query (banco) — usado quando não há confirmedMap para esta chave
     const match = findMatchingRecord(configs, chave);
     if (match && typeof match.ativa === 'boolean') return match.ativa;
-    // Prioridade 3: valor confirmado pelo backend (stick — não expira automaticamente)
-    // Só é sobrescrito quando a query retorna dados frescos com a chave (Prioridade 2)
-    if (chave in confirmedMap) return confirmedMap[chave];
     // Prioridade 4: fallback global
     if (Array.isArray(configs)) {
       const global = configs.find(c => c.chave === chave && !c.empresa_id && !c.group_id);

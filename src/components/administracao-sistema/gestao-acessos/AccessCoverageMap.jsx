@@ -57,8 +57,10 @@ export default function AccessCoverageMap({ perfis = [] }) {
   const moduleCoverage = expectedModules.map((moduleName) => {
     const profilesWithModule = safeArray(effectivePerfis).filter((perfil) => {
       const perms = safeObject(perfil?.permissoes);
-      // Wildcard "*" cobre todos os módulos
+      // Wildcard "*" cobre todos os módulos (formato do initializeRBACProfiles: { "*": ["*"] })
       if (perms["*"]) return true;
+      // Wildcard "_global" (formato do rbacModuleMap: { _global: ["*"] })
+      if (perms["_global"]) return true;
       // Busca exata, case-insensitive e accent-insensitive
       const normModule = normalize(moduleName);
       return Object.keys(perms).some(key => normalize(key) === normModule);
@@ -67,8 +69,13 @@ export default function AccessCoverageMap({ perfis = [] }) {
     const actions = new Set();
     safeArray(profilesWithModule).forEach((perfil) => {
       const perms = safeObject(perfil?.permissoes);
-      // Wildcard: "*" com ["*"] concede todas as ações
+      // Wildcard: "*" com ["*"] concede todas as ações (formato initializeRBACProfiles)
       if (perms["*"] && Array.isArray(perms["*"]) && perms["*"].includes("*")) {
+        expectedActions.forEach(a => actions.add(a));
+        return;
+      }
+      // Wildcard: "_global" com ["*"] concede todas as ações (formato rbacModuleMap)
+      if (perms["_global"] && Array.isArray(perms["_global"]) && perms["_global"].includes("*")) {
         expectedActions.forEach(a => actions.add(a));
         return;
       }

@@ -18,18 +18,29 @@ export default function PropagacaoQuickActions({ entityName, entityLabel }) {
 
   if (!grupoAtual?.id) return null;
 
+  const mapDirection = (dir) => {
+    if (dir === "down") return "grupo_to_empresas";
+    if (dir === "up") return "empresa_to_grupo";
+    return "ambos";
+  };
+
   const run = async (direction) => {
     const setLoading = direction === "down" ? setLoadingDown : setLoadingUp;
     setLoading(true);
     try {
       const payload = {
-        entityName,
-        groupId: grupoAtual.id,
-        direction,
+        group_id: grupoAtual.id,
+        direction: mapDirection(direction),
+        entidades: [entityName],
+        strategy: "merge",
       };
-      if (empresaAtual?.id && direction === "up") payload.empresa_id = empresaAtual.id;
-      const res = await base44.functions.invoke("syncBidirectional", payload);
-      const total = res?.data?.total_processados ?? 0;
+      if (direction === "up") {
+        payload.empresas_ids = empresaAtual?.id ? [empresaAtual.id] : [];
+      }
+      const res = await base44.functions.invoke("propagateGroupConfigs", payload);
+      const results = Array.isArray(res?.data?.results) ? res.data.results : [];
+      const entityResult = results.find(r => r.entity === entityName) || {};
+      const total = (entityResult.created || 0) + (entityResult.updated || 0) + (entityResult.skipped || 0);
       setLastOk(direction);
       toast.success(`${entityLabel}: ${total} registro(s) sincronizado(s) [${direction}]`);
     } catch (err) {

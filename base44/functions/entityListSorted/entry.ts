@@ -305,7 +305,10 @@ async function listOne(base44, user, q) {
     const now = Date.now();
     const waitMs = Math.max(0, LIST_MIN_GAP_MS - (now - LIST_LAST_CALL_AT));
     if (waitMs > 0) {
-      if (cached) return { entityName, items: cached.items };
+      // Only return cached data if it's still fresh (within TTL).
+      // With TTL=0 (e.g. ConfiguracaoSistema), stale cache is NEVER returned here —
+      // always waits and fetches fresh from DB so toggles persist after save+refresh.
+      if (cached && Date.now() - cached.ts < ttl) return { entityName, items: cached.items };
       await new Promise(r => setTimeout(r, waitMs));
     }
     LIST_LAST_CALL_AT = Date.now();

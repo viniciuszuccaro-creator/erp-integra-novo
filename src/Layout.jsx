@@ -59,6 +59,14 @@ const titleToModule = {
   "Financeiro e Contábil": "Financeiro",
   "Fiscal e Tributário": "Fiscal",
   "Recursos Humanos": "RH",
+  "Hub de Atendimento": "HubAtendimento",
+  "Gestão de Contratos": "Contratos",
+  "Cadastros Gerais": "Cadastros",
+  "Agenda e Calendário": "Agenda",
+  "Relatórios e Análises": "Relatórios",
+  "Administração do Sistema": "Sistema",
+  "Produção e Manufatura": "Produção",
+  "Expedição e Logística": "Expedição",
 };
 
 const pageToModule = {

@@ -145,18 +145,25 @@ export const RBAC_MODULES = {
     subsections: {
       Usuarios: ["criar", "editar", "excluir", "desativar"],
       Perfis: ["criar", "editar", "excluir", "duplicar"],
-      Configuracoes: ["ver", "editar", "configurar"],
-      Configuracao: ["ver", "editar", "configurar"],
+      Configuracoes: ["ver", "editar", "configurar", "executar"],
+      Configuracao: ["ver", "editar", "configurar", "executar"],
+      "Configurações": ["ver", "editar", "configurar", "executar"],
       Auditoria: ["visualizar", "exportar"],
       Integracoes: ["ver", "configurar", "testar"],
       Integracao: ["ver", "configurar", "testar"],
       Acessos: ["ver", "criar", "editar", "excluir"],
       Seguranca: ["ver", "configurar", "editar"],
+      "Segurança": ["ver", "configurar", "editar"],
       Propagacao: ["ver", "executar", "configurar"],
       Notificacoes: ["ver", "editar", "configurar"],
+      "Notificações": ["ver", "editar", "configurar"],
       IA: ["ver", "editar", "configurar"],
+      "IA e Otimizacao": ["ver", "editar", "configurar"],
+      "IA e Otimização": ["ver", "editar", "configurar"],
+      Fiscal: ["ver", "editar", "configurar"],
       Backup: ["ver", "configurar", "executar", "editar"],
       ConfigCenter: ["ver", "atualizar", "editar", "configurar"],
+      Sistema: ["ver", "editar", "configurar"],
     }
   },
   HubAtendimento: {
@@ -200,7 +207,7 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     Fiscal: ["ver", "criar", "editar", "excluir", "emitir", "cancelar", "exportar"],
     Contratos: ["ver", "criar", "editar", "excluir", "assinar", "renovar"],
     HubAtendimento: ["ver", "criar", "editar", "excluir", "responder"],
-    Sistema: ["ver", "configurar", "auditar", "backup", "seguranca"]
+    Sistema: ["ver", "editar", "configurar", "auditar", "backup", "seguranca", "executar", "testar", "exportar"]
   },
   gerente: {
     Dashboard: ["ver", "exportar"],
@@ -235,7 +242,7 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     Relatorios: ["ver", "criar", "editar", "exportar"],
     Contratos: ["ver", "criar", "editar", "excluir", "assinar", "renovar"],
     HubAtendimento: ["ver", "criar", "editar", "excluir", "responder"],
-    Sistema: ["ver", "configurar", "auditar", "backup", "seguranca"]
+    Sistema: ["ver", "editar", "configurar", "auditar", "backup", "seguranca", "executar", "testar", "exportar"]
   },
   analista: {
     Dashboard: ["ver", "exportar"],
@@ -270,7 +277,7 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     Contratos: ["ver", "criar", "editar", "excluir", "assinar", "renovar"],
     Relatorios: ["ver", "criar", "editar", "exportar"],
     HubAtendimento: ["ver", "criar", "editar", "excluir", "responder"],
-    Sistema: ["ver", "configurar", "auditar", "backup", "seguranca"]
+    Sistema: ["ver", "editar", "configurar", "auditar", "backup", "seguranca", "executar", "testar", "exportar"]
   },
   rh: {
     Dashboard: ["ver", "exportar"],
@@ -287,7 +294,7 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     Contratos: ["ver", "criar", "editar", "excluir", "assinar", "renovar"],
     Relatorios: ["ver", "criar", "editar", "exportar"],
     HubAtendimento: ["ver", "criar", "editar", "excluir", "responder"],
-    Sistema: ["ver", "configurar", "auditar", "backup", "seguranca"]
+    Sistema: ["ver", "editar", "configurar", "auditar", "backup", "seguranca", "executar", "testar", "exportar"]
   }
 };
 

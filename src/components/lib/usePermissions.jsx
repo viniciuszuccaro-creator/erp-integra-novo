@@ -122,7 +122,7 @@ export default function usePermissions() {
     const SYNONYM_GROUPS = {
       'visualizar': ['visualizar', 'ver', 'view', 'read', 'listar', 'consultar'],
       'criar': ['criar', 'create', 'add', 'emitir', 'enviar', 'importar', 'gerar'],
-      'editar': ['editar', 'update', 'edit', 'corrigir', 'gerenciar', 'executar', 'registrar', 'atualizar'],
+      'editar': ['editar', 'update', 'edit', 'corrigir', 'gerenciar', 'executar', 'registrar', 'atualizar', 'configurar', 'config'],
       'excluir': ['excluir', 'delete', 'remove', 'apagar', 'destroy'],
       'aprovar': ['aprovar', 'approve', 'rejeitar', 'validar'],
       'exportar': ['exportar', 'export', 'imprimir', 'print'],

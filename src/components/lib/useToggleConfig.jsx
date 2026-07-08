@@ -345,12 +345,16 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
     setConfirmedMap(prev => {
       let changed = false;
       const next = { ...prev };
-      // Agrupa por chave e usa findMatchingRecord para pegar o registro correto do escopo
+      // SEMPRE sobrescreve confirmedMap com dados frescos do backend.
+      // Isso garante que após um refresh da página, confirmedMap (que vem do localStorage
+      // e pode estar stale) seja corrigido com os valores reais do banco.
+      // O placeholderData: (prev) => prev no useQuery garante que durante transient 429
+      // o configs anterior é mantido, então confirmedMap não é limpo acidentalmente.
       const chaves = [...new Set(configs.map(c => c?.chave).filter(Boolean))];
       for (const chave of chaves) {
-        if (!(chave in next)) {
-          const match = findMatchingRecord(configs, chave);
-          if (match && typeof match.ativa === 'boolean') {
+        const match = findMatchingRecord(configs, chave);
+        if (match && typeof match.ativa === 'boolean') {
+          if (next[chave] !== match.ativa) {
             next[chave] = match.ativa;
             changed = true;
           }

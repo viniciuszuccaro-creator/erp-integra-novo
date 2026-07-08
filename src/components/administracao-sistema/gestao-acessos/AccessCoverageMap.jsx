@@ -29,31 +29,70 @@ const getExpectedActionsForModule = (moduleName) => {
 };
 
 // Normaliza uma ação bruta para um identificador canônico
+// Mapa COMPLETO — cobre todas as ações definidas em rbacModuleMap.js
+const ACTION_CANONICAL_MAP = {
+  // read
+  ver: "visualizar", view: "visualizar", read: "visualizar", listar: "visualizar",
+  consultar: "visualizar", visualizar: "visualizar", ver: "visualizar",
+  // delete
+  delete: "excluir", remove: "excluir", apagar: "excluir", excluir: "excluir", deletar: "excluir",
+  desligar: "excluir", desativar: "excluir",
+  // create
+  create: "criar", add: "criar", emitir: "criar", enviar: "criar", importar: "criar",
+  criar: "criar", gerar: "criar", duplicar: "criar", responder: "criar",
+  // edit
+  update: "editar", edit: "editar", corrigir: "editar", gerenciar: "editar",
+  executar: "editar", editar: "editar", configurar: "editar", atualizar: "editar",
+  // approve
+  approve: "aprovar", aprovar: "aprovar", rejeitar: "aprovar", validar: "aprovar",
+  avaliar: "aprovar", inspecionar: "aprovar",
+  // export
+  export: "exportar", exportar: "exportar", imprimir: "exportar", print: "exportar",
+  // finance
+  liquidar: "liquidar", pagar: "liquidar", receber: "liquidar",
+  // conciliar
+  conciliar: "conciliar", reconcile: "conciliar", ajustar: "conciliar",
+  // rastrear
+  rastrear: "rastrear", track: "rastrear",
+  // roteirizar
+  roteirizar: "roteirizar", route: "roteirizar",
+  // transferir
+  transferir: "transferir", transfer: "transferir",
+  // inventario
+  inventario: "inventario", inventory: "inventario", contar: "inventario",
+  // apontar
+  apontar: "apontar", registrar: "apontar",
+  // concluir
+  concluir: "concluir", finalizar: "concluir", parar: "concluir", fechar: "concluir",
+  // assinar
+  assinar: "assinar", sign: "assinar",
+  // renovar
+  renovar: "renovar", renew: "renovar",
+  // auditar
+  auditar: "auditar", audit: "auditar",
+  // backup
+  backup: "backup",
+  // seguranca
+  seguranca: "seguranca", security: "seguranca",
+  // cancelar
+  cancelar: "cancelar", cancel: "cancelar",
+  // desconto
+  desconto: "desconto", discount: "desconto",
+  // administrar
+  administrar: "editar", admin: "editar",
+  // separar
+  separar: "editar", conferir: "editar", expedir: "editar", entregar: "editar",
+  // solicitar
+  solicitar: "criar",
+  // abrir
+  abrir: "editar",
+  // testar
+  testar: "editar",
+};
+
 const normalizeAction = (rawAction) => {
   const a = normalize(rawAction);
-  if (["ver","view","read","listar","consultar","visualizar"].includes(a)) return "visualizar";
-  if (["delete","remove","apagar","excluir","deletar"].includes(a)) return "excluir";
-  if (["create","add","emitir","enviar","importar","criar","gerar"].includes(a)) return "criar";
-  if (["update","edit","corrigir","gerenciar","executar","editar","configurar"].includes(a)) return "editar";
-  if (["approve","aprovar","rejeitar","validar"].includes(a)) return "aprovar";
-  if (["export","exportar","imprimir","print"].includes(a)) return "exportar";
-  if (["liquidar","pagar","receber"].includes(a)) return "liquidar";
-  if (["conciliar","reconcile"].includes(a)) return "conciliar";
-  if (["rastrear","track"].includes(a)) return "rastrear";
-  if (["roteirizar","route"].includes(a)) return "roteirizar";
-  if (["transferir","transfer"].includes(a)) return "transferir";
-  if (["inventario","inventory"].includes(a)) return "inventario";
-  if (["apontar","registrar"].includes(a)) return "apontar";
-  if (["concluir","finalizar"].includes(a)) return "concluir";
-  if (["assinar","sign"].includes(a)) return "assinar";
-  if (["renovar","renew"].includes(a)) return "renovar";
-  if (["auditar","audit"].includes(a)) return "auditar";
-  if (["backup"].includes(a)) return "backup";
-  if (["seguranca","security"].includes(a)) return "seguranca";
-  if (["cancelar","cancel"].includes(a)) return "cancelar";
-  if (["desconto","discount"].includes(a)) return "desconto";
-  if (["receber","receive"].includes(a)) return "receber";
-  return a;
+  return ACTION_CANONICAL_MAP[a] || a;
 };
 
 // Percorre recursivamente a árvore de permissões (módulo → seção → [ações])

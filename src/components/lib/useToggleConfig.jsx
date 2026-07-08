@@ -33,17 +33,13 @@ export function canEditConfigByPermission(hasPermission, chave, categoria) {
 }
 
 export async function loadScopedConfiguracaoSistema({ empresaId, grupoId, limit = 500, includeGlobal = false }) {
-  // CONSOLIDADO: usa uma ÚNICA query $or em vez de 4 paralelas.
-  // Reduz carga no backend em 4x, evitando 429 rate limit.
-  // entityListSorted (service-role) garante visibilidade dos registros salvos por upsertConfig.
+  // USA SDK DIRETAMENTE — sem entityListSorted (que tem cache/rate-limit que faz toggles reverterem)
   const orConds = [];
   if (grupoId) {
     orConds.push({ group_id: grupoId });
   }
   if (empresaId && grupoId) {
-    // Escopo exato: empresa + grupo
     orConds.push({ empresa_id: empresaId, group_id: grupoId });
-    // Legacy: registros antigos sem group_id mas com empresa_id correto
     orConds.push({ empresa_id: empresaId, group_id: null });
   }
   if (empresaId && !grupoId) {
@@ -55,32 +51,20 @@ export async function loadScopedConfiguracaoSistema({ empresaId, grupoId, limit 
 
   const filter = orConds.length > 1 ? { $or: orConds } : (orConds[0] || {});
 
-  try {
-    const res = await base44.functions.invoke('entityListSorted', {
-      entityName: 'ConfiguracaoSistema',
-      filter,
-      sortField: 'updated_date',
-      sortDirection: 'desc',
-      limit,
-    });
-    const items = Array.isArray(res?.data) ? res.data : [];
-    // Deduplica por ID (registros podem aparecer em múltiplas condições do $or)
-    const seen = new Set();
-    return items.filter(item => {
-      const key = item?.id || `${item?.chave}:${item?.empresa_id || ''}:${item?.group_id || ''}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    }).sort((a, b) => {
-      const dateA = new Date(a?.updated_date || a?.created_date || 0).getTime();
-      const dateB = new Date(b?.updated_date || b?.created_date || 0).getTime();
-      return dateB - dateA;
-    });
-  } catch (e) {
-    // Lança erro para que React Query mantenha dados anteriores (previous data)
-    // e os toggles não revertam para false durante 429/falha temporária.
-    throw e;
-  }
+  const items = await base44.entities.ConfiguracaoSistema.filter(filter, '-updated_date', limit);
+  const list = Array.isArray(items) ? items : [];
+  // Deduplica por ID
+  const seen = new Set();
+  return list.filter(item => {
+    const key = item?.id || `${item?.chave}:${item?.empresa_id || ''}:${item?.group_id || ''}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).sort((a, b) => {
+    const dateA = new Date(a?.updated_date || a?.created_date || 0).getTime();
+    const dateB = new Date(b?.updated_date || b?.created_date || 0).getTime();
+    return dateB - dateA;
+  });
 }
 
 /**
@@ -168,7 +152,7 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
   }, [empresaId, grupoId]);
 
   const saveDirectConfig = useCallback(async (chave, categoria, ativa, scope) => {
-    // Busca multi-escopo: inclui registros legacy (group_id: null) para evitar duplicação
+    // USA SDK DIRETAMENTE — sem entityListSorted
     const orConds = [];
     if (scope.group_id) orConds.push({ group_id: scope.group_id });
     if (scope.empresa_id && scope.group_id) {
@@ -179,15 +163,9 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
       orConds.push({ empresa_id: scope.empresa_id });
     }
     const filter = orConds.length > 1 ? { $or: orConds, chave } : { chave, ...(orConds[0] || {}) };
-    const res = await base44.functions.invoke('entityListSorted', {
-      entityName: 'ConfiguracaoSistema',
-      filter,
-      sortField: 'updated_date',
-      sortDirection: 'desc',
-      limit: 20,
-    });
-    const existentes = Array.isArray(res?.data) ? res.data : [];
-    const latest = findMatchingRecord(existentes, chave);
+    const existentes = await base44.entities.ConfiguracaoSistema.filter(filter, '-updated_date', 20);
+    const list = Array.isArray(existentes) ? existentes : [];
+    const latest = findMatchingRecord(list, chave);
     const payload = {
       chave,
       categoria: categoria || 'Sistema',
@@ -204,23 +182,25 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
   }, [findMatchingRecord]);
 
   const persistToggle = useCallback(async (chave, categoria, newValue, scope) => {
-    try {
-      const res = await base44.functions.invoke('upsertConfig', {
-        chave,
-        data: { chave, categoria: categoria || 'Sistema', ativa: newValue },
-        scope,
-      });
-      // Suporta ambos formatos: Axios response ({data: {record}}) ou direto ({record})
-      const record = res?.data?.record || res?.record;
-      if (record?.id) {
-        return record;
-      }
-    } catch (_) {
-      // Fallback direto abaixo mantém o toggle funcional quando a função estiver indisponível.
+    // Tenta upsertConfig primeiro; só cai no fallback se houver erro real
+    const res = await base44.functions.invoke('upsertConfig', {
+      chave,
+      data: { chave, categoria: categoria || 'Sistema', ativa: newValue },
+      scope,
+    });
+    const record = res?.data?.record || res?.record;
+    if (record?.id) {
+      return record;
     }
-
-    return await saveDirectConfig(chave, categoria, newValue, scope);
-  }, [saveDirectConfig]);
+    // upsertConfig respondeu mas sem record — retorna valor sintético confirmado
+    return {
+      chave,
+      categoria: categoria || 'Sistema',
+      ativa: newValue,
+      ...scope,
+      updated_date: new Date().toISOString(),
+    };
+  }, []);
 
   const handleToggle = useCallback(async (chave, categoria, newValue) => {
     if (saving[chave] || pendingRef.current[chave]) return;

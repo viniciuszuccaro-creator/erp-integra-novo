@@ -168,7 +168,7 @@ export const ACTION_CATEGORIES = {
   special: ["emitir", "cancelar", "assinar", "transferir", "rastrear"]
 };
 
-// Permissões padrão por role
+// Permissões padrão por role — alinhado com initializeRBACProfiles (backend)
 export const DEFAULT_ROLE_PERMISSIONS = {
   admin: {
     // Admin tem acesso total a tudo
@@ -185,33 +185,88 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     RH: ["ver"]
   },
   gerente: {
-    // Gerente tem acesso mais amplo
     Dashboard: ["ver", "exportar"],
-    CRM: ["ver", "criar", "editar", "aprovar"],
-    Comercial: ["ver", "criar", "editar", "aprovar"],
-    Estoque: ["ver", "criar", "editar"],
-    Compras: ["ver", "criar", "editar", "aprovar"],
-    Financeiro: ["ver", "criar", "editar"],
-    RH: ["ver"]
+    Relatorios: ["ver", "exportar"],
+    CRM: ["ver", "criar", "editar", "excluir", "aprovar"],
+    Comercial: ["ver", "criar", "editar", "excluir", "aprovar", "desconto"],
+    Estoque: ["ver", "criar", "editar", "excluir"],
+    Compras: ["ver", "criar", "editar", "excluir", "aprovar"],
+    Expedicao: ["ver", "criar", "editar", "excluir"],
+    Producao: ["ver", "criar", "editar", "excluir"],
+    Financeiro: ["ver", "criar", "editar", "excluir", "aprovar"],
+    RH: ["ver", "criar", "editar", "excluir"],
+    Fiscal: ["ver", "criar", "editar", "excluir"],
+    Cadastros: ["ver", "criar", "editar", "excluir"],
+    Agenda: ["ver", "criar", "editar", "excluir"],
+    Contratos: ["ver", "criar", "editar", "excluir", "aprovar"],
+    HubAtendimento: ["ver", "criar", "editar", "excluir"],
+    Sistema: ["ver", "consultar"]
   },
   operacional: {
-    // Operacional tem acesso ao seu domínio
+    Dashboard: ["ver"],
+    CRM: ["ver", "criar", "editar"],
     Comercial: ["ver", "criar", "editar"],
     Estoque: ["ver", "criar", "editar"],
+    Compras: ["ver", "criar"],
     Expedicao: ["ver", "criar", "editar"],
     Producao: ["ver", "criar", "editar"],
-    RH: ["ver"]
+    Financeiro: ["ver"],
+    Fiscal: ["ver"],
+    Cadastros: ["ver", "criar", "editar"],
+    Agenda: ["ver", "criar", "editar"],
+    Relatorios: ["ver", "exportar"],
+    Contratos: ["ver"],
+    HubAtendimento: ["ver", "criar", "editar"]
   },
   analista: {
-    // Analista pode ver e exportar tudo
     Dashboard: ["ver", "exportar"],
     Relatorios: ["ver", "exportar"],
     CRM: ["ver", "exportar"],
     Comercial: ["ver", "exportar"],
     Estoque: ["ver", "exportar"],
     Compras: ["ver", "exportar"],
+    Expedicao: ["ver", "exportar"],
+    Producao: ["ver", "exportar"],
     Financeiro: ["ver", "exportar"],
-    RH: ["ver", "exportar"]
+    RH: ["ver", "exportar"],
+    Fiscal: ["ver", "exportar"],
+    Cadastros: ["ver", "exportar"],
+    Agenda: ["ver"],
+    Contratos: ["ver", "exportar"],
+    HubAtendimento: ["ver"],
+    Sistema: ["ver", "consultar"]
+  },
+  financeiro: {
+    Dashboard: ["ver"],
+    Financeiro: ["ver", "criar", "editar", "excluir", "aprovar", "liquidar", "conciliar"],
+    Comercial: ["ver"],
+    Estoque: ["ver"],
+    Compras: ["ver"],
+    Expedicao: ["ver"],
+    Producao: ["ver"],
+    CRM: ["ver"],
+    Fiscal: ["ver"],
+    Cadastros: ["ver"],
+    Agenda: ["ver", "criar"],
+    Contratos: ["ver", "criar", "editar"],
+    Relatorios: ["ver", "exportar"],
+    HubAtendimento: ["ver"]
+  },
+  rh: {
+    Dashboard: ["ver"],
+    RH: ["ver", "criar", "editar", "excluir", "aprovar"],
+    Comercial: ["ver"],
+    Estoque: ["ver"],
+    Compras: ["ver"],
+    Expedicao: ["ver"],
+    Producao: ["ver"],
+    Financeiro: ["ver"],
+    Fiscal: ["ver"],
+    Cadastros: ["ver"],
+    Agenda: ["ver", "criar", "editar"],
+    Contratos: ["ver"],
+    Relatorios: ["ver", "exportar"],
+    HubAtendimento: ["ver"]
   }
 };
 

@@ -59,7 +59,8 @@ export default function usePermissions() {
       'relatorios': 'Relatórios', 'relatorioseanalises': 'Relatórios',
       'agenda': 'Agenda',
       'cadastros': 'Cadastros', 'cadastrosgerais': 'Cadastros',
-      'contratos': 'Contratos',
+      'contratos': 'Contratos', 'gestaodecontratos': 'Contratos',
+      'hubatendimento': 'HubAtendimento', 'hubdeatendimento': 'HubAtendimento', 'hub': 'HubAtendimento',
       'administracao': 'Sistema', 'administracaosistema': 'Sistema', 'sistema': 'Sistema'
     };
 

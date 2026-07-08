@@ -147,7 +147,7 @@ export default function useVisualizadorCRUD({
       const nomeLimpo = descInfo.value.toLowerCase().trim();
       if (nomeLimpo.length >= 2 && !INVALID_DESC_VALUES.has(nomeLimpo)) {
         // Busca GLOBAL (sem restrição de escopo) — duplicatas podem existir em qualquer escopo
-        const nameFilter = { [descInfo.field]: { $regex: `^${nomeLimpo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' }, _merged: { $ne: true } };
+        const nameFilter = { [descInfo.field]: { $regex: `^${nomeLimpo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' } };
         try {
           const res2 = await base44.functions.invoke("entityListSorted", {
             entityName: ENTITY, filter: nameFilter,
@@ -165,8 +165,8 @@ export default function useVisualizadorCRUD({
     const cnpjClean = _cnpjRaw;
     const cpfClean  = _cpfRaw;
     const fiscalOr  = [];
-    if (cnpjClean.length >= 14) fiscalOr.push({ cnpj: formData.cnpj, _merged: { $ne: true } });
-    if (cpfClean.length  >= 11) fiscalOr.push({ cpf: formData.cpf, _merged: { $ne: true } });
+    if (cnpjClean.length >= 14) fiscalOr.push({ cnpj: formData.cnpj });
+    if (cpfClean.length  >= 11) fiscalOr.push({ cpf: formData.cpf });
     if (fiscalOr.length) {
       try {
         const res = await base44.functions.invoke("entityListSorted", {

@@ -125,6 +125,29 @@ const DEFAULT_PROFILES = {
       Relatorios: ["ver", "exportar"],
       HubAtendimento: ["ver"]
     }
+  },
+  User: {
+    nome_perfil: 'User',
+    descricao: 'Leitura em todos os módulos, sem ações de escrita nem Sistema',
+    ativo: true,
+    requer_aprovacao_especial: false,
+    permissoes: {
+      Dashboard: ["ver", "exportar"],
+      Relatorios: ["ver", "exportar"],
+      Agenda: ["ver", "criar", "editar", "excluir"],
+      CRM: ["ver"],
+      Cadastros: ["ver"],
+      Comercial: ["ver"],
+      Estoque: ["ver"],
+      Compras: ["ver"],
+      Expedicao: ["ver"],
+      Producao: ["ver"],
+      Financeiro: ["ver"],
+      RH: ["ver"],
+      Fiscal: ["ver"],
+      Contratos: ["ver"],
+      HubAtendimento: ["ver"]
+    }
   }
 };
 

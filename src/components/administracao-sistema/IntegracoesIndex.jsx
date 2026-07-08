@@ -74,19 +74,18 @@ export default function IntegracoesIndex({ initialTab }) {
 
   const handleTabChange = (next) => {
     setTab(next);
-    try {
-      base44.entities.AuditLog.create({
-        usuario: user?.full_name || user?.email || "Usuário",
-        usuario_id: user?.id,
-        empresa_id: empresaAtual?.id || null,
-        group_id: grupoAtivoId || null,
-        acao: "Visualização",
-        modulo: "Sistema",
-        entidade: "Integrações",
-        descricao: `Aba visualizada: ${next}`,
-        data_hora: new Date().toISOString(),
-      });
-    } catch {}
+    // Fire-and-forget with .catch() — prevents unhandled Promise rejection on 500
+    base44.entities.AuditLog.create({
+      usuario: user?.full_name || user?.email || "Usuário",
+      usuario_id: user?.id,
+      empresa_id: empresaAtual?.id || null,
+      group_id: grupoAtivoId || null,
+      acao: "Visualização",
+      modulo: "Sistema",
+      entidade: "Integrações",
+      descricao: `Aba visualizada: ${next}`,
+      data_hora: new Date().toISOString(),
+    }).catch(() => {});
   };
 
   const { data: configuracao } = useQuery({

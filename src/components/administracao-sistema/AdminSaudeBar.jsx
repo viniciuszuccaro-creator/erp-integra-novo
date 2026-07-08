@@ -23,15 +23,23 @@ export default function AdminSaudeBar() {
     let alive = true;
     const load = async () => {
       try {
+        // Usa entityListSorted (backend) em vez de SDK direto — protege contra 429/500
         const [usersRes, cfgRes] = await Promise.allSettled([
-          base44.entities.User.list("-created_date", 1),
-          base44.entities.ConfiguracaoSistema.filter({ chave: "propagacao_grupo_empresas_ativa" }, null, 1),
+          base44.functions.invoke('entityListSorted', {
+            entityName: 'User', filter: {}, sortField: 'created_date', sortDirection: 'desc', limit: 1,
+          }),
+          base44.functions.invoke('entityListSorted', {
+            entityName: 'ConfiguracaoSistema',
+            filter: { chave: "propagacao_grupo_empresas_ativa" },
+            sortField: 'updated_date', sortDirection: 'desc', limit: 1,
+          }),
         ]);
         if (!alive) return;
 
-        const usuarios = usersRes.status === "fulfilled" ? (Array.isArray(usersRes.value) ? usersRes.value.length : 0) : 0;
+        const usersData = usersRes.status === "fulfilled" ? (Array.isArray(usersRes.value?.data) ? usersRes.value.data : []) : [];
+        const usuarios = usersData.length;
         const perfis = perfisCache?.length || 0;
-        const cfgData = cfgRes.status === "fulfilled" ? (Array.isArray(cfgRes.value) ? cfgRes.value : []) : [];
+        const cfgData = cfgRes.status === "fulfilled" ? (Array.isArray(cfgRes.value?.data) ? cfgRes.value.data : []) : [];
         const propagacaoAtiva = cfgData.some(c => c.ativa === true);
         setPropStatus(propagacaoAtiva ? "ok" : "warn");
         setStats({ usuarios, perfis, loading: false, error: false });

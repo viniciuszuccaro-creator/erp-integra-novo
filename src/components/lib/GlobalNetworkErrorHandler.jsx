@@ -54,10 +54,13 @@ export default function GlobalNetworkErrorHandler() {
         return;
       }
       const isNetworkError = msg.includes('Network Error') ||
-                            msg.includes('Failed to fetch') ||
-                            code === 'ECONNABORTED';
-      
-      if (isNetworkError) {
+                             msg.includes('Failed to fetch') ||
+                             code === 'ECONNABORTED';
+      // 500 do backend: suprime para não virar erro não-tratado visível
+      const isServerError = msg.includes('status code 500') || msg.includes('status code 429') ||
+                            msg.includes('status code 502') || msg.includes('status code 503');
+
+      if (isNetworkError || isServerError) {
         event.preventDefault(); // Previne console spam
         handleError({ message: reason?.message });
       }

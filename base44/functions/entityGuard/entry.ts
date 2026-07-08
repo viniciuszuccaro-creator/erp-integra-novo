@@ -12,6 +12,68 @@ let __BACKEND_PAUSED_UNTIL = globalThis.__egBackendPausedUntil || 0;
 const __PERM_TTL = 900_000; // 15 min
 const __DECISION_TTL = 300_000; // 5 min
 
+// === Funções puras de normalização (module-level para evitar TDZ no catch) ===
+const normalize = (a) => {
+  if (!a) return 'visualizar';
+  const s = String(a).toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+  const map = {
+    ver: 'visualizar', view: 'visualizar', read: 'visualizar', listar: 'visualizar', consultar: 'visualizar', visualizar: 'visualizar', status: 'visualizar',
+    delete: 'excluir', remove: 'excluir', apagar: 'excluir', excluir: 'excluir',
+    create: 'criar', add: 'criar', emitir: 'criar', enviar: 'criar', importar: 'criar', gerar: 'criar', criar: 'criar',
+    update: 'editar', edit: 'editar', corrigir: 'editar', gerenciar: 'editar', executar: 'editar', registrar: 'editar', atualizar: 'editar', editar: 'editar',
+    approve: 'aprovar', aprovar: 'aprovar', approvar: 'aprovar', rejeitar: 'aprovar', validar: 'aprovar',
+    export: 'exportar', exportar: 'exportar', imprimir: 'exportar', print: 'exportar',
+    cancel: 'cancelar', cancelar: 'cancelar',
+    liquidar: 'liquidar', pagar: 'liquidar', receber: 'liquidar', conciliar: 'liquidar',
+    transferir: 'transferir', rastrear: 'rastrear', roteirizar: 'roteirizar',
+    apontar: 'apontar', concluir: 'concluir', inventario: 'inventario',
+    desconto: 'desconto', assinar: 'assinar', renovar: 'renovar', responder: 'responder',
+    duplicar: 'duplicar', testar: 'testar', receber: 'receber',
+    configurar: 'configurar', config: 'configurar',
+    auditar: 'auditar', audit: 'auditar', backup: 'backup',
+    seguranca: 'seguranca',
+  };
+  return map[s] || s;
+};
+
+const normalizeModule = (s) => {
+  if (!s) return 'Sistema';
+  const norm = String(s).normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const aliases = {
+    financeiro: 'Financeiro', financeiroecontabil: 'Financeiro',
+    compras: 'Compras', comprasesuprimentos: 'Compras',
+    comercial: 'Comercial', comercialevendas: 'Comercial',
+    estoque: 'Estoque', estoqueealmoxarifado: 'Estoque',
+    expedicao: 'Expedição', expedicaologistica: 'Expedição',
+    producao: 'Produção', producaoemanufatura: 'Produção',
+    crm: 'CRM', crmrelacionamento: 'CRM',
+    fiscal: 'Fiscal', fiscaletributario: 'Fiscal',
+    rh: 'RH', recursoshumanos: 'RH',
+    dashboard: 'Dashboard', dashboardcorporativo: 'Dashboard',
+    relatorios: 'Relatórios', relatorioseanalises: 'Relatórios',
+    agenda: 'Agenda', agendacalendario: 'Agenda',
+    cadastros: 'Cadastros', cadastrosgerais: 'Cadastros',
+    contratos: 'Contratos', gestaodecontratos: 'Contratos',
+    hubatendimento: 'HubAtendimento', hubdeatendimento: 'HubAtendimento', hub: 'HubAtendimento',
+    administracao: 'Sistema', administracaosistema: 'Sistema', sistema: 'Sistema',
+  };
+  return aliases[norm] || s || 'Sistema';
+};
+
+const READ_ONLY_ACTIONS = ['visualizar', 'ver', 'view', 'read', 'listar', 'consultar', 'status'];
+
+// Entidades que só admin pode criar/editar/excluir (controle de acesso e segurança)
+const ADMIN_ONLY_WRITE_ENTITIES = new Set([
+  'PerfilAcesso', 'User', 'ConfiguracaoSeguranca', 'ConfiguracaoSistema',
+  'ConfiguracaoBackup', 'ConfiguracaoMonitoramento', 'GovernancaEmpresa',
+  'PermissaoEmpresaModulo', 'ConfiguracaoNFe',
+]);
+
+// Entidades cuja leitura também é restrita (dados sensíveis)
+const ADMIN_ONLY_READ_ENTITIES = new Set([
+  'AuditLog', 'ConfiguracaoSeguranca', 'GovernancaEmpresa',
+]);
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -22,11 +84,17 @@ Deno.serve(async (req) => {
       return Response.json({ ok: true, status: 'healthy' });
     }
 
+    // === Variáveis derivadas (definidas antes de qualquer uso) ===
+    const moduleName = normalizeModule(body?.module || 'Sistema');
+    const section = body?.section || null;
+    const desired = normalize(body?.action || 'visualizar');
+    const isReadOnly = READ_ONLY_ACTIONS.includes(desired);
+    const targetEntity = body?.entity_name;
+
+    // Cooldown por rate-limit
     if (Date.now() < __BACKEND_PAUSED_UNTIL) {
       // Fail-open apenas para leitura; fail-closed para escrita durante cooldown
-      const fallbackAction = normalize(body?.action || 'visualizar');
-      const isRead = ['visualizar', 'ver', 'view', 'read', 'listar', 'consultar'].includes(fallbackAction);
-      return Response.json({ allowed: isRead, _fallback: true, reason: 'entityGuard em cooldown por rate-limit' });
+      return Response.json({ allowed: isReadOnly, _fallback: true, reason: 'entityGuard em cooldown por rate-limit' });
     }
 
     // Rate limit por IP
@@ -46,7 +114,7 @@ Deno.serve(async (req) => {
     let user = null;
     try {
       const authToken = req.headers.get('authorization') || '';
-      const cacheKey = authToken.slice(-32); // últimos 32 chars do token como chave
+      const cacheKey = authToken.slice(-32);
       const cached = __PERM_CACHE.get(cacheKey);
       if (cached && Date.now() - cached.ts < __PERM_TTL) {
         user = cached.user;
@@ -54,7 +122,6 @@ Deno.serve(async (req) => {
         user = await base44.auth.me();
         if (user && cacheKey) {
           __PERM_CACHE.set(cacheKey, { user, ts: Date.now() });
-          // Limpa entradas antigas (max 500)
           if (__PERM_CACHE.size > 500) {
             const oldest = __PERM_CACHE.keys().next().value;
             __PERM_CACHE.delete(oldest);
@@ -70,8 +137,8 @@ Deno.serve(async (req) => {
       return Response.json({ allowed: true });
     }
 
-    // Módulo Sistema é exclusivo de admin para ações de escrita/configuração
-    if (moduleName === 'Sistema' && !['visualizar', 'ver'].includes(desired)) {
+    // === Proteção do módulo Sistema: exclusivo de admin para qualquer ação além leitura ===
+    if (moduleName === 'Sistema' && !isReadOnly) {
       try {
         await base44.asServiceRole.entities.AuditLog.create({
           usuario: user.full_name || user.email || 'Usuário',
@@ -79,7 +146,7 @@ Deno.serve(async (req) => {
           acao: 'Bloqueio',
           modulo: 'Sistema',
           tipo_auditoria: 'seguranca',
-          entidade: body?.entity_name || section || 'Sistema',
+          entidade: targetEntity || section || 'Sistema',
           descricao: `RBAC: não-admin tentou ${desired} no módulo Sistema`,
           empresa_id: body?.empresa_id || null,
           group_id: body?.group_id || null,
@@ -89,75 +156,13 @@ Deno.serve(async (req) => {
       return Response.json({ allowed: false, reason: 'Módulo Sistema requer perfil admin' }, { status: 403 });
     }
 
-    const normalize = (a) => {
-      if (!a) return 'visualizar';
-      const s = String(a).toLowerCase();
-      const map = {
-        ver: 'visualizar', view: 'visualizar', read: 'visualizar', listar: 'visualizar',
-        delete: 'excluir', remove: 'excluir', apagar: 'excluir',
-        create: 'criar', add: 'criar', update: 'editar', edit: 'editar',
-        approve: 'aprovar', aprovar: 'aprovar', export: 'exportar', exportar: 'exportar'
-      };
-      return map[s] || s;
-    };
-
-    const normalizeModule = (s) => {
-      if (!s) return 'Sistema';
-      const norm = String(s).normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      const aliases = {
-        financeiro: 'Financeiro', financeiroecontabil: 'Financeiro',
-        compras: 'Compras', comprasesuprimentos: 'Compras',
-        comercial: 'Comercial', comercialevendas: 'Comercial',
-        estoque: 'Estoque', estoqueealmoxarifado: 'Estoque',
-        expedicao: 'Expedição', expedicaologistica: 'Expedição',
-        producao: 'Produção', crm: 'CRM', fiscal: 'Fiscal',
-        rh: 'RH', recursoshumanos: 'RH',
-        dashboard: 'Dashboard', relatorios: 'Relatórios',
-        agenda: 'Agenda', cadastros: 'Cadastros', cadastrosgerais: 'Cadastros',
-        contratos: 'Contratos', administracao: 'Sistema', sistema: 'Sistema',
-      };
-      return aliases[norm] || s || 'Sistema';
-    };
-
-    const moduleName = normalizeModule(body?.module || 'Sistema');
-    const section = body?.section || null;
-    const desired = normalize(body?.action || 'visualizar');
-
-    const normalizeKey = (value) => String(value || '')
-      .normalize('NFD').replace(/\p{Diacritic}/gu, '')
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, '');
-
-    const sectionAliases = {
-      controledeacesso: 'acessos', gestaoacessos: 'acessos', acessos: 'acessos', perfis: 'acessos', usuarios: 'acessos',
-      configuracoesgerais: 'configuracoes', configuracoes: 'configuracoes', integracoes: 'integracoes', ia: 'ia', seguranca: 'seguranca', auditoria: 'auditoria'
-    };
-
-    const findNode = (root, key) => {
-      if (!root || typeof root !== 'object') return undefined;
-      const target = sectionAliases[normalizeKey(key)] || normalizeKey(key);
-      const found = Object.keys(root).find((candidate) => normalizeKey(candidate) === target || sectionAliases[normalizeKey(candidate)] === target);
-      return found ? root[found] : undefined;
-    };
-
-    const decisionKey = JSON.stringify({ u: user?.id, r: user?.role, m: body?.module, s: body?.section, a: body?.action, e: body?.entity_name });
-    const decisionCached = __DECISION_CACHE.get(decisionKey);
-    if (decisionCached && Date.now() - decisionCached.ts < __DECISION_TTL) {
-      return Response.json({ allowed: decisionCached.allowed, _cached: true });
+    // === Proteção de entidades críticas ===
+    // AuditLog é imutável para não-admins
+    if (targetEntity === 'AuditLog' && ['criar', 'editar', 'excluir'].includes(desired)) {
+      return Response.json({ allowed: false, reason: 'AuditLog é imutável' }, { status: 403 });
     }
-
-    // Proteção de entidades críticas
-    const targetEntity = body?.entity_name;
-    if (targetEntity === 'AuditLog') {
-      if (['criar', 'editar', 'excluir'].includes(desired)) {
-        __DECISION_CACHE.set(decisionKey, { allowed: false, ts: Date.now() });
-        return Response.json({ allowed: false, reason: 'AuditLog é imutável' }, { status: 403 });
-      }
-    }
-    // Entidades de controle de acesso: só admin pode criar/editar/excluir
-    const ADMIN_ONLY_WRITE = new Set(['PerfilAcesso', 'User', 'ConfiguracaoSeguranca', 'ConfiguracaoSistema']);
-    if (ADMIN_ONLY_WRITE.has(targetEntity) && ['criar', 'editar', 'excluir'].includes(desired) && user?.role !== 'admin') {
-      __DECISION_CACHE.set(decisionKey, { allowed: false, ts: Date.now() });
+    // Entidades de controle de acesso: só admin pode escrever
+    if (ADMIN_ONLY_WRITE_ENTITIES.has(targetEntity) && ['criar', 'editar', 'excluir'].includes(desired)) {
       try {
         await base44.asServiceRole.entities.AuditLog.create({
           usuario: user.full_name || user.email || 'Usuário',
@@ -174,9 +179,41 @@ Deno.serve(async (req) => {
       } catch {}
       return Response.json({ allowed: false, reason: `${targetEntity} requer perfil admin` }, { status: 403 });
     }
+    // Entidades de leitura sensível: só admin pode ler
+    if (ADMIN_ONLY_READ_ENTITIES.has(targetEntity) && isReadOnly && user?.role !== 'admin') {
+      return Response.json({ allowed: false, reason: `${targetEntity} requer perfil admin para leitura` }, { status: 403 });
+    }
 
-    // Verifica perfil de acesso (fail-closed para escrita sem perfil)
-    const isReadOnly = ['visualizar', 'ver', 'view', 'read', 'listar', 'consultar'].includes(desired);
+    // === Cache de decisão ===
+    const normalizeKey = (value) => String(value || '')
+      .normalize('NFD').replace(/\p{Diacritic}/gu, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '');
+
+    const sectionAliases = {
+      controledeacesso: 'acessos', gestaoacessos: 'acessos', acessos: 'acessos', perfis: 'acessos', usuarios: 'acessos',
+      configuracoesgerais: 'configuracoes', configuracoes: 'configuracoes', configuracao: 'configuracoes',
+      integracoes: 'integracoes', integracao: 'integracoes',
+      ia: 'ia', iaeotimizacao: 'ia',
+      seguranca: 'seguranca', segurança: 'seguranca',
+      auditoria: 'auditoria', backup: 'backup', propagacao: 'propagacao',
+      notificacoes: 'notificacoes', notificações: 'notificacoes',
+    };
+
+    const findNode = (root, key) => {
+      if (!root || typeof root !== 'object') return undefined;
+      const target = sectionAliases[normalizeKey(key)] || normalizeKey(key);
+      const found = Object.keys(root).find((candidate) => normalizeKey(candidate) === target || sectionAliases[normalizeKey(candidate)] === target);
+      return found ? root[found] : undefined;
+    };
+
+    const decisionKey = JSON.stringify({ u: user?.id, r: user?.role, m: moduleName, s: body?.section, a: desired, e: targetEntity });
+    const decisionCached = __DECISION_CACHE.get(decisionKey);
+    if (decisionCached && Date.now() - decisionCached.ts < __DECISION_TTL) {
+      return Response.json({ allowed: decisionCached.allowed, _cached: true });
+    }
+
+    // === Verificação de perfil de acesso (fail-closed para escrita sem perfil) ===
     let allowed = false;
     try {
       if (user?.perfil_acesso_id) {
@@ -216,14 +253,11 @@ Deno.serve(async (req) => {
       allowed = isReadOnly;
     }
 
-    // RLS de escopo multiempresa: se a action é escrita sensível e há empresa_id/group_id no payload,
-    // verificar se o usuário tem acesso ao escopo solicitado (evita escalada horizontal)
-    if (allowed && ['criar','editar','excluir'].includes(desired)) {
+    // === RLS de escopo multiempresa: previne escalada horizontal ===
+    if (allowed && ['criar', 'editar', 'excluir'].includes(desired)) {
       const reqEmpresaId = body?.empresa_id || null;
       const reqGroupId = body?.group_id || null;
-      // Usuário com perfil que tem empresa_id diferente do escopo solicitado → bloquear
-      if (reqEmpresaId && user?.empresa_id && reqEmpresaId !== user.empresa_id && user.role !== 'admin') {
-        // só bloqueia se o usuário não tem company match ou group match
+      if (reqEmpresaId && user?.empresa_id && reqEmpresaId !== user.empresa_id) {
         const userGroupId = user?.group_id || null;
         if (!reqGroupId || !userGroupId || reqGroupId !== userGroupId) {
           allowed = false;
@@ -260,7 +294,7 @@ Deno.serve(async (req) => {
     }
     // Fail-closed para escrita em exceções; fail-open apenas para leitura
     const fallbackAction = normalize(body?.action || 'visualizar');
-    const isRead = ['visualizar', 'ver', 'view', 'read', 'listar', 'consultar'].includes(fallbackAction);
+    const isRead = READ_ONLY_ACTIONS.includes(fallbackAction);
     return Response.json({ allowed: isRead, _fallback: true });
   }
 });

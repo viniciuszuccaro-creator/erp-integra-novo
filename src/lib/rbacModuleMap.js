@@ -174,14 +174,16 @@ export const RBAC_MODULES = {
   }
 };
 
-// Mapeamento de ações por categoria
+// Mapeamento de ações por categoria — usado pela UI de gestão de perfis
 export const ACTION_CATEGORIES = {
-  read: ["ver", "visualizar", "listar", "exportar"],
-  write: ["criar", "editar", "duplicar"],
+  read: ["ver", "visualizar", "listar", "consultar", "status", "exportar"],
+  write: ["criar", "editar", "duplicar", "importar", "gerar", "enviar", "registrar", "atualizar", "configurar", "apontar", "responder", "roteirizar"],
   delete: ["excluir", "deletar", "remover"],
-  approve: ["aprovar", "rejeitar", "validar"],
+  approve: ["aprovar", "rejeitar", "validar", "desconto"],
   finance: ["liquidar", "pagar", "receber", "conciliar"],
-  special: ["emitir", "cancelar", "assinar", "transferir", "rastrear"]
+  logistics: ["transferir", "rastrear", "inventario", "concluir", "separar", "conferir", "expedir", "entregar"],
+  fiscal: ["emitir", "cancelar", "assinar", "renovar"],
+  system: ["auditar", "backup", "seguranca", "testar", "executar"]
 };
 
 // Permissões padrão por role — alinhado com initializeRBACProfiles (backend)

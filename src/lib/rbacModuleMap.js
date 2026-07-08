@@ -145,9 +145,13 @@ export const RBAC_MODULES = {
     subsections: {
       Usuarios: ["criar", "editar", "excluir", "desativar"],
       Perfis: ["criar", "editar", "excluir", "duplicar"],
-      Configuracoes: ["ver", "editar"],
+      Configuracoes: ["ver", "editar", "configurar"],
       Auditoria: ["visualizar", "exportar"],
-      Integracao: ["configurar", "testar"]
+      Integracoes: ["ver", "configurar", "testar"],
+      Integracao: ["ver", "configurar", "testar"],
+      Acessos: ["ver", "criar", "editar", "excluir"],
+      Seguranca: ["ver", "configurar", "editar"],
+      Propagacao: ["ver", "executar", "configurar"],
     }
   },
   HubAtendimento: {

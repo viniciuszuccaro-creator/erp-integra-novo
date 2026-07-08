@@ -119,14 +119,26 @@ export default function usePermissions() {
       return undefined;
     };
 
+    const SYNONYM_GROUPS = {
+      'visualizar': ['visualizar', 'ver', 'view', 'read', 'listar', 'consultar'],
+      'criar': ['criar', 'create', 'add', 'emitir', 'enviar', 'importar', 'gerar'],
+      'editar': ['editar', 'update', 'edit', 'corrigir', 'gerenciar', 'executar', 'registrar', 'atualizar'],
+      'excluir': ['excluir', 'delete', 'remove', 'apagar', 'destroy'],
+      'aprovar': ['aprovar', 'approve', 'rejeitar', 'validar'],
+      'exportar': ['exportar', 'export', 'imprimir', 'print'],
+      'cancelar': ['cancelar', 'cancel'],
+    };
+
     const nodeHasAction = (node, desired) => {
-      if (Array.isArray(node)) return node.includes(desired) || (desired === 'visualizar' && node.includes('ver'));
+      const synonyms = SYNONYM_GROUPS[desired] || [desired];
+      const checkMatch = (arr) => arr.some(v => synonyms.includes(v));
+      if (Array.isArray(node)) return checkMatch(node);
       if (!node || typeof node !== 'object') return false;
       const stack = [node];
       while (stack.length) {
         const current = stack.pop();
         if (Array.isArray(current)) {
-          if (current.includes(desired) || (desired === 'visualizar' && current.includes('ver'))) return true;
+          if (checkMatch(current)) return true;
         } else if (current && typeof current === 'object') {
           Object.values(current).forEach((value) => stack.push(value));
         }
@@ -165,19 +177,38 @@ export default function usePermissions() {
       if (!a) return 'visualizar';
       const map = {
         // visualizar
-        ver: 'visualizar', view: 'visualizar', read: 'visualizar', listar: 'visualizar', status: 'visualizar', consultar: 'visualizar',
+        ver: 'visualizar', view: 'visualizar', read: 'visualizar', listar: 'visualizar', status: 'visualizar', consultar: 'visualizar', visualizar: 'visualizar',
         // excluir
-        delete: 'excluir', remove: 'excluir', destroy: 'excluir', apagar: 'excluir',
+        delete: 'excluir', remove: 'excluir', destroy: 'excluir', apagar: 'excluir', excluir: 'excluir',
         // cancelar
         cancel: 'cancelar', cancelar: 'cancelar',
         // criar
-        create: 'criar', add: 'criar', emitir: 'criar', enviar: 'criar', importar: 'criar',
+        create: 'criar', add: 'criar', emitir: 'criar', enviar: 'criar', importar: 'criar', gerar: 'criar', criar: 'criar',
         // editar
-        update: 'editar', edit: 'editar', carta: 'editar', corrigir: 'editar', gerenciar: 'editar', executar: 'editar',
+        update: 'editar', edit: 'editar', carta: 'editar', corrigir: 'editar', gerenciar: 'editar', executar: 'editar', editar: 'editar', registrar: 'editar', atualizar: 'editar',
         // aprovar
-        approve: 'aprovar', aprovar: 'aprovar', approvar: 'aprovar',
+        approve: 'aprovar', aprovar: 'aprovar', approvar: 'aprovar', rejeitar: 'aprovar', validar: 'aprovar',
         // exportar
-        export: 'exportar', exportar: 'exportar', imprimir: 'exportar', print: 'exportar'
+        export: 'exportar', exportar: 'exportar', imprimir: 'exportar', print: 'exportar',
+        // configurar (Sistema)
+        configurar: 'configurar', config: 'configurar',
+        // auditar (Sistema)
+        auditar: 'auditar', audit: 'auditar',
+        // backup (Sistema)
+        backup: 'backup',
+        // seguranca (Sistema)
+        seguranca: 'seguranca', segurança: 'seguranca',
+        // financeiro
+        liquidar: 'liquidar', pagar: 'liquidar', receber: 'liquidar', conciliar: 'liquidar',
+        // especial
+        transferir: 'transferir', rastrear: 'rastrear', roteirizar: 'roteirizar', apontar: 'apontar', concluir: 'concluir',
+        inventario: 'inventario', desconto: 'desconto', assinar: 'assinar', renovar: 'renovar',
+        responder: 'responder', duplicar: 'duplicar', testar: 'testar',
+        // subsection actions
+        separar: 'separar', conferir: 'conferir', expedir: 'expedir', entregar: 'entregar',
+        contar: 'contar', ajustar: 'ajustar', parar: 'parar', inspecionar: 'inspecionar',
+        solicitar: 'solicitar', desligar: 'desligar', fechar: 'fechar', abrir: 'abrir',
+        administrar: 'administrar', calcular: 'calcular',
       };
       return map[a] || a;
     };

@@ -38,6 +38,47 @@ Deno.serve(async (req) => {
       return Response.json({ value: val, record, found: true });
     }
 
+    // ─── MODO LIST: Retorna configs no escopo via asServiceRole (bypass RLS) ───
+    // Garante que o frontend veja registros criados pelo service role
+    if (body.operation === 'list') {
+      const api = base44.asServiceRole.entities.ConfiguracaoSistema;
+      const sGrupoId = body.scope?.group_id || null;
+      const sEmpresaId = body.scope?.empresa_id || null;
+      const includeGlobal = body.includeGlobal !== false;
+
+      const orConds = [];
+      if (sGrupoId) orConds.push({ group_id: sGrupoId });
+      if (sEmpresaId && sGrupoId) {
+        orConds.push({ empresa_id: sEmpresaId, group_id: sGrupoId });
+        orConds.push({ empresa_id: sEmpresaId, group_id: null });
+      }
+      if (sEmpresaId && !sGrupoId) {
+        orConds.push({ empresa_id: sEmpresaId });
+      }
+      if (includeGlobal) {
+        orConds.push({ group_id: null, empresa_id: null });
+      }
+
+      const filtro = orConds.length > 1 ? { $or: orConds } : (orConds[0] || {});
+      const limit = body.limit || 500;
+      const rows = await api.filter(filtro, '-updated_date', limit).catch(() => []);
+
+      // Deduplica por ID
+      const seen = new Set();
+      const list = (Array.isArray(rows) ? rows : []).filter(item => {
+        const key = item?.id || `${item?.chave}:${item?.empresa_id || ''}:${item?.group_id || ''}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      }).sort((a, b) => {
+        const dateA = new Date(a?.updated_date || a?.created_date || 0).getTime();
+        const dateB = new Date(b?.updated_date || b?.created_date || 0).getTime();
+        return dateB - dateA;
+      });
+
+      return Response.json({ records: list, count: list.length });
+    }
+
     if (!data || typeof data !== 'object') {
       return Response.json({ error: 'data é obrigatório' }, { status: 400 });
     }
@@ -154,7 +195,40 @@ Deno.serve(async (req) => {
         });
       } catch (_) {}
 
-      return Response.json({ record: updated, id: updated.id || match.id, mode: 'update', _ts: Date.now() });
+      // ─── AUTO-PROPAGAÇÃO: config de grupo → todas as empresas ───
+      if (gId && !eId && data?.ativa !== undefined) {
+        try {
+          const empresas = await base44.asServiceRole.entities.Empresa
+            .filter({ group_id: gId }, undefined, 500).catch(() => []);
+          if (Array.isArray(empresas) && empresas.length) {
+            const toSync = [];
+            for (const emp of empresas) {
+              const exist = await api.filter({ chave, empresa_id: emp.id, group_id: gId }, '-updated_date', 1).catch(() => []);
+              const existRec = Array.isArray(exist) ? exist[0] : null;
+              if (existRec?.id) {
+                toSync.push({ id: existRec.id, ativa: data.ativa, chave, categoria: data.categoria || match.categoria, group_id: gId, empresa_id: emp.id });
+              } else {
+                toSync.push({ chave, ativa: data.ativa, categoria: data.categoria || 'Sistema', group_id: gId, empresa_id: emp.id });
+              }
+            }
+            // Bulk update existing, bulk create missing
+            const toUpdate = toSync.filter(r => r.id);
+            const toCreate = toSync.filter(r => !r.id);
+            if (toUpdate.length) {
+              for (let i = 0; i < toUpdate.length; i += 500) {
+                try { await api.bulkUpdate(toUpdate.slice(i, i + 500)); } catch (_) {}
+              }
+            }
+            if (toCreate.length) {
+              for (let i = 0; i < toCreate.length; i += 100) {
+                try { await api.bulkCreate(toCreate.slice(i, i + 100)); } catch (_) {}
+              }
+            }
+          }
+        } catch (_) {}
+      }
+
+      return Response.json({ record: updated, id: updated.id || match.id, mode: 'update', propagated: !!(gId && !eId), _ts: Date.now() });
     } else {
       // CRIA novo registro
       const createPayload = { chave, ...data };
@@ -181,7 +255,24 @@ Deno.serve(async (req) => {
         });
       } catch (_) {}
 
-      return Response.json({ record: created, id: created.id, mode: 'create', _ts: Date.now() });
+      // ─── AUTO-PROPAGAÇÃO: config de grupo criada → propaga para empresas ───
+      if (gId && !eId && data?.ativa !== undefined) {
+        try {
+          const empresas = await base44.asServiceRole.entities.Empresa
+            .filter({ group_id: gId }, undefined, 500).catch(() => []);
+          if (Array.isArray(empresas) && empresas.length) {
+            const toCreate = empresas.map(emp => ({
+              chave, ativa: data.ativa, categoria: data.categoria || 'Sistema',
+              group_id: gId, empresa_id: emp.id,
+            }));
+            for (let i = 0; i < toCreate.length; i += 100) {
+              try { await api.bulkCreate(toCreate.slice(i, i + 100)); } catch (_) {}
+            }
+          }
+        } catch (_) {}
+      }
+
+      return Response.json({ record: created, id: created.id, mode: 'create', propagated: !!(gId && !eId), _ts: Date.now() });
     }
 
   } catch (err) {

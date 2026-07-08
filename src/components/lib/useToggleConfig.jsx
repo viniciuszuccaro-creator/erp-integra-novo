@@ -33,7 +33,19 @@ export function canEditConfigByPermission(hasPermission, chave, categoria) {
 }
 
 export async function loadScopedConfiguracaoSistema({ empresaId, grupoId, limit = 500, includeGlobal = false }) {
-  // USA SDK DIRETAMENTE — sem entityListSorted (que tem cache/rate-limit que faz toggles reverterem)
+  // USA BACKEND upsertConfig operation: 'list' — via asServiceRole (bypass RLS)
+  // Garante que registros criados pelo service role sejam visíveis no frontend
+  try {
+    const res = await base44.functions.invoke('upsertConfig', {
+      operation: 'list',
+      scope: { group_id: grupoId || null, empresa_id: empresaId || null },
+      includeGlobal,
+      limit,
+    });
+    const records = res?.data?.records || res?.records || [];
+    if (Array.isArray(records) && records.length) return records;
+  } catch (_) {}
+  // Fallback: SDK direto user-scoped (pode não ver registros do service role via RLS)
   const orConds = [];
   if (grupoId) {
     orConds.push({ group_id: grupoId });

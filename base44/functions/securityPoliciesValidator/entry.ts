@@ -10,8 +10,22 @@ function detectSodConflicts(permissoes = {}) {
   const perms = permissoes || {};
   const conflitos = [];
 
-  const finAncer = perms['Financeiro'] || [];
-  if (Array.isArray(finAncer) && finAncer.includes('aprovar') && (finAncer.includes('liquidar') || finAncer.includes('pago'))) {
+  // Helper: verifica se módulo contém ação (suporta array direto ou subseções aninhadas)
+  const hasAction = (modNode, action) => {
+    if (!modNode) return false;
+    if (Array.isArray(modNode)) return modNode.includes(action);
+    if (typeof modNode === 'object') {
+      return Object.values(modNode).some(v => {
+        if (Array.isArray(v)) return v.includes(action);
+        if (v && typeof v === 'object') return Object.values(v).some(vv => Array.isArray(vv) && vv.includes(action));
+        return false;
+      });
+    }
+    return false;
+  };
+
+  const finNode = perms['Financeiro'] || perms['financeiro'];
+  if (hasAction(finNode, 'aprovar') && (hasAction(finNode, 'liquidar') || hasAction(finNode, 'pagar'))) {
     conflitos.push({
       regra: 'FIN-PAG-001',
       severidade: 'Alta',
@@ -19,8 +33,17 @@ function detectSodConflicts(permissoes = {}) {
     });
   }
 
-  const comercial = perms['Comercial'] || [];
-  if (Array.isArray(comercial) && comercial.includes('desconto') && comercial.includes('aprovar') && comercial.includes('editar')) {
+  // Financeiro: criar + excluir no mesmo perfil
+  if (hasAction(finNode, 'criar') && hasAction(finNode, 'excluir')) {
+    conflitos.push({
+      regra: 'FIN-CRU-001',
+      severidade: 'Média',
+      descricao: 'Mesmo perfil pode criar e excluir lançamentos financeiros.'
+    });
+  }
+
+  const comNode = perms['Comercial'] || perms['comercial'];
+  if (hasAction(comNode, 'desconto') && hasAction(comNode, 'aprovar') && hasAction(comNode, 'editar')) {
     conflitos.push({
       regra: 'COM-DESC-001',
       severidade: 'Média',
@@ -28,17 +51,27 @@ function detectSodConflicts(permissoes = {}) {
     });
   }
 
-  const sistema = perms['Sistema'] || [];
-  if (Array.isArray(sistema) && sistema.includes('editar') && sistema.includes('ver') && sistema.length >= 2) {
+  // Comercial: criar pedido + aprovar pedido no mesmo perfil
+  if (hasAction(comNode, 'criar') && hasAction(comNode, 'aprovar')) {
     conflitos.push({
-      regra: 'SYS-RBAC-001',
-      severidade: 'Crítica',
-      descricao: 'Perfil administra acessos e visualiza trilhas sensíveis.'
+      regra: 'COM-APR-001',
+      severidade: 'Média',
+      descricao: 'Mesmo perfil pode criar e aprovar pedidos.'
     });
   }
 
-  const fiscal = perms['Fiscal'] || [];
-  if (Array.isArray(fiscal) && (fiscal.includes('criar') || fiscal.includes('emitir')) && (fiscal.includes('excluir') || fiscal.includes('cancelar'))) {
+  const sysNode = perms['Sistema'] || perms['sistema'];
+  // Sistema: qualquer acesso de escrita para não-admin é conflito crítico
+  if (hasAction(sysNode, 'editar') || hasAction(sysNode, 'configurar') || hasAction(sysNode, 'backup') || hasAction(sysNode, 'seguranca')) {
+    conflitos.push({
+      regra: 'SYS-RBAC-001',
+      severidade: 'Crítica',
+      descricao: 'Perfil não-admin com acesso de escrita ao módulo Sistema.'
+    });
+  }
+
+  const fisNode = perms['Fiscal'] || perms['fiscal'];
+  if ((hasAction(fisNode, 'criar') || hasAction(fisNode, 'emitir')) && (hasAction(fisNode, 'excluir') || hasAction(fisNode, 'cancelar'))) {
     conflitos.push({
       regra: 'FIS-NFE-001',
       severidade: 'Alta',
@@ -46,12 +79,33 @@ function detectSodConflicts(permissoes = {}) {
     });
   }
 
-  const auditLog = perms['AuditLog'] || [];
-  if (Array.isArray(auditLog) && auditLog.includes('excluir')) {
+  // Compras: criar OC + aprovar OC no mesmo perfil
+  const compNode = perms['Compras'] || perms['compras'];
+  if (hasAction(compNode, 'criar') && hasAction(compNode, 'aprovar')) {
     conflitos.push({
-      regra: 'LOG-SEC-001',
-      severidade: 'Crítica',
-      descricao: 'Perfil pode deletar registros de auditoria.'
+      regra: 'CMP-APR-001',
+      severidade: 'Média',
+      descricao: 'Mesmo perfil pode criar e aprovar ordens de compra.'
+    });
+  }
+
+  // Estoque: transferir + excluir no mesmo perfil
+  const estNode = perms['Estoque'] || perms['estoque'];
+  if (hasAction(estNode, 'transferir') && hasAction(estNode, 'excluir')) {
+    conflitos.push({
+      regra: 'EST-TRF-001',
+      severidade: 'Média',
+      descricao: 'Mesmo perfil pode transferir e excluir movimentações de estoque.'
+    });
+  }
+
+  // RH: aprovar férias + editar colaborador (pode aprovar próprio pedido)
+  const rhNode = perms['RH'] || perms['rh'];
+  if (hasAction(rhNode, 'aprovar') && hasAction(rhNode, 'editar')) {
+    conflitos.push({
+      regra: 'RH-APR-001',
+      severidade: 'Baixa',
+      descricao: 'Mesmo perfil pode editar e aprovar solicitações de RH.'
     });
   }
 

@@ -38,6 +38,10 @@ export default function ProtectedSection({
   const [allowedFinal, setAllowedFinal] = useState(null);
   const [showDenied, setShowDenied] = useState(false);
 
+  // Fail-closed para ações de escrita; fail-open apenas para leitura
+  const isReadOnly = ['ver', 'visualizar', 'view', 'read', 'listar', 'consultar', 'status'].includes(String(action || '').toLowerCase());
+  const optimisticDefault = isReadOnly ? allowed : false;
+
   useEffect(() => {
     if (isLoading) return;
     if (!modulo) { setAllowedFinal(allowed); return; }
@@ -52,8 +56,8 @@ export default function ProtectedSection({
       return;
     }
 
-    // Valor otimista para não bloquear UI
-    setAllowedFinal(allowed);
+    // Otimismo seguro: leitura pode mostrar otimista; escrita espera confirmação do backend
+    setAllowedFinal(optimisticDefault);
 
     if (__guardInflight.has(key)) {
       __guardInflight.get(key)
@@ -62,7 +66,7 @@ export default function ProtectedSection({
           __guardCache.set(key, { allowed: backendAllowed, ts: Date.now() });
           setAllowedFinal(backendAllowed && allowed);
         })
-        .catch(() => {/* mantém otimista */});
+        .catch(() => { setAllowedFinal(optimisticDefault); });
       return;
     }
 
@@ -80,12 +84,11 @@ export default function ProtectedSection({
       __guardCache.set(key, { allowed: backendAllowed, ts: Date.now() });
       setAllowedFinal(backendAllowed && allowed);
     }).catch(() => {
-      // fallback em 429/erro
-      setAllowedFinal(allowed);
+      setAllowedFinal(optimisticDefault);
     }).finally(() => {
       __guardInflight.delete(key);
     });
-  }, [isLoading, allowed, modulo, section, action, empresaAtual?.id, grupoAtual?.id]);
+  }, [isLoading, allowed, modulo, section, action, empresaAtual?.id, grupoAtual?.id, optimisticDefault]);
 
   useEffect(() => {
     if (isLoading) return;

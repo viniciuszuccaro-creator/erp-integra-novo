@@ -189,12 +189,29 @@ Deno.serve(async (req) => {
     };
 
     const results = [];
-    if (direction === 'grupo_to_empresas') {
-      for (const en of entidades) results.push(await copyGroupToEmpresas(en));
-    } else if (direction === 'empresa_to_grupo') {
+
+    // "ambos" executa as duas direções sequencialmente
+    const runDown = direction === 'grupo_to_empresas' || direction === 'ambos' || direction === 'both';
+    const runUp = direction === 'empresa_to_grupo' || direction === 'ambos' || direction === 'both';
+
+    if (runDown) {
+      for (const en of entidades) {
+        try { results.push(await copyGroupToEmpresas(en)); } catch (e) { results.push({ entity: en, error: e.message }); }
+        await sleep(50);
+      }
+    }
+
+    if (runUp) {
       const ids = Array.isArray(empresas_ids) && empresas_ids.length ? empresas_ids : (empresaId ? [empresaId] : []);
-      if (!ids.length) return Response.json({ error: 'empresa_id ou empresas_ids obrigatório para empresa_to_grupo' }, { status: 400 });
-      for (const eid of ids) for (const en of entidades) results.push(await copyEmpresaToGroup(en, eid));
+      if (!ids.length && !runDown) {
+        return Response.json({ error: 'empresa_id ou empresas_ids obrigatório para empresa_to_grupo' }, { status: 400 });
+      }
+      for (const eid of ids) {
+        for (const en of entidades) {
+          try { results.push(await copyEmpresaToGroup(en, eid)); } catch (e) { results.push({ entity: en, error: e.message }); }
+          await sleep(50);
+        }
+      }
     }
 
     try {

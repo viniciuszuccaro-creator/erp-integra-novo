@@ -108,9 +108,11 @@ const SEARCH_FIELDS = {
 // em vez de array vazio (que faria todos os toggles reverterem para false).
 const NO_CACHE_ENTITIES = new Set([]);
 
-// TTL por entidade — ConfiguracaoSistema muda raramente, TTL maior dá estabilidade durante 429s
+// TTL por entidade — ConfiguracaoSistema TTL=0: leitura sempre fresca do banco.
+// Durante 429 pause, o cache Map ainda existe (expirado) e cached?.items é retornado como fallback,
+// evitando que toggles revertam para false. Após upsertConfig gravar, o refetch busca dados atualizados.
 const ENTITY_CACHE_TTL = {
-  ConfiguracaoSistema: 10 * 1000, // 10s
+  ConfiguracaoSistema: 0, // Always fresh — toggles must persist immediately after save
 };
 
 // Entidades que não precisam de filtro empresa/grupo

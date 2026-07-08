@@ -7,6 +7,31 @@ const safeArray = (value) => Array.isArray(value) ? value : [];
 const safeObject = (value) => value && typeof value === "object" && !Array.isArray(value) ? value : {};
 const normalize = (str) => String(str || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
+// Percorre recursivamente a árvore de permissões (módulo → seção → [ações])
+// para coletar TODAS as ações concedidas, independente do nível de aninhamento.
+const collectActions = (node, actionsSet) => {
+  if (!node) return;
+  if (Array.isArray(node)) {
+    node.forEach((action) => {
+      const normAction = normalize(action);
+      if (normAction === "ver" || normAction === "view" || normAction === "read" || normAction === "listar" || normAction === "consultar") actionsSet.add("visualizar");
+      else if (normAction === "delete" || normAction === "remove" || normAction === "apagar") actionsSet.add("excluir");
+      else if (normAction === "create" || normAction === "add" || normAction === "emitir" || normAction === "enviar" || normAction === "importar") actionsSet.add("criar");
+      else if (normAction === "update" || normAction === "edit" || normAction === "corrigir" || normAction === "gerenciar" || normAction === "executar") actionsSet.add("editar");
+      else if (normAction === "approve" || normAction === "aprovar") actionsSet.add("aprovar");
+      else if (normAction === "export" || normAction === "exportar" || normAction === "imprimir" || normAction === "print") actionsSet.add("exportar");
+      else if (normAction === "*") {
+        // Wildcard: concede todas as ações esperadas
+        expectedActions.forEach(a => actionsSet.add(a));
+      } else {
+        actionsSet.add(action);
+      }
+    });
+  } else if (typeof node === "object") {
+    Object.values(node).forEach((val) => collectActions(val, actionsSet));
+  }
+};
+
 const expectedModules = [
   "Dashboard", "CRM", "Comercial", "Estoque", "Compras", "Financeiro", "Fiscal",
   "RH", "Expedição", "Produção", "Sistema", "Cadastros", "Agenda", "Relatórios",
@@ -36,15 +61,9 @@ export default function AccessCoverageMap({ perfis = [] }) {
       const normModule = normalize(moduleName);
       const matchKey = Object.keys(perms).find(k => normalize(k) === normModule);
       const modulePerms = matchKey ? perms[matchKey] : null;
-      
-      if (Array.isArray(modulePerms)) {
-        modulePerms.forEach((action) => {
-          const normAction = normalize(action);
-          if (normAction === "ver") actions.add("visualizar");
-          else if (normAction === "excluir") actions.add("excluir");
-          else actions.add(action);
-        });
-      }
+
+      // Coleta ações recursivamente — a estrutura é módulo → seção → [ações]
+      collectActions(modulePerms, actions);
     });
 
     const actionCount = expectedActions.filter((action) => actions.has(action)).length;

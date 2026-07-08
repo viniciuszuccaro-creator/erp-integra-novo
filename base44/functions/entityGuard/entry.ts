@@ -19,7 +19,8 @@ const normalize = (a) => {
   const map = {
     ver: 'visualizar', view: 'visualizar', read: 'visualizar', listar: 'visualizar', consultar: 'visualizar', visualizar: 'visualizar', status: 'visualizar',
     delete: 'excluir', remove: 'excluir', apagar: 'excluir', excluir: 'excluir',
-    create: 'criar', add: 'criar', emitir: 'criar', enviar: 'criar', importar: 'criar', gerar: 'criar', criar: 'criar',
+    create: 'criar', add: 'criar', importar: 'criar', criar: 'criar',
+    emitir: 'emitir', enviar: 'enviar', gerar: 'gerar',
     update: 'editar', edit: 'editar', corrigir: 'editar', gerenciar: 'editar', executar: 'editar', registrar: 'editar', atualizar: 'editar', editar: 'editar',
     approve: 'aprovar', aprovar: 'aprovar', approvar: 'aprovar', rejeitar: 'aprovar', validar: 'aprovar',
     export: 'exportar', exportar: 'exportar', imprimir: 'exportar', print: 'exportar',
@@ -32,6 +33,10 @@ const normalize = (a) => {
     configurar: 'configurar', config: 'configurar',
     auditar: 'auditar', audit: 'auditar', backup: 'backup',
     seguranca: 'seguranca',
+    parar: 'parar', inspecionar: 'inspecionar', separar: 'separar', conferir: 'conferir',
+    expedir: 'expedir', entregar: 'entregar', contar: 'contar', ajustar: 'ajustar',
+    solicitar: 'solicitar', desligar: 'desligar', fechar: 'fechar', abrir: 'abrir',
+    administrar: 'administrar', calcular: 'calcular',
   };
   return map[s] || s;
 };
@@ -62,16 +67,31 @@ const normalizeModule = (s) => {
 
 const READ_ONLY_ACTIONS = ['visualizar', 'ver', 'view', 'read', 'listar', 'consultar', 'status'];
 
+// Helper: verifica se array de permissões do perfil contém a ação desejada (com normalização)
+// CRÍTICO: normaliza ambos os lados para evitar mismatch (perfil tem "ver", busca por "visualizar")
+const arrHasAction = (arr, desired, isReadOnly) => {
+  if (!Array.isArray(arr)) return false;
+  return arr.some(v => normalize(v) === desired)
+    || (isReadOnly && arr.some(v => normalize(v) === 'visualizar'));
+};
+
 // Entidades que só admin pode criar/editar/excluir (controle de acesso e segurança)
 const ADMIN_ONLY_WRITE_ENTITIES = new Set([
   'PerfilAcesso', 'User', 'ConfiguracaoSeguranca', 'ConfiguracaoSistema',
   'ConfiguracaoBackup', 'ConfiguracaoMonitoramento', 'GovernancaEmpresa',
   'PermissaoEmpresaModulo', 'ConfiguracaoNFe',
+  'ApiExterna', 'Webhook', 'JobAgendado', 'EventoNotificacao',
+  'ChatbotCanal', 'ChatbotIntent', 'TokenRefresh', 'SessaoUsuario',
+  'BackupAutomatico', 'MonitoramentoSistema',
 ]);
 
 // Entidades cuja leitura também é restrita (dados sensíveis)
 const ADMIN_ONLY_READ_ENTITIES = new Set([
   'AuditLog', 'ConfiguracaoSeguranca', 'GovernancaEmpresa',
+  'TokenRefresh', 'SessaoUsuario',
+  'LogFiscal', 'LogCobranca', 'LogsIA', 'LogPerformance',
+  'AuditoriaAcesso', 'AuditoriaGPS', 'AuditoriaIA', 'AuditoriaGlobal',
+  'MonitoramentoSistema', 'AlertaPerformance',
 ]);
 
 Deno.serve(async (req) => {
@@ -224,20 +244,20 @@ Deno.serve(async (req) => {
           if (modNode) {
             if (!section) {
               allowed = Object.values(modNode).some((node) => {
-                if (Array.isArray(node)) return node.includes(desired) || (isReadOnly && node.includes('visualizar'));
-                if (node && typeof node === 'object') return Object.values(node).some((v) => Array.isArray(v) && (v.includes(desired) || (isReadOnly && v.includes('visualizar'))));
+                if (Array.isArray(node)) return arrHasAction(node, desired, isReadOnly);
+                if (node && typeof node === 'object') return Object.values(node).some((v) => arrHasAction(v, desired, isReadOnly));
                 return false;
               });
             } else {
               const path = Array.isArray(section) ? section : String(section).split('.').filter(Boolean);
               let cursor = modNode;
               for (const seg of path) { if (!cursor) break; cursor = findNode(cursor, seg); }
-              if (Array.isArray(cursor)) allowed = cursor.includes(desired) || (isReadOnly && cursor.includes('visualizar'));
+              if (Array.isArray(cursor)) allowed = arrHasAction(cursor, desired, isReadOnly);
               else if (cursor && typeof cursor === 'object') {
                 const stack = [cursor];
                 while (stack.length && !allowed) {
                   const node = stack.pop();
-                  if (Array.isArray(node)) { if (node.includes(desired) || (isReadOnly && node.includes('visualizar'))) allowed = true; }
+                  if (Array.isArray(node)) {                   if (arrHasAction(node, desired, isReadOnly)) allowed = true; }
                   else if (node && typeof node === 'object') Object.values(node).forEach(v => stack.push(v));
                 }
               }

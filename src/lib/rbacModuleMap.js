@@ -98,7 +98,7 @@ export const RBAC_MODULES = {
     label: "Financeiro e Contábil",
     icon: "DollarSign",
     section: "Administrativo",
-    actions: ["ver", "criar", "editar", "excluir", "aprovar", "liquidar", "conciliar"],
+    actions: ["ver", "criar", "editar", "excluir", "aprovar", "liquidar", "conciliar", "cancelar"],
     subsections: {
       ContasReceber: ["visualizar", "gerar_cobranca", "registrar_pagamento", "cancelar"],
       ContasPagar: ["visualizar", "registrar", "aprovar", "pagar", "cancelar"],
@@ -160,7 +160,6 @@ export const RBAC_MODULES = {
       IA: ["ver", "editar", "configurar"],
       "IA e Otimizacao": ["ver", "editar", "configurar"],
       "IA e Otimização": ["ver", "editar", "configurar"],
-      Fiscal: ["ver", "editar", "configurar"],
       Backup: ["ver", "configurar", "executar", "editar"],
       ConfigCenter: ["ver", "atualizar", "editar", "configurar"],
       Sistema: ["ver", "editar", "configurar"],
@@ -170,19 +169,25 @@ export const RBAC_MODULES = {
     label: "Hub de Atendimento",
     icon: "MessageCircle",
     section: "Principal",
-    actions: ["ver", "criar", "editar", "excluir", "responder"]
+    actions: ["ver", "criar", "editar", "excluir", "responder", "transferir"],
+    subsections: {
+      Conversas: ["ver", "responder", "transferir", "fechar"],
+      FilaEspera: ["ver", "assumir", "transferir"],
+      Atendimentos: ["ver", "criar", "editar", "excluir", "responder"]
+    }
   }
 };
 
 // Mapeamento de ações por categoria — usado pela UI de gestão de perfis
 export const ACTION_CATEGORIES = {
   read: ["ver", "visualizar", "listar", "consultar", "status", "exportar"],
-  write: ["criar", "editar", "duplicar", "importar", "gerar", "enviar", "registrar", "atualizar", "configurar", "apontar", "responder", "roteirizar"],
-  delete: ["excluir", "deletar", "remover"],
+  write: ["criar", "editar", "duplicar", "importar", "gerar", "enviar", "registrar", "atualizar", "configurar", "apontar", "responder", "roteirizar", "solicitar", "abrir", "fechar", "calcular", "administrar"],
+  delete: ["excluir", "deletar", "remover", "desligar"],
   approve: ["aprovar", "rejeitar", "validar", "desconto"],
-  finance: ["liquidar", "pagar", "receber", "conciliar"],
-  logistics: ["transferir", "rastrear", "inventario", "concluir", "separar", "conferir", "expedir", "entregar"],
+  finance: ["liquidar", "pagar", "receber", "conciliar", "cancelar"],
+  logistics: ["transferir", "rastrear", "inventario", "concluir", "separar", "conferir", "expedir", "entregar", "contar", "ajustar", "parar"],
   fiscal: ["emitir", "cancelar", "assinar", "renovar"],
+  production: ["apontar", "parar", "concluir", "inspecionar"],
   system: ["auditar", "backup", "seguranca", "testar", "executar"]
 };
 
@@ -206,11 +211,11 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     Compras: ["ver", "criar", "editar", "excluir", "aprovar", "receber"],
     Expedicao: ["ver", "criar", "editar", "excluir", "rastrear", "roteirizar"],
     Producao: ["ver", "criar", "editar", "excluir", "apontar", "concluir"],
-    Financeiro: ["ver", "criar", "editar", "excluir", "aprovar", "liquidar", "conciliar"],
+    Financeiro: ["ver", "criar", "editar", "excluir", "aprovar", "liquidar", "conciliar", "cancelar"],
     RH: ["ver", "criar", "editar", "excluir", "aprovar"],
     Fiscal: ["ver", "criar", "editar", "excluir", "emitir", "cancelar", "exportar"],
     Contratos: ["ver", "criar", "editar", "excluir", "assinar", "renovar"],
-    HubAtendimento: ["ver", "criar", "editar", "excluir", "responder"],
+    HubAtendimento: ["ver", "criar", "editar", "excluir", "responder", "transferir"],
   },
   operacional: {
     // Operacional: CRUD em módulos operacionais, leitura em administrativos, sem Sistema
@@ -251,7 +256,7 @@ export const DEFAULT_ROLE_PERMISSIONS = {
   financeiro: {
     // Financeiro: controle total no Financeiro/Fiscal, leitura nos demais, sem Sistema
     Dashboard: ["ver", "exportar"],
-    Financeiro: ["ver", "criar", "editar", "excluir", "aprovar", "liquidar", "conciliar"],
+    Financeiro: ["ver", "criar", "editar", "excluir", "aprovar", "liquidar", "conciliar", "cancelar"],
     Fiscal: ["ver", "criar", "editar", "emitir", "cancelar", "exportar"],
     Comercial: ["ver"],
     Estoque: ["ver"],

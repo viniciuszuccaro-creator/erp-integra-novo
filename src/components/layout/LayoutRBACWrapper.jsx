@@ -61,10 +61,12 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
           Cliente: "CRM", Oportunidade: "CRM", Interacao: "CRM", Campanha: "CRM", HistoricoCliente: "CRM", ContatoB2B: "CRM",
           // Comercial
           Pedido: "Comercial", Comissao: "Comercial", OrcamentoCliente: "Comercial", TabelaPreco: "Comercial", TabelaPrecoItem: "Comercial",
+          OrcamentoSite: "Comercial", PedidoExterno: "Comercial", PedidoEtapa: "Comercial",
           // Fiscal
           NotaFiscal: "Fiscal", ImportacaoXMLNFe: "Fiscal", SPEDFiscal: "Fiscal", LogFiscal: "Fiscal", TabelaFiscal: "Fiscal", TabelaDIFAL: "Fiscal",
           // Expedição
           Entrega: "Expedição", Romaneio: "Expedição", Rota: "Expedição", EntregaItens: "Expedição", SeparacaoConferencia: "Expedição",
+          RoteirizacaoInteligente: "Expedição",
           // Compras
           Fornecedor: "Compras", SolicitacaoCompra: "Compras", OrdemCompra: "Compras", Cotacao: "Compras",
           // Estoque
@@ -73,14 +75,17 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
           ContaPagar: "Financeiro", ContaReceber: "Financeiro", CentroCusto: "Financeiro", CaixaMovimento: "Financeiro",
           ConciliacaoBancaria: "Financeiro", LancamentoContabil: "Financeiro", PlanoDeContas: "Financeiro", DRE: "Financeiro",
           ExtratoBancario: "Financeiro", MovimentoCartao: "Financeiro", RateioFinanceiro: "Financeiro", ContaBancariaEmpresa: "Financeiro",
+          CaixaOrdemLiquidacao: "Financeiro", ConciliacaoPedido: "Financeiro", PagamentoOmnichannel: "Financeiro",
           // Produção
-          OrdemProducao: "Produção", ApontamentoProducao: "Producao", ConfiguracaoProducao: "Producao",
+          OrdemProducao: "Produção", ApontamentoProducao: "Producao", ConfiguracaoProducao: "Producao", InspecaoQualidade: "Producao",
           // RH
           Colaborador: "RH", Ferias: "RH", Ponto: "RH", Cargo: "RH", Departamento: "RH", Turno: "RH", MonitoramentoRH: "RH",
           // Contratos
           Contrato: "Contratos",
           // Agenda
           Evento: "Agenda",
+          // Hub de Atendimento
+          Chamado: "HubAtendimento", ConversaOmnicanal: "HubAtendimento", MensagemOmnicanal: "HubAtendimento",
           // Cadastros
           Marca: "Cadastros", GrupoProduto: "Cadastros", UnidadeMedida: "Cadastros", TabelaNCM: "Cadastros",
           CondicaoComercial: "Cadastros", SetorAtividade: "Cadastros", RegiaoAtendimento: "Cadastros", SegmentoCliente: "Cadastros",
@@ -95,6 +100,15 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
           GovernancaEmpresa: "Sistema", PermissaoEmpresaModulo: "Sistema", IAConfig: "Sistema",
           ApiExterna: "Sistema", Webhook: "Sistema", JobAgendado: "Sistema", SessaoUsuario: "Sistema",
           TokenRefresh: "Sistema", ConfiguracaoIntegracaoMarketplace: "Sistema",
+          BackupAutomatico: "Sistema", MonitoramentoSistema: "Sistema", EventoNotificacao: "Sistema",
+          ChatbotCanal: "Sistema", ChatbotIntent: "Sistema", ChatbotIntents: "Sistema",
+          ConfiguracaoWhatsApp: "Sistema", ConfiguracaoBoletos: "Sistema", ConfiguracaoCanal: "Sistema",
+          ConfiguracaoCobrancaEmpresa: "Sistema", ConfiguracaoDespesaRecorrente: "Sistema",
+          ConfiguracaoGatewayPagamento: "Sistema", TemplateWhatsApp: "Sistema", DocumentacaoTecnica: "Sistema",
+          ParametroOrigemPedido: "Sistema", ParametroPortalCliente: "Sistema", ParametroCaixaDiario: "Sistema",
+          ParametroConciliacaoBancaria: "Sistema", ParametroRoteirizacao: "Sistema", ParametroRecebimentoNFe: "Sistema",
+          ConfigFiscalEmpresa: "Sistema", SyncReport: "Sistema", SyncMap: "Sistema",
+          ChatbotInteracao: "Sistema", BaseConhecimento: "Sistema",
         };
         const modName = map[entityName] || "Sistema";
         const scope = getScope();

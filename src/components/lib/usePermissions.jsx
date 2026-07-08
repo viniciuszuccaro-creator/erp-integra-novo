@@ -121,7 +121,9 @@ export default function usePermissions() {
 
     const SYNONYM_GROUPS = {
       'visualizar': ['visualizar', 'ver', 'view', 'read', 'listar', 'consultar'],
-      'criar': ['criar', 'create', 'add', 'emitir', 'enviar', 'importar', 'gerar'],
+      'criar': ['criar', 'create', 'add', 'importar', 'gerar'],
+      'emitir': ['emitir', 'emit'],
+      'enviar': ['enviar', 'send'],
       'editar': ['editar', 'update', 'edit', 'corrigir', 'gerenciar', 'executar', 'registrar', 'atualizar', 'configurar', 'config'],
       'excluir': ['excluir', 'delete', 'remove', 'apagar', 'destroy'],
       'aprovar': ['aprovar', 'approve', 'rejeitar', 'validar'],
@@ -206,7 +208,8 @@ export default function usePermissions() {
         // cancelar
         cancel: 'cancelar', cancelar: 'cancelar',
         // criar
-        create: 'criar', add: 'criar', emitir: 'criar', enviar: 'criar', importar: 'criar', gerar: 'criar', criar: 'criar',
+        create: 'criar', add: 'criar', importar: 'criar', gerar: 'criar', criar: 'criar',
+        emitir: 'emitir', enviar: 'enviar',
         // editar
         update: 'editar', edit: 'editar', carta: 'editar', corrigir: 'editar', gerenciar: 'editar', executar: 'editar', editar: 'editar', registrar: 'editar', atualizar: 'editar',
         // aprovar

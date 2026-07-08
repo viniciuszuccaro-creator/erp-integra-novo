@@ -25,13 +25,13 @@ const DEFAULT_PROFILES = {
       Compras: ["ver", "criar", "editar", "excluir", "aprovar", "receber"],
       Expedicao: ["ver", "criar", "editar", "excluir", "rastrear", "roteirizar"],
       Producao: ["ver", "criar", "editar", "excluir", "apontar", "concluir"],
-      Financeiro: ["ver", "criar", "editar", "excluir", "aprovar", "liquidar", "conciliar"],
+      Financeiro: ["ver", "criar", "editar", "excluir", "aprovar", "liquidar", "conciliar", "cancelar"],
       RH: ["ver", "criar", "editar", "excluir", "aprovar"],
       Fiscal: ["ver", "criar", "editar", "excluir", "emitir", "cancelar", "exportar"],
       Cadastros: ["ver", "criar", "editar", "excluir", "importar", "exportar"],
       Agenda: ["ver", "criar", "editar", "excluir"],
       Contratos: ["ver", "criar", "editar", "excluir", "assinar", "renovar"],
-      HubAtendimento: ["ver", "criar", "editar", "excluir", "responder"]
+      HubAtendimento: ["ver", "criar", "editar", "excluir", "responder", "transferir"]
     }
   },
   Operacional: {
@@ -87,7 +87,7 @@ const DEFAULT_PROFILES = {
     requer_aprovacao_especial: true,
     permissoes: {
       Dashboard: ["ver", "exportar"],
-      Financeiro: ["ver", "criar", "editar", "excluir", "aprovar", "liquidar", "conciliar"],
+      Financeiro: ["ver", "criar", "editar", "excluir", "aprovar", "liquidar", "conciliar", "cancelar"],
       Fiscal: ["ver", "criar", "editar", "emitir", "cancelar", "exportar"],
       Comercial: ["ver"],
       Estoque: ["ver"],

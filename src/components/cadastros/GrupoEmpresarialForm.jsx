@@ -50,7 +50,15 @@ export default function GrupoEmpresarialForm({ grupo, onSubmit, isSubmitting, wi
       toast.error('Preencha o nome do grupo');
       return;
     }
-    onSubmit(formData);
+    // Mapeia campos do formulário para o schema da entidade GrupoEmpresarial
+    const mapped = {
+      ...formData,
+      nome_do_grupo: formData.nome_do_grupo || formData.nome,
+      cnpj_grupo: formData.cnpj_grupo || formData.cnpj,
+      razao_social_grupo: formData.razao_social_grupo || formData.razao_social || formData.nome,
+      status: formData.status || 'Ativo',
+    };
+    onSubmit(mapped);
   };
 
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);

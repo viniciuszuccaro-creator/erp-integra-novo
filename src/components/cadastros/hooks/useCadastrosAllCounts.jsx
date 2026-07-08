@@ -31,7 +31,7 @@ ALL_ENTITIES.forEach(e => { SNAPSHOT[e] = 0; });
 // Catálogos puros sem escopo de empresa (contam global — são dados de referência)
 const PURE_CATALOG = new Set([
   'Banco', 'FormaPagamento', 'TipoDespesa', 'MoedaIndice', 'TipoFrete',
-  'UnidadeMedida', 'TabelaFiscal', 'CentroOperacao',
+  'UnidadeMedida', 'TabelaFiscal', 'CentroOperacao', 'GrupoEmpresarial',
 ]);
 
 // Campo de empresa por entidade (igual ao VisualizadorUniversalEntidadeV24)

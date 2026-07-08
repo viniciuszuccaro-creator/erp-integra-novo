@@ -87,7 +87,7 @@ export default function VisualizadorUniversalEntidadeV24({
 
   // ── Filtro multiempresa ────────────────────────────────────────────────────────
   // PURE_CATALOG: catálogos globais sem escopo (Banco, UnidadeMedida, etc.) — não filtram
-  const PURE_CATALOG = isSimple && (ENTITY === 'Banco' || ENTITY === 'FormaPagamento' || ENTITY === 'TipoDespesa' || ENTITY === 'MoedaIndice' || ENTITY === 'TipoFrete' || ENTITY === 'UnidadeMedida' || ENTITY === 'TabelaFiscal' || ENTITY === 'CentroOperacao');
+  const PURE_CATALOG = isSimple && (ENTITY === 'Banco' || ENTITY === 'FormaPagamento' || ENTITY === 'TipoDespesa' || ENTITY === 'MoedaIndice' || ENTITY === 'TipoFrete' || ENTITY === 'UnidadeMedida' || ENTITY === 'TabelaFiscal' || ENTITY === 'CentroOperacao' || ENTITY === 'GrupoEmpresarial');
   const readFilter = useMemo(() => {
     // Exclui registros mesclados (duplicatas desativadas) de todas as consultas e contagens
     const excludeMerged = { _merged: { $ne: true } };
@@ -270,7 +270,7 @@ export default function VisualizadorUniversalEntidadeV24({
   }, [crossPageAll, allPageSelected, items]);
 
   const formProps = useMemo(() => {
-    const base = { onClose: handleCloseForm, onSave: isSelfManaged ? handleCloseForm : (data) => { if (data && typeof data === 'object' && !data.target && !data.preventDefault && !data.nativeEvent) return handlePersistSubmit(data); handleCloseForm(false); }, onSuccess: handleCloseForm, onOpenChange: v => { if (!v) handleCloseForm(false); }, isOpen: showForm, open: showForm, windowMode: true, onSubmit: isSelfManaged ? handleCloseForm : handlePersistSubmit };
+    const base = { onClose: handleCloseForm, isSubmitting: isSaving, onSave: isSelfManaged ? handleCloseForm : (data) => { if (data && typeof data === 'object' && !data.target && !data.preventDefault && !data.nativeEvent) return handlePersistSubmit(data); handleCloseForm(false); }, onSuccess: handleCloseForm, onOpenChange: v => { if (!v) handleCloseForm(false); }, isOpen: showForm, open: showForm, windowMode: true, onSubmit: isSelfManaged ? handleCloseForm : handlePersistSubmit };
     const defaultValues = (!editItem && nextCode && ENTITY_CODE_FIELD[ENTITY]) ? { [ENTITY_CODE_FIELD[ENTITY]]: nextCode, codigo: nextCode } : {};
     if (!editItem) return { ...base, ...defaultValues, defaultValues };
     const aliases = {};

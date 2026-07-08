@@ -6,6 +6,13 @@ import { sanitizeOnWrite } from "@/components/lib/sanitizeOnWrite";
 // Re-exporta para compatibilidade com importadores existentes
 export { ENTITY_CODE_FIELD };
 
+// Entidades que NÃO devem receber group_id (não têm o campo no schema)
+// GrupoEmpresarial É o grupo; catálogos puros são globais sem escopo
+const NO_SCOPE_STAMP = new Set([
+  'GrupoEmpresarial', 'Banco', 'FormaPagamento', 'TipoDespesa', 'MoedaIndice',
+  'TipoFrete', 'UnidadeMedida', 'TabelaFiscal', 'CentroOperacao',
+]);
+
 // P3 (item 3): valores inválidos para descrição/nome
 const INVALID_DESC_VALUES = new Set([
   '', ' ', '  ', '.', '-', '_', 'teste', 'test', 'sem nome', 'sem descricao',
@@ -120,8 +127,10 @@ export default function useVisualizadorCRUD({
     const codeValue = formData[codeField] || formData.codigo || formData.sigla || formData.codigo_banco || null;
 
     // Helper: adiciona escopo multiempresa ao filtro de duplicidade
+    // Entidades NO_SCOPE_STAMP não têm group_id no schema — não filtra por escopo
     const withScope = (filter) => {
       const scoped = { ...filter };
+      if (NO_SCOPE_STAMP.has(ENTITY)) return scoped;
       if (groupId) scoped.group_id = groupId;
       else if (empresaId) scoped.empresa_id = empresaId;
       return scoped;
@@ -245,8 +254,10 @@ export default function useVisualizadorCRUD({
         throw new Error(erroDuplicata);
       }
       if (editItem?.id) {
-        // Catálogos simples sem contexto: usa update direto (não exige group_id/empresa_id)
-        if (isSimple && !groupId && !empresaId) {
+        // SIMPLE_CATALOG: update direto (evita createInContext carimbar group_id em entidades sem esse campo)
+        if (isSimple) {
+          // Carimba group_id apenas se a entidade suporta (GrupoEmpresarial e catálogos puros não têm)
+          if (groupId && !NO_SCOPE_STAMP.has(ENTITY) && !clean.group_id) clean.group_id = groupId;
           await base44.entities[ENTITY].update(editItem.id, clean);
         } else {
           await updateInContext(ENTITY, editItem.id, clean, "empresa_id");
@@ -254,7 +265,8 @@ export default function useVisualizadorCRUD({
         auditarAcao({ acao: 'Edição', ENTITY, registroId: editItem.id, empresaId, groupId, dadosAntes: editItem, dadosDepois: clean });
       } else {
         let criado;
-        if (isSimple && !groupId && !empresaId) {
+        if (isSimple) {
+          if (groupId && !NO_SCOPE_STAMP.has(ENTITY) && !clean.group_id) clean.group_id = groupId;
           criado = await base44.entities[ENTITY].create(clean);
         } else {
           criado = await createInContext(ENTITY, clean, "empresa_id");

@@ -40,6 +40,10 @@ export async function loadScopedConfiguracaoSistema({ empresaId, grupoId, limit 
   if (grupoId) {
     orConds.push({ group_id: grupoId });
   }
+  if (empresaId && grupoId) {
+    // Quando ambos estão presentes, busca também por empresa_id+group_id (escopo exato)
+    orConds.push({ empresa_id: empresaId, group_id: grupoId });
+  }
   if (empresaId && !grupoId) {
     orConds.push({ empresa_id: empresaId });
   }

@@ -6,13 +6,19 @@ import { CheckCircle2, Grid3X3, Shield } from "lucide-react";
 const safeArray = (value) => Array.isArray(value) ? value : [];
 const safeObject = (value) => value && typeof value === "object" && !Array.isArray(value) ? value : {};
 
-const expectedModules = ["Dashboard", "CRM", "Comercial", "Estoque", "Compras", "Financeiro", "Fiscal", "RH", "Expedição", "Produção", "Sistema"];
+const expectedModules = [
+  "Dashboard", "CRM", "Comercial", "Estoque", "Compras", "Financeiro", "Fiscal",
+  "RH", "Expedição", "Produção", "Sistema", "Cadastros", "Agenda", "Relatórios",
+  "Contratos", "HubAtendimento"
+];
 const expectedActions = ["visualizar", "criar", "editar", "excluir", "aprovar", "exportar"];
 
 export default function AccessCoverageMap({ perfis = [] }) {
   const moduleCoverage = expectedModules.map((moduleName) => {
     const profilesWithModule = safeArray(perfis).filter((perfil) => {
       const perms = safeObject(perfil?.permissoes);
+      // Wildcard "*" cobre todos os módulos
+      if (perms["*"]) return true;
       // Busca exata ou case-insensitive no objeto de permissões
       return Object.keys(perms).some(
         key => key === moduleName || key.toLowerCase() === moduleName.toLowerCase()
@@ -22,6 +28,11 @@ export default function AccessCoverageMap({ perfis = [] }) {
     const actions = new Set();
     profilesWithModule.forEach((perfil) => {
       const perms = safeObject(perfil?.permissoes);
+      // Wildcard: "*" com ["*"] concede todas as ações
+      if (perms["*"] && Array.isArray(perms["*"]) && perms["*"].includes("*")) {
+        expectedActions.forEach(a => actions.add(a));
+        return;
+      }
       const modulePerms = perms[moduleName] || perms[Object.keys(perms).find(k => k.toLowerCase() === moduleName.toLowerCase())];
       
       if (Array.isArray(modulePerms)) {

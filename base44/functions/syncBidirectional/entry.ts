@@ -55,10 +55,40 @@ function stripBlocked(data) {
 }
 
 async function fetchWithFallback(api, entityName, filter, limit = 500) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const result = await api.entities[entityName].filter(filter, null, limit);
+      // Throttle: pequeno delay entre chamadas para evitar 429
+      await new Promise(r => setTimeout(r, 100));
+      return result;
+    } catch (err) {
+      const status = err?.status || err?.response?.status;
+      if (status === 429 && attempt < 2) {
+        // Backoff exponencial: 1s, 2s
+        await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+        continue;
+      }
+      return [];
+    }
+  }
+  return [];
+}
+
+// Wrapper com retry para create/update — protege contra 429 em loops de propagação
+async function safeWrite(api, entityName, operation, data, attempt = 0) {
   try {
-    return await api.entities[entityName].filter(filter, null, limit);
-  } catch (_) {
-    return [];
+    if (operation === 'create') {
+      return await api.entities[entityName].create(data);
+    } else {
+      return await api.entities[entityName].update(data.id, data);
+    }
+  } catch (err) {
+    const status = err?.status || err?.response?.status;
+    if (status === 429 && attempt < 2) {
+      await new Promise(r => setTimeout(r, 1500 * (attempt + 1)));
+      return safeWrite(api, entityName, operation, data, attempt + 1);
+    }
+    throw err;
   }
 }
 
@@ -159,12 +189,14 @@ Deno.serve(async (req) => {
             }, 1);
 
             if (existing.length > 0) {
-              await api.entities[entityName].update(existing[0].id, newData);
+              await safeWrite(api, entityName, 'update', { ...newData, id: existing[0].id });
               results.push({ empresa_id: emp.id, empresa: emp.nome_fantasia || emp.razao_social, status: 'updated', entity: entityName });
             } else {
-              await api.entities[entityName].create(newData);
+              await safeWrite(api, entityName, 'create', newData);
               results.push({ empresa_id: emp.id, empresa: emp.nome_fantasia || emp.razao_social, status: 'created', entity: entityName });
             }
+            // Throttle entre registros para evitar 429
+            await new Promise(r => setTimeout(r, 50));
           } catch (e) {
             results.push({ empresa_id: emp.id, status: 'error', entity: entityName, error: e.message });
           }
@@ -192,10 +224,10 @@ Deno.serve(async (req) => {
         });
 
         if (existing.length > 0) {
-          await api.entities[entityName].update(existing[0].id, groupData);
+          await safeWrite(api, entityName, 'update', { ...groupData, id: existing[0].id });
           results.push({ group_id, status: 'updated_group', entity: entityName });
         } else {
-          await api.entities[entityName].create(groupData);
+          await safeWrite(api, entityName, 'create', groupData);
           results.push({ group_id, status: 'created_group', entity: entityName });
         }
       } catch (e) {

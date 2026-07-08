@@ -44,8 +44,11 @@ export default function ToggleConfigGlobal({
     queryKey: queryKeySelf,
     queryFn: () => loadScopedConfiguracaoSistema({ empresaId: eId, grupoId: gId, limit: 200, includeGlobal: true }),
     enabled: !onToggleProp && !getToggleValueProp && Boolean(eId || gId),
-    staleTime: 15000,
+    staleTime: 30000,
     refetchOnMount: true,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
+    placeholderData: (prev) => prev, // Mantém dados anteriores durante refetch — impede reset para false
   });
 
   // Decide qual modo usar

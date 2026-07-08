@@ -26,9 +26,13 @@ const DEFAULT_PROFILES = {
       Expedicao: ["ver", "criar", "editar"],
       Producao: ["ver", "criar", "editar"],
       Financeiro: ["ver", "criar", "editar", "aprovar"],
-      RH: ["ver"],
-      Fiscal: ["ver"],
-      Agenda: ["ver", "criar", "editar"]
+      RH: ["ver", "criar", "editar"],
+      Fiscal: ["ver", "criar", "editar"],
+      Cadastros: ["ver", "criar", "editar"],
+      Agenda: ["ver", "criar", "editar"],
+      Contratos: ["ver", "criar", "editar", "aprovar"],
+      HubAtendimento: ["ver", "criar", "editar"],
+      Sistema: ["ver", "consultar"]
     }
   },
   Operacional: {
@@ -43,7 +47,9 @@ const DEFAULT_PROFILES = {
       Compras: ["ver", "criar"],
       Expedicao: ["ver", "criar", "editar"],
       Producao: ["ver", "criar", "editar"],
-      Agenda: ["ver", "criar", "editar"]
+      Cadastros: ["ver", "criar", "editar"],
+      Agenda: ["ver", "criar", "editar"],
+      HubAtendimento: ["ver", "criar", "editar"]
     }
   },
   Analista: {
@@ -60,7 +66,13 @@ const DEFAULT_PROFILES = {
       Compras: ["ver", "exportar"],
       Financeiro: ["ver", "exportar"],
       RH: ["ver", "exportar"],
-      Fiscal: ["ver", "exportar"]
+      Fiscal: ["ver", "exportar"],
+      Cadastros: ["ver", "exportar"],
+      Expedicao: ["ver", "exportar"],
+      Producao: ["ver", "exportar"],
+      Agenda: ["ver"],
+      Contratos: ["ver", "exportar"],
+      HubAtendimento: ["ver"]
     }
   },
   Financeiro: {
@@ -72,8 +84,12 @@ const DEFAULT_PROFILES = {
       Dashboard: ["ver"],
       Financeiro: ["ver", "criar", "editar", "aprovar", "liquidar", "conciliar"],
       Comercial: ["ver"],
-      Contatos: ["ver"],
-      Agenda: ["ver", "criar"]
+      Fiscal: ["ver"],
+      Cadastros: ["ver"],
+      Agenda: ["ver", "criar"],
+      Contratos: ["ver", "criar", "editar"],
+      Relatorios: ["ver", "exportar"],
+      HubAtendimento: ["ver"]
     }
   },
   RH: {
@@ -84,7 +100,10 @@ const DEFAULT_PROFILES = {
     permissoes: {
       Dashboard: ["ver"],
       RH: ["ver", "criar", "editar", "aprovar"],
-      Agenda: ["ver", "criar", "editar"]
+      Cadastros: ["ver"],
+      Agenda: ["ver", "criar", "editar"],
+      Relatorios: ["ver", "exportar"],
+      HubAtendimento: ["ver"]
     }
   }
 };

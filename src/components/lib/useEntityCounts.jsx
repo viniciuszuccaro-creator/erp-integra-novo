@@ -104,12 +104,9 @@ export function useEntityCounts(entities = []) {
       const batchPayload = [];
 
       for (const entityName of normalized) {
-        const isSimple = SIMPLE_CATALOG.has(entityName);
-        let ctxFilter = {};
-        if (!isSimple) {
-          // buildContextFilter pode retornar null quando sem contexto — usa {} para contar global
-          ctxFilter = buildContextFilter(entityName, empresaId, groupId, empresasDoGrupo) ?? {};
-        }
+        // buildContextFilter já trata TRULY_GLOBAL (MoedaIndice, GrupoEmpresarial) retornando {}
+        // e SIMPLE_CATALOG aplicando group_id quando disponível
+        const ctxFilter = buildContextFilter(entityName, empresaId, groupId, empresasDoGrupo) ?? {};
         batchPayload.push({ entityName, filter: ctxFilter });
       }
 

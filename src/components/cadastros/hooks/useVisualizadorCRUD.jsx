@@ -119,40 +119,50 @@ export default function useVisualizadorCRUD({
     const codeField = ENTITY_CODE_FIELD[ENTITY] || 'codigo';
     const codeValue = formData[codeField] || formData.codigo || formData.sigla || formData.codigo_banco || null;
 
+    // Helper: adiciona escopo multiempresa ao filtro de duplicidade
+    const withScope = (filter) => {
+      const scoped = { ...filter };
+      if (groupId) scoped.group_id = groupId;
+      else if (empresaId) scoped.empresa_id = empresaId;
+      return scoped;
+    };
+
+    // Helper: timeout para evitar travamento quando entityListSorted sofre rate limit (429)
+    const withTimeout = (promise, ms = 8000) =>
+      Promise.race([
+        promise,
+        new Promise(resolve => setTimeout(() => resolve(null), ms))
+      ]);
+
     if (codeValue && String(codeValue).trim()) {
-      // P3 (item 4): uniqueness de código — busca GLOBAL (sem restrição de escopo)
-      // Exclui registros _merged (duplicatas já eliminadas) da verificação
       const codeStr = String(codeValue).trim();
-      const codeFilter = { [codeField]: codeStr };
+      const codeFilter = withScope({ [codeField]: codeStr });
       try {
-        const res = await base44.functions.invoke("entityListSorted", {
+        const res = await withTimeout(base44.functions.invoke("entityListSorted", {
           entityName: ENTITY, filter: codeFilter,
           sortField: "created_date", sortDirection: "asc", limit: 10, skip: 0,
-        });
+        }));
         const conflitos = (Array.isArray(res?.data) ? res.data : []).filter(r => r.id !== currentId);
         if (conflitos.length > 0) {
           const conflito = conflitos[0];
           const label = conflito.nome || conflito.razao_social || conflito.descricao || conflito.sigla || conflito.id;
           return `⚠️ Código "${codeValue}" já está em uso pelo registro "${label}". Não é permitido duplicar códigos.`;
         }
-      } catch { /* não bloqueia */ }
+      } catch { /* não bloqueia salvamento por falha de verificação */ }
     }
 
-    // P3 (item 3): verificar duplicidade por NOME/DESCRIÇÃO no mesmo escopo
-    // Só verifica nome quando a entidade NÃO tem CNPJ/CPF (nome é o identificador principal)
     const _cnpjRaw = formData.cnpj ? String(formData.cnpj).replace(/\D/g,'') : '';
     const _cpfRaw  = formData.cpf  ? String(formData.cpf).replace(/\D/g,'')  : '';
     const descInfo = getDescricaoField(formData, ENTITY);
     if (descInfo && !_cnpjRaw && !_cpfRaw) {
       const nomeLimpo = descInfo.value.toLowerCase().trim();
       if (nomeLimpo.length >= 2 && !INVALID_DESC_VALUES.has(nomeLimpo)) {
-        // Busca GLOBAL (sem restrição de escopo) — duplicatas podem existir em qualquer escopo
-        const nameFilter = { [descInfo.field]: { $regex: `^${nomeLimpo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' } };
+        const nameFilter = withScope({ [descInfo.field]: { $regex: `^${nomeLimpo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' } });
         try {
-          const res2 = await base44.functions.invoke("entityListSorted", {
+          const res2 = await withTimeout(base44.functions.invoke("entityListSorted", {
             entityName: ENTITY, filter: nameFilter,
             sortField: "created_date", sortDirection: "asc", limit: 10, skip: 0,
-          });
+          }));
           const conflitos2 = (Array.isArray(res2?.data) ? res2.data : []).filter(r => r.id !== currentId);
           if (conflitos2.length > 0) {
             const label2 = conflitos2[0].nome || conflitos2[0].razao_social || conflitos2[0].descricao || conflitos2[0].sigla || conflitos2[0].id;
@@ -168,11 +178,12 @@ export default function useVisualizadorCRUD({
     if (cnpjClean.length >= 14) fiscalOr.push({ cnpj: formData.cnpj });
     if (cpfClean.length  >= 11) fiscalOr.push({ cpf: formData.cpf });
     if (fiscalOr.length) {
+      const fiscalFilter = withScope(fiscalOr.length > 1 ? { $or: fiscalOr } : fiscalOr[0]);
       try {
-        const res = await base44.functions.invoke("entityListSorted", {
-          entityName: ENTITY, filter: fiscalOr.length > 1 ? { $or: fiscalOr } : fiscalOr[0],
+        const res = await withTimeout(base44.functions.invoke("entityListSorted", {
+          entityName: ENTITY, filter: fiscalFilter,
           sortField: "created_date", sortDirection: "asc", limit: 5, skip: 0,
-        });
+        }));
         const conflito = (Array.isArray(res?.data) ? res.data : []).find(r => r.id !== currentId);
         if (conflito) {
           const label = conflito.nome || conflito.razao_social || conflito.cnpj || conflito.id;

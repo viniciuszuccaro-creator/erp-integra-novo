@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Grid3X3, Shield } from "lucide-react";
-import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/rbacModuleMap";
+import { DEFAULT_ROLE_PERMISSIONS, RBAC_MODULES } from "@/lib/rbacModuleMap";
 
 const safeArray = (value) => Array.isArray(value) ? value : [];
 const safeObject = (value) => value && typeof value === "object" && !Array.isArray(value) ? value : {};
@@ -17,31 +17,39 @@ const buildDefaultProfiles = () => {
   }));
 };
 
-const expectedModules = [
-  "Dashboard", "CRM", "Comercial", "Estoque", "Compras", "Financeiro", "Fiscal",
-  "RH", "Expedição", "Produção", "Sistema", "Cadastros", "Agenda", "Relatórios",
-  "Contratos", "HubAtendimento"
-];
-const expectedActions = ["visualizar", "criar", "editar", "excluir", "aprovar", "exportar"];
+// Módulos esperados derivados de RBAC_MODULES — sempre sincronizado com a fonte de verdade
+const expectedModules = Object.keys(RBAC_MODULES);
+
+// Para cada módulo, as ações esperadas são as definidas em RBAC_MODULES[mod].actions
+// Isso garante 100% de cobertura quando todos os perfis concedem todas as ações do módulo
+const getExpectedActionsForModule = (moduleName) => {
+  const mod = RBAC_MODULES[moduleName];
+  if (!mod) return ["visualizar"];
+  return safeArray(mod.actions);
+};
+
+// Normaliza uma ação bruta para um identificador canônico
+const normalizeAction = (rawAction) => {
+  const a = normalize(rawAction);
+  if (["ver","view","read","listar","consultar","visualizar"].includes(a)) return "visualizar";
+  if (["delete","remove","apagar","excluir"].includes(a)) return "excluir";
+  if (["create","add","emitir","enviar","importar","criar","gerar"].includes(a)) return "criar";
+  if (["update","edit","corrigir","gerenciar","executar","editar","configurar"].includes(a)) return "editar";
+  if (["approve","aprovar","aprovar"].includes(a)) return "aprovar";
+  if (["export","exportar","imprimir","print"].includes(a)) return "exportar";
+  return a;
+};
 
 // Percorre recursivamente a árvore de permissões (módulo → seção → [ações])
-// para coletar TODAS as ações concedidas, independente do nível de aninhamento.
+// para coletar TODAS as ações concedidas em forma canônica
 const collectActions = (node, actionsSet) => {
   if (!node) return;
   if (Array.isArray(node)) {
     node.forEach((action) => {
-      const normAction = normalize(action);
-      if (normAction === "ver" || normAction === "view" || normAction === "read" || normAction === "listar" || normAction === "consultar") actionsSet.add("visualizar");
-      else if (normAction === "delete" || normAction === "remove" || normAction === "apagar") actionsSet.add("excluir");
-      else if (normAction === "create" || normAction === "add" || normAction === "emitir" || normAction === "enviar" || normAction === "importar") actionsSet.add("criar");
-      else if (normAction === "update" || normAction === "edit" || normAction === "corrigir" || normAction === "gerenciar" || normAction === "executar") actionsSet.add("editar");
-      else if (normAction === "approve" || normAction === "aprovar") actionsSet.add("aprovar");
-      else if (normAction === "export" || normAction === "exportar" || normAction === "imprimir" || normAction === "print") actionsSet.add("exportar");
-      else if (normAction === "*") {
-        // Wildcard: concede todas as ações esperadas
-        expectedActions.forEach(a => actionsSet.add(a));
+      if (normalize(action) === "*") {
+        actionsSet.add("__wildcard__");
       } else {
-        actionsSet.add(action);
+        actionsSet.add(normalizeAction(action));
       }
     });
   } else if (typeof node === "object") {
@@ -60,45 +68,51 @@ export default function AccessCoverageMap({ perfis = [] }) {
   const effectivePerfis = [...dbPerfis, ...missingDefaults];
 
   const moduleCoverage = expectedModules.map((moduleName) => {
+    const expectedActionsForModule = getExpectedActionsForModule(moduleName);
+    // Normaliza as ações esperadas para comparação canônica
+    const expectedNormalized = expectedActionsForModule.map(normalizeAction);
+    // Remove duplicatas
+    const expectedSet = [...new Set(expectedNormalized)];
+
     const profilesWithModule = safeArray(effectivePerfis).filter((perfil) => {
       const perms = safeObject(perfil?.permissoes);
-      // Wildcard "*" cobre todos os módulos (formato do initializeRBACProfiles: { "*": ["*"] })
       if (perms["*"]) return true;
-      // Wildcard "_global" (formato do rbacModuleMap: { _global: ["*"] })
       if (perms["_global"]) return true;
-      // Busca exata, case-insensitive e accent-insensitive
       const normModule = normalize(moduleName);
       return Object.keys(perms).some(key => normalize(key) === normModule);
     });
-    
+
     const actions = new Set();
     safeArray(profilesWithModule).forEach((perfil) => {
       const perms = safeObject(perfil?.permissoes);
-      // Wildcard: "*" com ["*"] concede todas as ações (formato initializeRBACProfiles)
-      if (perms["*"] && Array.isArray(perms["*"]) && perms["*"].includes("*")) {
-        expectedActions.forEach(a => actions.add(a));
-        return;
-      }
-      // Wildcard: "_global" com ["*"] concede todas as ações (formato rbacModuleMap)
-      if (perms["_global"] && Array.isArray(perms["_global"]) && perms["_global"].includes("*")) {
-        expectedActions.forEach(a => actions.add(a));
+      // Wildcard: concede todas as ações esperadas do módulo
+      const isWildcard = (perms["*"] && Array.isArray(perms["*"]) && perms["*"].includes("*"))
+        || (perms["_global"] && Array.isArray(perms["_global"]) && perms["_global"].includes("*"));
+      if (isWildcard) {
+        expectedSet.forEach(a => actions.add(a));
         return;
       }
       const normModule = normalize(moduleName);
       const matchKey = Object.keys(perms).find(k => normalize(k) === normModule);
       const modulePerms = matchKey ? perms[matchKey] : null;
-
-      // Coleta ações recursivamente — a estrutura é módulo → seção → [ações]
       collectActions(modulePerms, actions);
+      // Se actions contém __wildcard__, concede tudo
+      if (actions.has("__wildcard__")) {
+        expectedSet.forEach(a => actions.add(a));
+      }
     });
 
-    const actionCount = expectedActions.filter((action) => actions.has(action)).length;
-    const score = profilesWithModule.length > 0 ? Math.round((actionCount / expectedActions.length) * 100) : 0;
+    // Conta quantas ações esperadas estão cobertas
+    const actionCount = expectedSet.filter((action) => actions.has(action)).length;
+    const score = profilesWithModule.length > 0
+      ? Math.round((actionCount / Math.max(expectedSet.length, 1)) * 100)
+      : 0;
 
     return {
       moduleName,
       profiles: profilesWithModule.length,
       actions: actionCount,
+      totalActions: expectedSet.length,
       score,
     };
   });
@@ -133,7 +147,7 @@ export default function AccessCoverageMap({ perfis = [] }) {
               </div>
               <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500">
                 <span>{item.profiles} perfil(is)</span>
-                <span>{item.actions}/{expectedActions.length} ações</span>
+                <span>{item.actions}/{item.totalActions || 6} ações</span>
               </div>
             </div>
           ))}

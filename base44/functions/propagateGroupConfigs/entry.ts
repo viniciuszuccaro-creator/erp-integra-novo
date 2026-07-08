@@ -57,6 +57,8 @@ Deno.serve(async (req) => {
       'ParametroConciliacaoBancaria', 'ParametroCaixaDiario',
       // Chatbot & Templates
       'TemplateWhatsApp', 'ChatbotIntent',
+      // Sistema & Configurações
+      'ConfiguracaoSistema', 'IAConfig', 'EventoNotificacao', 'ModeloDocumento',
     ];
     entidades = Array.isArray(entidades) && entidades.length ? entidades : DEFAULT_ENTIDADES;
     strategy = strategy || 'merge'; // 'skip' | 'merge' | 'override'
@@ -112,6 +114,9 @@ Deno.serve(async (req) => {
         SegmentoCliente: ['nome_segmento'],
         RegiaoAtendimento: ['nome_regiao', 'codigo_regiao'],
         ModeloDocumento: ['nome', 'tipo'],
+        ConfiguracaoSistema: ['chave'],
+        IAConfig: ['chave'],
+        EventoNotificacao: ['nome_evento'],
       };
       return map[en] || ['codigo', 'descricao', 'nome', 'titulo'];
     };
@@ -128,7 +133,13 @@ Deno.serve(async (req) => {
 
     const copyGroupToEmpresas = async (entityName) => {
       if (!base44.asServiceRole.entities?.[entityName]) return { entity: entityName, skipped: 'not-found' };
-      const baseRegs = await base44.asServiceRole.entities[entityName].filter({ group_id: groupId }, undefined, 5000).catch(() => []);
+      // Busca registros do grupo — inclui legacy (group_id: null) para ConfiguracaoSistema e IAConfig
+      const isConfigEntity = entityName === 'ConfiguracaoSistema' || entityName === 'IAConfig';
+      let baseRegs = await base44.asServiceRole.entities[entityName].filter({ group_id: groupId }, undefined, 5000).catch(() => []);
+      if (isConfigEntity && !baseRegs.length) {
+        // Legacy fallback: registros sem group_id (globais ou criados antes do multi-tenant)
+        baseRegs = await base44.asServiceRole.entities[entityName].filter({ group_id: null, empresa_id: null }, undefined, 5000).catch(() => []);
+      }
       if (!baseRegs.length) return { entity: entityName, created: 0, updated: 0, skipped: 0, total_source: 0, direction: 'grupo_to_empresas' };
       const keys = keyFieldsByEntity(entityName);
       let created = 0, updated = 0, skipped = 0;
@@ -144,7 +155,12 @@ Deno.serve(async (req) => {
         const toCreate = [];
         const toUpdate = [];
         for (const r of baseRegs) {
-          const payload = sanitize({ ...r, group_id: undefined, empresa_id: emp.id });
+          // Para ConfiguracaoSistema: mantém group_id e adiciona empresa_id (escopo empresa+grupo)
+          // Para outras entidades: remove group_id e seta empresa_id (escopo empresa)
+          const isConfigEntity = entityName === 'ConfiguracaoSistema' || entityName === 'IAConfig';
+          const payload = sanitize(isConfigEntity
+            ? { ...r, empresa_id: emp.id }
+            : { ...r, group_id: undefined, empresa_id: emp.id });
           const keyField = keys.find(k => r?.[k]);
           const keyVal = keyField ? String(r[keyField]) : null;
           const existing = keyVal && existingKeys.has(keyVal) ? existingRegs.find(ex => keys.find(k => ex?.[k]) && String(ex[keys.find(k => ex?.[k])]) === keyVal) : null;
@@ -181,7 +197,13 @@ Deno.serve(async (req) => {
       if (!baseRegs.length) return { entity: entityName, created: 0, updated: 0, skipped: 0, total_source: 0, direction: 'empresa_to_grupo' };
       const keys = keyFieldsByEntity(entityName);
       // Pre-fetch ALL existing group records in ONE call, build a lookup set
-      const groupRegs = await base44.asServiceRole.entities[entityName].filter({ group_id: groupId }, undefined, 5000).catch(() => []);
+      // Inclui registros legacy (group_id: null) para ConfiguracaoSistema
+      const isConfigEntity = entityName === 'ConfiguracaoSistema' || entityName === 'IAConfig';
+      let groupRegs = await base44.asServiceRole.entities[entityName].filter({ group_id: groupId }, undefined, 5000).catch(() => []);
+      if (isConfigEntity) {
+        const legacyRegs = await base44.asServiceRole.entities[entityName].filter({ group_id: null, empresa_id: null }, undefined, 5000).catch(() => []);
+        groupRegs = [...groupRegs, ...legacyRegs];
+      }
       const groupKeyMap = new Map();
       for (const gr of groupRegs) {
         const keyField = keys.find(k => gr?.[k]);
@@ -191,7 +213,11 @@ Deno.serve(async (req) => {
       const toCreate = [];
       const toUpdate = [];
       for (const r of baseRegs) {
-        const payload = sanitize({ ...r, empresa_id: undefined, group_id: groupId });
+        // Para ConfiguracaoSistema: cria cópia no nível do grupo (sem empresa_id)
+        const isConfigEntity = entityName === 'ConfiguracaoSistema' || entityName === 'IAConfig';
+        const payload = sanitize(isConfigEntity
+          ? { ...r, empresa_id: undefined, group_id: groupId }
+          : { ...r, empresa_id: undefined, group_id: groupId });
         const keyField = keys.find(k => r?.[k]);
         const keyVal = keyField ? String(r[keyField]) : null;
         const existing = keyVal ? groupKeyMap.get(keyVal) : null;

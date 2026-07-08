@@ -148,8 +148,17 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
   }, [empresaId, grupoId]);
 
   const saveDirectConfig = useCallback(async (chave, categoria, ativa, scope) => {
-    // Usa entityListSorted (service-role) para leitura, garantindo visibilidade
-    const filter = { chave, ...scope };
+    // Busca multi-escopo: inclui registros legacy (group_id: null) para evitar duplicação
+    const orConds = [];
+    if (scope.group_id) orConds.push({ group_id: scope.group_id });
+    if (scope.empresa_id && scope.group_id) {
+      orConds.push({ empresa_id: scope.empresa_id, group_id: scope.group_id });
+      orConds.push({ empresa_id: scope.empresa_id, group_id: null });
+    }
+    if (scope.empresa_id && !scope.group_id) {
+      orConds.push({ empresa_id: scope.empresa_id });
+    }
+    const filter = orConds.length > 1 ? { $or: orConds, chave } : { chave, ...(orConds[0] || {}) };
     const res = await base44.functions.invoke('entityListSorted', {
       entityName: 'ConfiguracaoSistema',
       filter,

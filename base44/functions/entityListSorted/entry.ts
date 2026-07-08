@@ -129,6 +129,7 @@ const SIMPLE_CATALOG = new Set([
   'ContatoB2B', 'CentroCusto', 'PlanoDeContas', 'PlanoContas',
   'Veiculo', 'Motorista', 'Representante', 'GrupoEmpresarial', 'Empresa',
   'TabelaPrecoItem', 'CentroOperacao', 'ConfiguracaoDespesaRecorrente',
+  'ConfiguracaoSistema', 'IAConfig', 'GovernancaEmpresa',
 ]);
 
 // Entidades com empresas_compartilhadas_ids ou campos de vinculação múltiplos

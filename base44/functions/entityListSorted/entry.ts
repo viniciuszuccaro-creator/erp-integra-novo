@@ -239,7 +239,7 @@ async function listOne(base44, user, q) {
 
   // Sem escopo → lista tudo (acesso autenticado e auditado; dados protegidos por RBAC no frontend)
 
-  const limit = Math.max(1, Math.min(Number(q?.limit || q?.pageSize) || 80, 150));
+  const limit = Math.max(1, Math.min(Number(q?.limit || q?.pageSize) || 80, 5000));
   const skip = Math.max(0, Number(q?.skip ?? q?.offset ?? 0) || 0);
 
   const sortField = normalizeSortField(entityName, q?.sortField || q?.sortBy);
@@ -285,7 +285,10 @@ async function listOne(base44, user, q) {
   if (cached && Date.now() - cached.ts < LIST_CACHE_TTL_MS) {
     return { entityName, items: cached.items };
   }
-  if (Date.now() < LIST_BACKEND_PAUSED_UNTIL) {
+  // NO_CACHE_ENTITIES (ex: ConfiguracaoSistema) nunca retorna vazio durante pause —
+  // isso faria todos os toggles reverterem para false. Apenas entidades com cache
+  // podem retornar dados stale durante o pause.
+  if (Date.now() < LIST_BACKEND_PAUSED_UNTIL && !skipCache) {
     return { entityName, items: cached?.items || [] };
   }
 
@@ -301,7 +304,7 @@ async function listOne(base44, user, q) {
     // Ordenação numérica: busca TODOS os registros, ordena em memória, depois pagina
     // Necessário porque o BD ordena códigos como TEXTO (10 vem antes de 2)
     if (NUMERIC_SORT_FIELDS.has(sortField)) {
-      const allItems = await base44.asServiceRole.entities[entityName].filter(finalFilter, '-created_date', 2000, 0) || [];
+      const allItems = await base44.asServiceRole.entities[entityName].filter(finalFilter, '-created_date', 5000, 0) || [];
       const sorted = [...allItems].sort((a, b) => {
         const diff = toNum(a[sortField]) - toNum(b[sortField]);
         return sortDir === 'asc' ? diff : -diff;

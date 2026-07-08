@@ -16,6 +16,7 @@ import ConversaoProducaoMassa from "@/components/cadastros/ConversaoProducaoMass
 import DashboardProdutosProducao from "@/components/cadastros/DashboardProdutosProducao";
 import ImportadorProdutosPlanilha from "@/components/estoque/ImportadorProdutosPlanilha";
 import VisualizadorUniversalEntidade from "@/components/cadastros/VisualizadorUniversalEntidadeV24";
+import { getProdutoEstoqueDisponivel } from "@/components/estoque/utils/estoqueSafeData";
 
 export default function ProdutosTab(props) {
   const { hasPermission } = usePermissions();
@@ -27,7 +28,7 @@ export default function ProdutosTab(props) {
   const { toast } = useToast();
 
   // Queries via useRLSQuery (com escopo automático)
-  const { data: produtosRLS = [] } = useRLSQuery('Produto', { status: 'Ativo' }, '-updated_date', 300);
+  const { data: produtosRLS = [] } = useRLSQuery('Produto', { status: 'Ativo' }, '-updated_date', 2000);
   
   const contagensTotais = useMemo(() => {
     const total = produtosRLS.filter(p => p.status === 'Ativo').length;
@@ -35,7 +36,7 @@ export default function ProdutosTab(props) {
     const producao = produtosRLS.filter(p => p.tipo_item === 'Matéria-Prima Produção').length;
     // Estoque Crítico = Revenda ativo com estoque disponível <= 0 (sem estoque)
     const estoqueBaixo = produtosRLS.filter(p =>
-      p.status === 'Ativo' && p.tipo_item === 'Revenda' && (p.estoque_disponivel || 0) <= 0
+      p.status === 'Ativo' && p.tipo_item === 'Revenda' && getProdutoEstoqueDisponivel(p) <= 0
     ).length;
     return { total, revenda, producao, estoqueBaixo };
   }, [produtosRLS]);

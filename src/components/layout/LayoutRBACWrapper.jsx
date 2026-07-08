@@ -48,19 +48,53 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
     const __rbacCache = window.__layoutRbacCache || (window.__layoutRbacCache = new Map());
     const __RBAC_TTL = 5 * 60 * 1000;
 
+    const WRITE_ACTIONS = ["criar", "editar", "excluir"];
+
     const checkRBAC = async (entityName, action) => {
       try {
-        if (entityName === "AuditLog" && ["criar", "editar", "excluir"].includes(action)) throw new Error("RBAC: entidade protegida");
+        if (entityName === "AuditLog" && WRITE_ACTIONS.includes(action)) throw new Error("RBAC: entidade protegida");
         if (contextRef.current.user?.role === "admin") return;
 
+        // Mapeamento completo entidade → módulo RBAC
         const map = {
-          Cliente: "CRM", Oportunidade: "CRM", Interacao: "CRM",
-          Pedido: "Comercial", Comissao: "Comercial", NotaFiscal: "Fiscal",
-          Entrega: "Expedição", Romaneio: "Expedição",
-          Fornecedor: "Compras", SolicitacaoCompra: "Compras", OrdemCompra: "Compras",
-          Produto: "Estoque", MovimentacaoEstoque: "Estoque",
-          ContaPagar: "Financeiro", ContaReceber: "Financeiro", CentroCusto: "Financeiro",
-          PerfilAcesso: "Administração", User: "Administração", Evento: "Agenda",
+          // CRM
+          Cliente: "CRM", Oportunidade: "CRM", Interacao: "CRM", Campanha: "CRM", HistoricoCliente: "CRM", ContatoB2B: "CRM",
+          // Comercial
+          Pedido: "Comercial", Comissao: "Comercial", OrcamentoCliente: "Comercial", TabelaPreco: "Comercial", TabelaPrecoItem: "Comercial",
+          // Fiscal
+          NotaFiscal: "Fiscal", ImportacaoXMLNFe: "Fiscal", SPEDFiscal: "Fiscal", LogFiscal: "Fiscal", TabelaFiscal: "Fiscal", TabelaDIFAL: "Fiscal",
+          // Expedição
+          Entrega: "Expedição", Romaneio: "Expedição", Rota: "Expedição", EntregaItens: "Expedição", SeparacaoConferencia: "Expedição",
+          // Compras
+          Fornecedor: "Compras", SolicitacaoCompra: "Compras", OrdemCompra: "Compras", Cotacao: "Compras",
+          // Estoque
+          Produto: "Estoque", MovimentacaoEstoque: "Estoque", Inventario: "Estoque", TransferenciaFilial: "Estoque", LocalEstoque: "Estoque",
+          // Financeiro
+          ContaPagar: "Financeiro", ContaReceber: "Financeiro", CentroCusto: "Financeiro", CaixaMovimento: "Financeiro",
+          ConciliacaoBancaria: "Financeiro", LancamentoContabil: "Financeiro", PlanoDeContas: "Financeiro", DRE: "Financeiro",
+          ExtratoBancario: "Financeiro", MovimentoCartao: "Financeiro", RateioFinanceiro: "Financeiro", ContaBancariaEmpresa: "Financeiro",
+          // Produção
+          OrdemProducao: "Produção", ApontamentoProducao: "Producao", ConfiguracaoProducao: "Producao",
+          // RH
+          Colaborador: "RH", Ferias: "RH", Ponto: "RH", Cargo: "RH", Departamento: "RH", Turno: "RH", MonitoramentoRH: "RH",
+          // Contratos
+          Contrato: "Contratos",
+          // Agenda
+          Evento: "Agenda",
+          // Cadastros
+          Marca: "Cadastros", GrupoProduto: "Cadastros", UnidadeMedida: "Cadastros", TabelaNCM: "Cadastros",
+          CondicaoComercial: "Cadastros", SetorAtividade: "Cadastros", RegiaoAtendimento: "Cadastros", SegmentoCliente: "Cadastros",
+          Veiculo: "Cadastros", Motorista: "Cadastros", RotaPadrao: "Cadastros", TipoFrete: "Cadastros", Transportadora: "Cadastros",
+          Servico: "Cadastros", KitProduto: "Cadastros", MoedaIndice: "Cadastros", CentroResultado: "Cadastros",
+          CentroOperacao: "Cadastros", CatalogoWeb: "Cadastros", OperadorCaixa: "Cadastros", ModeloDocumento: "Cadastros",
+          FormaPagamento: "Cadastros", Banco: "Cadastros", GatewayPagamento: "Cadastros", Representante: "Cadastros",
+          TipoDespesa: "Cadastros", Empresa: "Cadastros", GrupoEmpresarial: "Cadastros",
+          // Sistema (admin-only para escrita — entityGuard bloqueia)
+          PerfilAcesso: "Sistema", User: "Sistema", ConfiguracaoSistema: "Sistema", ConfiguracaoNFe: "Sistema",
+          ConfiguracaoSeguranca: "Sistema", ConfiguracaoBackup: "Sistema", ConfiguracaoMonitoramento: "Sistema",
+          GovernancaEmpresa: "Sistema", PermissaoEmpresaModulo: "Sistema", IAConfig: "Sistema",
+          ApiExterna: "Sistema", Webhook: "Sistema", JobAgendado: "Sistema", SessaoUsuario: "Sistema",
+          TokenRefresh: "Sistema", ConfiguracaoIntegracaoMarketplace: "Sistema",
         };
         const modName = map[entityName] || "Sistema";
         const scope = getScope();
@@ -79,7 +113,13 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
         __rbacCache.set(cacheKey, { allowed, ts: now });
         if (!allowed) throw new Error("RBAC backend: ação negada");
       } catch (err) {
+        // Bloqueios explícitos do entityGuard: sempre re-throw
         if (err?.message === "RBAC backend: ação negada" || err?.response?.status === 403) throw err;
+        // Para ações de escrita: fail-closed — qualquer erro inesperado bloqueia a operação
+        if (WRITE_ACTIONS.includes(action)) {
+          throw new Error(`RBAC: verificação falhou para ${action} em ${entityName}`);
+        }
+        // Para leitura: permite continuar (fail-open apenas para leitura)
       }
     };
 

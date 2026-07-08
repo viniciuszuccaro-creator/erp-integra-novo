@@ -33,9 +33,13 @@ export default function useRBACGranular() {
    * Verifica se usuário pode acessar um CAMPO específico
    * Ex: hasFieldPermission('Pedido.Financeiro.desconto_geral', 'editar')
    */
+  const READ_ONLY_ACTIONS = ['visualizar', 'ver', 'view', 'read', 'listar', 'consultar', 'status'];
+
   const hasFieldPermission = (fieldPath, action = 'visualizar') => {
     if (user?.role === 'admin') return true;
-    if (!perfilAcesso?.permissoes) return false;
+    const isReadOnly = READ_ONLY_ACTIONS.includes(String(action || '').toLowerCase());
+    // Fail-open para leitura enquanto perfil carrega; fail-closed para escrita
+    if (!perfilAcesso?.permissoes) return isReadOnly;
 
     // Parse: "Pedido.Financeiro.desconto_geral" → [Pedido, Financeiro, desconto_geral]
     const parts = String(fieldPath).split('.').map(p => p.trim());
@@ -89,5 +93,6 @@ export default function useRBACGranular() {
     filterVisibleFields,
     isFieldReadOnly,
     isLoading: userCtx?.isLoading,
+    perfilAcesso
   };
 }

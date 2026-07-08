@@ -43,7 +43,7 @@ const SIMPLE_CATALOG = new Set([
 
 // Cache TTL
 const COUNT_CACHE = new Map();
-const TTL = 30_000;
+const TTL = 2_000;
 
 function cacheKey(name, filter) {
   try { return `${name}:${JSON.stringify(filter, Object.keys(filter).sort())}`; }

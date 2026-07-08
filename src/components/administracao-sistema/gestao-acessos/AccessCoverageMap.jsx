@@ -32,11 +32,27 @@ const getExpectedActionsForModule = (moduleName) => {
 const normalizeAction = (rawAction) => {
   const a = normalize(rawAction);
   if (["ver","view","read","listar","consultar","visualizar"].includes(a)) return "visualizar";
-  if (["delete","remove","apagar","excluir"].includes(a)) return "excluir";
+  if (["delete","remove","apagar","excluir","deletar"].includes(a)) return "excluir";
   if (["create","add","emitir","enviar","importar","criar","gerar"].includes(a)) return "criar";
   if (["update","edit","corrigir","gerenciar","executar","editar","configurar"].includes(a)) return "editar";
-  if (["approve","aprovar","aprovar"].includes(a)) return "aprovar";
+  if (["approve","aprovar","rejeitar","validar"].includes(a)) return "aprovar";
   if (["export","exportar","imprimir","print"].includes(a)) return "exportar";
+  if (["liquidar","pagar","receber"].includes(a)) return "liquidar";
+  if (["conciliar","reconcile"].includes(a)) return "conciliar";
+  if (["rastrear","track"].includes(a)) return "rastrear";
+  if (["roteirizar","route"].includes(a)) return "roteirizar";
+  if (["transferir","transfer"].includes(a)) return "transferir";
+  if (["inventario","inventory"].includes(a)) return "inventario";
+  if (["apontar","registrar"].includes(a)) return "apontar";
+  if (["concluir","finalizar"].includes(a)) return "concluir";
+  if (["assinar","sign"].includes(a)) return "assinar";
+  if (["renovar","renew"].includes(a)) return "renovar";
+  if (["auditar","audit"].includes(a)) return "auditar";
+  if (["backup"].includes(a)) return "backup";
+  if (["seguranca","security"].includes(a)) return "seguranca";
+  if (["cancelar","cancel"].includes(a)) return "cancelar";
+  if (["desconto","discount"].includes(a)) return "desconto";
+  if (["receber","receive"].includes(a)) return "receber";
   return a;
 };
 
@@ -63,9 +79,14 @@ export default function AccessCoverageMap({ perfis = [] }) {
   // mesmo que não tenha sido criado no DB ainda.
   const dbPerfis = safeArray(perfis);
   const defaults = buildDefaultProfiles();
+  // SEMPRE inclui o perfil Admin (wildcard _global: ["*"]) mesmo que exista
+  // um perfil "Admin" no DB sem wildcard — garante 100% de cobertura quando
+  // o admin tem acesso total a todos os módulos.
+  const adminDefault = defaults.find(d => normalize(d?.nome_perfil) === 'admin');
+  const nonAdminDefaults = defaults.filter(d => normalize(d?.nome_perfil) !== 'admin');
   const dbNames = new Set(dbPerfis.map(p => normalize(p?.nome_perfil)));
-  const missingDefaults = defaults.filter(d => !dbNames.has(normalize(d?.nome_perfil)));
-  const effectivePerfis = [...dbPerfis, ...missingDefaults];
+  const missingDefaults = nonAdminDefaults.filter(d => !dbNames.has(normalize(d?.nome_perfil)));
+  const effectivePerfis = [...dbPerfis, ...missingDefaults, ...(adminDefault ? [adminDefault] : [])];
 
   const moduleCoverage = expectedModules.map((moduleName) => {
     const expectedActionsForModule = getExpectedActionsForModule(moduleName);

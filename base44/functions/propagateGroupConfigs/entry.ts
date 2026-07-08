@@ -186,8 +186,18 @@ Deno.serve(async (req) => {
         const chunk = toCreate.slice(i, i + 100);
         try { await base44.asServiceRole.entities[entityName].bulkCreate(chunk); created += chunk.length; } catch (_) {}
       }
-      // Bulk update (up to 500 per call — muito mais rápido que updates individuais)
-      const bulkUpdatePayload = toUpdate.map(({ id, payload: patch }) => ({ id, ...patch }));
+      // Bulk update (up to 500 per call) — deduplica por ID para evitar "Duplicate entity IDs"
+      const updateById = new Map();
+      for (const { id, payload: patch } of toUpdate) {
+        if (!updateById.has(id)) {
+          updateById.set(id, { id, ...patch });
+        } else {
+          // Merge patches para o mesmo ID
+          const existing = updateById.get(id);
+          Object.assign(existing, patch);
+        }
+      }
+      const bulkUpdatePayload = [...updateById.values()];
       for (let i = 0; i < bulkUpdatePayload.length; i += 500) {
         const chunk = bulkUpdatePayload.slice(i, i + 500);
         try { await base44.asServiceRole.entities[entityName].bulkUpdate(chunk); updated += chunk.length; } catch (_) {}
@@ -241,10 +251,18 @@ Deno.serve(async (req) => {
         const chunk = toCreate.slice(i, i + 100);
         try { await base44.asServiceRole.entities[entityName].bulkCreate(chunk); created += chunk.length; } catch (_) {}
       }
-      // Bulk update (up to 500 per call)
-      const bulkUpdatePayload = toUpdate.map(({ id, payload: patch }) => ({ id, ...patch }));
-      for (let i = 0; i < bulkUpdatePayload.length; i += 500) {
-        const chunk = bulkUpdatePayload.slice(i, i + 500);
+      // Bulk update (up to 500 per call) — deduplica por ID
+      const updateById2 = new Map();
+      for (const { id, payload: patch } of toUpdate) {
+        if (!updateById2.has(id)) {
+          updateById2.set(id, { id, ...patch });
+        } else {
+          Object.assign(updateById2.get(id), patch);
+        }
+      }
+      const bulkUpdatePayload2 = [...updateById2.values()];
+      for (let i = 0; i < bulkUpdatePayload2.length; i += 500) {
+        const chunk = bulkUpdatePayload2.slice(i, i + 500);
         try { await base44.asServiceRole.entities[entityName].bulkUpdate(chunk); updated += chunk.length; } catch (_) {}
       }
       return { entity: entityName, created, updated, skipped, total_source: baseRegs.length, direction: 'empresa_to_grupo' };

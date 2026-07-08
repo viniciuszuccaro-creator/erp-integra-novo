@@ -92,17 +92,37 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
   // optimisticMap: valor durante o request (antes de confirmar)
   const [optimisticMap, setOptimisticMap] = useState({});
   // confirmedMap: valor confirmado pelo backend (sobrescreve dados da query enquanto não há novo fetch limpo)
-  const [confirmedMap, setConfirmedMap] = useState({});
+  const [confirmedMap, setConfirmedMap] = useState(() => {
+    // Restaura confirmedMap do localStorage para sobreviver a refresh
+    try {
+      const key = `tc_confirmed_${empresaId || 'sem'}_${grupoId || 'sem'}`;
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : {};
+    } catch { return {}; }
+  });
   const queryClient = useQueryClient();
   const pendingRef = useRef({});
   const confirmedTimeoutsRef = useRef({});
   const invalidationTimeoutsRef = useRef({});
   const { hasPermission } = usePermissions();
 
+  // Persiste confirmedMap no localStorage a cada mudança
+  useEffect(() => {
+    try {
+      const key = `tc_confirmed_${empresaId || 'sem'}_${grupoId || 'sem'}`;
+      localStorage.setItem(key, JSON.stringify(confirmedMap));
+    } catch {}
+  }, [confirmedMap, empresaId, grupoId]);
+
   // Reset ao trocar empresa/grupo
   useEffect(() => {
     setOptimisticMap({});
-    setConfirmedMap({});
+    // Restaura confirmedMap do localStorage para o novo escopo
+    try {
+      const key = `tc_confirmed_${empresaId || 'sem'}_${grupoId || 'sem'}`;
+      const raw = localStorage.getItem(key);
+      setConfirmedMap(raw ? JSON.parse(raw) : {});
+    } catch { setConfirmedMap({}); }
     pendingRef.current = {};
     // Limpa timeouts pendentes para evitar confirmedMap stale após troca de contexto
     Object.values(confirmedTimeoutsRef.current).forEach(id => clearTimeout(id));

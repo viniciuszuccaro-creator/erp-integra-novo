@@ -336,7 +336,12 @@ async function listOne(base44, user, q) {
     const status = err?.status || err?.response?.status;
     if (status === 429 || status === 502 || (typeof status === 'number' && status >= 500)) {
       LIST_BACKEND_PAUSED_UNTIL = Date.now() + LIST_BACKEND_PAUSE_MS;
-      // Retorna cache em fallback (mesmo stale) — impede toggles em false após refresh
+      // Para entidades TTL=0 (ex: ConfiguracaoSistema), PROPAGA o erro em vez de
+      // retornar array vazio — assim o React Query mantém placeholderData e o
+      // toggle não reverte para false. Só retorna cache se houver dados em cache.
+      if (ttl === 0 && !cached?.items?.length) {
+        throw err;
+      }
       return { entityName, items: cached?.items || [] };
     }
     throw err;

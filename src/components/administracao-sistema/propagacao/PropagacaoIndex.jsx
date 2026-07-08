@@ -104,11 +104,11 @@ export default function PropagacaoIndex() {
         direction: mapDirection(direction),
         entidades: [entityName],
         strategy: "merge",
+        // Sempre passa empresas_ids — o backend usa para filtrar quais empresas
+        // receberão a propagação (todas do grupo se não for passado, mas passar
+        // explicitamente garante que todas as empresas sejam incluídas)
+        empresas_ids: empresasDoGrupo.map(e => e.id).filter(Boolean),
       };
-      // UP e AMBOS precisam de empresas_ids para saber quais empresas sincronizar
-      if (direction === "up" || direction === "both") {
-        payload.empresas_ids = empresasDoGrupo.map(e => e.id).filter(Boolean);
-      }
 
       const res = await base44.functions.invoke("propagateGroupConfigs", payload);
 

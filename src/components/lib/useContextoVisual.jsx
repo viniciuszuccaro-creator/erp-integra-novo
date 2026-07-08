@@ -430,7 +430,8 @@ export function useContextoVisual() {
                    if (groupId && !empresaId) {
                      const filtro = noContext ? { ...rest } : { ...rest, group_id: groupId };
                      if (entityName === 'PerfilAcesso') {
-                       filtro.$or = [{ group_id: groupId }, { grupo_id: groupId }];
+                       // Inclui legacy (group_id: null) para perfis criados antes do multi-tenant
+                       filtro.$or = [{ group_id: groupId }, { grupo_id: groupId }, { group_id: null, empresa_id: null }];
                        delete filtro.group_id;
                      }
                      // TransferenciaFilial precisa de empresa_origem/destino (backend não expande)

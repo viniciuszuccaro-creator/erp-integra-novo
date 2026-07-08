@@ -103,14 +103,13 @@ const SEARCH_FIELDS = {
   default: ['nome', 'descricao', 'codigo', 'razao_social', 'nome_completo', 'nome_grupo', 'nome_segmento', 'nome_regiao', 'nome_banco', 'nome_fantasia', 'nome_conta', 'nome_cargo', 'nome_turno', 'nome_departamento', 'nome_condicao', 'nome_kit', 'nome_rota', 'nome_marca', 'nome_modelo', 'nome_api', 'nome_canal', 'nome_intent', 'nome_job', 'nome_webhook', 'nome_gateway', 'nome_perfil', 'codigo_servico', 'sigla', 'titulo', 'placa']
 };
 
-// Entidades que NÃO devem usar cache server-side (dados críticos que precisam de leitura sempre fresca).
-// ConfiguracaoSistema: toggles devem persistir após save — cache stale durante 429 faz os toggles
-// reverterem para o valor anterior. Sem cache, o 429 lança erro → React Query mantém dados anteriores
-// via placeholderData: (prev) => prev, e o toggle NÃO reverte.
-const NO_CACHE_ENTITIES = new Set(['ConfiguracaoSistema']);
+// NO_CACHE_ENTITIES vazio — TTL=0 já garante leitura sempre fresca.
+// O cache ainda é populado em sucesso, servindo como fallback durante 429 rate limit.
+// Isso impede que toggles revertam para false após atualizar a página durante 429.
+const NO_CACHE_ENTITIES = new Set();
 
 // TTL por entidade — ConfiguracaoSistema TTL=0: leitura sempre fresca do banco.
-// Durante 429 pause, o cache Map ainda existe (expirado) e cached?.items é retornado como fallback,
+// O cache é populado em cada sucesso, e durante 429 pause o cached?.items é retornado como fallback,
 // evitando que toggles revertam para false. Após upsertConfig gravar, o refetch busca dados atualizados.
 const ENTITY_CACHE_TTL = {
   ConfiguracaoSistema: 0, // Always fresh — toggles must persist immediately after save
@@ -298,10 +297,9 @@ async function listOne(base44, user, q) {
     return { entityName, items: cached.items };
   }
   // Durante pause de 429: retorna dados em cache (mesmo que stale) para evitar
-  // que listas fiquem vazias. EXCETO para entidades com TTL=0 (ex: ConfiguracaoSistema)
-  // — essas precisam de dados sempre frescos; esperar o pause terminar é melhor
-  // que retornar cache stale com toggles em estado anterior (false).
-  if (Date.now() < LIST_BACKEND_PAUSED_UNTIL && !skipCache && ttl > 0) {
+  // que listas fiquem vazias. Para TTL=0 (ex: ConfiguracaoSistema), o cached?.items
+  // do último sucesso é retornado como fallback — impede que toggles revertam para false.
+  if (Date.now() < LIST_BACKEND_PAUSED_UNTIL) {
     return { entityName, items: cached?.items || [] };
   }
 
@@ -331,15 +329,14 @@ async function listOne(base44, user, q) {
     }
 
     const items = await base44.asServiceRole.entities[entityName].filter(finalFilter, orderHint, limit, skip) || [];
-    if (!skipCache) LIST_CACHE.set(cacheKey, { items, ts: Date.now() });
+    // Sempre popula cache em sucesso (mesmo TTL=0) — serve como fallback durante 429
+    LIST_CACHE.set(cacheKey, { items, ts: Date.now() });
     return { entityName, items };
   } catch (err) {
     const status = err?.status || err?.response?.status;
     if (status === 429 || status === 502 || (typeof status === 'number' && status >= 500)) {
       LIST_BACKEND_PAUSED_UNTIL = Date.now() + LIST_BACKEND_PAUSE_MS;
-      // Para entidades NO_CACHE (ex: ConfiguracaoSistema): lança erro em vez de retornar cache/[]
-      // React Query com placeholderData:(prev)=>prev mantém os dados anteriores — toggle não reverte.
-      if (skipCache) throw err;
+      // Retorna cache em fallback (mesmo stale) — impede toggles em false após refresh
       return { entityName, items: cached?.items || [] };
     }
     throw err;

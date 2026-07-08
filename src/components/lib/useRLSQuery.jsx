@@ -47,6 +47,7 @@ export function useRLSQuery(
     retry: 1,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
+    placeholderData: (prev) => prev, // Mantém dados anteriores durante refetch — impede reset
     ...queryOptions,
   });
 }

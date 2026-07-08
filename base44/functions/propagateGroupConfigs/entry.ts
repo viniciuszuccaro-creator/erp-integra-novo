@@ -133,37 +133,40 @@ Deno.serve(async (req) => {
 
     const copyGroupToEmpresas = async (entityName) => {
       if (!base44.asServiceRole.entities?.[entityName]) return { entity: entityName, skipped: 'not-found' };
+      if (!targetEmpresas.length) return { entity: entityName, created: 0, updated: 0, skipped: 0, total_source: 0, direction: 'grupo_to_empresas' };
       // Busca registros do grupo — inclui legacy (group_id: null) para ConfiguracaoSistema e IAConfig
       const isConfigEntity = entityName === 'ConfiguracaoSistema' || entityName === 'IAConfig';
       let baseRegs = await base44.asServiceRole.entities[entityName].filter({ group_id: groupId }, undefined, 5000).catch(() => []);
       if (isConfigEntity && !baseRegs.length) {
-        // Legacy fallback: registros sem group_id (globais ou criados antes do multi-tenant)
         baseRegs = await base44.asServiceRole.entities[entityName].filter({ group_id: null, empresa_id: null }, undefined, 5000).catch(() => []);
       }
       if (!baseRegs.length) return { entity: entityName, created: 0, updated: 0, skipped: 0, total_source: 0, direction: 'grupo_to_empresas' };
       const keys = keyFieldsByEntity(entityName);
       let created = 0, updated = 0, skipped = 0;
-      for (const emp of targetEmpresas) {
-        // Pre-fetch ALL existing records for this empresa in ONE call, build a lookup set
-        const existingRegs = await base44.asServiceRole.entities[entityName].filter({ empresa_id: emp.id }, undefined, 5000).catch(() => []);
-        const existingKeys = new Set();
-        for (const ex of existingRegs) {
+
+      // BATCH: busca registros existentes em paralelo (uma chamada por empresa)
+      const existingByEmpresa = new Map(); // key: `${empresaId}:${keyVal}` → record
+      await Promise.all(targetEmpresas.map(async (emp) => {
+        const regs = await base44.asServiceRole.entities[entityName]
+          .filter({ empresa_id: emp.id }, undefined, 5000).catch(() => []);
+        for (const ex of (Array.isArray(regs) ? regs : [])) {
           const keyField = keys.find(k => ex?.[k]);
-          if (keyField) existingKeys.add(String(ex[keyField]));
+          if (keyField) {
+            existingByEmpresa.set(`${emp.id}:${String(ex[keyField])}`, ex);
+          }
         }
-        // Build batch of records to create (missing ones)
-        const toCreate = [];
-        const toUpdate = [];
+      }));
+
+      const toCreate = [];
+      const toUpdate = [];
+      for (const emp of targetEmpresas) {
         for (const r of baseRegs) {
-          // Para ConfiguracaoSistema: mantém group_id e adiciona empresa_id (escopo empresa+grupo)
-          // Para outras entidades: remove group_id e seta empresa_id (escopo empresa)
-          const isConfigEntity = entityName === 'ConfiguracaoSistema' || entityName === 'IAConfig';
           const payload = sanitize(isConfigEntity
             ? { ...r, empresa_id: emp.id }
             : { ...r, group_id: undefined, empresa_id: emp.id });
           const keyField = keys.find(k => r?.[k]);
           const keyVal = keyField ? String(r[keyField]) : null;
-          const existing = keyVal && existingKeys.has(keyVal) ? existingRegs.find(ex => keys.find(k => ex?.[k]) && String(ex[keys.find(k => ex?.[k])]) === keyVal) : null;
+          const existing = keyVal ? existingByEmpresa.get(`${emp.id}:${keyVal}`) : null;
           if (existing) {
             if (strategy === 'override') {
               toUpdate.push({ id: existing.id, payload });
@@ -177,16 +180,17 @@ Deno.serve(async (req) => {
             toCreate.push(payload);
           }
         }
-        // Bulk create missing records (up to 500 per call)
-        for (let i = 0; i < toCreate.length; i += 500) {
-          const chunk = toCreate.slice(i, i + 500);
-          try { await base44.asServiceRole.entities[entityName].bulkCreate(chunk); created += chunk.length; } catch (_) {}
-        }
-        // Update existing records individually (can't bulk-update with different patches)
-        for (const { id, payload: patch } of toUpdate) {
-          try { await base44.asServiceRole.entities[entityName].update(id, patch); updated++; } catch (_) {}
-        }
-        await sleep(30);
+      }
+      // Bulk create (lotes de 100 para evitar timeout)
+      for (let i = 0; i < toCreate.length; i += 100) {
+        const chunk = toCreate.slice(i, i + 100);
+        try { await base44.asServiceRole.entities[entityName].bulkCreate(chunk); created += chunk.length; } catch (_) {}
+      }
+      // Bulk update (up to 500 per call — muito mais rápido que updates individuais)
+      const bulkUpdatePayload = toUpdate.map(({ id, payload: patch }) => ({ id, ...patch }));
+      for (let i = 0; i < bulkUpdatePayload.length; i += 500) {
+        const chunk = bulkUpdatePayload.slice(i, i + 500);
+        try { await base44.asServiceRole.entities[entityName].bulkUpdate(chunk); updated += chunk.length; } catch (_) {}
       }
       return { entity: entityName, created, updated, skipped, total_source: baseRegs.length, direction: 'grupo_to_empresas' };
     };
@@ -196,13 +200,11 @@ Deno.serve(async (req) => {
       const baseRegs = await base44.asServiceRole.entities[entityName].filter({ empresa_id: empresaOrigemId }, undefined, 5000).catch(() => []);
       if (!baseRegs.length) return { entity: entityName, created: 0, updated: 0, skipped: 0, total_source: 0, direction: 'empresa_to_grupo' };
       const keys = keyFieldsByEntity(entityName);
-      // Pre-fetch ALL existing group records in ONE call, build a lookup set
       // Inclui registros legacy (group_id: null) para ConfiguracaoSistema
       const isConfigEntity = entityName === 'ConfiguracaoSistema' || entityName === 'IAConfig';
       let groupRegs = await base44.asServiceRole.entities[entityName].filter({ group_id: groupId }, undefined, 5000).catch(() => []);
-      if (isConfigEntity) {
-        const legacyRegs = await base44.asServiceRole.entities[entityName].filter({ group_id: null, empresa_id: null }, undefined, 5000).catch(() => []);
-        groupRegs = [...groupRegs, ...legacyRegs];
+      if (isConfigEntity && !groupRegs.length) {
+        groupRegs = await base44.asServiceRole.entities[entityName].filter({ group_id: null, empresa_id: null }, undefined, 5000).catch(() => []);
       }
       const groupKeyMap = new Map();
       for (const gr of groupRegs) {
@@ -234,14 +236,16 @@ Deno.serve(async (req) => {
           toCreate.push(payload);
         }
       }
-      // Bulk create missing records
-      for (let i = 0; i < toCreate.length; i += 500) {
-        const chunk = toCreate.slice(i, i + 500);
+      // Bulk create missing records (lotes de 100)
+      for (let i = 0; i < toCreate.length; i += 100) {
+        const chunk = toCreate.slice(i, i + 100);
         try { await base44.asServiceRole.entities[entityName].bulkCreate(chunk); created += chunk.length; } catch (_) {}
       }
-      // Update existing records
-      for (const { id, payload: patch } of toUpdate) {
-        try { await base44.asServiceRole.entities[entityName].update(id, patch); updated++; } catch (_) {}
+      // Bulk update (up to 500 per call)
+      const bulkUpdatePayload = toUpdate.map(({ id, payload: patch }) => ({ id, ...patch }));
+      for (let i = 0; i < bulkUpdatePayload.length; i += 500) {
+        const chunk = bulkUpdatePayload.slice(i, i + 500);
+        try { await base44.asServiceRole.entities[entityName].bulkUpdate(chunk); updated += chunk.length; } catch (_) {}
       }
       return { entity: entityName, created, updated, skipped, total_source: baseRegs.length, direction: 'empresa_to_grupo' };
     };

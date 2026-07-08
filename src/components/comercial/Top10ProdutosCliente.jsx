@@ -34,7 +34,7 @@ export default function Top10ProdutosCliente({ clienteId, onSelecionarProduto })
     queryKey: ['produtosDisponiveis', contextoKey],
     queryFn: async () => {
       try {
-        return await filterInContext('Produto', {}, 'descricao', 999);
+        return await filterInContext('Produto', { tipo_item: 'Revenda', status: 'Ativo' }, 'descricao', 999);
       } catch (error) {
         console.error('Erro ao buscar produtos disponíveis:', error);
         return [];

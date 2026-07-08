@@ -103,6 +103,9 @@ const SEARCH_FIELDS = {
   default: ['nome', 'descricao', 'codigo', 'razao_social', 'nome_completo', 'nome_grupo', 'nome_segmento', 'nome_regiao', 'nome_banco', 'nome_fantasia', 'nome_conta', 'nome_cargo', 'nome_turno', 'nome_departamento', 'nome_condicao', 'nome_kit', 'nome_rota', 'nome_marca', 'nome_modelo', 'nome_api', 'nome_canal', 'nome_intent', 'nome_job', 'nome_webhook', 'nome_gateway', 'nome_perfil', 'codigo_servico', 'sigla', 'titulo', 'placa']
 };
 
+// Entidades que NÃO devem usar cache server-side (dados críticos que precisam de leitura sempre fresca)
+const NO_CACHE_ENTITIES = new Set(['ConfiguracaoSistema']);
+
 // Entidades que não precisam de filtro empresa/grupo
 const SIMPLE_CATALOG = new Set([
   'Banco', 'FormaPagamento', 'TipoDespesa', 'MoedaIndice', 'TipoFrete',
@@ -276,8 +279,9 @@ async function listOne(base44, user, q) {
     finalFilter = hasScope ? { $and: [finalFilter, { $or: embeddedSearch }] } : { $or: embeddedSearch };
   }
 
+  const skipCache = NO_CACHE_ENTITIES.has(entityName);
   const cacheKey = `${entityName}:${stableListKey(finalFilter)}:${orderHint}:${limit}:${skip}`;
-  const cached = LIST_CACHE.get(cacheKey);
+  const cached = skipCache ? null : LIST_CACHE.get(cacheKey);
   if (cached && Date.now() - cached.ts < LIST_CACHE_TTL_MS) {
     return { entityName, items: cached.items };
   }
@@ -303,12 +307,12 @@ async function listOne(base44, user, q) {
         return sortDir === 'asc' ? diff : -diff;
       });
       const paged = sorted.slice(skip, skip + limit);
-      LIST_CACHE.set(cacheKey, { items: paged, ts: Date.now() });
+      if (!skipCache) LIST_CACHE.set(cacheKey, { items: paged, ts: Date.now() });
       return { entityName, items: paged };
     }
 
     const items = await base44.asServiceRole.entities[entityName].filter(finalFilter, orderHint, limit, skip) || [];
-    LIST_CACHE.set(cacheKey, { items, ts: Date.now() });
+    if (!skipCache) LIST_CACHE.set(cacheKey, { items, ts: Date.now() });
     return { entityName, items };
   } catch (err) {
     const status = err?.status || err?.response?.status;

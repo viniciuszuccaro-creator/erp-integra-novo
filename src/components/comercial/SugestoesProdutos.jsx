@@ -23,7 +23,7 @@ export default function SugestoesProdutos({ clienteId, itensAtuais = [], onAdici
 
   const { data: produtos = [] } = useQuery({
     queryKey: ['produtos', contextoKey],
-    queryFn: () => filterInContext('Produto', {}, 'descricao', 999),
+    queryFn: () => filterInContext('Produto', { tipo_item: 'Revenda', status: 'Ativo' }, 'descricao', 999),
     enabled: !!contexto,
   });
 

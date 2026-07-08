@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
  */
 export default function ValidadorEstoquePedido({ pedido, empresaId }) {
   const { data: produtos = [] } = useRLSQuery(
-    'Produto', {}, '-descricao', 500,
+    'Produto', { tipo_item: 'Revenda', status: 'Ativo' }, '-descricao', 500,
     { enabled: !!empresaId }
   );
 

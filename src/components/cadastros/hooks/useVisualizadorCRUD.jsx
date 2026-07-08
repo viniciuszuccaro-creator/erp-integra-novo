@@ -123,7 +123,7 @@ export default function useVisualizadorCRUD({
       // P3 (item 4): uniqueness de código — busca GLOBAL (sem restrição de escopo)
       // Exclui registros _merged (duplicatas já eliminadas) da verificação
       const codeStr = String(codeValue).trim();
-      const codeFilter = { [codeField]: codeStr, _merged: { $ne: true } };
+      const codeFilter = { [codeField]: codeStr };
       try {
         const res = await base44.functions.invoke("entityListSorted", {
           entityName: ENTITY, filter: codeFilter,

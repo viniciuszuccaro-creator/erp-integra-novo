@@ -2,10 +2,20 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Grid3X3, Shield } from "lucide-react";
+import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/rbacModuleMap";
 
 const safeArray = (value) => Array.isArray(value) ? value : [];
 const safeObject = (value) => value && typeof value === "object" && !Array.isArray(value) ? value : {};
 const normalize = (str) => String(str || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+// Converte DEFAULT_ROLE_PERMISSIONS em objetos PerfilAcesso para usar como baseline
+const buildDefaultProfiles = () => {
+  return Object.entries(DEFAULT_ROLE_PERMISSIONS).map(([roleKey, perms]) => ({
+    nome_perfil: roleKey.charAt(0).toUpperCase() + roleKey.slice(1),
+    permissoes: perms,
+    ativo: true,
+  }));
+};
 
 // Percorre recursivamente a árvore de permissões (módulo → seção → [ações])
 // para coletar TODAS as ações concedidas, independente do nível de aninhamento.
@@ -40,8 +50,12 @@ const expectedModules = [
 const expectedActions = ["visualizar", "criar", "editar", "excluir", "aprovar", "exportar"];
 
 export default function AccessCoverageMap({ perfis = [] }) {
+  // Se não há perfis no DB, usa os perfis padrão do initializeRBACProfiles como baseline
+  // (eles representam a cobertura esperada do sistema)
+  const effectivePerfis = safeArray(perfis).length > 0 ? perfis : buildDefaultProfiles();
+
   const moduleCoverage = expectedModules.map((moduleName) => {
-    const profilesWithModule = safeArray(perfis).filter((perfil) => {
+    const profilesWithModule = safeArray(effectivePerfis).filter((perfil) => {
       const perms = safeObject(perfil?.permissoes);
       // Wildcard "*" cobre todos os módulos
       if (perms["*"]) return true;
@@ -51,7 +65,7 @@ export default function AccessCoverageMap({ perfis = [] }) {
     });
     
     const actions = new Set();
-    profilesWithModule.forEach((perfil) => {
+    safeArray(profilesWithModule).forEach((perfil) => {
       const perms = safeObject(perfil?.permissoes);
       // Wildcard: "*" com ["*"] concede todas as ações
       if (perms["*"] && Array.isArray(perms["*"]) && perms["*"].includes("*")) {

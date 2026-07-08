@@ -133,30 +133,44 @@ Deno.serve(async (req) => {
       const keys = keyFieldsByEntity(entityName);
       let created = 0, updated = 0, skipped = 0;
       for (const emp of targetEmpresas) {
-        for (let i = 0; i < baseRegs.length; i += 50) {
-          const chunk = baseRegs.slice(i, i + 50);
-          for (const r of chunk) {
-            const payload = sanitize({ ...r, group_id: undefined, empresa_id: emp.id });
-            const keyField = keys.find(k => r?.[k]);
-            const filtro = { empresa_id: emp.id };
-            if (keyField) filtro[keyField] = r[keyField];
-            const existing = await base44.asServiceRole.entities[entityName].filter(filtro, undefined, 1).then(x => x?.[0]).catch(() => null);
-            if (existing) {
-              if (strategy === 'override') {
-                await base44.asServiceRole.entities[entityName].update(existing.id, payload).catch(() => {});
-                updated++;
-              } else if (strategy === 'merge') {
-                const patch = {};
-                for (const [k, v] of Object.entries(payload)) if (existing[k] == null) patch[k] = v;
-                if (Object.keys(patch).length) { await base44.asServiceRole.entities[entityName].update(existing.id, patch).catch(() => {}); updated++; } else { skipped++; }
-              } else { skipped++; }
-            } else {
-              await base44.asServiceRole.entities[entityName].create(payload).catch(() => {});
-              created++;
-            }
-          }
-          if (i + 50 < baseRegs.length) await sleep(150);
+        // Pre-fetch ALL existing records for this empresa in ONE call, build a lookup set
+        const existingRegs = await base44.asServiceRole.entities[entityName].filter({ empresa_id: emp.id }, undefined, 5000).catch(() => []);
+        const existingKeys = new Set();
+        for (const ex of existingRegs) {
+          const keyField = keys.find(k => ex?.[k]);
+          if (keyField) existingKeys.add(String(ex[keyField]));
         }
+        // Build batch of records to create (missing ones)
+        const toCreate = [];
+        const toUpdate = [];
+        for (const r of baseRegs) {
+          const payload = sanitize({ ...r, group_id: undefined, empresa_id: emp.id });
+          const keyField = keys.find(k => r?.[k]);
+          const keyVal = keyField ? String(r[keyField]) : null;
+          const existing = keyVal && existingKeys.has(keyVal) ? existingRegs.find(ex => keys.find(k => ex?.[k]) && String(ex[keys.find(k => ex?.[k])]) === keyVal) : null;
+          if (existing) {
+            if (strategy === 'override') {
+              toUpdate.push({ id: existing.id, payload });
+            } else if (strategy === 'merge') {
+              const patch = {};
+              for (const [k, v] of Object.entries(payload)) if (existing[k] == null) patch[k] = v;
+              if (Object.keys(patch).length) toUpdate.push({ id: existing.id, payload: patch });
+              else skipped++;
+            } else { skipped++; }
+          } else {
+            toCreate.push(payload);
+          }
+        }
+        // Bulk create missing records (up to 500 per call)
+        for (let i = 0; i < toCreate.length; i += 500) {
+          const chunk = toCreate.slice(i, i + 500);
+          try { await base44.asServiceRole.entities[entityName].bulkCreate(chunk); created += chunk.length; } catch (_) {}
+        }
+        // Update existing records individually (can't bulk-update with different patches)
+        for (const { id, payload: patch } of toUpdate) {
+          try { await base44.asServiceRole.entities[entityName].update(id, patch); updated++; } catch (_) {}
+        }
+        await sleep(30);
       }
       return { entity: entityName, created, updated, skipped, total_source: baseRegs.length, direction: 'grupo_to_empresas' };
     };
@@ -166,24 +180,42 @@ Deno.serve(async (req) => {
       const baseRegs = await base44.asServiceRole.entities[entityName].filter({ empresa_id: empresaOrigemId }, undefined, 5000).catch(() => []);
       if (!baseRegs.length) return { entity: entityName, created: 0, updated: 0, skipped: 0, total_source: 0, direction: 'empresa_to_grupo' };
       const keys = keyFieldsByEntity(entityName);
+      // Pre-fetch ALL existing group records in ONE call, build a lookup set
+      const groupRegs = await base44.asServiceRole.entities[entityName].filter({ group_id: groupId }, undefined, 5000).catch(() => []);
+      const groupKeyMap = new Map();
+      for (const gr of groupRegs) {
+        const keyField = keys.find(k => gr?.[k]);
+        if (keyField) groupKeyMap.set(String(gr[keyField]), gr);
+      }
       let created = 0, updated = 0, skipped = 0;
+      const toCreate = [];
+      const toUpdate = [];
       for (const r of baseRegs) {
         const payload = sanitize({ ...r, empresa_id: undefined, group_id: groupId });
         const keyField = keys.find(k => r?.[k]);
-        const filtro = { group_id: groupId };
-        if (keyField) filtro[keyField] = r[keyField];
-        const existing = await base44.asServiceRole.entities[entityName].filter(filtro, undefined, 1).then(x => x?.[0]).catch(() => null);
+        const keyVal = keyField ? String(r[keyField]) : null;
+        const existing = keyVal ? groupKeyMap.get(keyVal) : null;
         if (existing) {
           if (strategy === 'override') {
-            await base44.asServiceRole.entities[entityName].update(existing.id, payload).catch(() => {}); updated++;
+            toUpdate.push({ id: existing.id, payload });
           } else if (strategy === 'merge') {
             const patch = {};
             for (const [k, v] of Object.entries(payload)) if (existing[k] == null) patch[k] = v;
-            if (Object.keys(patch).length) { await base44.asServiceRole.entities[entityName].update(existing.id, patch).catch(() => {}); updated++; } else { skipped++; }
+            if (Object.keys(patch).length) toUpdate.push({ id: existing.id, payload: patch });
+            else skipped++;
           } else { skipped++; }
         } else {
-          await base44.asServiceRole.entities[entityName].create(payload).catch(() => {}); created++;
+          toCreate.push(payload);
         }
+      }
+      // Bulk create missing records
+      for (let i = 0; i < toCreate.length; i += 500) {
+        const chunk = toCreate.slice(i, i + 500);
+        try { await base44.asServiceRole.entities[entityName].bulkCreate(chunk); created += chunk.length; } catch (_) {}
+      }
+      // Update existing records
+      for (const { id, payload: patch } of toUpdate) {
+        try { await base44.asServiceRole.entities[entityName].update(id, patch); updated++; } catch (_) {}
       }
       return { entity: entityName, created, updated, skipped, total_source: baseRegs.length, direction: 'empresa_to_grupo' };
     };

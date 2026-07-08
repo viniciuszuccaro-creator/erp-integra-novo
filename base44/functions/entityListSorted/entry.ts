@@ -103,10 +103,11 @@ const SEARCH_FIELDS = {
   default: ['nome', 'descricao', 'codigo', 'razao_social', 'nome_completo', 'nome_grupo', 'nome_segmento', 'nome_regiao', 'nome_banco', 'nome_fantasia', 'nome_conta', 'nome_cargo', 'nome_turno', 'nome_departamento', 'nome_condicao', 'nome_kit', 'nome_rota', 'nome_marca', 'nome_modelo', 'nome_api', 'nome_canal', 'nome_intent', 'nome_job', 'nome_webhook', 'nome_gateway', 'nome_perfil', 'codigo_servico', 'sigla', 'titulo', 'placa']
 };
 
-// Entidades que NÃO devem usar cache server-side (dados críticos que precisam de leitura sempre fresca)
-// ConfiguracaoSistema REMOVIDA da lista — durante 429 rate limit, cache serve dados stale
-// em vez de array vazio (que faria todos os toggles reverterem para false).
-const NO_CACHE_ENTITIES = new Set([]);
+// Entidades que NÃO devem usar cache server-side (dados críticos que precisam de leitura sempre fresca).
+// ConfiguracaoSistema: toggles devem persistir após save — cache stale durante 429 faz os toggles
+// reverterem para o valor anterior. Sem cache, o 429 lança erro → React Query mantém dados anteriores
+// via placeholderData: (prev) => prev, e o toggle NÃO reverte.
+const NO_CACHE_ENTITIES = new Set(['ConfiguracaoSistema']);
 
 // TTL por entidade — ConfiguracaoSistema TTL=0: leitura sempre fresca do banco.
 // Durante 429 pause, o cache Map ainda existe (expirado) e cached?.items é retornado como fallback,
@@ -335,6 +336,9 @@ async function listOne(base44, user, q) {
     const status = err?.status || err?.response?.status;
     if (status === 429 || status === 502 || (typeof status === 'number' && status >= 500)) {
       LIST_BACKEND_PAUSED_UNTIL = Date.now() + LIST_BACKEND_PAUSE_MS;
+      // Para entidades NO_CACHE (ex: ConfiguracaoSistema): lança erro em vez de retornar cache/[]
+      // React Query com placeholderData:(prev)=>prev mantém os dados anteriores — toggle não reverte.
+      if (skipCache) throw err;
       return { entityName, items: cached?.items || [] };
     }
     throw err;

@@ -104,7 +104,14 @@ const SEARCH_FIELDS = {
 };
 
 // Entidades que NÃO devem usar cache server-side (dados críticos que precisam de leitura sempre fresca)
-const NO_CACHE_ENTITIES = new Set(['ConfiguracaoSistema']);
+// ConfiguracaoSistema REMOVIDA da lista — durante 429 rate limit, cache serve dados stale
+// em vez de array vazio (que faria todos os toggles reverterem para false).
+const NO_CACHE_ENTITIES = new Set([]);
+
+// TTL por entidade — ConfiguracaoSistema muda raramente, TTL maior dá estabilidade durante 429s
+const ENTITY_CACHE_TTL = {
+  ConfiguracaoSistema: 10 * 1000, // 10s
+};
 
 // Entidades que não precisam de filtro empresa/grupo
 const SIMPLE_CATALOG = new Set([
@@ -281,13 +288,13 @@ async function listOne(base44, user, q) {
 
   const skipCache = NO_CACHE_ENTITIES.has(entityName);
   const cacheKey = `${entityName}:${stableListKey(finalFilter)}:${orderHint}:${limit}:${skip}`;
+  const ttl = ENTITY_CACHE_TTL[entityName] || LIST_CACHE_TTL_MS;
   const cached = skipCache ? null : LIST_CACHE.get(cacheKey);
-  if (cached && Date.now() - cached.ts < LIST_CACHE_TTL_MS) {
+  if (cached && Date.now() - cached.ts < ttl) {
     return { entityName, items: cached.items };
   }
-  // NO_CACHE_ENTITIES (ex: ConfiguracaoSistema) nunca retorna vazio durante pause —
-  // isso faria todos os toggles reverterem para false. Apenas entidades com cache
-  // podem retornar dados stale durante o pause.
+  // Durante pause de 429: retorna dados em cache (mesmo que stale) para evitar
+  // que toggles e configs revertem para valores padrão (false/vazio).
   if (Date.now() < LIST_BACKEND_PAUSED_UNTIL && !skipCache) {
     return { entityName, items: cached?.items || [] };
   }

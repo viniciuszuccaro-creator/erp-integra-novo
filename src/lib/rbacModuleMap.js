@@ -141,7 +141,7 @@ export const RBAC_MODULES = {
     label: "Administração do Sistema",
     icon: "Settings",
     section: "Sistema",
-    actions: ["ver", "configurar", "auditar", "backup", "seguranca"],
+    actions: ["ver", "editar", "configurar", "auditar", "backup", "seguranca", "executar", "testar", "exportar"],
     subsections: {
       Usuarios: ["criar", "editar", "excluir", "desativar"],
       Perfis: ["criar", "editar", "excluir", "duplicar"],
@@ -155,8 +155,8 @@ export const RBAC_MODULES = {
       Propagacao: ["ver", "executar", "configurar"],
       Notificacoes: ["ver", "editar", "configurar"],
       IA: ["ver", "editar", "configurar"],
-      Backup: ["ver", "configurar", "executar"],
-      ConfigCenter: ["ver", "atualizar", "editar"],
+      Backup: ["ver", "configurar", "executar", "editar"],
+      ConfigCenter: ["ver", "atualizar", "editar", "configurar"],
     }
   },
   HubAtendimento: {

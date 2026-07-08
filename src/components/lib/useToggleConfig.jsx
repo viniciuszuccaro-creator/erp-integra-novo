@@ -120,18 +120,30 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
     if (!Array.isArray(list)) return null;
     const candidates = sortByNewest(list.filter(c => c.chave === chave));
     if (!candidates.length) return null;
+    // Contexto de empresa + grupo: match exato (empresa_id + group_id)
     if (empresaId && grupoId) {
       const exact = candidates.find(c => sameId(c.empresa_id, empresaId) && sameId(c.group_id, grupoId));
       if (exact) return exact;
+      // Fallback: empresa_id sem group_id (legacy)
+      const legacy = candidates.find(c => sameId(c.empresa_id, empresaId) && !c.group_id);
+      if (legacy) return legacy;
     }
-    if (empresaId) {
+    // Contexto de empresa sem grupo
+    if (empresaId && !grupoId) {
       const byE = candidates.find(c => sameId(c.empresa_id, empresaId));
       if (byE) return byE;
     }
-    if (grupoId) {
+    // Contexto de grupo (sem empresa): PREFERE registro de nível de grupo (empresa_id null)
+    if (grupoId && !empresaId) {
+      const groupLevel = candidates.find(c => sameId(c.group_id, grupoId) && !c.empresa_id);
+      if (groupLevel) return groupLevel;
+      // Fallback: qualquer registro do grupo
       const byG = candidates.find(c => sameId(c.group_id, grupoId));
       if (byG) return byG;
     }
+    // Fallback global: registro sem empresa nem grupo
+    const globalRec = candidates.find(c => !c.empresa_id && !c.group_id);
+    if (globalRec) return globalRec;
     return candidates[0] || null;
   }, [empresaId, grupoId]);
 
@@ -314,12 +326,35 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
     return false;
   }, [optimisticMap, confirmedMap, findMatchingRecord]);
 
+  // Sincroniza query data → confirmedMap para chaves que ainda não estão confirmadas.
+  // Isso garante que após um refresh, confirmedMap tenha os valores do banco para
+  // todas as chaves, não apenas as que o usuário clicou manualmente.
+  const syncWithQueryData = useCallback((configs) => {
+    if (!Array.isArray(configs) || !configs.length) return;
+    setConfirmedMap(prev => {
+      let changed = false;
+      const next = { ...prev };
+      // Agrupa por chave e usa findMatchingRecord para pegar o registro correto do escopo
+      const chaves = [...new Set(configs.map(c => c?.chave).filter(Boolean))];
+      for (const chave of chaves) {
+        if (!(chave in next)) {
+          const match = findMatchingRecord(configs, chave);
+          if (match && typeof match.ativa === 'boolean') {
+            next[chave] = match.ativa;
+            changed = true;
+          }
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [findMatchingRecord]);
+
   return {
     saving,
     optimistic: optimisticMap,
     handleToggle,
     getToggleValue,
     seedIdCache: () => {},
-    syncWithQueryData: () => {},
+    syncWithQueryData,
   };
 }

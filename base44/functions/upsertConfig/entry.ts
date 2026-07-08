@@ -146,7 +146,11 @@ Deno.serve(async (req) => {
     if (!match && eId && !gId) {
       match = await tryFind({ chave, empresa_id: eId });
     }
-    // 3) Chave + só grupo — apenas quando o escopo NÃO tem empresa
+    // 3) Chave + grupo + empresa_id null — REGISTRO DE NÍVEL DE GRUPO (não matchear registros de empresa)
+    if (!match && gId && !eId) {
+      match = await tryFind({ chave, group_id: gId, empresa_id: null });
+    }
+    // 3b) Fallback grupo: chave + grupo (pode incluir empresa_id) — apenas se 3 não achou
     if (!match && gId && !eId) {
       match = await tryFind({ chave, group_id: gId });
     }

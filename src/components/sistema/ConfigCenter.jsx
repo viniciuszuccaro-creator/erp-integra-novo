@@ -26,7 +26,7 @@ export default function ConfigCenter({ empresaId: empresaIdProp }) {
   const canLoad = Boolean(eId || gId);
 
   const queryKey = ['config-center-v2', eId ?? 'sem', gId ?? 'sem'];
-  const { saving, handleToggle, getToggleValue } = useToggleConfig(eId, gId, queryKey);
+  const { saving, handleToggle, getToggleValue, syncWithQueryData } = useToggleConfig(eId, gId, queryKey);
 
   // Carrega configs diretamente por escopo para manter heranca grupo/empresa apos refresh.
   const { data: configs = [], refetch, isFetching } = useQuery({
@@ -40,6 +40,11 @@ export default function ConfigCenter({ empresaId: empresaIdProp }) {
     refetchOnMount: true,
     placeholderData: (prev) => prev, // Mantém dados anteriores durante refetch — impede reset para false
   });
+
+  // Sincroniza query data → confirmedMap para persistir valores do banco em localStorage
+  useEffect(() => {
+    if (configs && configs.length) syncWithQueryData(configs);
+  }, [configs, syncWithQueryData]);
 
   // Subscription em tempo real — invalida cache quando ConfiguracaoSistema muda
   useEffect(() => {

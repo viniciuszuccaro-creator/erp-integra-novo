@@ -4,7 +4,7 @@
  * - Todos os toggles usam ToggleConfigGlobal (persistência garantida)
  * - Adicionado: propagação por módulo individual, gestão avançada, compras
  */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Settings, Shield, Bell, Globe, Zap, Package,
@@ -60,7 +60,7 @@ export default function ParametrosGeraisPanel() {
   const eId = empresaAtual?.id;
   const gId = grupoAtual?.id || empresaAtual?.group_id || (() => { try { return localStorage.getItem('group_atual_id'); } catch { return null; } })();
   const queryKey = ['toggle-parametros', eId ?? 'sem', gId ?? 'sem'];
-  const { saving, handleToggle, getToggleValue } = useToggleConfig(eId, gId, queryKey);
+  const { saving, handleToggle, getToggleValue, syncWithQueryData } = useToggleConfig(eId, gId, queryKey);
   const { data: configs = [], isFetching } = useQuery({
     queryKey,
     queryFn: () => loadScopedConfiguracaoSistema({ empresaId: eId, grupoId: gId, limit: 200, includeGlobal: true }),
@@ -71,6 +71,10 @@ export default function ParametrosGeraisPanel() {
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
     placeholderData: (prev) => prev,
   });
+  // Sincroniza query data → confirmedMap para persistir valores do banco em localStorage
+  useEffect(() => {
+    if (configs && configs.length) syncWithQueryData(configs);
+  }, [configs, syncWithQueryData]);
   // Props compartilhadas para todos os ToggleConfigGlobal — uma única instância de useToggleConfig
   const toggleProps = { saving, isFetching, onToggle: handleToggle, getToggleValue, configs };
 

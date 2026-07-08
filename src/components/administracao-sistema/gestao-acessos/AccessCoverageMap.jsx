@@ -17,6 +17,13 @@ const buildDefaultProfiles = () => {
   }));
 };
 
+const expectedModules = [
+  "Dashboard", "CRM", "Comercial", "Estoque", "Compras", "Financeiro", "Fiscal",
+  "RH", "Expedição", "Produção", "Sistema", "Cadastros", "Agenda", "Relatórios",
+  "Contratos", "HubAtendimento"
+];
+const expectedActions = ["visualizar", "criar", "editar", "excluir", "aprovar", "exportar"];
+
 // Percorre recursivamente a árvore de permissões (módulo → seção → [ações])
 // para coletar TODAS as ações concedidas, independente do nível de aninhamento.
 const collectActions = (node, actionsSet) => {
@@ -41,13 +48,6 @@ const collectActions = (node, actionsSet) => {
     Object.values(node).forEach((val) => collectActions(val, actionsSet));
   }
 };
-
-const expectedModules = [
-  "Dashboard", "CRM", "Comercial", "Estoque", "Compras", "Financeiro", "Fiscal",
-  "RH", "Expedição", "Produção", "Sistema", "Cadastros", "Agenda", "Relatórios",
-  "Contratos", "HubAtendimento"
-];
-const expectedActions = ["visualizar", "criar", "editar", "excluir", "aprovar", "exportar"];
 
 export default function AccessCoverageMap({ perfis = [] }) {
   // Mescla perfis do DB com os perfis padrão do sistema (rbacModuleMap / initializeRBACProfiles).

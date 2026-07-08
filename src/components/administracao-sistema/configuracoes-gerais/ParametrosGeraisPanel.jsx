@@ -5,12 +5,15 @@
  * - Adicionado: propagação por módulo individual, gestão avançada, compras
  */
 import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Settings, Shield, Bell, Globe, Zap, Package,
   DollarSign, Truck, ChevronDown, ChevronRight, Users, Briefcase,
   ShoppingCart, BarChart3, MessageCircle, Monitor
 } from "lucide-react";
 import ToggleConfigGlobal from "@/components/sistema/ToggleConfigGlobal";
+import { useToggleConfig, loadScopedConfiguracaoSistema } from "@/components/lib/useToggleConfig";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 function Section({ title, icon: Icon, defaultOpen = false, color = "blue", children }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -53,6 +56,24 @@ function Section({ title, icon: Icon, defaultOpen = false, color = "blue", child
 }
 
 export default function ParametrosGeraisPanel() {
+  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const eId = empresaAtual?.id;
+  const gId = grupoAtual?.id || empresaAtual?.group_id || (() => { try { return localStorage.getItem('group_atual_id'); } catch { return null; } })();
+  const queryKey = ['toggle-parametros', eId ?? 'sem', gId ?? 'sem'];
+  const { saving, handleToggle, getToggleValue } = useToggleConfig(eId, gId, queryKey);
+  const { data: configs = [], isFetching } = useQuery({
+    queryKey,
+    queryFn: () => loadScopedConfiguracaoSistema({ empresaId: eId, grupoId: gId, limit: 200, includeGlobal: true }),
+    enabled: Boolean(eId || gId),
+    staleTime: 30000,
+    refetchOnMount: true,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
+    placeholderData: (prev) => prev,
+  });
+  // Props compartilhadas para todos os ToggleConfigGlobal — uma única instância de useToggleConfig
+  const toggleProps = { saving, isFetching, onToggle: handleToggle, getToggleValue, configs };
+
   return (
     <div className="w-full h-full overflow-auto">
       <div className="flex items-center gap-2 mb-4 px-1">
@@ -67,23 +88,23 @@ export default function ParametrosGeraisPanel() {
           <ToggleConfigGlobal configKey="rbac_granular_ativo"
             label="Controle de acesso granular (RBAC)"
             description="Restrições por módulo, seção e ação individuais"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
           <ToggleConfigGlobal configKey="auditoria_completa_ativa"
             label="Auditoria completa de ações"
             description="Registrar todas as operações no AuditLog"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
           <ToggleConfigGlobal configKey="2fa_obrigatorio_admin"
             label="2FA obrigatório para administradores"
             description="Exige autenticação de dois fatores para admins"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="sessao_timeout_ativo"
             label="Timeout de sessão ativo"
             description="Encerrar sessão inativa após tempo configurado"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
           <ToggleConfigGlobal configKey="login_multiplos_dispositivos"
             label="Login simultâneo em múltiplos dispositivos"
             description="Permitir que o mesmo usuário acesse de vários dispositivos"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
         </Section>
 
         {/* ─ Notificações ─ */}
@@ -91,15 +112,15 @@ export default function ParametrosGeraisPanel() {
           <ToggleConfigGlobal configKey="notif_estoque_baixo"
             label="Alertar estoque abaixo do mínimo"
             description="Notificação quando produto atingir estoque mínimo"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
           <ToggleConfigGlobal configKey="notif_titulo_vencendo"
             label="Alertar títulos vencendo"
             description="Lembrete 3 dias antes do vencimento"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
           <ToggleConfigGlobal configKey="notif_whatsapp_pedido"
             label="Notificação WhatsApp em novos pedidos"
             description="Envia mensagem ao cliente quando pedido for criado"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
         </Section>
 
         {/* ─ Integrações ─ */}
@@ -107,19 +128,19 @@ export default function ParametrosGeraisPanel() {
           <ToggleConfigGlobal configKey="integracao_nfe_ativa"
             label="Emissão de NF-e ativa"
             description="Habilitar emissão eletrônica de notas fiscais"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="integracao_boleto_ativa"
             label="Geração de boletos ativa"
             description="Integração com gateway para emissão de boletos"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="marketplace_sync_ativo"
             label="Sincronização com Marketplaces"
             description="Sincronizar pedidos e estoque com marketplaces"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="integracao_whatsapp"
             label="WhatsApp Business ativo"
             description="Integração com WhatsApp para envio de mensagens"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
         </Section>
 
         {/* ─ Estoque & Produção ─ */}
@@ -127,15 +148,15 @@ export default function ParametrosGeraisPanel() {
           <ToggleConfigGlobal configKey="estoque_alerta_minimo_ativo"
             label="Alerta de estoque mínimo"
             description="Notifica quando produto abaixo do estoque mínimo"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
           <ToggleConfigGlobal configKey="estoque_reserva_automatica"
             label="Reserva automática ao confirmar pedido"
             description="Reservar estoque automaticamente ao aprovar pedidos"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
           <ToggleConfigGlobal configKey="producao_apontamento_mobile"
             label="Apontamento de produção via mobile"
             description="Habilitar app mobile para apontamento na fábrica"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
         </Section>
 
         {/* ─ Financeiro ─ */}
@@ -143,15 +164,15 @@ export default function ParametrosGeraisPanel() {
           <ToggleConfigGlobal configKey="financeiro_aprovacao_despesa_ativa"
             label="Aprovação de despesas ativada"
             description="Despesas acima do limite exigem aprovação do gestor"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
           <ToggleConfigGlobal configKey="conciliacao_bancaria_automatica"
             label="Conciliação bancária automática"
             description="Conciliar lançamentos automaticamente ao importar extrato"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="boleto_envio_automatico"
             label="Envio automático de boletos"
             description="Enviar boleto por e-mail/WhatsApp ao gerar"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
         </Section>
 
         {/* ─ Comercial & CRM ─ */}
@@ -159,19 +180,19 @@ export default function ParametrosGeraisPanel() {
           <ToggleConfigGlobal configKey="crm_pipeline_ativo"
             label="Pipeline de vendas ativo"
             description="Habilitar funil de vendas com estágios de oportunidade"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
           <ToggleConfigGlobal configKey="comercial_aprovacao_pedido_ativa"
             label="Aprovação de pedidos ativada"
             description="Pedidos acima do limite exigem aprovação de gestor"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
           <ToggleConfigGlobal configKey="comercial_desconto_aprovacao"
             label="Aprovação hierárquica de descontos"
             description="Descontos acima do limite exigem aprovação do gerente"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
           <ToggleConfigGlobal configKey="crm_follow_up_automatico"
             label="Follow-up automático de oportunidades"
             description="Sistema cria lembretes automáticos para oportunidades paradas"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
         </Section>
 
         {/* ─ Logística ─ */}
@@ -179,15 +200,15 @@ export default function ParametrosGeraisPanel() {
           <ToggleConfigGlobal configKey="logistica_rastreamento_ativo"
             label="Rastreamento em tempo real ativo"
             description="Habilitar rastreamento GPS de entregas"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="logistica_assinatura_digital"
             label="Assinatura digital de entrega"
             description="Exigir assinatura digital do recebedor na entrega"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="logistica_roteirizacao_ia"
             label="Roteirização inteligente por IA"
             description="Otimizar rotas de entrega automaticamente"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
         </Section>
 
         {/* ─ Compras ─ */}
@@ -195,11 +216,11 @@ export default function ParametrosGeraisPanel() {
           <ToggleConfigGlobal configKey="compras_aprovacao_ativa"
             label="Aprovação de ordens de compra"
             description="OCs acima do limite exigem aprovação do gestor"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
           <ToggleConfigGlobal configKey="compras_cotacao_automatica"
             label="Cotação automática ao criar OC"
             description="Envia automaticamente e-mail de cotação ao fornecedor"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
         </Section>
 
         {/* ─ RH & Operações ─ */}
@@ -207,15 +228,15 @@ export default function ParametrosGeraisPanel() {
           <ToggleConfigGlobal configKey="rh_ponto_eletronico_ativo"
             label="Ponto eletrônico ativo"
             description="Habilitar registro de ponto eletrônico para colaboradores"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="rh_ferias_aprovacao"
             label="Aprovação de férias por gestor"
             description="Solicitações de férias exigem aprovação do responsável"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
           <ToggleConfigGlobal configKey="rh_gamificacao_producao"
             label="Gamificação de produção"
             description="Sistema de pontos e metas para equipes de produção"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
         </Section>
 
         {/* ─ IA & Automação ─ */}
@@ -223,31 +244,31 @@ export default function ParametrosGeraisPanel() {
           <ToggleConfigGlobal configKey="ia_preditiva_vendas"
             label="Previsão preditiva de vendas"
             description="IA analisa histórico e prevê vendas para os próximos 30 dias"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="ia_anomalia_financeira"
             label="Detecção de anomalias financeiras"
             description="IA monitora lançamentos e alerta sobre inconsistências"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="ia_churn_clientes"
             label="Análise de risco de churn"
             description="Identificar clientes com risco de abandono"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="ia_precificacao_inteligente"
             label="Precificação inteligente por IA"
             description="IA sugere preços ótimos com base em histórico"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="ia_sugestao_compras"
             label="Sugestão de compras por IA"
             description="IA sugere produtos a repor com base em histórico de vendas"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="ia_classificacao_clientes"
             label="Classificação automática de clientes (IA)"
             description="IA classifica clientes ABC automaticamente"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="ia_roteirizacao_automatica"
             label="Roteirização automática de entregas"
             description="IA otimiza rotas de entrega automaticamente ao emitir romaneio"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
         </Section>
 
         {/* ─ Relatórios & BI ─ */}
@@ -255,15 +276,15 @@ export default function ParametrosGeraisPanel() {
           <ToggleConfigGlobal configKey="relatorios_consolidados_grupo"
             label="Relatórios consolidados do grupo"
             description="Exibir dados de todas as empresas consolidados nos relatórios"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
           <ToggleConfigGlobal configKey="bi_forecast_ativo"
             label="Previsões BI ativas"
             description="Habilitar módulo de forecast e previsões de negócio"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="relatorio_multiempresa_ativo"
             label="Modo multiempresa nos relatórios"
             description="Filtrar relatórios por empresa específica ou grupo consolidado"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
         </Section>
 
         {/* ─ Portal & Omnicanal ─ */}
@@ -271,19 +292,19 @@ export default function ParametrosGeraisPanel() {
           <ToggleConfigGlobal configKey="portal_cliente_ativo"
             label="Portal do Cliente ativo"
             description="Habilitar acesso de clientes ao portal self-service"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="portal_aprovacao_orcamento"
             label="Aprovação de orçamentos pelo portal"
             description="Cliente pode aprovar orçamentos diretamente no portal"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="omnicanal_ativo"
             label="Hub de Atendimento Omnicanal"
             description="Centralizar atendimento de WhatsApp, e-mail e chat"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="chatbot_ativo"
             label="Chatbot de atendimento ativo"
             description="Resposta automática para atendimento inicial de clientes"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
         </Section>
 
         {/* ─ Multiempresa Avançado ─ */}
@@ -291,19 +312,19 @@ export default function ParametrosGeraisPanel() {
           <ToggleConfigGlobal configKey="multiempresa_modo_grupo"
             label="Modo grupo ativo"
             description="Visualizar e operar no contexto consolidado do grupo"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
           <ToggleConfigGlobal configKey="multiempresa_segregar_dados"
             label="Segregar dados por empresa"
             description="Cada empresa vê apenas seus próprios dados (exceto admins)"
-            defaultValue={true} />
+            defaultValue={true} {...toggleProps} />
           <ToggleConfigGlobal configKey="multiempresa_transferencia_inter"
             label="Transferência entre empresas"
             description="Habilitar transferência de estoque/financeiro entre empresas"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
           <ToggleConfigGlobal configKey="multiempresa_rateio_automatico"
             label="Rateio automático de despesas"
             description="Distribuir despesas do grupo proporcionalmente entre empresas"
-            defaultValue={false} />
+            defaultValue={false} {...toggleProps} />
         </Section>
 
       </div>

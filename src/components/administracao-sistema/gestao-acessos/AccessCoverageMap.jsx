@@ -5,6 +5,7 @@ import { CheckCircle2, Grid3X3, Shield } from "lucide-react";
 
 const safeArray = (value) => Array.isArray(value) ? value : [];
 const safeObject = (value) => value && typeof value === "object" && !Array.isArray(value) ? value : {};
+const normalize = (str) => String(str || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
 const expectedModules = [
   "Dashboard", "CRM", "Comercial", "Estoque", "Compras", "Financeiro", "Fiscal",
@@ -19,10 +20,9 @@ export default function AccessCoverageMap({ perfis = [] }) {
       const perms = safeObject(perfil?.permissoes);
       // Wildcard "*" cobre todos os módulos
       if (perms["*"]) return true;
-      // Busca exata ou case-insensitive no objeto de permissões
-      return Object.keys(perms).some(
-        key => key === moduleName || key.toLowerCase() === moduleName.toLowerCase()
-      );
+      // Busca exata, case-insensitive e accent-insensitive
+      const normModule = normalize(moduleName);
+      return Object.keys(perms).some(key => normalize(key) === normModule);
     });
     
     const actions = new Set();
@@ -33,12 +33,16 @@ export default function AccessCoverageMap({ perfis = [] }) {
         expectedActions.forEach(a => actions.add(a));
         return;
       }
-      const modulePerms = perms[moduleName] || perms[Object.keys(perms).find(k => k.toLowerCase() === moduleName.toLowerCase())];
+      const normModule = normalize(moduleName);
+      const matchKey = Object.keys(perms).find(k => normalize(k) === normModule);
+      const modulePerms = matchKey ? perms[matchKey] : null;
       
       if (Array.isArray(modulePerms)) {
         modulePerms.forEach((action) => {
-          const normalized = action === "ver" ? "visualizar" : action;
-          actions.add(normalized);
+          const normAction = normalize(action);
+          if (normAction === "ver") actions.add("visualizar");
+          else if (normAction === "excluir") actions.add("excluir");
+          else actions.add(action);
         });
       }
     });

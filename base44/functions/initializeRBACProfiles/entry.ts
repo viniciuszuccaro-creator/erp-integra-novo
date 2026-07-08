@@ -19,19 +19,19 @@ const DEFAULT_PROFILES = {
     permissoes: {
       Dashboard: ["ver", "exportar"],
       Relatorios: ["ver", "exportar"],
-      CRM: ["ver", "criar", "editar", "aprovar"],
-      Comercial: ["ver", "criar", "editar", "aprovar", "desconto"],
-      Estoque: ["ver", "criar", "editar"],
-      Compras: ["ver", "criar", "editar", "aprovar"],
-      Expedicao: ["ver", "criar", "editar"],
-      Producao: ["ver", "criar", "editar"],
-      Financeiro: ["ver", "criar", "editar", "aprovar"],
-      RH: ["ver", "criar", "editar"],
-      Fiscal: ["ver", "criar", "editar"],
-      Cadastros: ["ver", "criar", "editar"],
-      Agenda: ["ver", "criar", "editar"],
-      Contratos: ["ver", "criar", "editar", "aprovar"],
-      HubAtendimento: ["ver", "criar", "editar"],
+      CRM: ["ver", "criar", "editar", "excluir", "aprovar"],
+      Comercial: ["ver", "criar", "editar", "excluir", "aprovar", "desconto"],
+      Estoque: ["ver", "criar", "editar", "excluir"],
+      Compras: ["ver", "criar", "editar", "excluir", "aprovar"],
+      Expedicao: ["ver", "criar", "editar", "excluir"],
+      Producao: ["ver", "criar", "editar", "excluir"],
+      Financeiro: ["ver", "criar", "editar", "excluir", "aprovar"],
+      RH: ["ver", "criar", "editar", "excluir"],
+      Fiscal: ["ver", "criar", "editar", "excluir"],
+      Cadastros: ["ver", "criar", "editar", "excluir"],
+      Agenda: ["ver", "criar", "editar", "excluir"],
+      Contratos: ["ver", "criar", "editar", "excluir", "aprovar"],
+      HubAtendimento: ["ver", "criar", "editar", "excluir"],
       Sistema: ["ver", "consultar"]
     }
   },
@@ -42,13 +42,18 @@ const DEFAULT_PROFILES = {
     requer_aprovacao_especial: false,
     permissoes: {
       Dashboard: ["ver"],
+      CRM: ["ver", "criar", "editar"],
       Comercial: ["ver", "criar", "editar"],
       Estoque: ["ver", "criar", "editar"],
       Compras: ["ver", "criar"],
       Expedicao: ["ver", "criar", "editar"],
       Producao: ["ver", "criar", "editar"],
+      Financeiro: ["ver"],
+      Fiscal: ["ver"],
       Cadastros: ["ver", "criar", "editar"],
       Agenda: ["ver", "criar", "editar"],
+      Relatorios: ["ver", "exportar"],
+      Contratos: ["ver"],
       HubAtendimento: ["ver", "criar", "editar"]
     }
   },
@@ -72,7 +77,8 @@ const DEFAULT_PROFILES = {
       Producao: ["ver", "exportar"],
       Agenda: ["ver"],
       Contratos: ["ver", "exportar"],
-      HubAtendimento: ["ver"]
+      HubAtendimento: ["ver"],
+      Sistema: ["ver", "consultar"]
     }
   },
   Financeiro: {
@@ -82,8 +88,13 @@ const DEFAULT_PROFILES = {
     requer_aprovacao_especial: true,
     permissoes: {
       Dashboard: ["ver"],
-      Financeiro: ["ver", "criar", "editar", "aprovar", "liquidar", "conciliar"],
+      Financeiro: ["ver", "criar", "editar", "excluir", "aprovar", "liquidar", "conciliar"],
       Comercial: ["ver"],
+      Estoque: ["ver"],
+      Compras: ["ver"],
+      Expedicao: ["ver"],
+      Producao: ["ver"],
+      CRM: ["ver"],
       Fiscal: ["ver"],
       Cadastros: ["ver"],
       Agenda: ["ver", "criar"],
@@ -99,9 +110,17 @@ const DEFAULT_PROFILES = {
     requer_aprovacao_especial: false,
     permissoes: {
       Dashboard: ["ver"],
-      RH: ["ver", "criar", "editar", "aprovar"],
+      RH: ["ver", "criar", "editar", "excluir", "aprovar"],
+      Comercial: ["ver"],
+      Estoque: ["ver"],
+      Compras: ["ver"],
+      Expedicao: ["ver"],
+      Producao: ["ver"],
+      Financeiro: ["ver"],
+      Fiscal: ["ver"],
       Cadastros: ["ver"],
       Agenda: ["ver", "criar", "editar"],
+      Contratos: ["ver"],
       Relatorios: ["ver", "exportar"],
       HubAtendimento: ["ver"]
     }

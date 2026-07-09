@@ -978,6 +978,145 @@ Deno.serve(async (req) => {
       ? (Array.isArray(body.entities) ? body.entities : [body.entities])
       : ALL_ENTITIES;
 
+    // MODO PURGE: hard-delete de duplicatas exatas validadas (Regra-Mãe §4: exclusão apenas para melhorar)
+    // Seguro: só deleta registros com identificador válido (cnpj/cpf/placa ≥ 11 dígitos, ou codigo+nome exato)
+    if (action === 'purge_duplicates') {
+      const entitiesToPurge = body.entities
+        ? (Array.isArray(body.entities) ? body.entities : [body.entities])
+        : ALL_ENTITIES;
+
+      const purgeSummary = [];
+      let totalPurged = 0;
+      let totalRefsUpdated = 0;
+      let totalErrors = 0;
+
+      for (const entityName of entitiesToPurge) {
+        try {
+          const api = base44.asServiceRole.entities[entityName];
+          if (!api) { purgeSummary.push({ entity: entityName, status: 'Erro', error: 'not found' }); continue; }
+
+          // Carrega todos os registros em batches
+          let allRecords = [];
+          let skip = 0;
+          while (true) {
+            let batch = [];
+            try { batch = await api.list('-created_date', 500, skip) || []; } catch { break; }
+            if (!batch.length) break;
+            allRecords = allRecords.concat(batch);
+            if (batch.length < 500) break;
+            skip += 500;
+          }
+
+          if (!allRecords.length) { purgeSummary.push({ entity: entityName, purged: 0 }); continue; }
+
+          // Agrupa por chave exata (cnpj/cpf/placa validos, ou codigo+nome)
+          const groups = new Map();
+          for (const rec of allRecords) {
+            const key = buildKey(rec);
+            if (!key) continue;
+            // Filtra chaves inválidas (cnpj/cpf com zeros, nomes genéricos)
+            if (key.startsWith('cnpj::') || key.startsWith('cpf::')) {
+              const digits = key.split('::')[1];
+              if (digits.length < 11) continue;
+              if (/^0+$/.test(digits)) continue;
+            }
+            if (key.startsWith('placa::')) {
+              const placa = key.split('::')[1];
+              if (placa.length < 3) continue;
+            }
+            // Para nome::nome, valida que o nome não é genérico
+            if (key.startsWith('nome::')) {
+              const nome = key.replace('nome::', '');
+              if (nome.length < 3) continue;
+              if (INVALID_DESC_VALUES.has(nome)) continue;
+            }
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key).push(rec);
+          }
+
+          // Para cada grupo de duplicatas, manter o mais antigo, deletar os demais
+          const refFields = REF_FIELDS[entityName] || [];
+          let entityPurged = 0;
+          let entityRefsUpdated = 0;
+          const errorsList = [];
+
+          for (const [key, recs] of groups) {
+            if (recs.length < 2) continue;
+
+            // Ordena por created_date (mais antigo primeiro); fallback por id
+            recs.sort((a, b) => {
+              const da = a.created_date ? new Date(a.created_date).getTime() : 0;
+              const db = b.created_date ? new Date(b.created_date).getTime() : 0;
+              return da - db;
+            });
+
+            const keepRec = recs[0];
+            const dups = recs.slice(1);
+
+            for (const dup of dups) {
+              try {
+                // Re-referencia entidades dependentes antes de deletar
+                for (const ref of refFields) {
+                  try {
+                    const refApi = base44.asServiceRole.entities[ref.entity];
+                    if (!refApi) continue;
+                    const refs = await refApi.filter({ [ref.field]: dup.id }, '-id', 500) || [];
+                    for (const r of refs) {
+                      try { await refApi.update(r.id, { [ref.field]: keepRec.id }); entityRefsUpdated++; } catch {}
+                    }
+                  } catch {}
+                }
+
+                // Hard-delete o duplicado
+                await api.delete(dup.id);
+                entityPurged++;
+
+                // Auditoria
+                try {
+                  await base44.asServiceRole.entities.AuditLog.create({
+                    acao: 'Exclusão', modulo: 'Cadastros', tipo_auditoria: 'entidade',
+                    entidade: entityName, registro_id: dup.id,
+                    descricao: `Purge de duplicata: registro "${getNome(dup)}" (${dup.id}) deletado — mantido "${getNome(keepRec)}" (${keepRec.id}). Chave: ${key}`,
+                    usuario: user.full_name || user.email,
+                    usuario_id: user.id,
+                    dados_anteriores: { id: dup.id, nome: getNome(dup), codigo: getCodigo(dup), merged_into: keepRec.id },
+                    dados_novos: { kept_id: keepRec.id, kept_name: getNome(keepRec) },
+                    data_hora: new Date().toISOString(),
+                  });
+                } catch {}
+              } catch (err) {
+                errorsList.push({ id: dup.id, error: err.message });
+                totalErrors++;
+              }
+            }
+          }
+
+          totalPurged += entityPurged;
+          totalRefsUpdated += entityRefsUpdated;
+          purgeSummary.push({
+            entity: entityName,
+            purged: entityPurged,
+            refs_updated: entityRefsUpdated,
+            errors: errorsList.length,
+          });
+        } catch (error) {
+          purgeSummary.push({ entity: entityName, status: 'Erro', error: error.message });
+          totalErrors++;
+        }
+      }
+
+      return Response.json({
+        ok: true,
+        action: 'purge_duplicates',
+        total_purged: totalPurged,
+        total_refs_updated: totalRefsUpdated,
+        total_errors: totalErrors,
+        entities: purgeSummary,
+        executado_por: user.email,
+        data_execucao: new Date().toISOString(),
+      });
+    }
+
     // MODO MERGE: mescla duplicatas (Passo 2 — correção controlada)
     if (action === 'merge' && body.duplicates) {
       const merged = [];

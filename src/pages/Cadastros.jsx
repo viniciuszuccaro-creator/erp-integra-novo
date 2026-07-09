@@ -26,7 +26,7 @@ import IAContextualModulo from "@/components/ia/IAContextualModulo";
 
 export default function Cadastros() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [acordeonAberto, setAcordeonAberto] = useState(["bloco1"]);
+  const [acordeonAberto, setAcordeonAberto] = useState([]);
   const [abaGerenciamento, setAbaGerenciamento] = useState("cadastros");
   const { counts: allCounts, totals, isLoading: countsLoading } = useCadastrosAllCounts();
   // countsLoading passado para blocos filhos (exibe skeleton nas grades)

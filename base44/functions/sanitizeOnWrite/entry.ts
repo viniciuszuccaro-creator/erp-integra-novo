@@ -155,7 +155,20 @@ Deno.serve(async (req) => {
             return Response.json({ ok: true, action: 'duplicate_blocked', deleted_id: event.entity_id, kept_id: existingDup.id });
           }
         }
-      } catch { /* não bloqueia se a verificação falhar */ }
+      } catch (dupError) {
+        // Loga falha de verificação para auditoria — não bloqueia o fluxo, mas registra para investigação
+        try {
+          await base44.asServiceRole.entities.AuditLog.create({
+            usuario: 'Sistema (sanitizeOnWrite)',
+            acao: 'Visualização', modulo: 'Sistema', tipo_auditoria: 'seguranca',
+            entidade: event.entity_name, registro_id: event.entity_id,
+            descricao: `Falha na verificação de duplicidade pós-criação: ${dupError?.message || 'erro desconhecido'}. Registro pode ser duplicata — verifique manualmente.`,
+            empresa_id: data?.empresa_id || null,
+            group_id: data?.group_id || null,
+            data_hora: new Date().toISOString(),
+          });
+        } catch {}
+      }
     }
 
     // Enriquecimento de contexto: se faltar group_id mas houver empresa_id, obtém do cadastro da empresa

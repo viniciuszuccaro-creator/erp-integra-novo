@@ -135,71 +135,86 @@ export default function useVisualizadorCRUD({
       return scoped;
     };
 
-    // Helper: timeout para evitar travamento quando entityListSorted sofre rate limit (429)
-    const withTimeout = (promise, ms = 8000) =>
-      Promise.race([
-        promise,
-        new Promise(resolve => setTimeout(() => resolve(null), ms))
-      ]);
+    // Helper: busca direta via SDK filter (mais rápido que entityListSorted, menos suscetível a rate limit)
+    // Fail-closed: se não conseguir verificar, BLOQUEIA o salvamento (Regra-Mãe §5c)
+    const findDuplicates = async (filter) => {
+      const scoped = withScope(filter);
+      try {
+        const results = await base44.entities[ENTITY].filter(scoped, 'created_date', 10);
+        return (results || []).filter(r => r.id !== currentId);
+      } catch (e) {
+        // Se a verificação falhar por rate limit ou erro de rede, BLOQUEIA (fail-closed)
+        throw new Error(`⚠️ Não foi possível verificar duplicidade (${e.message || 'erro desconhecido'}). O salvamento foi bloqueado para evitar duplicatas. Tente novamente em alguns segundos.`);
+      }
+    };
 
+    // 1. Verificação por CÓDIGO (codigo, sigla, codigo_banco, etc.)
     if (codeValue && String(codeValue).trim()) {
       const codeStr = String(codeValue).trim();
-      const codeFilter = withScope({ [codeField]: codeStr });
-      try {
-        const res = await withTimeout(base44.functions.invoke("entityListSorted", {
-          entityName: ENTITY, filter: codeFilter,
-          sortField: "created_date", sortDirection: "asc", limit: 10, skip: 0,
-        }));
-        const conflitos = (Array.isArray(res?.data) ? res.data : []).filter(r => r.id !== currentId);
-        if (conflitos.length > 0) {
-          const conflito = conflitos[0];
-          const label = conflito.nome || conflito.razao_social || conflito.descricao || conflito.sigla || conflito.id;
-          return `⚠️ Código "${codeValue}" já está em uso pelo registro "${label}". Não é permitido duplicar códigos.`;
-        }
-      } catch { /* não bloqueia salvamento por falha de verificação */ }
-    }
-
-    const _cnpjRaw = formData.cnpj ? String(formData.cnpj).replace(/\D/g,'') : '';
-    const _cpfRaw  = formData.cpf  ? String(formData.cpf).replace(/\D/g,'')  : '';
-    const descInfo = getDescricaoField(formData, ENTITY);
-    if (descInfo && !_cnpjRaw && !_cpfRaw) {
-      const nomeLimpo = descInfo.value.toLowerCase().trim();
-      if (nomeLimpo.length >= 2 && !INVALID_DESC_VALUES.has(nomeLimpo)) {
-        const nameFilter = withScope({ [descInfo.field]: { $regex: `^${nomeLimpo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' } });
-        try {
-          const res2 = await withTimeout(base44.functions.invoke("entityListSorted", {
-            entityName: ENTITY, filter: nameFilter,
-            sortField: "created_date", sortDirection: "asc", limit: 10, skip: 0,
-          }));
-          const conflitos2 = (Array.isArray(res2?.data) ? res2.data : []).filter(r => r.id !== currentId);
-          if (conflitos2.length > 0) {
-            const label2 = conflitos2[0].nome || conflitos2[0].razao_social || conflitos2[0].descricao || conflitos2[0].sigla || conflitos2[0].id;
-            return `⚠️ Já existe um registro com o nome "${label2}". Não é permitido duplicar nomes/descrições.`;
-          }
-        } catch { /* não bloqueia */ }
+      const conflitos = await findDuplicates({ [codeField]: codeStr });
+      if (conflitos.length > 0) {
+        const conflito = conflitos[0];
+        const label = conflito.nome || conflito.razao_social || conflito.descricao || conflito.sigla || conflito.id;
+        return `⚠️ Código "${codeValue}" já está em uso pelo registro "${label}". Não é permitido duplicar códigos.`;
       }
     }
 
-    const cnpjClean = _cnpjRaw;
-    const cpfClean  = _cpfRaw;
+    // 2. Verificação por PLACA (Veiculo)
+    const placaRaw = formData.placa ? String(formData.placa).toUpperCase().trim() : '';
+    if (placaRaw.length >= 3) {
+      const conflitos = await findDuplicates({ placa: formData.placa });
+      if (conflitos.length > 0) {
+        return `⚠️ Placa "${placaRaw}" já cadastrada no veículo "${conflitos[0].modelo || conflitos[0].id}". Não é permitido duplicar placas.`;
+      }
+    }
+
+    // 3. Verificação por CNPJ/CPF (pessoas e empresas)
+    const cnpjClean = formData.cnpj ? String(formData.cnpj).replace(/\D/g,'') : '';
+    const cpfClean  = formData.cpf  ? String(formData.cpf).replace(/\D/g,'')  : '';
     const fiscalOr  = [];
     if (cnpjClean.length >= 14) fiscalOr.push({ cnpj: formData.cnpj });
     if (cpfClean.length  >= 11) fiscalOr.push({ cpf: formData.cpf });
     if (fiscalOr.length) {
-      const fiscalFilter = withScope(fiscalOr.length > 1 ? { $or: fiscalOr } : fiscalOr[0]);
-      try {
-        const res = await withTimeout(base44.functions.invoke("entityListSorted", {
-          entityName: ENTITY, filter: fiscalFilter,
-          sortField: "created_date", sortDirection: "asc", limit: 5, skip: 0,
-        }));
-        const conflito = (Array.isArray(res?.data) ? res.data : []).find(r => r.id !== currentId);
-        if (conflito) {
-          const label = conflito.nome || conflito.razao_social || conflito.cnpj || conflito.id;
-          const docType = cnpjClean.length >= 14 ? 'CNPJ' : 'CPF';
-          return `⚠️ ${docType} já cadastrado no registro "${label}". Não é permitido duplicar.`;
-        }
-      } catch { /* não bloqueia */ }
+      const conflitoFilter = fiscalOr.length > 1 ? { $or: fiscalOr } : fiscalOr[0];
+      const conflitos = await findDuplicates(conflitoFilter);
+      if (conflitos.length > 0) {
+        const c = conflitos[0];
+        const label = c.nome || c.razao_social || c.cnpj || c.id;
+        const docType = cnpjClean.length >= 14 ? 'CNPJ' : 'CPF';
+        return `⚠️ ${docType} já cadastrado no registro "${label}". Não é permitido duplicar.`;
+      }
     }
+
+    // 4. Verificação por NOME/DESCRIÇÃO exato (case-insensitive)
+    //    Executada apenas se não há CNPJ/CPF (cadastros sem documento fiscal)
+    const descInfo = getDescricaoField(formData, ENTITY);
+    if (descInfo && !cnpjClean && !cpfClean) {
+      const nomeLimpo = descInfo.value.toLowerCase().trim();
+      if (nomeLimpo.length >= 2 && !INVALID_DESC_VALUES.has(nomeLimpo)) {
+        const conflitos = await findDuplicates({
+          [descInfo.field]: { $regex: `^${nomeLimpo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' }
+        });
+        if (conflitos.length > 0) {
+          const c = conflitos[0];
+          const label = c.nome || c.razao_social || c.descricao || c.sigla || c.id;
+          return `⚠️ Já existe um registro com o nome "${label}". Não é permitido duplicar nomes/descrições.`;
+        }
+      }
+    }
+
+    // 5. Verificação cruzada: codigo + nome (previne duplicata mesmo se código foi alterado)
+    if (codeValue && descInfo && !cnpjClean && !cpfClean) {
+      const nomeLimpo = descInfo.value.toLowerCase().trim();
+      if (nomeLimpo.length >= 2) {
+        const conflitos = await findDuplicates({
+          [descInfo.field]: { $regex: `^${nomeLimpo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' }
+        });
+        if (conflitos.length > 0) {
+          return `⚠️ Detectado registro com mesmo nome "${descInfo.value}" mas código diferente. Cadastros Gerais são únicos — não é permitido duplicar.`;
+        }
+      }
+    }
+
     return null;
   }, [ENTITY, empresaId, groupId]);
 
@@ -246,12 +261,14 @@ export default function useVisualizadorCRUD({
         if (!clean.empresa_id && empresaId) clean.empresa_id = empresaId;
         if (!clean.group_id  && groupId)   clean.group_id   = groupId;
       }
-      // P3: verificar duplicata antes de salvar
+      // P3: verificar duplicata antes de salvar (fail-closed — bloqueia se não conseguir verificar)
       const erroDuplicata = await checkDuplicate(clean, !!(editItem?.id), editItem?.id);
       if (erroDuplicata) {
         setIsSaving(false);
         throw new Error(erroDuplicata);
       }
+      // Dupla verificação: confirmação via SDK direto antes de persistir (Regra-Mãe §5c)
+      // Se checkDuplicate passou mas houve instabilidade, o backend sanitizeOnWrite fará a barreira final
       let savedEntity;
       if (editItem?.id) {
         // SIMPLE_CATALOG: update direto (evita createInContext carimbar group_id em entidades sem esse campo)

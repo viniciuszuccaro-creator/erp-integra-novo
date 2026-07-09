@@ -38,7 +38,7 @@ const DEFAULT_PROFILES = {
       Agenda: ["ver", "criar", "editar", "excluir"],
       CRM: ["ver", "editar", "aprovar", "exportar"],
       Cadastros: ["ver", "editar", "exportar"],
-      Comercial: ["ver", "aprovar", "desconto", "cancelar", "exportar"],
+      Comercial: ["ver", "aprovar", "cancelar", "exportar"],
       Estoque: ["ver", "transferir", "inventario", "exportar"],
       Compras: ["ver", "aprovar", "exportar"],
       Expedicao: ["ver", "rastrear", "roteirizar", "exportar"],

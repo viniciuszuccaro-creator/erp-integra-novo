@@ -1,5 +1,5 @@
 // Regras e detecção de Segregação de Funções (SoD)
-// Fonte única de verdade — sincronizada com securityPoliciesValidator/entry.ts
+// Fonte única de verdade — sincronizada com securityPoliciesValidator/entry.ts e sodValidator/entry.ts
 // 14 regras cobrindo intra-módulo, inter-módulo e acesso indevido a Sistema/AuditLog.
 
 export const SOD_RULES = [
@@ -49,17 +49,3 @@ export function detectSodConflicts(permissoes) {
 function prioridade(level) {
   return { 'Baixa': 1, 'Média': 2, 'Alta': 3, 'Crítica': 4 }[level] || 0;
 }
-
-// Endpoint mínimo para satisfazer o Deno Deploy isolate
-Deno.serve(async (req) => {
-  try {
-    const body = await req.json().catch(() => ({}));
-    if (body?.permissoes) {
-      const result = detectSodConflicts(body.permissoes);
-      return Response.json({ ok: true, ...result });
-    }
-    return Response.json({ ok: true, rules: SOD_RULES.length, regras: SOD_RULES });
-  } catch (error) {
-    return Response.json({ error: String(error?.message || error) }, { status: 500 });
-  }
-});

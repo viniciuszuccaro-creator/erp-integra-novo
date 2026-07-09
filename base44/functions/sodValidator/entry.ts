@@ -132,18 +132,119 @@ function detectSodConflicts(permissoes = {}) {
   return { conflitos, severidadeMax };
 }
 
-async function validateProfile(base44, perfil) {
+/**
+ * Remove recursivamente uma ação de um nó de permissões (modulo/subseções).
+ * Retorna true se algo foi removido.
+ */
+function removeActionFromNode(node, action) {
+  const norm = normalizeAction(action);
+  let changed = false;
+  if (Array.isArray(node)) {
+    const before = node.length;
+    const filtered = node.filter(a => normalizeAction(a) !== norm);
+    if (filtered.length !== before) {
+      node.length = 0;
+      node.push(...filtered);
+      changed = true;
+    }
+  } else if (node && typeof node === 'object') {
+    for (const key of Object.keys(node)) {
+      if (removeActionFromNode(node[key], action)) changed = true;
+    }
+  }
+  return changed;
+}
+
+/**
+ * Auto-correção de permissões: remove a ação menos crítica de cada conflito SoD.
+ * Estratégia alinhada com os perfis padrão:
+ * - excluir → sempre removido (admin-only)
+ * - liquidar/pagar → removido (keep aprovar)
+ * - desconto → removido (keep aprovar)
+ * - cancelar → removido (keep emitir/criar)
+ * - aprovar + criar/editar → se perfil é "Gestor/Gerente/Aprovador", remove criar/editar; senão remove aprovar
+ */
+function autofixPermissions(permissoes, conflitos, profileName) {
+  const fixed = JSON.parse(JSON.stringify(permissoes || {}));
+  const isApprover = /gestor|gerente|aprovador|supervisor|manager/i.test(profileName || '');
+
+  // For each conflict rule, define which actions to try removing from which module
+  // Key = regra ID, value = [{ modulo, acoes: [action1, action2, ...] }]
+  const RULE_FIX_MAP = {
+    'FIN-PAG-001': [{ modulo: 'Financeiro', acoes: ['liquidar', 'pagar'] }],
+    'FIN-CRU-001': [{ modulo: 'Financeiro', acoes: ['excluir'] }],
+    'FIN-APR-001': [{ modulo: 'Financeiro', acoes: isApprover ? ['criar', 'editar'] : ['aprovar'] }],
+    'COM-DESC-001': [{ modulo: 'Comercial', acoes: isApprover ? ['desconto', 'editar'] : ['aprovar'] }],
+    'COM-APR-001': [{ modulo: 'Comercial', acoes: isApprover ? ['criar'] : ['aprovar'] }],
+    'FIS-NFE-001': [{ modulo: 'Fiscal', acoes: ['cancelar', 'excluir'] }],
+    'CMP-APR-001': [{ modulo: 'Compras', acoes: isApprover ? ['criar'] : ['aprovar'] }],
+    'EST-TRF-001': [{ modulo: 'Estoque', acoes: ['excluir'] }],
+    'RH-APR-001': [{ modulo: 'RH', acoes: isApprover ? ['editar'] : ['aprovar'] }],
+    'CMP-OC-001': [{ modulo: 'Financeiro', acoes: ['liquidar', 'pagar'] }],
+    'PRD-OC-001': [{ modulo: 'Compras', acoes: ['criar'] }],
+    'SYS-RBAC-001': [{ modulo: 'Sistema', acoes: ['editar', 'criar', 'configurar', 'backup', 'seguranca', 'executar'] }],
+    'LOG-SEC-001': [{ modulo: 'AuditLog', acoes: ['excluir', 'deletar', 'remover'] }],
+    'ADM-USR-001': [{ modulo: 'Sistema', acoes: ['editar', 'criar'] }],
+  };
+
+  let actionsRemoved = [];
+
+  for (const conflito of conflitos) {
+    const fixes = RULE_FIX_MAP[conflito.regra];
+    if (!fixes) continue;
+    for (const fix of fixes) {
+      const modNode = fixed[fix.modulo];
+      if (!modNode) continue;
+      for (const act of fix.acoes) {
+        if (removeActionFromNode(modNode, act)) {
+          actionsRemoved.push({ modulo: fix.modulo, acao: act });
+        }
+      }
+    }
+  }
+  return { fixed, actionsRemoved };
+}
+
+async function validateProfile(base44, perfil, autofix = false) {
   const { conflitos, severidadeMax } = detectSodConflicts(perfil?.permissoes || {});
   const patch = {
     conflitos_sod_detectados: conflitos,
     requer_aprovacao_especial: ['Alta', 'Crítica'].includes(severidadeMax) || perfil?.requer_aprovacao_especial || false,
   };
+
+  let fixedPerms = null;
+  let actionsRemoved = [];
+  let recheckConflitos = conflitos;
+  let recheckSev = severidadeMax;
+
+  if (autofix && conflitos.length > 0) {
+    const result = autofixPermissions(perfil?.permissoes || {}, conflitos, perfil?.nome_perfil || perfil?.nome);
+    fixedPerms = result.fixed;
+    actionsRemoved = result.actionsRemoved;
+    if (actionsRemoved.length > 0) {
+      const recheck = detectSodConflicts(fixedPerms);
+      recheckConflitos = recheck.conflitos;
+      recheckSev = recheck.severidadeMax;
+      patch.conflitos_sod_detectados = recheckConflitos;
+      patch.requer_aprovacao_especial = ['Alta', 'Crítica'].includes(recheckSev) || perfil?.requer_aprovacao_especial || false;
+      patch.permissoes = fixedPerms;
+    }
+  }
+
   const sameConflicts = JSON.stringify(perfil?.conflitos_sod_detectados || []) === JSON.stringify(patch.conflitos_sod_detectados || []);
   const sameApproval = perfil?.requer_aprovacao_especial === patch.requer_aprovacao_especial;
-  if (!sameConflicts || !sameApproval) {
+  const samePerms = !fixedPerms || JSON.stringify(perfil?.permissoes || {}) === JSON.stringify(fixedPerms);
+  if (!sameConflicts || !sameApproval || !samePerms) {
     await base44.asServiceRole.entities.PerfilAcesso.update(perfil.id, patch);
   }
-  return { perfil_id: perfil.id, nome: perfil.nome_perfil || perfil.nome || perfil.id, conflitos: conflitos.length, severidadeMax, detalhes: conflitos };
+  return {
+    perfil_id: perfil.id,
+    nome: perfil.nome_perfil || perfil.nome || perfil.id,
+    conflitos: recheckConflitos.length,
+    severidadeMax: recheckSev,
+    detalhes: recheckConflitos,
+    autofix_applied: actionsRemoved.length > 0 ? actionsRemoved : undefined,
+  };
 }
 
 Deno.serve(async (req) => {
@@ -173,6 +274,8 @@ Deno.serve(async (req) => {
     if (!isEntityAutomation) LAST_SOD_RUN_AT = Date.now();
     const results = [];
 
+    const autofix = payload?.autofix === true;
+
     if (event?.entity_name === 'PerfilAcesso') {
       let perfil = incoming;
       if (!perfil) {
@@ -180,7 +283,7 @@ Deno.serve(async (req) => {
         perfil = list?.[0] || null;
       }
       if (!perfil) return Response.json({ ok: false, error: 'Perfil não encontrado' }, { status: 400 });
-      results.push(await validateProfile(base44, perfil));
+      results.push(await validateProfile(base44, perfil, autofix));
     } else {
       const scope = {};
       if (payload?.group_id) scope.group_id = payload.group_id;
@@ -188,7 +291,7 @@ Deno.serve(async (req) => {
       
       const perfis = await base44.asServiceRole.entities.PerfilAcesso.filter(scope, '-updated_date', 100);
       for (const perfil of perfis || []) {
-        results.push(await validateProfile(base44, perfil));
+        results.push(await validateProfile(base44, perfil, autofix));
       }
     }
 

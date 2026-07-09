@@ -1,27 +1,35 @@
 // Regras e detecção de Segregação de Funções (SoD)
+// Fonte única de verdade — sincronizada com securityPoliciesValidator/entry.ts
+// 14 regras cobrindo intra-módulo, inter-módulo e acesso indevido a Sistema/AuditLog.
 
-const regras = [
+export const SOD_RULES = [
+  { modulo: 'Financeiro', conflito: ['aprovar', 'liquidar'], severidade: 'Alta', descricao: 'Quem aprova pagamentos não deve liquidar.' },
+  { modulo: 'Financeiro', conflito: ['criar', 'excluir'], severidade: 'Média', descricao: 'Quem cria lançamentos não deve excluir.' },
   { modulo: 'Financeiro', conflito: ['aprovar', 'criar'], severidade: 'Alta', descricao: 'Quem aprova no Financeiro não deve criar.' },
   { modulo: 'Financeiro', conflito: ['aprovar', 'editar'], severidade: 'Alta', descricao: 'Quem aprova no Financeiro não deve editar.' },
   { modulo: 'Financeiro', conflito: ['aprovar', 'excluir'], severidade: 'Crítica', descricao: 'Quem aprova no Financeiro não deve excluir.' },
-  { modulo: 'Compras', conflito: ['aprovar', 'criar'], severidade: 'Alta', descricao: 'Quem aprova compras não deve criar solicitações/OCs.' },
-  { modulo: 'Compras', conflito: ['aprovar', 'editar'], severidade: 'Alta', descricao: 'Quem aprova compras não deve editar solicitações/OCs.' },
+  { modulo: 'Comercial', conflito: ['editar', 'aprovar'], severidade: 'Média', descricao: 'Quem edita não deve aprovar descontos.' },
+  { modulo: 'Comercial', conflito: ['criar', 'aprovar'], severidade: 'Média', descricao: 'Quem cria pedidos não deve aprová-los.' },
+  { modulo: 'Fiscal', conflito: ['emitir', 'cancelar'], severidade: 'Alta', descricao: 'Separar emissão e cancelamento fiscal.' },
   { modulo: 'Fiscal', conflito: ['emitir', 'aprovar'], severidade: 'Média', descricao: 'Separar emissão e aprovação fiscal.' },
-  { modulo: 'Comercial', conflito: ['aprovar', 'descontos_especiais'], severidade: 'Média', descricao: 'Aprovação e concessão de descontos especiais.' },
-  { modulo: 'Sistema', conflito: ['gerenciar_usuarios', 'aprovar'], severidade: 'Alta', descricao: 'Gerenciar usuários e aprovar processos.' },
+  { modulo: 'Compras', conflito: ['criar', 'aprovar'], severidade: 'Alta', descricao: 'Quem aprova compras não deve criar.' },
+  { modulo: 'Compras', conflito: ['aprovar', 'editar'], severidade: 'Alta', descricao: 'Quem aprova compras não deve editar.' },
+  { modulo: 'Estoque', conflito: ['transferir', 'excluir'], severidade: 'Média', descricao: 'Quem transfere não deve excluir movimentações.' },
+  { modulo: 'RH', conflito: ['editar', 'aprovar'], severidade: 'Média', descricao: 'Quem edita dados de RH não deve aprovar.' },
+  { modulo: 'Sistema', conflito: ['criar', 'editar'], severidade: 'Crítica', descricao: 'Criar usuários e editar perfis (escalada de privilégio).' },
 ];
 
 export function detectSodConflicts(permissoes) {
   const conflitos = [];
   let severidadeMax = null;
 
-  for (const regra of regras) {
+  for (const regra of SOD_RULES) {
     const mod = permissoes?.[regra.modulo];
     if (!mod) continue;
     const secoes = Object.values(mod || {});
     const acoesPresentes = new Set();
     for (const lista of secoes) {
-      if (Array.isArray(lista)) for (const ac of lista) acoesPresentes.add(String(ac));
+      if (Array.isArray(lista)) for (const ac of lista) acoesPresentes.add(String(ac).toLowerCase());
     }
     if (regra.conflito.every((ac) => acoesPresentes.has(ac))) {
       conflitos.push({
@@ -39,5 +47,19 @@ export function detectSodConflicts(permissoes) {
 }
 
 function prioridade(level) {
-  return { 'Média': 1, 'Alta': 2, 'Crítica': 3 }[level] || 0;
+  return { 'Baixa': 1, 'Média': 2, 'Alta': 3, 'Crítica': 4 }[level] || 0;
 }
+
+// Endpoint mínimo para satisfazer o Deno Deploy isolate
+Deno.serve(async (req) => {
+  try {
+    const body = await req.json().catch(() => ({}));
+    if (body?.permissoes) {
+      const result = detectSodConflicts(body.permissoes);
+      return Response.json({ ok: true, ...result });
+    }
+    return Response.json({ ok: true, rules: SOD_RULES.length, regras: SOD_RULES });
+  } catch (error) {
+    return Response.json({ error: String(error?.message || error) }, { status: 500 });
+  }
+});

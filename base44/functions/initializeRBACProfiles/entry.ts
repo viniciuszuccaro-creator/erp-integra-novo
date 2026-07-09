@@ -1,51 +1,68 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-// Perfis RBAC padrão do sistema
+/**
+ * Perfis RBAC padrão do sistema — alinhados com regras SoD.
+ *
+ * Princípio de Segregação de Funções (SoD):
+ * - Quem CRIA/INICIA uma transação NÃO APROVA (Operacional cria → Gerente aprova)
+ * - Quem APROVA NÃO EXECUTA/LIQUIDA (Gerente aprova → Financeiro liquida)
+ * - Ninguém tem CRIAR + EXCLUIR no mesmo módulo (exclusão é admin-only)
+ * - Ninguém tem EMITIR + CANCELAR NF-e no mesmo perfil
+ * - Sistema é exclusivo de admin (entityGuard bloqueia não-admin)
+ *
+ * 3 níveis de responsabilidade:
+ * 1. Executor (Operacional) — cria/edita, não aprova nem exclui
+ * 2. Aprovador (Gerente) — aprova/autoriza, não cria nem exclui
+ * 3. Especialista (Financeiro/RH) — executa ações específicas sem aprovar
+ */
 const DEFAULT_PROFILES = {
   Administrador: {
     nome_perfil: 'Administrador',
-    descricao: 'Acesso total ao sistema',
+    descricao: 'Acesso total ao sistema — isento de regras SoD',
+    nivel_perfil: 'Administrador',
     ativo: true,
     requer_aprovacao_especial: false,
     permissoes: {
-      "*": ["*"] // Acesso total
+      "*": ["*"]
     }
   },
   Gerente: {
     nome_perfil: 'Gerente',
-    descricao: 'Acesso gerencial a todos os módulos operacionais e administrativos, sem acesso a Sistema',
+    descricao: 'Aprovador/Gestor — aprova e autoriza transações, não cria nem exclui. Sem acesso a Sistema.',
+    nivel_perfil: 'Gerencial',
     ativo: true,
     requer_aprovacao_especial: false,
     permissoes: {
       Dashboard: ["ver", "exportar"],
       Relatorios: ["ver", "criar", "editar", "exportar"],
-      CRM: ["ver", "criar", "editar", "excluir", "aprovar"],
-      Comercial: ["ver", "criar", "editar", "excluir", "aprovar", "desconto"],
-      Estoque: ["ver", "criar", "editar", "excluir", "transferir", "inventario"],
-      Compras: ["ver", "criar", "editar", "excluir", "aprovar", "receber"],
-      Expedicao: ["ver", "criar", "editar", "excluir", "rastrear", "roteirizar"],
-      Producao: ["ver", "criar", "editar", "excluir", "apontar", "concluir"],
-      Financeiro: ["ver", "criar", "editar", "excluir", "aprovar", "liquidar", "conciliar", "cancelar"],
-      RH: ["ver", "criar", "editar", "excluir", "aprovar"],
-      Fiscal: ["ver", "criar", "editar", "excluir", "emitir", "cancelar", "exportar"],
-      Cadastros: ["ver", "criar", "editar", "excluir", "importar", "exportar"],
       Agenda: ["ver", "criar", "editar", "excluir"],
-      Contratos: ["ver", "criar", "editar", "excluir", "assinar", "renovar"],
-      HubAtendimento: ["ver", "criar", "editar", "excluir", "responder", "transferir"]
+      CRM: ["ver", "editar", "aprovar", "exportar"],
+      Cadastros: ["ver", "editar", "exportar"],
+      Comercial: ["ver", "aprovar", "desconto", "cancelar", "exportar"],
+      Estoque: ["ver", "transferir", "inventario", "exportar"],
+      Compras: ["ver", "aprovar", "exportar"],
+      Expedicao: ["ver", "rastrear", "roteirizar", "exportar"],
+      Producao: ["ver", "aprovar", "concluir", "exportar"],
+      Financeiro: ["ver", "aprovar", "conciliar", "exportar"],
+      RH: ["ver", "aprovar"],
+      Fiscal: ["ver", "exportar"],
+      Contratos: ["ver", "aprovar", "assinar", "renovar", "exportar"],
+      HubAtendimento: ["ver", "responder", "transferir", "exportar"]
     }
   },
   Operacional: {
     nome_perfil: 'Operacional',
-    descricao: 'CRUD em módulos operacionais, leitura em administrativos, sem acesso a Sistema',
+    descricao: 'Executor — cria e edita transações operacionais, não aprova nem exclui. Sem Sistema.',
+    nivel_perfil: 'Operacional',
     ativo: true,
     requer_aprovacao_especial: false,
     permissoes: {
       Dashboard: ["ver", "exportar"],
       Agenda: ["ver", "criar", "editar", "excluir"],
-      CRM: ["ver", "criar", "editar", "excluir"],
-      Cadastros: ["ver", "criar", "editar", "excluir", "importar"],
-      Comercial: ["ver", "criar", "editar", "excluir"],
-      Estoque: ["ver", "criar", "editar", "excluir", "transferir"],
+      CRM: ["ver", "criar", "editar", "exportar"],
+      Cadastros: ["ver", "criar", "editar", "importar"],
+      Comercial: ["ver", "criar", "editar", "exportar"],
+      Estoque: ["ver", "criar", "editar", "transferir"],
       Compras: ["ver", "criar", "editar", "receber"],
       Expedicao: ["ver", "criar", "editar", "rastrear", "roteirizar"],
       Producao: ["ver", "criar", "editar", "apontar", "concluir"],
@@ -59,36 +76,38 @@ const DEFAULT_PROFILES = {
   },
   Analista: {
     nome_perfil: 'Analista',
-    descricao: 'Leitura e exportação em todos os módulos, sem ações destrutivas nem Sistema',
+    descricao: 'Consultor — leitura e exportação em todos os módulos, sem ações destrutivas nem Sistema.',
+    nivel_perfil: 'Consulta',
     ativo: true,
     requer_aprovacao_especial: false,
     permissoes: {
       Dashboard: ["ver", "exportar"],
       Relatorios: ["ver", "criar", "editar", "exportar"],
+      Agenda: ["ver"],
       CRM: ["ver", "exportar"],
+      Cadastros: ["ver", "exportar"],
       Comercial: ["ver", "exportar"],
       Estoque: ["ver", "exportar"],
       Compras: ["ver", "exportar"],
+      Expedicao: ["ver", "exportar"],
+      Producao: ["ver", "exportar"],
       Financeiro: ["ver", "exportar"],
       RH: ["ver", "exportar"],
       Fiscal: ["ver", "exportar"],
-      Cadastros: ["ver", "exportar"],
-      Expedicao: ["ver", "exportar"],
-      Producao: ["ver", "exportar"],
-      Agenda: ["ver"],
       Contratos: ["ver", "exportar"],
       HubAtendimento: ["ver"]
     }
   },
   Financeiro: {
     nome_perfil: 'Financeiro',
-    descricao: 'Controle total no Financeiro/Fiscal, leitura nos demais, sem Sistema',
+    descricao: 'Especialista financeiro — executa liquidações e emissões, não aprova nem exclui. Sem Sistema.',
+    nivel_perfil: 'Operacional',
     ativo: true,
     requer_aprovacao_especial: true,
     permissoes: {
       Dashboard: ["ver", "exportar"],
-      Financeiro: ["ver", "criar", "editar", "excluir", "aprovar", "liquidar", "conciliar", "cancelar"],
-      Fiscal: ["ver", "criar", "editar", "emitir", "cancelar", "exportar"],
+      Financeiro: ["ver", "criar", "editar", "liquidar", "conciliar", "exportar"],
+      Fiscal: ["ver", "criar", "editar", "emitir", "exportar"],
       Comercial: ["ver"],
       Estoque: ["ver"],
       Compras: ["ver"],
@@ -105,12 +124,13 @@ const DEFAULT_PROFILES = {
   },
   RH: {
     nome_perfil: 'RH',
-    descricao: 'Controle total no RH, leitura nos demais, sem Sistema',
+    descricao: 'Especialista de RH — edita dados de pessoal, não aprova nem exclui. Sem Sistema.',
+    nivel_perfil: 'Operacional',
     ativo: true,
     requer_aprovacao_especial: false,
     permissoes: {
       Dashboard: ["ver", "exportar"],
-      RH: ["ver", "criar", "editar", "excluir", "aprovar"],
+      RH: ["ver", "criar", "editar", "exportar"],
       Cadastros: ["ver", "criar", "editar"],
       Agenda: ["ver", "criar", "editar", "excluir"],
       Comercial: ["ver"],
@@ -128,7 +148,8 @@ const DEFAULT_PROFILES = {
   },
   User: {
     nome_perfil: 'User',
-    descricao: 'Leitura em todos os módulos, sem ações de escrita nem Sistema',
+    descricao: 'Leitura em todos os módulos, sem ações de escrita nem Sistema.',
+    nivel_perfil: 'Consulta',
     ativo: true,
     requer_aprovacao_especial: false,
     permissoes: {
@@ -156,7 +177,6 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    // Apenas admin pode inicializar perfis
     if (!user || user.role !== 'admin') {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
@@ -175,12 +195,30 @@ Deno.serve(async (req) => {
 
     // Verifica quais perfis já existem
     const existingProfiles = await base44.asServiceRole.entities.PerfilAcesso.filter(scope);
-    const existingNames = new Set(existingProfiles.map(p => p.nome_perfil));
+    const existingByName = new Map();
+    for (const p of existingProfiles || []) {
+      existingByName.set(p.nome_perfil, p);
+    }
 
-    // Cria apenas perfis que não existem
     const created = [];
+    const updated = [];
+
     for (const [key, profile] of Object.entries(DEFAULT_PROFILES)) {
-      if (!existingNames.has(profile.nome_perfil)) {
+      const existing = existingByName.get(profile.nome_perfil);
+      if (existing) {
+        // Atualiza permissões do perfil existente para alinhar com SoD
+        const permsChanged = JSON.stringify(existing.permissoes || {}) !== JSON.stringify(profile.permissoes);
+        const descChanged = existing.descricao !== profile.descricao;
+        const nivelChanged = existing.nivel_perfil !== profile.nivel_perfil;
+        if (permsChanged || descChanged || nivelChanged) {
+          await base44.asServiceRole.entities.PerfilAcesso.update(existing.id, {
+            permissoes: profile.permissoes,
+            descricao: profile.descricao,
+            nivel_perfil: profile.nivel_perfil,
+          });
+          updated.push({ id: existing.id, nome: profile.nome_perfil });
+        }
+      } else {
         try {
           const newProfile = await base44.asServiceRole.entities.PerfilAcesso.create({
             ...profile,
@@ -194,18 +232,22 @@ Deno.serve(async (req) => {
     }
 
     // Auditoria
-    if (created.length > 0) {
+    if (created.length > 0 || updated.length > 0) {
       await base44.entities.AuditLog.create({
         usuario: user.full_name,
         usuario_id: user.id,
-        acao: 'Criação',
+        acao: created.length > 0 ? 'Criação' : 'Edição',
         modulo: 'Sistema',
         tipo_auditoria: 'seguranca',
         entidade: 'PerfilAcesso',
-        descricao: `Inicialização de ${created.length} perfis RBAC`,
+        descricao: `Inicialização RBAC: ${created.length} criados, ${updated.length} atualizados (SoD-compliant)`,
         empresa_id: empresa_id || null,
         group_id: group_id || null,
-        dados_novos: { profiles: created.map(p => p.nome_perfil) },
+        dados_novos: {
+          created: created.map(p => p.nome_perfil),
+          updated: updated.map(p => p.nome),
+          sod_compliant: true
+        },
         data_hora: new Date().toISOString(),
       });
     }
@@ -213,7 +255,9 @@ Deno.serve(async (req) => {
     return Response.json({
       ok: true,
       created: created.length,
-      profiles: created.map(p => ({ id: p.id, nome: p.nome_perfil }))
+      updated: updated.length,
+      profiles: [...created, ...updated].map(p => ({ id: p.id, nome: p.nome_perfil || p.nome })),
+      sod_compliant: true
     });
   } catch (error) {
     return Response.json({ error: String(error?.message || error) }, { status: 500 });

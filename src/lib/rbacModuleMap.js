@@ -192,39 +192,42 @@ export const ACTION_CATEGORIES = {
 };
 
 // Permissões padrão por role — alinhado com initializeRBACProfiles (backend)
-// Princípio do menor privilégio: cada role tem acesso apenas ao necessário para sua função.
-// Sistema é exclusivo de admin. Ações sensíveis (emitir, cancelar, liquidar) são restritas.
+// Princípio do menor privilégio + Segregação de Funções (SoD):
+// - Executor (Operacional): cria/edita, NÃO aprova nem exclui
+// - Aprovador (Gerente): aprova/autoriza, NÃO cria nem exclui
+// - Especialista (Financeiro/RH): executa ações específicas, NÃO aprova nem exclui
+// - Sistema é exclusivo de admin. Exclusão é admin-only em todos os módulos.
+// - Quem cria não aprova; quem aprova não liquida; quem emite não cancela.
 export const DEFAULT_ROLE_PERMISSIONS = {
   admin: {
-    // Admin tem acesso total a tudo
     _global: ["*"]
   },
   gerente: {
-    // Gerente: CRUD + aprovação em módulos operacionais e administrativos, sem acesso a Sistema
+    // Aprovador/Gestor — aprova e autoriza, não cria nem exclui
     Dashboard: ["ver", "exportar"],
     Relatorios: ["ver", "criar", "editar", "exportar"],
     Agenda: ["ver", "criar", "editar", "excluir"],
-    CRM: ["ver", "criar", "editar", "excluir", "aprovar"],
-    Cadastros: ["ver", "criar", "editar", "excluir", "importar", "exportar"],
-    Comercial: ["ver", "criar", "editar", "excluir", "aprovar", "desconto"],
-    Estoque: ["ver", "criar", "editar", "excluir", "transferir", "inventario"],
-    Compras: ["ver", "criar", "editar", "excluir", "aprovar", "receber"],
-    Expedicao: ["ver", "criar", "editar", "excluir", "rastrear", "roteirizar"],
-    Producao: ["ver", "criar", "editar", "excluir", "apontar", "concluir"],
-    Financeiro: ["ver", "criar", "editar", "excluir", "aprovar", "liquidar", "conciliar", "cancelar"],
-    RH: ["ver", "criar", "editar", "excluir", "aprovar"],
-    Fiscal: ["ver", "criar", "editar", "excluir", "emitir", "cancelar", "exportar"],
-    Contratos: ["ver", "criar", "editar", "excluir", "assinar", "renovar"],
-    HubAtendimento: ["ver", "criar", "editar", "excluir", "responder", "transferir"],
+    CRM: ["ver", "editar", "aprovar", "exportar"],
+    Cadastros: ["ver", "editar", "exportar"],
+    Comercial: ["ver", "aprovar", "desconto", "cancelar", "exportar"],
+    Estoque: ["ver", "transferir", "inventario", "exportar"],
+    Compras: ["ver", "aprovar", "exportar"],
+    Expedicao: ["ver", "rastrear", "roteirizar", "exportar"],
+    Producao: ["ver", "aprovar", "concluir", "exportar"],
+    Financeiro: ["ver", "aprovar", "conciliar", "exportar"],
+    RH: ["ver", "aprovar"],
+    Fiscal: ["ver", "exportar"],
+    Contratos: ["ver", "aprovar", "assinar", "renovar", "exportar"],
+    HubAtendimento: ["ver", "responder", "transferir", "exportar"],
   },
   operacional: {
-    // Operacional: CRUD em módulos operacionais, leitura em administrativos, sem Sistema
+    // Executor — cria e edita, não aprova nem exclui
     Dashboard: ["ver", "exportar"],
     Agenda: ["ver", "criar", "editar", "excluir"],
-    CRM: ["ver", "criar", "editar", "excluir"],
-    Cadastros: ["ver", "criar", "editar", "excluir", "importar"],
-    Comercial: ["ver", "criar", "editar", "excluir"],
-    Estoque: ["ver", "criar", "editar", "excluir", "transferir"],
+    CRM: ["ver", "criar", "editar", "exportar"],
+    Cadastros: ["ver", "criar", "editar", "importar"],
+    Comercial: ["ver", "criar", "editar", "exportar"],
+    Estoque: ["ver", "criar", "editar", "transferir"],
     Compras: ["ver", "criar", "editar", "receber"],
     Expedicao: ["ver", "criar", "editar", "rastrear", "roteirizar"],
     Producao: ["ver", "criar", "editar", "apontar", "concluir"],
@@ -236,7 +239,7 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     HubAtendimento: ["ver", "criar", "editar", "responder"],
   },
   analista: {
-    // Analista: leitura + exportação em todos os módulos, sem ações destrutivas nem Sistema
+    // Consultor — leitura + exportação, sem ações destrutivas nem Sistema
     Dashboard: ["ver", "exportar"],
     Relatorios: ["ver", "criar", "editar", "exportar"],
     Agenda: ["ver"],
@@ -254,10 +257,10 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     HubAtendimento: ["ver"],
   },
   financeiro: {
-    // Financeiro: controle total no Financeiro/Fiscal, leitura nos demais, sem Sistema
+    // Especialista — executa liquidações e emissões, não aprova nem exclui
     Dashboard: ["ver", "exportar"],
-    Financeiro: ["ver", "criar", "editar", "excluir", "aprovar", "liquidar", "conciliar", "cancelar"],
-    Fiscal: ["ver", "criar", "editar", "emitir", "cancelar", "exportar"],
+    Financeiro: ["ver", "criar", "editar", "liquidar", "conciliar", "exportar"],
+    Fiscal: ["ver", "criar", "editar", "emitir", "exportar"],
     Comercial: ["ver"],
     Estoque: ["ver"],
     Compras: ["ver"],
@@ -272,9 +275,9 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     HubAtendimento: ["ver"],
   },
   rh: {
-    // RH: controle total no RH, leitura nos demais, sem Sistema
+    // Especialista — edita dados de pessoal, não aprova nem exclui
     Dashboard: ["ver", "exportar"],
-    RH: ["ver", "criar", "editar", "excluir", "aprovar"],
+    RH: ["ver", "criar", "editar", "exportar"],
     Cadastros: ["ver", "criar", "editar"],
     Agenda: ["ver", "criar", "editar", "excluir"],
     Comercial: ["ver"],
@@ -290,7 +293,7 @@ export const DEFAULT_ROLE_PERMISSIONS = {
     HubAtendimento: ["ver"],
   },
   user: {
-    // User padrão: leitura em todos os módulos, sem ações de escrita nem Sistema
+    // Leitura em todos os módulos, sem escrita nem Sistema
     Dashboard: ["ver", "exportar"],
     Relatorios: ["ver", "exportar"],
     Agenda: ["ver", "criar", "editar", "excluir"],

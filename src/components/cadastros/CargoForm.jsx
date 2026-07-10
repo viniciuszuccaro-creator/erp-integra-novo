@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Briefcase, Trash2, Power, PowerOff, AlertTriangle } from "lucide-react";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
 
 /**
@@ -14,6 +16,8 @@ import { toast } from "sonner";
  */
 export default function CargoForm({ cargo, item, data, initialData, defaultValues, onSubmit, isSubmitting, windowMode = false }) {
   const dadosIniciais = item || data || initialData || defaultValues || cargo;
+  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || dadosIniciais?.group_id || null;
   const [formData, setFormData] = useState(dadosIniciais || {
     nome_cargo: '',
     descricao: '',
@@ -31,13 +35,16 @@ export default function CargoForm({ cargo, item, data, initialData, defaultValue
     }
   }, [dadosIniciais?.id]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nome_cargo) {
       toast.error('Preencha o nome do cargo');
       return;
     }
-    onSubmit({ ...formData, nome: formData.nome_cargo });
+    const payload = { ...formData, group_id: groupId || formData.group_id, nome: formData.nome_cargo };
+    const erroUnicidade = await checkGlobalUniqueness('Cargo', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    onSubmit(payload);
   };
 
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);

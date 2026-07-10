@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Receipt, Trash2, Power, PowerOff, AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import usePermissions from "@/components/lib/usePermissions";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
 
 /**
@@ -15,6 +17,8 @@ import { toast } from "sonner";
 export default function CentroCustoForm({ centroCusto, item, data, initialData, defaultValues, onSubmit, onSave, onClose, isSubmitting, windowMode = false }) {
   const dadosCentroCusto = item || data || initialData || defaultValues || centroCusto;
   const { canCreate, canEdit, canDelete } = usePermissions();
+  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || dadosCentroCusto?.group_id || null;
   const podeCriar = canCreate("Cadastros", "CentroCusto") || canCreate("Financeiro", "CentroCusto") || canCreate("Cadastros", null);
   const podeEditar = canEdit("Cadastros", "CentroCusto") || canEdit("Financeiro", "CentroCusto") || canEdit("Cadastros", null);
   const podeExcluir = canDelete("Cadastros", "CentroCusto") || canDelete("Financeiro", "CentroCusto") || canDelete("Cadastros", null);
@@ -37,7 +41,7 @@ export default function CentroCustoForm({ centroCusto, item, data, initialData, 
     }
   }, [dadosCentroCusto?.id]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (dadosCentroCusto?.id && !podeEditar) {
       toast.error("Sem permissão para editar centros de custo.");
@@ -50,9 +54,11 @@ export default function CentroCustoForm({ centroCusto, item, data, initialData, 
     const dataToSubmit = {
       ...formData,
       orcamento_mensal: formData.orcamento_mensal ? parseFloat(formData.orcamento_mensal) : null,
-      // Injeta 'nome' para o Visualizador Universal (CentroCusto usa 'descricao' como nome)
+      group_id: groupId || formData.group_id,
       nome: formData.nome || formData.descricao || '',
     };
+    const erroUnicidade = await checkGlobalUniqueness('CentroCusto', dataToSubmit, { groupId, empresaId: empresaAtual?.id, currentId: dadosCentroCusto?.id, isEdit: !!dadosCentroCusto?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
     if (onSubmit) {
       onSubmit(dataToSubmit);
     } else {

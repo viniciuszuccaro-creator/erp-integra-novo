@@ -6,10 +6,14 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Target } from 'lucide-react';
 import usePermissions from '@/components/lib/usePermissions';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import { checkGlobalUniqueness } from '@/components/lib/sanitizeOnWrite';
 import { toast } from "sonner";
 
 export default function CentroResultadoForm({ centro, centroResultado, item, data, onSubmit, onSave, onClose, windowMode = false }) {
   const dadosIniciais = item || data || centroResultado || centro;
+  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || dadosIniciais?.group_id || null;
   const { canCreate, canEdit } = usePermissions();
   const podeCriar = canCreate("Cadastros", "CentroResultado") || canCreate("Financeiro", "CentroResultado") || canCreate("Cadastros", null);
   const podeEditar = canEdit("Cadastros", "CentroResultado") || canEdit("Financeiro", "CentroResultado") || canEdit("Cadastros", null);
@@ -21,7 +25,7 @@ export default function CentroResultadoForm({ centro, centroResultado, item, dat
     if (dadosIniciais?.id) setFormData({ ...dadosIniciais });
   }, [dadosIniciais?.id]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (dadosIniciais?.id && !podeEditar) {
       toast.error("Sem permissão para editar centros de resultado.");
@@ -31,8 +35,11 @@ export default function CentroResultadoForm({ centro, centroResultado, item, dat
       toast.error("Sem permissão para criar centros de resultado.");
       return;
     }
+    const payload = { ...formData, group_id: groupId || formData.group_id };
+    const erroUnicidade = await checkGlobalUniqueness('CentroResultado', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
     if (onSubmit) {
-      onSubmit(formData);
+      onSubmit(payload);
     } else {
       if (onSave) onSave();
       if (onClose) onClose();

@@ -6,19 +6,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Users } from 'lucide-react';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import { checkGlobalUniqueness } from '@/components/lib/sanitizeOnWrite';
+import { toast } from "sonner";
 
 export default function SegmentoClienteForm({ segmento, segmentoCliente, item, data, initialData, defaultValues, onSubmit, onSave, onClose, windowMode = false }) {
   const dadosIniciais = item || data || initialData || defaultValues || segmentoCliente || segmento;
+  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || dadosIniciais?.group_id || null;
   const [formData, setFormData] = useState(dadosIniciais || {
     nome_segmento: '',
     tipo_segmento: 'Comercial',
     ativo: true
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    const payload = { ...formData, group_id: groupId || formData.group_id, nome: formData.nome_segmento || formData.nome || '' };
+    const erroUnicidade = await checkGlobalUniqueness('SegmentoCliente', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
     if (onSubmit) {
-      onSubmit(formData);
+      onSubmit(payload);
     } else {
       if (onSave) onSave();
       if (onClose) onClose();

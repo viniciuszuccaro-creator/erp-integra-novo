@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import BuscaCEP from "../comercial/BuscaCEP";
 
 /**
@@ -57,7 +58,7 @@ export default function CentroOperacaoForm({ centro, onSubmit, isSubmitting }) {
     }, 1000);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!formData.nome_centro || !formData.tipo) {
@@ -65,7 +66,10 @@ export default function CentroOperacaoForm({ centro, onSubmit, isSubmitting }) {
       return;
     }
 
-    onSubmit(formData);
+    const payload = { ...formData, group_id: grupoAtual?.id || formData.group_id, nome: formData.nome_centro };
+    const erroUnicidade = await checkGlobalUniqueness('CentroOperacao', payload, { groupId: grupoAtual?.id, empresaId: empresaAtual?.id, currentId: centro?.id, isEdit: !!centro?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    onSubmit(payload);
   };
 
   return (

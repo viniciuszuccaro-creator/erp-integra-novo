@@ -7,10 +7,14 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { FileText } from 'lucide-react';
 import usePermissions from '@/components/lib/usePermissions';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import { checkGlobalUniqueness } from '@/components/lib/sanitizeOnWrite';
 import { toast } from "sonner";
 
 export default function PlanoContasForm({ conta, item, data, onSubmit, onSave, onClose, windowMode = false }) {
   const dadosIniciais = item || data || conta;
+  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || dadosIniciais?.group_id || null;
   const { canCreate, canEdit } = usePermissions();
   const podeCriar = canCreate("Cadastros", "PlanoDeContas") || canCreate("Financeiro", "PlanoDeContas") || canCreate("Cadastros", null);
   const podeEditar = canEdit("Cadastros", "PlanoDeContas") || canEdit("Financeiro", "PlanoDeContas") || canEdit("Cadastros", null);
@@ -36,7 +40,7 @@ export default function PlanoContasForm({ conta, item, data, onSubmit, onSave, o
     }
   }, [dadosIniciais?.id]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (dadosIniciais?.id && !podeEditar) {
       toast.error("Sem permissão para editar plano de contas.");
@@ -46,13 +50,15 @@ export default function PlanoContasForm({ conta, item, data, onSubmit, onSave, o
       toast.error("Sem permissão para criar plano de contas.");
       return;
     }
-    // Injeta 'nome'/'codigo'/'descricao' para o Visualizador Universal
     const payload = {
       ...formData,
+      group_id: groupId || formData.group_id,
       nome: formData.nome_conta || formData.nome || '',
       codigo: formData.codigo_conta || formData.codigo || '',
       descricao: formData.descricao || formData.nome_conta || '',
     };
+    const erroUnicidade = await checkGlobalUniqueness('PlanoDeContas', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
     if (onSubmit) {
       onSubmit(payload);
     } else {

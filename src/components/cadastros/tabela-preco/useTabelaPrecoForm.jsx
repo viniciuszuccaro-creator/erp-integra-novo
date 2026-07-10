@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import useContextoVisual from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 
@@ -140,29 +141,17 @@ export default function useTabelaPrecoForm({ tabela, onSubmit }) {
     if (tabela?.id ? !podeEditar : !podeCriar) { toast.error('Seu perfil nao permite salvar tabelas de preco'); return; }
     setSalvando(true);
     try {
-      // Helper: filtro com escopo multiempresa (direto no SDK, mais confiável que filterInContext)
-      const withScope = (filter) => {
-        const scoped = { ...filter };
-        if (groupId) scoped.group_id = groupId;
-        else if (empresaAtual?.id) scoped.empresa_id = empresaAtual.id;
-        return scoped;
-      };
-      // Verifica duplicidade por nome (case-insensitive) antes de salvar — fail-closed
-      try {
-        const existentes = await base44.entities.TabelaPreco.filter(
-          withScope({ nome: { $regex: `^${formData.nome.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' } }),
-          '-created_date', 10
-        );
-        const dup = (existentes || []).find(r => r.id !== tabela?.id);
-        if (dup) { toast.error(`⚠️ Já existe uma tabela de preço com o nome "${formData.nome}". Não é permitido duplicar nomes.`); setSalvando(false); return; }
-      } catch (e) {
-        toast.error(`⚠️ Não foi possível verificar duplicidade: ${e.message}. Salvamento bloqueado.`); setSalvando(false); return;
-      }
+      // TRAVA GLOBAL: verifica unicidade de código E nome antes de salvar (Regra-Mãe §5c)
+      const erroUnicidade = await checkGlobalUniqueness('TabelaPreco', formData, {
+        groupId, empresaId: empresaAtual?.id, currentId: tabela?.id, isEdit: !!tabela?.id,
+      });
+      if (erroUnicidade) { toast.error(erroUnicidade); setSalvando(false); return; }
       // Gera código numérico crescente automaticamente (apenas para novo registro sem código)
       let codigoFinal = formData.codigo;
       if (!tabela?.id && !codigoFinal) {
         try {
-          const todasTabelas = await base44.entities.TabelaPreco.filter(withScope({}), '-created_date', 999);
+          const scopeFilter = groupId ? { group_id: groupId } : (empresaAtual?.id ? { empresa_id: empresaAtual.id } : {});
+          const todasTabelas = await base44.entities.TabelaPreco.filter(scopeFilter, '-created_date', 999);
           const maxCodigo = (todasTabelas || []).map(t => t.codigo).filter(c => c && /^\d+$/.test(String(c))).map(c => parseInt(String(c))).sort((a, b) => b - a)[0] || 0;
           codigoFinal = String(maxCodigo + 1).padStart(3, '0');
         } catch { codigoFinal = String(Date.now()).slice(-6); }

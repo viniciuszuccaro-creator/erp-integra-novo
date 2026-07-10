@@ -56,8 +56,8 @@ Deno.serve(async (req) => {
 
     const sanitized = sanitizeValue(data);
 
-    // === PREVENÇÃO DE DUPLICIDADE (Regra-Mãe §5c: validação dupla em ações sensíveis) ===
-    // Só executa em eventos de criação (não em update) e apenas para entidades do Cadastro Gerais
+    // === TRAVA GLOBAL DE UNICIDADE (Regra-Mãe §5c: validação dupla em ações sensíveis) ===
+    // Executa em create E update para entidades do Cadastro Gerais
     const CADASTRO_GERAIS_ENTITIES = new Set([
       'Cliente','Fornecedor','Transportadora','Colaborador','Representante','ContatoB2B',
       'SegmentoCliente','RegiaoAtendimento','Produto','Servico','SetorAtividade','GrupoProduto',
@@ -69,11 +69,11 @@ Deno.serve(async (req) => {
       'JobAgendado','Webhook','ConfiguracaoNFe','GatewayPagamento','EventoNotificacao',
     ]);
 
-    if (event.type === 'create' && CADASTRO_GERAIS_ENTITIES.has(event.entity_name)) {
+    if ((event.type === 'create' || event.type === 'update') && CADASTRO_GERAIS_ENTITIES.has(event.entity_name)) {
       try {
         const api = base44.asServiceRole.entities[event.entity_name];
         if (api) {
-          // Extrai chaves de duplicidade do registro recém-criado
+          // Extrai chaves de duplicidade do registro
           const cnpjRaw = data?.cnpj ? String(data.cnpj).replace(/\D/g, '') : '';
           const cpfRaw = data?.cpf ? String(data.cpf).replace(/\D/g, '') : '';
           const placa = data?.placa ? String(data.placa).toUpperCase().trim() : '';
@@ -86,73 +86,87 @@ Deno.serve(async (req) => {
             data?.nome_conta || data?.nome_cargo || data?.nome_modelo || data?.nome_condicao ||
             data?.nome_turno || data?.nome_departamento || data?.nome_rota || data?.nome_regra || '').toLowerCase().trim();
 
-          // Constrói filtro OR para buscar duplicatas
+          // Constrói filtro OR para buscar duplicatas por documento/placa
           const orConditions = [];
           if (cnpjRaw.length >= 14) orConditions.push({ cnpj: data.cnpj });
           if (cpfRaw.length >= 11) orConditions.push({ cpf: data.cpf });
           if (placa.length >= 3) orConditions.push({ placa: data.placa });
 
           let existingDup = null;
+
+          // 1. Busca por documento/placa
           if (orConditions.length > 0) {
             const filter = orConditions.length > 1 ? { $or: orConditions } : orConditions[0];
             const results = await api.filter(filter, 'created_date', 10) || [];
             existingDup = results.find(r => r.id !== event.entity_id);
           }
 
-          // Se não encontrou por documento, busca por codigo+nome (mesmo escopo)
-          if (!existingDup && codigo && nomeRaw && nomeRaw.length >= 3) {
-            const nameFilter = { codigo };
-            const results = await api.filter(nameFilter, 'created_date', 10) || [];
-            existingDup = results.find(r =>
-              r.id !== event.entity_id &&
-              String(r.nome || r.nome_completo || r.razao_social || r.descricao || '').toLowerCase().trim() === nomeRaw
-            );
+          // 2. Busca por código (independente de nome)
+          if (!existingDup && codigo) {
+            const results = await api.filter({ codigo: String(data.codigo || data.codigo_banco || data.sigla) }, 'created_date', 10) || [];
+            existingDup = results.find(r => r.id !== event.entity_id);
+          }
+
+          // 3. Busca por nome/descrição exato (case-insensitive) — Regra-Mãe: cadastros únicos
+          if (!existingDup && nomeRaw && nomeRaw.length >= 2) {
+            const nomeField = data?.nome ? 'nome' : data?.descricao ? 'descricao' : data?.nome_completo ? 'nome_completo' : data?.razao_social ? 'razao_social' : null;
+            if (nomeField) {
+              const results = await api.filter({ [nomeField]: { $regex: `^${nomeRaw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' } }, 'created_date', 10) || [];
+              existingDup = results.find(r => r.id !== event.entity_id);
+            }
           }
 
           if (existingDup) {
-            // Duplicata detectada: o registro atual é o mais novo (já foi criado).
-            // Re-referencia dependentes para o registro original, depois hard-delete o duplicado.
-            const REF_MAP = {
-              Cliente: [{ entity: 'Pedido', field: 'cliente_id' }, { entity: 'ContaReceber', field: 'cliente_id' }],
-              Fornecedor: [{ entity: 'OrdemCompra', field: 'fornecedor_id' }, { entity: 'ContaPagar', field: 'fornecedor_id' }],
-              Produto: [{ entity: 'MovimentacaoEstoque', field: 'produto_id' }],
-              Transportadora: [{ entity: 'Entrega', field: 'transportadora_id' }],
-              Colaborador: [{ entity: 'ApontamentoProducao', field: 'colaborador_id' }],
-              Veiculo: [{ entity: 'Entrega', field: 'veiculo_id' }],
-              Motorista: [{ entity: 'Entrega', field: 'motorista_id' }],
-              FormaPagamento: [{ entity: 'ContaReceber', field: 'forma_pagamento_id' }],
-            };
-            const refs = REF_MAP[event.entity_name] || [];
-            for (const ref of refs) {
-              try {
-                const refApi = base44.asServiceRole.entities[ref.entity];
-                if (!refApi) continue;
-                const depRecords = await refApi.filter({ [ref.field]: event.entity_id }, '-id', 200) || [];
-                for (const r of depRecords) {
-                  try { await refApi.update(r.id, { [ref.field]: existingDup.id }); } catch {}
-                }
-              } catch {}
+            if (event.type === 'create') {
+              // CREATE: duplicata detectada pós-criação — re-referencia dependentes e hard-delete
+              const REF_MAP = {
+                Cliente: [{ entity: 'Pedido', field: 'cliente_id' }, { entity: 'ContaReceber', field: 'cliente_id' }],
+                Fornecedor: [{ entity: 'OrdemCompra', field: 'fornecedor_id' }, { entity: 'ContaPagar', field: 'fornecedor_id' }],
+                Produto: [{ entity: 'MovimentacaoEstoque', field: 'produto_id' }],
+                Transportadora: [{ entity: 'Entrega', field: 'transportadora_id' }],
+                Colaborador: [{ entity: 'ApontamentoProducao', field: 'colaborador_id' }],
+                Veiculo: [{ entity: 'Entrega', field: 'veiculo_id' }],
+                Motorista: [{ entity: 'Entrega', field: 'motorista_id' }],
+                FormaPagamento: [{ entity: 'ContaReceber', field: 'forma_pagamento_id' }],
+              };
+              const refs = REF_MAP[event.entity_name] || [];
+              for (const ref of refs) {
+                try {
+                  const refApi = base44.asServiceRole.entities[ref.entity];
+                  if (!refApi) continue;
+                  const depRecords = await refApi.filter({ [ref.field]: event.entity_id }, '-id', 200) || [];
+                  for (const r of depRecords) {
+                    try { await refApi.update(r.id, { [ref.field]: existingDup.id }); } catch {}
+                  }
+                } catch {}
+              }
+              // Hard-delete o duplicado recém-criado
+              try { await api.delete(event.entity_id); } catch {}
             }
 
-            // Hard-delete o duplicado recém-criado
-            try { await api.delete(event.entity_id); } catch {}
-
-            // Auditoria
+            // Auditoria (create: bloqueio+remoção; update: alerta)
             try {
               await base44.asServiceRole.entities.AuditLog.create({
                 usuario: 'Sistema (sanitizeOnWrite)',
-                acao: 'Exclusão', modulo: 'Cadastros', tipo_auditoria: 'seguranca',
+                acao: event.type === 'create' ? 'Exclusão' : 'Bloqueio',
+                modulo: 'Cadastros', tipo_auditoria: 'seguranca',
                 entidade: event.entity_name, registro_id: event.entity_id,
-                descricao: `Duplicata bloqueada e removida: registro "${nomeRaw}" (${event.entity_id}) era duplicata de ${existingDup.id}.`,
+                descricao: event.type === 'create'
+                  ? `Duplicata bloqueada e removida: registro "${nomeRaw}" (${event.entity_id}) era duplicata de ${existingDup.id}.`
+                  : `Alerta de duplicidade em update: registro "${nomeRaw}" (${event.entity_id}) colide com ${existingDup.id}. Verificação frontend pode ter falhado — investigar.`,
                 empresa_id: data?.empresa_id || null,
                 group_id: data?.group_id || null,
                 dados_anteriores: { id: event.entity_id, nome: nomeRaw, codigo },
-                dados_novos: { kept_id: existingDup.id, action: 'auto_purged_duplicate' },
+                dados_novos: event.type === 'create'
+                  ? { kept_id: existingDup.id, action: 'auto_purged_duplicate' }
+                  : { conflict_id: existingDup.id, action: 'duplicate_alert_update' },
                 data_hora: new Date().toISOString(),
               });
             } catch {}
 
-            return Response.json({ ok: true, action: 'duplicate_blocked', deleted_id: event.entity_id, kept_id: existingDup.id });
+            if (event.type === 'create') {
+              return Response.json({ ok: true, action: 'duplicate_blocked', deleted_id: event.entity_id, kept_id: existingDup.id });
+            }
           }
         }
       } catch (dupError) {
@@ -162,7 +176,7 @@ Deno.serve(async (req) => {
             usuario: 'Sistema (sanitizeOnWrite)',
             acao: 'Visualização', modulo: 'Sistema', tipo_auditoria: 'seguranca',
             entidade: event.entity_name, registro_id: event.entity_id,
-            descricao: `Falha na verificação de duplicidade pós-criação: ${dupError?.message || 'erro desconhecido'}. Registro pode ser duplicata — verifique manualmente.`,
+            descricao: `Falha na verificação de duplicidade (${event.type}): ${dupError?.message || 'erro desconhecido'}. Registro pode ser duplicata — verifique manualmente.`,
             empresa_id: data?.empresa_id || null,
             group_id: data?.group_id || null,
             data_hora: new Date().toISOString(),

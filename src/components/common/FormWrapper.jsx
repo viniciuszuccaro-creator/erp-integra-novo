@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
 import FormErrorSummary from "@/components/common/FormErrorSummary";
 import useContextoVisual from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 
 /**
  * FormWrapper
@@ -11,6 +12,8 @@ import useContextoVisual from "@/components/lib/useContextoVisual";
  * - Carimba multiempresa automaticamente (group_id/empresa_id) via useContextoVisual
  * - Exibe resumo de erros consistente
  * - Garante layout responsivo: w-full h-full
+ * - TRAVA GLOBAL DE UNICIDADE: se entityName for fornecido, valida código/descrição
+ *   duplicados antes de salvar (Regra-Mãe §5c: validação dupla em ações sensíveis)
  *
  * Props principais:
  * - schema?: zod schema (opcional)
@@ -20,6 +23,8 @@ import useContextoVisual from "@/components/lib/useContextoVisual";
  * - contextFieldName?: string (default 'empresa_id')
  * - className?: string
  * - children: ReactNode | (methods) => ReactNode
+ * - entityName?: string — habilita trava global de unicidade (ex: 'Produto')
+ * - editItemId?: string — ID do registro em edição (exclui da verificação de duplicata)
  */
 export default function FormWrapper({
   schema,
@@ -31,9 +36,11 @@ export default function FormWrapper({
   mode = 'onChange',
   reValidateMode = 'onChange',
   externalData,
+  entityName,
+  editItemId,
   children,
 }) {
-  const { carimbarContexto } = useContextoVisual();
+  const { carimbarContexto, empresaAtual, grupoAtual } = useContextoVisual();
   const methods = useForm({
     resolver: schema ? zodResolver(schema) : undefined,
     defaultValues,
@@ -55,6 +62,15 @@ export default function FormWrapper({
           return;
         }
       }
+      // TRAVA GLOBAL: verifica unicidade de código/descrição antes de salvar
+      if (entityName) {
+        const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+        const empresaId = empresaAtual?.id || null;
+        const erroUnicidade = await checkGlobalUniqueness(entityName, stampedExternal, {
+          groupId, empresaId, currentId: editItemId, isEdit: !!editItemId,
+        });
+        if (erroUnicidade) { setErrorMessages([erroUnicidade]); return; }
+      }
       setErrorMessages([]);
       if (typeof onSubmit === 'function') { try { await onSubmit(stampedExternal, methods); } catch (e) { setErrorMessages([e?.message || 'Erro ao salvar.']); } }
       return;
@@ -68,6 +84,15 @@ export default function FormWrapper({
         setErrorMessages(msgs);
         return;
       }
+    }
+    // TRAVA GLOBAL: verifica unicidade de código/descrição antes de salvar
+    if (entityName) {
+      const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+      const empresaId = empresaAtual?.id || null;
+      const erroUnicidade = await checkGlobalUniqueness(entityName, payload, {
+        groupId, empresaId, currentId: editItemId, isEdit: !!editItemId,
+      });
+      if (erroUnicidade) { setErrorMessages([erroUnicidade]); return; }
     }
     setErrorMessages([]);
     if (typeof onSubmit === 'function') {

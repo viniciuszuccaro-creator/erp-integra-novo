@@ -6,14 +6,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Users } from 'lucide-react';
+import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import { checkGlobalUniqueness } from '@/components/lib/sanitizeOnWrite';
 import { toast } from "sonner";
 
 export default function SegmentoClienteForm({ segmento, segmentoCliente, item, data, initialData, defaultValues, onSubmit, onSave, onClose, windowMode = false }) {
   const dadosIniciais = item || data || initialData || defaultValues || segmentoCliente || segmento;
+  const { hasPermission } = usePermissions();
   const { empresaAtual, grupoAtual } = useContextoVisual();
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || dadosIniciais?.group_id || null;
+  const podeCriar = hasPermission?.("Cadastros.SegmentoCliente.criar") || hasPermission?.("CRM.SegmentoCliente.criar") || hasPermission?.("Cadastros.Cliente.criar");
+  const podeEditar = hasPermission?.("Cadastros.SegmentoCliente.editar") || hasPermission?.("CRM.SegmentoCliente.editar") || hasPermission?.("Cadastros.Cliente.editar");
+  const podeSalvar = dadosIniciais?.id ? podeEditar : podeCriar;
   const [formData, setFormData] = useState(dadosIniciais || {
     nome_segmento: '',
     tipo_segmento: 'Comercial',
@@ -77,7 +82,7 @@ export default function SegmentoClienteForm({ segmento, segmentoCliente, item, d
         />
       </div>
 
-      <Button type="submit" data-permission="Cadastros.Segmento.salvar" className="w-full bg-blue-600 hover:bg-blue-700">
+      <Button type="submit" disabled={!podeSalvar} data-permission="Cadastros.Segmento.salvar" className="w-full bg-blue-600 hover:bg-blue-700">
         {dadosIniciais ? 'Atualizar Segmento' : 'Criar Segmento'}
       </Button>
     </form>

@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Building2, Trash2, Power, PowerOff, AlertTriangle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
@@ -15,8 +16,12 @@ import { toast } from "sonner";
  */
 export default function DepartamentoForm({ departamento, item, data, initialData, defaultValues, onSubmit, isSubmitting, windowMode = false }) {
   const dadosIniciais = item || data || initialData || defaultValues || departamento;
+  const { hasPermission } = usePermissions();
   const { empresaAtual, grupoAtual } = useContextoVisual();
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || dadosIniciais?.group_id || null;
+  const podeCriar = hasPermission?.("Cadastros.Departamento.criar") || hasPermission?.("RH.Departamento.criar") || hasPermission?.("Cadastros.Colaborador.criar");
+  const podeEditar = hasPermission?.("Cadastros.Departamento.editar") || hasPermission?.("RH.Departamento.editar") || hasPermission?.("Cadastros.Colaborador.editar");
+  const podeSalvar = dadosIniciais?.id ? podeEditar : podeCriar;
   const [formData, setFormData] = useState(dadosIniciais || {
     nome: '',
     codigo: '',
@@ -136,7 +141,7 @@ export default function DepartamentoForm({ departamento, item, data, initialData
             </Button>
           </>
         )}
-        <Button type="submit" disabled={isSubmitting} data-permission="Cadastros.Departamento.salvar">
+        <Button type="submit" disabled={isSubmitting || !podeSalvar} data-permission="Cadastros.Departamento.salvar">
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {dadosIniciais ? 'Atualizar' : 'Criar Departamento'}
         </Button>

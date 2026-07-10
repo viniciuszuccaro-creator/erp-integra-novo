@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Stars } from "lucide-react";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
 
 /**
@@ -37,7 +38,7 @@ export default function ServicoForm({ servico, onSubmit, isSubmitting, windowMod
     observacoes: ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.descricao || !formData.preco_servico) {
       toast.error('Preencha os campos obrigatórios');
@@ -51,12 +52,15 @@ export default function ServicoForm({ servico, onSubmit, isSubmitting, windowMod
       toast.error('Sem permissão para salvar serviço.');
       return;
     }
-    onSubmit({
+    const payload = {
       ...formData,
       group_id: groupId || formData.group_id,
       empresa_id: contextoAtual === "empresa" ? empresaAtual?.id : formData.empresa_id,
       nome: formData.descricao
-    });
+    };
+    const erroUnicidade = await checkGlobalUniqueness('Servico', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    onSubmit(payload);
   };
 
   const formContent = (

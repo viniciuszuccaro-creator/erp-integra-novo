@@ -8,6 +8,7 @@ import { Box, Plus, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
 
 export default function KitProdutoForm({ kit, kitProduto, onSubmit, windowMode = false }) {
@@ -30,7 +31,7 @@ export default function KitProdutoForm({ kit, kitProduto, onSubmit, windowMode =
     ativo: true
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!contextoValido) {
       toast.error('Selecione um grupo ou empresa antes de salvar.');
@@ -40,12 +41,15 @@ export default function KitProdutoForm({ kit, kitProduto, onSubmit, windowMode =
       toast.error('Sem permissão para salvar kit de produtos.');
       return;
     }
-    onSubmit({
+    const payload = {
       ...formData,
       group_id: groupId || formData.group_id,
       empresa_id: contextoAtual === "empresa" ? empresaAtual?.id : formData.empresa_id,
       nome: formData.nome_kit || formData.nome || ''
-    });
+    };
+    const erroUnicidade = await checkGlobalUniqueness('KitProduto', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    onSubmit(payload);
   };
 
   const adicionarItem = () => {

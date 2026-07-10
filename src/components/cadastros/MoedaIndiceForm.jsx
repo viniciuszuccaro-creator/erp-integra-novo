@@ -6,10 +6,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { TrendingUp } from 'lucide-react';
 import usePermissions from '@/components/lib/usePermissions';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import { checkGlobalUniqueness } from '@/components/lib/sanitizeOnWrite';
 import { toast } from "sonner";
 
 export default function MoedaIndiceForm({ moeda, moedaIndice, item, data, onSubmit, onSave, onClose, windowMode = false }) {
   const dadosIniciais = item || data || moedaIndice || moeda;
+  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || dadosIniciais?.group_id || null;
   const { canCreate, canEdit } = usePermissions();
   const podeCriar = canCreate("Cadastros", "MoedaIndice") || canCreate("Financeiro", "MoedaIndice") || canCreate("Cadastros", null);
   const podeEditar = canEdit("Cadastros", "MoedaIndice") || canEdit("Financeiro", "MoedaIndice") || canEdit("Cadastros", null);
@@ -29,7 +33,7 @@ export default function MoedaIndiceForm({ moeda, moedaIndice, item, data, onSubm
     }
   }, [dadosIniciais?.id]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (dadosIniciais?.id && !podeEditar) {
       toast.error("Sem permissão para editar moedas e índices.");
@@ -39,8 +43,11 @@ export default function MoedaIndiceForm({ moeda, moedaIndice, item, data, onSubm
       toast.error("Sem permissão para criar moedas e índices.");
       return;
     }
+    const payload = { ...formData, group_id: groupId || formData.group_id };
+    const erroUnicidade = await checkGlobalUniqueness('MoedaIndice', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
     if (onSubmit) {
-      onSubmit(formData);
+      onSubmit(payload);
     } else {
       if (onSave) onSave();
       if (onClose) onClose();

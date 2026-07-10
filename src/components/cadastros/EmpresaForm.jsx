@@ -10,6 +10,7 @@ import FormWrapper from "@/components/common/FormWrapper";
 import { Loader2, Building2, AlertTriangle, Upload } from "lucide-react";
 import { toast } from "sonner";
 import usePermissions from "@/components/lib/usePermissions";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -78,7 +79,10 @@ export default function EmpresaForm({ empresa, onSubmit, isSubmitting, windowMod
       toast.error("Seu perfil nao permite criar empresas.");
       return;
     }
-    onSubmit(formData);
+    const payload = { ...formData, nome: formData.razao_social || formData.nome_fantasia || formData.nome || '' };
+    const erroUnicidade = await checkGlobalUniqueness('Empresa', payload, { groupId: formData.group_id, empresaId: empresa?.id, currentId: empresa?.id, isEdit: !!empresa?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    onSubmit(payload);
   };
 
   const formContent = (

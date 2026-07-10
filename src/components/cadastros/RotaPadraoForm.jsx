@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { MapPin } from 'lucide-react';
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
 
 export default function RotaPadraoForm({ rota, rotaPadrao, onSubmit, windowMode = false }) {
@@ -28,7 +29,7 @@ export default function RotaPadraoForm({ rota, rotaPadrao, onSubmit, windowMode 
     ativo: true
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!contextoValido) {
       toast.error('Selecione um grupo ou empresa antes de salvar.');
@@ -38,12 +39,15 @@ export default function RotaPadraoForm({ rota, rotaPadrao, onSubmit, windowMode 
       toast.error('Sem permissão para salvar rota padrão.');
       return;
     }
-    onSubmit({
+    const payload = {
       ...formData,
       group_id: groupId || formData.group_id,
       empresa_id: contextoAtual === "empresa" ? empresaAtual?.id : formData.empresa_id,
       nome: formData.nome_rota || formData.nome || ''
-    });
+    };
+    const erroUnicidade = await checkGlobalUniqueness('RotaPadrao', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    onSubmit(payload);
   };
 
   const content = (

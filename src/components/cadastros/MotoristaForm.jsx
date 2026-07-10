@@ -11,6 +11,7 @@ import { z } from "zod";
 import FormWrapper from "@/components/common/FormWrapper";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
 
 /**
@@ -72,12 +73,15 @@ export default function MotoristaForm({ motorista, item, data, initialData, defa
       toast.error("Sem permissão para salvar motorista.");
       return;
     }
-    onSubmit({
+    const payload = {
       ...formData,
       group_id: groupId || formData.group_id,
       empresa_id: contextoAtual === "empresa" ? empresaAtual?.id : formData.empresa_id,
       nome: formData.nome_completo || formData.nome || ''
-    });
+    };
+    const erroUnicidade = await checkGlobalUniqueness('Motorista', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    onSubmit(payload);
   };
 
   const formContent = (

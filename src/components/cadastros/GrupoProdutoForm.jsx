@@ -9,6 +9,7 @@ import { Loader2, Package, Trash2, Power, PowerOff } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
 
 /**
@@ -41,7 +42,7 @@ export default function GrupoProdutoForm({ grupo, grupoProduto, item, data, init
     }
   }, [dadosIniciais?.id]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nome_grupo || !formData.natureza) {
       toast.error('Preencha os campos obrigatórios');
@@ -55,12 +56,15 @@ export default function GrupoProdutoForm({ grupo, grupoProduto, item, data, init
       toast.error('Sem permissão para salvar grupo de produto.');
       return;
     }
-    onSubmit({
+    const payload = {
       ...formData,
       group_id: groupId || formData.group_id,
       empresa_id: contextoAtual === "empresa" ? empresaAtual?.id : formData.empresa_id,
       nome: formData.nome_grupo
-    });
+    };
+    const erroUnicidade = await checkGlobalUniqueness('GrupoProduto', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    onSubmit(payload);
     if (typeof closeSelf === 'function') closeSelf();
   };
 

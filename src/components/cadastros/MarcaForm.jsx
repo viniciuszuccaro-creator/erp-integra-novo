@@ -9,6 +9,7 @@ import { Loader2, Award, Trash2, Power, PowerOff, AlertTriangle } from "lucide-r
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
 
 /**
@@ -42,7 +43,7 @@ export default function MarcaForm({ marca, item, data, initialData, defaultValue
     }
   }, [dadosIniciais?.id]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nome_marca) {
       toast.error('Preencha o nome da marca');
@@ -56,12 +57,15 @@ export default function MarcaForm({ marca, item, data, initialData, defaultValue
       toast.error('Sem permissão para salvar marca.');
       return;
     }
-    onSubmit({
+    const payload = {
       ...formData,
       group_id: groupId || formData.group_id,
       empresa_id: contextoAtual === "empresa" ? empresaAtual?.id : formData.empresa_id,
       nome: formData.nome_marca
-    });
+    };
+    const erroUnicidade = await checkGlobalUniqueness('Marca', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    onSubmit(payload);
   };
 
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);

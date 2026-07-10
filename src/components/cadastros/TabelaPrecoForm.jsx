@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 
-export default function TabelaPrecoForm({ tabela, onSubmit, isSubmitting }) {
+export default function TabelaPrecoForm({ tabela, onSubmit, isSubmitting, codigo }) {
   const { empresaAtual, grupoAtual } = useContextoVisual();
   const [formData, setFormData] = useState(tabela || {
     nome: '',
@@ -17,11 +17,23 @@ export default function TabelaPrecoForm({ tabela, onSubmit, isSubmitting }) {
     tipo: 'Padrão',
     data_inicio: new Date().toISOString().split('T')[0],
     data_fim: '',
-    ativo: true
+    ativo: true,
+    codigo: codigo || '',
   });
+  const [localSaving, setLocalSaving] = useState(false);
+
+  // Sincroniza codigo auto-gerado do visualizador para novos registros
+  useEffect(() => {
+    if (!tabela && codigo && !formData.codigo) {
+      setFormData(prev => ({ ...prev, codigo }));
+    }
+  }, [codigo, tabela]); // eslint-disable-line
+
+  const saving = localSaving || isSubmitting;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (saving) return; // guard contra duplo-clique
     if (!formData.nome || !formData.tipo || !formData.data_inicio) {
       toast.error('Preencha os campos obrigatórios');
       return;
@@ -29,11 +41,30 @@ export default function TabelaPrecoForm({ tabela, onSubmit, isSubmitting }) {
     const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
     const erroUnicidade = await checkGlobalUniqueness('TabelaPreco', formData, { groupId, empresaId: empresaAtual?.id, currentId: tabela?.id, isEdit: !!tabela?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(formData);
+    setLocalSaving(true);
+    try {
+      await onSubmit(formData);
+    } catch (err) {
+      toast.error(err?.message || 'Erro ao salvar tabela.');
+    } finally {
+      setLocalSaving(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label>Código</Label>
+        <Input
+          value={formData.codigo || ''}
+          onChange={(e) => setFormData({...formData, codigo: e.target.value})}
+          placeholder="Auto-gerado (ex: 001)"
+          readOnly={!tabela}
+          className={tabela ? '' : 'bg-slate-50 text-slate-500'}
+        />
+        {!tabela && <p className="text-xs text-slate-400 mt-1">Gerado automaticamente</p>}
+      </div>
+
       <div>
         <Label>Nome da Tabela *</Label>
         <Input
@@ -62,8 +93,10 @@ export default function TabelaPrecoForm({ tabela, onSubmit, isSubmitting }) {
             <SelectItem value="Padrão">Padrão</SelectItem>
             <SelectItem value="Atacado">Atacado</SelectItem>
             <SelectItem value="Varejo">Varejo</SelectItem>
-            <SelectItem value="Especial">Especial</SelectItem>
+            <SelectItem value="Obra">Obra</SelectItem>
+            <SelectItem value="Marketplace">Marketplace</SelectItem>
             <SelectItem value="Promocional">Promocional</SelectItem>
+            <SelectItem value="VIP">VIP</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -97,9 +130,9 @@ export default function TabelaPrecoForm({ tabela, onSubmit, isSubmitting }) {
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="submit" data-permission="Comercial.TabelaPreco.salvar" disabled={isSubmitting}>
-          {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          {tabela ? 'Atualizar' : 'Criar Tabela'}
+        <Button type="submit" data-permission="Comercial.TabelaPreco.salvar" disabled={saving}>
+          {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+          {tabela ? 'Atualizar Tabela' : 'Criar Tabela'}
         </Button>
       </div>
     </form>

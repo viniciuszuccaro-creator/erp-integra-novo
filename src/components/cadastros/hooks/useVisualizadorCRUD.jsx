@@ -91,6 +91,19 @@ export default function useVisualizadorCRUD({
         if (!clean.empresa_id && empresaId) clean.empresa_id = empresaId;
         if (!clean.group_id  && groupId)   clean.group_id   = groupId;
       }
+      // P3: auto-gerar codigo numérico sequencial se não vier do formulário (Regra-Mãe: códigos únicos)
+      const codeField = ENTITY_CODE_FIELD[ENTITY];
+      if (codeField && !editItem?.id && !clean[codeField]) {
+        try {
+          const res = await base44.functions.invoke("entityListSorted", {
+            entityName: ENTITY, filter: readFilter || {},
+            sortField: codeField, sortDirection: "desc", limit: 1, skip: 0,
+          });
+          const last = Array.isArray(res?.data) && res.data[0];
+          const n = last ? parseInt(String(last[codeField]).replace(/\D/g, ''), 10) : 0;
+          clean[codeField] = String(isNaN(n) ? 1 : n + 1).padStart(3, '0');
+        } catch { /* fallback: sem código — backend pode rejeitar se obrigatório */ }
+      }
       // P3: verificar duplicata antes de salvar (fail-closed — bloqueia se não conseguir verificar)
       const erroDuplicata = await checkDuplicate(clean, !!(editItem?.id), editItem?.id);
       if (erroDuplicata) {
@@ -125,7 +138,7 @@ export default function useVisualizadorCRUD({
       // Relança para que o formulário possa exibir o erro inline
       throw e;
     } finally { setIsSaving(false); }
-  }, [ENTITY, editItem, empresaId, groupId, handleCloseForm, isSimple, canCreateCadastro, canEditCadastro, canDeleteCadastro, createInContext, updateInContext, deleteInContext, checkDuplicate, setIsSaving]);
+  }, [ENTITY, editItem, empresaId, groupId, handleCloseForm, isSimple, canCreateCadastro, canEditCadastro, canDeleteCadastro, createInContext, updateInContext, deleteInContext, checkDuplicate, setIsSaving, readFilter]);
 
   return { fetchNextCode, handlePersistSubmit, checkDuplicate };
 }

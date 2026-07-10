@@ -5,13 +5,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { DollarSign } from 'lucide-react';
+import { DollarSign, Loader2 } from 'lucide-react';
 import usePermissions from '@/components/lib/usePermissions';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import { checkGlobalUniqueness } from '@/components/lib/sanitizeOnWrite';
 import { toast } from "sonner";
 
-export default function CondicaoComercialForm({ condicao, condicaoComercial, onSubmit, windowMode = false }) {
+export default function CondicaoComercialForm({ condicao, condicaoComercial, onSubmit, isSubmitting, codigo, windowMode = false }) {
   const dadosIniciais = condicaoComercial || condicao;
   const { empresaAtual, grupoAtual } = useContextoVisual();
   const { canCreate, canEdit } = usePermissions();
@@ -43,7 +43,8 @@ export default function CondicaoComercialForm({ condicao, condicaoComercial, onS
     const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
     const erroUnicidade = await checkGlobalUniqueness('CondicaoComercial', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar condição.'); }
   };
 
   const content = (
@@ -159,10 +160,11 @@ export default function CondicaoComercialForm({ condicao, condicaoComercial, onS
       <Button
         type="submit"
         className="w-full bg-green-600 hover:bg-green-700"
-        disabled={dadosIniciais?.id ? !podeEditar : !podeCriar}
+        disabled={isSubmitting || (dadosIniciais?.id ? !podeEditar : !podeCriar)}
         data-permission="Cadastros.CondicaoComercial.salvar"
         data-sensitive
       >
+        {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
         {dadosIniciais ? 'Atualizar Condição' : 'Criar Condição Comercial'}
       </Button>
     </form>

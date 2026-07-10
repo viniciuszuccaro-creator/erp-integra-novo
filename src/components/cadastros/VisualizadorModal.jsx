@@ -3,7 +3,7 @@
  * P3: captura erros inline do onSubmit (duplicata, validação) e exibe no header.
  * P4: fecha com Escape, sem bloquear o formulário.
  */
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { AlertCircle, RefreshCw, X } from "lucide-react";
 
 export default function VisualizadorModal({
@@ -12,27 +12,38 @@ export default function VisualizadorModal({
   onClose,
 }) {
   const [inlineError, setInlineError] = useState(null);
+  // Guard síncrono contra duplo-clique / dupla submissão (Regra-Mãe §5c)
+  const submittingRef = useRef(false);
 
-  // Reseta o erro inline ao abrir um novo form
-  useEffect(() => { setInlineError(null); }, [formKey]);
+  // Reseta o erro inline e o guard ao abrir um novo form
+  useEffect(() => { setInlineError(null); submittingRef.current = false; }, [formKey]);
 
   // P3: wrapper do onSubmit/onSave que captura exceções e exibe inline
+  // Guard ref previne race condition que permitia criar registros duplicados
   const wrappedOnSubmit = useCallback(async (data) => {
+    if (submittingRef.current) return;
     setInlineError(null);
+    submittingRef.current = true;
     try {
       if (formProps?.onSubmit) return await formProps.onSubmit(data);
     } catch (e) {
       setInlineError(e?.message || "Erro ao salvar. Tente novamente.");
+    } finally {
+      submittingRef.current = false;
     }
   }, [formProps?.onSubmit]); // eslint-disable-line
 
   const wrappedOnSave = useCallback(async (data) => {
+    if (submittingRef.current) return;
     setInlineError(null);
     if (data && typeof data === 'object' && !data.target && !data.preventDefault && !data.nativeEvent) {
+      submittingRef.current = true;
       try {
         if (formProps?.onSave) await formProps.onSave(data);
       } catch (e) {
         setInlineError(e?.message || "Erro ao salvar. Tente novamente.");
+      } finally {
+        submittingRef.current = false;
       }
       return;
     }

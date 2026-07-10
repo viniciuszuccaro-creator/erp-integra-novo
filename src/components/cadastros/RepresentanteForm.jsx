@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 
 /**
@@ -14,6 +15,8 @@ import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
  */
 export default function RepresentanteForm({ representante, onSubmit, isSubmitting, windowMode = false }) {
   const { empresaAtual, grupoAtual } = useContextoVisual();
+  const { canCreate, canEdit } = usePermissions();
+  const podeSalvar = representante?.id ? (canEdit("Cadastros", "Representante") || canEdit("Cadastros", null)) : (canCreate("Cadastros", "Representante") || canCreate("Cadastros", null));
   const [formData, setFormData] = useState(representante || {
     nome: '',
     cpf_cnpj: '',
@@ -30,6 +33,10 @@ export default function RepresentanteForm({ representante, onSubmit, isSubmittin
     e.preventDefault();
     if (!formData.nome) {
       toast.error('Preencha o nome do representante');
+      return;
+    }
+    if (!podeSalvar) {
+      toast.error('Sem permissão para salvar representante.');
       return;
     }
     const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
@@ -110,7 +117,7 @@ export default function RepresentanteForm({ representante, onSubmit, isSubmittin
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="submit" data-permission="Cadastros.Representante.salvar" disabled={isSubmitting}>
+        <Button type="submit" data-permission="Cadastros.Representante.salvar" disabled={isSubmitting || !podeSalvar}>
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {representante ? 'Atualizar' : 'Criar Representante'}
         </Button>

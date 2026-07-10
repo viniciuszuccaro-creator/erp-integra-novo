@@ -7,12 +7,15 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { FileText } from 'lucide-react';
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
 
 export default function ModeloDocumentoForm({ modelo, modeloDocumento, onSubmit, windowMode = false }) {
   const dadosIniciais = modeloDocumento || modelo;
   const { empresaAtual, grupoAtual } = useContextoVisual();
+  const { canCreate, canEdit } = usePermissions();
+  const podeSalvar = dadosIniciais?.id ? (canEdit("Cadastros", "ModeloDocumento") || canEdit("Cadastros", null)) : (canCreate("Cadastros", "ModeloDocumento") || canCreate("Cadastros", null));
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || dadosIniciais?.group_id || null;
   const [formData, setFormData] = useState(dadosIniciais || {
     nome_modelo: '',
@@ -27,6 +30,10 @@ export default function ModeloDocumentoForm({ modelo, modeloDocumento, onSubmit,
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!podeSalvar) {
+      toast.error('Sem permissão para salvar modelo de documento.');
+      return;
+    }
     const payload = { ...formData, group_id: groupId || formData.group_id, nome: formData.nome_modelo || formData.nome || '' };
     const erroUnicidade = await checkGlobalUniqueness('ModeloDocumento', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
@@ -114,7 +121,7 @@ export default function ModeloDocumentoForm({ modelo, modeloDocumento, onSubmit,
         />
       </div>
 
-      <Button type="submit" data-permission="Cadastros.ModeloDocumento.salvar" className="w-full bg-slate-600 hover:bg-slate-700">
+      <Button type="submit" data-permission="Cadastros.ModeloDocumento.salvar" disabled={!podeSalvar} className="w-full bg-slate-600 hover:bg-slate-700">
         {dadosIniciais ? 'Atualizar' : 'Criar Modelo'}
       </Button>
     </form>

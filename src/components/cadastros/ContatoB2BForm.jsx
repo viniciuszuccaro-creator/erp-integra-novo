@@ -8,6 +8,7 @@ import { Loader2, MessageCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
 
@@ -34,6 +35,8 @@ export default function ContatoB2BForm({ contato, contatoB2B, item, data, onSubm
   });
 
   const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const { canCreate, canEdit } = usePermissions();
+  const podeSalvar = dadosIniciais?.id ? (canEdit("Cadastros", "ContatoB2B") || canEdit("Cadastros", null)) : (canCreate("Cadastros", "ContatoB2B") || canCreate("Cadastros", null));
   const { data: clientes = [] } = useQuery({
     queryKey: ['clientes', grupoAtual?.id, empresaAtual?.id],
     queryFn: () => filterInContext('Cliente', {}, 'nome_fantasia', 999),
@@ -44,6 +47,10 @@ export default function ContatoB2BForm({ contato, contatoB2B, item, data, onSubm
     e.preventDefault();
     if (!formData.nome_contato || !formData.email) {
       toast.error('Preencha os campos obrigatórios');
+      return;
+    }
+    if (!podeSalvar) {
+      toast.error('Sem permissão para salvar contato.');
       return;
     }
     // TRAVA GLOBAL: verifica unicidade de nome antes de salvar (Regra-Mãe §5c)
@@ -144,7 +151,7 @@ export default function ContatoB2BForm({ contato, contatoB2B, item, data, onSubm
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="submit" disabled={isSubmitting} data-permission="Cadastros.ContatoB2B.salvar">
+        <Button type="submit" disabled={isSubmitting || !podeSalvar} data-permission="Cadastros.ContatoB2B.salvar">
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {dadosIniciais ? 'Atualizar' : 'Criar Contato'}
         </Button>

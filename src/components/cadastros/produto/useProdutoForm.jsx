@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import useContextoVisual from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { buildInitialFormData } from "./useProdutoFormState";
 import useProdutoIA from "./useProdutoIA";
 
@@ -101,50 +102,11 @@ export default function useProdutoForm({ produto, onSubmit, onSuccess, closeSelf
     if (!formData.descricao) { toast.error('Preencha a descrição do produto'); return; }
     if (!contextoValido) { toast.error('Selecione um grupo ou empresa antes de salvar o produto'); return; }
     if (produto?.id ? !podeEditar : !podeCriar) { toast.error('Seu perfil nao permite salvar produtos'); return; }
-    // Helper: filtro com escopo multiempresa (direto no SDK, mais confiável que filterInContext)
-    const withScope = (filter) => {
-      const scoped = { ...filter };
-      if (groupId) scoped.group_id = groupId;
-      else if (empresaAtual?.id) scoped.empresa_id = empresaAtual.id;
-      return scoped;
-    };
-    if (formData.codigo && !produto?.id) {
-      try {
-        const produtosExistentes = await base44.entities.Produto.filter(withScope({ codigo: formData.codigo }), '-created_date', 5);
-        const dup = (produtosExistentes || []).find(r => r.id !== produto?.id);
-        if (dup) { toast.error(`❌ Código "${formData.codigo}" já existe no produto "${dup.descricao || dup.id}"`); setAbaAtiva('dados-gerais'); return; }
-      } catch (e) {
-        toast.error(`⚠️ Não foi possível verificar código duplicado: ${e.message}. Salvamento bloqueado.`); return;
-      }
-    }
-    // Verifica duplicidade por descrição (case-insensitive) — Regra-Mãe §5c
-    if (formData.descricao && !produto?.id) {
-      try {
-        const descLimpa = formData.descricao.toLowerCase().trim();
-        const duplicados = await base44.entities.Produto.filter(
-          withScope({ descricao: { $regex: `^${descLimpa.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' } }),
-          '-created_date', 10
-        );
-        const dup = (duplicados || []).find(r => r.id !== produto?.id);
-        if (dup) { toast.error(`⚠️ Já existe um produto com a descrição "${formData.descricao}". Não é permitido duplicar.`); setAbaAtiva('dados-gerais'); return; }
-      } catch (e) {
-        toast.error(`⚠️ Não foi possível verificar duplicidade: ${e.message}. Salvamento bloqueado.`); return;
-      }
-    }
-    // Verifica duplicidade por descrição também em edição (não apenas criação)
-    if (formData.descricao && produto?.id) {
-      try {
-        const descLimpa = formData.descricao.toLowerCase().trim();
-        const duplicados = await base44.entities.Produto.filter(
-          withScope({ descricao: { $regex: `^${descLimpa.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' } }),
-          '-created_date', 10
-        );
-        const dup = (duplicados || []).find(r => r.id !== produto?.id);
-        if (dup) { toast.error(`⚠️ Já existe outro produto com a descrição "${formData.descricao}". Não é permitido duplicar.`); setAbaAtiva('dados-gerais'); return; }
-      } catch (e) {
-        toast.error(`⚠️ Não foi possível verificar duplicidade: ${e.message}. Salvamento bloqueado.`); return;
-      }
-    }
+    // TRAVA GLOBAL: verifica unicidade de código E descrição antes de salvar (Regra-Mãe §5c)
+    const erroUnicidade = await checkGlobalUniqueness('Produto', formData, {
+      groupId, empresaId: empresaAtual?.id, currentId: produto?.id, isEdit: !!produto?.id,
+    });
+    if (erroUnicidade) { toast.error(erroUnicidade); setAbaAtiva('dados-gerais'); return; }
     if (!formData.setor_atividade_id) { toast.error('Selecione o Setor de Atividade'); setAbaAtiva('dados-gerais'); return; }
     if (!formData.grupo_produto_id) { toast.error('Selecione o Grupo de Produto'); setAbaAtiva('dados-gerais'); return; }
     if (!formData.marca_id) { toast.error('Selecione a Marca'); setAbaAtiva('dados-gerais'); return; }

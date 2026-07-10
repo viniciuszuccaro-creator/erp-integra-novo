@@ -16,6 +16,7 @@ import { useConfirm } from "@/components/ui/confirm-dialog";
 import useContextoVisual from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import GerenciarContatosClienteForm from "./GerenciarContatosClienteForm";
 import GerenciarEnderecosClienteForm from "./GerenciarEnderecosClienteForm";
 import ClienteDadosGeraisTab from "./cliente/ClienteDadosGeraisTab";
@@ -86,6 +87,11 @@ export default function CadastroClienteCompleto({ cliente: clienteProp, item, da
     mutationFn: async (data) => {
       if (!contextoValido) throw new Error("Selecione um grupo ou empresa antes de salvar o cliente.");
       const payload = { ...data, ...(empresaAtual?.id && !data.empresa_id ? { empresa_id: empresaAtual.id } : {}), ...(groupId && !data.group_id ? { group_id: groupId } : {}) };
+      // TRAVA GLOBAL: verifica unicidade de CPF/CNPJ/nome antes de salvar (Regra-Mãe §5c)
+      const erroUnicidade = await checkGlobalUniqueness('Cliente', payload, {
+        groupId, empresaId: empresaAtual?.id, currentId: cliente?.id, isEdit: !!cliente?.id,
+      });
+      if (erroUnicidade) throw new Error(erroUnicidade);
       if (cliente?.id) {
         if (!podeEditar) throw new Error("Seu perfil não permite editar clientes.");
         return updateInContext('Cliente', cliente.id, payload);

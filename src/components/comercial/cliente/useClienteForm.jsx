@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
 import useContextoVisual from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 
 const defaultFormData = {
   tipo: "Pessoa Jurídica", status: "Prospect", motivo_inatividade: "", nome: "", razao_social: "", nome_fantasia: "",
@@ -44,7 +45,7 @@ const buildInitialFormData = (cliente) => {
  * Estado, busca CEP/CNPJ com debounce, handlers de contatos/locais/documentos, submit.
  */
 export default function useClienteForm({ cliente, onSubmit, onCancel }) {
-  const { carimbarContexto } = useContextoVisual();
+  const { carimbarContexto, empresaAtual, grupoAtual } = useContextoVisual();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("principal");
   const [buscandoCep, setBuscandoCep] = useState(false);
@@ -128,6 +129,12 @@ export default function useClienteForm({ cliente, onSubmit, onCancel }) {
       return;
     }
     const dataToSubmit = { ...formData, condicao_comercial: { ...formData.condicao_comercial, limite_credito: formData.condicao_comercial?.condicao_pagamento === 'À Vista' ? 0 : formData.condicao_comercial?.limite_credito || 0 } };
+    // TRAVA GLOBAL: verifica unicidade de CPF/CNPJ/nome antes de salvar (Regra-Mãe §5c)
+    const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+    const erroUnicidade = await checkGlobalUniqueness('Cliente', dataToSubmit, {
+      groupId, empresaId: empresaAtual?.id, currentId: cliente?.id, isEdit: !!cliente?.id,
+    });
+    if (erroUnicidade) { toast({ title: "⚠️ Duplicidade Detectada", description: erroUnicidade, variant: "destructive" }); setActiveTab("principal"); return; }
     onSubmit(carimbarContexto(dataToSubmit, 'empresa_id'));
   };
 

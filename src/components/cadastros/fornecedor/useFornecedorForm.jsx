@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import useContextoVisual from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 
 /**
@@ -35,6 +36,11 @@ export default function useFornecedorForm({ fornecedor: fornecedorProp, item, da
     mutationFn: async (data) => {
       if (!contextoValido) throw new Error("Selecione um grupo ou empresa antes de salvar o fornecedor.");
       const payload = { ...data, ...(empresaAtual?.id && !data.empresa_id ? { empresa_id: empresaAtual.id } : {}), ...(empresaAtual?.id && !data.empresa_dona_id ? { empresa_dona_id: data.empresa_id || empresaAtual.id } : {}), ...(groupId && !data.group_id ? { group_id: groupId } : {}) };
+      // TRAVA GLOBAL: verifica unicidade de CNPJ/nome antes de salvar (Regra-Mãe §5c)
+      const erroUnicidade = await checkGlobalUniqueness('Fornecedor', payload, {
+        groupId, empresaId: empresaAtual?.id, currentId: fornecedor?.id, isEdit: !!fornecedor?.id,
+      });
+      if (erroUnicidade) throw new Error(erroUnicidade);
       if (fornecedor?.id) { if (!podeEditar) throw new Error("Seu perfil nao permite editar fornecedores."); return updateInContext('Fornecedor', fornecedor.id, payload, 'empresa_dona_id'); }
       if (!podeCriar) throw new Error("Seu perfil nao permite criar fornecedores.");
       return createInContext('Fornecedor', payload, 'empresa_dona_id');

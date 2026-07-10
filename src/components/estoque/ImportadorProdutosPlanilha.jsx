@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   num, sanitize, sleep, norm, isHeaderRow, HEADERS, UNIDADES_ACEITAS,
-  autoMapFromHeaders, mapUnidade, mapTipoItem, sanitizeNCM, isNCMValido, makeKey, get
+  autoMapFromHeaders, mapUnidade, mapTipoItem, sanitizeNCM, isNCMValido, makeKey, get, resolverCodigoProduto
 } from "./importador/importadorHelpers";
 import ImportadorPreviewTable from "./importador/ImportadorPreviewTable";
 import ImportadorDuplicidadesPanel from "./importador/ImportadorDuplicidadesPanel";
@@ -310,6 +310,11 @@ export default function ImportadorProdutosPlanilha({ onConcluido, closeSelf }) {
       // Remover duplicidades (pular por padrão)
       const dupKeys = new Set(duplicidades.map(d => makeKey(d.empresa_id, d.codigo)));
       produtos = produtos.filter(p => !dupKeys.has(makeKey(p.empresa_id, p.codigo)));
+      // Regra-Mãe §5c: resolver código sequencial para cada produto importado
+      const resolvedGid = grupoId || produtos[0]?.group_id || empresaAtual?.group_id;
+      for (const p of produtos) {
+        p.codigo = await resolverCodigoProduto(p.codigo, resolvedGid, base44);
+      }
       let createdTotal = 0, failedTotal = 0;
       const chunkSize = 10; let delay = 0;
       for (let i = 0; i < produtos.length; i += chunkSize) {

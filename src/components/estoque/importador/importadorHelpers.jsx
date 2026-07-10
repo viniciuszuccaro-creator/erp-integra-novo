@@ -126,3 +126,37 @@ export const isNCMValido = (v) => {
 };
 
 export const makeKey = (empresaId, codigo) => `${empresaId || ''}__${String(codigo || '').toUpperCase()}`;
+
+/**
+ * Resolve código sequencial para produtos importados (Regra-Mãe §5c)
+ * - Se código fornecido e NÃO existe no grupo → mantém o código
+ * - Se código fornecido e JÁ existe → busca próximo na sequência
+ * - Se sem código → auto-gera sequencial
+ * @param {string} codigoFornecido - código da planilha/NF-e (pode ser vazio)
+ * @param {string} groupId - ID do grupo empresarial
+ * @param {object} base44 - instância do SDK
+ * @returns {Promise<string>} código resolvido
+ */
+export async function resolverCodigoProduto(codigoFornecido, groupId, base44) {
+  const getNext = async () => {
+    const res = await base44.functions.invoke("entityListSorted", {
+      entityName: "Produto", filter: { group_id: groupId, _merged: { $ne: true } },
+      sortField: "codigo", sortDirection: "desc", limit: 1, skip: 0,
+    });
+    const last = res?.data?.[0];
+    const n = last ? parseInt(String(last.codigo).replace(/\D/g, ''), 10) : 0;
+    return String(isNaN(n) ? 1 : n + 1).padStart(3, '0');
+  };
+
+  if (codigoFornecido && String(codigoFornecido).trim()) {
+    const codeVal = String(codigoFornecido).trim();
+    try {
+      const existing = await base44.entities.Produto.filter(
+        { group_id: groupId, codigo: codeVal }, 'created_date', 1
+      );
+      if (existing && existing.length > 0) return getNext(); // já existe → sequencial
+      return codeVal; // não existe → mantém
+    } catch { return getNext(); } // fail-closed → sequencial
+  }
+  return getNext(); // sem código → sequencial
+}

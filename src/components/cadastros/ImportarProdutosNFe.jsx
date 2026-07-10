@@ -112,11 +112,34 @@ IMPORTANTE: Extraia TODOS os itens, não apenas um exemplo.`,
 
     try {
       const produtosCriados = [];
+      const gid = grupoAtual?.id || empresaAtual?.group_id;
+
+      const resolverCodigo = async (codigoFornecido) => {
+        const getNext = async () => {
+          const res = await base44.functions.invoke("entityListSorted", {
+            entityName: "Produto", filter: { group_id: gid, _merged: { $ne: true } },
+            sortField: "codigo", sortDirection: "desc", limit: 1, skip: 0,
+          });
+          const last = res?.data?.[0];
+          const n = last ? parseInt(String(last.codigo).replace(/\D/g, ''), 10) : 0;
+          return String(isNaN(n) ? 1 : n + 1).padStart(3, '0');
+        };
+        if (codigoFornecido && String(codigoFornecido).trim()) {
+          const codeVal = String(codigoFornecido).trim();
+          try {
+            const existing = await base44.entities.Produto.filter({ group_id: gid, codigo: codeVal }, 'created_date', 1);
+            if (existing && existing.length > 0) return getNext();
+            return codeVal;
+          } catch { return getNext(); }
+        }
+        return getNext();
+      };
 
       for (const item of itensCriar) {
+        const codigoFinal = await resolverCodigo(item.codigo_produto);
         const novoProduto = {
           descricao: item.descricao,
-          codigo: item.codigo_produto || '',
+          codigo: codigoFinal,
           ncm: item.ncm || '',
           unidade_medida: item.unidade || 'UN',
           unidade_principal: item.unidade || 'UN',
@@ -126,7 +149,7 @@ IMPORTANTE: Extraia TODOS os itens, não apenas um exemplo.`,
           grupo: 'Outros',
           status: 'Ativo',
           empresa_id: empresaAtual?.id,
-          group_id: grupoAtual?.id || empresaAtual?.group_id,
+          group_id: gid,
         };
 
         const produtoCriado = await base44.entities.Produto.create(novoProduto);

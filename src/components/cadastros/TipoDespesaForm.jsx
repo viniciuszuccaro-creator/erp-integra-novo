@@ -10,6 +10,7 @@ import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import usePermissions from '@/components/lib/usePermissions';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import { checkGlobalUniqueness } from '@/components/lib/sanitizeOnWrite';
 import useRLSQuery from "@/components/lib/useRLSQuery";
 
 export default function TipoDespesaForm({ tipo, tipoDespesa, item, data, onSubmit, onSave, onClose, windowMode = false }) {
@@ -40,7 +41,7 @@ export default function TipoDespesaForm({ tipo, tipoDespesa, item, data, onSubmi
   const { data: contasContabeis = [] } = useRLSQuery('PlanoDeContas', {}, 'codigo', 999, { staleTime: 300000, enabled: !!contexto });
   const { data: centrosResultado = [] } = useRLSQuery('CentroResultado', {}, 'codigo', 999, { staleTime: 300000, enabled: !!contexto });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (dadosIniciais?.id && !podeEditar) {
       toast.error("Sem permissão para editar tipos de despesa.");
@@ -50,8 +51,12 @@ export default function TipoDespesaForm({ tipo, tipoDespesa, item, data, onSubmi
       toast.error("Sem permissão para criar tipos de despesa.");
       return;
     }
+    const groupId = grupoAtual?.id || empresaAtual?.group_id || dadosIniciais?.group_id || null;
+    const payload = { ...formData, group_id: groupId || formData.group_id };
+    const erroUnicidade = await checkGlobalUniqueness('TipoDespesa', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
     if (onSubmit) {
-      onSubmit(formData);
+      onSubmit(payload);
     } else {
       if (onSave) onSave();
       if (onClose) onClose();

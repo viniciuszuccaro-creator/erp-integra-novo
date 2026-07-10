@@ -10,6 +10,7 @@ import { Loader2, Network, CheckCircle2, Trash2, Power, PowerOff, AlertTriangle 
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { Card, CardContent } from "@/components/ui/card";
 
 /**
@@ -76,6 +77,8 @@ export default function GrupoEmpresarialForm({ grupo, onSubmit, isSubmitting, wi
       razao_social_grupo: formData.razao_social_grupo || formData.razao_social || formData.nome,
       status: formData.status || 'Ativo',
     };
+    const erroUnicidade = await checkGlobalUniqueness('GrupoEmpresarial', mapped, { groupId: grupo?.id, empresaId: null, currentId: grupo?.id, isEdit: !!grupo?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
     // Salva o grupo e obtém a entidade criada/atualizada (com ID)
     const savedGrupo = await onSubmit(mapped);
     const grupoId = savedGrupo?.id || grupo?.id;

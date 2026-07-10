@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Wallet, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
 
@@ -74,6 +75,8 @@ export default function OperadorCaixaForm({ operador, item, data, initialData, d
       ...(empresaAtual?.id && !formData.empresa_id ? { empresa_id: empresaAtual.id } : {}),
       ...(groupId && !formData.group_id ? { group_id: groupId } : {})
     };
+    const erroUnicidade = await checkGlobalUniqueness('OperadorCaixa', payload, { groupId, empresaId: empresaAtual?.id, currentId: operador?.id, isEdit: !!operador?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
     try {
       if (operador?.id) {
         await updateInContext('OperadorCaixa', operador.id, payload);

@@ -13,6 +13,7 @@ import { Receipt } from "lucide-react";
 import { toast } from "sonner";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import useTabelaFiscalIA from "@/components/cadastros/tabela-fiscal/useTabelaFiscalIA";
 import TabelaFiscalSugestaoIA from "@/components/cadastros/tabela-fiscal/TabelaFiscalSugestaoIA";
 import TabelaFiscalTabConfig from "@/components/cadastros/tabela-fiscal/TabelaFiscalTabConfig";
@@ -46,19 +47,22 @@ export default function TabelaFiscalForm({ tabela, windowMode = false, onSubmit,
   const [abaAtiva, setAbaAtiva] = useState("configuracao");
   const { validandoIA, sugestaoIA, handleValidarIA, handleAplicarSugestaoIA } = useTabelaFiscalIA(podeUsarIA, podeSalvar);
 
-  const handleSubmitForm = (e) => {
+  const handleSubmitForm = async (e) => {
     e.preventDefault();
     if (!formData.nome_regra || !formData.cfop) { toast.error("Preencha os campos obrigatórios"); return; }
     if (!contextoValido) { toast.error("Selecione um grupo ou empresa antes de salvar."); return; }
     if (!podeSalvar) { toast.error("Sem permissão para salvar tabela fiscal."); return; }
+    const payload = {
+      ...formData,
+      empresa_id: contextoAtual === "empresa" ? empresaAtual?.id : formData.empresa_id,
+      group_id: groupId || formData.group_id,
+      nome: formData.nome_regra,
+      descricao: formData.cfop + ' - ' + formData.regime_tributario
+    };
+    const erroUnicidade = await checkGlobalUniqueness('TabelaFiscal', payload, { groupId, empresaId: empresaAtual?.id, currentId: tabela?.id, isEdit: !!tabela?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
     if (onSubmit) {
-      onSubmit({
-        ...formData,
-        empresa_id: contextoAtual === "empresa" ? empresaAtual?.id : formData.empresa_id,
-        group_id: groupId || formData.group_id,
-        nome: formData.nome_regra,
-        descricao: formData.cfop + ' - ' + formData.regime_tributario
-      });
+      onSubmit(payload);
     }
   };
 

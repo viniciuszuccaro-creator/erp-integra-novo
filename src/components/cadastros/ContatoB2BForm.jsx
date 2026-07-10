@@ -50,12 +50,10 @@ export default function ContatoB2BForm({ contato, contatoB2B, item, data, onSubm
     const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
     const erroUnicidade = await checkGlobalUniqueness('ContatoB2B', formData, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    if (onSubmit) {
-      onSubmit(formData);
-    } else {
-      if (onSave) onSave();
-      if (onClose) onClose();
-    }
+    try {
+      if (onSubmit) { await onSubmit(formData); }
+      else { if (onSave) await onSave(); if (onClose) onClose(); }
+    } catch (e) { toast.error(e?.message || 'Erro ao salvar contato.'); }
   };
 
   const formContent = (

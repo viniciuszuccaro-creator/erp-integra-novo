@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { useUser } from "@/components/lib/UserContext";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
 
 export default function useEntregasMotorista() {
   const { user } = useUser();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
   const [entregaAtual, setEntregaAtual] = useState(null);
   const [localizacao, setLocalizacao] = useState(null);
   const [rastreando, setRastreando] = useState(false);
@@ -21,12 +23,12 @@ export default function useEntregasMotorista() {
   const [reversaValor, setReversaValor] = useState(0);
 
   const { data: minhasEntregas = [], refetch } = useQuery({
-    queryKey: ["entregas-motorista"],
+    queryKey: ["entregas-motorista", `${grupoAtual?.id || 'g'}-${empresaAtual?.id || 'e'}`],
     queryFn: async () => {
-      const todas = await base44.entities.Entrega.list("-data_saida");
-      return todas.filter((e) => e.motorista_id === user?.id && ["Saiu para Entrega", "Em Trânsito"].includes(e.status));
+      const todas = await filterInContext("Entrega", { motorista_id: user?.id }, "-data_saida", 200);
+      return todas.filter((e) => ["Saiu para Entrega", "Em Trânsito"].includes(e.status));
     },
-    enabled: !!user,
+    enabled: !!user && !!(empresaAtual?.id || grupoAtual?.id),
     refetchInterval: 30000,
   });
 

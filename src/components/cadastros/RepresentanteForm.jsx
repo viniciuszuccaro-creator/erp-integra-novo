@@ -35,7 +35,8 @@ export default function RepresentanteForm({ representante, onSubmit, isSubmittin
     const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
     const erroUnicidade = await checkGlobalUniqueness('Representante', formData, { groupId, empresaId: empresaAtual?.id, currentId: representante?.id, isEdit: !!representante?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(formData);
+    try { await onSubmit(formData); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar representante.'); }
   };
 
   const formContent = (

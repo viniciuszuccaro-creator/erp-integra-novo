@@ -99,11 +99,46 @@ export default function ImportarProdutosLote({ onProdutosCriados, onClose }) {
 
     try {
       const produtosCriados = [];
+      const gid = grupoAtual?.id || empresaAtual?.group_id;
+
+      // Helper: resolve código sequencial — se código importado já existe, busca próximo na sequência
+      const resolverCodigo = async (codigoFornecido) => {
+        if (codigoFornecido && String(codigoFornecido).trim()) {
+          const codeVal = String(codigoFornecido).trim();
+          try {
+            const existing = await base44.entities.Produto.filter(
+              { group_id: gid, codigo: codeVal }, 'created_date', 1
+            );
+            if (existing && existing.length > 0) {
+              // Código já existe → buscar próximo na sequência
+              const res = await base44.functions.invoke("entityListSorted", {
+                entityName: "Produto", filter: { group_id: gid, _merged: { $ne: true } },
+                sortField: "codigo", sortDirection: "desc", limit: 1, skip: 0,
+              });
+              const last = res?.data?.[0];
+              const n = last ? parseInt(String(last.codigo).replace(/\D/g, ''), 10) : 0;
+              return String(isNaN(n) ? 1 : n + 1).padStart(3, '0');
+            }
+            return codeVal; // Código não existe → manter o fornecido
+          } catch {
+            // Fail-closed: se não conseguir verificar, buscar próximo sequencial
+          }
+        }
+        // Sem código ou erro → auto-gerar sequencial
+        const res = await base44.functions.invoke("entityListSorted", {
+          entityName: "Produto", filter: { group_id: gid, _merged: { $ne: true } },
+          sortField: "codigo", sortDirection: "desc", limit: 1, skip: 0,
+        });
+        const last = res?.data?.[0];
+        const n = last ? parseInt(String(last.codigo).replace(/\D/g, ''), 10) : 0;
+        return String(isNaN(n) ? 1 : n + 1).padStart(3, '0');
+      };
 
       for (const linha of dadosParsed.linhas) {
+        const codigoFinal = await resolverCodigo(mapeamento.codigo ? linha[mapeamento.codigo] : '');
         const novoProduto = {
           descricao: linha[mapeamento.descricao] || '',
-          codigo: mapeamento.codigo ? linha[mapeamento.codigo] : '',
+          codigo: codigoFinal,
           ncm: mapeamento.ncm ? linha[mapeamento.ncm] : '',
           unidade_medida: mapeamento.unidade_medida ? linha[mapeamento.unidade_medida] : 'UN',
           unidade_principal: mapeamento.unidade_medida ? linha[mapeamento.unidade_medida] : 'UN',
@@ -115,7 +150,7 @@ export default function ImportarProdutosLote({ onProdutosCriados, onClose }) {
           tipo_item: 'Revenda',
           status: 'Ativo',
           empresa_id: empresaAtual?.id,
-          group_id: grupoAtual?.id || empresaAtual?.group_id,
+          group_id: gid,
         };
 
         // IA pode sugerir eh_bitola se tiver peso_teorico

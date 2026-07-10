@@ -48,19 +48,30 @@ export default function useVisualizadorCRUD({
     });
   }, [ENTITY, empresaId, groupId]);
 
-  const fetchNextCode = useCallback(async (rf) => {
-    const codeField = ENTITY_CODE_FIELD[ENTITY];
-    if (!codeField) return;
+  // Regra-Mãe §5c: busca o próximo código sequencial disponível para a entidade no escopo do grupo
+  const getNextSequentialCode = useCallback(async (entityName, codeField, gid) => {
     try {
+      const filter = NO_SCOPE_STAMP.has(entityName)
+        ? { _merged: { $ne: true } }
+        : { group_id: gid, _merged: { $ne: true } };
       const res = await base44.functions.invoke("entityListSorted", {
-        entityName: ENTITY, filter: rf,
+        entityName, filter,
         sortField: codeField, sortDirection: "desc", limit: 1, skip: 0,
       });
       const last = Array.isArray(res?.data) && res.data[0];
-      const n = last ? parseInt(String(last[codeField]).replace(/\D/g,''), 10) : 0;
-      setNextCode(String(isNaN(n) ? 1 : n + 1).padStart(3, '0'));
-    } catch { setNextCode(null); }
-  }, [ENTITY, setNextCode]);
+      const n = last ? parseInt(String(last[codeField]).replace(/\D/g, ''), 10) : 0;
+      return String(isNaN(n) ? 1 : n + 1).padStart(3, '0');
+    } catch {
+      return String(1).padStart(3, '0');
+    }
+  }, []);
+
+  const fetchNextCode = useCallback(async (rf) => {
+    const codeField = ENTITY_CODE_FIELD[ENTITY];
+    if (!codeField) return;
+    const next = await getNextSequentialCode(ENTITY, codeField, groupId);
+    setNextCode(next);
+  }, [ENTITY, groupId, getNextSequentialCode, setNextCode]);
 
   const handlePersistSubmit = useCallback(async (formData) => {
     if (!formData || !ENTITY) return;
@@ -91,18 +102,38 @@ export default function useVisualizadorCRUD({
         if (!clean.empresa_id && empresaId) clean.empresa_id = empresaId;
         if (!clean.group_id  && groupId)   clean.group_id   = groupId;
       }
-      // P3: auto-gerar codigo numérico sequencial se não vier do formulário (Regra-Mãe: códigos únicos)
+      // Regra-Mãe §5c: código sequencial OBRIGATÓRIO
+      // Manual: sempre auto-gerar (IGNORA código digitado pelo usuário — só importação permite código custom)
+      // Import (_importMode): permite código customizado, mas se já existir → busca próximo na sequência
       const codeField = ENTITY_CODE_FIELD[ENTITY];
-      if (codeField && !editItem?.id && !clean[codeField]) {
-        try {
-          const res = await base44.functions.invoke("entityListSorted", {
-            entityName: ENTITY, filter: readFilter || {},
-            sortField: codeField, sortDirection: "desc", limit: 1, skip: 0,
-          });
-          const last = Array.isArray(res?.data) && res.data[0];
-          const n = last ? parseInt(String(last[codeField]).replace(/\D/g, ''), 10) : 0;
-          clean[codeField] = String(isNaN(n) ? 1 : n + 1).padStart(3, '0');
-        } catch { /* fallback: sem código — backend pode rejeitar se obrigatório */ }
+      if (codeField && !editItem?.id) {
+        const isImport = !!clean._importMode;
+        delete clean._importMode;
+
+        if (!isImport) {
+          // MANUAL: sempre auto-gerar sequencial (proíbe código manual)
+          clean[codeField] = await getNextSequentialCode(ENTITY, codeField, groupId);
+        } else if (clean[codeField] && String(clean[codeField]).trim()) {
+          // IMPORT com código fornecido: verificar se já existe → se sim, buscar próximo na sequência
+          const codeVal = String(clean[codeField]).trim();
+          const scopeFilter = NO_SCOPE_STAMP.has(ENTITY) ? {} : { group_id: groupId };
+          try {
+            const existing = await base44.entities[ENTITY].filter(
+              { ...scopeFilter, [codeField]: codeVal },
+              'created_date', 5
+            );
+            if (existing && existing.length > 0) {
+              // Código já existe → buscar próximo na sequência
+              clean[codeField] = await getNextSequentialCode(ENTITY, codeField, groupId);
+            }
+          } catch {
+            // Fail-closed: se não conseguir verificar, buscar próximo sequencial
+            clean[codeField] = await getNextSequentialCode(ENTITY, codeField, groupId);
+          }
+        } else {
+          // IMPORT sem código: auto-gerar sequencial
+          clean[codeField] = await getNextSequentialCode(ENTITY, codeField, groupId);
+        }
       }
       // P3: verificar duplicata antes de salvar (fail-closed — bloqueia se não conseguir verificar)
       const erroDuplicata = await checkDuplicate(clean, !!(editItem?.id), editItem?.id);
@@ -138,7 +169,7 @@ export default function useVisualizadorCRUD({
       // Relança para que o formulário possa exibir o erro inline
       throw e;
     } finally { setIsSaving(false); }
-  }, [ENTITY, editItem, empresaId, groupId, handleCloseForm, isSimple, canCreateCadastro, canEditCadastro, canDeleteCadastro, createInContext, updateInContext, deleteInContext, checkDuplicate, setIsSaving, readFilter]);
+  }, [ENTITY, editItem, empresaId, groupId, handleCloseForm, isSimple, canCreateCadastro, canEditCadastro, canDeleteCadastro, createInContext, updateInContext, deleteInContext, checkDuplicate, setIsSaving, readFilter, getNextSequentialCode]);
 
   return { fetchNextCode, handlePersistSubmit, checkDuplicate };
 }

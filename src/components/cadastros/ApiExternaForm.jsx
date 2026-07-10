@@ -36,7 +36,8 @@ export default function ApiExternaForm({ apiExterna, onSubmit, isSubmitting, win
     const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
     const erroUnicidade = await checkGlobalUniqueness('ApiExterna', payload, { groupId, empresaId: empresaAtual?.id, currentId: apiExterna?.id, isEdit: !!apiExterna?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    await onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar API externa.'); }
   };
 
   const form = (

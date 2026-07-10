@@ -47,7 +47,8 @@ export default function CatalogoWebForm({ catalogo, catalogoWeb, onSubmit, windo
     };
     const erroUnicidade = await checkGlobalUniqueness('CatalogoWeb', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar catálogo web.'); }
   };
 
   const content = (

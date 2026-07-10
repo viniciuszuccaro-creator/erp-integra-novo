@@ -34,7 +34,8 @@ export default function EventoNotificacaoForm({ evento, onSubmit, isSubmitting, 
     const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
     const erroUnicidade = await checkGlobalUniqueness('EventoNotificacao', payload, { groupId, empresaId: empresaAtual?.id, currentId: evento?.id, isEdit: !!evento?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    await onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar evento de notificação.'); }
   };
 
   const form = (

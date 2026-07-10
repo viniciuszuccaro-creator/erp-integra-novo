@@ -53,7 +53,8 @@ export default function ChatbotIntentForm({ chatbotIntent, onSubmit, isSubmittin
     const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
     const erroUnicidade = await checkGlobalUniqueness('ChatbotIntent', payload, { groupId, empresaId: empresaAtual?.id, currentId: chatbotIntent?.id, isEdit: !!chatbotIntent?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    await onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar intent do chatbot.'); }
   };
 
   const form = (

@@ -88,7 +88,8 @@ export default function useDespesaRecorrenteForm(config, onSubmit) {
     const payload = { ...formData, nome: formData.descricao || formData.tipo_despesa_nome || '' };
     const erroUnicidade = await checkGlobalUniqueness('ConfiguracaoDespesaRecorrente', payload, { groupId, empresaId: empresaAtual?.id, currentId: config?.id, isEdit: !!config?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit?.(payload);
+    try { await onSubmit?.(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar configuração de despesa recorrente.'); }
   };
 
   return {

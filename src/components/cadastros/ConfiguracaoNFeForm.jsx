@@ -57,7 +57,8 @@ export default function ConfiguracaoNFeForm({ config, onSubmit, isSubmitting, wi
     if (erroUnicidade) { toast({ title: "⚠️ Duplicidade Detectada", description: erroUnicidade, variant: "destructive" }); return; }
 
     if (onSubmit) {
-      await onSubmit(payload);
+      try { await onSubmit(payload); }
+      catch (e) { toast({ title: "Erro ao salvar NF-e", description: String(e?.message || e), variant: "destructive" }); }
       return;
     }
 

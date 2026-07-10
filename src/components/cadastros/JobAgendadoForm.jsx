@@ -34,7 +34,8 @@ export default function JobAgendadoForm({ jobAgendado, onSubmit, isSubmitting, w
     const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
     const erroUnicidade = await checkGlobalUniqueness('JobAgendado', payload, { groupId, empresaId: empresaAtual?.id, currentId: jobAgendado?.id, isEdit: !!jobAgendado?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    await onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar job agendado.'); }
   };
 
   const form = (

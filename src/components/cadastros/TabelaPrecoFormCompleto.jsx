@@ -44,7 +44,10 @@ export default function TabelaPrecoFormCompleto({ tabela, onSubmit, windowMode =
           <TabsContent value="config" className="space-y-4 mt-4">
             <Card className="border-blue-200 bg-blue-50"><CardContent className="p-4 space-y-4">
               <h3 className="font-bold text-blue-900">⚙️ Identificação da Tabela</h3>
-              <div><Label>Nome da Tabela *</Label><Input value={formData.nome} onChange={(e) => setFormData({ ...formData, nome: e.target.value })} placeholder="Ex: Atacado SP, Varejo Nacional, Tabela Obra" required /></div>
+              <div className="grid grid-cols-3 gap-4">
+                <div><Label>Código</Label><Input value={formData.codigo || '— auto —'} readOnly className="bg-slate-100 text-slate-500" placeholder="— auto —" /></div>
+                <div className="col-span-2"><Label>Nome da Tabela *</Label><Input value={formData.nome} onChange={(e) => setFormData({ ...formData, nome: e.target.value })} placeholder="Ex: Atacado SP, Varejo Nacional, Tabela Obra" required /></div>
+              </div>
               <div><Label>Descrição</Label><Input value={formData.descricao} onChange={(e) => setFormData({ ...formData, descricao: e.target.value })} placeholder="Detalhes sobre aplicação desta tabela" /></div>
               <div><Label>Tipo de Tabela *</Label>
                 <Select value={formData.tipo} onValueChange={(v) => setFormData({ ...formData, tipo: v })}>

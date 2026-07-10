@@ -119,8 +119,10 @@ export const CADASTROS_ENTITIES = {
   TabelaPreco: {
     label: "Tabelas de Preço", group: "Produtos & Serviços", icon: Package,
     columns: [
+      { field: "codigo", label: "Código", searchable: true, sortable: true, numeric: true },
       { field: "nome", label: "Nome", searchable: true, sortable: true },
-      { field: "descricao", label: "Descrição", searchable: true },
+      { field: "tipo", label: "Tipo", searchable: true },
+      { field: "ativo", label: "Ativo", type: "boolean" },
     ],
   },
   KitProduto: {

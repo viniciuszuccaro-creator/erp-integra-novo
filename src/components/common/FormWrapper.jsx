@@ -56,7 +56,7 @@ export default function FormWrapper({
         }
       }
       setErrorMessages([]);
-      if (typeof onSubmit === 'function') await onSubmit(stampedExternal, methods);
+      if (typeof onSubmit === 'function') { try { await onSubmit(stampedExternal, methods); } catch (e) { setErrorMessages([e?.message || 'Erro ao salvar.']); } }
       return;
     }
 
@@ -71,7 +71,7 @@ export default function FormWrapper({
     }
     setErrorMessages([]);
     if (typeof onSubmit === 'function') {
-      await onSubmit(payload, methods);
+      try { await onSubmit(payload, methods); } catch (e) { setErrorMessages([e?.message || 'Erro ao salvar.']); }
     }
   };
 

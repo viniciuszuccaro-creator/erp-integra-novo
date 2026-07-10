@@ -27,7 +27,7 @@ export default function useTabelaPrecoForm({ tabela, onSubmit }) {
   useEffect(() => { const loadUser = async () => { setUser(await base44.auth.me()); }; loadUser(); }, []);
 
   const [formData, setFormData] = useState({
-    nome: tabela?.nome || '', descricao: tabela?.descricao || '', tipo: tabela?.tipo || 'Padrão',
+    codigo: tabela?.codigo || '', nome: tabela?.nome || '', descricao: tabela?.descricao || '', tipo: tabela?.tipo || 'Padrão',
     data_inicio: tabela?.data_inicio || new Date().toISOString().split('T')[0], data_fim: tabela?.data_fim || '',
     ativo: tabela?.ativo !== undefined ? tabela.ativo : true,
     empresa_id: tabela?.empresa_id || empresaAtual?.id || user?.empresa_selecionada_id || '',
@@ -140,7 +140,34 @@ export default function useTabelaPrecoForm({ tabela, onSubmit }) {
     if (tabela?.id ? !podeEditar : !podeCriar) { toast.error('Seu perfil nao permite salvar tabelas de preco'); return; }
     setSalvando(true);
     try {
-      const dadosTabela = { ...formData, empresa_id: empresaAtual?.id || formData.empresa_id || user?.empresa_selecionada_id || user?.empresa_id, group_id: groupId || formData.group_id, criado_por: user?.email || 'sistema' };
+      // Helper: filtro com escopo multiempresa (direto no SDK, mais confiável que filterInContext)
+      const withScope = (filter) => {
+        const scoped = { ...filter };
+        if (groupId) scoped.group_id = groupId;
+        else if (empresaAtual?.id) scoped.empresa_id = empresaAtual.id;
+        return scoped;
+      };
+      // Verifica duplicidade por nome (case-insensitive) antes de salvar — fail-closed
+      try {
+        const existentes = await base44.entities.TabelaPreco.filter(
+          withScope({ nome: { $regex: `^${formData.nome.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' } }),
+          '-created_date', 10
+        );
+        const dup = (existentes || []).find(r => r.id !== tabela?.id);
+        if (dup) { toast.error(`⚠️ Já existe uma tabela de preço com o nome "${formData.nome}". Não é permitido duplicar nomes.`); setSalvando(false); return; }
+      } catch (e) {
+        toast.error(`⚠️ Não foi possível verificar duplicidade: ${e.message}. Salvamento bloqueado.`); setSalvando(false); return;
+      }
+      // Gera código numérico crescente automaticamente (apenas para novo registro sem código)
+      let codigoFinal = formData.codigo;
+      if (!tabela?.id && !codigoFinal) {
+        try {
+          const todasTabelas = await base44.entities.TabelaPreco.filter(withScope({}), '-created_date', 999);
+          const maxCodigo = (todasTabelas || []).map(t => t.codigo).filter(c => c && /^\d+$/.test(String(c))).map(c => parseInt(String(c))).sort((a, b) => b - a)[0] || 0;
+          codigoFinal = String(maxCodigo + 1).padStart(3, '0');
+        } catch { codigoFinal = String(Date.now()).slice(-6); }
+      }
+      const dadosTabela = { ...formData, codigo: codigoFinal, empresa_id: empresaAtual?.id || formData.empresa_id || user?.empresa_selecionada_id || user?.empresa_id, group_id: groupId || formData.group_id, criado_por: user?.email || 'sistema' };
       let tabelaId = tabela?.id;
       if (!tabelaId) { const tabelaCriada = await createInContext('TabelaPreco', dadosTabela); tabelaId = tabelaCriada.id; }
       else await updateInContext('TabelaPreco', tabelaId, dadosTabela);

@@ -15,6 +15,10 @@
       "default": false,
       "description": "V21.0: Se todas empresas do grupo podem usar"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo num\u00e9rico sequencial \u00fanico da tabela"
+    },
     "nome": {
       "type": "string",
       "description": "Nome da tabela de pre\u00e7o"

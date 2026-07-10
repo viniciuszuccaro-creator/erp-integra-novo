@@ -6,6 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Landmark } from "lucide-react";
 import usePermissions from "@/components/lib/usePermissions";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
 
 /**
@@ -13,6 +15,7 @@ import { toast } from "sonner";
  */
 export default function BancoForm({ banco, item, data, initialData, defaultValues, onSubmit, onSave, onClose, isSubmitting, windowMode = false }) {
   const dadosIniciais = item || data || initialData || defaultValues || banco;
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const { canCreate, canEdit } = usePermissions();
   const podeCriar = canCreate("Cadastros", "Banco") || canCreate("Financeiro", "Banco") || canCreate("Cadastros", null);
   const podeEditar = canEdit("Cadastros", "Banco") || canEdit("Financeiro", "Banco") || canEdit("Cadastros", null);
@@ -43,7 +46,7 @@ export default function BancoForm({ banco, item, data, initialData, defaultValue
     }
   }, [dadosIniciais?.id]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (dadosIniciais?.id && !podeEditar) {
       toast.error("Sem permissão para editar bancos.");
@@ -59,6 +62,10 @@ export default function BancoForm({ banco, item, data, initialData, defaultValue
     }
     // Injeta 'nome' para compatibilidade com o Visualizador Universal
     const payload = { ...formData, nome: formData.nome_banco };
+    // TRAVA GLOBAL: verifica unicidade de nome/código antes de salvar (Regra-Mãe §5c)
+    const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+    const erroUnicidade = await checkGlobalUniqueness('Banco', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
     if (onSubmit) {
       onSubmit(payload);
     } else {

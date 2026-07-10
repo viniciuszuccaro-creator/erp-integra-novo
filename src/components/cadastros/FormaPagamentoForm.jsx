@@ -72,7 +72,7 @@ export default function FormaPagamentoForm({ forma, onSubmit, isSubmitting, wind
   };
 
   const formContent = (
-    <FormWrapper schema={schema} defaultValues={formData} onSubmit={handleSubmit} externalData={formData} className="space-y-4">
+    <FormWrapper schema={schema} defaultValues={formData} onSubmit={handleSubmit} externalData={formData} entityName="FormaPagamento" editItemId={forma?.id} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label>Descrição *</Label>

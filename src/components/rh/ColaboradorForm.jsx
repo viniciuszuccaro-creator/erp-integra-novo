@@ -87,7 +87,7 @@ function ColaboradorForm({ colaborador: colaboradorProp, item, data, onSubmit, o
   };
 
   const content = (
-    <FormWrapper schema={schema} defaultValues={formData} onSubmit={handleSubmit} externalData={formData} className={`w-full h-full space-y-6 ${windowMode ? 'p-6 overflow-auto' : ''}`}>
+    <FormWrapper schema={schema} defaultValues={formData} onSubmit={handleSubmit} externalData={formData} entityName="Colaborador" editItemId={colaborador?.id} className={`w-full h-full space-y-6 ${windowMode ? 'p-6 overflow-auto' : ''}`}>
       <div className="space-y-4">
         <Card className="bg-white/60 backdrop-blur-md border-white/40 shadow-md rounded-sm">
           <CardContent className="p-6 space-y-4">

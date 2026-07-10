@@ -7,10 +7,13 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { DollarSign } from 'lucide-react';
 import usePermissions from '@/components/lib/usePermissions';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import { checkGlobalUniqueness } from '@/components/lib/sanitizeOnWrite';
 import { toast } from "sonner";
 
 export default function CondicaoComercialForm({ condicao, condicaoComercial, onSubmit, windowMode = false }) {
   const dadosIniciais = condicaoComercial || condicao;
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const { canCreate, canEdit } = usePermissions();
   const podeCriar = canCreate("Cadastros", "CondicaoComercial") || canCreate("Financeiro", "CondicaoComercial") || canCreate("Cadastros", null);
   const podeEditar = canEdit("Cadastros", "CondicaoComercial") || canEdit("Financeiro", "CondicaoComercial") || canEdit("Cadastros", null);
@@ -25,7 +28,7 @@ export default function CondicaoComercialForm({ condicao, condicaoComercial, onS
     ativo: true
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (dadosIniciais?.id && !podeEditar) {
       toast.error("Sem permissão para editar condições comerciais.");
@@ -35,7 +38,12 @@ export default function CondicaoComercialForm({ condicao, condicaoComercial, onS
       toast.error("Sem permissão para criar condições comerciais.");
       return;
     }
-    onSubmit({ ...formData, nome: formData.nome_condicao || formData.nome || '' });
+    const payload = { ...formData, nome: formData.nome_condicao || formData.nome || '' };
+    // TRAVA GLOBAL: verifica unicidade de nome/código antes de salvar (Regra-Mãe §5c)
+    const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+    const erroUnicidade = await checkGlobalUniqueness('CondicaoComercial', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    onSubmit(payload);
   };
 
   const content = (

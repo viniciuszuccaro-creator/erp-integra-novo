@@ -307,13 +307,11 @@ export default function ImportadorProdutosPlanilha({ onConcluido, closeSelf }) {
       produtos = produtos.map(p => ({ ...p, empresa_id: p.empresa_id || empresaId || empresaAtual?.id || '', ...(grupoId ? { group_id: grupoId } : {}), unidade_medida: UNIDADES_ACEITAS.includes(p.unidade_medida) ? p.unidade_medida : 'UN', estoque_atual: 0, estoque_reservado: 0, estoque_disponivel: 0 }));
       const seenKeys = new Set();
       produtos = produtos.filter(p => { const k = makeKey(p.empresa_id, p.codigo); if (seenKeys.has(k)) return false; seenKeys.add(k); return true; });
-      // Remover duplicidades (pular por padrão)
-      const dupKeys = new Set(duplicidades.map(d => makeKey(d.empresa_id, d.codigo)));
-      produtos = produtos.filter(p => !dupKeys.has(makeKey(p.empresa_id, p.codigo)));
-      // Regra-Mãe §5c: resolver código sequencial para cada produto importado
+      // Regra-Mãe §5c: resolver códigos sequenciais — duplicatas são auto-sequenciadas, NUNCA puladas
       const resolvedGid = grupoId || produtos[0]?.group_id || empresaAtual?.group_id;
+      const usedCodes = new Set();
       for (const p of produtos) {
-        p.codigo = await resolverCodigoProduto(p.codigo, resolvedGid, base44);
+        p.codigo = await resolverCodigoProduto(p.codigo, resolvedGid, base44, usedCodes);
       }
       let createdTotal = 0, failedTotal = 0;
       const chunkSize = 10; let delay = 0;

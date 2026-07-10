@@ -129,32 +129,40 @@ export const makeKey = (empresaId, codigo) => `${empresaId || ''}__${String(codi
 
 /**
  * Resolve código sequencial para produtos importados (Regra-Mãe §5c)
- * - Se código fornecido e NÃO existe no grupo → mantém o código
- * - Se código fornecido e JÁ existe → busca próximo na sequência
+ * - Se código fornecido, não existe no banco nem no lote atual → mantém
+ * - Se código fornecido e JÁ existe (banco ou lote) → busca próximo na sequência
  * - Se sem código → auto-gera sequencial
+ *
  * @param {string} codigoFornecido - código da planilha/NF-e (pode ser vazio)
  * @param {string} groupId - ID do grupo empresarial
  * @param {object} base44 - instância do SDK
+ * @param {Set<string>} usedCodes - códigos já atribuídos no lote atual (previne colisão intra-lote)
  * @returns {Promise<string>} código resolvido
  */
-export async function resolverCodigoProduto(codigoFornecido, groupId, base44) {
+export async function resolverCodigoProduto(codigoFornecido, groupId, base44, usedCodes = new Set()) {
   const getNext = async () => {
     const res = await base44.functions.invoke("entityListSorted", {
-      entityName: "Produto", filter: { group_id: groupId, _merged: { $ne: true } },
+      entityName: "Produto", filter: { group_id: groupId },
       sortField: "codigo", sortDirection: "desc", limit: 1, skip: 0,
     });
     const last = res?.data?.[0];
-    const n = last ? parseInt(String(last.codigo).replace(/\D/g, ''), 10) : 0;
-    return String(isNaN(n) ? 1 : n + 1).padStart(3, '0');
+    let n = last ? parseInt(String(last.codigo).replace(/\D/g, ''), 10) : 0;
+    if (isNaN(n)) n = 0;
+    let next;
+    do { n++; next = String(n).padStart(3, '0'); } while (usedCodes.has(next));
+    usedCodes.add(next);
+    return next;
   };
 
   if (codigoFornecido && String(codigoFornecido).trim()) {
     const codeVal = String(codigoFornecido).trim();
+    if (usedCodes.has(codeVal)) return getNext(); // colisão intra-lote → sequencial
     try {
       const existing = await base44.entities.Produto.filter(
         { group_id: groupId, codigo: codeVal }, 'created_date', 1
       );
-      if (existing && existing.length > 0) return getNext(); // já existe → sequencial
+      if (existing && existing.length > 0) return getNext(); // já existe no banco → sequencial
+      usedCodes.add(codeVal);
       return codeVal; // não existe → mantém
     } catch { return getNext(); } // fail-closed → sequencial
   }

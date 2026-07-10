@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Package } from "lucide-react";
 import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
 
 /**
@@ -32,7 +33,7 @@ export default function TipoFreteForm({ tipo, tipoFrete, onSubmit, isSubmitting,
     ativo: true
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.descricao || !formData.modalidade) {
       toast.error('Preencha os campos obrigatórios');
@@ -46,12 +47,15 @@ export default function TipoFreteForm({ tipo, tipoFrete, onSubmit, isSubmitting,
       toast.error('Sem permissão para salvar tipo de frete.');
       return;
     }
-    onSubmit({
+    const payload = {
       ...formData,
       group_id: groupId || formData.group_id,
       empresa_id: contextoAtual === "empresa" ? empresaAtual?.id : formData.empresa_id,
       nome: formData.descricao
-    });
+    };
+    const erroUnicidade = await checkGlobalUniqueness('TipoFrete', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    onSubmit(payload);
   };
 
   const formContent = (

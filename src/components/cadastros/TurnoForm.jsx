@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
 
 /**
@@ -12,6 +14,8 @@ import { toast } from "sonner";
  */
 export default function TurnoForm({ turno, item, data, initialData, defaultValues, onSubmit, isSubmitting, windowMode = false }) {
   const dadosIniciais = item || data || initialData || defaultValues || turno;
+  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || dadosIniciais?.group_id || null;
   const [formData, setFormData] = useState(dadosIniciais || {
     nome_turno: '',
     horario_inicio: '08:00',
@@ -41,13 +45,16 @@ export default function TurnoForm({ turno, item, data, initialData, defaultValue
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nome_turno || !formData.horario_inicio || !formData.horario_fim) {
       toast.error('Preencha os campos obrigatórios');
       return;
     }
-    onSubmit({ ...formData, nome: formData.nome_turno });
+    const payload = { ...formData, group_id: groupId || formData.group_id, nome: formData.nome_turno };
+    const erroUnicidade = await checkGlobalUniqueness('Turno', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    onSubmit(payload);
   };
 
   const formContent = (

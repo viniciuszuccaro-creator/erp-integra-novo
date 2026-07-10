@@ -8,6 +8,7 @@ import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import { useConfirm } from "@/components/ui/confirm-dialog";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { DEFAULT_FORM } from "./regiao/regiaoConstants";
 import RegiaoTabGeral from "./regiao/RegiaoTabGeral";
 import RegiaoTabLogistica from "./regiao/RegiaoTabLogistica";
@@ -31,10 +32,13 @@ export default function RegiaoAtendimentoForm({ regiaoId, regiaoAtendimento, ite
     else if (!regiaoId && !dadosIniciaisProps && open) { setFormData(DEFAULT_FORM); }
   }, [regiaoId, open]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e?.preventDefault();
     if (!formData.nome_regiao) { toast.error("Nome da região é obrigatório"); return; }
-    if (onSubmit) { onSubmit(formData); if (onOpenChange) onOpenChange(false); }
+    const payload = { ...formData, group_id: grupoAtual?.id || formData.group_id };
+    const erroUnicidade = await checkGlobalUniqueness('RegiaoAtendimento', payload, { groupId: grupoAtual?.id, empresaId: empresaAtual?.id, currentId: formData?.id, isEdit: !!formData?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    if (onSubmit) { onSubmit(payload); if (onOpenChange) onOpenChange(false); }
     else { if (onOpenChange) onOpenChange(false); if (onSave) onSave(); if (onClose) onClose(); }
   };
 

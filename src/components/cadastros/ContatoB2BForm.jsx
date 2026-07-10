@@ -8,6 +8,7 @@ import { Loader2, MessageCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
 
 /**
@@ -39,12 +40,16 @@ export default function ContatoB2BForm({ contato, contatoB2B, item, data, onSubm
     enabled: !!contexto,
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nome_contato || !formData.email) {
       toast.error('Preencha os campos obrigatórios');
       return;
     }
+    // TRAVA GLOBAL: verifica unicidade de nome antes de salvar (Regra-Mãe §5c)
+    const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+    const erroUnicidade = await checkGlobalUniqueness('ContatoB2B', formData, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
     if (onSubmit) {
       onSubmit(formData);
     } else {

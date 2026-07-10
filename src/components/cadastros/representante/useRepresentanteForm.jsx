@@ -4,6 +4,7 @@ import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
 import { useToast } from "@/components/ui/use-toast";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 
 /**
@@ -56,6 +57,8 @@ export default function useRepresentanteForm({ representante: representanteProp,
     mutationFn: async (data) => {
       if (!contextoValido) throw new Error("Selecione um grupo ou empresa antes de salvar o representante.");
       const payload = { ...data, ...(empresaAtual?.id && !data.empresa_id ? { empresa_id: empresaAtual.id } : {}), ...(groupId && !data.group_id ? { group_id: groupId } : {}) };
+      const erroUnicidade = await checkGlobalUniqueness('Representante', payload, { groupId, empresaId: empresaAtual?.id, currentId: representante?.id, isEdit: !!representante?.id });
+      if (erroUnicidade) throw new Error(erroUnicidade);
       if (representante?.id) { if (!podeEditar) throw new Error("Seu perfil nao permite editar representantes."); return updateInContext('Representante', representante.id, payload); }
       if (!podeCriar) throw new Error("Seu perfil nao permite criar representantes.");
       return createInContext('Representante', payload);

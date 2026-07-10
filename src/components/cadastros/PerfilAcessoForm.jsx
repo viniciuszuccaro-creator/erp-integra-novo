@@ -11,12 +11,15 @@ import { Loader2, Shield, AlertTriangle, XCircle, Trash2, Power, PowerOff } from
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import usePermissions from "@/components/lib/usePermissions";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 
 /**
  * V21.1.2 - WINDOW MODE READY
  */
 export default function PerfilAcessoForm({ perfil, onSubmit, isSubmitting, windowMode = false }) {
   const { canCreate, canEdit, canDelete } = usePermissions();
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const podeCriar = canCreate("Cadastros", "PerfilAcesso") || canCreate("Sistema", "Controle de Acesso") || canCreate("Cadastros", null);
   const podeEditar = canEdit("Cadastros", "PerfilAcesso") || canEdit("Sistema", "Controle de Acesso") || canEdit("Cadastros", null);
   const podeExcluir = canDelete("Cadastros", "PerfilAcesso") || canDelete("Sistema", "Controle de Acesso") || canDelete("Cadastros", null);
@@ -109,8 +112,13 @@ export default function PerfilAcessoForm({ perfil, onSubmit, isSubmitting, windo
       return;
     }
     
+    // TRAVA GLOBAL: verifica unicidade de nome antes de salvar (Regra-Mãe §5c)
+    const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || perfil?.group_id || null;
+    const payload = { ...formData, nome_perfil: formData.nome_perfil || formData.nome || '' };
+    const erroUnicidade = await checkGlobalUniqueness('PerfilAcesso', payload, { groupId, empresaId: null, currentId: perfil?.id, isEdit: !!perfil?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
     // Injeta nome_perfil para compatibilidade com o schema da entidade PerfilAcesso
-    onSubmit({ ...formData, nome_perfil: formData.nome_perfil || formData.nome || '' });
+    onSubmit(payload);
   };
 
   const { confirm, ConfirmDialog: ConfirmExcluirDialog } = useConfirm();

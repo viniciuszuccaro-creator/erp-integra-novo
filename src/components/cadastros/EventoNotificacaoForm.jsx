@@ -8,8 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Bell, Save } from "lucide-react";
 import { toast } from "sonner";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 
 export default function EventoNotificacaoForm({ evento, onSubmit, isSubmitting, windowMode = false }) {
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const [formData, setFormData] = useState(evento || {
     nome_evento: "",
     tipo_evento: "Sistema",
@@ -27,7 +30,11 @@ export default function EventoNotificacaoForm({ evento, onSubmit, isSubmitting, 
       toast.error('Nome do evento é obrigatório');
       return;
     }
-    await onSubmit(formData);
+    const payload = { ...formData, nome: formData.nome_evento };
+    const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+    const erroUnicidade = await checkGlobalUniqueness('EventoNotificacao', payload, { groupId, empresaId: empresaAtual?.id, currentId: evento?.id, isEdit: !!evento?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    await onSubmit(payload);
   };
 
   const form = (

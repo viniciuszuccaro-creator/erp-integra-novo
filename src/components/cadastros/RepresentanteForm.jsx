@@ -6,11 +6,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Briefcase } from "lucide-react";
 import { toast } from "sonner";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 
 /**
  * V21.1.2 - WINDOW MODE READY
  */
 export default function RepresentanteForm({ representante, onSubmit, isSubmitting, windowMode = false }) {
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const [formData, setFormData] = useState(representante || {
     nome: '',
     cpf_cnpj: '',
@@ -23,12 +26,15 @@ export default function RepresentanteForm({ representante, onSubmit, isSubmittin
     ativo: true
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nome) {
       toast.error('Preencha o nome do representante');
       return;
     }
+    const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+    const erroUnicidade = await checkGlobalUniqueness('Representante', formData, { groupId, empresaId: empresaAtual?.id, currentId: representante?.id, isEdit: !!representante?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
     onSubmit(formData);
   };
 

@@ -8,9 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Smartphone, Save } from "lucide-react";
 import { toast } from "sonner";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 
 export default function ChatbotCanalForm({ chatbotCanal, onSubmit, isSubmitting, windowMode = false }) {
   const dadosIniciais = chatbotCanal;
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const [formData, setFormData] = useState(dadosIniciais || {
     nome_canal: "",
     tipo_canal: "WhatsApp",
@@ -29,7 +32,11 @@ export default function ChatbotCanalForm({ chatbotCanal, onSubmit, isSubmitting,
       toast.error('Nome do canal é obrigatório');
       return;
     }
-    await onSubmit({ ...formData, nome: formData.nome_canal });
+    const payload = { ...formData, nome: formData.nome_canal };
+    const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+    const erroUnicidade = await checkGlobalUniqueness('ChatbotCanal', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    await onSubmit(payload);
   };
 
   const form = (

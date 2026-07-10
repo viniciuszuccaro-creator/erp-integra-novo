@@ -13,6 +13,8 @@ import { CreditCard, Globe, Lock, BarChart3, Settings } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
+import { toast } from "sonner";
 import GatewayTaxasTab from "./gateway-pagamento/GatewayTaxasTab";
 import GatewayConfigTab from "./gateway-pagamento/GatewayConfigTab";
 
@@ -56,12 +58,13 @@ export default function GatewayPagamentoForm({ gateway, windowMode = false, onSu
     formData.tipos_pagamento_suportados || ["PIX", "Boleto"]
   );
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit?.({
-      ...formData,
-      tipos_pagamento_suportados: tiposSelecionados
-    });
+    const payload = { ...formData, tipos_pagamento_suportados: tiposSelecionados };
+    const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+    const erroUnicidade = await checkGlobalUniqueness('GatewayPagamento', payload, { groupId, empresaId: empresaAtual?.id, currentId: gateway?.id, isEdit: !!gateway?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    onSubmit?.(payload);
   };
 
   const tiposPagamentoDisponiveis = [

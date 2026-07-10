@@ -8,8 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Clock, Save } from "lucide-react";
 import { toast } from "sonner";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 
 export default function JobAgendadoForm({ jobAgendado, onSubmit, isSubmitting, windowMode = false }) {
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const [formData, setFormData] = useState(jobAgendado || {
     nome_job: "",
     tipo_job: "IA_Fiscal",
@@ -27,7 +30,11 @@ export default function JobAgendadoForm({ jobAgendado, onSubmit, isSubmitting, w
       toast.error('Nome do job é obrigatório');
       return;
     }
-    await onSubmit({ ...formData, nome: formData.nome_job });
+    const payload = { ...formData, nome: formData.nome_job };
+    const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+    const erroUnicidade = await checkGlobalUniqueness('JobAgendado', payload, { groupId, empresaId: empresaAtual?.id, currentId: jobAgendado?.id, isEdit: !!jobAgendado?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    await onSubmit(payload);
   };
 
   const form = (

@@ -8,8 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Zap, Save } from "lucide-react";
 import { toast } from "sonner";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 
 export default function ApiExternaForm({ apiExterna, onSubmit, isSubmitting, windowMode = false }) {
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const [formData, setFormData] = useState(apiExterna || {
     nome_integracao: "",
     tipo_api: "REST",
@@ -29,7 +32,11 @@ export default function ApiExternaForm({ apiExterna, onSubmit, isSubmitting, win
       toast.error('Nome da integração é obrigatório');
       return;
     }
-    await onSubmit({ ...formData, nome: formData.nome_integracao });
+    const payload = { ...formData, nome: formData.nome_integracao };
+    const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+    const erroUnicidade = await checkGlobalUniqueness('ApiExterna', payload, { groupId, empresaId: empresaAtual?.id, currentId: apiExterna?.id, isEdit: !!apiExterna?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    await onSubmit(payload);
   };
 
   const form = (

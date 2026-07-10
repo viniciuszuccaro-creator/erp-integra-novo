@@ -8,8 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MessageCircle, Save, Plus, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 
 export default function ChatbotIntentForm({ chatbotIntent, onSubmit, isSubmitting, windowMode = false }) {
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const [formData, setFormData] = useState(chatbotIntent || {
     nome_intent: "",
     descricao: "",
@@ -46,7 +49,11 @@ export default function ChatbotIntentForm({ chatbotIntent, onSubmit, isSubmittin
       toast.error('Nome da intent é obrigatório');
       return;
     }
-    await onSubmit({ ...formData, nome: formData.nome_intent });
+    const payload = { ...formData, nome: formData.nome_intent };
+    const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+    const erroUnicidade = await checkGlobalUniqueness('ChatbotIntent', payload, { groupId, empresaId: empresaAtual?.id, currentId: chatbotIntent?.id, isEdit: !!chatbotIntent?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    await onSubmit(payload);
   };
 
   const form = (

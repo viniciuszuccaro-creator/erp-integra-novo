@@ -6,9 +6,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Webhook as WebhookIcon } from 'lucide-react';
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
+import { toast } from "sonner";
 
 export default function WebhookForm({ webhook, onSubmit, windowMode = false }) {
   const dadosIniciais = webhook;
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const [formData, setFormData] = useState(dadosIniciais || {
     nome_webhook: '',
     evento_gatilho: 'pedido_aprovado',
@@ -18,9 +22,13 @@ export default function WebhookForm({ webhook, onSubmit, windowMode = false }) {
     ativo: true
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit({ ...formData, nome: formData.nome_webhook || formData.nome || '' });
+    const payload = { ...formData, nome: formData.nome_webhook || formData.nome || '' };
+    const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+    const erroUnicidade = await checkGlobalUniqueness('Webhook', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    onSubmit(payload);
   };
 
   const content = (

@@ -49,7 +49,8 @@ export default function FormaPagamentoForm({ forma, onSubmit, isSubmitting, wind
       toast.error("Sem permissão para criar formas de pagamento.");
       return;
     }
-    onSubmit(formData);
+    try { await onSubmit(formData); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar forma de pagamento.'); }
   };
 
   const { confirm, ConfirmDialog: ConfirmExcluirDialog } = useConfirm();
@@ -62,7 +63,8 @@ export default function FormaPagamentoForm({ forma, onSubmit, isSubmitting, wind
     const ok = await confirm({ title: 'Confirmar Exclusão', description: `Tem certeza que deseja excluir a forma de pagamento "${formData.descricao}"? Esta ação não pode ser desfeita.`, confirmText: 'Excluir' });
     if (!ok) return;
     if (onSubmit) {
-      onSubmit({ ...formData, _action: 'delete' });
+      try { await onSubmit({ ...formData, _action: 'delete' }); }
+      catch (e) { toast.error(e?.message || 'Erro ao excluir forma de pagamento.'); }
     }
   };
 

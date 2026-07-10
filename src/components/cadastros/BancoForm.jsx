@@ -67,10 +67,8 @@ export default function BancoForm({ banco, item, data, initialData, defaultValue
     const erroUnicidade = await checkGlobalUniqueness('Banco', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
     if (onSubmit) {
-      onSubmit(payload);
-    } else {
-      if (onSave) onSave();
-      if (onClose) onClose();
+      try { await onSubmit(payload); }
+      catch (e) { toast.error(e?.message || 'Erro ao salvar banco.'); }
     }
   };
 

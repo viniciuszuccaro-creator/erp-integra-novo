@@ -81,7 +81,8 @@ export default function MotoristaForm({ motorista, item, data, initialData, defa
     };
     const erroUnicidade = await checkGlobalUniqueness('Motorista', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar motorista.'); }
   };
 
   const formContent = (

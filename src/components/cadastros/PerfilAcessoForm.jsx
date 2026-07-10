@@ -118,7 +118,8 @@ export default function PerfilAcessoForm({ perfil, onSubmit, isSubmitting, windo
     const erroUnicidade = await checkGlobalUniqueness('PerfilAcesso', payload, { groupId, empresaId: null, currentId: perfil?.id, isEdit: !!perfil?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
     // Injeta nome_perfil para compatibilidade com o schema da entidade PerfilAcesso
-    onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar perfil de acesso.'); }
   };
 
   const { confirm, ConfirmDialog: ConfirmExcluirDialog } = useConfirm();
@@ -136,7 +137,8 @@ export default function PerfilAcessoForm({ perfil, onSubmit, isSubmitting, windo
     });
     if (!ok) return;
     if (onSubmit) {
-      onSubmit({ ...formData, _action: 'delete' });
+      try { await onSubmit({ ...formData, _action: 'delete' }); }
+      catch (e) { toast.error(e?.message || 'Erro ao excluir perfil de acesso.'); }
     }
   };
 

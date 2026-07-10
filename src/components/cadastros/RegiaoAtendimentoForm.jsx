@@ -38,13 +38,13 @@ export default function RegiaoAtendimentoForm({ regiaoId, regiaoAtendimento, ite
     const payload = { ...formData, group_id: grupoAtual?.id || formData.group_id };
     const erroUnicidade = await checkGlobalUniqueness('RegiaoAtendimento', payload, { groupId: grupoAtual?.id, empresaId: empresaAtual?.id, currentId: formData?.id, isEdit: !!formData?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    if (onSubmit) { onSubmit(payload); if (onOpenChange) onOpenChange(false); }
-    else { if (onOpenChange) onOpenChange(false); if (onSave) onSave(); if (onClose) onClose(); }
+    if (onSubmit) { try { await onSubmit(payload); } catch (e) { toast.error(e?.message || 'Erro ao salvar região.'); return; } }
+    if (onOpenChange) onOpenChange(false);
   };
 
   const handleExcluir = async () => {
     const ok = await confirm({ title: "Confirmar Exclusão", description: "Tem certeza que deseja excluir esta região? Esta ação não pode ser desfeita.", confirmText: "Excluir" });
-    if (ok) { onSubmit({ ...formData, _delete: true }); onOpenChange(false); }
+    if (ok) { try { await onSubmit({ ...formData, _delete: true }); } catch (e) { toast.error(e?.message || 'Erro ao excluir região.'); return; } if (onOpenChange) onOpenChange(false); }
   };
 
   const handleAlternarStatus = () => setFormData({ ...formData, ativo: !formData.ativo });

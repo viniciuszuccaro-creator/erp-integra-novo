@@ -56,10 +56,8 @@ export default function TipoDespesaForm({ tipo, tipoDespesa, item, data, onSubmi
     const erroUnicidade = await checkGlobalUniqueness('TipoDespesa', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
     if (onSubmit) {
-      onSubmit(payload);
-    } else {
-      if (onSave) onSave();
-      if (onClose) onClose();
+      try { await onSubmit(payload); }
+      catch (e) { toast.error(e?.message || 'Erro ao salvar tipo de despesa.'); }
     }
   };
 

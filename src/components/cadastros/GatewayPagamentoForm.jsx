@@ -64,7 +64,8 @@ export default function GatewayPagamentoForm({ gateway, windowMode = false, onSu
     const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
     const erroUnicidade = await checkGlobalUniqueness('GatewayPagamento', payload, { groupId, empresaId: empresaAtual?.id, currentId: gateway?.id, isEdit: !!gateway?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit?.(payload);
+    try { await onSubmit?.(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar gateway de pagamento.'); }
   };
 
   const tiposPagamentoDisponiveis = [

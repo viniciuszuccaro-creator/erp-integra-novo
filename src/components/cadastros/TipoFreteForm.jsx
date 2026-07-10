@@ -55,7 +55,8 @@ export default function TipoFreteForm({ tipo, tipoFrete, onSubmit, isSubmitting,
     };
     const erroUnicidade = await checkGlobalUniqueness('TipoFrete', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar tipo de frete.'); }
   };
 
   const formContent = (

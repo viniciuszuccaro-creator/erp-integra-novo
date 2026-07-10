@@ -82,7 +82,8 @@ export default function EmpresaForm({ empresa, onSubmit, isSubmitting, windowMod
     const payload = { ...formData, nome: formData.razao_social || formData.nome_fantasia || formData.nome || '' };
     const erroUnicidade = await checkGlobalUniqueness('Empresa', payload, { groupId: formData.group_id, empresaId: empresa?.id, currentId: empresa?.id, isEdit: !!empresa?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar empresa.'); }
   };
 
   const formContent = (

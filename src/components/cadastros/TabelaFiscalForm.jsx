@@ -62,7 +62,8 @@ export default function TabelaFiscalForm({ tabela, windowMode = false, onSubmit,
     const erroUnicidade = await checkGlobalUniqueness('TabelaFiscal', payload, { groupId, empresaId: empresaAtual?.id, currentId: tabela?.id, isEdit: !!tabela?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
     if (onSubmit) {
-      onSubmit(payload);
+      try { await onSubmit(payload); }
+      catch (e) { toast.error(e?.message || 'Erro ao salvar tabela fiscal.'); }
     }
   };
 

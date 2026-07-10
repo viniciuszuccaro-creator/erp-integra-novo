@@ -28,7 +28,8 @@ export default function WebhookForm({ webhook, onSubmit, windowMode = false }) {
     const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
     const erroUnicidade = await checkGlobalUniqueness('Webhook', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar webhook.'); }
   };
 
   const content = (

@@ -54,7 +54,8 @@ export default function TurnoForm({ turno, item, data, initialData, defaultValue
     const payload = { ...formData, group_id: groupId || formData.group_id, nome: formData.nome_turno };
     const erroUnicidade = await checkGlobalUniqueness('Turno', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar turno.'); }
   };
 
   const formContent = (

@@ -26,10 +26,8 @@ export default function SegmentoClienteForm({ segmento, segmentoCliente, item, d
     const erroUnicidade = await checkGlobalUniqueness('SegmentoCliente', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
     if (onSubmit) {
-      onSubmit(payload);
-    } else {
-      if (onSave) onSave();
-      if (onClose) onClose();
+      try { await onSubmit(payload); }
+      catch (e) { toast.error(e?.message || 'Erro ao salvar segmento.'); }
     }
   };
 

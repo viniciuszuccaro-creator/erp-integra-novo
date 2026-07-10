@@ -69,7 +69,8 @@ export default function CentroOperacaoForm({ centro, onSubmit, isSubmitting }) {
     const payload = { ...formData, group_id: grupoAtual?.id || formData.group_id, nome: formData.nome_centro };
     const erroUnicidade = await checkGlobalUniqueness('CentroOperacao', payload, { groupId: grupoAtual?.id, empresaId: empresaAtual?.id, currentId: centro?.id, isEdit: !!centro?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar centro de operação.'); }
   };
 
   return (

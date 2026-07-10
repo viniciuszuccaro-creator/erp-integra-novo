@@ -59,8 +59,8 @@ export default function SetorAtividadeForm({ setor, setorAtividade, item, data, 
     };
     const erroUnicidade = await checkGlobalUniqueness('SetorAtividade', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(payload);
-    if (typeof closeSelf === 'function') closeSelf();
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar setor de atividade.'); }
   };
 
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
@@ -73,11 +73,11 @@ export default function SetorAtividadeForm({ setor, setorAtividade, item, data, 
     setConfirmandoExclusao(true);
   };
 
-  const confirmarExclusaoDefinitiva = () => {
+  const confirmarExclusaoDefinitiva = async () => {
     setConfirmandoExclusao(false);
     if (onSubmit) {
-      onSubmit({ ...formData, _action: 'delete' });
-    if (typeof closeSelf === 'function') closeSelf();
+      try { await onSubmit({ ...formData, _action: 'delete' }); }
+      catch (e) { toast.error(e?.message || 'Erro ao excluir setor de atividade.'); }
     }
   };
 

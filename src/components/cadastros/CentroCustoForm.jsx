@@ -60,10 +60,8 @@ export default function CentroCustoForm({ centroCusto, item, data, initialData, 
     const erroUnicidade = await checkGlobalUniqueness('CentroCusto', dataToSubmit, { groupId, empresaId: empresaAtual?.id, currentId: dadosCentroCusto?.id, isEdit: !!dadosCentroCusto?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
     if (onSubmit) {
-      onSubmit(dataToSubmit);
-    } else {
-      if (onSave) onSave();
-      if (onClose) onClose();
+      try { await onSubmit(dataToSubmit); }
+      catch (e) { toast.error(e?.message || 'Erro ao salvar centro de custo.'); }
     }
   };
 
@@ -77,10 +75,11 @@ export default function CentroCustoForm({ centroCusto, item, data, initialData, 
     setConfirmandoExclusao(true);
   };
 
-  const confirmarExclusaoDefinitiva = () => {
+  const confirmarExclusaoDefinitiva = async () => {
     setConfirmandoExclusao(false);
     if (onSubmit) {
-      onSubmit({ ...formData, _action: 'delete' });
+      try { await onSubmit({ ...formData, _action: 'delete' }); }
+      catch (e) { toast.error(e?.message || 'Erro ao excluir centro de custo.'); }
     }
   };
 

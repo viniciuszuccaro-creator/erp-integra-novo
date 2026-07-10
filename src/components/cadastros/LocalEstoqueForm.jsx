@@ -66,7 +66,8 @@ export default function LocalEstoqueForm({
     const erroUnicidade = await checkGlobalUniqueness('LocalEstoque', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
     if (onSubmit) {
-      onSubmit(payload);
+      try { await onSubmit(payload); }
+      catch (e) { toast.error(e?.message || 'Erro ao salvar local de estoque.'); }
     }
   };
 

@@ -30,7 +30,8 @@ export default function ModeloDocumentoForm({ modelo, modeloDocumento, onSubmit,
     const payload = { ...formData, group_id: groupId || formData.group_id, nome: formData.nome_modelo || formData.nome || '' };
     const erroUnicidade = await checkGlobalUniqueness('ModeloDocumento', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar modelo de documento.'); }
   };
 
   const content = (

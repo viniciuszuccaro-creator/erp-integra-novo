@@ -51,10 +51,11 @@ export default function DepartamentoForm({ departamento, item, data, initialData
     setConfirmandoExclusao(true);
   };
 
-  const confirmarExclusaoDefinitiva = () => {
+  const confirmarExclusaoDefinitiva = async () => {
     setConfirmandoExclusao(false);
     if (onSubmit) {
-      onSubmit({ ...formData, _action: 'delete' });
+      try { await onSubmit({ ...formData, _action: 'delete' }); }
+      catch (e) { toast.error(e?.message || 'Erro ao excluir departamento.'); }
     }
   };
 

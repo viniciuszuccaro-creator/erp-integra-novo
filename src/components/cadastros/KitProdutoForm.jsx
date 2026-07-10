@@ -49,7 +49,8 @@ export default function KitProdutoForm({ kit, kitProduto, onSubmit, windowMode =
     };
     const erroUnicidade = await checkGlobalUniqueness('KitProduto', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar kit de produtos.'); }
   };
 
   const adicionarItem = () => {

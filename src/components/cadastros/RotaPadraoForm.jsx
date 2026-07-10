@@ -47,7 +47,8 @@ export default function RotaPadraoForm({ rota, rotaPadrao, onSubmit, windowMode 
     };
     const erroUnicidade = await checkGlobalUniqueness('RotaPadrao', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar rota padrão.'); }
   };
 
   const content = (

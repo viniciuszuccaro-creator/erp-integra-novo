@@ -44,7 +44,8 @@ export default function CargoForm({ cargo, item, data, initialData, defaultValue
     const payload = { ...formData, group_id: groupId || formData.group_id, nome: formData.nome_cargo };
     const erroUnicidade = await checkGlobalUniqueness('Cargo', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar cargo.'); }
   };
 
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
@@ -53,10 +54,11 @@ export default function CargoForm({ cargo, item, data, initialData, defaultValue
     setConfirmandoExclusao(true);
   };
 
-  const confirmarExclusaoDefinitiva = () => {
+  const confirmarExclusaoDefinitiva = async () => {
     setConfirmandoExclusao(false);
     if (onSubmit) {
-      onSubmit({ ...formData, _action: 'delete' });
+      try { await onSubmit({ ...formData, _action: 'delete' }); }
+      catch (e) { toast.error(e?.message || 'Erro ao excluir cargo.'); }
     }
   };
 

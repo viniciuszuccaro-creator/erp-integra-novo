@@ -64,8 +64,8 @@ export default function GrupoProdutoForm({ grupo, grupoProduto, item, data, init
     };
     const erroUnicidade = await checkGlobalUniqueness('GrupoProduto', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(payload);
-    if (typeof closeSelf === 'function') closeSelf();
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar grupo de produto.'); }
   };
 
   const { confirm, ConfirmDialog: ConfirmExcluirDialog } = useConfirm();
@@ -78,8 +78,8 @@ export default function GrupoProdutoForm({ grupo, grupoProduto, item, data, init
     const ok = await confirm({ title: 'Confirmar Exclusão', description: `Tem certeza que deseja excluir o grupo "${formData.nome_grupo}"? Esta ação não pode ser desfeita.`, confirmText: 'Excluir' });
     if (!ok) return;
     if (onSubmit) {
-      onSubmit({ ...formData, _action: 'delete' });
-    if (typeof closeSelf === 'function') closeSelf();
+      try { await onSubmit({ ...formData, _action: 'delete' }); }
+      catch (e) { toast.error(e?.message || 'Erro ao excluir grupo de produto.'); }
     }
   };
 

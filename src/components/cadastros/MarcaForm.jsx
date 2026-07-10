@@ -65,7 +65,8 @@ export default function MarcaForm({ marca, item, data, initialData, defaultValue
     };
     const erroUnicidade = await checkGlobalUniqueness('Marca', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar marca.'); }
   };
 
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
@@ -78,10 +79,11 @@ export default function MarcaForm({ marca, item, data, initialData, defaultValue
     setConfirmandoExclusao(true);
   };
 
-  const confirmarExclusaoDefinitiva = () => {
+  const confirmarExclusaoDefinitiva = async () => {
     setConfirmandoExclusao(false);
     if (onSubmit) {
-      onSubmit({ ...formData, _action: 'delete' });
+      try { await onSubmit({ ...formData, _action: 'delete' }); }
+      catch (e) { toast.error(e?.message || 'Erro ao excluir marca.'); }
     }
   };
 

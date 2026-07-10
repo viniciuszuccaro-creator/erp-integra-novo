@@ -60,7 +60,8 @@ export default function ServicoForm({ servico, onSubmit, isSubmitting, windowMod
     };
     const erroUnicidade = await checkGlobalUniqueness('Servico', payload, { groupId, empresaId: empresaAtual?.id, currentId: dadosIniciais?.id, isEdit: !!dadosIniciais?.id });
     if (erroUnicidade) { toast.error(erroUnicidade); return; }
-    onSubmit(payload);
+    try { await onSubmit(payload); }
+    catch (e) { toast.error(e?.message || 'Erro ao salvar serviço.'); }
   };
 
   const formContent = (

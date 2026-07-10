@@ -10,6 +10,7 @@ import { FileText, Save, Upload } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import useContextoVisual from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 
 export default function ConfiguracaoNFeForm({ config, onSubmit, isSubmitting, windowMode = false, empresaId, groupId, scope: scopeProp }) {
   const { toast } = useToast();
@@ -51,6 +52,9 @@ export default function ConfiguracaoNFeForm({ config, onSubmit, isSubmitting, wi
     }
 
     const payload = { ...formData, nome: formData.nome || (formData.provedor + ' - ' + formData.ambiente), ...scope };
+    // TRAVA GLOBAL: verifica unicidade antes de salvar (Regra-Mãe §5c)
+    const erroUnicidade = await checkGlobalUniqueness('ConfiguracaoNFe', payload, { groupId: grupoIdAtual, empresaId: empresaIdAtual, currentId: config?.id, isEdit: !!config?.id });
+    if (erroUnicidade) { toast({ title: "⚠️ Duplicidade Detectada", description: erroUnicidade, variant: "destructive" }); return; }
 
     if (onSubmit) {
       await onSubmit(payload);

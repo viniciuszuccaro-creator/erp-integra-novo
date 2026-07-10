@@ -6,8 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Loader2, DollarSign } from "lucide-react";
 import { toast } from "sonner";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 
 export default function TabelaPrecoForm({ tabela, onSubmit, isSubmitting }) {
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const [formData, setFormData] = useState(tabela || {
     nome: '',
     descricao: '',
@@ -17,12 +20,15 @@ export default function TabelaPrecoForm({ tabela, onSubmit, isSubmitting }) {
     ativo: true
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.nome || !formData.tipo || !formData.data_inicio) {
       toast.error('Preencha os campos obrigatórios');
       return;
     }
+    const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+    const erroUnicidade = await checkGlobalUniqueness('TabelaPreco', formData, { groupId, empresaId: empresaAtual?.id, currentId: tabela?.id, isEdit: !!tabela?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
     onSubmit(formData);
   };
 

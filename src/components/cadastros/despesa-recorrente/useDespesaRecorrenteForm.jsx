@@ -1,6 +1,7 @@
 import { useState } from "react";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
 
 const DEFAULT_FORM = {
@@ -80,10 +81,14 @@ export default function useDespesaRecorrenteForm(config, onSubmit) {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    onSubmit?.({ ...formData, nome: formData.descricao || formData.tipo_despesa_nome || '' });
+    const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+    const payload = { ...formData, nome: formData.descricao || formData.tipo_despesa_nome || '' };
+    const erroUnicidade = await checkGlobalUniqueness('ConfiguracaoDespesaRecorrente', payload, { groupId, empresaId: empresaAtual?.id, currentId: config?.id, isEdit: !!config?.id });
+    if (erroUnicidade) { toast.error(erroUnicidade); return; }
+    onSubmit?.(payload);
   };
 
   return {

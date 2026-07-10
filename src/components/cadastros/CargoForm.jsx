@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Briefcase, Trash2, Power, PowerOff, AlertTriangle } from "lucide-react";
+import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
@@ -16,8 +17,12 @@ import { toast } from "sonner";
  */
 export default function CargoForm({ cargo, item, data, initialData, defaultValues, onSubmit, isSubmitting, windowMode = false }) {
   const dadosIniciais = item || data || initialData || defaultValues || cargo;
+  const { hasPermission } = usePermissions();
   const { empresaAtual, grupoAtual } = useContextoVisual();
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || dadosIniciais?.group_id || null;
+  const podeCriar = hasPermission?.("Cadastros.Cargo.criar") || hasPermission?.("RH.Cargo.criar") || hasPermission?.("Cadastros.Colaborador.criar");
+  const podeEditar = hasPermission?.("Cadastros.Cargo.editar") || hasPermission?.("RH.Cargo.editar") || hasPermission?.("Cadastros.Colaborador.editar");
+  const podeSalvar = dadosIniciais?.id ? podeEditar : podeCriar;
   const [formData, setFormData] = useState(dadosIniciais || {
     nome_cargo: '',
     descricao: '',
@@ -164,7 +169,7 @@ export default function CargoForm({ cargo, item, data, initialData, defaultValue
             </Button>
           </>
         )}
-        <Button type="submit" disabled={isSubmitting} data-permission="Cadastros.Cargo.salvar">
+        <Button type="submit" disabled={isSubmitting || !podeSalvar} data-permission="Cadastros.Cargo.salvar">
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {dadosIniciais ? 'Atualizar' : 'Criar Cargo'}
         </Button>

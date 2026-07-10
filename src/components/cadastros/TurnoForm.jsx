@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { checkGlobalUniqueness } from "@/components/lib/sanitizeOnWrite";
 import { toast } from "sonner";
@@ -14,8 +15,12 @@ import { toast } from "sonner";
  */
 export default function TurnoForm({ turno, item, data, initialData, defaultValues, onSubmit, isSubmitting, windowMode = false }) {
   const dadosIniciais = item || data || initialData || defaultValues || turno;
+  const { hasPermission } = usePermissions();
   const { empresaAtual, grupoAtual } = useContextoVisual();
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || dadosIniciais?.group_id || null;
+  const podeCriar = hasPermission?.("Cadastros.Turno.criar") || hasPermission?.("RH.Turno.criar") || hasPermission?.("Cadastros.Colaborador.criar");
+  const podeEditar = hasPermission?.("Cadastros.Turno.editar") || hasPermission?.("RH.Turno.editar") || hasPermission?.("Cadastros.Colaborador.editar");
+  const podeSalvar = dadosIniciais?.id ? podeEditar : podeCriar;
   const [formData, setFormData] = useState(dadosIniciais || {
     nome_turno: '',
     horario_inicio: '08:00',
@@ -127,7 +132,7 @@ export default function TurnoForm({ turno, item, data, initialData, defaultValue
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="submit" data-permission="RH.Turno.salvar" disabled={isSubmitting}>
+        <Button type="submit" data-permission="RH.Turno.salvar" disabled={isSubmitting || !podeSalvar}>
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {dadosIniciais ? 'Atualizar' : 'Criar Turno'}
         </Button>

@@ -146,13 +146,17 @@ export default function useTabelaPrecoForm({ tabela, onSubmit }) {
         groupId, empresaId: empresaAtual?.id, currentId: tabela?.id, isEdit: !!tabela?.id,
       });
       if (erroUnicidade) { toast.error(erroUnicidade); setSalvando(false); return; }
-      // Gera código numérico crescente automaticamente (apenas para novo registro sem código)
+      // Regra-Mãe §5c: código sequencial SEMPRE auto-gerado para novos registros
       let codigoFinal = formData.codigo;
-      if (!tabela?.id && !codigoFinal) {
+      if (!tabela?.id) {
         try {
           const scopeFilter = groupId ? { group_id: groupId } : (empresaAtual?.id ? { empresa_id: empresaAtual.id } : {});
-          const todasTabelas = await base44.entities.TabelaPreco.filter(scopeFilter, '-created_date', 999);
-          const maxCodigo = (todasTabelas || []).map(t => t.codigo).filter(c => c && /^\d+$/.test(String(c))).map(c => parseInt(String(c))).sort((a, b) => b - a)[0] || 0;
+          const res = await base44.functions.invoke('entityListSorted', {
+            entityName: 'TabelaPreco', filter: scopeFilter,
+            sortField: 'codigo', sortDirection: 'desc', limit: 1,
+          });
+          const last = res?.data?.[0];
+          const maxCodigo = last ? (parseInt(String(last.codigo).replace(/\D/g, ''), 10) || 0) : 0;
           codigoFinal = String(maxCodigo + 1).padStart(3, '0');
         } catch { codigoFinal = String(Date.now()).slice(-6); }
       }

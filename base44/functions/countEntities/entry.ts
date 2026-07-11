@@ -82,15 +82,13 @@ async function buildFilter(base44, entityName, rawFilter) {
   // Contexto de empresa específica
   if (empresaId && !groupId) {
     if (EXPAND_SET.has(entityName)) {
-      // Conta apenas registros que pertencem a esta empresa (campo principal)
-      // NÃO inclui empresa_id: null (legados) — isso inflaria a contagem
       const conds = [{ [campo]: empresaId }];
-      // Inclui registros compartilhados com esta empresa
       conds.push({ empresas_compartilhadas_ids: { $in: [empresaId] } });
       if (campo !== 'empresa_id') conds.push({ empresa_id: empresaId });
+      // Cliente: inclui empresa_dona_id (front-end countEntity buildEntityFilter)
+      if (entityName === 'Cliente') conds.push({ empresa_dona_id: empresaId });
       return { $or: conds };
     }
-    // Demais entidades com empresa_id
     return { [campo]: empresaId };
   }
 
@@ -102,8 +100,18 @@ async function buildFilter(base44, entityName, rawFilter) {
 
       if (EXPAND_SET.has(entityName)) {
         const conds = [{ group_id: groupId }];
-        if (ids.length > 0) conds.push({ [campo]: { $in: ids } });
-        if (campo !== 'empresa_id' && ids.length > 0) conds.push({ empresa_id: { $in: ids } });
+        if (ids.length > 0) {
+          conds.push({ [campo]: { $in: ids } });
+          if (campo !== 'empresa_id') conds.push({ empresa_id: { $in: ids } });
+          // Cliente: inclui empresa_dona_id e empresas_compartilhadas_ids (igual front-end)
+          if (entityName === 'Cliente') {
+            conds.push({ empresa_dona_id: { $in: ids } }, { empresas_compartilhadas_ids: { $in: ids } });
+          }
+          // Fornecedor/Transportadora: inclui empresas_compartilhadas_ids
+          if (entityName === 'Fornecedor' || entityName === 'Transportadora') {
+            conds.push({ empresas_compartilhadas_ids: { $in: ids } });
+          }
+        }
         return { $or: conds };
       }
 

@@ -6,6 +6,10 @@
       "type": "string",
       "description": "Nome do grupo empresarial"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo num\u00e9rico sequencial \u00fanico"
+    },
     "cnpj_grupo": {
       "type": "string",
       "description": "CNPJ do grupo (quando existir)"

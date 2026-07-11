@@ -10,6 +10,10 @@
       "type": "string",
       "description": "ID da empresa"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo num\u00e9rico sequencial \u00fanico"
+    },
     "nome_job": {
       "type": "string",
       "description": "Nome do job"

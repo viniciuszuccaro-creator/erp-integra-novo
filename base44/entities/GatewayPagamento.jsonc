@@ -10,6 +10,10 @@
       "type": "string",
       "description": "Empresa propriet\u00e1ria da configura\u00e7\u00e3o"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo num\u00e9rico sequencial \u00fanico"
+    },
     "nome": {
       "type": "string",
       "description": "Nome do Gateway (ex: Pagar.me Principal)"

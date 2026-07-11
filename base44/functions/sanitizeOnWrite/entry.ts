@@ -77,14 +77,35 @@ Deno.serve(async (req) => {
           const cnpjRaw = data?.cnpj ? String(data.cnpj).replace(/\D/g, '') : '';
           const cpfRaw = data?.cpf ? String(data.cpf).replace(/\D/g, '') : '';
           const placa = data?.placa ? String(data.placa).toUpperCase().trim() : '';
-          const codigo = String(data?.codigo || data?.codigo_banco || data?.sigla || '').toLowerCase().trim();
-          const nomeRaw = String(data?.nome || data?.nome_completo || data?.razao_social || data?.nome_fantasia ||
-            data?.descricao || data?.nome_marca || data?.nome_segmento || data?.nome_regiao ||
-            data?.nome_perfil || data?.nome_rota || data?.nome_banco || data?.nome_kit ||
-            data?.nome_grupo || data?.nome_setor || data?.nome_canal || data?.nome_intent ||
-            data?.nome_job || data?.nome_webhook || data?.nome_api || data?.nome_gateway ||
-            data?.nome_conta || data?.nome_cargo || data?.nome_modelo || data?.nome_condicao ||
-            data?.nome_turno || data?.nome_departamento || data?.nome_rota || data?.nome_regra || '').toLowerCase().trim();
+          // Mapeamento entidade → campo de código único (Regra-Mãe §5c)
+          const CODE_FIELD_MAP = {
+            Banco: 'codigo_banco', Servico: 'codigo_servico', KitProduto: 'codigo_kit',
+            OperadorCaixa: 'codigo_operador',
+          };
+          const codeField = CODE_FIELD_MAP[event.entity_name] || 'codigo';
+          const codigo = String(data?.[codeField] || '').toLowerCase().trim();
+
+          // Mapeamento entidade → campo de nome/descrição principal
+          const NAME_FIELD_MAP = {
+            Produto: 'descricao', Servico: 'descricao', TabelaPreco: 'nome',
+            UnidadeMedida: 'nome_completo', PlanoDeContas: 'nome_conta', CentroCusto: 'descricao',
+            Banco: 'nome_banco', Veiculo: 'placa', ModeloDocumento: 'nome_modelo',
+            Marca: 'nome_marca', SegmentoCliente: 'nome_segmento', RegiaoAtendimento: 'nome_regiao',
+            GrupoProduto: 'nome_grupo', KitProduto: 'nome_kit', SetorAtividade: 'nome',
+            PerfilAcesso: 'nome_perfil', Cargo: 'nome_cargo', Departamento: 'nome_departamento',
+            Turno: 'nome_turno', CondicaoComercial: 'nome_condicao', Empresa: 'razao_social',
+            GrupoEmpresarial: 'nome_do_grupo', TipoFrete: 'nome', LocalEstoque: 'nome',
+            RotaPadrao: 'nome_rota', TipoDespesa: 'nome', MoedaIndice: 'nome',
+            OperadorCaixa: 'usuario_nome', FormaPagamento: 'descricao', TabelaFiscal: 'nome_regra',
+            CentroResultado: 'nome', ConfiguracaoDespesaRecorrente: 'descricao',
+            ApiExterna: 'nome_integracao', ChatbotCanal: 'nome_canal', ChatbotIntent: 'nome_intent',
+            JobAgendado: 'nome_job', Webhook: 'nome_webhook', GatewayPagamento: 'nome',
+            EventoNotificacao: 'nome_evento', ConfiguracaoNFe: 'provedor', CatalogoWeb: 'produto_id',
+            Representante: 'nome', ContatoB2B: 'nome_completo', Motorista: 'nome_completo',
+            Transportadora: 'razao_social', Fornecedor: 'nome', Cliente: 'nome', Colaborador: 'nome_completo',
+          };
+          const nameField = NAME_FIELD_MAP[event.entity_name] || 'nome';
+          const nomeRaw = String(data?.[nameField] || '').toLowerCase().trim();
 
           // Constrói filtro OR para buscar duplicatas por documento/placa
           const orConditions = [];
@@ -101,19 +122,16 @@ Deno.serve(async (req) => {
             existingDup = results.find(r => r.id !== event.entity_id);
           }
 
-          // 2. Busca por código (independente de nome)
+          // 2. Busca por código (usando campo específico da entidade) — Regra-Mãe §5c
           if (!existingDup && codigo) {
-            const results = await api.filter({ codigo: String(data.codigo || data.codigo_banco || data.sigla) }, 'created_date', 10) || [];
+            const results = await api.filter({ [codeField]: String(data[codeField]) }, 'created_date', 10) || [];
             existingDup = results.find(r => r.id !== event.entity_id);
           }
 
           // 3. Busca por nome/descrição exato (case-insensitive) — Regra-Mãe: cadastros únicos
           if (!existingDup && nomeRaw && nomeRaw.length >= 2) {
-            const nomeField = data?.nome ? 'nome' : data?.descricao ? 'descricao' : data?.nome_completo ? 'nome_completo' : data?.razao_social ? 'razao_social' : null;
-            if (nomeField) {
-              const results = await api.filter({ [nomeField]: { $regex: `^${nomeRaw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' } }, 'created_date', 10) || [];
-              existingDup = results.find(r => r.id !== event.entity_id);
-            }
+            const results = await api.filter({ [nameField]: { $regex: `^${nomeRaw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, $options: 'i' } }, 'created_date', 10) || [];
+            existingDup = results.find(r => r.id !== event.entity_id);
           }
 
           if (existingDup) {

@@ -47,7 +47,7 @@ const DESC_FIELDS_BY_ENTITY = {
   TabelaFiscal: ['nome_regra', 'cenario_operacao'],
   CentroResultado: ['nome', 'codigo'],
   ConfiguracaoDespesaRecorrente: ['descricao'],
-  ApiExterna: ['nome_api', 'descricao'],
+  ApiExterna: ['nome_integracao', 'descricao'],
   ChatbotCanal: ['nome_canal', 'descricao'],
   ChatbotIntent: ['nome_intent', 'descricao'],
   JobAgendado: ['nome_job', 'descricao'],

@@ -10,6 +10,10 @@
       "type": "string",
       "description": "Empresa para a qual esta regra fiscal se aplica - OBRIGAT\u00d3RIO"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo num\u00e9rico sequencial \u00fanico"
+    },
     "nome_regra": {
       "type": "string",
       "description": "Nome descritivo da regra fiscal"

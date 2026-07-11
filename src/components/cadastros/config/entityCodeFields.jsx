@@ -20,5 +20,5 @@ export const ENTITY_CODE_FIELD = {
   ChatbotIntent: 'codigo', JobAgendado: 'codigo', Webhook: 'codigo',
   ConfiguracaoNFe: 'codigo', GatewayPagamento: 'codigo', EventoNotificacao: 'codigo',
   Banco: 'codigo_banco', UnidadeMedida: 'codigo', Veiculo: 'codigo', Motorista: 'codigo',
-  Empresa: 'codigo', ContatoB2B: 'codigo',
+  Empresa: 'codigo',
 };

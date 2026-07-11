@@ -10,6 +10,10 @@
       "type": "string",
       "description": "ID da empresa (cliente/fornecedor) a qual este contato pertence"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo \u00fanico do contato"
+    },
     "tipo_vinculo": {
       "type": "string",
       "enum": [

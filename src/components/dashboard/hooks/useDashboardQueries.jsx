@@ -71,6 +71,58 @@ export function useDashboardQueries({ canSeeFinanceiro, canSeeCRM, canSeeComerci
     staleTime: 300000,
   });
 
+  // Contagens precisas via countEntities batch (não limitadas a 80 registros)
+  const { data: cadastroCounts = {} } = useQuery({
+    queryKey: ['dash-cadastro-counts', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
+    queryFn: async () => {
+      if (!hasContextoAtivo) return {};
+      const scope = getFiltroContexto('empresa_id', true);
+      const groupId = scope.group_id;
+      const empresaId = scope.empresa_id;
+
+      // Constrói filtros de contexto para cada entidade
+      const buildFilter = (entityName) => {
+        const orConds = [];
+        if (groupId) orConds.push({ group_id: groupId });
+        if (empresaId) {
+          if (entityName === 'Cliente') {
+            orConds.push({ empresa_id: empresaId }, { empresa_dona_id: empresaId }, { empresas_compartilhadas_ids: { $in: [empresaId] } });
+          } else if (entityName === 'Colaborador') {
+            orConds.push({ empresa_alocada_id: empresaId });
+          } else if (entityName === 'Produto') {
+            orConds.push({ empresa_id: empresaId }, { empresa_dona_id: empresaId }, { empresas_compartilhadas_ids: { $in: [empresaId] } }, { compartilhado_grupo: true });
+          } else {
+            orConds.push({ empresa_id: empresaId });
+          }
+        }
+        return orConds.length ? { $or: orConds } : {};
+      };
+
+      // Contagem total (sem filtro de status)
+      const entitiesPayload = [
+        { entityName: 'Cliente', filter: buildFilter('Cliente') },
+        { entityName: 'Colaborador', filter: buildFilter('Colaborador') },
+        { entityName: 'Produto', filter: { ...buildFilter('Produto'), status: 'Ativo' } },
+        { entityName: 'Fornecedor', filter: buildFilter('Fornecedor') },
+      ];
+
+      try {
+        const res = await base44.functions.invoke("countEntities", { entities: entitiesPayload });
+        const counts = res?.data?.counts || res?.counts || {};
+        return {
+          clientesTotal: counts['Cliente'] || 0,
+          colaboradoresTotal: counts['Colaborador'] || 0,
+          produtosAtivos: counts['Produto'] || 0,
+          fornecedoresTotal: counts['Fornecedor'] || 0,
+        };
+      } catch (_) {
+        return {};
+      }
+    },
+    staleTime: 30000,
+    enabled: Boolean(hasContextoAtivo),
+  });
+
   useEffect(() => {
     if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return;
     const subs = [];
@@ -81,12 +133,20 @@ export function useDashboardQueries({ canSeeFinanceiro, canSeeCRM, canSeeComerci
     add(base44.entities?.Entrega, 'Entrega');
     add(base44.entities?.Produto, 'Produto');
     add(base44.entities?.Cliente, 'Cliente');
+    add(base44.entities?.Colaborador, 'Colaborador');
+    add(base44.entities?.Fornecedor, 'Fornecedor');
     add(base44.entities?.OrdemProducao, 'OrdemProducao');
     add(base44.entities?.NotaFiscal, 'NotaFiscal');
+    // Invalida contagens de cadastro quando entidades mudam
+    const invCad = () => { try { queryClient.invalidateQueries({ queryKey: ['dash-cadastro-counts'], exact: false }); } catch (_) {} };
+    if (base44.entities?.Cliente?.subscribe) subs.push(base44.entities.Cliente.subscribe(invCad));
+    if (base44.entities?.Colaborador?.subscribe) subs.push(base44.entities.Colaborador.subscribe(invCad));
+    if (base44.entities?.Produto?.subscribe) subs.push(base44.entities.Produto.subscribe(invCad));
+    if (base44.entities?.Fornecedor?.subscribe) subs.push(base44.entities.Fornecedor.subscribe(invCad));
     return () => { subs.forEach(u => { try { u && u(); } catch (_) {} }); };
   }, [empresaAtual?.id, grupoAtual?.id, estaNoGrupo]);
 
-  return { pedidos, contasReceber, contasPagar, entregas, colaboradores, produtos, clientes, ordensProducao, notasFiscais, iaConsolidado, loadingAnomIA, ccMetrics, botMetrics, hasContextoAtivo };
+  return { pedidos, contasReceber, contasPagar, entregas, colaboradores, produtos, clientes, ordensProducao, notasFiscais, iaConsolidado, loadingAnomIA, ccMetrics, botMetrics, hasContextoAtivo, cadastroCounts };
 }
 
 export default useDashboardQueries;

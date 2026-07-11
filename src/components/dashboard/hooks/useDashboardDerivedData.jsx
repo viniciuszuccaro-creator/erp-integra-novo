@@ -2,7 +2,7 @@ import { safeArray, safeNumber, safeDate, safeDateKey, isBefore, isBeforeOrEqual
 import { getPedidoItens } from "@/components/dashboard/utils/dashboardOrderItems";
 import { getProdutoEstoqueDisponivel } from "@/components/estoque/utils/estoqueSafeData";
 
-export default function useDashboardDerivedData({ pedidos = [], contasReceber = [], contasPagar = [], entregas = [], ordensProducao = [], colaboradores = [], clientes = [], produtos = [], periodo = "mes" }) {
+export default function useDashboardDerivedData({ pedidos = [], contasReceber = [], contasPagar = [], entregas = [], ordensProducao = [], colaboradores = [], clientes = [], produtos = [], periodo = "mes", cadastroCounts = {} }) {
   pedidos = safeArray(pedidos);
   contasReceber = safeArray(contasReceber);
   contasPagar = safeArray(contasPagar);
@@ -62,8 +62,14 @@ export default function useDashboardDerivedData({ pedidos = [], contasReceber = 
     return getProdutoEstoqueDisponivel(p) <= 0;
   }).length;
 
-  const colaboradoresAtivos = colaboradores.filter((c) => (c.status || 'Ativo') !== 'Inativo' && (c.status || 'Ativo') !== 'Afastado').length;
-  const clientesAtivos = clientes.filter((c) => (c.status || 'Ativo') !== 'Inativo' && (c.status || 'Ativo') !== 'Bloqueado').length;
+  // Usa contagens precisas do countEntities batch quando disponíveis (não limitadas a 80 registros)
+  // Fallback: filtra os registros carregados (limitados a DASHBOARD_LIST_LIMIT)
+  const clientesAtivos = cadastroCounts?.clientesTotal != null
+    ? cadastroCounts.clientesTotal
+    : clientes.filter((c) => (c.status || 'Ativo') !== 'Inativo' && (c.status || 'Ativo') !== 'Bloqueado').length;
+  const colaboradoresAtivos = cadastroCounts?.colaboradoresTotal != null
+    ? cadastroCounts.colaboradoresTotal
+    : colaboradores.filter((c) => (c.status || 'Ativo') !== 'Inativo' && (c.status || 'Ativo') !== 'Afastado').length;
   const taxaConversao = clientesAtivos > 0
     ? ((pedidosPeriodo.filter((p) => p.status !== "Cancelado").length / clientesAtivos) * 100).toFixed(1)
     : 0;

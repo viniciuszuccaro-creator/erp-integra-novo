@@ -44,7 +44,7 @@ export default function Dashboard() {
     canSeeRH, canSeeProducao, canSeeFiscal, periodo, autoRefresh,
     empresaAtual, estaNoGrupo, grupoAtual, getFiltroContexto
   });
-  const { pedidos, contasReceber, contasPagar, entregas, colaboradores, produtos, clientes, ordensProducao, iaConsolidado, loadingAnomIA, ccMetrics, botMetrics } = queries;
+  const { pedidos, contasReceber, contasPagar, entregas, colaboradores, produtos, clientes, ordensProducao, iaConsolidado, loadingAnomIA, ccMetrics, botMetrics, cadastroCounts } = queries;
 
   const {
     pedidosPeriodo, totalVendas, ticketMedio, receitasPendentes, despesasPendentes,
@@ -53,13 +53,15 @@ export default function Dashboard() {
     aproveitamentoBarra, taxaInadimplencia, valorVencido, dadosVendasStatus,
     vendasUltimos30Dias, fluxo7Dias, topProdutos, vendasPorMesData, top5ClientesData,
     statusPedidosDataAll, fluxoCaixaMensalData,
-  } = useDashboardDerivedData({ pedidos, contasReceber, contasPagar, entregas, ordensProducao, colaboradores, clientes, produtos, periodo });
+  } = useDashboardDerivedData({ pedidos, contasReceber, contasPagar, entregas, ordensProducao, colaboradores, clientes, produtos, periodo, cadastroCounts });
 
   const pedidosRecentes = (pedidos || []).slice(0, 8);
   const pedidosPendentes = (pedidos || []).filter(p => ['Rascunho','Em Produção','Pronto para Faturar','Em Expedição'].includes(p?.status)).slice(0, 8);
   const pedidosAguardandoAprovacao = (pedidos || []).filter(p => (p?.status_aprovacao === 'pendente') || (p?.status === 'Aguardando Aprovação')).slice(0, 8);
 
-  const totalColaboradoresDash = colaboradores.length;
+  const totalColaboradoresDash = cadastroCounts?.colaboradoresTotal != null
+    ? cadastroCounts.colaboradoresTotal
+    : colaboradores.length;
   const opsConcluidasCount = (ordensProducao || []).filter(op => ["Concluída","Concluido","Concluida","Concluído","Finalizada","Finalizado","Encerrada","Encerrado","Pronto"].includes(op?.status)).length;
 
   const handleDrillDown = (rota) => { startTransition(() => { navigate(rota); }); };

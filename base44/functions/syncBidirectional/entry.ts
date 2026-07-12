@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 /**
  * syncBidirectional v4.1
@@ -46,6 +46,10 @@ const UP_ENTITIES = new Set([
   'Cliente', 'Produto', 'Fornecedor', 'OrdemCompra', 'MovimentacaoEstoque',
   'Oportunidade', 'Comissao', 'CaixaMovimento', 'LancamentoContabil',
   'InspecaoQualidade', 'OrdemProducao', 'ApontamentoProducao',
+  // V21.8: entidades operacionais adicionais para propagação UP completa
+  'Contrato', 'Evento', 'SolicitacaoCompra', 'TransferenciaFilial',
+  'Inventario', 'SeparacaoConferencia', 'ConciliacaoBancaria', 'MovimentoCartao',
+  'DRE', 'RateioFinanceiro', 'ExtratoBancario', 'CaixaOrdemLiquidacao',
 ]);
 
 function stripBlocked(data) {
@@ -206,7 +210,7 @@ Deno.serve(async (req) => {
 
     // ===== UP: Empresa → Grupo =====
     // Entidades que usam empresa_id direto (não empresa_dona_id)
-    const UP_DIRECT_EMPRESA_ID = new Set(['Pedido','ContaReceber','ContaPagar','Entrega','Romaneio','NotaFiscal','OrdemCompra','MovimentacaoEstoque','CaixaMovimento','LancamentoContabil','OrdemProducao','ApontamentoProducao','InspecaoQualidade']);
+    const UP_DIRECT_EMPRESA_ID = new Set(['Pedido','ContaReceber','ContaPagar','Entrega','Romaneio','NotaFiscal','OrdemCompra','MovimentacaoEstoque','CaixaMovimento','LancamentoContabil','OrdemProducao','ApontamentoProducao','InspecaoQualidade','Contrato','Evento','SolicitacaoCompra','TransferenciaFilial','Inventario','SeparacaoConferencia','ConciliacaoBancaria','MovimentoCartao','DRE','RateioFinanceiro','ExtratoBancario','CaixaOrdemLiquidacao']);
     if (isUp && eventData && eventType !== 'delete') {
       const isDirectId = UP_DIRECT_EMPRESA_ID.has(entityName);
       try {

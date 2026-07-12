@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 /**
  * countEntities V6 — CORREÇÃO DEFINITIVA DE CONTAGEM INFLADA
@@ -42,9 +42,9 @@ const SIMPLE_CATALOG = new Set([
   'ConfiguracaoDespesaRecorrente',
 ]);
 
-// Cache TTL
+// Cache TTL — aumentado para 5s para reduzir carga em dashboards com múltiplos KPIs
 const COUNT_CACHE = new Map();
-const TTL = 2_000;
+const TTL = 5_000;
 
 function cacheKey(name, filter) {
   try { return `${name}:${JSON.stringify(filter, Object.keys(filter).sort())}`; }

@@ -2,7 +2,7 @@
 // Fonte única de verdade — sincronizada com securityPoliciesValidator/entry.ts e sodValidator/entry.ts
 // 14 regras cobrindo intra-módulo, inter-módulo e acesso indevido a Sistema/AuditLog.
 
-export const SOD_RULES = [
+const SOD_RULES = [
   { modulo: 'Financeiro', conflito: ['aprovar', 'liquidar'], severidade: 'Alta', descricao: 'Quem aprova pagamentos não deve liquidar.' },
   { modulo: 'Financeiro', conflito: ['criar', 'excluir'], severidade: 'Média', descricao: 'Quem cria lançamentos não deve excluir.' },
   { modulo: 'Financeiro', conflito: ['aprovar', 'criar'], severidade: 'Alta', descricao: 'Quem aprova no Financeiro não deve criar.' },
@@ -19,7 +19,7 @@ export const SOD_RULES = [
   { modulo: 'Sistema', conflito: ['criar', 'editar'], severidade: 'Crítica', descricao: 'Criar usuários e editar perfis (escalada de privilégio).' },
 ];
 
-export function detectSodConflicts(permissoes) {
+function detectSodConflicts(permissoes) {
   const conflitos = [];
   let severidadeMax = null;
 
@@ -49,3 +49,8 @@ export function detectSodConflicts(permissoes) {
 function prioridade(level) {
   return { 'Baixa': 1, 'Média': 2, 'Alta': 3, 'Crítica': 4 }[level] || 0;
 }
+
+// Health-check — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  return Response.json({ ok: true, status: 'healthy', module: '_lib/security/sodRules' });
+});

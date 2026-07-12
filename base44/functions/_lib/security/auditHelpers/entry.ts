@@ -1,6 +1,6 @@
 // Helpers de auditoria e segurança
 
-export function getModuleForEntity(entidade) {
+function getModuleForEntity(entidade) {
   const moduloMap = {
     Cliente: 'CRM', Oportunidade: 'CRM', Interacao: 'CRM',
     Pedido: 'Comercial', Comissao: 'Comercial', NotaFiscal: 'Fiscal',
@@ -12,7 +12,7 @@ export function getModuleForEntity(entidade) {
   return moduloMap[entidade] || 'Sistema';
 }
 
-export function safeTrimPayload(obj, maxKeys = 200) {
+function safeTrimPayload(obj, maxKeys = 200) {
   try {
     if (!obj || typeof obj !== 'object') return obj;
     const keys = Object.keys(obj);

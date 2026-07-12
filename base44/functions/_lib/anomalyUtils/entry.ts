@@ -1,4 +1,4 @@
-export async function loadAnomalyConfig(base44) {
+async function loadAnomalyConfig(base44) {
   try {
     const cfgs = await base44.asServiceRole.entities.ConfiguracaoSistema.filter({ categoria: 'Financeiro', chave: 'anomalias_financeiras' }, '-updated_date', 1);
     const rec = Array.isArray(cfgs) && cfgs.length ? cfgs[0] : null;
@@ -35,7 +35,7 @@ export async function loadAnomalyConfig(base44) {
   }
 }
 
-export function computeIssues(receber, pagar, cfg) {
+function computeIssues(receber, pagar, cfg) {
   const issues = [];
   const hoje = new Date();
   const limiar = Number(cfg?.limiar_atraso_dias ?? 1);
@@ -148,3 +148,8 @@ export function computeIssues(receber, pagar, cfg) {
 
   return issues;
 }
+
+// Health-check — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  return Response.json({ ok: true, status: 'healthy', module: '_lib/anomalyUtils' });
+});

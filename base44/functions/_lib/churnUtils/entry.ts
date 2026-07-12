@@ -1,4 +1,4 @@
-export async function loadChurnConfig(base44) {
+async function loadChurnConfig(base44) {
   try {
     const cfgs = await base44.asServiceRole.entities.ConfiguracaoSistema.filter({ categoria: 'CRM', chave: 'churn_ia' }, '-updated_date', 1);
     const cfg = Array.isArray(cfgs) && cfgs.length ? cfgs[0] : null;
@@ -12,7 +12,7 @@ export async function loadChurnConfig(base44) {
   }
 }
 
-export function evaluateChurnRisk(oportunidade, cfg) {
+function evaluateChurnRisk(oportunidade, cfg) {
   const dias = Number(oportunidade?.dias_sem_contato || 0);
   const prob = Number(oportunidade?.probabilidade || 0);
   let atrasoPrev = 0;
@@ -26,3 +26,8 @@ export function evaluateChurnRisk(oportunidade, cfg) {
   const recomendacao = 'Agendar follow-up nas próximas 24h';
   return { flagged, detalhes, recomendacao };
 }
+
+// Health-check — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  return Response.json({ ok: true, status: 'healthy', module: '_lib/churnUtils' });
+});

@@ -2,7 +2,7 @@
 // Consolida: auditError + auditEntityEvents + orderFlowAuditor
 // Reuso em ambientes: automação, frontend, backend
 
-export async function logAudit(base44, {
+async function logAudit(base44, {
   usuario, usuario_id, acao, modulo, tipo_auditoria,
   entidade, registro_id, descricao,
   dados_anteriores, dados_novos,
@@ -40,7 +40,7 @@ export async function logAudit(base44, {
 }
 
 // Mapper de entidade → módulo (para RBAC/auditoria)
-export function getModuleForEntity(entity) {
+function getModuleForEntity(entity) {
   const map = {
     Cliente: 'CRM', Oportunidade: 'CRM', Interacao: 'CRM',
     Pedido: 'Comercial', Comissao: 'Comercial',
@@ -55,7 +55,7 @@ export function getModuleForEntity(entity) {
 }
 
 // Safe trim para payloads grandes
-export function safeTrimPayload(input, depth = 0) {
+function safeTrimPayload(input, depth = 0) {
   if (input == null) return null;
   if (typeof input === 'string') return input.slice(0, 4000);
   if (typeof input === 'number' || typeof input === 'boolean') return input;
@@ -76,7 +76,7 @@ export function safeTrimPayload(input, depth = 0) {
 }
 
 // Calcula risco de mudança
-export function computeRiskLevel({ entity, type, diffSensitive, gaps }) {
+function computeRiskLevel({ entity, type, diffSensitive, gaps }) {
   const highEntities = new Set(['NotaFiscal', 'MovimentacaoEstoque', 'ContaPagar', 'ContaReceber']);
   const hasGaps = gaps && gaps.length > 0;
   const sensitiveChange = diffSensitive && diffSensitive.length > 0;
@@ -88,7 +88,7 @@ export function computeRiskLevel({ entity, type, diffSensitive, gaps }) {
 }
 
 // Detecta ação de negócio (Aprovação, Pagamento, etc)
-export function detectBusinessAction(entity, type, before, after) {
+function detectBusinessAction(entity, type, before, after) {
   if (type !== 'update') return null;
   const b = before || {}; const a = after || {};
   

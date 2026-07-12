@@ -1,6 +1,5 @@
 // Validações leves para geração de reservas/movimentos a partir do Pedido
-// Não altera regras de negócio: apenas produz sinais/avisos úteis
-export function validatePedidoForReserva(pedido) {
+function validatePedidoForReserva(pedido) {
   const itensRev = Array.isArray(pedido?.itens_revenda) ? pedido.itens_revenda : [];
   const itensArm = Array.isArray(pedido?.itens_armado_padrao) ? pedido.itens_armado_padrao : [];
   const itensCD  = Array.isArray(pedido?.itens_corte_dobra) ? pedido.itens_corte_dobra : [];
@@ -17,3 +16,8 @@ export function validatePedidoForReserva(pedido) {
     warnings,
   };
 }
+
+// Health-check — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  return Response.json({ ok: true, status: 'healthy', module: '_lib/pedido/validatePedido' });
+});

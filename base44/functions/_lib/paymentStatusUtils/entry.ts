@@ -1,4 +1,4 @@
-export function computeUpdatesForContaPagar(action, justificativa, registro) {
+function computeUpdatesForContaPagar(action, justificativa, registro) {
   const updates = {};
   if (action === 'aprovar') {
     updates.status_pagamento = 'Aprovado';
@@ -17,7 +17,7 @@ export function computeUpdatesForContaPagar(action, justificativa, registro) {
   return updates;
 }
 
-export function computeUpdatesForContaReceber(action, justificativa, registro) {
+function computeUpdatesForContaReceber(action, justificativa, registro) {
   const updates = {};
   if (action === 'receber') {
     updates.status = 'Recebido';
@@ -32,3 +32,8 @@ export function computeUpdatesForContaReceber(action, justificativa, registro) {
   }
   return updates;
 }
+
+// Health-check — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  return Response.json({ ok: true, status: 'healthy', module: '_lib/paymentStatusUtils' });
+});

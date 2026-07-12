@@ -1,4 +1,4 @@
-export function buildMovementRecord(inv, item, user) {
+function buildMovementRecord(inv, item, user) {
   const delta = Number(item.ajuste || 0);
   if (!item.produto_id || delta === 0) return null;
   return {
@@ -17,7 +17,7 @@ export function buildMovementRecord(inv, item, user) {
   };
 }
 
-export function computeMovements(inv, user) {
+function computeMovements(inv, user) {
   if (!Array.isArray(inv?.itens)) return [];
   const movimentos = [];
   for (const item of inv.itens) {
@@ -27,7 +27,7 @@ export function computeMovements(inv, user) {
   return movimentos;
 }
 
-export async function persistMovements(base44, movimentos) {
+async function persistMovements(base44, movimentos) {
   const produtoIds = [];
   for (const rec of movimentos) {
     await base44.asServiceRole.entities.MovimentacaoEstoque.create(rec);
@@ -36,7 +36,7 @@ export async function persistMovements(base44, movimentos) {
   return produtoIds;
 }
 
-export function buildFinalizePatch(user) {
+function buildFinalizePatch(user) {
   return {
     status: 'Concluído',
     aprovado_por: user?.full_name || user?.email,
@@ -44,3 +44,8 @@ export function buildFinalizePatch(user) {
     data_aprovacao: new Date().toISOString(),
   };
 }
+
+// Health-check — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  return Response.json({ ok: true, status: 'healthy', module: '_lib/inventoryUtils' });
+});

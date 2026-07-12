@@ -1,4 +1,4 @@
-export async function emitirENotas(nfe, integracao, config) {
+async function emitirENotas(nfe, integracao, config) {
   const apiKey = integracao.api_key;
   const empresaProv = integracao.empresa_id_provedor;
   const payload = {
@@ -58,7 +58,7 @@ export async function emitirENotas(nfe, integracao, config) {
   };
 }
 
-export async function statusENotas(nfeId, integracao) {
+async function statusENotas(nfeId, integracao) {
   const r = await fetch(`https://api.enotas.com.br/v2/empresas/${integracao.empresa_id_provedor}/nfes/${nfeId}`, {
     headers: { Authorization: `Basic ${btoa(integracao.api_key + ':')}` }
   });
@@ -66,3 +66,8 @@ export async function statusENotas(nfeId, integracao) {
   const j = await r.json();
   return { sucesso: true, status: j.status, protocolo: j.protocolo, dataAutorizacao: j.dataAutorizacao, xml: j.linkDownloadXml, pdf: j.linkDownloadPdf };
 }
+
+// Health-check — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  return Response.json({ ok: true, status: 'healthy', module: '_lib/nfeEnotas' });
+});

@@ -1,7 +1,7 @@
 // Serviço central de notificação para o sistema (UI NotificationCenter + canais opcionais)
 // Mantém multiempresa, RBAC (invocado no backend autenticado) e auditoria via funções chamadoras
 
-export async function notify(base44, notif, options = {}) {
+async function notify(base44, notif, options = {}) {
   const { whatsapp = false } = options;
   const {
     titulo,
@@ -51,3 +51,8 @@ export async function notify(base44, notif, options = {}) {
     }
   }
 }
+
+// Health-check — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  return Response.json({ ok: true, status: 'healthy', module: '_lib/notificationService' });
+});

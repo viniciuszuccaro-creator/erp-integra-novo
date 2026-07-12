@@ -1,27 +1,84 @@
-import { computeInventoryMovements } from './computeInventoryMovements.js';
-import { persistInventoryMovements } from './persistInventoryMovements.js';
-import { finalizeInventoryPatch } from './finalizeInventoryPatch.js';
-import { audit } from '../guard.js';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+
+// Inlined: buildMovementRecord + computeMovements (from inventoryUtils)
+function buildMovementRecord(inv, item, user) {
+  const delta = Number(item.ajuste || 0);
+  if (!item.produto_id || delta === 0) return null;
+  return {
+    origem_movimento: 'ajuste', tipo_movimento: 'ajuste',
+    produto_id: item.produto_id, produto_descricao: item.produto_descricao,
+    quantidade: delta, unidade_medida: item.unidade || 'UN',
+    empresa_id: inv.empresa_id, group_id: inv.group_id || null,
+    data_movimentacao: new Date().toISOString(),
+    motivo: `Ajuste inventário ${inv.id || ''}`,
+    responsavel: user?.full_name || user?.email, responsavel_id: user?.id,
+  };
+}
+
+function computeMovements(inv, user) {
+  if (!Array.isArray(inv?.itens)) return [];
+  const movimentos = [];
+  for (const item of inv.itens) {
+    const rec = buildMovementRecord(inv, item, user);
+    if (rec) movimentos.push(rec);
+  }
+  return movimentos;
+}
+
+// Inlined: persistMovements
+async function persistMovements(base44, movimentos) {
+  const produtoIds = [];
+  for (const rec of movimentos) {
+    await base44.asServiceRole.entities.MovimentacaoEstoque.create(rec);
+    if (rec.produto_id) produtoIds.push(rec.produto_id);
+  }
+  return produtoIds;
+}
+
+// Inlined: finalizeInventoryPatch
+function buildFinalizePatch(user) {
+  return {
+    status: 'Concluído',
+    aprovado_por: user?.full_name || user?.email,
+    aprovado_por_id: user?.id,
+    data_aprovacao: new Date().toISOString(),
+  };
+}
+
+// Inlined: audit (from _lib/guard)
+async function audit(base44, user, { acao = 'Ação', modulo = 'Sistema', entidade = '-', registro_id = null, descricao = '', dados_novos = null, empresa_id = null, duracao_ms = null }) {
+  try {
+    await base44.asServiceRole.entities.AuditLog.create({
+      usuario: user?.full_name || user?.email || 'Sistema',
+      usuario_id: user?.id,
+      acao, modulo, entidade, registro_id, descricao,
+      empresa_id: empresa_id || null,
+      duracao_ms: typeof duracao_ms === 'number' ? duracao_ms : null,
+      dados_novos: dados_novos || null,
+      data_hora: new Date().toISOString(),
+    });
+  } catch {}
+}
 
 // Handler pequeno e reutilizável para aplicar ajustes de inventário
-export async function handleApplyInventoryAdjustments(base44, ctx, inv, user) {
-  const movimentoRecords = computeInventoryMovements(inv, user);
+async function handleApplyInventoryAdjustments(base44, ctx, inv, user) {
+  const movimentoRecords = computeMovements(inv, user);
   if (!Array.isArray(movimentoRecords) || movimentoRecords.length === 0) {
     return { movimentos: [], movimentos_count: 0, skipped: true };
   }
 
-  const movimentos = await persistInventoryMovements(base44, movimentoRecords);
-
-  await base44.asServiceRole.entities.Inventario.update(inv.id, finalizeInventoryPatch(user));
-
+  const movimentos = await persistMovements(base44, movimentoRecords);
+  await base44.asServiceRole.entities.Inventario.update(inv.id, buildFinalizePatch(user));
   await audit(base44, user, {
-    acao: 'Edição',
-    modulo: 'Estoque',
-    entidade: 'Inventario',
-    registro_id: inv.id,
-    descricao: 'Aplicação de ajustes de inventário',
+    acao: 'Edição', modulo: 'Estoque', entidade: 'Inventario',
+    registro_id: inv.id, descricao: 'Aplicação de ajustes de inventário',
     dados_novos: { movimentos }
   });
 
   return { movimentos, movimentos_count: movimentos.length, skipped: false };
 }
+
+// Health-check — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  return Response.json({ ok: true, status: 'healthy', module: '_lib/inventario/applyAdjustmentsHandler' });
+});

@@ -1,7 +1,6 @@
 // Utilities for price optimization with external quotations (multiempresa-ready)
-export async function getTabelaPrecosIAConfig(base44, empresaId = null) {
+async function getTabelaPrecosIAConfig(base44, empresaId = null) {
   try {
-    // Busca configurações comerciais (inclui caminhos antigos e novos)
     const cfgs = await base44.asServiceRole.entities.ConfiguracaoSistema.filter({ categoria: 'Comercial' }, '-updated_date', 50);
     if (!Array.isArray(cfgs)) return null;
 
@@ -25,32 +24,25 @@ export async function getTabelaPrecosIAConfig(base44, empresaId = null) {
       const tpiRaw = c?.configuracoes_comerciais?.tabela_precos_ia ?? c?.tabela_precos_ia;
       if (!tpiRaw) continue;
 
-      const tpi = { ...tpiRaw }; // não mutar origem
+      const tpi = { ...tpiRaw };
       const habilitadas = Array.isArray(tpi.empresas_habilitadas) ? tpi.empresas_habilitadas : null;
       const bloqueadas = Array.isArray(tpi.empresas_bloqueadas) ? tpi.empresas_bloqueadas : null;
-      const overrides = tpi.empresas_overrides || tpi.overrides_por_empresa || null; // suporta ambos os nomes
+      const overrides = tpi.empresas_overrides || tpi.overrides_por_empresa || null;
 
-      // Se houver override específico para a empresa, aplica e retorna prioritariamente
       if (empresaId && overrides && overrides[empresaId]) {
         return mergeOverride(tpi, overrides[empresaId]);
       }
-
-      // Feature flag por lista de empresas
       if (empresaId && habilitadas && habilitadas.includes(empresaId)) {
         return { ...tpi, _escopo: 'empresa', _empresaId: empresaId };
       }
       if (empresaId && bloqueadas && bloqueadas.includes(empresaId)) {
-        // empresa bloqueada neste registro — segue procurando outro registro compatível
         continue;
       }
-
-      // Guarda o primeiro candidato global (fallback)
       if (!candidatoGlobal) {
         candidatoGlobal = { ...tpi, _escopo: 'global' };
       }
     }
 
-    // Se houver candidato global e existir override para a empresa nele, aplica
     if (candidatoGlobal && empresaId) {
       const overrides = candidatoGlobal.empresas_overrides || candidatoGlobal.overrides_por_empresa || null;
       if (overrides && overrides[empresaId]) {
@@ -61,10 +53,9 @@ export async function getTabelaPrecosIAConfig(base44, empresaId = null) {
 
     if (candidatoGlobal) return candidatoGlobal;
 
-    // Stub/config padrão multiempresa (seguro e não-invasivo)
     return {
       habilitado: true,
-      fonte_cotacoes: 'internas', // políticas internas (sem cotações externas)
+      fonte_cotacoes: 'internas',
       markup_minimo_percentual: 12,
       politicas_precificacao: [],
       empresas_habilitadas: null,
@@ -76,9 +67,8 @@ export async function getTabelaPrecosIAConfig(base44, empresaId = null) {
   }
 }
 
-export async function fetchExternalQuotes(cfg, context, produto) {
+async function fetchExternalQuotes(cfg, context, produto) {
   try {
-    // MOCK TEMPORÁRIO: quando cfg.mock === true ou url_api ausente/'mock', não chama API externa
     if (!cfg) return null;
     const isMock = cfg?.mock === true || !cfg?.url_api || String(cfg?.url_api).toLowerCase() === 'mock';
     if (cfg.fonte_cotacoes === 'mock') {
@@ -87,14 +77,13 @@ export async function fetchExternalQuotes(cfg, context, produto) {
     if (cfg.fonte_cotacoes === 'externa' && isMock) {
       return generateMockQuotes(context, produto, cfg);
     }
-
     if (cfg.fonte_cotacoes !== 'externa' || !cfg.url_api) return null;
 
     const headers = { 'Content-Type': 'application/json' };
     if (cfg.api_key) {
       headers['Authorization'] = `Bearer ${cfg.api_key}`;
       headers['x-api-key'] = cfg.api_key;
-      headers['X-Token'] = cfg.api_key; // compatibilidade com fornecedores privados
+      headers['X-Token'] = cfg.api_key;
     }
     const body = {
       empresa_id: context?.empresa_id || null,
@@ -117,7 +106,6 @@ export async function fetchExternalQuotes(cfg, context, produto) {
 
 function extractSteelIndex(quotes) {
   if (!quotes) return null;
-  // Aceita diferentes formatos comuns
   if (typeof quotes === 'number') return quotes;
   if (Array.isArray(quotes)) {
     const cand = quotes.find((q) => q?.material?.toLowerCase?.() === 'aço' || q?.material?.toLowerCase?.() === 'aco');
@@ -126,15 +114,15 @@ function extractSteelIndex(quotes) {
   return Number(quotes?.preco || quotes?.price || quotes?.steel_price || quotes?.aco || quotes?.indice) || null;
 }
 
-export function generateMockQuotes(context, produto, cfg) {
+function generateMockQuotes(context, produto, cfg) {
   const base = Number(produto?.custo_medio ?? produto?.custo_aquisicao ?? 1000);
   const seg = String(produto?.grupo || produto?.classificacao_abc || '');
-  const factor = 1 + ((seg.length % 7) / 100); // determinístico
+  const factor = 1 + ((seg.length % 7) / 100);
   const steel_price = Math.max(50, Math.round(base * factor * 100) / 100);
   return { steel_price, fonte: 'mock' };
 }
 
-export function computeOptimizedPrice(produto, quotes, cfg) {
+function computeOptimizedPrice(produto, quotes, cfg) {
   const custoBase = Number(produto?.custo_medio ?? produto?.custo_aquisicao ?? 0) || 0;
   const markupMin = Number(cfg?.markup_minimo_percentual ?? 10);
   const regra = cfg?.regra_prioridade || 'custo';
@@ -143,23 +131,19 @@ export function computeOptimizedPrice(produto, quotes, cfg) {
 
   let precoSugerido = 0;
   if (steelIdx && steelIdx > 0 && (regra === 'mercado' || regra === 'historico')) {
-    // Preço ancorado no índice de aço + markup mínimo
     precoSugerido = steelIdx * (1 + markupMin / 100);
   } else if (custoBase > 0) {
-    // Fallback em custo + markup
     precoSugerido = custoBase * (1 + markupMin / 100);
   } else {
-    // Último recurso: mantém preço atual
     precoSugerido = Number(produto?.preco_venda || 0);
   }
 
-  // Ajustes por políticas específicas (segmento/grupo de produto)
   try {
     const politicas = Array.isArray(cfg?.politicas_precificacao) ? cfg.politicas_precificacao : [];
     const seg = produto?.grupo || produto?.classificacao_abc || '';
     const pol = politicas.find(p => (p.segmento || '').toLowerCase() === String(seg).toLowerCase());
     if (pol) {
-      const adj = Number(pol.ajuste || 0); // % +- adicional
+      const adj = Number(pol.ajuste || 0);
       if (!Number.isNaN(adj) && adj !== 0) {
         precoSugerido = precoSugerido * (1 + adj / 100);
       }
@@ -171,10 +155,8 @@ export function computeOptimizedPrice(produto, quotes, cfg) {
     }
   } catch (_) {}
 
-  // Arredondamento comercial
   precoSugerido = Math.max(0, Number(precoSugerido?.toFixed(2) || 0));
 
-  // Margem resultante
   const margemPercent = custoBase > 0 ? Math.max(0, Math.round(((precoSugerido - custoBase) / custoBase) * 100)) : Math.max(0, Math.round(markupMin));
 
   return {
@@ -182,3 +164,8 @@ export function computeOptimizedPrice(produto, quotes, cfg) {
     margem_minima_percentual: margemPercent
   };
 }
+
+// Health-check — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  return Response.json({ ok: true, status: 'healthy', module: '_lib/priceUtils' });
+});

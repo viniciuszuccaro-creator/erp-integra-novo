@@ -1,11 +1,11 @@
-export const ITEM_KEYS = ['itens_revenda','itens_armado_padrao','itens_corte_dobra'];
+const ITEM_KEYS = ['itens_revenda','itens_armado_padrao','itens_corte_dobra'];
 
-export async function updateProdutoReservado(base44, produto, quantidade) {
+async function updateProdutoReservado(base44, produto, quantidade) {
   const novoReservado = Number(produto?.estoque_reservado || 0) + Number(quantidade || 0);
   await base44.asServiceRole.entities.Produto.update(produto.id, { estoque_reservado: novoReservado });
 }
 
-export function buildReservaMov(produto, item, data, user) {
+function buildReservaMov(produto, item, data, user) {
   const quantidade = Number(item?.quantidade || 0);
   return {
     origem_movimento: 'pedido',
@@ -24,7 +24,7 @@ export function buildReservaMov(produto, item, data, user) {
   };
 }
 
-export async function processReservas(base44, data, user) {
+async function processReservas(base44, data, user) {
   const movimentos = [];
   for (const key of ITEM_KEYS) {
     const itens = Array.isArray(data?.[key]) ? data[key] : [];
@@ -47,3 +47,8 @@ export async function processReservas(base44, data, user) {
   }
   return movimentos;
 }
+
+// Health-check — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  return Response.json({ ok: true, status: 'healthy', module: '_lib/orderReservationUtils' });
+});

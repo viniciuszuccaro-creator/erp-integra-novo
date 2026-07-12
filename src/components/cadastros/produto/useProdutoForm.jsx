@@ -102,11 +102,6 @@ export default function useProdutoForm({ produto, onSubmit, onSuccess, closeSelf
     if (!formData.descricao) { toast.error('Preencha a descrição do produto'); return; }
     if (!contextoValido) { toast.error('Selecione um grupo ou empresa antes de salvar o produto'); return; }
     if (produto?.id ? !podeEditar : !podeCriar) { toast.error('Seu perfil nao permite salvar produtos'); return; }
-    // TRAVA GLOBAL: verifica unicidade de código E descrição antes de salvar (Regra-Mãe §5c)
-    const erroUnicidade = await checkGlobalUniqueness('Produto', formData, {
-      groupId, empresaId: empresaAtual?.id, currentId: produto?.id, isEdit: !!produto?.id,
-    });
-    if (erroUnicidade) { toast.error(erroUnicidade); setAbaAtiva('dados-gerais'); return; }
     if (!formData.setor_atividade_id) { toast.error('Selecione o Setor de Atividade'); setAbaAtiva('dados-gerais'); return; }
     if (!formData.grupo_produto_id) { toast.error('Selecione o Grupo de Produto'); setAbaAtiva('dados-gerais'); return; }
     if (!formData.marca_id) { toast.error('Selecione a Marca'); setAbaAtiva('dados-gerais'); return; }
@@ -119,6 +114,12 @@ export default function useProdutoForm({ produto, onSubmit, onSuccess, closeSelf
     };
     const dadosSubmit = carimbarContexto(dadosBase, 'empresa_id');
     try {
+      // TRAVA GLOBAL: verifica unicidade de código E descrição antes de salvar (Regra-Mãe §5c)
+      const erroUnicidade = await checkGlobalUniqueness('Produto', formData, {
+        groupId, empresaId: empresaAtual?.id, currentId: produto?.id, isEdit: !!produto?.id,
+      });
+      if (erroUnicidade) { toast.error(erroUnicidade); setAbaAtiva('dados-gerais'); return; }
+
       if (produto?.id) { await updateInContext('Produto', produto.id, dadosSubmit); toast.success('✅ Produto atualizado com sucesso!'); }
       else { await createInContext('Produto', dadosSubmit); toast.success('✅ Produto criado com sucesso!'); }
       if (onSuccess) onSuccess();

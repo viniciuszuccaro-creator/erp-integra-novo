@@ -56,9 +56,9 @@ export default function useDashboardDerivedData({ pedidos = [], contasReceber = 
 
   const fluxoCaixa = receitasPendentes - despesasPendentes;
 
-  // Estoque Crítico = produtos ativos de Revenda com estoque disponível <= 0 (sem estoque)
+  // Estoque Crítico = produtos ativos com estoque disponível <= 0 (sem estoque)
   const produtosBaixoEstoque = produtos.filter((p) => {
-    if (p.status !== "Ativo" || p.tipo_item !== "Revenda") return false;
+    if (p.status !== "Ativo") return false;
     return getProdutoEstoqueDisponivel(p) <= 0;
   }).length;
 

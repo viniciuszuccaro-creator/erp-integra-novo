@@ -20,7 +20,7 @@ export function useDashboardQueries({ canSeeFinanceiro, canSeeCRM, canSeeComerci
   const { data: contasPagar = [] } = useRLSQuery('ContaPagar', {}, '-data_vencimento', DASHBOARD_LIST_LIMIT, { enabled: Boolean(canSeeFinanceiro && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval });
   const { data: entregas = [] } = useRLSQuery('Entrega', {}, '-created_date', DASHBOARD_LIST_LIMIT, { enabled: Boolean(canSeeExpedicao && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval });
   const { data: colaboradores = [] } = useRLSQuery('Colaborador', {}, '-created_date', DASHBOARD_LIST_LIMIT, { enabled: Boolean(canSeeRH && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval });
-  const { data: produtos = [] } = useRLSQuery('Produto', { status: 'Ativo', tipo_item: 'Revenda' }, '-created_date', 500, { enabled: Boolean(canSeeEstoque && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval });
+  const { data: produtos = [] } = useRLSQuery('Produto', { status: 'Ativo' }, '-created_date', 500, { enabled: Boolean(canSeeEstoque && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval });
   const { data: clientes = [] } = useRLSQuery('Cliente', {}, '-created_date', DASHBOARD_LIST_LIMIT, { enabled: Boolean(canSeeCRM && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval });
   const { data: ordensProducao = [] } = useRLSQuery('OrdemProducao', {}, '-data_emissao', DASHBOARD_LIST_LIMIT, { enabled: Boolean(canSeeProducao && hasContextoAtivo), ...dashboardQueryDefaults, refetchInterval });
   const { data: notasFiscais = [] } = useRLSQuery('NotaFiscal', {}, '-created_date', DASHBOARD_LIST_LIMIT, { enabled: Boolean((canSeeFinanceiro || canSeeFiscal || canSeeComercial) && hasContextoAtivo), staleTime: 15000, refetchOnWindowFocus: false, refetchOnReconnect: false, retry: 1, refetchInterval });
@@ -102,7 +102,7 @@ export function useDashboardQueries({ canSeeFinanceiro, canSeeCRM, canSeeComerci
       const entitiesPayload = [
         { entityName: 'Cliente', filter: buildFilter('Cliente') },
         { entityName: 'Colaborador', filter: buildFilter('Colaborador') },
-        { entityName: 'Produto', filter: { ...buildFilter('Produto'), status: 'Ativo' } },
+        { entityName: 'Produto', filter: buildFilter('Produto') },
         { entityName: 'Fornecedor', filter: buildFilter('Fornecedor') },
       ];
 

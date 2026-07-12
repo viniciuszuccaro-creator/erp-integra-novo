@@ -106,16 +106,63 @@ function withScope(filter, entityName, groupId, empresaId) {
 }
 
 /**
- * Busca duplicatas via SDK filter direto (fail-closed: bloqueia se não conseguir verificar).
+ * Busca duplicatas via SDK filter direto.
+ * Se o filtro contém $regex (suporte intermitente na SDK), faz fallback:
+ * busca todos os registros do escopo e filtra client-side.
  * @returns array de duplicatas (excluindo currentId)
  */
 async function findDuplicates(entityName, filter, groupId, empresaId, currentId) {
   const scoped = withScope(filter, entityName, groupId, empresaId);
+
+  // Detecta se o filtro contém $regex — se sim, separa para fallback client-side
+  let regexField = null, regexPattern = null, regexOptions = null;
+  const directFilter = {};
+  for (const [k, v] of Object.entries(scoped)) {
+    if (v && typeof v === 'object' && v.$regex) {
+      regexField = k; regexPattern = v.$regex; regexOptions = v.$options || '';
+    } else {
+      directFilter[k] = v;
+    }
+  }
+
+  // Tentativa 1: filtro direto (sem $regex ou com $regex se suportado)
   try {
-    const results = await base44.entities[entityName].filter(scoped, 'created_date', 10);
+    const results = await base44.entities[entityName].filter(scoped, 'created_date', 50);
     return (results || []).filter(r => r.id !== currentId);
-  } catch (e) {
-    throw new Error(`⚠️ Não foi possível verificar duplicidade (${e.message || 'erro desconhecido'}). O salvamento foi bloqueado para evitar duplicatas. Tente novamente em alguns segundos.`);
+  } catch (_) {
+    // Se falhou e não havia $regex, não há fallback possível
+    if (!regexField) {
+      // Fall back to scope-only fetch and client-side filtering
+      try {
+        const scopeOnly = withScope({}, entityName, groupId, empresaId);
+        const all = await base44.entities[entityName].filter(scopeOnly, 'created_date', 200);
+        // Apply directFilter fields client-side
+        return (all || []).filter(r => {
+          if (r.id === currentId) return false;
+          return Object.entries(directFilter).every(([k, v]) => r[k] === v);
+        });
+      } catch (e2) {
+        throw new Error(`⚠️ Não foi possível verificar duplicidade (${e2.message || 'erro desconhecido'}). O salvamento foi bloqueado para evitar duplicatas. Tente novamente em alguns segundos.`);
+      }
+    }
+    // Tentativa 2: fallback para $regex — busca por escopo e filtra client-side
+    try {
+      const scopeOnly = withScope({}, entityName, groupId, empresaId);
+      const all = await base44.entities[entityName].filter(scopeOnly, 'created_date', 200);
+      const flags = regexOptions.includes('i') ? 'i' : '';
+      const re = new RegExp(regexPattern, flags);
+      return (all || []).filter(r => {
+        if (r.id === currentId) return false;
+        // Aplica filtros diretos (não-regex)
+        const matchesDirect = Object.entries(directFilter).every(([k, v]) => r[k] === v);
+        if (!matchesDirect) return false;
+        // Aplica regex client-side
+        const val = r[regexField];
+        return val != null && re.test(String(val));
+      });
+    } catch (e2) {
+      throw new Error(`⚠️ Não foi possível verificar duplicidade (${e2.message || 'erro desconhecido'}). O salvamento foi bloqueado para evitar duplicatas. Tente novamente em alguns segundos.`);
+    }
   }
 }
 

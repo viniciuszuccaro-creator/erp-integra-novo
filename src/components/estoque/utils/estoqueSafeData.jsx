@@ -14,6 +14,6 @@ export function getProdutoEstoqueDisponivel(produto) {
 }
 
 export function isProdutoEstoqueBaixo(produto) {
-  // Estoque Crítico = produto ativo de Revenda com estoque disponível <= 0 (sem estoque)
-  return produto?.status === 'Ativo' && produto?.tipo_item === 'Revenda' && getProdutoEstoqueDisponivel(produto) <= 0;
+  // Estoque Crítico = produto ativo com estoque disponível <= 0 (sem estoque)
+  return produto?.status === 'Ativo' && getProdutoEstoqueDisponivel(produto) <= 0;
 }

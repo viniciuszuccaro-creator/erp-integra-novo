@@ -9,7 +9,7 @@
  *  - { id, data, chave?, scope? }   → update direto pelo ID
  *  - { chave, data, scope }         → upsert por chave+scope
  */
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 // upsertConfig v2 — escopo exato, sem fallback cross-scope, auditoria completa
 
 Deno.serve(async (req) => {

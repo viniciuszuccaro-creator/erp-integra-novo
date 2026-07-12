@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // Rate-limit por IP
 const __RL = globalThis.__egRate || (globalThis.__egRate = new Map());

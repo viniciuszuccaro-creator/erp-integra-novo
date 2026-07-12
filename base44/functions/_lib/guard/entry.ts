@@ -1,9 +1,9 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
-// RBAC + Multiempresa helpers para backend functions
-// Uso: import { getUserAndPerfil, hasPermission, assertPermission, assertContext, audit } from './_lib/guard.js'
+// RBAC + Multiempresa helpers para backend functions (biblioteca de referência)
+// A lógica aqui é inlined em entityGuard e outras funções — este endpoint expõe health-check
 
-export async function getUserAndPerfil(base44) {
+async function getUserAndPerfil(base44) {
   const user = await base44.auth.me().catch(() => null);
   let perfil = null;
   try {
@@ -169,5 +169,4 @@ export async function audit(base44, user, { acao = 'Ação', modulo = 'Sistema',
       data_hora: new Date().toISOString(),
     });
   } catch {}
-}
 }

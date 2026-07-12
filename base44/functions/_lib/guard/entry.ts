@@ -154,7 +154,7 @@ export async function ensureContextFields(base44, data, requireEmpresa = true) {
   }
 }
 
-export async function audit(base44, user, { acao = 'Ação', modulo = 'Sistema', entidade = '-', registro_id = null, descricao = '', dados_novos = null, empresa_id = null, empresa_nome = null, duracao_ms = null }, meta = null) {
+async function audit(base44, user, { acao = 'Ação', modulo = 'Sistema', entidade = '-', registro_id = null, descricao = '', dados_novos = null, empresa_id = null, empresa_nome = null, duracao_ms = null }, meta = null) {
   try {
     const payloadDados = (dados_novos && typeof dados_novos === 'object') ? { ...dados_novos } : {};
     if (meta) payloadDados._meta = meta; // ip, user_agent, request_id
@@ -170,3 +170,21 @@ export async function audit(base44, user, { acao = 'Ação', modulo = 'Sistema',
     });
   } catch {}
 }
+
+// Health-check endpoint — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  try {
+    const base44 = createClientFromRequest(req);
+    const body = await req.json().catch(() => ({}));
+    // Suporta chamada de verificação de permissão via invoke
+    if (body?.module && body?.action) {
+      const { user, perfil } = await getUserAndPerfil(base44);
+      if (!user) return Response.json({ allowed: false, error: 'Unauthorized' }, { status: 401 });
+      const allowed = backendHasPermission(perfil, body.module, body.section, body.action, user?.role);
+      return Response.json({ allowed, _via: '_lib/guard' });
+    }
+    return Response.json({ ok: true, status: 'healthy', module: '_lib/guard' });
+  } catch (err) {
+    return Response.json({ ok: false, error: err?.message || 'Internal error' }, { status: 500 });
+  }
+});

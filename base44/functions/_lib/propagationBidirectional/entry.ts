@@ -128,3 +128,8 @@ async function propagateUp(base44, entityName, data) {
     return { action: 'error', error: err.message };
   }
 }
+
+// Health-check — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  return Response.json({ ok: true, status: 'healthy', module: '_lib/propagationBidirectional' });
+});

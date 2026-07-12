@@ -109,3 +109,8 @@ export function detectBusinessAction(entity, type, before, after) {
   }
   return null;
 }
+
+// Health-check — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  return Response.json({ ok: true, status: 'healthy', module: '_lib/security/centralizedAuditLogger' });
+});

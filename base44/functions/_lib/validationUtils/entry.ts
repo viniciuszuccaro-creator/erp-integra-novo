@@ -13,8 +13,13 @@ export function resolveEntityIdFromPayload(payload, keys = []) {
   return data?.id || event?.entity_id || null;
 }
 
-export function isApprovedStatus(data, field = 'status', approved = 'Aprovado') {
+function isApprovedStatus(data, field = 'status', approved = 'Aprovado') {
   if (!data) return true;
   const s = data?.[field];
   return !s || s === approved;
 }
+
+// Health-check — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  return Response.json({ ok: true, status: 'healthy', module: '_lib/validationUtils' });
+});

@@ -1,6 +1,8 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+
 // Heurística leve de risco (somente score/auditoria, sem bloqueio)
 
-export function computeRisk({ event, data, ip, userAgent }) {
+function computeRisk({ event, data, ip, userAgent }) {
   const hora = new Date().getHours();
   const offHours = (hora < 7 || hora > 20);
   const entidade = event?.entity_name;
@@ -21,3 +23,8 @@ export function computeRisk({ event, data, ip, userAgent }) {
 
   return { score, level, tags, tipo_alerta };
 }
+
+// Health-check — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  return Response.json({ ok: true, status: 'healthy', module: '_lib/security/riskScoring' });
+});

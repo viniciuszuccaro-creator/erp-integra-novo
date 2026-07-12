@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // Entidades de catálogo global que NÃO precisam de escopo empresa/grupo
 const SIMPLE_CATALOG = new Set([

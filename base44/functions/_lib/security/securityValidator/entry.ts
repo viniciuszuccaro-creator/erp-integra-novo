@@ -177,3 +177,8 @@ function detectFlowInconsistencies(pedido, entregas, notasFiscais) {
 
   return issues;
 }
+
+// Health-check — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  return Response.json({ ok: true, status: 'healthy', module: '_lib/security/securityValidator' });
+});

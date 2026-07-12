@@ -1,8 +1,8 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // Avaliação de risco com IA (não bloqueante). Usa Core.InvokeLLM quando habilitado em ConfiguracaoSistema.
 // Retorna: { score: 0-100, level: 'Baixo'|'Médio'|'Alto'|'Crítico', reasons: string[] }
-export async function assessActionRisk(base44, { entity, op, user, ip, userAgent, data }) {
+async function assessActionRisk(base44, { entity, op, user, ip, userAgent, data }) {
   try {
     // Prompt compacto e objetivo (privacidade: sem PII sensível)
     const now = new Date().toISOString();
@@ -49,3 +49,8 @@ export async function assessActionRisk(base44, { entity, op, user, ip, userAgent
     return null; // nunca quebra o fluxo
   }
 }
+
+// Health-check — _lib functions need Deno.serve to deploy
+Deno.serve(async (req) => {
+  return Response.json({ ok: true, status: 'healthy', module: '_lib/security/iaAccessRiskAssessor' });
+});

@@ -1,38 +1,66 @@
 // Regras e detecção de Segregação de Funções (SoD)
-// Fonte única de verdade — sincronizada com securityPoliciesValidator/entry.ts e sodValidator/entry.ts
-// 14 regras cobrindo intra-módulo, inter-módulo e acesso indevido a Sistema/AuditLog.
+// Fonte única de verdade — CONSOLIDADO com securityValidator/entry.ts e sodValidator/entry.ts
+// 17 regras cobrindo intra-módulo, inter-módulo, cross-módulo e acesso indevido a Sistema/AuditLog.
 
 const SOD_RULES = [
-  { modulo: 'Financeiro', conflito: ['aprovar', 'liquidar'], severidade: 'Alta', descricao: 'Quem aprova pagamentos não deve liquidar.' },
-  { modulo: 'Financeiro', conflito: ['criar', 'excluir'], severidade: 'Média', descricao: 'Quem cria lançamentos não deve excluir.' },
-  { modulo: 'Financeiro', conflito: ['aprovar', 'criar'], severidade: 'Alta', descricao: 'Quem aprova no Financeiro não deve criar.' },
-  { modulo: 'Financeiro', conflito: ['aprovar', 'editar'], severidade: 'Alta', descricao: 'Quem aprova no Financeiro não deve editar.' },
-  { modulo: 'Financeiro', conflito: ['aprovar', 'excluir'], severidade: 'Crítica', descricao: 'Quem aprova no Financeiro não deve excluir.' },
-  { modulo: 'Comercial', conflito: ['editar', 'aprovar'], severidade: 'Média', descricao: 'Quem edita não deve aprovar descontos.' },
-  { modulo: 'Comercial', conflito: ['criar', 'aprovar'], severidade: 'Média', descricao: 'Quem cria pedidos não deve aprová-los.' },
-  { modulo: 'Fiscal', conflito: ['emitir', 'cancelar'], severidade: 'Alta', descricao: 'Separar emissão e cancelamento fiscal.' },
-  { modulo: 'Fiscal', conflito: ['emitir', 'aprovar'], severidade: 'Média', descricao: 'Separar emissão e aprovação fiscal.' },
-  { modulo: 'Compras', conflito: ['criar', 'aprovar'], severidade: 'Alta', descricao: 'Quem aprova compras não deve criar.' },
-  { modulo: 'Compras', conflito: ['aprovar', 'editar'], severidade: 'Alta', descricao: 'Quem aprova compras não deve editar.' },
-  { modulo: 'Estoque', conflito: ['transferir', 'excluir'], severidade: 'Média', descricao: 'Quem transfere não deve excluir movimentações.' },
-  { modulo: 'RH', conflito: ['editar', 'aprovar'], severidade: 'Média', descricao: 'Quem edita dados de RH não deve aprovar.' },
-  { modulo: 'Sistema', conflito: ['criar', 'editar'], severidade: 'Crítica', descricao: 'Criar usuários e editar perfis (escalada de privilégio).' },
+  { modulo: 'Financeiro', conflito: ['aprovar', 'liquidar'], severidade: 'Alta', codigo: 'FIN-PAG-001', descricao: 'Quem aprova pagamentos não deve liquidar.' },
+  { modulo: 'Financeiro', conflito: ['criar', 'excluir'], severidade: 'Média', codigo: 'FIN-CR-001', descricao: 'Quem cria lançamentos não deve excluir.' },
+  { modulo: 'Financeiro', conflito: ['aprovar', 'criar'], severidade: 'Alta', codigo: 'FIN-AP-001', descricao: 'Quem aprova no Financeiro não deve criar.' },
+  { modulo: 'Financeiro', conflito: ['aprovar', 'editar'], severidade: 'Alta', codigo: 'FIN-ED-001', descricao: 'Quem aprova no Financeiro não deve editar.' },
+  { modulo: 'Financeiro', conflito: ['aprovar', 'excluir'], severidade: 'Crítica', codigo: 'FIN-EX-001', descricao: 'Quem aprova no Financeiro não deve excluir.' },
+  { modulo: 'Comercial', conflito: ['editar', 'aprovar'], severidade: 'Média', codigo: 'COM-DESC-001', descricao: 'Quem edita não deve aprovar descontos.' },
+  { modulo: 'Comercial', conflito: ['criar', 'aprovar'], severidade: 'Média', codigo: 'COM-CR-001', descricao: 'Quem cria pedidos não deve aprová-los.' },
+  { modulo: 'Fiscal', conflito: ['emitir', 'cancelar'], severidade: 'Alta', codigo: 'FIS-NFE-001', descricao: 'Separar emissão e cancelamento fiscal.' },
+  { modulo: 'Fiscal', conflito: ['emitir', 'aprovar'], severidade: 'Média', codigo: 'FIS-AP-001', descricao: 'Separar emissão e aprovação fiscal.' },
+  { modulo: 'Compras', conflito: ['criar', 'aprovar'], severidade: 'Alta', codigo: 'CMP-OC-001', descricao: 'Quem aprova compras não deve criar.' },
+  { modulo: 'Compras', conflito: ['aprovar', 'editar'], severidade: 'Alta', codigo: 'CMP-ED-001', descricao: 'Quem aprova compras não deve editar.' },
+  { modulo: 'Estoque', conflito: ['criar', 'aprovar'], severidade: 'Alta', codigo: 'EST-MOV-001', descricao: 'Quem cria movimentações não deve aprovar.' },
+  { modulo: 'Estoque', conflito: ['transferir', 'excluir'], severidade: 'Média', codigo: 'EST-TR-001', descricao: 'Quem transfere não deve excluir movimentações.' },
+  { modulo: 'RH', conflito: ['editar', 'aprovar'], severidade: 'Média', codigo: 'RH-SAL-001', descricao: 'Quem edita dados de RH não deve aprovar.' },
+  { modulo: 'Sistema', conflito: ['criar', 'editar'], severidade: 'Crítica', codigo: 'ADM-USR-001', descricao: 'Criar usuários e editar perfis (escalada de privilégio).' },
+  { modulo: 'AuditLog', conflito: ['excluir'], severidade: 'Crítica', codigo: 'LOG-SEC-001', descricao: 'Perfil pode deletar registros de auditoria (não permitido).' },
+  { modulo: 'Produção', conflito: ['aprovar'], crossModulo: 'Compras', crossConflito: ['criar'], severidade: 'Média', codigo: 'PRD-OC-001', descricao: 'Aprovar produção + criar requisição de compra.' },
 ];
+
+function extractActions(node) {
+  if (!node) return [];
+  if (Array.isArray(node)) return node.map(a => String(a).toLowerCase());
+  if (typeof node === 'object') return Object.values(node).flatMap(v => extractActions(v));
+  return [];
+}
 
 function detectSodConflicts(permissoes) {
   const conflitos = [];
   let severidadeMax = null;
 
   for (const regra of SOD_RULES) {
-    const mod = permissoes?.[regra.modulo];
-    if (!mod) continue;
-    const secoes = Object.values(mod || {});
-    const acoesPresentes = new Set();
-    for (const lista of secoes) {
-      if (Array.isArray(lista)) for (const ac of lista) acoesPresentes.add(String(ac).toLowerCase());
+    // Regra cross-módulo (ex: Produção aprovar + Compras criar)
+    if (regra.crossModulo) {
+      const modAcoes = new Set(extractActions(permissoes?.[regra.modulo]));
+      const crossModAcoes = new Set(extractActions(permissoes?.[regra.crossModulo]));
+      if (regra.conflito.every((ac) => modAcoes.has(ac)) && regra.crossConflito.every((ac) => crossModAcoes.has(ac))) {
+        conflitos.push({
+          regra: regra.codigo,
+          tipo_conflito: `${regra.modulo}+${regra.crossModulo}:${[...regra.conflito, ...regra.crossConflito].join('+')}`,
+          descricao: regra.descricao,
+          severidade: regra.severidade,
+          data_deteccao: new Date().toISOString(),
+        });
+        if (!severidadeMax || prioridade(regra.severidade) > prioridade(severidadeMax)) {
+          severidadeMax = regra.severidade;
+        }
+      }
+      continue;
     }
+
+    // Regra intra-módulo
+    const mod = permissoes?.[regra.modulo] || permissoes?.[regra.modulo === 'Sistema' ? 'Administração' : regra.modulo];
+    if (!mod) continue;
+    const acoesPresentes = new Set(extractActions(mod));
+
     if (regra.conflito.every((ac) => acoesPresentes.has(ac))) {
       conflitos.push({
+        regra: regra.codigo,
         tipo_conflito: `${regra.modulo}:${regra.conflito.join('+')}`,
         descricao: regra.descricao,
         severidade: regra.severidade,
@@ -43,7 +71,8 @@ function detectSodConflicts(permissoes) {
       }
     }
   }
-  return { conflitos, severidadeMax };
+
+  return { conflitos, severidadeMax: severidadeMax || 'Baixa' };
 }
 
 function prioridade(level) {
@@ -52,5 +81,8 @@ function prioridade(level) {
 
 // Health-check — _lib functions need Deno.serve to deploy
 Deno.serve(async (req) => {
-  return Response.json({ ok: true, status: 'healthy', module: '_lib/security/sodRules' });
+  return Response.json({
+    ok: true, status: 'healthy', module: '_lib/security/sodRules',
+    consolidated: true, rulesCount: SOD_RULES.length
+  });
 });

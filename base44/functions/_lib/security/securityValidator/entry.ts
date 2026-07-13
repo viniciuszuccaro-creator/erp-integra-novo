@@ -1,90 +1,85 @@
 // Função utilitária consolidada de validações de segurança
-// Consolida: securityAlerts + sodValidator + conflictPolicy
-// NOTA: arquivo de lib puro — não usa Deno.serve nem export (usado apenas como referência de lógica)
+// CONSOLIDADO: detectSodConflicts agora usa SOD_RULES data-driven (mirror de sodRules/entry.ts)
+// Mantém funções extras: detectSecurityAlerts + detectFlowInconsistencies
 
+// === SOD_RULES — data-driven, sincronizado com sodRules/entry.ts ===
+const SOD_RULES = [
+  { modulo: 'Financeiro', conflito: ['aprovar', 'liquidar'], severidade: 'Alta', codigo: 'FIN-PAG-001', descricao: 'Quem aprova pagamentos não deve liquidar.' },
+  { modulo: 'Financeiro', conflito: ['criar', 'excluir'], severidade: 'Média', codigo: 'FIN-CR-001', descricao: 'Quem cria lançamentos não deve excluir.' },
+  { modulo: 'Financeiro', conflito: ['aprovar', 'criar'], severidade: 'Alta', codigo: 'FIN-AP-001', descricao: 'Quem aprova no Financeiro não deve criar.' },
+  { modulo: 'Financeiro', conflito: ['aprovar', 'editar'], severidade: 'Alta', codigo: 'FIN-ED-001', descricao: 'Quem aprova no Financeiro não deve editar.' },
+  { modulo: 'Financeiro', conflito: ['aprovar', 'excluir'], severidade: 'Crítica', codigo: 'FIN-EX-001', descricao: 'Quem aprova no Financeiro não deve excluir.' },
+  { modulo: 'Comercial', conflito: ['editar', 'aprovar'], severidade: 'Média', codigo: 'COM-DESC-001', descricao: 'Quem edita não deve aprovar descontos.' },
+  { modulo: 'Comercial', conflito: ['criar', 'aprovar'], severidade: 'Média', codigo: 'COM-CR-001', descricao: 'Quem cria pedidos não deve aprová-los.' },
+  { modulo: 'Fiscal', conflito: ['emitir', 'cancelar'], severidade: 'Alta', codigo: 'FIS-NFE-001', descricao: 'Separar emissão e cancelamento fiscal.' },
+  { modulo: 'Fiscal', conflito: ['emitir', 'aprovar'], severidade: 'Média', codigo: 'FIS-AP-001', descricao: 'Separar emissão e aprovação fiscal.' },
+  { modulo: 'Compras', conflito: ['criar', 'aprovar'], severidade: 'Alta', codigo: 'CMP-OC-001', descricao: 'Quem aprova compras não deve criar.' },
+  { modulo: 'Compras', conflito: ['aprovar', 'editar'], severidade: 'Alta', codigo: 'CMP-ED-001', descricao: 'Quem aprova compras não deve editar.' },
+  { modulo: 'Estoque', conflito: ['criar', 'aprovar'], severidade: 'Alta', codigo: 'EST-MOV-001', descricao: 'Quem cria movimentações não deve aprovar.' },
+  { modulo: 'Estoque', conflito: ['transferir', 'excluir'], severidade: 'Média', codigo: 'EST-TR-001', descricao: 'Quem transfere não deve excluir movimentações.' },
+  { modulo: 'RH', conflito: ['editar', 'aprovar'], severidade: 'Média', codigo: 'RH-SAL-001', descricao: 'Quem edita dados de RH não deve aprovar.' },
+  { modulo: 'Sistema', conflito: ['criar', 'editar'], severidade: 'Crítica', codigo: 'ADM-USR-001', descricao: 'Criar usuários e editar perfis (escalada de privilégio).' },
+  { modulo: 'AuditLog', conflito: ['excluir'], severidade: 'Crítica', codigo: 'LOG-SEC-001', descricao: 'Perfil pode deletar registros de auditoria (não permitido).' },
+  { modulo: 'Produção', conflito: ['aprovar'], crossModulo: 'Compras', crossConflito: ['criar'], severidade: 'Média', codigo: 'PRD-OC-001', descricao: 'Aprovar produção + criar requisição de compra.' },
+];
+
+function prioridade(level) {
+  return { 'Baixa': 1, 'Média': 2, 'Alta': 3, 'Crítica': 4 }[level] || 0;
+}
+
+// Extrai ações de qualquer nó (array ou objeto aninhado)
+function extractActions(node) {
+  if (!node) return [];
+  if (Array.isArray(node)) return node.map(a => String(a).toLowerCase());
+  if (typeof node === 'object') return Object.values(node).flatMap(v => extractActions(v));
+  return [];
+}
+
+// detectSodConflicts — agora data-driven via SOD_RULES (sincronizado com sodRules/entry.ts)
 function detectSodConflicts(permissoes = {}) {
-  const perms = permissoes || {};
   const conflitos = [];
+  let severidadeMax = null;
 
-  // Extrai ações de qualquer nó (array ou objeto aninhado)
-  const extractActions = (node) => {
-    if (!node) return [];
-    if (Array.isArray(node)) return node.map(a => String(a).toLowerCase());
-    if (typeof node === 'object') return Object.values(node).flatMap(v => extractActions(v));
-    return [];
-  };
-  const hasAny = (node, ...actions) => {
-    const acts = extractActions(node);
-    return actions.some(a => acts.includes(a));
-  };
+  for (const regra of SOD_RULES) {
+    // Regra cross-módulo (ex: Produção aprovar + Compras criar)
+    if (regra.crossModulo) {
+      const modAcoes = new Set(extractActions(permissoes?.[regra.modulo]));
+      const crossModAcoes = new Set(extractActions(permissoes?.[regra.crossModulo]));
+      if (regra.conflito.every((ac) => modAcoes.has(ac)) && regra.crossConflito.every((ac) => crossModAcoes.has(ac))) {
+        conflitos.push({
+          regra: regra.codigo,
+          tipo_conflito: `${regra.modulo}+${regra.crossModulo}:${[...regra.conflito, ...regra.crossConflito].join('+')}`,
+          descricao: regra.descricao,
+          severidade: regra.severidade,
+          data_deteccao: new Date().toISOString(),
+        });
+        if (!severidadeMax || prioridade(regra.severidade) > prioridade(severidadeMax)) {
+          severidadeMax = regra.severidade;
+        }
+      }
+      continue;
+    }
 
-  const fin = perms['Financeiro'] || {};
-  const com = perms['Comercial'] || {};
-  const sys = perms['Sistema'] || perms['Administração'] || {};
-  const fis = perms['Fiscal'] || {};
-  const aud = perms['AuditLog'] || {};
-  const est = perms['Estoque'] || {};
-  const cmp = perms['Compras'] || {};
-  const rh  = perms['RH'] || {};
-  const adm = perms['Administração'] || perms['Sistema'] || {};
-  const prod = perms['Produção'] || perms['Producao'] || {};
+    // Regra intra-módulo
+    const mod = permissoes?.[regra.modulo] || permissoes?.[regra.modulo === 'Sistema' ? 'Administração' : regra.modulo];
+    if (!mod) continue;
+    const acoesPresentes = new Set(extractActions(mod));
 
-  // FIN-PAG-001: Aprovação e Liquidação de Pagamentos
-  if (hasAny(fin, 'aprovar') && hasAny(fin, 'liquidar', 'pago')) {
-    conflitos.push({ regra: 'FIN-PAG-001', severidade: 'Alta', descricao: 'Mesmo perfil pode aprovar e liquidar pagamentos.' });
+    if (regra.conflito.every((ac) => acoesPresentes.has(ac))) {
+      conflitos.push({
+        regra: regra.codigo,
+        tipo_conflito: `${regra.modulo}:${regra.conflito.join('+')}`,
+        descricao: regra.descricao,
+        severidade: regra.severidade,
+        data_deteccao: new Date().toISOString(),
+      });
+      if (!severidadeMax || prioridade(regra.severidade) > prioridade(severidadeMax)) {
+        severidadeMax = regra.severidade;
+      }
+    }
   }
 
-  // COM-DESC-001: Edição e Aprovação de Descontos
-  if (hasAny(com, 'desconto', 'editar') && hasAny(com, 'aprovar')) {
-    conflitos.push({ regra: 'COM-DESC-001', severidade: 'Média', descricao: 'Mesmo perfil pode editar e aprovar descontos.' });
-  }
-
-  // SYS-RBAC-001: Admin de Acessos + Leitura de Auditoria
-  if (hasAny(sys, 'editar', 'criar') && hasAny(sys, 'ver', 'visualizar') && extractActions(sys).length >= 2) {
-    conflitos.push({ regra: 'SYS-RBAC-001', severidade: 'Crítica', descricao: 'Perfil administra acessos e visualiza trilhas sensíveis.' });
-  }
-
-  // FIS-NFE-001: Emissão e Cancelamento de NF-e
-  if (hasAny(fis, 'criar', 'emitir') && hasAny(fis, 'excluir', 'cancelar')) {
-    conflitos.push({ regra: 'FIS-NFE-001', severidade: 'Alta', descricao: 'Mesmo perfil pode emitir e cancelar documentos fiscais.' });
-  }
-
-  // LOG-SEC-001: Deletar Logs de Auditoria
-  if (hasAny(aud, 'excluir', 'deletar')) {
-    conflitos.push({ regra: 'LOG-SEC-001', severidade: 'Crítica', descricao: 'Perfil pode deletar registros de auditoria (não permitido).' });
-  }
-
-  // EST-MOV-001: Criar e Aprovar Movimentações de Estoque
-  if (hasAny(est, 'criar') && hasAny(est, 'aprovar')) {
-    conflitos.push({ regra: 'EST-MOV-001', severidade: 'Alta', descricao: 'Mesmo perfil pode criar e aprovar movimentações de estoque.' });
-  }
-
-  // CMP-OC-001: Criar OC e Liquidar Pagamento
-  if (hasAny(cmp, 'criar') && hasAny(fin, 'liquidar', 'pago')) {
-    conflitos.push({ regra: 'CMP-OC-001', severidade: 'Alta', descricao: 'Mesmo perfil pode criar Ordem de Compra e liquidar pagamentos.' });
-  }
-
-  // RH-SAL-001: Editar Salário e Aprovar Folha
-  if (hasAny(rh, 'editar') && hasAny(rh, 'aprovar')) {
-    conflitos.push({ regra: 'RH-SAL-001', severidade: 'Média', descricao: 'Mesmo perfil pode editar dados salariais e aprovar folha de pagamento.' });
-  }
-
-  // ADM-USR-001: Criar Usuários + Editar Perfis (escalada de privilégio)
-  if (hasAny(adm, 'criar') && hasAny(adm, 'editar')) {
-    conflitos.push({ regra: 'ADM-USR-001', severidade: 'Crítica', descricao: 'Mesmo perfil pode criar usuários e editar perfis de acesso (escalada de privilégio).' });
-  }
-
-  // PRD-OC-001: Aprovar Produção + Criar Requisição de Compra
-  if (hasAny(prod, 'aprovar') && hasAny(cmp, 'criar')) {
-    conflitos.push({ regra: 'PRD-OC-001', severidade: 'Média', descricao: 'Mesmo perfil pode aprovar ordens de produção e criar requisições de compra.' });
-  }
-
-  const order = { Baixa: 1, Média: 2, Alta: 3, Crítica: 4 };
-  const severidadeMax = conflitos.length > 0
-    ? conflitos.reduce((max, item) => order[item.severidade] > order[max] ? item.severidade : max, 'Baixa')
-    : 'Baixa';
-
-  return { conflitos, severidadeMax };
+  return { conflitos, severidadeMax: severidadeMax || 'Baixa' };
 }
 
 // Detecta alertas de segurança nos logs
@@ -180,5 +175,8 @@ function detectFlowInconsistencies(pedido, entregas, notasFiscais) {
 
 // Health-check — _lib functions need Deno.serve to deploy
 Deno.serve(async (req) => {
-  return Response.json({ ok: true, status: 'healthy', module: '_lib/security/securityValidator' });
+  return Response.json({
+    ok: true, status: 'healthy', module: '_lib/security/securityValidator',
+    consolidated: true, sodRulesCount: SOD_RULES.length
+  });
 });

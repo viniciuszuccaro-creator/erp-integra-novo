@@ -227,6 +227,11 @@
           "quantidade": {
             "type": "number"
           },
+          "quantidade_faturada": {
+            "type": "number",
+            "default": 0,
+            "description": "Vol 5.2: Quantidade j\u00e1 faturada (controle de faturamento parcial)"
+          },
           "unidade": {
             "type": "string"
           },
@@ -276,6 +281,11 @@
           "quantidade": {
             "type": "number"
           },
+          "quantidade_faturada": {
+            "type": "number",
+            "default": 0,
+            "description": "Vol 5.2: Quantidade j\u00e1 faturada (controle de faturamento parcial)"
+          },
           "unidade": {
             "type": "string"
           },
@@ -324,6 +334,11 @@
           },
           "quantidade": {
             "type": "number"
+          },
+          "quantidade_faturada": {
+            "type": "number",
+            "default": 0,
+            "description": "Vol 5.2: Quantidade j\u00e1 faturada (controle de faturamento parcial)"
           },
           "unidade": {
             "type": "string"
@@ -388,10 +403,35 @@
           },
           "data_criacao": {
             "type": "string"
+          },
+          "valor_faturado": {
+            "type": "number",
+            "default": 0,
+            "description": "Vol 5.2: Valor faturado nesta etapa"
+          },
+          "data_faturamento": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Vol 5.2: Data/hora do faturamento desta etapa"
           }
         }
       },
       "description": "Etapas de entrega/faturamento parcial"
+    },
+    "valor_faturado": {
+      "type": "number",
+      "default": 0,
+      "description": "Vol 5.2: Valor total j\u00e1 faturado (parcial ou total)"
+    },
+    "valor_pendente_faturamento": {
+      "type": "number",
+      "default": 0,
+      "description": "Vol 5.2: Valor ainda pendente de faturamento"
+    },
+    "peso_faturado_kg": {
+      "type": "number",
+      "default": 0,
+      "description": "Vol 5.2: Peso j\u00e1 faturado em KG"
     },
     "observacoes_nfe": {
       "type": "string",
@@ -520,6 +560,7 @@
         "Aprovado",
         "Em Produ\u00e7\u00e3o",
         "Pronto para Faturar",
+        "Faturamento Parcial",
         "Faturado",
         "Em Expedi\u00e7\u00e3o",
         "Em Tr\u00e2nsito",

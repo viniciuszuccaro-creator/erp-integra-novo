@@ -123,6 +123,14 @@ export default function Comercial() {
     pedidosPendentesAprovacao,
     pedidosEntrega,
     pedidosRetirada,
+    valorFaturado,
+    valorPendenteFaturamento,
+    pesoTotalVendido,
+    pedidosFaturados,
+    pedidosFaturamentoParcial,
+    pedidosCancelados,
+    margemBruta,
+    margemPercentual,
   } = useComercialDerivedData({ pedidos, clientes, pedidosExternos });
 
   const handleCreateNewPedido = () => {
@@ -325,7 +333,7 @@ export default function Comercial() {
         empresa_id: empresaAtual?.id || null,
         group_id: grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null,
         data_hora: new Date().toISOString(),
-      }).catch(() => {});
+      }).catch((auditErr) => { console.error('AuditLog falhou (Comercial module click):', auditErr); });
       openWindow(
         module.component,
         { ...(module.props || {}), windowMode: true },
@@ -347,11 +355,10 @@ export default function Comercial() {
               subtitle="Vendas, clientes e canais"
               actions={<div className="flex items-center gap-2">
                 <ProtectedSection module="Comercial" section="Pedidos" action="criar">
-                  <Button data-permission="Comercial.Pedidos.criar" data-sensitive onClick={handleCreateNewPedido} className="bg-indigo-600 hover:bg-indigo-700">Novo Pedido</Button>
+                  <Button onClick={handleCreateNewPedido} className="bg-indigo-600 hover:bg-indigo-700">Novo Pedido</Button>
                 </ProtectedSection>
                 <ProtectedSection module="Comercial" section="Pedidos" action="visualizar">
                   <Button
-                    data-permission="Comercial.Pedidos.visualizar"
                     variant="outline"
                     onClick={() => openWindow(ValidarPedidosExternos, { windowMode: true }, { title: 'Validar Pedidos Externos', width: 1300, height: 800 })}
                   >Validar Pedido Externo</Button>
@@ -365,6 +372,14 @@ export default function Comercial() {
                    totalPedidos={pedidos.length}
                    totalVendas={totalVendas}
                    ticketMedio={ticketMedio}
+                   valorFaturado={valorFaturado}
+                   valorPendenteFaturamento={valorPendenteFaturamento}
+                   pesoTotalVendido={pesoTotalVendido}
+                   pedidosFaturados={pedidosFaturados}
+                   pedidosFaturamentoParcial={pedidosFaturamentoParcial}
+                   pedidosCancelados={pedidosCancelados}
+                   margemBruta={margemBruta}
+                   margemPercentual={margemPercentual}
                  />
                 {pedidosExternosPendentes > 0 && (
                   <Badge className="bg-orange-100 text-orange-700 px-3 py-2 text-sm font-medium">

@@ -126,30 +126,31 @@ export default function usePermissions() {
       'enviar': ['enviar', 'send'],
       'editar': ['editar', 'update', 'edit', 'corrigir', 'gerenciar', 'executar', 'registrar', 'atualizar', 'configurar', 'config'],
       'excluir': ['excluir', 'delete', 'remove', 'apagar', 'destroy'],
-      // Vol 3.4: aprovar e rejeitar são ações SEPARADAS — backward compat: aprovar no perfil também concede rejeitar
+      // Vol 3.4 (Seção 3.4 do plano): aprovar e rejeitar são ações SEPARADAS — sem backward compat
       'aprovar': ['aprovar', 'approve', 'validar'],
-      'rejeitar': ['rejeitar', 'aprovar', 'approve', 'validar'],
+      'rejeitar': ['rejeitar', 'reject'],
       'exportar': ['exportar', 'export', 'imprimir', 'print'],
       'cancelar': ['cancelar', 'cancel'],
       'configurar': ['configurar', 'config', 'editar', 'update'],
       'auditar': ['auditar', 'audit', 'visualizar'],
       'backup': ['backup', 'executar'],
       'seguranca': ['seguranca', 'segurança', 'configurar'],
-      // Vol 3.4: pagar, receber, conciliar, estornar são ações SEPARADAS — backward compat: liquidar no perfil concede todas
+      // Vol 3.4 (Seção 3.4 do plano): pagar, receber, conciliar, estornar são ações SEPARADAS — sem backward compat com liquidar
       'liquidar': ['liquidar'],
-      'pagar': ['pagar', 'liquidar'],
-      'receber': ['receber', 'liquidar'],
-      'conciliar': ['conciliar', 'liquidar'],
-      'estornar': ['estornar', 'liquidar'],
+      'pagar': ['pagar'],
+      'receber': ['receber'],
+      'conciliar': ['conciliar'],
+      'estornar': ['estornar'],
       'abrir': ['abrir'],
-      'fechar': ['fechar', 'concluir'],
+      'fechar': ['fechar'],
       'transferir': ['transferir', 'mover'],
       'rastrear': ['rastrear', 'track'],
       'roteirizar': ['roteirizar', 'otimizar'],
       'apontar': ['apontar', 'registrar'],
       'concluir': ['concluir', 'finalizar'],
       'inventario': ['inventario', 'contar', 'ajustar'],
-      'desconto': ['desconto', 'aprovar', 'approve'],
+      // Vol 3.4: desconto é ação separada — não herda aprovar automaticamente
+      'desconto': ['desconto'],
       'assinar': ['assinar', 'assinatura'],
       'renovar': ['renovar', 'prorrogar'],
       'responder': ['responder', 'reply'],
@@ -197,8 +198,13 @@ export default function usePermissions() {
     // Após carregar (isLoading=false) sem perfil → fail-closed para TODAS as ações.
     if (!perms) {
       if (loadingPerfil) {
+        // Vol 3.4 (Seção 3.4 do plano): áreas sensíveis permanecem BLOQUEADAS durante carregamento
+        const sensitiveActions = ['pagar', 'receber', 'liquidar', 'conciliar', 'estornar', 'abrir', 'fechar',
+          'aprovar', 'rejeitar', 'desconto', 'excluir', 'cancelar', 'estornar', 'transferir', 'assinar', 'desativar'];
+        const actionLower = String(action || '').toLowerCase();
+        if (sensitiveActions.includes(actionLower)) return false;
         const readOnlyActions = ['ver', 'visualizar', 'view', 'read', 'listar', 'consultar', 'status'];
-        return readOnlyActions.includes(String(action || '').toLowerCase());
+        return readOnlyActions.includes(actionLower);
       }
       return false; // Perfil carregou mas não existe — fail-closed
     }
@@ -312,6 +318,15 @@ export default function usePermissions() {
     return hasPermission(module, section, 'cancelar');
   };
 
+  // Vol 3.4: helpers granulares para ações financeiras separadas
+  const canPay = (module, section = null) => hasPermission(module, section, 'pagar');
+  const canReceive = (module, section = null) => hasPermission(module, section, 'receber');
+  const canLiquidate = (module, section = null) => hasPermission(module, section, 'liquidar');
+  const canReconcile = (module, section = null) => hasPermission(module, section, 'conciliar');
+  const canRefund = (module, section = null) => hasPermission(module, section, 'estornar');
+  const canReject = (module, section = null) => hasPermission(module, section, 'rejeitar');
+  const canDiscount = (module, section = null) => hasPermission(module, section, 'desconto');
+
   const canCreate = (module, section = null) => {
     return hasPermission(module, section, 'criar');
   };
@@ -338,6 +353,14 @@ export default function usePermissions() {
     canEdit,
     canExport,
     canCancel,
+    // Vol 3.4: ações financeiras granulares
+    canPay,
+    canReceive,
+    canLiquidate,
+    canReconcile,
+    canRefund,
+    canReject,
+    canDiscount,
     resolveModuleKey,
     isLoading: loadingUser || loadingPerfil,
     user,

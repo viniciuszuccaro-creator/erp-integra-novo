@@ -19,8 +19,8 @@ export default function CorteDobraIATab({ formData, setFormData, empresaId, onNe
   } = useCorteDobraIA(formData, setFormData, empresaId);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[400px] lg:min-h-[500px]">
-      <div className="space-y-4 overflow-auto min-h-[400px] lg:max-h-[calc(100vh-200px)]">
+    <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 min-h-[400px] lg:min-h-[500px]">
+      <div className="space-y-4 overflow-auto min-h-[300px] lg:min-h-[400px] lg:max-h-[calc(100vh-180px)]">
         <UploadIACard
           onUpload={handleUploadIA}
           processandoIA={processandoIA}
@@ -45,7 +45,7 @@ export default function CorteDobraIATab({ formData, setFormData, empresaId, onNe
         />
       </div>
 
-      <div className="border-2 border-slate-200 rounded-lg bg-white overflow-hidden lg:sticky lg:top-4 self-start">
+      <div className="border-2 border-slate-200 rounded-lg bg-white overflow-hidden lg:sticky lg:top-4 self-start flex-1 min-h-[250px] lg:min-h-[400px]">
         <div className="p-3 bg-slate-50 border-b">
           <h3 className="font-semibold text-sm flex items-center gap-2">
             <Eye className="w-4 h-4 text-blue-600" />

@@ -19,6 +19,9 @@ Estas 7 automações estão desarquivadas e ativadas. Executarão automaticament
 | 5 | Notify WhatsApp - ContaReceber Atrasado | `onEntityWhatsappNotify` | WhatsApp | On ContaReceber update |
 | 6 | Lembretes Financeiros D+0/D±3 | `paymentStatusManager` | WhatsApp | Diário 12:00 |
 | 7 | Security Alerts Scanner | `securityAlerts` | SendEmail | A cada 30 min |
+| 8 | Auditoria Fluxo de Pedidos | `orderFlowAuditor` | — | A cada 2h |
+| 9 | Consolidação de Grupo Noturna | `groupConsolidation` | — | Diário 02:00 |
+| 10 | Deploy Heartbeat | `deployAudit` | — | A cada 15min |
 
 ### Automações já ativas (não-crédito-dependentes ou já ativadas anteriormente):
 - Propagação bidirecional Grupo↔Empresas (8 entidades)
@@ -58,6 +61,11 @@ Estas 12 funções tinham imports relativos quebrados (`./_lib/...`) que impedia
 | 11 | `onPedidoCreated` | ✅ 200 OK — skip correto |
 | 12 | `parseSpreadsheet` | ✅ 400 OK — file_url required |
 | 13 | `sendEmailProvider` | ✅ 200 OK — status: Core |
+| 14 | `autoBackup` | ✅ 200 OK — cooldown anti-rate-limit |
+| 15 | `onNotaFiscalAuthorized` | ✅ 200 OK — skip (no data) |
+| 16 | `paymentStatusManager` | ✅ 400 OK — params required |
+| 17 | `oportunidadeScorer` | ✅ 400 OK — oportunidade_id required |
+| 18 | `whatsappSend` | ✅ 200 OK — modo simulado, sucesso |
 
 **Resultado da varredura final:** 0 imports relativos quebrados restantes.
 
@@ -105,6 +113,9 @@ Quando os créditos de integração resetarem:
 6. **WhatsApp notifications** dispararão em tempo real (pedido aprovado, conta atrasada)
 7. **NF-e Autorizada** enviará email/WhatsApp com DANFE/XML automaticamente
 8. **Todas as automações operacionais** (propagação, sync, auditoria, roteirização) continuarão funcionando
+9. **Auditoria de Fluxo de Pedidos** rodará a cada 2h, validando consistência do fluxo comercial
+10. **Consolidação de Grupo** rodará diariamente, agregando dados financeiros multiempresa
+11. **Deploy Heartbeat** rodará a cada 15min, coletando métricas de saúde/latência/erros
 
 ---
 

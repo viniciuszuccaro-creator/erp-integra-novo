@@ -32,6 +32,18 @@ export const ACOES = [
   { id: "cancelar", nome: "Cancelar", icone: "X", cor: "red" },
   { id: "duplicar", nome: "Duplicar", icone: "Copy", cor: "blue" },
   { id: "consultar", nome: "Consultar", icone: "Search", cor: "slate" },
+
+  // Vol 10.2: Segregação de funções no Caixa
+  { id: "receber", nome: "Receber", icone: "ArrowDownCircle", cor: "green" },
+  { id: "pagar", nome: "Pagar", icone: "ArrowUpCircle", cor: "red" },
+  { id: "liquidar", nome: "Liquidar", icone: "CheckCircle", cor: "cyan" },
+  { id: "conciliar", nome: "Conciliar", icone: "GitMerge", cor: "purple" },
+  { id: "desfazer", nome: "Desfazer/Estornar", icone: "Undo2", cor: "red" },
+  { id: "abrir", nome: "Abrir Caixa", icone: "Unlock", cor: "blue" },
+  { id: "fechar", nome: "Fechar Caixa", icone: "Lock", cor: "slate" },
+
+  // Vol 7.2: Estoque
+  { id: "permitir_negativo", nome: "Permitir Estoque Negativo", icone: "AlertTriangle", cor: "amber" },
 ];
 
 // Mapeamento de cores de ícones

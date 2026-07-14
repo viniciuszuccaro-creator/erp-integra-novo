@@ -261,7 +261,7 @@ export function useContextoVisual() {
         dados_anteriores: null, dados_novos: created,
         data_hora: new Date().toISOString()
       });
-    } catch {}
+    } catch (e) { console.error('[useContextoVisual] Falha ao auditar criação:', e?.message || e); }
     return created;
   };
   const bulkCreateInContext = async (entityName, lista, campo = 'empresa_id') => {
@@ -282,7 +282,7 @@ export function useContextoVisual() {
         dados_anteriores: null, dados_novos: { count: res?.length || stampedList.length },
         data_hora: new Date().toISOString()
       });
-    } catch {}
+    } catch (e) { console.error('[useContextoVisual] Falha ao auditar criação em lote:', e?.message || e); }
     return res;
   };
   const updateInContext = async (entityName, id, dados, campo = 'empresa_id') => {
@@ -301,7 +301,7 @@ export function useContextoVisual() {
         dados_anteriores: before, dados_novos: updated,
         data_hora: new Date().toISOString()
       });
-    } catch {}
+    } catch (e) { console.error('[useContextoVisual] Falha ao auditar edição:', e?.message || e); }
     return updated;
   };
   // Vol 3.4: Exclusão lógica obrigatória para dados corporativos — converte delete em inativação
@@ -347,7 +347,7 @@ export function useContextoVisual() {
           dados_anteriores: before, dados_novos: inactivated,
           data_hora: new Date().toISOString()
         });
-      } catch {}
+      } catch (e) { console.error('[useContextoVisual] Falha ao auditar inativação (exclusão lógica):', e?.message || e); }
       return inactivated;
     }
 
@@ -362,7 +362,7 @@ export function useContextoVisual() {
         dados_anteriores: before, dados_novos: null,
         data_hora: new Date().toISOString()
       });
-    } catch {}
+    } catch (e) { console.error('[useContextoVisual] Falha ao auditar exclusão física:', e?.message || e); }
     return res;
   };
   const DEFAULT_SORTS = {

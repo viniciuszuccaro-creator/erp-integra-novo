@@ -5,6 +5,7 @@ import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import RBACButton from "@/components/lib/RBACButton";
 import { Badge } from "@/components/ui/badge";
 import ConfigFinanceiroLogistica from "./ConfigFinanceiroLogistica";
 
@@ -125,8 +126,8 @@ export default function LogisticaFinanceiroPanel({ empresaId }) {
 
       <Section title="Ações Rápidas" extra={<Badge variant="outline" className="text-xs">Config necessária para gerar títulos</Badge>}>
         <div className="flex flex-wrap gap-2">
-          <Button data-permission="Financeiro.ContaReceber.criar" onClick={() => gerarCRMutation.mutate()} disabled={gerarCRMutation.isPending}>Gerar Contas a Receber por Entregas Entregues</Button>
-          <Button data-permission="Financeiro.ContaPagar.criar" variant="outline" onClick={() => gerarCPCombustivelMutation.mutate()} disabled={gerarCPCombustivelMutation.isPending}>Gerar Contas a Pagar de Combustível</Button>
+          <RBACButton module="Financeiro" action="criar" onClick={() => gerarCRMutation.mutate()} disabled={gerarCRMutation.isPending}>Gerar Contas a Receber por Entregas Entregues</RBACButton>
+          <RBACButton module="Financeiro" action="criar" variant="outline" onClick={() => gerarCPCombustivelMutation.mutate()} disabled={gerarCPCombustivelMutation.isPending}>Gerar Contas a Pagar de Combustível</RBACButton>
         </div>
       </Section>
 
@@ -141,7 +142,7 @@ export default function LogisticaFinanceiroPanel({ empresaId }) {
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">{c.status}</Badge>
-                {c.status !== 'Recebido' && <Button data-permission="Financeiro.ContaReceber.baixar" size="sm" onClick={() => conciliarCR(c)}>Conciliar</Button>}
+                {c.status !== 'Recebido' && <RBACButton module="Financeiro" action="baixar" size="sm" onClick={() => conciliarCR(c)}>Conciliar</RBACButton>}
               </div>
             </div>
           ))}
@@ -159,7 +160,7 @@ export default function LogisticaFinanceiroPanel({ empresaId }) {
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">{c.status}</Badge>
-                {c.status !== 'Pago' && <Button data-permission="Financeiro.ContaPagar.baixar" size="sm" onClick={() => conciliarCP(c)}>Conciliar</Button>}
+                {c.status !== 'Pago' && <RBACButton module="Financeiro" action="baixar" size="sm" onClick={() => conciliarCP(c)}>Conciliar</RBACButton>}
               </div>
             </div>
           ))}

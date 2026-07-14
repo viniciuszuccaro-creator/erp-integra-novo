@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import RBACButton from "@/components/lib/RBACButton";
 import { Scan, MapPin, CheckCircle } from "lucide-react";
 import useSeparacaoConferenciaIA from "./separacao-ia/useSeparacaoConferenciaIA";
 import SeparacaoKPIs from "./separacao-ia/SeparacaoKPIs";

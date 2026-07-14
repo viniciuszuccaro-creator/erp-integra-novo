@@ -18,8 +18,8 @@ export default function CorteDobraIATab({ formData, setFormData, empresaId, onNe
   } = useCorteDobraIA(formData, setFormData, empresaId);
 
   return (
-    <div className="grid grid-cols-2 gap-6" style={{ height: 'calc(100vh - 400px)' }}>
-      <div className="space-y-4 overflow-auto">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[500px]">
+      <div className="space-y-4 overflow-auto max-h-[calc(100vh-300px)] lg:max-h-[calc(100vh-250px)]">
         <UploadIACard onUpload={handleUploadIA} processandoIA={processandoIA} />
         <PosicaoForm
           editando={editando}
@@ -38,7 +38,7 @@ export default function CorteDobraIATab({ formData, setFormData, empresaId, onNe
         />
       </div>
 
-      <div className="border-2 border-slate-200 rounded-lg bg-white overflow-hidden sticky top-0">
+      <div className="border-2 border-slate-200 rounded-lg bg-white overflow-hidden lg:sticky lg:top-4 self-start">
         <div className="p-3 bg-slate-50 border-b">
           <h3 className="font-semibold text-sm flex items-center gap-2">
             <Eye className="w-4 h-4 text-blue-600" />

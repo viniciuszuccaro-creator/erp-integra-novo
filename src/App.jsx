@@ -59,6 +59,12 @@ const AuthenticatedApp = () => {
     Contratos: 'Contratos',
     AdministracaoSistema: 'Sistema',
     HubAtendimento: 'HubAtendimento',
+    EntregasMobile: 'Expedicao',
+    ProducaoMobile: 'Producao',
+    CustomerIntelligence: 'CRM',
+    PlanoMelhoria: 'Sistema',
+    ConfiguracoesUsuario: 'Sistema',
+    Documentacao: 'Sistema',
     // DashboardCorporativo: removido da navegação (P5 — duplicata do Dashboard)
   };
 

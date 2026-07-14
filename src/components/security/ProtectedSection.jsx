@@ -107,7 +107,7 @@ export default function ProtectedSection({
           descricao: `Acesso negado: ${modulo}.${section}.${action}`,
           data_hora: new Date().toISOString(),
         });
-      } catch (_) {}
+      } catch (e) { console.error('[ProtectedSection] Falha ao registrar acesso negado:', e?.message || e); }
     }
   }, [isLoading, allowedFinal, action, modulo, section, user?.id, empresaAtual?.id]);
 

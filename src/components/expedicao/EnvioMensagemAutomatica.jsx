@@ -11,6 +11,7 @@ import { MessageCircle, Send, CheckCircle, AlertCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { mockEnviarWhatsApp, avisoModoSimulacao } from "@/components/integracoes/MockIntegracoes";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import RBACButton from "@/components/lib/RBACButton";
 
 /**
  * Componente para envio de WhatsApp automático nas entregas
@@ -157,30 +158,30 @@ export default function EnvioMensagemAutomatica({ entrega, tipo = "saida_entrega
             <div>
               <Label>Templates Prontos</Label>
               <div className="grid grid-cols-3 gap-2 mt-2">
-                <Button data-permission="Expedicao.EnvioMensagemAutomatica.enviar"
+                <RBACButton module="Expedição" action="enviar"
                   size="sm"
                   variant="outline"
                   onClick={() => handleEnviar(templates.confirmacao_pedido)}
                   disabled={enviando}
                 >
                   Confirmação
-                </Button>
-                <Button data-permission="Expedicao.EnvioMensagemAutomatica.enviar"
+                </RBACButton>
+                <RBACButton module="Expedição" action="enviar"
                   size="sm"
                   variant="outline"
                   onClick={() => handleEnviar(templates.saida_entrega)}
                   disabled={enviando}
                 >
                   Saída
-                </Button>
-                <Button data-permission="Expedicao.EnvioMensagemAutomatica.enviar"
+                </RBACButton>
+                <RBACButton module="Expedição" action="enviar"
                   size="sm"
                   variant="outline"
                   onClick={() => handleEnviar(templates.entrega_realizada)}
                   disabled={enviando}
                 >
                   Entregue
-                </Button>
+                </RBACButton>
               </div>
             </div>
 
@@ -195,7 +196,7 @@ export default function EnvioMensagemAutomatica({ entrega, tipo = "saida_entrega
               />
             </div>
 
-            <Button data-permission="Expedicao.EnvioMensagemAutomatica.enviar"
+            <RBACButton module="Expedição" action="enviar"
               onClick={() => handleEnviar(null)}
               disabled={enviando || !mensagemCustom}
               className="w-full bg-green-600 hover:bg-green-700"
@@ -211,7 +212,7 @@ export default function EnvioMensagemAutomatica({ entrega, tipo = "saida_entrega
                   Enviar Mensagem (Simulação)
                 </>
               )}
-            </Button>
+            </RBACButton>
           </>
         )}
       </CardContent>

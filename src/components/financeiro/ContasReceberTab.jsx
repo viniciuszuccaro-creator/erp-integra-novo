@@ -105,7 +105,7 @@ export default function ContasReceberTab({ contas, empresas = [], windowMode = f
           const url = URL.createObjectURL(blob); const a = document.createElement('a');
           a.href = url; a.download = `contas_receber_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
           URL.revokeObjectURL(url);
-          try { base44.entities.AuditLog.create({ acao: 'Exportação', modulo: 'Financeiro', entidade: 'ContaReceber', descricao: `Exportados ${itens.length} títulos`, data_hora: new Date().toISOString() }); } catch (_) { }
+          try { base44.entities.AuditLog.create({ acao: 'Exportação', modulo: 'Financeiro', entidade: 'ContaReceber', descricao: `Exportados ${itens.length} títulos`, data_hora: new Date().toISOString() }); } catch (e) { console.error('[ContasReceber] Falha ao auditar exportação:', e?.message || e); }
         }}
         onBaixarMultipla={handleBaixarMultipla}
         onNovaConta={() => {

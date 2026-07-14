@@ -125,7 +125,7 @@ function PedidoFormCompleto({ pedido, clientes = [], onSubmit, onCancel, windowM
           dados_propostos: { status_aprovacao: 'pendente', status: 'Aguardando Aprovação' },
           justificativa: formData.justificativa_desconto || 'Solicitação de aprovação do pedido'
         });
-        try { await base44.entities.AuditLog.create({ acao: 'Aprovação', modulo: 'Comercial', entidade: 'Pedido', registro_id: formData?.id, descricao: `Solicitada aprovação do pedido (#${solicitacao?.id || ''})`, data_hora: new Date().toISOString() }); } catch {}
+        try { await base44.entities.AuditLog.create({ acao: 'Aprovação', modulo: 'Comercial', entidade: 'Pedido', registro_id: formData?.id, descricao: `Solicitada aprovação do pedido (#${solicitacao?.id || ''})`, data_hora: new Date().toISOString() }); } catch (e) { console.error('[PedidoForm] Falha ao auditar solicitação de aprovação:', e?.message || e); }
       } catch (e) {}
     };
 

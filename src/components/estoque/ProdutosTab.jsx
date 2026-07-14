@@ -213,7 +213,7 @@ export default function ProdutosTab(props) {
                  try {
                    await createRLS('Produto', data);
                    queryClient.invalidateQueries({ queryKey: ['Produto'] });
-                   try { await base44.entities.AuditLog.create({ acao: 'Criação', modulo: 'Estoque', entidade: 'Produto', descricao: 'Produto criado', data_hora: new Date().toISOString() }); } catch(_) {}
+                   try { await base44.entities.AuditLog.create({ acao: 'Criação', modulo: 'Estoque', entidade: 'Produto', descricao: 'Produto criado', data_hora: new Date().toISOString() }); } catch(e) { console.error('[ProdutosTab] Falha ao auditar criação de produto:', e?.message || e); }
                    toast({ title: "✅ Produto criado!" });
                  } catch (error) {
                    toast({ title: "❌ Erro", description: error.message, variant: "destructive" });

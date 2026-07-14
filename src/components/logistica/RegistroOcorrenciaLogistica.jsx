@@ -154,33 +154,36 @@ export default function RegistroOcorrenciaLogistica({ pedido, entrega, onClose, 
           <CardContent className="p-4">
             <Label className="mb-2 block">📸 Foto da Ocorrência (Opcional)</Label>
             <div className="flex gap-3">
-              <Button
+              <RBACButton
+                module="Expedição"
+                action="criar"
                 variant="outline"
-                data-permission="Logistica.Ocorrencia.criar"
                 onClick={() => document.getElementById('foto-ocorrencia-input').click()}
                 disabled={uploadando}
                 className="flex-1"
               >
                 <Camera className="w-4 h-4 mr-2" />
                 {uploadando ? 'Enviando...' : fotoUrl ? '✅ Foto Enviada' : 'Enviar Foto'}
-              </Button>
+              </RBACButton>
               {fotoUrl && (
                 <>
-                  <Button
+                  <RBACButton
+                    module="Expedição"
+                    action="visualizar"
                     variant="outline"
-                    data-permission="Logistica.Ocorrencia.visualizar"
                     onClick={() => window.open(fotoUrl, '_blank')}
                   >
                     Ver
-                  </Button>
-                  <Button
+                  </RBACButton>
+                  <RBACButton
+                    module="Expedição"
+                    action="editar"
                     variant="outline"
-                    data-permission="Logistica.Ocorrencia.editar"
                     onClick={() => setFotoUrl(null)}
                     className="text-red-600"
                   >
                     <X className="w-4 h-4" />
-                  </Button>
+                  </RBACButton>
                 </>
               )}
             </div>
@@ -216,23 +219,25 @@ export default function RegistroOcorrenciaLogistica({ pedido, entrega, onClose, 
 
         {/* Ações */}
         <div className="flex gap-3 pt-4 border-t">
-          <Button
+          <RBACButton
+            module="Expedição"
+            action="visualizar"
             variant="outline"
-            data-permission="Logistica.Ocorrencia.visualizar"
             onClick={onClose}
             className="flex-1"
           >
             Cancelar
-          </Button>
-          <Button
+          </RBACButton>
+          <RBACButton
+            module="Expedição"
+            action="criar"
             onClick={() => registrarOcorrenciaMutation.mutate()}
-            data-permission="Logistica.Ocorrencia.criar"
             disabled={!descricao.trim() || registrarOcorrenciaMutation.isPending}
             className="flex-1 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
           >
             <CheckCircle2 className="w-4 h-4 mr-2" />
             {registrarOcorrenciaMutation.isPending ? 'Registrando...' : 'Registrar Ocorrência'}
-          </Button>
+          </RBACButton>
         </div>
       </CardContent>
     </Card>

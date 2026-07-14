@@ -57,7 +57,7 @@ export function logUIAction({ component, action, status, meta }) {
         },
       });
     });
-  } catch (_) {}
+  } catch (e) { console.error('[uiAudit] Falha ao registrar logUIAction:', e?.message || e); }
 }
 
 export function logUIIssue({ component, issue, severity = "warn", meta }) {
@@ -83,7 +83,7 @@ export function logUIIssue({ component, issue, severity = "warn", meta }) {
         },
       });
     });
-  } catch (_) {}
+  } catch (e) { console.error('[uiAudit] Falha ao registrar logUIIssue:', e?.message || e); }
 }
 
 function sanitizeMeta(meta) {

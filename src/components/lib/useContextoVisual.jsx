@@ -322,6 +322,10 @@ export function useContextoVisual() {
     'Pedido', 'OrdemCompra', 'SolicitacaoCompra', 'OrdemProducao',
     'ApontamentoProducao', 'Entrega', 'Romaneio', 'MovimentacaoEstoque',
     'Inventario', 'Contrato', 'Evento', 'Comissao',
+    // Vol 3.6/3.7: Logs de segurança e auditoria nunca podem ser excluídos fisicamente
+    'AuditLog', 'AuditoriaGlobal', 'AuditoriaAcesso', 'AuditoriaGPS', 'AuditoriaIA',
+    'LogFiscal', 'LogCobranca', 'LogPerformance', 'LogsIA', 'AlertaPerformance',
+    'SessaoUsuario', 'TokenRefresh', 'ConfiguracaoSeguranca',
   ]);
 
   const deleteInContext = async (entityName, id) => {

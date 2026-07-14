@@ -4,7 +4,7 @@
  * Cria os registros de ConfiguracaoSistema se não existirem.
  * Admin-only.
  */
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 const DEFAULT_CONFIGS = [
   // Propagação

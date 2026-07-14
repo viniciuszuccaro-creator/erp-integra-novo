@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // Token simples: payloadBase64.signatureBase64
 // Assinatura = HMAC-SHA256(payloadBase64 bytes) com PORTAL_TOKEN_SECRET

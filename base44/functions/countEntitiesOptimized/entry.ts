@@ -4,7 +4,7 @@
  * ✅ Suporta grupo + empresa com $or automático
  * ✅ Cache de 30s no servidor
  */
-import { createClientFromRequest } from "npm:@base44/sdk@0.8.25";
+import { createClientFromRequest } from "npm:@base44/sdk@0.8.38";
 
 const FIELD_MAP = {
   Cliente: "empresa_id",

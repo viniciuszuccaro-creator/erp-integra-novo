@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // Seed Multiempresa (Grupo atual + empresas do grupo + dados base)
 // Quando body.group_id não é informado, tenta detectar o grupo atual pelas empresas existentes.

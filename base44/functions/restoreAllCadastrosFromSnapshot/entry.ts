@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 /**
  * Restaura TODOS os registros de Cadastro Gerais a partir de snapshot

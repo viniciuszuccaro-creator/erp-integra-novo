@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import { getUserAndPerfil, assertPermission, assertContextPresence, extractRequestMeta, ensureContextFields } from './_lib/guard.js';
 import { processReservas } from './_lib/orderReservationUtils.js';
 import { ensureEventType } from './_lib/validationUtils.js';

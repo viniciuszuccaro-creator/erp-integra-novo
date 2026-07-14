@@ -2,7 +2,7 @@
  * cleanupOrphanedPerfilAcesso — Remove referências órfãs de PerfilAcesso
  * Limpa caches e referências que apontam para IDs deletados/inválidos
  */
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 const ORPHANED_IDS = ['692316b82206c99d5778f10c']; // ID órfão conhecida
 

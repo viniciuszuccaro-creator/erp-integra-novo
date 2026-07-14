@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import { loadAnomalyConfig, computeIssues } from './_lib/anomalyUtils.js';
 import * as ss from 'npm:simple-statistics@7.8.3';
 import { notify } from './_lib/notificationService.js';

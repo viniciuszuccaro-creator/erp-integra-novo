@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 // Inline helpers to avoid local imports
 async function getUserAndPerfil(base44){
   const user = await base44.auth.me();

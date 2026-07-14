@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // Service Worker script responder (same-origin). Registers as /functions/pwaSw
 // Returns JS with basic offline caching (app shell) + SW lifecycle helpers.

@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 /**
  * P2.2: Propagação Grupo → Empresas — Evento (Reunião, Tarefa, etc.)

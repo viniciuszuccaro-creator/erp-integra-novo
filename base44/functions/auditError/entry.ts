@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // Centraliza auditoria de erros do frontend/backend
 // Espera payload: { module, message, stack, page, empresa_id, group_id, metadata }

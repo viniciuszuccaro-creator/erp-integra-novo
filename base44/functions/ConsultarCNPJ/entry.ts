@@ -4,7 +4,7 @@
  * Fontes: ReceitaWS → BrasilAPI (fallback automático)
  */
 
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import { getUserAndPerfil, assertPermission } from './_lib/guard.js';
 
 export default async function ConsultarCNPJ({ cnpj, cfg }) {

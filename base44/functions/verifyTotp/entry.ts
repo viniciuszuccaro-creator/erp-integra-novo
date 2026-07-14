@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // Verifica código 2FA (compatível com entityGuard):
 // Payload: { module?:string, section?:string|string[], empresa_id?:string, group_id?:string, code:string }

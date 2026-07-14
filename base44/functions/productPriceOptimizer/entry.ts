@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import { optimizeProductPrice } from './_lib/pricing/optimizeProductPriceHandler.js';
 import { getUserAndPerfil, assertPermission, audit } from './_lib/guard.js';
 

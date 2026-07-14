@@ -3,7 +3,7 @@
  * Valida 10 controles: EventBus, fluxo automático, webhooks internos,
  * sincronização realtime, auditoria de fluxo, RBAC por módulo, etc.
  */
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 Deno.serve(async (req) => {
   try {

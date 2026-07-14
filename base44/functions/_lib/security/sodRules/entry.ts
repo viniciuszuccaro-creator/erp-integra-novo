@@ -20,6 +20,13 @@ const SOD_RULES = [
   { modulo: 'Sistema', conflito: ['criar', 'editar'], severidade: 'Crítica', codigo: 'ADM-USR-001', descricao: 'Criar usuários e editar perfis (escalada de privilégio).' },
   { modulo: 'AuditLog', conflito: ['excluir'], severidade: 'Crítica', codigo: 'LOG-SEC-001', descricao: 'Perfil pode deletar registros de auditoria (não permitido).' },
   { modulo: 'Produção', conflito: ['aprovar'], crossModulo: 'Compras', crossConflito: ['criar'], severidade: 'Média', codigo: 'PRD-OC-001', descricao: 'Aprovar produção + criar requisição de compra.' },
+  // Vol 10.2: Segregação de funções no Caixa — usuários separados para receber, pagar, conferir, abrir, fechar e estornar
+  { modulo: 'Financeiro', conflito: ['receber', 'pagar'], severidade: 'Alta', codigo: 'FIN-CAIXA-001', descricao: 'Quem recebe não deve pagar (segregação de caixa).' },
+  { modulo: 'Financeiro', conflito: ['liquidar', 'conciliar'], severidade: 'Alta', codigo: 'FIN-CAIXA-002', descricao: 'Quem liquida não deve conciliar (prevenção de fraude).' },
+  { modulo: 'Financeiro', conflito: ['liquidar', 'desfazer'], severidade: 'Crítica', codigo: 'FIN-CAIXA-003', descricao: 'Quem liquida não deve estornar (prevenção de desvio).' },
+  { modulo: 'Financeiro', conflito: ['abrir', 'fechar'], severidade: 'Alta', codigo: 'FIN-CAIXA-004', descricao: 'Quem abre o caixa não deve fechar (dual control).' },
+  { modulo: 'Financeiro', conflito: ['receber', 'conciliar'], severidade: 'Alta', codigo: 'FIN-CAIXA-005', descricao: 'Quem recebe não deve conciliar (independência).' },
+  { modulo: 'Financeiro', conflito: ['pagar', 'conciliar'], severidade: 'Alta', codigo: 'FIN-CAIXA-006', descricao: 'Quem paga não deve conciliar (independência).' },
 ];
 
 function extractActions(node) {

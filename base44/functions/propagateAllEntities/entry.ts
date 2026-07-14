@@ -4,7 +4,7 @@
  * Chama syncBidirectional para cada entidade em sequência com delay anti-429.
  * Admin-only.
  */
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 const DOWN_ENTITIES = [
   'ConfiguracaoSistema', 'PerfilAcesso', 'FormaPagamento', 'PlanoDeContas', 'CentroCusto',

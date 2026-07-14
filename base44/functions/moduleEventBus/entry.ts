@@ -4,7 +4,7 @@
  * Multiempresa: todos os eventos têm group_id + empresa_id
  * Persistência: AuditLog (tipo_auditoria = 'evento_modulo')
  */
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // Buffer in-memory para eventos recentes (TTL 10min)
 const EVENT_BUFFER = new Map();

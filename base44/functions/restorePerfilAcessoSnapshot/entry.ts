@@ -2,7 +2,7 @@
  * restorePerfilAcessoSnapshot — Restaura PerfilAcesso deletados/órfãos
  * Recriar perfis base para cada bloco de módulo (5 perfis mínimo)
  */
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 const PERFIS_BASE = [
   {

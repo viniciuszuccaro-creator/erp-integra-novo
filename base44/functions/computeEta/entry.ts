@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 const GMAPS_KEY = Deno.env.get('GOOGLE_MAPS_API_KEY');
 

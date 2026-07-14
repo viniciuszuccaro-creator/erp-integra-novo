@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // Simple in-memory cache per instance
 const CACHE = globalThis.__gcCache || (globalThis.__gcCache = new Map());

@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // Self-contained guards (no local imports per platform rules)
 async function hasPermission(base44, user, moduleName, section, action) {

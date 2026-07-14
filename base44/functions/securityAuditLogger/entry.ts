@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // Consolidação de: auditError + auditEntityEvents + orderFlowAuditor
 // Ponto único de entrada para todas as logs de segurança

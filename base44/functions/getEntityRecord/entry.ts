@@ -5,7 +5,7 @@
  *   - Por filtro: { entityName, filter, limit, sortField }
  * Usa asServiceRole para garantir acesso sem filtros de contexto (multiempresa).
  */
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 const CACHE = new Map();
 const CACHE_TTL = 3 * 60 * 1000; // 3 minutos

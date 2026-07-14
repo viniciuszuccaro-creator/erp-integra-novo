@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 let LAST_BACKUP_RUN_AT = 0;
 const BACKUP_COOLDOWN_MS = 60 * 60 * 1000;

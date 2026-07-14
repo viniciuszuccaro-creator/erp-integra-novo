@@ -3,7 +3,7 @@
  * Valida 10 controles: Gestor centralizado, sync realtime, webhook handler,
  * rate limiting, circuit breaker, dashboard de integrações, etc.
  */
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 Deno.serve(async (req) => {
   try {

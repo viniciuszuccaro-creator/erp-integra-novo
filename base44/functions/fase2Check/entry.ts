@@ -3,7 +3,7 @@
  * 10 itens verificados com evidências concretas do AuditLog e entidades reais.
  * Retorna { ok, score, passed, total, items: [{id, ok, detail}] }
  */
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 Deno.serve(async (req) => {
   try {

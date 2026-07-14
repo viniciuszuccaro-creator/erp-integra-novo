@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 let LAST_AUDITOR_RUN_AT = 0;
 const AUDITOR_COOLDOWN_MS = 30 * 60 * 1000;

@@ -5,7 +5,7 @@
  * - Só atualiza registros onde o campo está vazio/nulo
  * - Admin-only
  */
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // Campo "código" de cada entidade de cadastro
 const ENTITY_CODE_FIELD = {

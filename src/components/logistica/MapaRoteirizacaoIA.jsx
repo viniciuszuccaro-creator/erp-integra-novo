@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import RBACButton from "@/components/lib/RBACButton";
 
 /**
  * 🗺️ MAPA DE ROTEIRIZAÇÃO COM IA V21.5
@@ -131,8 +132,10 @@ Retorne a rota otimizada com:
           </p>
         </CardHeader>
         <CardContent className="p-6 space-y-4">
-          {/* Botão de Otimização */}
-          <Button
+          {/* Botão de Otimização — Vol 9.1: RBAC funcional */}
+          <RBACButton
+            module="Expedicao"
+            action="gerar"
             onClick={otimizarRotaComIA}
             disabled={otimizando || pedidosRoteirizaveis.length === 0}
             className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
@@ -140,7 +143,7 @@ Retorne a rota otimizada com:
           >
             <Zap className="w-5 h-5 mr-2" />
             {otimizando ? '🤖 Otimizando com IA...' : '🚀 Otimizar Rota com IA'}
-          </Button>
+          </RBACButton>
 
           {/* Resultado da Otimização */}
           {rotaOtimizada && (

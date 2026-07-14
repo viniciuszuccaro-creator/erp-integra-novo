@@ -31,6 +31,75 @@
       "type": "string",
       "description": "Ex: leitura_projeto, upsell, refugo, roteirizacao"
     },
+    "objetivo": {
+      "type": "string",
+      "description": "Vol 19.1: Objetivo claro da IA \u2014 o que ela faz e por qu\u00ea"
+    },
+    "dados_usados": {
+      "type": "string",
+      "description": "Vol 19.1: Descri\u00e7\u00e3o dos dados consumidos pela IA"
+    },
+    "limites": {
+      "type": "string",
+      "description": "Vol 19.1: O que a IA N\u00c3O pode fazer (limites expl\u00edcitos)"
+    },
+    "periodicidade": {
+      "type": "string",
+      "enum": [
+        "Tempo Real",
+        "Por Evento",
+        "Hor\u00e1ria",
+        "Di\u00e1ria",
+        "Semanal",
+        "Mensal",
+        "Sob Demanda"
+      ],
+      "default": "Sob Demanda",
+      "description": "Vol 19.1: Periodicidade de execu\u00e7\u00e3o"
+    },
+    "acao_permitida": {
+      "type": "string",
+      "enum": [
+        "Sugerir",
+        "Classificar",
+        "Resumir",
+        "Prever",
+        "Detectar Anomalia",
+        "Automatizar (com aprova\u00e7\u00e3o)",
+        "Automatizar (sem aprova\u00e7\u00e3o)"
+      ],
+      "default": "Sugerir",
+      "description": "Vol 19.1: N\u00edvel m\u00e1ximo de a\u00e7\u00e3o permitida \u00e0 IA"
+    },
+    "risco_nivel": {
+      "type": "string",
+      "enum": [
+        "Baixo",
+        "M\u00e9dio",
+        "Alto",
+        "Cr\u00edtico"
+      ],
+      "default": "M\u00e9dio",
+      "description": "Vol 19.1: N\u00edvel de risco associado a esta IA"
+    },
+    "explicacao_habilitada": {
+      "type": "boolean",
+      "default": true,
+      "description": "Vol 19.1: Se a IA deve fornecer explica\u00e7\u00e3o para suas sugest\u00f5es"
+    },
+    "aprovacao_humana_obrigatoria": {
+      "type": "boolean",
+      "default": true,
+      "description": "Vol 19.1: Se decis\u00f5es cr\u00edticas exigem aprova\u00e7\u00e3o humana antes de executar"
+    },
+    "responsavel": {
+      "type": "string",
+      "description": "Vol 19.1: Nome do respons\u00e1vel por esta IA"
+    },
+    "responsavel_id": {
+      "type": "string",
+      "description": "Vol 19.1: ID do usu\u00e1rio respons\u00e1vel"
+    },
     "ativo": {
       "type": "boolean",
       "default": false,
@@ -89,7 +158,7 @@
       "items": {
         "type": "string"
       },
-      "description": "IDs das empresas autorizadas a usar"
+      "description": "Vol 19.1: Opt-in por empresa \u2014 IDs das empresas autorizadas"
     },
     "usuarios_autorizados": {
       "type": "array",

@@ -15,6 +15,7 @@ const SOD_RULES = [
   { modulo: 'Fiscal', conflito: ['emitir', 'aprovar'], severidade: 'Média', codigo: 'FIS-AP-001', descricao: 'Separar emissão e aprovação fiscal.' },
   { modulo: 'Compras', conflito: ['criar', 'aprovar'], severidade: 'Alta', codigo: 'CMP-OC-001', descricao: 'Quem aprova compras não deve criar.' },
   { modulo: 'Compras', conflito: ['aprovar', 'editar'], severidade: 'Alta', codigo: 'CMP-ED-001', descricao: 'Quem aprova compras não deve editar.' },
+  { modulo: 'Compras', conflito: ['criar', 'baixar'], severidade: 'Alta', codigo: 'CMP-RCB-001', descricao: 'Vol 6.1: Quem cria ordem de compra não deve receber mercadoria.' },
   { modulo: 'Estoque', conflito: ['criar', 'aprovar'], severidade: 'Alta', codigo: 'EST-MOV-001', descricao: 'Quem cria movimentações não deve aprovar.' },
   { modulo: 'Estoque', conflito: ['transferir', 'excluir'], severidade: 'Média', codigo: 'EST-TR-001', descricao: 'Quem transfere não deve excluir movimentações.' },
   { modulo: 'RH', conflito: ['editar', 'aprovar'], severidade: 'Média', codigo: 'RH-SAL-001', descricao: 'Quem edita dados de RH não deve aprovar.' },

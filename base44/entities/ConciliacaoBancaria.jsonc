@@ -58,7 +58,8 @@
         "pendente",
         "conciliado",
         "divergente",
-        "resolvido"
+        "resolvido",
+        "desfeito"
       ],
       "default": "pendente"
     },
@@ -78,6 +79,28 @@
     },
     "responsavel_id": {
       "type": "string"
+    },
+    "desfeito": {
+      "type": "boolean",
+      "default": false,
+      "description": "Vol 10.4: Se a concilia\u00e7\u00e3o foi desfeita"
+    },
+    "data_desfazer": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Vol 10.4: Data/hora do desfazimento"
+    },
+    "justificativa_desfazer": {
+      "type": "string",
+      "description": "Vol 10.4: Justificativa obrigat\u00f3ria para desfazer concilia\u00e7\u00e3o"
+    },
+    "responsavel_desfazer": {
+      "type": "string",
+      "description": "Vol 10.4: Usu\u00e1rio que desfez a concilia\u00e7\u00e3o"
+    },
+    "responsavel_desfazer_id": {
+      "type": "string",
+      "description": "Vol 10.4: ID do usu\u00e1rio que desfez"
     },
     "observacoes": {
       "type": "string"

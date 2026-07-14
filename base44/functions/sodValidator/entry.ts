@@ -80,6 +80,11 @@ function detectSodConflicts(permissoes = {}) {
     conflitos.push({ regra: 'CMP-APR-001', tipo_conflito: 'Compras:criar+aprovar', severidade: 'Média', descricao: 'Mesmo perfil pode criar e aprovar ordens de compra.' });
   }
 
+  // 7b. CMP-RCB-001 (Alta): Criar OC + Receber Mercadoria (Vol 6.1)
+  if (hasAction(cmp, 'criar') && hasAny(cmp, 'baixar', 'receber')) {
+    conflitos.push({ regra: 'CMP-RCB-001', tipo_conflito: 'Compras:criar+baixar', severidade: 'Alta', descricao: 'Vol 6.1: Mesmo perfil pode criar ordens de compra e receber mercadoria.' });
+  }
+
   // 8. EST-TRF-001 (Média): Transferir + Excluir
   const est = perms['Estoque'] || perms['estoque'] || {};
   if (hasAction(est, 'transferir') && hasAction(est, 'excluir')) {

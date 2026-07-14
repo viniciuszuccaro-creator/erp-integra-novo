@@ -20,6 +20,7 @@ import {
 import { toast } from 'sonner';
 import { useConfirm } from '@/components/ui/confirm-dialog';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import RBACButton from '@/components/lib/RBACButton';
 import {
   Dialog,
   DialogContent,
@@ -190,8 +191,9 @@ export default function GerenciadorTemplates() {
             Crie respostas rápidas e reutilizáveis com variáveis dinâmicas
           </p>
         </div>
-        <Button
-          data-permission="Chatbot.Template.criar"
+        <RBACButton
+          module="HubAtendimento"
+          action="criar"
           onClick={() => {
             resetForm();
             setDialogAberto(true);
@@ -200,7 +202,7 @@ export default function GerenciadorTemplates() {
         >
           <Plus className="w-4 h-4 mr-2" />
           Novo Template
-        </Button>
+        </RBACButton>
       </div>
 
       {/* Busca */}
@@ -226,28 +228,31 @@ export default function GerenciadorTemplates() {
                   <Badge className="mt-2 text-xs">{template.categoria}</Badge>
                 </div>
                 <div className="flex gap-1">
-                  <Button
+                  <RBACButton
                     variant="ghost"
                     size="icon"
-                    data-permission="Chatbot.Template.visualizar"
+                    module="HubAtendimento"
+                    action="ver"
                     onClick={() => handleCopiar(template.conteudo)}
                     className="h-8 w-8"
                   >
                     <Copy className="w-4 h-4" />
-                  </Button>
-                  <Button
+                  </RBACButton>
+                  <RBACButton
                     variant="ghost"
                     size="icon"
-                    data-permission="Chatbot.Template.editar"
+                    module="HubAtendimento"
+                    action="editar"
                     onClick={() => handleEditar(template)}
                     className="h-8 w-8"
                   >
                     <Edit2 className="w-4 h-4" />
-                  </Button>
-                  <Button
+                  </RBACButton>
+                  <RBACButton
                     variant="ghost"
                     size="icon"
-                    data-permission="Chatbot.Template.excluir"
+                    module="HubAtendimento"
+                    action="excluir"
                     onClick={async () => {
                       const ok = await confirm({ title: "Excluir Template", description: "Confirma a exclusão deste template?", variant: "danger", confirmText: "Excluir" });
                       if (ok) excluirTemplateMutation.mutate(template);
@@ -255,7 +260,7 @@ export default function GerenciadorTemplates() {
                     className="h-8 w-8 text-red-600 hover:text-red-700"
                   >
                     <Trash2 className="w-4 h-4" />
-                  </Button>
+                  </RBACButton>
                 </div>
               </div>
             </CardHeader>
@@ -353,15 +358,16 @@ export default function GerenciadorTemplates() {
             <Button variant="outline" onClick={resetForm}>
               Cancelar
             </Button>
-            <Button
+            <RBACButton
               onClick={() => salvarTemplateMutation.mutate(formData)}
-              data-permission="Chatbot.Template.criar"
+              module="HubAtendimento"
+              action="criar"
               disabled={!formData.nome || !formData.conteudo || salvarTemplateMutation.isPending}
               className="bg-blue-600 hover:bg-blue-700"
             >
               <Check className="w-4 h-4 mr-2" />
               {templateEditando ? 'Atualizar' : 'Criar'} Template
-            </Button>
+            </RBACButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>

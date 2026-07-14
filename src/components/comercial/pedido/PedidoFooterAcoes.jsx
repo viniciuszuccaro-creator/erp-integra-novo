@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
+import RBACButton from "@/components/lib/RBACButton";
 import { Check, CheckCircle2, Truck, ShieldCheck } from "lucide-react";
 
 export default function PedidoFooterAcoes({
@@ -44,53 +44,53 @@ export default function PedidoFooterAcoes({
         </div>
 
         <div className="flex gap-3">
-          <Button variant="outline" data-permission="Comercial.Pedido.cancelar" onClick={onCancelar}>Cancelar</Button>
+          <RBACButton module="Comercial" action="cancelar" variant="outline" onClick={onCancelar}>Cancelar</RBACButton>
 
           {canSalvarRascunho && (
-            <Button variant="outline" data-permission="Comercial.Pedido.salvarRascunho" data-sensitive onClick={onSalvarRascunho} disabled={salvando}>
+            <RBACButton module="Comercial" action="salvarRascunho" variant="outline" onClick={onSalvarRascunho} disabled={salvando}>
               {salvando ? 'Salvando...' : 'Salvar Rascunho'}
-            </Button>
+            </RBACButton>
           )}
 
           {canSolicitarAprovacao && (
-            <Button data-permission="Comercial.Pedido.aprovar" data-sensitive variant="outline" onClick={onSolicitarAprovacao} disabled={salvando}>
+            <RBACButton module="Comercial" action="aprovar" variant="outline" onClick={onSolicitarAprovacao} disabled={salvando}>
               <ShieldCheck className="w-4 h-4 mr-2" />
               {salvando ? 'Enviando...' : 'Solicitar Aprovação'}
-            </Button>
+            </RBACButton>
           )}
 
           {canFecharCompleto && (
-            <Button
-              data-permission="Comercial.Pedido.fechar"
-              data-sensitive
+            <RBACButton
+              module="Comercial"
+              action="fechar"
               onClick={onFecharCompleto}
               className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-lg"
               disabled={salvando}
             >
               <CheckCircle2 className="w-4 h-4 mr-2" />
               {salvando ? 'Salvando...' : '🚀 Fechar Pedido Completo'}
-            </Button>
+            </RBACButton>
           )}
 
           {canFecharEnviarEntrega && (
-            <Button data-permission="Comercial.Pedido.marcarProntoFaturar" data-sensitive onClick={onFecharEnviarEntrega} className="bg-blue-600 hover:bg-blue-700 shadow-lg" disabled={salvando}>
+            <RBACButton module="Comercial" action="marcarProntoFaturar" onClick={onFecharEnviarEntrega} className="bg-blue-600 hover:bg-blue-700 shadow-lg" disabled={salvando}>
               <Truck className="w-4 h-4 mr-2" />
               {salvando ? 'Fechando...' : 'Fechar e Enviar para Entrega'}
-            </Button>
+            </RBACButton>
           )}
 
           {canSalvarAlteracoes && (
-            <Button data-permission="Comercial.Pedido.salvar" data-sensitive onClick={onSalvarAlteracoes} className="bg-slate-600 hover:bg-slate-700" disabled={salvando}>
+            <RBACButton module="Comercial" action="salvar" onClick={onSalvarAlteracoes} className="bg-slate-600 hover:bg-slate-700" disabled={salvando}>
               <Check className="w-4 h-4 mr-2" />
               {salvando ? 'Salvando...' : 'Salvar Alterações'}
-            </Button>
+            </RBACButton>
           )}
 
           {canCriarPedido && (
-            <Button data-permission="Comercial.Pedido.criar" data-sensitive onClick={onCriarPedido} className="bg-blue-600 hover:bg-blue-700" disabled={salvando}>
+            <RBACButton module="Comercial" action="criar" onClick={onCriarPedido} className="bg-blue-600 hover:bg-blue-700" disabled={salvando}>
               <Check className="w-4 h-4 mr-2" />
               {salvando ? 'Salvando...' : 'Criar Pedido'}
-            </Button>
+            </RBACButton>
           )}
         </div>
       </div>

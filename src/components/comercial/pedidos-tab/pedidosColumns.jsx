@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
+import RBACButton from "@/components/lib/RBACButton";
 import { Badge } from "@/components/ui/badge";
 import BadgeOrigemPedido from "../BadgeOrigemPedido";
 import {
@@ -59,7 +60,7 @@ export default function usePedidosColumns({
       key: 'actions', label: 'Ações Rápidas', render: (pedido) => (
         <div className="flex items-center gap-1">
           {pedido.status === 'Rascunho' && (
-            <Button variant="ghost" size="sm" data-permission="Comercial.Pedido.fechar"
+            <RBACButton module="Comercial" action="fechar" variant="ghost" size="sm"
               onClick={() => {
                 openWindow(AutomacaoFluxoPedido, {
                   pedido, empresaId: pedido.empresa_id, windowMode: true,
@@ -75,10 +76,10 @@ export default function usePedidosColumns({
               }}
               className="h-8 px-2 bg-gradient-to-r from-green-600 to-blue-600 text-white hover:from-green-700 hover:to-blue-700 font-semibold shadow-lg">
               <CheckCircle2 className="w-3 h-3 mr-1" /><span className="text-xs">🚀 Fechar Pedido</span>
-            </Button>
+            </RBACButton>
           )}
 
-          <Button variant="ghost" size="sm" data-permission="Comercial.Pedido.editar" data-sensitive
+          <RBACButton module="Comercial" action="editar" variant="ghost" size="sm"
             disabled={pedido.status_aprovacao === 'pendente' && !(canApprove && canApprove('Comercial', 'Pedido'))}
             onClick={async () => {
               try { await base44.entities.AuditLog.create({ acao: 'Edição', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Abrir editor de pedido', data_hora: new Date().toISOString() }); } catch { }
@@ -86,11 +87,11 @@ export default function usePedidosColumns({
             }}
             title={pedido.status_aprovacao === 'pendente' ? 'Edição bloqueada até aprovação' : 'Editar Pedido'} className="h-8 px-2">
             <Edit2 className="w-3 h-3 mr-1" /><span className="text-xs">Editar</span>
-          </Button>
+          </RBACButton>
 
           {pedido.status === 'Aprovado' && (
             <>
-              <Button variant="ghost" size="sm" data-permission="Comercial.Pedido.marcarProntoFaturar"
+              <RBACButton module="Comercial" action="marcarProntoFaturar" variant="ghost" size="sm"
                 onClick={async () => {
                   try {
                     await updatePedido('Pedido', pedido.id, { status: 'Pronto para Faturar' });
@@ -100,52 +101,52 @@ export default function usePedidosColumns({
                 }}
                 className="h-8 px-2 bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold border border-blue-200">
                 <Truck className="w-4 h-4 mr-1" /><span className="text-xs">🚚 Fechar p/ Entrega</span>
-              </Button>
-              <Button variant="ghost" size="sm" data-permission="Comercial.Pedido.gerarNFe" data-sensitive
+              </RBACButton>
+              <RBACButton module="Comercial" action="gerarNFe" variant="ghost" size="sm"
                 onClick={async () => {
                   toast({ title: '🚀 Gerando NF-e...' });
                   try { await base44.entities.AuditLog.create({ acao: 'Emissão NF-e', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada geração de NF-e', data_hora: new Date().toISOString() }); } catch { }
                 }}
                 title="Gerar NF-e" className="h-8 px-2 text-green-600">
                 <FileText className="w-3 h-3 mr-1" /><span className="text-xs">NF-e</span>
-              </Button>
+              </RBACButton>
             </>
           )}
 
           {pedido.status === 'Pronto para Faturar' && (
-            <Button variant="ghost" size="sm" data-permission="Comercial.Pedido.gerarNFe" data-sensitive
+            <RBACButton module="Comercial" action="gerarNFe" variant="ghost" size="sm"
               onClick={async () => {
                 toast({ title: '🚀 Gerando NF-e...' });
                 try { await base44.entities.AuditLog.create({ acao: 'Emissão NF-e', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada geração de NF-e', data_hora: new Date().toISOString() }); } catch { }
               }}
               title="Gerar NF-e" className="h-8 px-2 text-green-600">
               <FileText className="w-3 h-3 mr-1" /><span className="text-xs">NF-e</span>
-            </Button>
+            </RBACButton>
           )}
 
           {pedido.status === 'Faturado' && (
-            <Button variant="ghost" size="sm" data-permission="Comercial.Pedido.criarEntrega" data-sensitive
+            <RBACButton module="Comercial" action="criarEntrega" variant="ghost" size="sm"
               onClick={async () => {
                 toast({ title: '📦 Criando entrega...' });
                 try { await base44.entities.AuditLog.create({ acao: 'Criação Entrega', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada criação de entrega', data_hora: new Date().toISOString() }); } catch { }
               }}
               title="Criar Entrega" className="h-8 px-2 text-blue-600">
               <Truck className="w-3 h-3 mr-1" /><span className="text-xs">Entrega</span>
-            </Button>
+            </RBACButton>
           )}
 
           {(pedido.tipo_pedido === 'Produção Sob Medida' || pedido.itens_corte_dobra?.length > 0 || pedido.itens_armado_padrao?.length > 0) && pedido.status !== 'Cancelado' && (
-            <Button variant="ghost" size="sm" data-permission="Comercial.Pedido.gerarOP" data-sensitive
+            <RBACButton module="Comercial" action="gerarOP" variant="ghost" size="sm"
               onClick={async () => {
                 toast({ title: '🏭 Criando OP...' });
                 try { await base44.entities.AuditLog.create({ acao: 'Gerar OP', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada geração de OP', data_hora: new Date().toISOString() }); } catch { }
               }}
               title="Gerar Ordem de Produção" className="h-8 px-2 text-purple-600">
               <Factory className="w-3 h-3 mr-1" /><span className="text-xs">OP</span>
-            </Button>
+            </RBACButton>
           )}
 
-          <Button variant="ghost" size="sm" data-permission="Comercial.Pedido.imprimir"
+          <RBACButton module="Comercial" action="imprimir" variant="ghost" size="sm"
             onClick={async () => {
               const empresa = empresas?.find(e => e.id === pedido.empresa_id);
               try { await base44.entities.AuditLog.create({ acao: 'Impressão', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Imprimir pedido', data_hora: new Date().toISOString() }); } catch { }
@@ -153,26 +154,26 @@ export default function usePedidosColumns({
             }}
             title="Imprimir Pedido" className="h-8 px-2 text-slate-600">
             <Printer className="w-3 h-3 mr-1" /><span className="text-xs">Imprimir</span>
-          </Button>
+          </RBACButton>
 
-          <Button variant="ghost" size="sm" data-permission="Comercial.Pedido.visualizar"
+          <RBACButton module="Comercial" action="visualizar" variant="ghost" size="sm"
             onClick={async () => {
               try { await base44.entities.AuditLog.create({ acao: 'Visualização', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Abrir visualização do pedido', data_hora: new Date().toISOString() }); } catch { }
               onEditPedido(pedido);
             }}
             title="Visualizar" className="h-8 px-2">
             <Eye className="w-3 h-3 mr-1" /><span className="text-xs">Ver</span>
-          </Button>
+          </RBACButton>
 
           {pedido.status_aprovacao === 'pendente' && (
-            <Button variant="ghost" size="sm" data-permission="Comercial.Pedido.aprovar"
+            <RBACButton module="Comercial" action="aprovar" variant="ghost" size="sm"
               onClick={() => openWindow(CentralAprovacoesManager, { windowMode: true, initialTab: 'descontos' }, { title: '🔐 Central de Aprovações', width: 1200, height: 700 })}
               title="Analisar Aprovação" className="h-8 px-2 text-orange-600 animate-pulse">
               <ShieldCheck className="w-3 h-3 mr-1" /><span className="text-xs">Analisar</span>
-            </Button>
+            </RBACButton>
           )}
 
-          <Button variant="ghost" size="sm" data-permission="Comercial.Pedido.excluir" data-sensitive
+          <RBACButton module="Comercial" action="excluir" variant="ghost" size="sm"
             onClick={async () => {
               const ok = await confirm({ title: "Excluir Pedido", description: "Deseja realmente excluir este pedido?", variant: "danger", confirmText: "Excluir" });
               if (ok) {
@@ -182,7 +183,7 @@ export default function usePedidosColumns({
             }}
             title="Excluir" className="h-8 px-2 text-red-600">
             <Trash2 className="w-3 h-3 mr-1" /><span className="text-xs">Excluir</span>
-          </Button>
+          </RBACButton>
         </div>
       )
     }

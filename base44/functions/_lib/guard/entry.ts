@@ -88,6 +88,17 @@ export async function assertPermission(base44, { user, perfil }, moduleName, sec
       });
     } catch (e) {
       console.error('[guard] Falha ao auditar bloqueio de permissão:', e?.message || e);
+      // Vol 3.6: Alerta visível quando auditoria de bloqueio falha
+      try {
+        await base44.asServiceRole.entities.AlertaPerformance.create({
+          timestamp: new Date().toISOString(), data_hora: new Date().toISOString(),
+          tipo_alerta: 'Erro Crítico', severidade: 'Critical', modulo: moduleName || 'Sistema',
+          funcionalidade: 'Auditoria: Bloqueio de Permissão',
+          descricao: `Falha ao auditar bloqueio — ${moduleName}/${section || '-'} → ${action}: ${e?.message || e}`,
+          impacto_estimado: 'Alto', status: 'Novo', automaticamente_criado: true,
+          empresa_id: user?.group_id || null,
+        });
+      } catch (_) { /* best-effort */ }
     }
     return Response.json({ error: 'Forbidden' }, { status: 403 });
   }
@@ -112,6 +123,16 @@ export async function assertPermission(base44, { user, perfil }, moduleName, sec
         });
       } catch (e) {
         console.error('[guard] Falha ao auditar bloqueio SoD:', e?.message || e);
+        try {
+          await base44.asServiceRole.entities.AlertaPerformance.create({
+            timestamp: new Date().toISOString(), data_hora: new Date().toISOString(),
+            tipo_alerta: 'Erro Crítico', severidade: 'Critical', modulo: moduleName || 'Sistema',
+            funcionalidade: 'Auditoria: Bloqueio SoD',
+            descricao: `Falha ao auditar bloqueio SoD — ${moduleName}/${section || '-'} → ${action}: ${e?.message || e}`,
+            impacto_estimado: 'Alto', status: 'Novo', automaticamente_criado: true,
+            empresa_id: user?.group_id || null,
+          });
+        } catch (_) { /* best-effort */ }
       }
       return Response.json({ error: 'Forbidden: Bloqueado por regra SoD' }, { status: 403 });
     }
@@ -197,6 +218,27 @@ async function audit(base44, user, { acao = 'Ação', modulo = 'Sistema', entida
     });
   } catch (e) {
     console.error('[guard] Falha ao registrar auditoria:', e?.message || e);
+    // Vol 3.6: Gera alerta visível no monitoramento quando a fila de auditoria falha
+    try {
+      await base44.asServiceRole.entities.AlertaPerformance.create({
+        timestamp: new Date().toISOString(),
+        data_hora: new Date().toISOString(),
+        tipo_alerta: 'Erro Crítico',
+        severidade: 'Critical',
+        modulo: modulo || 'Sistema',
+        funcionalidade: `Auditoria: ${acao}`,
+        descricao: `Falha ao registrar auditoria — ${entidade} / ${acao}: ${e?.message || e}`,
+        impacto_estimado: 'Alto',
+        acao_recomendada: 'Verificar conectividade do banco e integridade da fila de auditoria',
+        status: 'Novo',
+        automaticamente_criado: true,
+        frequencia: 'Única',
+        quantidade_ocorrencias: 1,
+        primeira_ocorrencia: new Date().toISOString(),
+        ultima_ocorrencia: new Date().toISOString(),
+        empresa_id: empresa_id || null,
+      });
+    } catch (_) { /* best-effort — não propagar erro de alerta */ }
   }
 }
 

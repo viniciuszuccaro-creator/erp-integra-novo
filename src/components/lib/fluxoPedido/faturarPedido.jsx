@@ -57,6 +57,17 @@ async function baixarEstoqueItem(item, pedido, empresaId) {
 export async function faturarPedidoCompleto(pedido, nfe, empresaId) {
   const resultados = { baixasEstoque: [], entrega: null, erros: [] };
 
+  // Vol 5.2/Regra-Mãe: Faturamento deve ocorrer na empresa, nunca no grupo.
+  // Emissão de NF-e só na empresa — bloqueia faturamento sem empresa_id explícita.
+  if (!empresaId) {
+    resultados.erros.push('Faturamento bloqueado: empresa_id é obrigatório. NF-e só pode ser emitida na empresa, não no grupo.');
+    return resultados;
+  }
+  if (!pedido?.group_id) {
+    resultados.erros.push('Faturamento bloqueado: pedido sem group_id (multiempresa).');
+    return resultados;
+  }
+
   try {
     if (pedido.itens_revenda?.length > 0) {
       for (const item of pedido.itens_revenda) {

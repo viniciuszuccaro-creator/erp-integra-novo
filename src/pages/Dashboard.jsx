@@ -53,6 +53,7 @@ export default function Dashboard() {
     aproveitamentoBarra, taxaInadimplencia, valorVencido, dadosVendasStatus,
     vendasUltimos30Dias, fluxo7Dias, topProdutos, vendasPorMesData, top5ClientesData,
     statusPedidosDataAll, fluxoCaixaMensalData,
+    pedidosTotalCount, contasReceberPendentesCount, contasPagarPendentesCount,
   } = useDashboardDerivedData({ pedidos, contasReceber, contasPagar, entregas, ordensProducao, colaboradores, clientes, produtos, periodo, cadastroCounts });
 
   const pedidosRecentes = (pedidos || []).slice(0, 8);
@@ -73,7 +74,8 @@ export default function Dashboard() {
     otd, entregasNoPrazo, entregasConcluidas, pesoProduzido, opsConcluidasCount,
     clientesAtivos, totalColaboradoresDash, entregasPendentes, pedidos,
     contasReceber, contasPagar, canSeeComercial, canSeeEstoque, canSeeExpedicao, canSeeFinanceiro,
-    handleDrillDown
+    handleDrillDown,
+    pedidosTotalCount, contasReceberPendentesCount, contasPagarPendentesCount
   });
 
   return (
@@ -93,7 +95,7 @@ export default function Dashboard() {
         <div>
           <Suspense fallback={<div className="h-16 w-full bg-slate-100 rounded animate-pulse" />}>
             <ErrorBoundary>
-              <DashboardKPIStrip totalVendas={totalVendas} fluxoCaixa={fluxoCaixa} entregasPendentes={entregasPendentes} produtosBaixoEstoque={produtosBaixoEstoque} otd={otd} taxaInadimplencia={taxaInadimplencia} totalPedidos={pedidos.length} clientesAtivos={clientesAtivos} />
+              <DashboardKPIStrip totalVendas={totalVendas} fluxoCaixa={fluxoCaixa} entregasPendentes={entregasPendentes} produtosBaixoEstoque={produtosBaixoEstoque} otd={otd} taxaInadimplencia={taxaInadimplencia} totalPedidos={pedidosTotalCount != null ? pedidosTotalCount : pedidos.length} clientesAtivos={clientesAtivos} />
             </ErrorBoundary>
           </Suspense>
         </div>

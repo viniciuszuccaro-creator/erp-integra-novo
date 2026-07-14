@@ -74,7 +74,19 @@ export default function useDashboardDerivedData({ pedidos = [], contasReceber = 
     ? ((pedidosPeriodo.filter((p) => p.status !== "Cancelado").length / clientesAtivos) * 100).toFixed(1)
     : 0;
 
-  const entregasPendentes = entregas.filter((e) => e.status !== "Entregue" && e.status !== "Devolvido").length;
+  // Vol 3.3: Usa contagem server-side quando disponível (não limitada a DASHBOARD_LIST_LIMIT)
+  const entregasPendentes = cadastroCounts?.entregasPendentesTotal != null
+    ? cadastroCounts.entregasPendentesTotal
+    : entregas.filter((e) => e.status !== "Entregue" && e.status !== "Devolvido").length;
+  const pedidosTotalCount = cadastroCounts?.pedidosTotal != null
+    ? cadastroCounts.pedidosTotal
+    : pedidos.length;
+  const contasReceberPendentesCount = cadastroCounts?.contasReceberPendentes != null
+    ? cadastroCounts.contasReceberPendentes
+    : contasReceber.filter((c) => c.status === 'Pendente').length;
+  const contasPagarPendentesCount = cadastroCounts?.contasPagarPendentes != null
+    ? cadastroCounts.contasPagarPendentes
+    : contasPagar.filter((c) => c.status === 'Pendente').length;
 
   // OTD (On-Time Delivery)
   const entregasConcluidas = entregas.filter((e) => e.status === "Entregue" && e.data_entrega);
@@ -286,6 +298,10 @@ export default function useDashboardDerivedData({ pedidos = [], contasReceber = 
     aproveitamentoBarra,
     taxaInadimplencia,
     valorVencido,
+    // Vol 3.3: Contagens server-side precisas
+    pedidosTotalCount,
+    contasReceberPendentesCount,
+    contasPagarPendentesCount,
     // Gráficos e listas
     dadosVendasStatus,
     vendasUltimos30Dias,

@@ -8,6 +8,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Truck, Building2, Pen } from "lucide-react";
 import { toast } from "sonner";
+import RBACButton from "@/components/lib/RBACButton";
 import EnvioMensagemAutomatica from "./EnvioMensagemAutomatica";
 import AssinaturaDigitalEntrega from "./AssinaturaDigitalEntrega";
 
@@ -163,51 +164,56 @@ export default function DetalhesEntregaView({
 
           {!showAssinatura ? (
             <div className="flex flex-wrap gap-2 pt-4 border-t">
-              <Button
+              <RBACButton
+                module="Expedição"
+                action="editar"
                 onClick={() => onStatusChange(entrega, "Em Separação")}
-                data-permission="Expedicao.Entrega.editar"
                 disabled={entrega.status !== "Aguardando Separação"}
                 size="sm"
                 variant="outline"
               >
                 Iniciar Separação
-              </Button>
-              <Button
+              </RBACButton>
+              <RBACButton
+                module="Expedição"
+                action="editar"
                 onClick={() => onStatusChange(entrega, "Pronto para Expedir")}
-                data-permission="Expedicao.Entrega.editar"
                 disabled={entrega.status !== "Em Separação"}
                 size="sm"
                 className="bg-indigo-600 hover:bg-indigo-700"
               >
                 Pronto para Expedir
-              </Button>
-              <Button
+              </RBACButton>
+              <RBACButton
+                module="Expedição"
+                action="editar"
                 onClick={() => onStatusChange(entrega, "Saiu para Entrega")}
-                data-permission="Expedicao.Entrega.editar"
                 disabled={entrega.status !== "Pronto para Expedir"}
                 size="sm"
                 className="bg-orange-600 hover:bg-orange-700"
               >
                 Saiu para Entrega
-              </Button>
-              <Button
+              </RBACButton>
+              <RBACButton
+                module="Expedição"
+                action="editar"
                 onClick={() => setShowAssinatura(true)}
-                data-permission="Expedicao.Entrega.editar"
                 disabled={!["Saiu para Entrega", "Em Trânsito"].includes(entrega.status)}
                 size="sm"
                 className="bg-green-600 hover:bg-green-700"
               >
                 Confirmar Entrega
-              </Button>
-              <Button
+              </RBACButton>
+              <RBACButton
+                module="Expedição"
+                action="editar"
                 onClick={() => onStatusChange(entrega, "Entrega Frustrada")}
-                data-permission="Expedicao.Entrega.editar"
                 disabled={["Entregue", "Cancelado", "Aguardando Separação"].includes(entrega.status)}
                 size="sm"
                 variant="destructive"
               >
                 Marcar como Frustrada
-              </Button>
+              </RBACButton>
             </div>
           ) : (
             <Card className="border-green-200 bg-green-50">
@@ -220,15 +226,16 @@ export default function DetalhesEntregaView({
                   onAssinaturaConcluida={(dados) => confirmarEntregaAssinaturaMutation.mutate(dados)}
                   isLoading={confirmarEntregaAssinaturaMutation.isPending}
                 />
-                <Button
+                <RBACButton
+                  module="Expedição"
+                  action="editar"
                   variant="outline"
                   size="sm"
-                  data-permission="Expedicao.Entrega.editar"
                   onClick={() => setShowAssinatura(false)}
                   className="mt-3"
                 >
                   Cancelar Assinatura
-                </Button>
+                </RBACButton>
               </CardContent>
             </Card>
           )}

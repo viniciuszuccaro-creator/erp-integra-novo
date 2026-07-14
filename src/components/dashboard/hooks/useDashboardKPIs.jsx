@@ -10,7 +10,9 @@ export function useDashboardKPIs({
   otd, entregasNoPrazo, entregasConcluidas, pesoProduzido, opsConcluidasCount,
   clientesAtivos, totalColaboradoresDash, entregasPendentes, pedidos,
   contasReceber, contasPagar, canSeeComercial, canSeeEstoque, canSeeExpedicao, canSeeFinanceiro,
-  handleDrillDown
+  handleDrillDown,
+  // Vol 3.3: Contagens server-side precisas (não limitadas a DASHBOARD_LIST_LIMIT)
+  pedidosTotalCount, contasReceberPendentesCount, contasPagarPendentesCount
 }) {
   const statsCards = [
     {
@@ -31,7 +33,7 @@ export function useDashboardKPIs({
     {
       title: "Contas a Receber Pendentes",
       value: `R$ ${receitasPendentes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-      subtitle: `${(contasReceber || []).filter(c => c?.status === 'Pendente').length} títulos pendentes`,
+      subtitle: `${contasReceberPendentesCount != null ? contasReceberPendentesCount : (contasReceber || []).filter(c => c?.status === 'Pendente').length} títulos pendentes`,
       icon: AlertCircle, color: receitasPendentes > 0 ? "from-orange-500 to-orange-600" : "from-green-500 to-green-600",
       bgColor: receitasPendentes > 0 ? "bg-orange-50" : "bg-green-50", textColor: receitasPendentes > 0 ? "text-orange-600" : "text-green-600",
       drillDown: () => handleDrillDown("/financeiro")
@@ -39,7 +41,7 @@ export function useDashboardKPIs({
     {
       title: "Contas a Pagar Pendentes",
       value: `R$ ${despesasPendentes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-      subtitle: `${(contasPagar || []).filter(c => c?.status === 'Pendente').length} títulos pendentes`,
+      subtitle: `${contasPagarPendentesCount != null ? contasPagarPendentesCount : (contasPagar || []).filter(c => c?.status === 'Pendente').length} títulos pendentes`,
       icon: AlertCircle, color: despesasPendentes > 0 ? "from-orange-500 to-orange-600" : "from-green-500 to-green-600",
       bgColor: despesasPendentes > 0 ? "bg-orange-50" : "bg-green-50", textColor: despesasPendentes > 0 ? "text-orange-600" : "text-green-600",
       drillDown: () => handleDrillDown("/financeiro")
@@ -67,7 +69,7 @@ export function useDashboardKPIs({
     { title: "Clientes Ativos", value: clientesAtivos, icon: Users, color: "text-blue-600", bgColor: "bg-blue-50", drillDown: () => handleDrillDown("/comercial") },
     { title: "Colaboradores", value: totalColaboradoresDash, icon: UserCircle, color: "text-pink-600", bgColor: "bg-pink-50", drillDown: () => handleDrillDown("/rh") },
     { title: "Entregas Pendentes", value: entregasPendentes, icon: Truck, color: "text-orange-600", bgColor: "bg-orange-50", drillDown: () => handleDrillDown("/expedicao") },
-    { title: "Total Pedidos", value: pedidos.length, icon: ShoppingCart, color: "text-cyan-600", bgColor: "bg-cyan-50", drillDown: () => handleDrillDown("/comercial") }
+    { title: "Total Pedidos", value: pedidosTotalCount != null ? pedidosTotalCount : pedidos.length, icon: ShoppingCart, color: "text-cyan-600", bgColor: "bg-cyan-50", drillDown: () => handleDrillDown("/comercial") }
   ];
 
   const quickAccessBase = [

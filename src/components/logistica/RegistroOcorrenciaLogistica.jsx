@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertTriangle, Upload, Camera, CheckCircle2, X } from "lucide-react";
 import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import RBACButton from "@/components/lib/RBACButton";
 
 /**
  * ⚠️ REGISTRO DE OCORRÊNCIAS LOGÍSTICAS V21.5

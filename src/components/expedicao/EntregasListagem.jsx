@@ -11,6 +11,7 @@ import { Eye, Edit, CheckCircle2, AlertCircle, MessageCircle, Camera, Download, 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import IconeAcessoCliente from "@/components/cadastros/IconeAcessoCliente";
 import IconeAcessoTransportadora from "@/components/cadastros/IconeAcessoTransportadora";
+import RBACButton from "@/components/lib/RBACButton";
 import { useWindow } from '@/components/lib/useWindow';
 import usePermissions from '@/components/lib/usePermissions';
 import { ProtectedAction } from '@/components/ProtectedAction';
@@ -89,10 +90,10 @@ export default function EntregasListagem({ entregas, clientes, pedidos, empresas
                 <SelectItem value="Entregue">Entregue</SelectItem>
               </SelectContent>
             </Select>
-            {selectedEntregas.length > 0 && hasPermission('Expedição','Entrega','exportar') && (
-              <Button variant="outline" size="sm" data-permission="Expedição.Entrega.exportar">
+            {selectedEntregas.length > 0 && (
+              <RBACButton module="Expedição" action="exportar" variant="outline" size="sm">
                 <Download className="w-3 h-3 mr-1" /> CSV ({selectedEntregas.length})
-              </Button>
+              </RBACButton>
             )}
           </div>
         </CardContent>
@@ -117,14 +118,12 @@ export default function EntregasListagem({ entregas, clientes, pedidos, empresas
               { key: 'status', label: 'Status', render: (e) => <Badge className={statusColors[e.status]} style={{ fontSize: '10px' }}>{e.status}</Badge> },
               { key: 'actions', label: 'Ações', render: (e) => (
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" data-permission="Expedição.Entrega.visualizar" onClick={() => openWindow(DetalhesEntregaView, { entrega: e, estaNoGrupo, obterNomeEmpresa, statusColors, windowMode: true }, { title: `🚚 ${e.numero_pedido}`, width: 1000, height: 700 })} className="h-7 w-7">
+                  <RBACButton module="Expedição" action="visualizar" variant="ghost" size="icon" onClick={() => openWindow(DetalhesEntregaView, { entrega: e, estaNoGrupo, obterNomeEmpresa, statusColors, windowMode: true }, { title: `🚚 ${e.numero_pedido}`, width: 1000, height: 700 })} className="h-7 w-7">
                    <Eye className="w-3 h-3" />
-                  </Button>
-                  {hasPermission('Expedição','Entrega','editar') && (
-                    <Button variant="ghost" size="icon" data-permission="Expedição.Entrega.editar" onClick={() => openWindow(FormularioEntrega, { formData: e, windowMode: true, isEditing: true }, { title: `✏️ ${e.numero_pedido}`, width: 1100, height: 650 })} className="h-7 w-7">
-                      <Edit className="w-3 h-3" />
-                    </Button>
-                  )}
+                  </RBACButton>
+                  <RBACButton module="Expedição" action="editar" variant="ghost" size="icon" onClick={() => openWindow(FormularioEntrega, { formData: e, windowMode: true, isEditing: true }, { title: `✏️ ${e.numero_pedido}`, width: 1100, height: 650 })} className="h-7 w-7">
+                    <Edit className="w-3 h-3" />
+                  </RBACButton>
                 </div>
               ) }
             ]}

@@ -83,11 +83,19 @@ const AuthenticatedApp = () => {
         } />
         {Object.entries(Pages).map(([path, Page]) => {
           // Skip deprecated/orphaned pages — DemoMultitarefas is legacy; ChatbotAtendimento consolidated into HubAtendimento (P5)
-          // EntregasMobile and ProducaoMobile remain active as mobile-optimized routes (accessed via mobile app, not sidebar)
-          if (['DemoMultitarefas', 'portal', 'portalcliente', 'ChatbotAtendimento'].includes(path)) {
+          if (['DemoMultitarefas', 'ChatbotAtendimento'].includes(path)) {
            return null;
           }
-          
+
+          // Vol 3.2: Páginas PORTAL/PUBLICA não recebem Layout ERP nem EmpresaSelectorGuard
+          // PortalCliente = token-based auth; OrcamentoSite = pública; Home = landing/redirect
+          const publicPages = new Set(['PortalCliente', 'OrcamentoSite', 'Home']);
+          if (publicPages.has(path)) {
+            return (
+              <Route key={path} path={`/${path}`} element={<Page />} />
+            );
+          }
+
           const moduleName = pageModuleMap[path];
           const requiredAction = moduleName ? 'ver' : undefined;
 

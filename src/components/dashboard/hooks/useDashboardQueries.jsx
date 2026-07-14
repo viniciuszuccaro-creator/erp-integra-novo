@@ -98,12 +98,22 @@ export function useDashboardQueries({ canSeeFinanceiro, canSeeCRM, canSeeComerci
         return orConds.length ? { $or: orConds } : {};
       };
 
-      // Contagem total (sem filtro de status)
+      // Contagem total (sem filtro de status) + Vol 3.3: contagens server-side para KPIs
+      const pedidoFilter = buildFilter('Pedido');
+      const contaReceberFilter = buildFilter('ContaReceber');
+      const contaPagarFilter = buildFilter('ContaPagar');
+      const entregaFilter = buildFilter('Entrega');
+
       const entitiesPayload = [
         { entityName: 'Cliente', filter: buildFilter('Cliente') },
         { entityName: 'Colaborador', filter: buildFilter('Colaborador') },
         { entityName: 'Produto', filter: buildFilter('Produto') },
         { entityName: 'Fornecedor', filter: buildFilter('Fornecedor') },
+        // Vol 3.3: Contagens precisas para KPIs (não limitadas a DASHBOARD_LIST_LIMIT)
+        { entityName: 'Pedido', filter: pedidoFilter },
+        { entityName: 'ContaReceber', filter: { ...contaReceberFilter, status: 'Pendente' } },
+        { entityName: 'ContaPagar', filter: { ...contaPagarFilter, status: 'Pendente' } },
+        { entityName: 'Entrega', filter: { ...entregaFilter, status: { $ne: 'Entregue' } } },
       ];
 
       try {
@@ -114,6 +124,10 @@ export function useDashboardQueries({ canSeeFinanceiro, canSeeCRM, canSeeComerci
           colaboradoresTotal: counts['Colaborador'] || 0,
           produtosAtivos: counts['Produto'] || 0,
           fornecedoresTotal: counts['Fornecedor'] || 0,
+          pedidosTotal: counts['Pedido'] || 0,
+          contasReceberPendentes: counts['ContaReceber'] || 0,
+          contasPagarPendentes: counts['ContaPagar'] || 0,
+          entregasPendentesTotal: counts['Entrega'] || 0,
         };
       } catch (_) {
         return {};

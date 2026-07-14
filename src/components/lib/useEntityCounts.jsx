@@ -98,30 +98,38 @@ export function useEntityCounts(entities = []) {
     queryFn: async () => {
       if (!normalized.length) return {};
 
-      // Aguarda para evitar bombardeio de requisições em renders paralelos (HMR)
-      await new Promise(r => setTimeout(r, 50));
+      // Vol 14.3/23.1: contagem server-side via countEntities (não carrega registros no cliente)
+      // Usa filtros pré-construídos do buildContextFilter para garantir consistência com filterInContext da listagem
+      const entitiesPayload = normalized.map(entityName => ({
+        entityName,
+        filter: buildContextFilter(entityName, empresaId, groupId, empresasDoGrupo) ?? {},
+      }));
 
-      const batchPayload = [];
-
-      for (const entityName of normalized) {
-        // buildContextFilter já trata TRULY_GLOBAL (MoedaIndice, GrupoEmpresarial) retornando {}
-        // e SIMPLE_CATALOG aplicando group_id quando disponível
-        const ctxFilter = buildContextFilter(entityName, empresaId, groupId, empresasDoGrupo) ?? {};
-        batchPayload.push({ entityName, filter: ctxFilter });
+      try {
+        const res = await base44.functions.invoke('countEntities', { entities: entitiesPayload });
+        const countsData = res?.data?.counts || res?.counts || {};
+        const result = {};
+        for (const e of normalized) {
+          const n = countsData[e];
+          if (typeof n === 'number') result[e] = Math.max(0, n);
+        }
+        return result;
+      } catch (err) {
+        // Fallback: SDK direto apenas se backend falhar (rate limit/timeout)
+        if (String(err?.message || '').includes('Rate limit') || err?.response?.status === 429) {
+          const result = {};
+          await Promise.allSettled(
+            normalized.map(async (entityName) => {
+              const ctxFilter = buildContextFilter(entityName, empresaId, groupId, empresasDoGrupo) ?? {};
+              result[entityName] = await countSingle(entityName, ctxFilter);
+            })
+          );
+          return result;
+        }
+        throw err;
       }
-
-      if (!batchPayload.length) return {};
-
-      // SDK direto em paralelo (sem função backend → sem rate limit de funções)
-      const result = {};
-      await Promise.allSettled(
-        batchPayload.map(async ({ entityName, filter }) => {
-          result[entityName] = await countSingle(entityName, filter);
-        })
-      );
-      return result;
     },
-    staleTime: 15_000,      // 30s — balanceia frescor e performance
+    staleTime: 15_000,
     gcTime: 300_000,
     placeholderData: (prev) => prev,
     refetchOnWindowFocus: false,

@@ -93,7 +93,8 @@ Deno.serve(async (req) => {
         globalThis.__countEntitiesOptimizedLastCallAt = lastBackendCallAt;
 
         const api = base44.asServiceRole.entities[entity];
-        const rows = await api.filter(countFilter, "-id", 1000, 0);
+        // Vol 14.3/23.1: contagem server-side com limite alto para precisão (não carrega no cliente)
+        const rows = await api.filter(countFilter, "-id", 9999, 0);
         const count = Array.isArray(rows) ? rows.length : 0;
 
         result[entity] = count;

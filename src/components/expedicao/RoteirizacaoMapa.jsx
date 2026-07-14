@@ -8,6 +8,7 @@ import { Map, MapPin, Package } from "lucide-react";
 import useRoteirizacaoMapa from "./roteirizacao-mapa/useRoteirizacaoMapa";
 import EntregasDisponiveisList from "./roteirizacao-mapa/EntregasDisponiveisList";
 import RotaOtimizadaResult from "./roteirizacao-mapa/RotaOtimizadaResult";
+import RBACButton from "@/components/lib/RBACButton";
 
 export default function RoteirizacaoMapa({ entregas, motoristas, veiculos, windowMode = false }) {
   const h = useRoteirizacaoMapa(entregas, motoristas, veiculos);
@@ -109,13 +110,14 @@ export default function RoteirizacaoMapa({ entregas, motoristas, veiculos, windo
                 </CardContent>
               </Card>
 
-              {/* Otimizar */}
-              <Button
+              {/* Otimizar — Vol 9.1: proteção funcional RBAC (fail-closed) */}
+              <RBACButton
+                module="Expedicao"
+                action="gerar"
                 onClick={h.handleOtimizarRota}
                 disabled={h.entregasSelecionadas.length === 0 || h.isOptimizing}
                 className="w-full bg-purple-600 hover:bg-purple-700"
                 size="lg"
-                data-permission="Expedicao.Rota.otimizar"
               >
                 {h.isOptimizing ? (
                   <>
@@ -128,7 +130,7 @@ export default function RoteirizacaoMapa({ entregas, motoristas, veiculos, windo
                     🚀 Otimizar Rota
                   </>
                 )}
-              </Button>
+              </RBACButton>
 
               <RotaOtimizadaResult
                 rotaOtimizada={h.rotaOtimizada}

@@ -2,6 +2,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import RBACButton from "@/components/lib/RBACButton";
 import { Zap, FileText } from "lucide-react";
 
 export default function RotaOtimizadaResult({
@@ -64,16 +65,16 @@ export default function RotaOtimizadaResult({
           </div>
         </div>
 
-        <Button
-          data-permission="Expedicao.Romaneio.gerar"
+        <RBACButton
+          module="Expedicao"
+          action="gerar"
           onClick={onGerarRomaneio}
           disabled={!motoristaSelecionado || !veiculoSelecionado}
           className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
-          data-permission="Expedicao.Romaneio.criar"
         >
           <FileText className="w-4 h-4 mr-2" />
           Gerar Romaneio e Criar Rota
-        </Button>
+        </RBACButton>
       </CardContent>
     </Card>
   );

@@ -40,8 +40,7 @@ export default function Top10ProdutosCliente({ clienteId, onSelecionarProduto })
         return [];
       }
     },
-    enabled: !!contexto,
-    enabled: !!clienteId // Only fetch products if a client ID is provided
+    enabled: !!contexto && !!clienteId // Only fetch products if a client ID is provided
   });
 
 
@@ -72,7 +71,7 @@ export default function Top10ProdutosCliente({ clienteId, onSelecionarProduto })
       }
 
       produtosConsolidados[key].quantidade_total += item.quantidade || 0;
-      produtosConsolidados[key].valor_total += item.valor_item || 0;
+      produtosConsolidados[key].valor_total += item.valor_total || 0;
       produtosConsolidados[key].frequencia += 1;
       produtosConsolidados[key].ultimo_preco = item.preco_unitario || 0;
 
@@ -82,9 +81,9 @@ export default function Top10ProdutosCliente({ clienteId, onSelecionarProduto })
     });
   });
 
-  const top10Produtos = Object.values(produtosConsolidados)
+  const top20Produtos = Object.values(produtosConsolidados)
     .sort((a, b) => b.valor_total - a.valor_total)
-    .slice(0, 10);
+    .slice(0, 20);
 
   // Buscar sugestões com IA
   const buscarSugestoesIA = async () => {
@@ -186,7 +185,7 @@ Retorne um JSON contendo um array de objetos, onde cada objeto representa uma su
   // Usar sugestões IA se disponível, senão usa top10 normal
   const sugestoesExibir = sugestoesIA.length > 0
     ? sugestoesIA
-    : top10Produtos.map(t => {
+    : top20Produtos.map(t => {
       // Ensure we find the full product object for the fallback
       const fullProduct = produtos.find(p => p.id === t.produto_id) || {
         id: t.produto_id,
@@ -213,7 +212,7 @@ Retorne um JSON contendo um array de objetos, onde cada objeto representa uma su
   }
 
   // No client ID or no historical data and no IA suggestions
-  if (!clienteId || (pedidos.length === 0 && sugestoesIA.length === 0 && top10Produtos.length === 0)) {
+  if (!clienteId || (pedidos.length === 0 && sugestoesIA.length === 0 && top20Produtos.length === 0)) {
     return (
       <div className="text-center py-8 text-slate-500 border rounded-lg bg-white p-6 shadow-sm">
         <Package className="w-12 h-12 mx-auto mb-2 opacity-30" />
@@ -270,7 +269,7 @@ Retorne um JSON contendo um array de objetos, onde cada objeto representa uma su
 
       {/* LISTA DE SUGESTÕES */}
       <div className="space-y-2 max-h-64 overflow-y-auto pr-2"> {/* Added pr-2 for scrollbar visibility */}
-        {sugestoesExibir.slice(0, 10).map((sug, idx) => (
+        {sugestoesExibir.slice(0, 20).map((sug, idx) => (
           <button
             key={sug.produto?.id || `sug-${idx}`} // Use a more robust key
             onClick={() => onSelecionarProduto && typeof onSelecionarProduto === 'function' && sug.produto ? onSelecionarProduto(sug.produto) : null}

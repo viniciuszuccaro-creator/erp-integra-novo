@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import TesteGoogleMaps from "@/components/integracoes/TesteGoogleMaps";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
+import RBACButton from "@/components/lib/RBACButton";
 
 export default function RoteirizacaoInteligente({ windowMode = false }) {
   const queryClient = useQueryClient();
@@ -105,7 +106,9 @@ Retorne a melhor sequência de entregas, distância total, tempo estimado e cust
           <p className="text-sm text-slate-600 mt-1">Otimização de rotas com IA</p>
         </div>
 
-        <Button data-permission="Expedicao.Rota.criar"
+        <RBACButton
+          module="Expedicao"
+          action="gerar"
           onClick={() => {
             if (entregasPendentes.length > 0 && motoristas.length > 0 && veiculos.length > 0) {
               gerarRotaIAMutation.mutate({
@@ -122,7 +125,7 @@ Retorne a melhor sequência de entregas, distância total, tempo estimado e cust
         >
           <Zap className="w-4 h-4 mr-2" />
           Gerar Rota com IA
-        </Button>
+        </RBACButton>
       </div>
 
       <div className="grid grid-cols-3 gap-4">

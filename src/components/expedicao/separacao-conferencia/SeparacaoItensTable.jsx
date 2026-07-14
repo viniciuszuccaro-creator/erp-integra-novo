@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import usePermissions from "@/components/lib/usePermissions";
 
 /**
  * Tabela de itens para conferência (extraído de SeparacaoConferencia)

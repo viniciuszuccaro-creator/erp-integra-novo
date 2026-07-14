@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Card, CardContent } from "@/components/ui/card";
 import FormWrapper from "@/components/common/FormWrapper";
 import { Button } from "@/components/ui/button";
+import RBACButton from "@/components/lib/RBACButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -227,9 +228,9 @@ export default function RomaneioForm({ isOpen, onClose, empresaId, windowMode = 
 
         <div className="flex gap-3 pt-4 border-t">
           <Button type="button" variant="outline" onClick={onClose} className="flex-1">Cancelar</Button>
-          <Button type="submit" data-permission="Expedicao.Romaneio.criar" disabled={!formData.motorista || formData.entregas_selecionadas.length === 0 || gerarRomaneioMutation.isPending} className="flex-1 bg-purple-600 hover:bg-purple-700">
+          <RBACButton type="submit" module="Expedicao" action="criar" disabled={!formData.motorista || formData.entregas_selecionadas.length === 0 || gerarRomaneioMutation.isPending} className="flex-1 bg-purple-600 hover:bg-purple-700">
             {gerarRomaneioMutation.isPending ? 'Gerando...' : 'Gerar Romaneio'}
-          </Button>
+          </RBACButton>
         </div>
       </FormWrapper>
     </div>

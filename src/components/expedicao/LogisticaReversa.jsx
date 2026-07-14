@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import RBACButton from "@/components/lib/RBACButton";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -178,12 +179,12 @@ export default function LogisticaReversa({ entrega, onConcluido }) {
         </div>
 
         <div className="flex justify-end gap-2">
-          <Button data-permission="Expedicao.Logistica.reversa"
+          <RBACButton module="Expedicao" action="reversa"
             variant="outline"
             onClick={onConcluido}
           >
             Cancelar
-          </Button>
+          </RBACButton>
           <Button
             onClick={() => processarDevolucaoMutation.mutate()}
             disabled={!motivo || !acao || processarDevolucaoMutation.isPending}

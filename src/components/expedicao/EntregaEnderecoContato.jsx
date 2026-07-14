@@ -2,6 +2,7 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import RBACButton from "@/components/lib/RBACButton";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin, Phone, Zap } from "lucide-react";
@@ -31,7 +32,7 @@ export default function EntregaEnderecoContato({ formData, setFormData, buscarDa
         <Card className="bg-purple-50 border-purple-300">
           <div className="p-3 flex items-center justify-between">
             <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-purple-600" /><span className="text-sm text-purple-900 font-medium">{formData.endereco_entrega_completo.link_google_maps ? '✅ Geolocalização Configurada' : '📍 Gerar Link Google Maps'}</span></div>
-            <Button type="button" data-permission="Expedicao.Entrega.editar" onClick={buscarDadosGoogleMaps} variant="outline" size="sm" className="border-purple-300 text-purple-700 hover:bg-purple-100"><Zap className="w-4 h-4 mr-1" />Gerar com IA</Button>
+            <RBACButton type="button" module="Expedicao" action="editar" onClick={buscarDadosGoogleMaps} variant="outline" size="sm" className="border-purple-300 text-purple-700 hover:bg-purple-100"><Zap className="w-4 h-4 mr-1" />Gerar com IA</RBACButton>
           </div>
         </Card>
         <div className="flex items-center gap-2 p-3 bg-blue-50 rounded border border-blue-200">

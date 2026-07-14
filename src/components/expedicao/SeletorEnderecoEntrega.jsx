@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import RBACButton from "@/components/lib/RBACButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -274,7 +275,7 @@ export default function SeletorEnderecoEntrega({ cliente, onEnderecoSelecionado 
 
       {/* Botão Confirmar */}
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button data-permission="Expedicao.SeletorEnderecoEntrega.salvar"
+        <RBACButton module="Expedicao" action="salvar"
           onClick={handleConfirmar}
           disabled={
             (modo === "selecionar" && !enderecoSelecionado) ||
@@ -285,7 +286,7 @@ export default function SeletorEnderecoEntrega({ cliente, onEnderecoSelecionado 
         >
           <CheckCircle className="w-4 h-4 mr-2" />
           {salvarEnderecoMutation.isPending ? 'Salvando...' : 'Confirmar Endereço'}
-        </Button>
+        </RBACButton>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import RBACButton from "@/components/lib/RBACButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -281,13 +282,13 @@ export default function AssinaturaDigitalEntrega({ onAssinaturaConcluida, isLoad
       </Card>
 
       {/* Botão Confirmar */}
-      <Button data-permission="Expedicao.AssinaturaDigitalEntrega.confirmar"
+      <RBACButton module="Expedicao" action="confirmar"
         onClick={handleConfirmar}
         disabled={!dados.nome_recebedor || !assinado || isLoading}
         className="w-full h-14 text-lg bg-green-600 hover:bg-green-700"
       >
         {isLoading ? 'Confirmando...' : 'Confirmar Entrega'}
-      </Button>
+      </RBACButton>
     </div>
   );
 }

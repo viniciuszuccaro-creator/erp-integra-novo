@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import RBACButton from "@/components/lib/RBACButton";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Send } from "lucide-react";
 import { useUser } from "@/components/lib/UserContext";
@@ -81,9 +82,9 @@ export default function DriverChat({ entrega, onUpdated }) {
       </CardContent>
       <form onSubmit={handleSend} className="border-t p-2 flex gap-2">
         <Input value={msg} onChange={(e)=>setMsg(e.target.value)} placeholder="Escreva uma mensagem..." className="flex-1" disabled={enviarMutation.isPending} />
-        <Button type="submit" data-permission="Expedicao.Motorista.enviar" disabled={!msg.trim() || enviarMutation.isPending} className="bg-blue-600 hover:bg-blue-700">
+        <RBACButton type="submit" module="Expedicao" action="enviar" disabled={!msg.trim() || enviarMutation.isPending} className="bg-blue-600 hover:bg-blue-700">
           <Send className="w-4 h-4"/>
-        </Button>
+        </RBACButton>
       </form>
     </Card>
   );

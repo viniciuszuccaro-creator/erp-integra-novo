@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import RBACButton from "@/components/lib/RBACButton";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -129,14 +130,14 @@ export default function ScannerQRCode({
               className="text-lg font-mono"
               autoFocus
             />
-            <Button data-permission="Expedicao.ScannerQRCode.confirmar" 
+            <RBACButton module="Expedicao" action="confirmar" 
               onClick={handleScanManual}
               disabled={!codigoManual.trim()}
               className="bg-blue-600 hover:bg-blue-700"
             >
               <Scan className="w-5 h-5 mr-2" />
               Confirmar
-            </Button>
+            </RBACButton>
           </div>
 
           <p className="text-xs text-slate-500 mt-2">

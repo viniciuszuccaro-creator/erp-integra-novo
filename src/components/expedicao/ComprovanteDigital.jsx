@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import RBACButton from "@/components/lib/RBACButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -267,7 +268,7 @@ export default function ComprovanteDigital({ entrega, isOpen, onClose, windowMod
             <Button type="button" variant="outline" onClick={onClose} disabled={uploading}>
               Cancelar
             </Button>
-            <Button data-permission="Expedicao.ComprovanteDigital.salvar" 
+            <RBACButton module="Expedicao" action="salvar" 
               type="submit" 
               disabled={uploading || !formData.nome_recebedor}
               className="bg-green-600 hover:bg-green-700"
@@ -283,7 +284,7 @@ export default function ComprovanteDigital({ entrega, isOpen, onClose, windowMod
                   Confirmar Entrega
                 </>
               )}
-            </Button>
+            </RBACButton>
           </div>
         </form>
   );

@@ -85,8 +85,8 @@ export default function ControlsBar({ filters, setFilters, rules, onSaveRules, l
       </div>
       <div className="ml-auto flex items-center gap-2">
         <Badge variant="outline" className="text-xs">Regras: atraso≥{local.minAtrasoHoras ?? 1}h • filaRota&gt;{local.maxFilaRota ?? 8} • trânsito≥{local.maxTransitoHoras ?? 6}h • esperaCD≥{local.maxEsperaCentroHoras ?? 4}h</Badge>
-        <Button variant="outline" data-permission="Expedicao.Configuracao.editar" disabled={!canConfig} onClick={() => setOpen(true)}>Configurar Regras</Button>
-        <Button data-permission="Expedicao.Roteirizacao.simular" onClick={() => setOpen('sim')}>Simular Cenário</Button>
+        <RBACButton variant="outline" module="Expedicao" action="editar" disabled={!canConfig} onClick={() => setOpen(true)}>Configurar Regras</RBACButton>
+                    <RBACButton module="Expedicao" action="simular" onClick={() => setOpen('sim')}>Simular Cenário</RBACButton>
       </div>
 
       <Dialog open={open===true} onOpenChange={(v)=>setOpen(v?true:false)}>
@@ -110,7 +110,7 @@ export default function ControlsBar({ filters, setFilters, rules, onSaveRules, l
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-              <Button data-permission="Expedicao.Configuracao.editar" disabled={!canConfig || loadingRules} onClick={() => { onSaveRules?.(local); setOpen(false); }}>Salvar</Button>
+              <RBACButton module="Expedicao" action="editar" disabled={!canConfig || loadingRules} onClick={() => { onSaveRules?.(local); setOpen(false); }}>Salvar</RBACButton>
             </div>
           </div>
         </DialogContent>

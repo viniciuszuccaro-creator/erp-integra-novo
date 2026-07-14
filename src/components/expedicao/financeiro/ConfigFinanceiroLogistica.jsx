@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import RBACButton from "@/components/lib/RBACButton";
 
 export default function ConfigFinanceiroLogistica({ empresaId }) {
   const queryClient = useQueryClient();
@@ -109,7 +110,7 @@ export default function ConfigFinanceiroLogistica({ empresaId }) {
           </div>
         </div>
         <div className="flex justify-end">
-          <Button data-permission="Expedicao.ConfigFinanceiroLogistica.salvar" onClick={() => saveMutation.mutate(form)} disabled={saveMutation.isPending}>Salvar Configuração</Button>
+          <RBACButton module="Expedicao" action="salvar" onClick={() => saveMutation.mutate(form)} disabled={saveMutation.isPending}>Salvar Configuração</RBACButton>
         </div>
       </CardContent>
     </Card>

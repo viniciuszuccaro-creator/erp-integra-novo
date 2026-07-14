@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
+import RBACButton from "@/components/lib/RBACButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Truck, MessageCircle, Mail, Settings } from "lucide-react";
 import { useConfigExpedicao } from "./configuracao-expedicao/useConfigExpedicao";
@@ -48,11 +49,10 @@ export default function ConfiguracaoExpedicao({ empresaId }) {
       </Tabs>
 
       <div className="flex justify-end">
-        <Button onClick={() => salvarMutation.mutate()} disabled={salvarMutation.isPending}
-          data-permission="Expedicao.Configuracao.salvar"
+        <RBACButton module="Expedicao" action="salvar" onClick={() => salvarMutation.mutate()} disabled={salvarMutation.isPending}
           className="bg-blue-600 hover:bg-blue-700">
           {salvarMutation.isPending ? 'Salvando...' : 'Salvar Configurações'}
-        </Button>
+        </RBACButton>
       </div>
     </div>
   );

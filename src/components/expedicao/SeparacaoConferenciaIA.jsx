@@ -56,22 +56,24 @@ export default function SeparacaoConferenciaIA({ pedidoId, onClose, windowMode =
                 className="text-lg"
                 autoFocus
               />
-              <Button
-                data-permission="Expedicao.Separacao.executar"
+              <RBACButton
+                module="Expedicao"
+                action="executar"
                 onClick={h.handleScanCodigoBarras}
                 className="bg-purple-600 hover:bg-purple-700"
               >
                 <Scan className="w-4 h-4 mr-2" />
                 Escanear
-              </Button>
-              <Button
-                data-permission="Expedicao.Separacao.executar"
+              </RBACButton>
+              <RBACButton
+                module="Expedicao"
+                action="executar"
                 onClick={h.handleOtimizarRota}
                 variant="outline"
               >
                 <MapPin className="w-4 h-4 mr-2" />
                 Otimizar Rota IA
-              </Button>
+              </RBACButton>
             </div>
           </CardContent>
         </Card>
@@ -112,15 +114,16 @@ export default function SeparacaoConferenciaIA({ pedidoId, onClose, windowMode =
           <Button variant="outline" onClick={onClose}>
             Cancelar
           </Button>
-          <Button
+          <RBACButton
+            module="Expedicao"
+            action="finalizar"
             onClick={h.finalizarSeparacao}
             disabled={h.separacao.itens_separados.length === 0}
             className="bg-green-600 hover:bg-green-700"
-            data-permission="Expedicao.Separacao.finalizar"
           >
             <CheckCircle className="w-4 h-4 mr-2" />
             Finalizar Separação
-          </Button>
+          </RBACButton>
         </div>
       </div>
     </div>

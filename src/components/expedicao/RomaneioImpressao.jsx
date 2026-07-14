@@ -23,14 +23,14 @@ export default function RomaneioImpressao({ romaneio, entregas, empresa }) {
     <div className="bg-white">
       {/* Botões (não imprimem) */}
       <div className="flex justify-end gap-3 mb-4 print:hidden">
-        <Button data-permission="Expedicao.RomaneioImpressao.baixar" variant="outline" onClick={handlePDF}>
+        <RBACButton module="Expedicao" action="baixar" variant="outline" onClick={handlePDF}>
           <Download className="w-4 h-4 mr-2" />
           Baixar PDF
-        </Button>
-        <Button data-permission="Expedicao.Romaneio.imprimir" onClick={handleImprimir} className="bg-blue-600">
+        </RBACButton>
+        <RBACButton module="Expedicao" action="imprimir" onClick={handleImprimir} className="bg-blue-600">
           <Printer className="w-4 h-4 mr-2" />
           Imprimir
-        </Button>
+        </RBACButton>
       </div>
 
       {/* Documento Imprimível */}

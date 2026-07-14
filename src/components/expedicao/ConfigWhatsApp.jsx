@@ -325,27 +325,27 @@ export default function ConfigWhatsApp() {
               </div>
             </div>
             <div className="flex justify-end mt-4">
-              <Button data-permission="Expedicao.ConfigWhatsApp.enviar"
+              <RBACButton module="Expedicao" action="enviar"
                 type="button"
                 variant="outline"
                 onClick={handleTestar}
                 disabled={testando || !config.exp_notif_whatsapp_ativo}
               >
                 {testando ? 'Enviando...' : 'Enviar Teste'}
-              </Button>
+              </RBACButton>
             </div>
           </CardContent>
         </Card>
 
         {/* Botões */}
         <div className="flex justify-end gap-3">
-          <Button data-permission="Expedicao.ConfigWhatsApp.salvar"
+          <RBACButton module="Expedicao" action="salvar"
             type="submit"
             disabled={salvarConfigMutation.isPending}
             className="bg-purple-600 hover:bg-purple-700"
           >
             {salvarConfigMutation.isPending ? 'Salvando...' : 'Salvar Configurações'}
-          </Button>
+          </RBACButton>
         </div>
       </form>
 

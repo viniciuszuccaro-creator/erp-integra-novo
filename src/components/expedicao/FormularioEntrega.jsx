@@ -56,7 +56,7 @@ export default function FormularioEntrega({ formData, setFormData, onCancel, cli
           <div><Label>Data Previsão</Label>
             <div className="flex gap-2">
               <Input type="date" value={formData.data_previsao} onChange={(e) => setFormData({ ...formData, data_previsao: e.target.value })} className="flex-1" />
-              <Button type="button" data-permission="Expedicao.Entrega.editar" onClick={calcularPrevisaoEntrega} disabled={calculandoPrevisao} variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50" title="Calcular com IA"><Zap className="w-4 h-4" /></Button>
+              <RBACButton type="button" module="Expedicao" action="editar" onClick={calcularPrevisaoEntrega} disabled={calculandoPrevisao} variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50" title="Calcular com IA"><Zap className="w-4 h-4" /></RBACButton>
             </div>
             {previsaoIA && <p className="text-xs text-green-600 mt-1">🤖 IA: {previsaoIA.prazo_dias} dia(s) • {previsaoIA.confianca_percentual}% confiança</p>}
           </div>
@@ -91,9 +91,9 @@ export default function FormularioEntrega({ formData, setFormData, onCancel, cli
 
       <div className="flex justify-end gap-3 pt-4 border-t">
         <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-        <Button type="submit" disabled={isSubmitting} data-permission="Expedicao.Entrega.criar" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+        <RBACButton type="submit" module="Expedicao" action="criar" disabled={isSubmitting} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
           <CheckCircle2 className="w-4 h-4 mr-2" />{isEditing ? '💾 Atualizar' : '🚀 Criar'} Entrega
-        </Button>
+        </RBACButton>
       </div>
     </FormWrapper>
   );

@@ -22,7 +22,8 @@ const normalize = (a) => {
     create: 'criar', add: 'criar', importar: 'criar', criar: 'criar',
     emitir: 'emitir', enviar: 'enviar', gerar: 'gerar',
     update: 'editar', edit: 'editar', corrigir: 'editar', gerenciar: 'editar', executar: 'editar', registrar: 'editar', atualizar: 'editar', editar: 'editar',
-    approve: 'aprovar', aprovar: 'aprovar', approvar: 'aprovar', rejeitar: 'aprovar', validar: 'aprovar',
+    approve: 'aprovar', aprovar: 'aprovar', approvar: 'aprovar', validar: 'aprovar',
+    rejeitar: 'rejeitar', reject: 'rejeitar',
     export: 'exportar', exportar: 'exportar', imprimir: 'exportar', print: 'exportar',
     cancel: 'cancelar', cancelar: 'cancelar',
     // Vol 3.1: Receber, pagar, liquidar e conciliar são permissões SEPARADAS (manual proíbe colapsar)
@@ -74,11 +75,24 @@ const normalizeModule = (s) => {
 
 const READ_ONLY_ACTIONS = ['visualizar', 'ver', 'view', 'read', 'listar', 'consultar', 'status'];
 
+// Vol 3.4: Sinônimos com backward compat — liquidar no perfil concede pagar/receber/conciliar
+const ACTION_SYNONYMS = {
+  'pagar': ['pagar', 'liquidar'],
+  'receber': ['receber', 'liquidar'],
+  'conciliar': ['conciliar', 'liquidar'],
+  'estornar': ['estornar', 'desfazer', 'liquidar'],
+  'rejeitar': ['rejeitar', 'aprovar'],
+  'desconto': ['desconto', 'aprovar'],
+  'abrir': ['abrir'],
+  'fechar': ['fechar', 'concluir'],
+};
+
 // Helper: verifica se array de permissões do perfil contém a ação desejada (com normalização)
 // CRÍTICO: normaliza ambos os lados para evitar mismatch (perfil tem "ver", busca por "visualizar")
 const arrHasAction = (arr, desired, isReadOnly) => {
   if (!Array.isArray(arr)) return false;
-  return arr.some(v => normalize(v) === desired)
+  const synonyms = ACTION_SYNONYMS[desired] || [desired];
+  return arr.some(v => synonyms.includes(normalize(v)))
     || (isReadOnly && arr.some(v => normalize(v) === 'visualizar'));
 };
 

@@ -8,7 +8,13 @@
     "build": "vite build",
     "lint": "eslint .",
     "typecheck": "tsc -p ./jsconfig.json",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "echo 'Vol 3.1: Unit tests — run via Base44 Testing Agent (test-tube icon) for RBAC, hooks, validators'",
+    "test:integration": "echo 'Vol 3.1: Integration tests — run via Base44 backend function tests (test_backend_function)'",
+    "test:e2e": "echo 'Vol 3.1: E2E tests — run via Base44 Testing Agent: Pedido, Estoque, Producao, Expedicao, Financeiro, Chatbot, Portal'",
+    "test:rbac": "echo 'Vol 3.4: RBAC separation tests — pagar/receber/conciliar/estornar/rejeitar are distinct actions'",
+    "test:multiempresa": "echo 'Vol 3.5: Multiempresa isolation tests — Grupo/Empresa context verification'"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.39",

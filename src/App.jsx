@@ -76,8 +76,9 @@ const AuthenticatedApp = () => {
           </EmpresaSelectorGuard>
         } />
         {Object.entries(Pages).map(([path, Page]) => {
-          // Skip deprecated pages & duplicates (P1: removed ChatbotAtendimento, ProducaoMobile, EntregasMobile)
-          if (['DemoMultitarefas', 'portal', 'portalcliente'].includes(path)) {
+          // Skip deprecated/orphaned pages — DemoMultitarefas is legacy; ChatbotAtendimento consolidated into HubAtendimento (P5)
+          // EntregasMobile and ProducaoMobile remain active as mobile-optimized routes (accessed via mobile app, not sidebar)
+          if (['DemoMultitarefas', 'portal', 'portalcliente', 'ChatbotAtendimento'].includes(path)) {
            return null;
           }
           

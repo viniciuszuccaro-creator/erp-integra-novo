@@ -1,25 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/components/lib/UserContext';
-import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import { base44 } from '@/api/base44Client';
 
 /**
- * Guard que verifica se há empresas cadastradas.
- * Deve ser usado DENTRO do Layout (onde UserProvider existe).
- * Redireciona para /EmpresaOnboarding se nenhuma empresa encontrada.
+ * Guard que verifica se há empresas cadastradas GLOBALMENTE (não por contexto).
+ * Usa list() direto para evitar filtro por group_id/empresa_id que retornaria vazio
+ * quando o usuário ainda não foi associado a um grupo.
+ * Redireciona para /EmpresaOnboarding apenas se NENHUMA empresa existir no sistema.
  */
 export default function EmpresaOnboardingGuard({ children }) {
   const { user } = useUser();
   const navigate = useNavigate();
   const [checked, setChecked] = useState(false);
-  const { filterInContext } = useContextoVisual();
 
   useEffect(() => {
     if (!user?.id) { setChecked(true); return; }
     let cancelled = false;
     (async () => {
       try {
-        const res = await filterInContext('Empresa', {}, '-updated_date', 5);
+        // Busca global sem filtro de contexto — apenas para saber se é first-time setup
+        const res = await base44.entities.Empresa.list('-updated_date', 1);
         if (!cancelled && (!res || res.length === 0)) {
           navigate('/EmpresaOnboarding');
         }

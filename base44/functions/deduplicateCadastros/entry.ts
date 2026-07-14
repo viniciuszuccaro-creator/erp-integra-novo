@@ -11,7 +11,7 @@
  * Regra-Mãe §4: Nenhuma exclusão automática. Tudo é relatório para correção controlada.
  * Admin-only. Auditoria completa de cada execução.
  */
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 const BLOCOS_ENTITIES = {
   "Pessoas & Parceiros": ["Cliente","Fornecedor","Transportadora","Colaborador","Representante","ContatoB2B","SegmentoCliente","RegiaoAtendimento"],

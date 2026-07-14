@@ -304,8 +304,50 @@ export function useContextoVisual() {
     } catch {}
     return updated;
   };
+  // Vol 3.4: Exclusão lógica obrigatória para dados corporativos — converte delete em inativação
+  const NO_PHYSICAL_DELETE_ENTITIES = new Set([
+    'Cliente', 'Fornecedor', 'Transportadora', 'Representante', 'ContatoB2B',
+    'Produto', 'Servico', 'KitProduto', 'GrupoProduto', 'Marca', 'SetorAtividade',
+    'UnidadeMedida', 'TabelaNCM', 'CondicaoComercial', 'SegmentoCliente',
+    'RegiaoAtendimento', 'Cargo', 'Departamento', 'Turno', 'MoedaIndice',
+    'TipoDespesa', 'TipoFrete', 'Banco', 'LocalEstoque', 'RotaPadrao',
+    'Veiculo', 'Motorista', 'CentroResultado', 'CentroOperacao',
+    'CentroCusto', 'PlanoDeContas', 'FormaPagamento', 'TabelaPreco',
+    'TabelaPrecoItem', 'GrupoEmpresarial', 'Empresa',
+    'NotaFiscal', 'TabelaFiscal', 'TabelaDIFAL',
+    'ContaReceber', 'ContaPagar', 'CaixaMovimento', 'LancamentoContabil',
+    'ConciliacaoBancaria', 'RateioFinanceiro', 'ExtratoBancario',
+    'MovimentoCartao', 'CaixaOrdemLiquidacao', 'DRE', 'SPEDFiscal',
+    'Colaborador', 'Ferias', 'Ponto',
+    'Pedido', 'OrdemCompra', 'SolicitacaoCompra', 'OrdemProducao',
+    'ApontamentoProducao', 'Entrega', 'Romaneio', 'MovimentacaoEstoque',
+    'Inventario', 'Contrato', 'Evento', 'Comissao',
+  ]);
+
   const deleteInContext = async (entityName, id) => {
     const before = await base44.entities[entityName].get(id).catch(() => null);
+
+    // Vol 3.4: Dados corporativos usam exclusão lógica (inativação), não física
+    if (NO_PHYSICAL_DELETE_ENTITIES.has(entityName)) {
+      const inactivated = await base44.entities[entityName].update(id, {
+        ativo: false,
+        status: 'Inativo',
+        _inactivated_at: new Date().toISOString(),
+      });
+      try {
+        await base44.entities.AuditLog.create({
+          usuario: (await base44.auth.me())?.email || 'Usuário',
+          acao: 'Inativação', modulo: MODULE_BY_ENTITY[entityName] || 'Sistema', tipo_auditoria: 'entidade', entidade: entityName,
+          descricao: `Inativação (exclusão lógica Vol 3.4) do registro ${id} em ${entityName}`,
+          empresa_id: before?.empresa_id || null, group_id: before?.group_id || null,
+          dados_anteriores: before, dados_novos: inactivated,
+          data_hora: new Date().toISOString()
+        });
+      } catch {}
+      return inactivated;
+    }
+
+    // Entidades temporárias/não-corporativas: exclusão física permitida com auditoria
     const res = await base44.entities[entityName].delete(id);
     try {
       await base44.entities.AuditLog.create({

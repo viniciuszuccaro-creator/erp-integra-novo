@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 let LAST_SECURITY_ALERTS_RUN_AT = 0;
 const SECURITY_ALERTS_COOLDOWN_MS = 15 * 60 * 1000;

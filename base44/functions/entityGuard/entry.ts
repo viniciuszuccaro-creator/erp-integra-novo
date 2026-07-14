@@ -210,6 +210,37 @@ function validateMultiempresaContext(entityName, data, user, desired) {
     return { valid: false, classification, reason: 'Configurações de tecnologia requerem admin' };
   }
 
+  // Vol 3.4: Exclusão lógica obrigatória — dados corporativos não podem ser excluídos fisicamente
+  // Deve usar inativação/arquivamento. Apenas dados temporários expressamente autorizados podem ser excluídos.
+  if (desired === 'excluir') {
+    const NO_PHYSICAL_DELETE = new Set([
+      // Mestres compartilhados
+      'Cliente', 'Fornecedor', 'Transportadora', 'Representante', 'ContatoB2B',
+      'Produto', 'Servico', 'KitProduto', 'GrupoProduto', 'Marca', 'SetorAtividade',
+      'UnidadeMedida', 'TabelaNCM', 'CondicaoComercial', 'SegmentoCliente',
+      'RegiaoAtendimento', 'Cargo', 'Departamento', 'Turno', 'MoedaIndice',
+      'TipoDespesa', 'TipoFrete', 'Banco', 'LocalEstoque', 'RotaPadrao',
+      'Veiculo', 'Motorista', 'CentroResultado', 'CentroOperacao',
+      'CentroCusto', 'PlanoDeContas', 'FormaPagamento', 'TabelaPreco',
+      'TabelaPrecoItem', 'GrupoEmpresarial', 'Empresa',
+      // Fiscais (retenção longa obrigatória)
+      'NotaFiscal', 'TabelaFiscal', 'TabelaDIFAL',
+      // Financeiros (trilha imutável)
+      'ContaReceber', 'ContaPagar', 'CaixaMovimento', 'LancamentoContabil',
+      'ConciliacaoBancaria', 'RateioFinanceiro', 'ExtratoBancario',
+      'MovimentoCartao', 'CaixaOrdemLiquidacao', 'DRE', 'SPEDFiscal',
+      // Confidenciais LGPD
+      'Colaborador', 'Ferias', 'Ponto',
+      // Operacionais com trilha
+      'Pedido', 'OrdemCompra', 'SolicitacaoCompra', 'OrdemProducao',
+      'ApontamentoProducao', 'Entrega', 'Romaneio', 'MovimentacaoEstoque',
+      'Inventario', 'Contrato', 'Evento', 'Comissao',
+    ]);
+    if (NO_PHYSICAL_DELETE.has(entityName)) {
+      return { valid: false, classification, reason: `Exclusão física bloqueada para ${entityName} — use inativação/arquivamento (Vol 3.4)` };
+    }
+  }
+
   return { valid: true, classification };
 }
 

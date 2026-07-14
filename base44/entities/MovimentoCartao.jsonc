@@ -98,9 +98,54 @@
         "A Compensar",
         "Compensado",
         "Cancelado",
-        "Divergente"
+        "Divergente",
+        "Chargeback Solicitado",
+        "Chargeback Confirmado"
       ],
       "default": "Em Tr\u00e2nsito"
+    },
+    "chargeback": {
+      "type": "boolean",
+      "default": false,
+      "description": "Vol 10.3: Se houve chargeback (contesta\u00e7\u00e3o pelo cliente)"
+    },
+    "data_chargeback": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Vol 10.3: Data/hora da solicita\u00e7\u00e3o de chargeback"
+    },
+    "motivo_chargeback": {
+      "type": "string",
+      "enum": [
+        "Fraude",
+        "Produto n\u00e3o recebido",
+        "Produto divergente",
+        "Duplicidade",
+        "Cancelamento pelo cliente",
+        "Valor divergente",
+        "Outro"
+      ],
+      "description": "Vol 10.3: Motivo do chargeback"
+    },
+    "valor_chargeback": {
+      "type": "number",
+      "default": 0,
+      "description": "Vol 10.3: Valor contestado (parcial ou total)"
+    },
+    "chargeback_resolvido": {
+      "type": "boolean",
+      "default": false,
+      "description": "Vol 10.3: Se o chargeback foi resolvido (aceito ou revertido)"
+    },
+    "antecipacao": {
+      "type": "boolean",
+      "default": false,
+      "description": "Vol 10.3: Se foi antecipado pelo adquirente"
+    },
+    "taxa_antecipacao": {
+      "type": "number",
+      "default": 0,
+      "description": "Vol 10.3: Taxa cobrada pela antecipa\u00e7\u00e3o"
     },
     "conciliacao_bancaria_id": {
       "type": "string",

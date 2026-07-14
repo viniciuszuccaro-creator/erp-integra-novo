@@ -85,9 +85,14 @@
         "CNAB",
         "CSV",
         "API",
+        "Open Finance",
         "Manual"
       ],
-      "description": "Como foi importado"
+      "description": "Vol 10.4: Como foi importado (inclui Open Finance)"
+    },
+    "hash_idempotencia": {
+      "type": "string",
+      "description": "Vol 18.1: Hash para garantir idempot\u00eancia em importa\u00e7\u00f5es automatizadas"
     },
     "arquivo_origem": {
       "type": "string",

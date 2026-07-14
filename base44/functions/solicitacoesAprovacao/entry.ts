@@ -78,9 +78,11 @@ Deno.serve(async (req) => {
       return Response.json({ sucesso: true, id: cfg.id });
     }
 
-    // CREATE generic approval (alçada)
+    // CREATE generic approval (alçada) — Vol 6.1: valor, categoria e nível
     if (action === 'create') {
-      const { group_id, empresa_id, tipo_solicitacao, entidade_alvo, entidade_alvo_id, dados_propostos, justificativa, aprovador_id, perfil_aprovador_necessario } = payload;
+      const { group_id, empresa_id, tipo_solicitacao, entidade_alvo, entidade_alvo_id, dados_propostos, justificativa, aprovador_id, perfil_aprovador_necessario,
+              valor_solicitado, categoria_alcada, nivel_alcada, valor_limite_alcada,
+              concessao_temporaria, data_expiracao_concessao } = payload;
       const permOk = await hasPermission(base44, user, 'Comercial', 'Aprovacoes', 'criar');
       if (!permOk) return Response.json({ error: 'Forbidden' }, { status: 403 });
       const ctxErr = assertContextPresence({ empresa_id, group_id }, true);
@@ -98,6 +100,12 @@ Deno.serve(async (req) => {
         justificativa,
         aprovador_id: aprovador_id || null,
         perfil_aprovador_necessario: perfil_aprovador_necessario || null,
+        valor_solicitado: valor_solicitado || 0,
+        categoria_alcada: categoria_alcada || null,
+        nivel_alcada: nivel_alcada || null,
+        valor_limite_alcada: valor_limite_alcada || 0,
+        concessao_temporaria: concessao_temporaria || false,
+        data_expiracao_concessao: data_expiracao_concessao || null,
         status: 'pendente',
         data_solicitacao: new Date().toISOString()
       });

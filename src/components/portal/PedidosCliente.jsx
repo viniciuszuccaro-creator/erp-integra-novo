@@ -7,9 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Package, Search, Eye, MapPin, FileText, Download } from 'lucide-react';
+import { Package, Search, Eye, MapPin, FileText, Download, Repeat } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 /**
  * V21.5 - Meus Pedidos COMPLETO
@@ -20,6 +22,7 @@ import { Progress } from '@/components/ui/progress';
  */
 export default function PedidosCliente() {
   const { user } = useUser();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPedido, setSelectedPedido] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -92,6 +95,36 @@ export default function PedidosCliente() {
   const handleViewDetails = (pedido) => {
     setSelectedPedido(pedido);
     setDetailsOpen(true);
+  };
+
+  // Vol 16.2: Recompra — redireciona para orçamento com itens do pedido anterior
+  const handleRecomprar = (pedido) => {
+    try {
+      const itens = pedido.itens_revenda || [];
+      if (itens.length === 0) {
+        toast.error('Este pedido não possui itens para recompra.');
+        return;
+      }
+      const recompraData = {
+        cliente_id: pedido.cliente_id,
+        cliente_nome: pedido.cliente_nome,
+        itens_revenda: itens.map(i => ({
+          produto_id: i.produto_id,
+          produto_descricao: i.produto_descricao,
+          quantidade: i.quantidade,
+          unidade: i.unidade,
+          preco_unitario: i.preco_unitario || i.valor_unitario,
+          valor_total: i.valor_total
+        })),
+        origem: 'Portal',
+        tipo: 'Orçamento'
+      };
+      sessionStorage.setItem('recompra_pedido', JSON.stringify(recompraData));
+      toast.success(`Itens do pedido ${pedido.numero_pedido} carregados para novo orçamento.`);
+      navigate('/PortalCliente?tab=orcamento');
+    } catch (e) {
+      toast.error('Não foi possível carregar os itens para recompra.');
+    }
   };
 
   if (isLoading) {
@@ -169,6 +202,15 @@ export default function PedidosCliente() {
                   >
                     <Eye className="w-4 h-4" />
                     Ver Detalhes
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleRecomprar(pedido)}
+                    className="flex items-center gap-2"
+                  >
+                    <Repeat className="w-4 h-4" />
+                    Recomprar
                   </Button>
                   {entrega && entrega.qr_code && (
                     <Button
@@ -266,6 +308,27 @@ export default function PedidosCliente() {
                   </p>
                 </div>
               )}
+
+              <div className="flex gap-2 pt-4 border-t">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleRecomprar(selectedPedido)}
+                  className="flex items-center gap-2"
+                >
+                  <Repeat className="w-4 h-4" />
+                  Recomprar Itens
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  onClick={() => toast.info('Download de documentos será disponibilizado após faturamento.')}
+                >
+                  <Download className="w-4 h-4" />
+                  XML / DANFE
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>

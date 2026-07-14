@@ -30,6 +30,10 @@
         "desconto_pedido",
         "alteracao_preco",
         "cadastro_fornecedor",
+        "aprovacao_compra",
+        "liberar_credito",
+        "estorno_financeiro",
+        "cancelamento_nf",
         "outro"
       ],
       "default": "desconto_pedido"
@@ -47,13 +51,63 @@
     "justificativa": {
       "type": "string"
     },
+    "valor_solicitado": {
+      "type": "number",
+      "default": 0,
+      "description": "Vol 6.1: Valor financeiro envolvido na solicita\u00e7\u00e3o (para al\u00e7ada)"
+    },
+    "categoria_alcada": {
+      "type": "string",
+      "enum": [
+        "Comercial",
+        "Compras",
+        "Financeiro",
+        "Fiscal",
+        "RH",
+        "Operacional",
+        "Sistema"
+      ],
+      "description": "Vol 6.1: Categoria da al\u00e7ada (define limites por \u00e1rea)"
+    },
+    "nivel_alcada": {
+      "type": "string",
+      "enum": [
+        "Vendedor",
+        "Supervisor",
+        "Gerente",
+        "Diretor",
+        "Admin"
+      ],
+      "description": "Vol 6.1/3.2: N\u00edvel de al\u00e7ada necess\u00e1rio para aprovar"
+    },
+    "valor_limite_alcada": {
+      "type": "number",
+      "default": 0,
+      "description": "Vol 6.1: Valor m\u00e1ximo que o aprovador deste n\u00edvel pode autorizar"
+    },
+    "concessao_temporaria": {
+      "type": "boolean",
+      "default": false,
+      "description": "Vol 3.2: Se \u00e9 uma concess\u00e3o tempor\u00e1ria de permiss\u00e3o"
+    },
+    "data_expiracao_concessao": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Vol 3.2: Data de expira\u00e7\u00e3o da concess\u00e3o tempor\u00e1ria"
+    },
+    "excecao_aprovada_superior": {
+      "type": "boolean",
+      "default": false,
+      "description": "Vol 3.2: Se foi aprovada como exce\u00e7\u00e3o por superior (fluxo de exce\u00e7\u00e3o)"
+    },
     "status": {
       "type": "string",
       "enum": [
         "pendente",
         "aprovado",
         "rejeitado",
-        "cancelado"
+        "cancelado",
+        "expirado"
       ],
       "default": "pendente"
     },

@@ -69,6 +69,25 @@
       "type": "object",
       "description": "Template do payload a ser enviado"
     },
+    "secret_assinatura": {
+      "type": "string",
+      "description": "Vol 18.1: Secret usado para assinar o payload (HMAC-SHA256) e validar integridade"
+    },
+    "header_assinatura": {
+      "type": "string",
+      "default": "X-Webhook-Signature",
+      "description": "Vol 18.1: Nome do header onde a assinatura \u00e9 enviada"
+    },
+    "idempotencia_habilitada": {
+      "type": "boolean",
+      "default": true,
+      "description": "Vol 18.1: Se idempot\u00eancia est\u00e1 ativa (evita duplica\u00e7\u00e3o de processamento)"
+    },
+    "chave_idempotencia_campo": {
+      "type": "string",
+      "default": "event_id",
+      "description": "Vol 18.1: Campo do payload usado como chave de idempot\u00eancia"
+    },
     "politica_retry": {
       "type": "object",
       "properties": {

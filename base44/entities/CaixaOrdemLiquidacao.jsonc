@@ -66,6 +66,82 @@
       },
       "description": "T\u00edtulos vinculados a esta ordem"
     },
+    "eh_rateio": {
+      "type": "boolean",
+      "default": false,
+      "description": "Vol 10.2: Se \u00e9 um rateio de pagamento entre m\u00faltiplos clientes/pedidos"
+    },
+    "rateio_detalhes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cliente_id": {
+            "type": "string"
+          },
+          "cliente_nome": {
+            "type": "string"
+          },
+          "pedido_id": {
+            "type": "string"
+          },
+          "valor_rateado": {
+            "type": "number"
+          },
+          "percentual": {
+            "type": "number"
+          },
+          "titulo_id": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Vol 10.2: Detalhes do rateio \u2014 permite dividir um pagamento entre 2+ clientes/pedidos"
+    },
+    "meios_pagamento": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "forma_pagamento": {
+            "type": "string",
+            "enum": [
+              "Dinheiro",
+              "PIX",
+              "Boleto",
+              "Transfer\u00eancia",
+              "Cheque",
+              "Cart\u00e3o Cr\u00e9dito",
+              "Cart\u00e3o D\u00e9bito",
+              "Cr\u00e9dito Loja"
+            ]
+          },
+          "valor": {
+            "type": "number"
+          },
+          "referencia": {
+            "type": "string",
+            "description": "NSU, comprovante, ID da transa\u00e7\u00e3o, etc"
+          }
+        }
+      },
+      "description": "Vol 10.2: M\u00faltiplos meios de pagamento no mesmo lote"
+    },
+    "valor_diferenca": {
+      "type": "number",
+      "default": 0,
+      "description": "Vol 10.2: Diferen\u00e7a entre valor total e soma dos meios/t\u00edtulos"
+    },
+    "acrescimo": {
+      "type": "number",
+      "default": 0,
+      "description": "Vol 10.1: Acr\u00e9scimo aplicado (juros, multa)"
+    },
+    "desconto": {
+      "type": "number",
+      "default": 0,
+      "description": "Vol 10.1: Desconto aplicado"
+    },
     "data_ordem": {
       "type": "string",
       "format": "date-time",
@@ -82,6 +158,10 @@
     },
     "usuario_processou_id": {
       "type": "string"
+    },
+    "operador_caixa_id": {
+      "type": "string",
+      "description": "Vol 10.2: ID do operador de caixa respons\u00e1vel"
     },
     "detalhes_processamento": {
       "type": "object",

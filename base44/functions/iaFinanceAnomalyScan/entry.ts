@@ -65,7 +65,7 @@ function computeIssues(receber, pagar, cfg) {
 async function notify(base44, notif, options = {}) {
   const { whatsapp = false } = options;
   const { titulo, mensagem, tipo = 'alerta', categoria = 'Sistema', prioridade = 'Normal', empresa_id = null, dados = null } = notif || {};
-  try { if (base44?.asServiceRole?.entities?.Notificacao?.create) { await base44.asServiceRole.entities.Notificacao.create({ titulo, mensagem, tipo, categoria, prioridade, empresa_id, dados }); } } catch (_) {}
+  try { if (base44?.asServiceRole?.entities?.Notificacao?.create) { await base44.asServiceRole.entities.Notificacao.create({ titulo, mensagem, tipo, categoria, prioridade, empresa_id, dados }); } } catch (notifErr) { console.error('Notificação falhou (iaFinanceAnomalyScan):', notifErr); }
   if (whatsapp && empresa_id) {
     try {
       const cfgs = await base44.asServiceRole.entities?.ConfiguracaoWhatsApp?.filter?.({ empresa_id }, '-updated_date', 1);
@@ -275,7 +275,7 @@ Deno.serve(async (req) => {
                 ...idsDup.map(id => base44.asServiceRole.entities.ContaPagar.update(id, { duplicidade_detectada: true }))
               ]);
             }
-          } catch (_) {}
+          } catch (flagErr) { console.error('Flag persistence falhou (iaFinanceAnomalyScan ContaPagar):', flagErr); }
 
     // ML leve: outliers por Z-Score (valor)
     const valoresRec = Array.isArray(receber) ? receber.map(r => Number(r.valor || 0)).filter(v => v > 0) : [];
@@ -411,9 +411,9 @@ Deno.serve(async (req) => {
             dados_novos: { params: { ...body?.previsao_estoque, estoque_params }, amostra: previsoes.slice(0, 20) },
             data_hora: new Date().toISOString(),
           });
-        } catch (_) {}
+        } catch (auditErr) { console.error('AuditLog falhou (iaFinanceAnomalyScan previsões):', auditErr); }
       }
-    } catch (_) {}
+    } catch (prevErr) { console.error('Previsão de estoque falhou (iaFinanceAnomalyScan):', prevErr); }
 
     // Auditoria + Alerta no NotificationCenter
     if (issues.length > 0) {

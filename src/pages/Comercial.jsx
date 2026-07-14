@@ -322,6 +322,24 @@ export default function Comercial() {
     .map((m) => ({ ...m, permissionKey: `Comercial.${m.sectionKey || m.title}.visualizar` }))
     .filter(m => canViewComercial(m.sectionKey || m.title));
 
+   // Vol 5.1: Drill-down de KPIs — clicar no card abre o módulo de origem
+   const handleKPIDrillDown = (dataKey) => {
+     const moduleMap = {
+       clientes: modules.find(m => m.title === 'Clientes'),
+       pedidos: modules.find(m => m.title === 'Pedidos'),
+       vendas: modules.find(m => m.title === 'Pedidos'),
+       ticket: modules.find(m => m.title === 'Pedidos'),
+       faturado: modules.find(m => m.title === 'Notas Fiscais'),
+       pendente: modules.find(m => m.title === 'Pedidos'),
+       peso: modules.find(m => m.title === 'Pedidos'),
+       margem: modules.find(m => m.title === 'Pedidos'),
+     };
+     const targetModule = moduleMap[dataKey];
+     if (targetModule) {
+       handleModuleClick(targetModule);
+     }
+   };
+
    const handleModuleClick = (module) => {
     if (!canViewComercial(module.sectionKey || module.title)) {
       toast.error('Sem permissao para visualizar esta area do Comercial.');
@@ -386,7 +404,8 @@ export default function Comercial() {
                    pedidosCancelados={pedidosCancelados}
                    margemBruta={margemBruta}
                    margemPercentual={margemPercentual}
-                 />
+                   onDrillDown={handleKPIDrillDown}
+                   />
                 {pedidosExternosPendentes > 0 && (
                   <Badge className="bg-orange-100 text-orange-700 px-3 py-2 text-sm font-medium">
                     <AlertCircle className="w-3 h-3 mr-2" />

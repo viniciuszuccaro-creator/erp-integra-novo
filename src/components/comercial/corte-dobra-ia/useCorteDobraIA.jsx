@@ -94,14 +94,21 @@ export default function useCorteDobraIA(formData, setFormData, empresaId) {
     setEditando({
       codigo: `N${((formData?.itens_corte_dobra || []).length) + 1}`,
       bitola: '', formato: 'reto', quantidade: 1, medidas: { A: 0 },
-      etapa_obra_id: '', etapa_obra_nome: '', origem_ia: false
+      etapa_obra_id: '', etapa_obra_nome: '', origem_ia: false,
+      // Vol 5.4: Vínculo a obra, etapa, ponto, pavimento, posição, revisão e data prevista
+      ponto: '', pavimento: '', posicao: '', revisao: 1, data_prevista: '',
+      // Vol 5.4: Controle de produção/faturamento (impede remoção)
+      produzido: false, quantidade_faturada: 0,
     });
   };
 
   const salvarPosicao = () => {
     if (!editando.bitola || !editando.quantidade) { toast.error('Preencha bitola e quantidade'); return; }
     const pesoCalculado = calcularPesoPosicao(editando, bitolas);
-    const posicaoFinal = { ...editando, peso_kg: pesoCalculado };
+    // Vol 5.4: QR Code para produção, separação e entrega + memória de cálculo
+    const qrCode = `CD-${editando.codigo || Date.now().toString(36)}-${Date.now().toString(36).toUpperCase()}`;
+    const memoriaCalculo = `Peso = ${pesoCalculado.toFixed(2)} kg (comprimento × peso teórico/m × quantidade)`;
+    const posicaoFinal = { ...editando, peso_kg: pesoCalculado, qr_code: editando.qr_code || qrCode, memoria_calculo: memoriaCalculo };
     if (editando.index !== undefined) {
       const novasPos = [...(formData?.itens_corte_dobra || [])];
       novasPos[editando.index] = posicaoFinal;
@@ -114,6 +121,12 @@ export default function useCorteDobraIA(formData, setFormData, empresaId) {
   };
 
   const removerPosicao = (index) => {
+    // Vol 5.4: Impedir remoção de posição já produzida ou faturada
+    const pos = formData?.itens_corte_dobra?.[index];
+    if (pos?.produzido || (pos?.quantidade_faturada || 0) > 0) {
+      toast.error('❌ Posição já produzida/faturada — não pode ser removida. Use estorno autorizado.');
+      return;
+    }
     setFormData(prev => ({ ...prev, itens_corte_dobra: (prev?.itens_corte_dobra || []).filter((_, i) => i !== index) }));
     toast.success('✅ Posição removida');
   };

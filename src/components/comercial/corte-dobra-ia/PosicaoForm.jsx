@@ -18,7 +18,7 @@ export default function PosicaoForm({ editando, setEditando, bitolas, onSave, on
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Button data-permission="Comercial.CorteDobra.criar" onClick={onAdd} variant="outline" className="w-full">
+          <Button onClick={onAdd} variant="outline" className="w-full">
             <Plus className="w-4 h-4 mr-2" />
             Nova Posição
           </Button>
@@ -112,6 +112,30 @@ export default function PosicaoForm({ editando, setEditando, bitolas, onSave, on
             </Select>
           </div>
 
+          {/* Vol 5.4: Vínculo a obra — ponto, pavimento, posição, revisão, data prevista */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 p-3 bg-blue-50 rounded">
+            <div>
+              <Label className="text-xs">Ponto</Label>
+              <Input placeholder="Ex: P1" value={editando.ponto || ''} onChange={(e) => setEditando({ ...editando, ponto: e.target.value })} />
+            </div>
+            <div>
+              <Label className="text-xs">Pavimento</Label>
+              <Input placeholder="Ex: Térreo" value={editando.pavimento || ''} onChange={(e) => setEditando({ ...editando, pavimento: e.target.value })} />
+            </div>
+            <div>
+              <Label className="text-xs">Posição</Label>
+              <Input placeholder="Ex: A1" value={editando.posicao || ''} onChange={(e) => setEditando({ ...editando, posicao: e.target.value })} />
+            </div>
+            <div>
+              <Label className="text-xs">Revisão</Label>
+              <Input type="number" min="1" value={editando.revisao || 1} onChange={(e) => setEditando({ ...editando, revisao: parseInt(e.target.value) || 1 })} />
+            </div>
+            <div>
+              <Label className="text-xs">Data Prevista</Label>
+              <Input type="date" value={editando.data_prevista || ''} onChange={(e) => setEditando({ ...editando, data_prevista: e.target.value })} />
+            </div>
+          </div>
+
           {formatoSelecionado && (
             <div className="grid grid-cols-4 gap-2 p-3 bg-slate-50 rounded">
               {formatoSelecionado.medidas.map((medida) => (
@@ -132,10 +156,10 @@ export default function PosicaoForm({ editando, setEditando, bitolas, onSave, on
           )}
 
           <div className="flex gap-2">
-            <Button onClick={() => setEditando(null)} data-permission="Comercial.CorteDobra.editar" variant="outline" className="flex-1">
+            <Button onClick={() => setEditando(null)} variant="outline" className="flex-1">
               Cancelar
             </Button>
-            <Button onClick={onSave} data-permission="Comercial.CorteDobra.criar" className="flex-1 bg-green-600 hover:bg-green-700">
+            <Button onClick={onSave} className="flex-1 bg-green-600 hover:bg-green-700">
               Salvar Posição
             </Button>
           </div>

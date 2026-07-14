@@ -98,7 +98,7 @@ function computeOptimizedPrice(produto, quotes, cfg) {
         if (precoSugerido < precoMinSeg) precoSugerido = precoMinSeg;
       }
     }
-  } catch (_) {}
+  } catch (polErr) { console.error('Policy application falhou (optimizeProductPrice):', polErr); }
   precoSugerido = Math.max(0, Number(precoSugerido?.toFixed(2) || 0));
   const margemPercent = custoBase > 0 ? Math.max(0, Math.round(((precoSugerido - custoBase) / custoBase) * 100)) : Math.max(0, Math.round(markupMin));
   return { preco_venda: precoSugerido, margem_minima_percentual: margemPercent };
@@ -116,7 +116,7 @@ async function audit(base44, user, { acao = 'Ação', modulo = 'Sistema', entida
       dados_novos: dados_novos || null,
       data_hora: new Date().toISOString(),
     });
-  } catch {}
+  } catch (auditErr) { console.error('AuditLog falhou (optimizeProductPriceHandler audit):', auditErr); }
 }
 
 // Handler pequeno e reutilizável para otimização de preço de produto

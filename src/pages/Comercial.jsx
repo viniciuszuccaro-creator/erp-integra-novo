@@ -22,6 +22,7 @@ import ModuleTabs from "@/components/layout/ModuleTabs";
 import KPIsComercial from "@/components/comercial/comercial-launchpad/KPIsComercial";
 import ModulosGridComercial from "@/components/comercial/comercial-launchpad/ModulosGridComercial";
 import useComercialDerivedData from "@/components/comercial/hooks/useComercialDerivedData";
+import useCountEntitiesOptimized from "@/components/lib/useCountEntitiesOptimized";
 import {
   COMERCIAL_COMPANY_LIMIT,
   COMERCIAL_EXTERNAL_LIMIT,
@@ -132,6 +133,11 @@ export default function Comercial() {
     margemBruta,
     margemPercentual,
   } = useComercialDerivedData({ pedidos, clientes, pedidosExternos });
+
+  // Vol 3.3: Contagens server-side precisas (não limitadas pelo batch carregado)
+  const { counts: serverCounts } = useCountEntitiesOptimized(['Pedido', 'Cliente']);
+  const totalPedidosServer = serverCounts?.Pedido ?? pedidos.length;
+  const totalClientesServer = serverCounts?.Cliente ?? clientes.length;
 
   const handleCreateNewPedido = () => {
     let pedidoCriado = false;
@@ -367,9 +373,9 @@ export default function Comercial() {
             >
               <ModuleKPIs>
                 <KPIsComercial
-                   totalClientes={clientes.length}
+                   totalClientes={totalClientesServer}
                    clientesAtivos={clientesAtivos}
-                   totalPedidos={pedidos.length}
+                   totalPedidos={totalPedidosServer}
                    totalVendas={totalVendas}
                    ticketMedio={ticketMedio}
                    valorFaturado={valorFaturado}

@@ -30,8 +30,19 @@ export function useArmadoPadraoCalculo({ formData, setFormData, onNext }) {
       tipo_peca: tipoPeca,
       identificador: dadosPeca.identificador || `${tipoPeca.toUpperCase()}-${Date.now()}`,
       quantidade: dadosPeca.quantidade || 1,
+      // Vol 5.3: Vínculo a obra, etapa, ponto, pavimento, posição, revisão e data prevista
       etapa_obra_id: dadosPeca.etapa_obra_id || '',
       etapa_obra_nome: dadosPeca.etapa_obra_nome || '',
+      ponto: dadosPeca.ponto || '',
+      pavimento: dadosPeca.pavimento || '',
+      posicao: dadosPeca.posicao || '',
+      revisao: dadosPeca.revisao || 1,
+      data_prevista: dadosPeca.data_prevista || '',
+      // Vol 5.3: QR Code para produção, separação e entrega
+      qr_code: `ARM-${dadosPeca.identificador || tipoPeca.toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
+      // Vol 5.3: Controle de produção/faturamento (impede remoção)
+      produzido: dadosPeca.produzido || false,
+      quantidade_faturada: dadosPeca.quantidade_faturada || 0,
       quantidade_ferros_principais: dadosPeca.quantidade_ferros_principais || 4,
       bitola_principal: dadosPeca.bitola_principal || '',
       reforco_bitola: dadosPeca.reforco_bitola || '',
@@ -78,6 +89,8 @@ export function useArmadoPadraoCalculo({ formData, setFormData, onNext }) {
     resultado.peso_total_kg = pesoEstimado;
     const precoPorKg = 8.50;
     resultado.preco_venda_total = pesoEstimado * precoPorKg;
+    // Vol 5.3: Memória de cálculo do peso
+    resultado.memoria_calculo = `Peso = ${pesoEstimado.toFixed(2)} kg (peso médio 1.5 kg/m × comprimento × ferros × qty + estribos)`;
     return resultado;
   };
 
@@ -147,6 +160,12 @@ export function useArmadoPadraoCalculo({ formData, setFormData, onNext }) {
   };
 
   const removerPeca = (index) => {
+    // Vol 5.3: Impedir remoção de peça já produzida ou faturada — exigir revisão/estorno autorizado
+    const peca = formData.itens_armado_padrao?.[index];
+    if (peca?.produzido || (peca?.quantidade_faturada || 0) > 0) {
+      toast.error('❌ Peça já produzida/faturada — não pode ser removida. Use estorno autorizado.');
+      return;
+    }
     setFormData(prev => ({
       ...prev,
       itens_armado_padrao: prev.itens_armado_padrao.filter((_, i) => i !== index)

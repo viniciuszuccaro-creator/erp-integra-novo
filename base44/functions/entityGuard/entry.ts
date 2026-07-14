@@ -75,16 +75,16 @@ const normalizeModule = (s) => {
 
 const READ_ONLY_ACTIONS = ['visualizar', 'ver', 'view', 'read', 'listar', 'consultar', 'status'];
 
-// Vol 3.4: Sinônimos com backward compat — liquidar no perfil concede pagar/receber/conciliar
+// Vol 3.4 (Seção 3.4 do plano): Ações SEPARADAS — sem backward compat com liquidar/aprovar
 const ACTION_SYNONYMS = {
-  'pagar': ['pagar', 'liquidar'],
-  'receber': ['receber', 'liquidar'],
-  'conciliar': ['conciliar', 'liquidar'],
-  'estornar': ['estornar', 'desfazer', 'liquidar'],
-  'rejeitar': ['rejeitar', 'aprovar'],
-  'desconto': ['desconto', 'aprovar'],
+  'pagar': ['pagar'],
+  'receber': ['receber'],
+  'conciliar': ['conciliar'],
+  'estornar': ['estornar', 'desfazer'],
+  'rejeitar': ['rejeitar', 'reject'],
+  'desconto': ['desconto'],
   'abrir': ['abrir'],
-  'fechar': ['fechar', 'concluir'],
+  'fechar': ['fechar'],
 };
 
 // Helper: verifica se array de permissões do perfil contém a ação desejada (com normalização)
@@ -249,6 +249,10 @@ function validateMultiempresaContext(entityName, data, user, desired) {
       'Pedido', 'OrdemCompra', 'SolicitacaoCompra', 'OrdemProducao',
       'ApontamentoProducao', 'Entrega', 'Romaneio', 'MovimentacaoEstoque',
       'Inventario', 'Contrato', 'Evento', 'Comissao',
+      'TransferenciaFilial', 'SeparacaoConferencia', 'ConciliacaoPedido',
+      'ImportacaoXMLNFe', 'PedidoExterno', 'PedidoEtapa', 'EntregaItens',
+      'InspecaoQualidade', 'OperadorCaixa', 'SolicitacaoAprovacao',
+      'MonitoramentoRH', 'LogFiscal',
     ]);
     if (NO_PHYSICAL_DELETE.has(entityName)) {
       return { valid: false, classification, reason: `Exclusão física bloqueada para ${entityName} — use inativação/arquivamento (Vol 3.4)` };

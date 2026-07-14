@@ -29,7 +29,6 @@ export default function ArmadoPadraoFormFields({
           <Button
             variant="outline"
             size="sm"
-            data-permission="Comercial.ArmadoPadrao.editar"
             onClick={onTrocarTipo}
           >
             Trocar Tipo
@@ -86,6 +85,30 @@ export default function ArmadoPadraoFormFields({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+        </div>
+
+        {/* Vol 5.3: Vínculo a obra — ponto, pavimento, posição, revisão, data prevista */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 bg-blue-50 rounded-lg">
+          <div>
+            <Label>Ponto</Label>
+            <Input placeholder="Ex: P1, P2" value={dadosPeca.ponto || ''} onChange={(e) => setDadosPeca({ ...dadosPeca, ponto: e.target.value })} />
+          </div>
+          <div>
+            <Label>Pavimento</Label>
+            <Input placeholder="Ex: Térreo, 1º" value={dadosPeca.pavimento || ''} onChange={(e) => setDadosPeca({ ...dadosPeca, pavimento: e.target.value })} />
+          </div>
+          <div>
+            <Label>Posição</Label>
+            <Input placeholder="Ex: A1, B2" value={dadosPeca.posicao || ''} onChange={(e) => setDadosPeca({ ...dadosPeca, posicao: e.target.value })} />
+          </div>
+          <div>
+            <Label>Revisão</Label>
+            <Input type="number" min="1" value={dadosPeca.revisao || 1} onChange={(e) => setDadosPeca({ ...dadosPeca, revisao: parseInt(e.target.value) || 1 })} />
+          </div>
+          <div>
+            <Label>Data Prevista</Label>
+            <Input type="date" value={dadosPeca.data_prevista || ''} onChange={(e) => setDadosPeca({ ...dadosPeca, data_prevista: e.target.value })} />
           </div>
         </div>
 
@@ -237,12 +260,12 @@ export default function ArmadoPadraoFormFields({
           </>
         )}
 
-        <Button onClick={onAdicionar} data-permission="Comercial.ArmadoPadrao.criar" className="w-full bg-blue-600 hover:bg-blue-700" size="lg">
+        <Button onClick={onAdicionar} className="w-full bg-blue-600 hover:bg-blue-700" size="lg">
           <Plus className="w-5 h-5 mr-2" />
           {pecaEditandoIndex !== null ? '💾 Salvar Edição' : 'Adicionar Peça ao Pedido'}
         </Button>
         {pecaEditandoIndex !== null && (
-          <Button onClick={onCancelarEdicao} data-permission="Comercial.ArmadoPadrao.editar" variant="outline" className="w-full mt-2" size="lg">
+          <Button onClick={onCancelarEdicao} variant="outline" className="w-full mt-2" size="lg">
             Cancelar Edição
           </Button>
         )}

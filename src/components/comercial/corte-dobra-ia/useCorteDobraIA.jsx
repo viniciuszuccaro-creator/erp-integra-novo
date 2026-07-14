@@ -32,6 +32,7 @@ export default function useCorteDobraIA(formData, setFormData, empresaId) {
   const [posicaoSelecionada, setPosicaoSelecionada] = useState(null);
   const [editando, setEditando] = useState(null);
   const [processandoIA, setProcessandoIA] = useState(false);
+  const [previewPosicoes, setPreviewPosicoes] = useState(null);
 
   const { data: bitolas = [] } = useRLSQuery(
     'Produto', { eh_bitola: true, status: 'Ativo' }, '-descricao', 200,
@@ -69,17 +70,15 @@ export default function useCorteDobraIA(formData, setFormData, empresaId) {
             etapa_obra_id: pos.etapa || '', etapa_obra_nome: ETAPAS_OBRA.find(e => e.id === pos.etapa)?.nome || ''
           };
         });
-        setFormData(prev => ({
-          ...prev,
-          itens_corte_dobra: [...(prev?.itens_corte_dobra || []), ...posicoesComPeso],
-          projetos_ia: [...(prev?.projetos_ia || []), {
-            arquivo_url: file_url, arquivo_nome: file.name,
-            tipo_arquivo: file.name.endsWith('.pdf') ? 'PDF' : 'DWG',
-            processado_ia: true, data_processamento: new Date().toISOString(),
-            pecas_detectadas: resultado.posicoes.length, confianca_media: resultado.confianca
-          }]
-        }));
-        toast.success(`✅ ${resultado.posicoes.length} posição(ões) extraída(s) com IA!`);
+        // Vol 5.4: Prévia antes de gravar — usuário confirma antes de commitar
+        setPreviewPosicoes({
+          posicoes: posicoesComPeso,
+          arquivo_nome: file.name,
+          arquivo_url: file_url,
+          confianca: resultado.confianca || 85,
+          observacoes: resultado.observacoes || ''
+        });
+        toast.info(`📋 IA detectou ${posicoesComPeso.length} posição(ões) — confirme para gravar`);
       } else {
         toast.error('❌ Nenhuma posição foi detectada pela IA');
       }
@@ -134,12 +133,35 @@ export default function useCorteDobraIA(formData, setFormData, empresaId) {
     return resumo;
   };
 
+  // Vol 5.4: Confirmar importação IA — grava no formData apenas após confirmação
+  const confirmarImportacaoIA = () => {
+    if (!previewPosicoes) return;
+    setFormData(prev => ({
+      ...prev,
+      itens_corte_dobra: [...(prev?.itens_corte_dobra || []), ...previewPosicoes.posicoes],
+      projetos_ia: [...(prev?.projetos_ia || []), {
+        arquivo_url: previewPosicoes.arquivo_url, arquivo_nome: previewPosicoes.arquivo_nome,
+        tipo_arquivo: previewPosicoes.arquivo_nome.endsWith('.pdf') ? 'PDF' : 'DWG',
+        processado_ia: true, data_processamento: new Date().toISOString(),
+        pecas_detectadas: previewPosicoes.posicoes.length, confianca_media: previewPosicoes.confianca
+      }]
+    }));
+    toast.success(`✅ ${previewPosicoes.posicoes.length} posição(ões) confirmada(s) e gravada(s)!`);
+    setPreviewPosicoes(null);
+  };
+
+  const cancelarImportacaoIA = () => {
+    setPreviewPosicoes(null);
+    toast.info('Importação IA cancelada');
+  };
+
   const formatoSelecionado = FORMATOS_DISPONIVEIS.find(f => f.id === editando?.formato);
 
   return {
     bitolas, posicaoSelecionada, setPosicaoSelecionada,
-    editando, setEditando, processandoIA,
+    editando, setEditando, processandoIA, previewPosicoes,
     handleUploadIA, adicionarManual, salvarPosicao, removerPosicao, consolidarPorEtapa,
+    confirmarImportacaoIA, cancelarImportacaoIA,
     formatoSelecionado,
   };
 }

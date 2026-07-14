@@ -459,7 +459,7 @@ Deno.serve(async (req) => {
     }
 
     const durationMs = Date.now() - t0;
-    try { if (durationMs > 500) { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Sistema', acao: 'Visualização', modulo: body?.previsao_estoque?.enabled ? 'Estoque' : 'Financeiro', tipo_auditoria: 'sistema', entidade: 'Performance', descricao: `iaFinanceAnomalyScan demorou ${durationMs}ms`, dados_novos: { durationMs, filtros }, data_hora: new Date().toISOString() }); } } catch (_) {}
+    try { if (durationMs > 500) { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Sistema', acao: 'Visualização', modulo: body?.previsao_estoque?.enabled ? 'Estoque' : 'Financeiro', tipo_auditoria: 'sistema', entidade: 'Performance', descricao: `iaFinanceAnomalyScan demorou ${durationMs}ms`, dados_novos: { durationMs, filtros }, data_hora: new Date().toISOString() }); } } catch (perfErr) { console.error('Performance audit log falhou (iaFinanceAnomalyScan):', perfErr); }
     return Response.json({ ok: true, issues: issues.length, details: issues, previsoes });
   } catch (error) {
     return Response.json({ error: String(error?.message || error) }, { status: 500 });

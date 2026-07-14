@@ -145,9 +145,9 @@ export default function HerancaOverridesPanel() {
         </div>
         {contextoValidoParaOverride && (
           override ? (
-            <Button variant="outline" size="sm" data-permission="Administracao.Heranca.remover" onClick={() => removerOverrideMutation.mutate({ chave: g.chave })} disabled={removerOverrideMutation.isPending || !podeEditarOverrides} data-action="ConfigHeranca.override.remover" data-permission="Sistema.Configuracoes.editar" data-sensitive="true">Remover Override</Button>
+            <Button variant="outline" size="sm" onClick={() => removerOverrideMutation.mutate({ chave: g.chave })} disabled={removerOverrideMutation.isPending || !podeEditarOverrides}>Remover Override</Button>
           ) : (
-            <Button size="sm" onClick={() => upsertMutation.mutate({ registroGrupo: g })} disabled={upsertMutation.isPending || !podeEditarOverrides} data-action="ConfigHeranca.override.criar" data-permission="Sistema.Configuracoes.criar" data-sensitive="true">Criar Override</Button>
+            <Button size="sm" onClick={() => upsertMutation.mutate({ registroGrupo: g })} disabled={upsertMutation.isPending || !podeEditarOverrides}>Criar Override</Button>
           )
         )}
       </div>
@@ -184,7 +184,7 @@ export default function HerancaOverridesPanel() {
                       <div className="text-sm font-medium truncate">{e.chave || '(sem chave)'}</div>
                       <div className="text-xs text-slate-500 truncate">{JSON.stringify(e.valor || e, null, 0)}</div>
                     </div>
-                    <Button variant="outline" size="sm" data-permission="Administracao.Heranca.remover" onClick={() => removerOverrideMutation.mutate({ chave: e.chave })} disabled={removerOverrideMutation.isPending || !podeEditarOverrides} data-action="ConfigHeranca.override.removerEmpresa" data-permission="Sistema.Configuracoes.editar" data-sensitive="true">Remover</Button>
+                    <Button variant="outline" size="sm" onClick={() => removerOverrideMutation.mutate({ chave: e.chave })} disabled={removerOverrideMutation.isPending || !podeEditarOverrides}>Remover</Button>
                   </div>
                 ))}
                 {(!cfgEmpresa || cfgEmpresa.length === 0) && (

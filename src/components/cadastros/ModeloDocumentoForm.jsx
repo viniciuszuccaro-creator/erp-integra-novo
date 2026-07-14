@@ -121,7 +121,7 @@ export default function ModeloDocumentoForm({ modelo, modeloDocumento, onSubmit,
         />
       </div>
 
-      <Button type="submit" data-permission="Cadastros.ModeloDocumento.salvar" disabled={!podeSalvar} className="w-full bg-slate-600 hover:bg-slate-700">
+      <Button type="submit" disabled={!podeSalvar} className="w-full bg-slate-600 hover:bg-slate-700">
         {dadosIniciais ? 'Atualizar' : 'Criar Modelo'}
       </Button>
     </form>

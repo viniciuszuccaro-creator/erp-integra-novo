@@ -129,15 +129,15 @@ export default function ConflitosRevisaoPanel() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div className="space-y-1 md:col-span-2">
               <label className="text-xs text-slate-600">Entidade</label>
-              <Input placeholder="Ex.: Produto, Cliente, ConfiguracaoSistema" value={entityName} onChange={(e) => setEntityName(e.target.value)} data-action="Conflitos.entidade" />
+              <Input placeholder="Ex.: Produto, Cliente, ConfiguracaoSistema" value={entityName} onChange={(e) => setEntityName(e.target.value)} />
             </div>
             <div className="space-y-1">
               <label className="text-xs text-slate-600">Registro ID (aplicar)</label>
-              <Input placeholder="ID do registro" value={registroId} onChange={(e) => setRegistroId(e.target.value)} data-action="Conflitos.registroId" />
+              <Input placeholder="ID do registro" value={registroId} onChange={(e) => setRegistroId(e.target.value)} />
             </div>
             <div className="space-y-1">
               <label className="text-xs text-slate-600">Direcao</label>
-              <select className="w-full border rounded-md h-9 px-2 text-sm" value={source} onChange={(e) => setSource(e.target.value)} data-action="Conflitos.direcao">
+              <select className="w-full border rounded-md h-9 px-2 text-sm" value={source} onChange={(e) => setSource(e.target.value)}>
                 <option value="up">Empresa {'->'} Grupo (up)</option>
                 <option value="down">Grupo {'->'} Empresa (down)</option>
               </select>
@@ -147,17 +147,17 @@ export default function ConflitosRevisaoPanel() {
           <div className="grid md:grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="text-xs text-slate-600">Atual (JSON)</label>
-              <Textarea className="min-h-[160px] font-mono text-xs" value={currentJson} onChange={(e) => setCurrentJson(e.target.value)} data-action="Conflitos.jsonAtual" />
+              <Textarea className="min-h-[160px] font-mono text-xs" value={currentJson} onChange={(e) => setCurrentJson(e.target.value)} />
             </div>
             <div className="space-y-1">
               <label className="text-xs text-slate-600">Entrante (JSON)</label>
-              <Textarea className="min-h-[160px] font-mono text-xs" value={incomingJson} onChange={(e) => setIncomingJson(e.target.value)} data-action="Conflitos.jsonEntrante" />
+              <Textarea className="min-h-[160px] font-mono text-xs" value={incomingJson} onChange={(e) => setIncomingJson(e.target.value)} />
             </div>
           </div>
 
           <div className="flex gap-2">
-            <Button onClick={onPreview} disabled={loading || !entityName || !contextoValido} className="bg-slate-800 hover:bg-slate-700" data-action="Conflitos.previewMerge" data-permission="Sistema.Configuracoes.executar">Pre-visualizar Merge</Button>
-            <Button onClick={onApply} disabled={loading || !entityName || !registroId || !result?.merged || !contextoValido} variant="outline" data-action="Conflitos.aplicarMerge" data-permission="Sistema.Configuracoes.editar" data-sensitive="true">Aplicar Merge</Button>
+            <Button onClick={onPreview} disabled={loading || !entityName || !contextoValido} className="bg-slate-800 hover:bg-slate-700">Pre-visualizar Merge</Button>
+            <Button onClick={onApply} disabled={loading || !entityName || !registroId || !result?.merged || !contextoValido} variant="outline">Aplicar Merge</Button>
           </div>
 
           {result && (

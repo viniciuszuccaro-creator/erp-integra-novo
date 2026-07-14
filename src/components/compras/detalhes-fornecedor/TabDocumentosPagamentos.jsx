@@ -51,7 +51,7 @@ export default function TabDocumentosPagamentos({
           {canEdit('compras', 'fornecedores') && (
             <Dialog open={showDocumentoDialog} onOpenChange={setShowDocumentoDialog}>
               <DialogTrigger asChild>
-                <Button size="sm" data-permission="Compras.Fornecedor.editar" data-action="Compras.Fornecedor.adicionarDocumento">
+                <Button size="sm">
                   <Plus className="w-4 h-4 mr-2" />
                   Upload Documento
                 </Button>
@@ -87,7 +87,7 @@ export default function TabDocumentosPagamentos({
                     <Label>Observação</Label>
                     <Textarea value={documentoForm.observacao} onChange={(e) => setDocumentoForm({ ...documentoForm, observacao: e.target.value })} />
                   </div>
-                  <Button data-permission="Compras.Fornecedor.editar" onClick={onAdicionarDocumento} className="w-full">Adicionar</Button>
+                  <Button onClick={onAdicionarDocumento} className="w-full">Adicionar</Button>
                 </div>
               </DialogContent>
             </Dialog>
@@ -113,9 +113,9 @@ export default function TabDocumentosPagamentos({
                     {doc.observacao && <p className="text-xs text-slate-500 mt-1">{doc.observacao}</p>}
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="ghost" data-permission="Compras.Fornecedor.baixar" title="Download"><Download className="w-4 h-4" /></Button>
+                    <Button size="sm" variant="ghost" title="Download"><Download className="w-4 h-4" /></Button>
                     {canEdit('compras', 'fornecedores') && (
-                      <Button size="sm" variant="ghost" onClick={() => onRemoverDocumento(index)} data-permission="Compras.Fornecedor.excluir" data-action="Compras.Fornecedor.removerDocumento">
+                      <Button size="sm" variant="ghost" onClick={() => onRemoverDocumento(index)}>
                         <Trash2 className="w-4 h-4 text-red-500" />
                       </Button>
                     )}
@@ -148,7 +148,7 @@ export default function TabDocumentosPagamentos({
             </>
           )}
           {canEdit('compras', 'fornecedores') && (
-            <Button className="w-full mt-4" data-permission="Compras.Fornecedor.editar" data-action="Compras.Fornecedor.editarBancario">
+            <Button className="w-full mt-4">
               <Edit className="w-4 h-4 mr-2" />
               Editar Dados Bancários
             </Button>

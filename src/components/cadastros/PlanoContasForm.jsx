@@ -159,8 +159,6 @@ export default function PlanoContasForm({ conta, item, data, onSubmit, onSave, o
         type="submit"
         className="w-full bg-green-600 hover:bg-green-700"
         disabled={dadosIniciais?.id ? !podeEditar : !podeCriar}
-        data-permission="Cadastros.PlanoDeContas.salvar"
-        data-sensitive
       >
         {dadosIniciais ? 'Atualizar Conta' : 'Criar Conta'}
       </Button>

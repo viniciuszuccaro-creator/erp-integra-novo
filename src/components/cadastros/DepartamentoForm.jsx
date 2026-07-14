@@ -114,7 +114,7 @@ export default function DepartamentoForm({ departamento, item, data, initialData
             <span className="text-sm text-red-900 font-medium">Confirmar exclusão do departamento "{formData.nome}"?</span>
             <div className="flex gap-2">
               <Button type="button" size="sm" variant="outline" onClick={() => setConfirmandoExclusao(false)}>Cancelar</Button>
-              <Button type="button" size="sm" variant="destructive" data-permission="Cadastros.Departamento.excluir" data-action="Cadastros.Departamento.excluir" data-sensitive="true" onClick={confirmarExclusaoDefinitiva}>Excluir</Button>
+              <Button type="button" size="sm" variant="destructive" onClick={confirmarExclusaoDefinitiva}>Excluir</Button>
             </div>
           </AlertDescription>
         </Alert>
@@ -126,7 +126,6 @@ export default function DepartamentoForm({ departamento, item, data, initialData
             <Button
               type="button"
               variant="outline"
-              data-permission="Cadastros.Departamento.alternarStatus"
               onClick={handleAlternarStatus}
               className={formData.ativo ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}
             >
@@ -136,12 +135,12 @@ export default function DepartamentoForm({ departamento, item, data, initialData
                 <><Power className="w-4 h-4 mr-2" />Ativar</>
               )}
             </Button>
-            <Button type="button" variant="destructive" data-permission="Cadastros.Departamento.excluir" onClick={handleExcluir}>
+            <Button type="button" variant="destructive" onClick={handleExcluir}>
               <Trash2 className="w-4 h-4 mr-2" />Excluir
             </Button>
           </>
         )}
-        <Button type="submit" disabled={isSubmitting || !podeSalvar} data-permission="Cadastros.Departamento.salvar">
+        <Button type="submit" disabled={isSubmitting || !podeSalvar}>
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {dadosIniciais ? 'Atualizar' : 'Criar Departamento'}
         </Button>

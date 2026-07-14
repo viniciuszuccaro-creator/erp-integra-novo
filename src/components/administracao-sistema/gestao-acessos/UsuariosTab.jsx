@@ -121,10 +121,10 @@ export default function UsuariosTab() {
         <div className="flex flex-wrap gap-2 flex-1">
           <div className="relative min-w-[180px] flex-1 max-w-sm">
             <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-slate-400" />
-            <Input className="pl-8" placeholder="Buscar usuário..." value={search} onChange={e => setSearch(e.target.value)} data-action="RBAC.Usuario.buscar" />
+            <Input className="pl-8" placeholder="Buscar usuário..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <Select value={roleFilter} onValueChange={setRoleFilter}>
-            <SelectTrigger className="w-32" data-action="RBAC.Usuario.filtroRole"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos</SelectItem>
               <SelectItem value="admin">Admin</SelectItem>
@@ -132,7 +132,7 @@ export default function UsuariosTab() {
             </SelectContent>
           </Select>
           <Select value={perfilFilter} onValueChange={setPerfilFilter}>
-            <SelectTrigger className="w-36" data-action="RBAC.Usuario.filtroPerfil"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos</SelectItem>
               <SelectItem value="com_perfil">Com perfil</SelectItem>
@@ -141,7 +141,7 @@ export default function UsuariosTab() {
           </Select>
         </div>
         {podeConvidar && (
-          <Button onClick={handleInvite} disabled={!contextoValido} className="bg-blue-600 hover:bg-blue-700" data-action="RBAC.Usuario.convidar" data-permission="Sistema.Controle de Acesso.criar" data-sensitive="true">
+          <Button onClick={handleInvite} disabled={!contextoValido} className="bg-blue-600 hover:bg-blue-700">
             <UserCog className="w-4 h-4 mr-2" />Convidar Usuário
           </Button>
         )}
@@ -191,9 +191,6 @@ export default function UsuariosTab() {
                     className={semPerfilUser ? "bg-amber-500 hover:bg-amber-600 text-white" : ""}
                     disabled={!podeEditarUsuarios}
                     onClick={() => setSelectedUser(u)}
-                    data-action="RBAC.Usuario.configurar"
-                    data-permission="Sistema.Controle de Acesso.editar"
-                    data-sensitive="true"
                   >
                     {semPerfilUser ? "Atribuir Perfil" : "Configurar"}
                   </Button>

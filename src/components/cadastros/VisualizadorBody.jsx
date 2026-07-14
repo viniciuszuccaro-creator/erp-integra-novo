@@ -63,10 +63,10 @@ export default function VisualizadorBody({
       {showCrossPageBanner && (
         <div className="bg-amber-50 border border-amber-200 rounded-sm px-3 py-1.5 text-xs text-amber-800 flex items-center gap-2 flex-wrap shrink-0">
           <span className="font-medium">{selectedIds.size} selecionados nesta página.</span>
-          <button onClick={handleActivateCrossPage} data-permission="Cadastros.Selecao.selecionar_todos" className="text-blue-600 hover:text-blue-800 underline font-semibold">
+          <button onClick={handleActivateCrossPage} className="text-blue-600 hover:text-blue-800 underline font-semibold">
             Selecionar todos os {totalCount} registros
           </button>
-          <button onClick={handleCancelSelection} data-permission="Cadastros.Selecao.cancelar" className="ml-auto text-slate-500 underline">Cancelar</button>
+          <button onClick={handleCancelSelection} className="ml-auto text-slate-500 underline">Cancelar</button>
         </div>
       )}
       {/* Banner seleção total */}

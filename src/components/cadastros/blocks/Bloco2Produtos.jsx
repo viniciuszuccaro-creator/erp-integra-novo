@@ -69,9 +69,7 @@ export default function Bloco2Produtos({ allCounts, isLoading, searchTerm = "" }
 
       {/* Card Produtos (abre VisualizadorProdutos especializado) */}
       <Card className="rounded-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-150 cursor-pointer group border"
-        onClick={canViewEntity("Produto", "Estoque") ? openProdutos : undefined}
-        data-permission="Cadastros.Produto.visualizar"
-        data-action="Cadastros.Produto.abrir">
+        onClick={canViewEntity("Produto", "Estoque") ? openProdutos : undefined}>
         <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-semibold flex items-center gap-2 text-slate-700">
@@ -83,9 +81,7 @@ export default function Bloco2Produtos({ allCounts, isLoading, searchTerm = "" }
             </CardTitle>
             <Button size="sm" className="bg-purple-600 hover:bg-purple-700 rounded-sm text-xs h-7"
               onClick={(e) => { e.stopPropagation(); openProdutos(); }}
-              disabled={!canViewEntity("Produto", "Estoque")}
-              data-permission="Cadastros.Produto.visualizar"
-              data-action="Cadastros.Produto.abrir">
+              disabled={!canViewEntity("Produto", "Estoque")}>
               Abrir
             </Button>
           </div>

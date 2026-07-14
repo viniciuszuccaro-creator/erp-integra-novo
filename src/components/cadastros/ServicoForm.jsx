@@ -143,8 +143,6 @@ export default function ServicoForm({ servico, onSubmit, isSubmitting, windowMod
           checked={formData.ativo}
           onCheckedChange={(v) => setFormData({...formData, ativo: v})}
           disabled={!podeSalvar}
-          data-permission="Cadastros.Servico.alterarStatus"
-          data-sensitive="true"
         />
       </div>
 
@@ -152,8 +150,6 @@ export default function ServicoForm({ servico, onSubmit, isSubmitting, windowMod
         <Button
           type="submit"
           disabled={isSubmitting || !contextoValido || !podeSalvar}
-          data-permission="Cadastros.Servico.salvar"
-          data-sensitive="true"
         >
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {dadosIniciais ? 'Atualizar' : 'Criar Serviço'}

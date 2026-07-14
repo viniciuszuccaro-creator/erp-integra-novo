@@ -104,8 +104,6 @@ export default function KitProdutoForm({ kit, kitProduto, onSubmit, windowMode =
             size="sm"
             onClick={adicionarItem}
             disabled={!podeSalvar}
-            data-permission="Cadastros.KitProduto.editar"
-            data-sensitive="true"
           >
             <Plus className="w-4 h-4 mr-1" />
             Adicionar Item
@@ -141,11 +139,8 @@ export default function KitProdutoForm({ kit, kitProduto, onSubmit, windowMode =
               type="button"
               size="sm"
               variant="ghost"
-              data-permission="Cadastros.KitProduto.editar"
               onClick={() => removerItem(idx)}
                 disabled={!podeSalvar}
-                data-permission="Cadastros.KitProduto.editar"
-                data-sensitive="true"
               >
                 <Trash2 className="w-4 h-4 text-red-600" />
               </Button>
@@ -169,8 +164,6 @@ export default function KitProdutoForm({ kit, kitProduto, onSubmit, windowMode =
           <Switch
             checked={formData.aplicar_desconto_kit}
             disabled={!podeSalvar}
-            data-permission="Cadastros.KitProduto.editar"
-            data-sensitive="true"
             onCheckedChange={(v) => setFormData({ ...formData, aplicar_desconto_kit: v })}
           />
         </div>
@@ -193,8 +186,6 @@ export default function KitProdutoForm({ kit, kitProduto, onSubmit, windowMode =
         <Switch
           checked={formData.ativo}
           disabled={!podeSalvar}
-          data-permission="Cadastros.KitProduto.alterarStatus"
-          data-sensitive="true"
           onCheckedChange={(v) => setFormData({ ...formData, ativo: v })}
         />
       </div>
@@ -203,8 +194,6 @@ export default function KitProdutoForm({ kit, kitProduto, onSubmit, windowMode =
         type="submit"
         className="w-full bg-purple-600 hover:bg-purple-700"
         disabled={!contextoValido || !podeSalvar}
-        data-permission="Cadastros.KitProduto.salvar"
-        data-sensitive="true"
       >
         {dadosIniciais ? 'Atualizar Kit' : 'Criar Kit de Produtos'}
       </Button>

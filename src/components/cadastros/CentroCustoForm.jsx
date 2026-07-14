@@ -205,7 +205,7 @@ export default function CentroCustoForm({ centroCusto, item, data, initialData, 
             <span className="text-sm text-red-900 font-medium">Confirmar exclusão do centro de custo "{formData.descricao}"?</span>
             <div className="flex gap-2">
               <Button type="button" size="sm" variant="outline" onClick={() => setConfirmandoExclusao(false)}>Cancelar</Button>
-              <Button type="button" size="sm" variant="destructive" data-permission="Cadastros.CentroCusto.excluir" data-action="Cadastros.CentroCusto.excluir" data-sensitive="true" onClick={confirmarExclusaoDefinitiva}>Excluir</Button>
+              <Button type="button" size="sm" variant="destructive" onClick={confirmarExclusaoDefinitiva}>Excluir</Button>
             </div>
           </AlertDescription>
         </Alert>
@@ -219,8 +219,6 @@ export default function CentroCustoForm({ centroCusto, item, data, initialData, 
               variant="outline"
               onClick={handleAlternarStatus}
               disabled={!podeEditar}
-              data-permission="Cadastros.CentroCusto.alterarStatus"
-              data-sensitive
               className={formData.status === 'Ativo' ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}
             >
               {formData.status === 'Ativo' ? (
@@ -232,11 +230,8 @@ export default function CentroCustoForm({ centroCusto, item, data, initialData, 
             <Button
               type="button"
               variant="destructive"
-              data-permission="Financeiro.CentroCusto.excluir"
               onClick={handleExcluir}
               disabled={!podeExcluir}
-              data-permission="Cadastros.CentroCusto.excluir"
-              data-sensitive
             >
               <Trash2 className="w-4 h-4 mr-2" />Excluir
             </Button>
@@ -246,8 +241,6 @@ export default function CentroCustoForm({ centroCusto, item, data, initialData, 
           type="submit"
           disabled={isSubmitting || (dadosCentroCusto?.id ? !podeEditar : !podeCriar)}
           className="bg-purple-600 hover:bg-purple-700"
-          data-permission="Cadastros.CentroCusto.salvar"
-          data-sensitive
         >
           {isSubmitting ? 'Salvando...' : 'Salvar'}
         </Button>

@@ -162,8 +162,6 @@ export default function MarcaForm({ marca, item, data, initialData, defaultValue
           checked={formData.ativo}
           onCheckedChange={(v) => setFormData({...formData, ativo: v})}
           disabled={!podeSalvar}
-          data-permission="Cadastros.Marca.alterarStatus"
-          data-sensitive="true"
         />
       </div>
 
@@ -174,7 +172,7 @@ export default function MarcaForm({ marca, item, data, initialData, defaultValue
             <span className="text-sm text-red-900 font-medium">Confirmar exclusão da marca "{formData.nome_marca}"?</span>
             <div className="flex gap-2">
               <Button type="button" size="sm" variant="outline" onClick={() => setConfirmandoExclusao(false)}>Cancelar</Button>
-              <Button type="button" size="sm" variant="destructive" data-permission="Cadastros.Marca.excluir" data-action="Cadastros.Marca.excluir" data-sensitive="true" onClick={confirmarExclusaoDefinitiva}>Excluir</Button>
+              <Button type="button" size="sm" variant="destructive" disabled={!podeExcluir} onClick={confirmarExclusaoDefinitiva}>Excluir</Button>
             </div>
           </AlertDescription>
         </Alert>
@@ -188,8 +186,6 @@ export default function MarcaForm({ marca, item, data, initialData, defaultValue
               variant="outline"
               onClick={handleAlternarStatus}
               disabled={!podeSalvar}
-              data-permission="Cadastros.Marca.alterarStatus"
-              data-sensitive="true"
               className={formData.ativo ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}
             >
               {formData.ativo ? (
@@ -201,11 +197,8 @@ export default function MarcaForm({ marca, item, data, initialData, defaultValue
             <Button
               type="button"
               variant="destructive"
-              data-permission="Cadastros.Marca.excluir"
               onClick={handleExcluir}
               disabled={!podeExcluir}
-              data-permission="Cadastros.Marca.excluir"
-              data-sensitive="true"
             >
               <Trash2 className="w-4 h-4 mr-2" />Excluir
             </Button>
@@ -214,8 +207,6 @@ export default function MarcaForm({ marca, item, data, initialData, defaultValue
         <Button
           type="submit"
           disabled={isSubmitting || !contextoValido || !podeSalvar}
-          data-permission="Cadastros.Marca.salvar"
-          data-sensitive="true"
         >
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {dadosIniciais ? 'Atualizar' : 'Criar Marca'}

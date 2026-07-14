@@ -178,7 +178,7 @@ export default function GestorFormasPagamento({ windowMode = false }) {
           <h2 className="text-2xl font-bold text-slate-900">Formas de Pagamento</h2>
           <p className="text-sm text-slate-600">Configuração centralizada de métodos de pagamento</p>
         </div>
-        <Button data-permission="Cadastros.FormaPagamento.criar" onClick={handleNova} disabled={!contextoValido || !podeCriar} className="bg-blue-600 hover:bg-blue-700">
+        <Button onClick={handleNova} disabled={!contextoValido || !podeCriar} className="bg-blue-600 hover:bg-blue-700">
           <Plus className="w-4 h-4 mr-2" />
           Nova Forma
         </Button>

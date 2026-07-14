@@ -19,7 +19,7 @@ export default function NotasFiscaisFormDialog({
     }}>
       <DialogTrigger asChild>
         {hasPermission('Fiscal', 'NotaFiscal', 'criar') && (
-          <Button className="bg-blue-600 hover:bg-blue-700" data-permission="Fiscal.NotaFiscal.criar">
+          <Button className="bg-blue-600 hover:bg-blue-700">
             <Plus className="w-4 h-4 mr-2" /> Nova NF-e (Rápido)
           </Button>
         )}
@@ -79,8 +79,8 @@ export default function NotasFiscaisFormDialog({
               onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })} />
           </div>
           <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" data-permission="Fiscal.NotaFiscal.criar" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-            <Button type="submit" data-permission="Fiscal.NotaFiscal.criar" disabled={createMutation.isPending || updateMutation.isPending}>
+            <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
+            <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
               {selectedNF ? 'Atualizar' : 'Criar'}
             </Button>
           </div>

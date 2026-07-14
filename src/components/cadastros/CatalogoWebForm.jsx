@@ -86,8 +86,6 @@ export default function CatalogoWebForm({ catalogo, catalogoWeb, onSubmit, windo
           <Switch
             checked={formData.exibir_site}
             disabled={!podeSalvar}
-            data-permission="Cadastros.CatalogoWeb.editar"
-            data-sensitive="true"
             onCheckedChange={(v) => setFormData({ ...formData, exibir_site: v })}
           />
         </div>
@@ -96,8 +94,6 @@ export default function CatalogoWebForm({ catalogo, catalogoWeb, onSubmit, windo
           <Switch
             checked={formData.exibir_marketplace}
             disabled={!podeSalvar}
-            data-permission="Cadastros.CatalogoWeb.editar"
-            data-sensitive="true"
             onCheckedChange={(v) => setFormData({ ...formData, exibir_marketplace: v })}
           />
         </div>
@@ -117,8 +113,6 @@ export default function CatalogoWebForm({ catalogo, catalogoWeb, onSubmit, windo
         <Switch
           checked={formData.ativo}
           disabled={!podeSalvar}
-          data-permission="Cadastros.CatalogoWeb.alterarStatus"
-          data-sensitive="true"
           onCheckedChange={(v) => setFormData({ ...formData, ativo: v })}
         />
       </div>
@@ -127,8 +121,6 @@ export default function CatalogoWebForm({ catalogo, catalogoWeb, onSubmit, windo
         type="submit"
         className="w-full bg-blue-600 hover:bg-blue-700"
         disabled={!contextoValido || !podeSalvar}
-        data-permission="Cadastros.CatalogoWeb.salvar"
-        data-sensitive="true"
       >
         {dadosIniciais ? 'Atualizar' : 'Criar Catálogo Web'}
       </Button>

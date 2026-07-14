@@ -149,8 +149,6 @@ export default function SetorAtividadeForm({ setor, setorAtividade, item, data, 
           checked={formData.ativo}
           onCheckedChange={(v) => setFormData({...formData, ativo: v})}
           disabled={!podeSalvar}
-          data-permission="Cadastros.SetorAtividade.alterarStatus"
-          data-sensitive="true"
         />
       </div>
 
@@ -161,7 +159,7 @@ export default function SetorAtividadeForm({ setor, setorAtividade, item, data, 
             <span className="text-sm text-red-900 font-medium">Confirmar exclusão do setor "{formData.nome}"?</span>
             <div className="flex gap-2">
               <Button type="button" size="sm" variant="outline" onClick={() => setConfirmandoExclusao(false)}>Cancelar</Button>
-              <Button type="button" size="sm" variant="destructive" data-permission="Cadastros.SetorAtividade.excluir" data-action="Cadastros.SetorAtividade.excluir" data-sensitive="true" onClick={confirmarExclusaoDefinitiva}>Excluir</Button>
+              <Button type="button" size="sm" variant="destructive" onClick={confirmarExclusaoDefinitiva}>Excluir</Button>
             </div>
           </AlertDescription>
         </Alert>
@@ -175,8 +173,6 @@ export default function SetorAtividadeForm({ setor, setorAtividade, item, data, 
               variant="outline"
               onClick={handleAlternarStatus}
               disabled={!podeSalvar}
-              data-permission="Cadastros.SetorAtividade.alterarStatus"
-              data-sensitive="true"
               className={formData.ativo ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}
             >
               {formData.ativo ? (
@@ -188,11 +184,8 @@ export default function SetorAtividadeForm({ setor, setorAtividade, item, data, 
             <Button
               type="button"
               variant="destructive"
-              data-permission="Cadastros.SetorAtividade.excluir"
               onClick={handleExcluir}
               disabled={!podeExcluir}
-              data-permission="Cadastros.SetorAtividade.excluir"
-              data-sensitive="true"
             >
               <Trash2 className="w-4 h-4 mr-2" />Excluir
             </Button>
@@ -201,8 +194,6 @@ export default function SetorAtividadeForm({ setor, setorAtividade, item, data, 
         <Button
           type="submit"
           disabled={isSubmitting || !contextoValido || !podeSalvar}
-          data-permission="Cadastros.SetorAtividade.salvar"
-          data-sensitive="true"
         >
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {setor ? 'Atualizar' : 'Criar'} Setor

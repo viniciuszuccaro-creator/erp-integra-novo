@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import RBACButton from "@/components/lib/RBACButton";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,12 +36,12 @@ export default function EntregaAtivaView({
           <p className="text-sm text-slate-600">{entregaAtual.endereco_entrega_completo?.bairro} - {entregaAtual.endereco_entrega_completo?.cidade}/{entregaAtual.endereco_entrega_completo?.estado}</p>
           <p className="text-sm text-slate-500 mt-1">CEP: {entregaAtual.endereco_entrega_completo?.cep}</p>
           {entregaAtual.endereco_entrega_completo?.mapa_url && (
-            <Button variant="outline" data-permission="Expedicao.Entrega.visualizar" className="w-full mt-3" onClick={() => window.open(entregaAtual.endereco_entrega_completo.mapa_url, "_blank")}>
+            <Button variant="outline" className="w-full mt-3" onClick={() => window.open(entregaAtual.endereco_entrega_completo.mapa_url, "_blank")}>
               <Navigation className="w-4 h-4 mr-2" />Abrir no Google Maps
             </Button>
           )}
           {entregaAtual.contato_entrega?.telefone && (
-            <Button variant="outline" data-permission="Expedicao.Entrega.visualizar" className="w-full mt-2" onClick={() => window.open(`tel:${entregaAtual.contato_entrega.telefone}`, "_self")}>
+            <Button variant="outline" className="w-full mt-2" onClick={() => window.open(`tel:${entregaAtual.contato_entrega.telefone}`, "_self")}>
               <Phone className="w-4 h-4 mr-2" />Ligar para {entregaAtual.contato_entrega.nome || "contato"}
             </Button>
           )}
@@ -55,10 +56,10 @@ export default function EntregaAtivaView({
             {fotoComprovante ? (
               <div className="relative">
                 <img src={fotoComprovante} className="w-full rounded-lg border" alt="Comprovante" />
-                <Button size="sm" variant="outline" data-permission="Expedicao.Entrega.editar" className="absolute top-2 right-2" onClick={() => setFotoComprovante(null)}>Tirar outra</Button>
+                <Button size="sm" variant="outline" className="absolute top-2 right-2" onClick={() => setFotoComprovante(null)}>Tirar outra</Button>
               </div>
             ) : (
-              <Button onClick={tirarFoto} data-permission="Expedicao.Entrega.editar" variant="outline" className="w-full h-32 border-dashed">
+              <Button onClick={tirarFoto} variant="outline" className="w-full h-32 border-dashed">
                 <div className="text-center"><Camera className="w-8 h-8 mx-auto mb-2" /><p>Tirar Foto</p></div>
               </Button>
             )}
@@ -75,7 +76,7 @@ export default function EntregaAtivaView({
             <Label className="mb-2 block">Assinatura Digital</Label>
             <div className="border-2 border-dashed rounded-lg p-4 bg-white">
               <canvas id="assinatura-canvas" width="300" height="150" className="w-full border rounded" style={{ touchAction: "none" }} />
-              <Button size="sm" variant="outline" data-permission="Expedicao.Entrega.editar" className="mt-2" onClick={() => {
+              <Button size="sm" variant="outline" className="mt-2" onClick={() => {
                 const canvas = document.getElementById("assinatura-canvas");
                 const ctx = canvas.getContext("2d");
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -92,7 +93,7 @@ export default function EntregaAtivaView({
             Sem conexão: envie sua posição via SMS.
             <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2">
               <Input placeholder="Número do gateway SMS" value={smsNumero} onChange={(e) => setSmsNumero(e.target.value)} />
-              <Button variant="outline" data-permission="Expedicao.Entrega.editar" onClick={() => {
+              <Button variant="outline" onClick={() => {
                 const lat = localizacao?.latitude?.toFixed(6) || "LAT";
                 const lng = localizacao?.longitude?.toFixed(6) || "LNG";
                 const body = `GPS ${lat},${lng} ENTREGA:${entregaAtual?.id || "ENTREGA"} PLACA:${entregaAtual?.placa || "PLACA"}`;
@@ -104,16 +105,16 @@ export default function EntregaAtivaView({
       )}
 
       <div className="space-y-3">
-        <Button onClick={confirmarEntrega} data-permission="Expedicao.Entrega.criar" disabled={!fotoComprovante || !nomeRecebedor} className="w-full bg-green-600 hover:bg-green-700 h-14 text-lg">
+        <RBACButton module="Expedição" section="Entrega" action="criar" onClick={confirmarEntrega} disabled={!fotoComprovante || !nomeRecebedor} className="w-full bg-green-600 hover:bg-green-700 h-14 text-lg">
           <CheckCircle className="w-5 h-5 mr-2" />Confirmar Entrega
-        </Button>
+        </RBACButton>
 
         <details className="bg-white rounded-lg border">
           <summary className="p-4 cursor-pointer font-medium text-sm">⚠️ Entrega Frustrada?</summary>
           <div className="p-4 pt-0 space-y-2">
-            <Button variant="outline" data-permission="Expedicao.Entrega.editar" className="w-full justify-start" onClick={() => registrarOcorrencia("Cliente Ausente")}>Cliente Ausente</Button>
-            <Button variant="outline" data-permission="Expedicao.Entrega.editar" className="w-full justify-start" onClick={() => registrarOcorrencia("Endereço Incorreto")}>Endereço Incorreto</Button>
-            <Button variant="outline" data-permission="Expedicao.Entrega.editar" className="w-full justify-start" onClick={() => registrarOcorrencia("Recusa de Recebimento")}>Recusa de Recebimento</Button>
+            <RBACButton module="Expedição" section="Entrega" action="editar" variant="outline" className="w-full justify-start" onClick={() => registrarOcorrencia("Cliente Ausente")}>Cliente Ausente</RBACButton>
+            <RBACButton module="Expedição" section="Entrega" action="editar" variant="outline" className="w-full justify-start" onClick={() => registrarOcorrencia("Endereço Incorreto")}>Endereço Incorreto</RBACButton>
+            <RBACButton module="Expedição" section="Entrega" action="editar" variant="outline" className="w-full justify-start" onClick={() => registrarOcorrencia("Recusa de Recebimento")}>Recusa de Recebimento</RBACButton>
           </div>
         </details>
 
@@ -134,11 +135,11 @@ export default function EntregaAtivaView({
                 <input type="number" step="0.01" className="w-full border rounded p-2" value={reversaValor} onChange={(e) => setReversaValor(parseFloat(e.target.value) || 0)} />
               </div>
             </div>
-            <Button variant="outline" data-permission="Expedicao.Entrega.editar" className="w-full border-red-300 text-red-700" onClick={registrarReversa}>Registrar Reversa</Button>
+            <RBACButton module="Expedição" section="Entrega" action="editar" variant="outline" className="w-full border-red-300 text-red-700" onClick={registrarReversa}>Registrar Reversa</RBACButton>
           </div>
         </details>
 
-        <Button variant="outline" data-permission="Expedicao.Entrega.visualizar" className="w-full" onClick={onVoltar}>Voltar para Lista</Button>
+        <Button variant="outline" className="w-full" onClick={onVoltar}>Voltar para Lista</Button>
       </div>
     </div>
   );

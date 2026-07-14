@@ -83,11 +83,11 @@ export default function CotacaoComparativoDialog({ comparativoModal, setComparat
                         </div>
                       )}
                       <div className="flex justify-end gap-3 mt-4">
-                        <Button data-permission="Compras.CotacaoComparativo.gerar" variant="outline" size="sm" onClick={() => toast({ title: "📧 E-mail Enviado", description: `Solicitação de esclarecimentos enviada para ${proposta.fornecedor_nome}` })}>
+                        <Button variant="outline" size="sm" onClick={() => toast({ title: "📧 E-mail Enviado", description: `Solicitação de esclarecimentos enviada para ${proposta.fornecedor_nome}` })}>
                           <Send className="w-4 h-4 mr-2" />Solicitar Esclarecimentos
                         </Button>
                         {hasPermission("Compras", "Cotacao", "gerar_oc") && (
-                          <Button data-permission="Compras.CotacaoComparativo.gerar" size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => gerarOrdemCompraMutation.mutate(proposta)} disabled={gerarOrdemCompraMutation.isPending}>
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => gerarOrdemCompraMutation.mutate(proposta)} disabled={gerarOrdemCompraMutation.isPending}>
                             <ShoppingCart className="w-4 h-4 mr-2" />{gerarOrdemCompraMutation.isPending ? "Gerando..." : "Gerar Ordem de Compra"}
                           </Button>
                         )}

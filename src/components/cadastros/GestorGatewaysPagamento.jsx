@@ -117,7 +117,6 @@ export default function GestorGatewaysPagamento({ windowMode = false }) {
                 className="max-w-xs"
               />
               <Button
-                data-permission="Cadastros.GatewayPagamento.criar"
                 onClick={() => openWindow(GatewayPagamentoForm, {
                   windowMode: true,
                   onSubmit: async (data) => {
@@ -202,7 +201,6 @@ export default function GestorGatewaysPagamento({ windowMode = false }) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        data-permission="Cadastros.GatewayPagamento.editar"
                         onClick={() => toggleAtivoMutation.mutate({ id: gateway.id, ativo: gateway.ativo })}
                         disabled={!contextoValido || !podeEditar || toggleAtivoMutation.isPending}
                         title={gateway.ativo ? "Desativar" : "Ativar"}
@@ -216,7 +214,6 @@ export default function GestorGatewaysPagamento({ windowMode = false }) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        data-permission="Cadastros.GatewayPagamento.editar"
                         onClick={() => openWindow(GatewayPagamentoForm, {
                           gateway,
                           windowMode: true,
@@ -243,7 +240,6 @@ export default function GestorGatewaysPagamento({ windowMode = false }) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        data-permission="Cadastros.GatewayPagamento.excluir"
                         onClick={async () => {
                            const ok = await confirm({ title: "Excluir Gateway", description: "Deseja realmente excluir este gateway de pagamento?", variant: "danger", confirmText: "Excluir" });
                            if (ok) deleteMutation.mutate(gateway.id);

@@ -161,8 +161,6 @@ export default function CondicaoComercialForm({ condicao, condicaoComercial, onS
         type="submit"
         className="w-full bg-green-600 hover:bg-green-700"
         disabled={isSubmitting || (dadosIniciais?.id ? !podeEditar : !podeCriar)}
-        data-permission="Cadastros.CondicaoComercial.salvar"
-        data-sensitive
       >
         {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
         {dadosIniciais ? 'Atualizar Condição' : 'Criar Condição Comercial'}

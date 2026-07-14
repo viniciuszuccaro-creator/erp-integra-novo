@@ -92,7 +92,7 @@ export default function VersionamentoConfigPanel() {
                   <div className="text-xs text-slate-500 truncate">{new Date(l.data_hora || l.created_date).toLocaleString('pt-BR')} • Usuário: {l.usuario}</div>
                 </div>
                 <Badge variant="outline" className="text-xs">{l.acao}</Badge>
-                <Button size="sm" variant="outline" onClick={() => restoreMutation.mutate(l)} disabled={restoreMutation.isPending || !contextoValido || !podeRestaurarConfig} data-action="ConfigVersionamento.restaurar" data-permission="Sistema.Configuracoes.editar" data-sensitive="true">
+                <Button size="sm" variant="outline" onClick={() => restoreMutation.mutate(l)} disabled={restoreMutation.isPending || !contextoValido || !podeRestaurarConfig}>
                   Restaurar
                 </Button>
               </div>

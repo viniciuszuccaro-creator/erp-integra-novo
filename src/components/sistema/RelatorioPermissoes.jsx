@@ -163,23 +163,21 @@ export default function RelatorioPermissoes({ perfis = [], usuarios = [], empres
         </div>
 
         <div className="space-y-2">
-          <Button data-permission="Sistema.RelatorioPermissoes.gerar"
+          <Button
             onClick={gerarRelatorio}
             className="w-full justify-start"
             variant="outline"
             disabled={!contextoValido || !podeExportar}
-            data-action="RBAC.Relatorio.exportarJson"
           >
             <Download className="w-4 h-4 mr-2" />
             Exportar Relatório Completo (JSON)
           </Button>
           
-          <Button data-permission="Sistema.RelatorioPermissoes.gerar"
+          <Button
             onClick={gerarRelatorioSimplificado}
             className="w-full justify-start"
             variant="outline"
             disabled={!contextoValido || !podeExportar}
-            data-action="RBAC.Relatorio.exportarTxt"
           >
             <FileText className="w-4 h-4 mr-2" />
             Exportar Relatório Simplificado (TXT)

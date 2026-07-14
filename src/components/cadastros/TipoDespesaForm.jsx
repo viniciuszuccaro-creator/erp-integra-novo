@@ -145,8 +145,6 @@ export default function TipoDespesaForm({ tipo, tipoDespesa, item, data, onSubmi
         type="submit"
         className="w-full bg-purple-600 hover:bg-purple-700"
         disabled={dadosIniciais?.id ? !podeEditar : !podeCriar}
-        data-permission="Cadastros.TipoDespesa.salvar"
-        data-sensitive
       >
         {dadosIniciais ? 'Atualizar Tipo' : 'Criar Tipo de Despesa'}
       </Button>

@@ -92,7 +92,7 @@ export default function NotasFiscaisTab({ notasFiscais, pedidos, clientes, onCre
                       <Download className="w-4 h-4 mr-2" /> Exportar CSV
                     </Button>
                   </ProtectedAction>
-                  <Button variant="ghost" data-permission="Fiscal.NotaFiscal.visualizar" onClick={() => setSelectedNotas([])}>Limpar Seleção</Button>
+                  <Button variant="ghost" onClick={() => setSelectedNotas([])}>Limpar Seleção</Button>
                 </div>
               </AlertDescription>
             </Alert>
@@ -111,27 +111,27 @@ export default function NotasFiscaisTab({ notasFiscais, pedidos, clientes, onCre
               ) },
               { key: 'actions', label: 'Ações', render: (nota) => (
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="sm" data-permission="Fiscal.NotaFiscal.visualizar" onClick={() => setViewingDetails(nota)} title="Ver Detalhes" className="h-8 px-2">
+                  <Button variant="ghost" size="sm" onClick={() => setViewingDetails(nota)} title="Ver Detalhes" className="h-8 px-2">
                     <Eye className="w-3 h-3 mr-1" /> <span className="text-xs">Ver</span>
                   </Button>
-                  <Button variant="ghost" size="sm" data-permission="Fiscal.NotaFiscal.imprimir"
+                  <Button variant="ghost" size="sm"
                     onClick={() => { const empresa = empresasDoGrupo?.find(e => e.id === nota.empresa_id); ImprimirDANFESimplificado({ nfe: nota, empresa }); }}
                     title="Imprimir DANFE" className="h-8 px-2 text-slate-600">
                     <Printer className="w-3 h-3 mr-1" /> <span className="text-xs">Imprimir</span>
                   </Button>
                   {nota.danfe_url && (
-                    <Button variant="ghost" size="sm" data-permission="Fiscal.NotaFiscal.baixar_pdf" onClick={() => window.open(nota.danfe_url, '_blank')} title="Baixar DANFE" className="h-8 px-2 text-blue-600">
+                    <Button variant="ghost" size="sm" onClick={() => window.open(nota.danfe_url, '_blank')} title="Baixar DANFE" className="h-8 px-2 text-blue-600">
                       <Download className="w-3 h-3 mr-1" /> <span className="text-xs">PDF</span>
                     </Button>
                   )}
                   {nota.status === 'Pendente' && hasPermission('Fiscal', 'NotaFiscal', 'enviar') && (
-                    <Button variant="ghost" size="sm" title="Enviar NF-e" className="h-8 px-2 text-green-600" data-permission="Fiscal.NotaFiscal.enviar">
+                    <Button variant="ghost" size="sm" title="Enviar NF-e" className="h-8 px-2 text-green-600">
                       <Send className="w-3 h-3 mr-1" /> <span className="text-xs">Enviar</span>
                     </Button>
                   )}
                   {nota.status === 'Autorizada' && (
                     <ProtectedAction module="Fiscal" section="NotaFiscal" action="cancelar" mode="disable">
-                      <Button variant="ghost" size="sm" data-permission="Fiscal.NotaFiscal.cancelar" onClick={() => handleCancelarNFe(nota)} className="h-8 px-2 text-red-600" title="Cancelar NF-e">
+                      <Button variant="ghost" size="sm" onClick={() => handleCancelarNFe(nota)} className="h-8 px-2 text-red-600" title="Cancelar NF-e">
                         <XCircle className="w-3 h-3 mr-1" /> <span className="text-xs">Cancelar</span>
                       </Button>
                     </ProtectedAction>

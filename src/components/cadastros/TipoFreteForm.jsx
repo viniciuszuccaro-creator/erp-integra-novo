@@ -96,8 +96,6 @@ export default function TipoFreteForm({ tipo, tipoFrete, onSubmit, isSubmitting,
           checked={formData.cobra_frete}
           onCheckedChange={(v) => setFormData({...formData, cobra_frete: v})}
           disabled={!podeSalvar}
-          data-permission="Cadastros.TipoFrete.editar"
-          data-sensitive="true"
         />
       </div>
 
@@ -137,8 +135,6 @@ export default function TipoFreteForm({ tipo, tipoFrete, onSubmit, isSubmitting,
         <Button
           type="submit"
           disabled={isSubmitting || !contextoValido || !podeSalvar}
-          data-permission="Cadastros.TipoFrete.salvar"
-          data-sensitive="true"
         >
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {tipo ? 'Atualizar' : 'Criar Tipo de Frete'}

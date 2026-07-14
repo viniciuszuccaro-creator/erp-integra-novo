@@ -92,14 +92,13 @@ export default function TabelaFiscalForm({ tabela, windowMode = false, onSubmit,
             <div className="flex items-center gap-2">
               <Switch checked={formData.regra_ativa}
                 onCheckedChange={(checked) => setFormData({ ...formData, regra_ativa: checked })}
-                disabled={!podeSalvar} data-permission="Cadastros.TabelaFiscal.alterarStatus" data-sensitive="true" />
+                disabled={!podeSalvar} />
               <Label>Regra Ativa</Label>
             </div>
             <div className="flex gap-3">
               {onCancel && (<Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>)}
               <Button type="submit" className="bg-blue-600 hover:bg-blue-700"
-                disabled={!contextoValido || !podeSalvar}
-                data-permission="Cadastros.TabelaFiscal.salvar" data-sensitive="true">
+                disabled={!contextoValido || !podeSalvar}>
                 <Receipt className="w-4 h-4 mr-2" />
                 {tabela ? 'Atualizar' : 'Criar'} Tabela Fiscal
               </Button>

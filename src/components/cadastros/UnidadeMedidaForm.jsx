@@ -128,8 +128,6 @@ export default function UnidadeMedidaForm({ unidade, unidadeMedida, item, data, 
           <Switch
             checked={formData.usa_em_estoque}
             disabled={!podeSalvar}
-            data-permission="Cadastros.UnidadeMedida.editar"
-            data-sensitive="true"
             onCheckedChange={(v) => setFormData({ ...formData, usa_em_estoque: v })}
           />
         </div>
@@ -138,8 +136,6 @@ export default function UnidadeMedidaForm({ unidade, unidadeMedida, item, data, 
           <Switch
             checked={formData.usa_em_compras}
             disabled={!podeSalvar}
-            data-permission="Cadastros.UnidadeMedida.editar"
-            data-sensitive="true"
             onCheckedChange={(v) => setFormData({ ...formData, usa_em_compras: v })}
           />
         </div>
@@ -151,8 +147,6 @@ export default function UnidadeMedidaForm({ unidade, unidadeMedida, item, data, 
           <Switch
             checked={formData.usa_em_vendas}
             disabled={!podeSalvar}
-            data-permission="Cadastros.UnidadeMedida.editar"
-            data-sensitive="true"
             onCheckedChange={(v) => setFormData({ ...formData, usa_em_vendas: v })}
           />
         </div>
@@ -161,8 +155,6 @@ export default function UnidadeMedidaForm({ unidade, unidadeMedida, item, data, 
           <Switch
             checked={formData.ativo}
             disabled={!podeSalvar}
-            data-permission="Cadastros.UnidadeMedida.alterarStatus"
-            data-sensitive="true"
             onCheckedChange={(v) => setFormData({ ...formData, ativo: v })}
           />
         </div>
@@ -172,8 +164,6 @@ export default function UnidadeMedidaForm({ unidade, unidadeMedida, item, data, 
         type="submit"
         className="w-full bg-indigo-600 hover:bg-indigo-700"
         disabled={!contextoValido || !podeSalvar}
-        data-permission="Cadastros.UnidadeMedida.salvar"
-        data-sensitive="true"
       >
         {dadosIniciais ? 'Atualizar Unidade' : 'Criar Unidade de Medida'}
       </Button>

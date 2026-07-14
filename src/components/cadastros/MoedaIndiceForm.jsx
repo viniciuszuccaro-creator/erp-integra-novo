@@ -110,8 +110,6 @@ export default function MoedaIndiceForm({ moeda, moedaIndice, item, data, onSubm
         type="submit"
         className="w-full bg-emerald-600 hover:bg-emerald-700"
         disabled={dadosIniciais?.id ? !podeEditar : !podeCriar}
-        data-permission="Cadastros.MoedaIndice.salvar"
-        data-sensitive
       >
         {dadosIniciais ? 'Atualizar' : 'Criar Moeda/Índice'}
       </Button>

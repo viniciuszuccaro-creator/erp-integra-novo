@@ -143,12 +143,12 @@ async function optimizeProductPrice(base44, ctx, { entityId, payload, user }) {
   const needsUpdate = (produto?.preco_venda !== opt.preco_venda) || (produto?.margem_minima_percentual !== opt.margem_minima_percentual);
 
   if (!needsUpdate) {
-    try { await audit(base44, user || { full_name: 'Automação' }, { acao: 'Edição', modulo: 'Comercial', entidade: 'Produto', registro_id: entityId, descricao: 'Otimização de preço/margem ignorada (sem mudança)', dados_novos: { ...patch, skipped: 'no_change', fonte_cotacoes: quoteSource }, empresa_id: produto?.empresa_id || null, duracao_ms: Date.now() - t0 }); } catch {}
+    try { await audit(base44, user || { full_name: 'Automação' }, { acao: 'Edição', modulo: 'Comercial', entidade: 'Produto', registro_id: entityId, descricao: 'Otimização de preço/margem ignorada (sem mudança)', dados_novos: { ...patch, skipped: 'no_change', fonte_cotacoes: quoteSource }, empresa_id: produto?.empresa_id || null, duracao_ms: Date.now() - t0 }); } catch (auditErr) { console.error('AuditLog falhou (optimizeProductPriceHandler skip):', auditErr); }
     return { success: true, skipped: true, reason: 'no_change' };
   }
 
   await base44.asServiceRole.entities.Produto.update(entityId, patch);
-  try { await audit(base44, user || { full_name: 'Automação' }, { acao: 'Edição', modulo: 'Comercial', entidade: 'Produto', registro_id: entityId, descricao: 'Preço/margem otimizados', dados_novos: { ...patch, fonte_cotacoes: quoteSource }, empresa_id: produto?.empresa_id || null, duracao_ms: Date.now() - t0 }); } catch {}
+  try { await audit(base44, user || { full_name: 'Automação' }, { acao: 'Edição', modulo: 'Comercial', entidade: 'Produto', registro_id: entityId, descricao: 'Preço/margem otimizados', dados_novos: { ...patch, fonte_cotacoes: quoteSource }, empresa_id: produto?.empresa_id || null, duracao_ms: Date.now() - t0 }); } catch (auditErr) { console.error('AuditLog falhou (optimizeProductPriceHandler update):', auditErr); }
   return { success: true, updated: patch };
 }
 

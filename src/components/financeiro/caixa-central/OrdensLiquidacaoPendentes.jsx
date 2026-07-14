@@ -182,11 +182,11 @@ export default function OrdensLiquidacaoPendentes() {
                     <TableCell><Badge className="bg-blue-100 text-blue-700">{ordem.forma_pagamento_pretendida}</Badge></TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button size="sm" data-permission="Financeiro.Caixa.liquidar" disabled={!contextoValido || !podeLiquidar || liquidarOrdemMutation.isPending} onClick={() => handleLiquidar(ordem)} className="bg-emerald-600 hover:bg-emerald-700">
+                        <Button size="sm" disabled={!contextoValido || !podeLiquidar || liquidarOrdemMutation.isPending} onClick={() => handleLiquidar(ordem)} className="bg-emerald-600 hover:bg-emerald-700">
                           <CheckCircle2 className="w-4 h-4 mr-1" />
                           Liquidar
                         </Button>
-                        <Button data-permission="Financeiro.Caixa.liquidar" 
+                        <Button 
                           size="sm" 
                           variant="outline" 
                           onClick={() => cancelarOrdemMutation.mutate(ordem.id)} 
@@ -291,7 +291,6 @@ export default function OrdensLiquidacaoPendentes() {
               <div className="flex justify-end gap-3">
                 <Button variant="outline" onClick={() => setLiquidacaoDialogOpen(false)}>Cancelar</Button>
                 <Button
-                  data-permission="Financeiro.Caixa.liquidar"
                   className="bg-emerald-600 hover:bg-emerald-700"
                   onClick={confirmarLiquidacao}
                   disabled={!contextoValido || !podeLiquidar || liquidarOrdemMutation.isPending}

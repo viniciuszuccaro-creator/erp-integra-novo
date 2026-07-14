@@ -132,7 +132,7 @@ export default function TurnoForm({ turno, item, data, initialData, defaultValue
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="submit" data-permission="RH.Turno.salvar" disabled={isSubmitting || !podeSalvar}>
+        <Button type="submit" disabled={isSubmitting || !podeSalvar}>
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {dadosIniciais ? 'Atualizar' : 'Criar Turno'}
         </Button>

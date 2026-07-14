@@ -199,7 +199,7 @@ export default function IAReposicao({ empresaId }) {
                             📦 Sugestão: Comprar {sug.quantidade_sugerida} unidades
                           </p>
                         </div>
-                        <Button data-permission="Estoque.IAReposicao.gerar"
+                        <Button
                           size="sm"
                           onClick={() => gerarSolicitacaoMutation.mutate(sug)}
                           disabled={gerarSolicitacaoMutation.isPending || !contextoValido || !podeSolicitar}

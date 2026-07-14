@@ -120,16 +120,16 @@ export default function PedidoTabsContainer({
           </span>
           <div className="flex gap-2">
             {isTransferido && (
-              <button data-permission="Comercial.Pedido.liberar" className="px-3 py-1 rounded bg-amber-600 text-white" onClick={solicitarLiberacao}>Pedir liberação</button>
+              <button className="px-3 py-1 rounded bg-amber-600 text-white" onClick={solicitarLiberacao}>Pedir liberação</button>
             )}
             {isTransferido && (
               <ProtectedSection module="Comercial" action="aprovar" hideInstead>
-                <button data-permission="Comercial.Pedido.aprovar" className="px-3 py-1 rounded bg-green-600 text-white" onClick={liberarEdicaoLocal}>Liberar Edição (Gerente)</button>
+                <button className="px-3 py-1 rounded bg-green-600 text-white" onClick={liberarEdicaoLocal}>Liberar Edição (Gerente)</button>
               </ProtectedSection>
             )}
             {!isStatusBloqueado && podeLiberarVendedor && (
               <ProtectedSection module="Comercial" action="editar" hideInstead>
-                <button data-permission="Comercial.Pedido.editar" className="px-3 py-1 rounded bg-blue-600 text-white" onClick={liberarEdicaoVendedor}>Liberar Edição (Vendedor)</button>
+                <button className="px-3 py-1 rounded bg-blue-600 text-white" onClick={liberarEdicaoVendedor}>Liberar Edição (Vendedor)</button>
               </ProtectedSection>
             )}
           </div>

@@ -99,15 +99,15 @@ export default function TransportadoraForm({ transportadora: transportadoraProp,
       <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
         {transportadora && (
           <>
-            <Button type="button" variant="outline" onClick={() => setFormData({ ...formData, status: formData.status === 'Ativo' ? 'Inativo' : 'Ativo' })} disabled={!podeEditar || !contextoValido} data-permission="Cadastros.Transportadora.alterarStatus" data-sensitive className={formData.status === 'Ativo' ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}>
+            <Button type="button" variant="outline" onClick={() => setFormData({ ...formData, status: formData.status === 'Ativo' ? 'Inativo' : 'Ativo' })} disabled={!podeEditar || !contextoValido} className={formData.status === 'Ativo' ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}>
               {formData.status === 'Ativo' ? <><PowerOff className="w-4 h-4 mr-2" />Inativar</> : <><Power className="w-4 h-4 mr-2" />Ativar</>}
             </Button>
-            <Button type="button" variant="destructive" onClick={handleExcluir} disabled={!podeExcluir || !contextoValido} data-permission="Cadastros.Transportadora.excluir" data-sensitive>
+            <Button type="button" variant="destructive" onClick={handleExcluir} disabled={!podeExcluir || !contextoValido}>
               <Trash2 className="w-4 h-4 mr-2" />Excluir
             </Button>
           </>
         )}
-        <Button type="submit" className="bg-orange-600 hover:bg-orange-700" disabled={!contextoValido || (transportadora?.id ? !podeEditar : !podeCriar)} data-permission="Cadastros.Transportadora.salvar" data-sensitive>
+        <Button type="submit" className="bg-orange-600 hover:bg-orange-700" disabled={!contextoValido || (transportadora?.id ? !podeEditar : !podeCriar)}>
           <Save className="w-4 h-4 mr-2" />{transportadora ? 'Atualizar' : 'Criar'} Transportadora
         </Button>
       </div>

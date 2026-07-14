@@ -45,7 +45,6 @@ export default function TabelaPrecoItensModal({ tabela, isOpen, onClose, windowM
           {podeEditar && !h.showItemForm && (
             <Button
               onClick={() => { h.setEditingItem(null); h.resetForm(); h.setShowItemForm(true); }}
-              data-permission="Comercial.TabelaPreco.criar"
               className="bg-green-600 hover:bg-green-700"
             >
               <Plus className="w-4 h-4 mr-2" /> Adicionar Produto

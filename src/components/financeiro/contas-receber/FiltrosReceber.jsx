@@ -26,7 +26,7 @@ export default function FiltrosReceber({
       <CardContent className="p-3">
         <div className="flex flex-wrap items-center gap-2">
           <ProtectedAction permission="financeiro_receber_exportar">
-            <Button data-permission="Financeiro.FiltrosReceber.exportar" variant="outline" size="sm" onClick={onExportar}>
+            <Button variant="outline" size="sm" onClick={onExportar}>
               <Download className="w-3 h-3 mr-1" /> CSV
             </Button>
           </ProtectedAction>
@@ -58,19 +58,19 @@ export default function FiltrosReceber({
               </Badge>
               
               <ProtectedAction permission="financeiro_receber_baixar_multiplos">
-                <Button data-permission="Financeiro.ContaReceber.baixar" variant="outline" size="sm" onClick={onBaixarMultipla} disabled={baixarPending}>
+                <Button variant="outline" size="sm" onClick={onBaixarMultipla} disabled={baixarPending}>
                   <CheckCircle2 className="w-3 h-3 mr-1" /> Baixar
                 </Button>
               </ProtectedAction>
 
-              <Button data-permission="Financeiro.ContaReceber.enviarCaixa" variant="outline" size="sm" onClick={onEnviarCaixa} disabled={enviarPending} className="bg-emerald-50">
+              <Button variant="outline" size="sm" onClick={onEnviarCaixa} disabled={enviarPending} className="bg-emerald-50">
                 <Send className="w-3 h-3 mr-1" /> Enviar Caixa
               </Button>
             </>
           )}
 
           <ProtectedAction permission="financeiro_receber_criar">
-            <Button size="sm" data-permission="Financeiro.ContaReceber.criar" onClick={onNovaConta} className="bg-green-600 hover:bg-green-700 ml-auto">
+            <Button size="sm" onClick={onNovaConta} className="bg-green-600 hover:bg-green-700 ml-auto">
               <Plus className="w-3 h-3 mr-1" /> Nova
             </Button>
           </ProtectedAction>

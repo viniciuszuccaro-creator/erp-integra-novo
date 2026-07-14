@@ -190,8 +190,6 @@ export default function EmpresaForm({ empresa, onSubmit, isSubmitting, windowMod
         <Button
           type="submit"
           disabled={isSubmitting || (empresa ? !podeEditar : !podeCriar)}
-          data-permission="Cadastros.Empresa.salvar"
-          data-sensitive
         >
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {empresa ? 'Atualizar' : 'Criar Empresa'}

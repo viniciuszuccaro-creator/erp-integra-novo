@@ -167,8 +167,6 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
             <Button
               size="sm"
               className="bg-blue-600 hover:bg-blue-700"
-              data-permission="Compras.SolicitacaoCompra.criar"
-              data-sensitive="true"
               onClick={() => openWindow(SolicitacaoCompraForm, {
                 windowMode: true,
                 onSubmit: async (data) => {
@@ -198,7 +196,7 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
               <AlertDescription className="flex items-center justify-between">
                 <div className="text-blue-900 font-semibold">{selectedSolicitacoes.length} solicitacao(oes) selecionada(s)</div>
                 <div className="flex gap-2">
-                  <Button data-permission="Compras.SolicitacoesCompra.exportar" variant="outline" onClick={() => exportarSolicitacoesCSV(solList.filter(s => selectedSolicitacoes.includes(s.id)))}>
+                  <Button variant="outline" onClick={() => exportarSolicitacoesCSV(solList.filter(s => selectedSolicitacoes.includes(s.id)))}>
                     <Download className="w-4 h-4 mr-2" /> Exportar CSV
                   </Button>
                   <Button variant="ghost" onClick={() => setSelectedSolicitacoes([])}>Limpar Selecao</Button>
@@ -226,19 +224,19 @@ export default function SolicitacoesCompraTab({ solicitacoes, windowMode = false
                   {s.status === 'Pendente' && (
                     <>
                       {hasPermission('Compras','SolicitacaoCompra','aprovar') && (
-                        <Button variant="ghost" size="icon" data-permission="Compras.SolicitacaoCompra.aprovar" data-sensitive="true" onClick={() => handleAprovar(s)} title="Aprovar">
+                        <Button variant="ghost" size="icon" onClick={() => handleAprovar(s)} title="Aprovar">
                           <CheckCircle2 className="w-4 h-4 text-green-600" />
                         </Button>
                       )}
                       {hasPermission('Compras','SolicitacaoCompra','rejeitar') && (
-                        <Button variant="ghost" size="icon" data-permission="Compras.SolicitacaoCompra.rejeitar" data-sensitive="true" onClick={() => handleRejeitar(s)} title="Rejeitar">
+                        <Button variant="ghost" size="icon" onClick={() => handleRejeitar(s)} title="Rejeitar">
                           <XCircle className="w-4 h-4 text-red-600" />
                         </Button>
                       )}
                     </>
                   )}
                   {s.status === 'Aprovada' && hasPermission('Compras','SolicitacaoCompra','gerar_oc') && (
-                    <Button variant="ghost" size="sm" data-permission="Compras.SolicitacaoCompra.gerar_oc" data-sensitive="true" onClick={() => handleGerarOC(s)} className="text-purple-600">
+                    <Button variant="ghost" size="sm" onClick={() => handleGerarOC(s)} className="text-purple-600">
                       <ShoppingCart className="w-4 h-4 mr-1" /> Gerar OC
                     </Button>
                   )}

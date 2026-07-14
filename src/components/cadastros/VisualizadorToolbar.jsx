@@ -110,7 +110,6 @@ export default function VisualizadorToolbar({
           size="sm"
           onClick={onNew}
           disabled={!contextoValido}
-          data-permission="Cadastros.criar"
           className="h-9 rounded-sm gap-1 shrink-0"
           title={!contextoValido ? "Selecione uma empresa ou grupo primeiro" : undefined}
         >
@@ -122,9 +121,7 @@ export default function VisualizadorToolbar({
         <Button
           size="sm"
           variant="destructive"
-          data-permission="Cadastros.Visualizador.excluir"
           onClick={onDeleteSelected}
-          data-permission="Cadastros.excluir"
           className="h-9 rounded-sm gap-1 shrink-0"
         >
           <Trash2 className="w-4 h-4" />

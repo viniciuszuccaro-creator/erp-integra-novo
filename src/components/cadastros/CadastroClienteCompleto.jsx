@@ -164,7 +164,6 @@ export default function CadastroClienteCompleto({ cliente: clienteProp, item, da
               <>
                 <Button
                   type="button" variant="outline"
-                  data-permission="Cadastros.Cliente.alterarStatus" data-sensitive="true"
                   onClick={async () => {
                     const statusAnterior = formData.status;
                     const novoStatus = formData.status === 'Ativo' ? 'Inativo' : 'Ativo';
@@ -186,7 +185,6 @@ export default function CadastroClienteCompleto({ cliente: clienteProp, item, da
                 </Button>
                 <Button
                   type="button" variant="destructive"
-                  data-permission="Cadastros.Cliente.excluir" data-sensitive="true"
                   onClick={async () => {
                     const ok = await confirmExcluir({ title: 'Confirmar Exclusão', description: `Excluir o cliente "${formData.nome}"? Esta ação não pode ser desfeita.`, confirmText: 'Excluir' });
                     if (!ok) return;
@@ -209,7 +207,6 @@ export default function CadastroClienteCompleto({ cliente: clienteProp, item, da
               </>
             )}
             <Button
-              data-permission="Cadastros.Cliente.criar"
               onClick={async () => {
                 try {
                   await base44.entities.AuditLog.create({
@@ -222,7 +219,6 @@ export default function CadastroClienteCompleto({ cliente: clienteProp, item, da
                 } catch (_) {}
                 handleSave();
               }}
-              data-permission="Cadastros.Cliente.salvar" data-sensitive="true"
               disabled={saveMutation.isPending || !contextoValido || (cliente?.id ? !podeEditar : !podeCriar)}
               className="bg-blue-600 hover:bg-blue-700"
             >

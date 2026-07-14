@@ -161,7 +161,7 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
               <Label>Saldo Inicial em Dinheiro (R$)</Label>
               <Input type="number" step="0.01" value={saldoInicial} onChange={(e) => setSaldoInicial(parseFloat(e.target.value) || 0)} placeholder="0.00" className="text-lg" disabled={controlesDesabilitados} />
             </div>
-            <Button data-permission="Financeiro.Caixa.abrir" onClick={() => abrirCaixa.mutate(saldoInicial)} className="w-full bg-emerald-600 h-10" disabled={controlesDesabilitados || abrirCaixa.isPending}>
+            <Button onClick={() => abrirCaixa.mutate(saldoInicial)} className="w-full bg-emerald-600 h-10" disabled={controlesDesabilitados || abrirCaixa.isPending}>
               <CheckCircle2 className="w-4 h-4 mr-2" /> Abrir Caixa
             </Button>
           </CardContent>
@@ -182,7 +182,7 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
             <p className="text-xs text-slate-500">Saldo em Dinheiro</p>
             <p className="text-lg font-bold text-emerald-600">R$ {saldoAtual.toFixed(2)}</p>
           </div>
-          <Button data-permission="Financeiro.Caixa.fechar" onClick={async () => { const ok = await confirm({ title: "Fechar Caixa", description: `Fechar caixa?\nSaldo: R$ ${saldoAtual.toFixed(2)}`, variant: "warning", confirmText: "Fechar" }); if (ok) fecharCaixa.mutate(); }} variant="outline" size="sm" disabled={controlesDesabilitados || fecharCaixa.isPending}>Fechar Caixa</Button>
+          <Button onClick={async () => { const ok = await confirm({ title: "Fechar Caixa", description: `Fechar caixa?\nSaldo: R$ ${saldoAtual.toFixed(2)}`, variant: "warning", confirmText: "Fechar" }); if (ok) fecharCaixa.mutate(); }} variant="outline" size="sm" disabled={controlesDesabilitados || fecharCaixa.isPending}>Fechar Caixa</Button>
         </div>
       </div>
 
@@ -230,7 +230,7 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
                     <TableCell>{p.cliente_nome}</TableCell>
                     <TableCell className="font-bold">R$ {(p.valor_total || 0).toFixed(2)}</TableCell>
                     <TableCell>
-                      <Button size="sm" data-permission="Financeiro.Caixa.liquidar" disabled={!contextoValido || !podeLiquidarTitulos || liquidarTitulo.isPending} onClick={() => liquidarTitulo.mutate({ titulo: { id: p.id, cliente: p.cliente_nome, valor: p.valor_total }, tipo: 'receber', forma: 'Dinheiro' })}>Receber</Button>
+                      <Button size="sm" disabled={!contextoValido || !podeLiquidarTitulos || liquidarTitulo.isPending} onClick={() => liquidarTitulo.mutate({ titulo: { id: p.id, cliente: p.cliente_nome, valor: p.valor_total }, tipo: 'receber', forma: 'Dinheiro' })}>Receber</Button>
                     </TableCell>
                   </tr>
                 ))}

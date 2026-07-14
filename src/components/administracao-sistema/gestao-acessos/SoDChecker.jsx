@@ -131,11 +131,11 @@ export default function SoDChecker() {
             <p className="text-xs text-slate-500">Verifica conflitos de permissoes nos perfis de acesso.</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={executarAnalise} disabled={loading || !hasValidScope || !podeExecutar} data-action="SoD.analisar" data-permission="Sistema.Controle de Acesso.editar">
+            <Button onClick={executarAnalise} disabled={loading || !hasValidScope || !podeExecutar}>
               {loading ? "Analisando..." : "Executar Analise"}
             </Button>
             {resultado && (
-              <Button onClick={persistirConflitos} disabled={persistindo || !hasValidScope || !podeExecutar} variant="outline" data-action="SoD.persistir" data-permission="Sistema.Controle de Acesso.editar" data-sensitive="true">
+              <Button onClick={persistirConflitos} disabled={persistindo || !hasValidScope || !podeExecutar} variant="outline">
                 {persistindo ? "Salvando..." : "Persistir Conflitos"}
               </Button>
             )}

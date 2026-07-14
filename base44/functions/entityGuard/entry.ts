@@ -442,8 +442,11 @@ Deno.serve(async (req) => {
       const reqEmpresaId = body?.empresa_id || null;
       const reqGroupId = body?.group_id || null;
       if (reqEmpresaId && user?.empresa_id && reqEmpresaId !== user.empresa_id) {
+        // Vol 3.5: Verifica empresas_vinculadas — usuário pode ter acesso a múltiplas empresas
+        const userEmpresasVinculadas = Array.isArray(user?.empresas_vinculadas) ? user.empresas_vinculadas : [];
+        const hasEmpresaAccess = userEmpresasVinculadas.includes(reqEmpresaId);
         const userGroupId = user?.group_id || null;
-        if (!reqGroupId || !userGroupId || reqGroupId !== userGroupId) {
+        if (!hasEmpresaAccess && (!reqGroupId || !userGroupId || reqGroupId !== userGroupId)) {
           allowed = false;
           try {
             await base44.asServiceRole.entities.AuditLog.create({
@@ -458,7 +461,7 @@ Deno.serve(async (req) => {
               group_id: reqGroupId,
               data_hora: new Date().toISOString(),
             });
-          } catch {}
+          } catch (rlsErr) { console.error('RLS audit log falhou:', rlsErr); }
         }
       }
     }

@@ -175,7 +175,6 @@ export default function RequisicoesAlmoxarifadoTab({ requisicoes, produtos }) {
         {canCreate('Estoque', 'Requisicoes') && (
           <Button
             className="bg-orange-600 hover:bg-orange-700"
-            data-permission="Estoque.Requisicoes.criar"
             onClick={() => openWindow(RequisicaoAlmoxarifadoForm, {
             windowMode: true,
             onSubmit: async (data) => {

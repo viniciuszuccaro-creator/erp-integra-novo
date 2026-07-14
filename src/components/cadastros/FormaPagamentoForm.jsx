@@ -187,8 +187,6 @@ export default function FormaPagamentoForm({ forma, onSubmit, isSubmitting, wind
               variant="outline"
               onClick={handleAlternarStatus}
               disabled={!podeEditar}
-              data-permission="Cadastros.FormaPagamento.alterarStatus"
-              data-sensitive
               className={formData.ativa ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}
             >
               {formData.ativa ? (
@@ -200,11 +198,8 @@ export default function FormaPagamentoForm({ forma, onSubmit, isSubmitting, wind
             <Button
               type="button"
               variant="destructive"
-              data-permission="Cadastros.FormaPagamento.excluir"
               onClick={handleExcluir}
               disabled={!podeExcluir}
-              data-permission="Cadastros.FormaPagamento.excluir"
-              data-sensitive
             >
               <Trash2 className="w-4 h-4 mr-2" />Excluir
             </Button>
@@ -213,8 +208,6 @@ export default function FormaPagamentoForm({ forma, onSubmit, isSubmitting, wind
         <Button
           type="submit"
           disabled={isSubmitting || (forma ? !podeEditar : !podeCriar)}
-          data-permission="Cadastros.FormaPagamento.salvar"
-          data-sensitive
         >
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {forma ? 'Atualizar' : 'Criar Forma de Pagamento'}

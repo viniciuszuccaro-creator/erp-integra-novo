@@ -143,7 +143,7 @@ export default function FeriasTab({ windowMode = false }) {
           </SelectContent>
         </Select>
         {canCreate('RH') && (
-           <Button size="sm" className="bg-orange-600 hover:bg-orange-700 h-9" data-permission="RH.Ferias.criar" onClick={() => { setEditingFerias(null); setFormOpen(true); }}>
+           <Button size="sm" className="bg-orange-600 hover:bg-orange-700 h-9" onClick={() => { setEditingFerias(null); setFormOpen(true); }}>
              <Plus className="w-4 h-4 mr-1" /> Nova Solicitação
            </Button>
          )}
@@ -195,12 +195,10 @@ export default function FeriasTab({ windowMode = false }) {
                         {canAprovar && f.status === 'Solicitada' && (
                            <>
                              <Button variant="ghost" size="sm" className="h-7 text-green-600 hover:bg-green-50 text-xs"
-                               data-permission="RH.Ferias.aprovar" data-sensitive="true"
                                onClick={() => handleAprovar(f)} disabled={updateMutation.isPending}>
                                <CheckCircle className="w-3 h-3 mr-1" />Aprovar
                              </Button>
                              <Button variant="ghost" size="sm" className="h-7 text-red-600 hover:bg-red-50 text-xs"
-                               data-permission="RH.Ferias.rejeitar" data-sensitive="true"
                                onClick={() => handleRejeitar(f)} disabled={updateMutation.isPending}>
                                <XCircle className="w-3 h-3 mr-1" />Rejeitar
                              </Button>
@@ -208,7 +206,6 @@ export default function FeriasTab({ windowMode = false }) {
                          )}
                          {canCreate('RH') && (
                            <Button variant="ghost" size="sm" className="h-7 text-xs"
-                             data-permission="RH.Ferias.editar"
                              onClick={() => { setEditingFerias(f); setFormOpen(true); }}>
                              Editar
                            </Button>

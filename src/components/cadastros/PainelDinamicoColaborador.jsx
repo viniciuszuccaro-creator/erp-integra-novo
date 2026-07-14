@@ -96,7 +96,7 @@ export default function PainelDinamicoColaborador({ colaborador, isOpen, onClose
             </div>
             
             {podeEditar && (
-              <Button data-permission="Cadastros.PainelDinamicoColaborador.editar" onClick={handleEditarCadastro} className="gap-2">
+              <Button onClick={handleEditarCadastro} className="gap-2">
                 <Edit className="w-4 h-4" />
                 Editar no Cadastro Gerais
               <ExternalLink className="w-3 h-3" />

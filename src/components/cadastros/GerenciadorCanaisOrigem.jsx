@@ -105,7 +105,7 @@ export default function GerenciadorCanaisOrigem({ windowMode = false }) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2"><Activity className="w-5 h-5 text-blue-600" />Canais Configurados</h3>
-          <ExportButton data={parametros.map(p => calcularMetricas(p))} filename="canais-origem-status" className="bg-green-600 hover:bg-green-700" data-permission="Cadastros.CanalOrigem.exportar">
+          <ExportButton data={parametros.map(p => calcularMetricas(p))} filename="canais-origem-status" className="bg-green-600 hover:bg-green-700">
             <Download className="w-4 h-4 mr-2" />Exportar Status
           </ExportButton>
         </div>

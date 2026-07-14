@@ -137,7 +137,7 @@ export default function TabelaPrecoForm({ tabela, onSubmit, isSubmitting, codigo
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="submit" data-permission="Comercial.TabelaPreco.salvar" disabled={saving || !podeSalvar}>
+        <Button type="submit" disabled={saving || !podeSalvar}>
           {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {tabela ? 'Atualizar Tabela' : 'Criar Tabela'}
         </Button>

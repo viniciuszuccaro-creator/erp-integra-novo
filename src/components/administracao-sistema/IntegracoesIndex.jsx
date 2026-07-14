@@ -209,14 +209,14 @@ export default function IntegracoesIndex({ initialTab }) {
     <div className="w-full h-full flex flex-col">
       <Tabs value={tab} onValueChange={handleTabChange} className="w-full h-full">
         <TabsList className="flex flex-wrap gap-2 h-auto">
-          <TabsTrigger value="gerenciamento" data-action="Integracoes.tab.gerenciamento"><CheckCircle2 className="w-4 h-4 mr-2" />Gerenciamento</TabsTrigger>
-          <TabsTrigger value="status" data-action="Integracoes.tab.status"><CheckCircle2 className="w-4 h-4 mr-2" />Status</TabsTrigger>
-          <TabsTrigger value="nfe" data-action="Integracoes.tab.nfe"><FileText className="w-4 h-4 mr-2" />NF-e</TabsTrigger>
-          <TabsTrigger value="boletos" data-action="Integracoes.tab.boletos"><DollarSign className="w-4 h-4 mr-2" />Boletos/PIX</TabsTrigger>
-          <TabsTrigger value="whatsapp" data-action="Integracoes.tab.whatsapp"><MessageCircle className="w-4 h-4 mr-2" />WhatsApp</TabsTrigger>
-          <TabsTrigger value="transportadoras" data-action="Integracoes.tab.transportadoras"><Truck className="w-4 h-4 mr-2" />Transportadoras</TabsTrigger>
-          <TabsTrigger value="maps" data-action="Integracoes.tab.maps"><Globe className="w-4 h-4 mr-2" />Maps</TabsTrigger>
-          <TabsTrigger value="marketplaces" data-action="Integracoes.tab.marketplaces"><ShoppingCart className="w-4 h-4 mr-2" />Marketplaces</TabsTrigger>
+          <TabsTrigger value="gerenciamento"><CheckCircle2 className="w-4 h-4 mr-2" />Gerenciamento</TabsTrigger>
+          <TabsTrigger value="status"><CheckCircle2 className="w-4 h-4 mr-2" />Status</TabsTrigger>
+          <TabsTrigger value="nfe"><FileText className="w-4 h-4 mr-2" />NF-e</TabsTrigger>
+          <TabsTrigger value="boletos"><DollarSign className="w-4 h-4 mr-2" />Boletos/PIX</TabsTrigger>
+          <TabsTrigger value="whatsapp"><MessageCircle className="w-4 h-4 mr-2" />WhatsApp</TabsTrigger>
+          <TabsTrigger value="transportadoras"><Truck className="w-4 h-4 mr-2" />Transportadoras</TabsTrigger>
+          <TabsTrigger value="maps"><Globe className="w-4 h-4 mr-2" />Maps</TabsTrigger>
+          <TabsTrigger value="marketplaces"><ShoppingCart className="w-4 h-4 mr-2" />Marketplaces</TabsTrigger>
         </TabsList>
 
         <TabsContent value="gerenciamento" className="mt-4">
@@ -240,9 +240,6 @@ export default function IntegracoesIndex({ initialTab }) {
                         variant="outline"
                         onClick={handleCriarBase}
                         disabled={criandoBase || !contextoValido || !podeCriarIntegracoes}
-                        data-action="Integracoes.criarEstruturaBase"
-                        data-permission="Sistema.Integracoes.criar"
-                        data-sensitive="true"
                       >
                         {criandoBase ? "Criando..." : "Criar estrutura base"}
                       </Button>
@@ -283,14 +280,14 @@ export default function IntegracoesIndex({ initialTab }) {
                   <h3 className="font-semibold">Webhooks & Testes Rápidos</h3>
                   <div className="flex items-center gap-2 text-xs">
                     <code className="px-2 py-1 bg-slate-100 rounded flex-1 overflow-x-auto">{webhookUrl}</code>
-                    <Button size="sm" variant="outline" onClick={() => handleCopy(webhookUrl)} data-action="Integracoes.webhook.copiarUrl" data-permission="Sistema.Integracoes.visualizar">Copiar URL</Button>
+                    <Button size="sm" variant="outline" onClick={() => handleCopy(webhookUrl)}>Copiar URL</Button>
                   </div>
                   <div className="text-xs text-slate-600">Header: x-internal-token: <span className="font-mono">DEPLOY_AUDIT_TOKEN</span></div>
                   <div className="flex flex-wrap gap-2">
-                    <Button size="sm" onClick={handleTestWebhookAsaasPago} disabled={testandoWebhook === "asaas" || !contextoValido || !podeEditarIntegracoes} data-action="Integracoes.webhook.testarAsaasPago" data-permission="Sistema.Integracoes.editar" data-sensitive="true">
+                    <Button size="sm" onClick={handleTestWebhookAsaasPago} disabled={testandoWebhook === "asaas" || !contextoValido || !podeEditarIntegracoes}>
                       {testandoWebhook === "asaas" ? "Testando..." : "Testar webhook Asaas (pago)"}
                     </Button>
-                    <Button size="sm" onClick={handleTestWebhookNFeAutorizada} disabled={testandoWebhook === "nfe" || !contextoValido || !podeEditarIntegracoes} data-action="Integracoes.webhook.simularNFeAutorizada" data-permission="Sistema.Integracoes.editar" data-sensitive="true">
+                    <Button size="sm" onClick={handleTestWebhookNFeAutorizada} disabled={testandoWebhook === "nfe" || !contextoValido || !podeEditarIntegracoes}>
                       {testandoWebhook === "nfe" ? "Simulando..." : "Simular NF-e autorizada"}
                     </Button>
                   </div>

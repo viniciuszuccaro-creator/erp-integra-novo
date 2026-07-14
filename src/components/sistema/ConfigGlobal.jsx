@@ -119,7 +119,7 @@ export default function ConfigGlobal({ empresaId, grupoId }) {
             {eId ? `Empresa: ${empresaAtual?.nome_fantasia || eId}` : `Grupo: ${grupoAtual?.nome_do_grupo || gId}`}
           </p>
         </div>
-        <Button variant="outline" size="sm" disabled={isFetching || !hasValidScope} data-permission="Sistema.Configuracoes.visualizar" data-action="ConfigGlobal.atualizar"
+        <Button variant="outline" size="sm" disabled={isFetching || !hasValidScope}
           onClick={() => { queryClient.invalidateQueries({ queryKey }); refetch(); }}>
           <RefreshCw className={`w-4 h-4 mr-1.5 ${isFetching ? 'animate-spin' : ''}`} />
           {isFetching ? 'Atualizando…' : 'Atualizar'}
@@ -144,29 +144,29 @@ export default function ConfigGlobal({ empresaId, grupoId }) {
                 <div>
                   <Label>CFOP Padrão — Dentro do Estado</Label>
                   <Input key={`cfop-int-${eId}-${gId}`} defaultValue={getConfig('fiscal_cfop_interno')?.valor || '5102'}
-                    placeholder="5102" disabled={!hasValidScope || !!savingField.fiscal_cfop_interno} data-permission={getFieldPermission('fiscal_cfop_interno', 'Fiscal')} data-action="ConfigGlobal.Fiscal.cfopInterno" onBlur={(e) => handleFieldBlur('fiscal_cfop_interno', 'Fiscal', { valor: e.target.value }, getConfig('fiscal_cfop_interno') || { valor: '5102' })} />
+                    placeholder="5102" disabled={!hasValidScope || !!savingField.fiscal_cfop_interno} data-permission={getFieldPermission('fiscal_cfop_interno', 'Fiscal')} onBlur={(e) => handleFieldBlur('fiscal_cfop_interno', 'Fiscal', { valor: e.target.value }, getConfig('fiscal_cfop_interno') || { valor: '5102' })} />
                 </div>
                 <div>
                   <Label>CFOP Padrão — Fora do Estado</Label>
                   <Input key={`cfop-ext-${eId}-${gId}`} defaultValue={getConfig('fiscal_cfop_externo')?.valor || '6102'}
-                    placeholder="6102" disabled={!hasValidScope || !!savingField.fiscal_cfop_externo} data-permission={getFieldPermission('fiscal_cfop_externo', 'Fiscal')} data-action="ConfigGlobal.Fiscal.cfopExterno" onBlur={(e) => handleFieldBlur('fiscal_cfop_externo', 'Fiscal', { valor: e.target.value }, getConfig('fiscal_cfop_externo') || { valor: '6102' })} />
+                    placeholder="6102" disabled={!hasValidScope || !!savingField.fiscal_cfop_externo} data-permission={getFieldPermission('fiscal_cfop_externo', 'Fiscal')} onBlur={(e) => handleFieldBlur('fiscal_cfop_externo', 'Fiscal', { valor: e.target.value }, getConfig('fiscal_cfop_externo') || { valor: '6102' })} />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <Label>Alíquota ICMS (%)</Label>
                   <Input type="number" key={`icms-${eId}-${gId}`} defaultValue={getConfig('fiscal_aliq_icms')?.numero || 18}
-                    disabled={!hasValidScope || !!savingField.fiscal_aliq_icms} data-permission={getFieldPermission('fiscal_aliq_icms', 'Fiscal')} data-action="ConfigGlobal.Fiscal.icms" onBlur={(e) => handleFieldBlur('fiscal_aliq_icms', 'Fiscal', { numero: e.target.value === '' ? 18 : Number(e.target.value) }, getConfig('fiscal_aliq_icms') || { numero: 18 })} />
+                    disabled={!hasValidScope || !!savingField.fiscal_aliq_icms} data-permission={getFieldPermission('fiscal_aliq_icms', 'Fiscal')} onBlur={(e) => handleFieldBlur('fiscal_aliq_icms', 'Fiscal', { numero: e.target.value === '' ? 18 : Number(e.target.value) }, getConfig('fiscal_aliq_icms') || { numero: 18 })} />
                 </div>
                 <div>
                   <Label>Alíquota PIS (%)</Label>
                   <Input type="number" key={`pis-${eId}-${gId}`} defaultValue={getConfig('fiscal_aliq_pis')?.numero || 1.65}
-                    disabled={!hasValidScope || !!savingField.fiscal_aliq_pis} data-permission={getFieldPermission('fiscal_aliq_pis', 'Fiscal')} data-action="ConfigGlobal.Fiscal.pis" onBlur={(e) => handleFieldBlur('fiscal_aliq_pis', 'Fiscal', { numero: e.target.value === '' ? 1.65 : Number(e.target.value) }, getConfig('fiscal_aliq_pis') || { numero: 1.65 })} />
+                    disabled={!hasValidScope || !!savingField.fiscal_aliq_pis} data-permission={getFieldPermission('fiscal_aliq_pis', 'Fiscal')} onBlur={(e) => handleFieldBlur('fiscal_aliq_pis', 'Fiscal', { numero: e.target.value === '' ? 1.65 : Number(e.target.value) }, getConfig('fiscal_aliq_pis') || { numero: 1.65 })} />
                 </div>
                 <div>
                   <Label>Alíquota COFINS (%)</Label>
                   <Input type="number" key={`cofins-${eId}-${gId}`} defaultValue={getConfig('fiscal_aliq_cofins')?.numero || 7.6}
-                    disabled={!hasValidScope || !!savingField.fiscal_aliq_cofins} data-permission={getFieldPermission('fiscal_aliq_cofins', 'Fiscal')} data-action="ConfigGlobal.Fiscal.cofins" onBlur={(e) => handleFieldBlur('fiscal_aliq_cofins', 'Fiscal', { numero: e.target.value === '' ? 7.6 : Number(e.target.value) }, getConfig('fiscal_aliq_cofins') || { numero: 7.6 })} />
+                    disabled={!hasValidScope || !!savingField.fiscal_aliq_cofins} data-permission={getFieldPermission('fiscal_aliq_cofins', 'Fiscal')} onBlur={(e) => handleFieldBlur('fiscal_aliq_cofins', 'Fiscal', { numero: e.target.value === '' ? 7.6 : Number(e.target.value) }, getConfig('fiscal_aliq_cofins') || { numero: 7.6 })} />
                 </div>
               </div>
               <div>
@@ -174,7 +174,6 @@ export default function ConfigGlobal({ empresaId, grupoId }) {
                 <Textarea key={`obs-nfe-${eId}`} placeholder="Observações que aparecerão em todas as notas..." rows={2}
                   defaultValue={getConfig('fiscal_obs_nfe')?.valor || ''}
                   data-permission={getFieldPermission('fiscal_obs_nfe', 'Fiscal')}
-                  data-action="ConfigGlobal.Fiscal.obsNfe"
                   disabled={!hasValidScope || !!savingField.fiscal_obs_nfe}
                   onBlur={(e) => handleFieldBlur('fiscal_obs_nfe', 'Fiscal', { valor: e.target.value }, getConfig('fiscal_obs_nfe') || { valor: '' })} />
               </div>

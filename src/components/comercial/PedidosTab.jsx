@@ -57,7 +57,7 @@ export default function PedidosTab({ pedidos, clientes, isLoading, empresas, onC
 
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Pedidos</h2>
-        <Button className="bg-blue-600 hover:bg-blue-700" onClick={onCreatePedido} data-permission="Comercial.Pedido.criar">
+        <Button className="bg-blue-600 hover:bg-blue-700" onClick={onCreatePedido}>
           <Plus className="w-4 h-4 mr-2" />Novo Pedido
         </Button>
       </div>
@@ -97,12 +97,12 @@ export default function PedidosTab({ pedidos, clientes, isLoading, empresas, onC
                     <div className="text-blue-900 font-semibold">{selectedPedidos.length} pedido(s) selecionado(s)</div>
                     <div className="flex gap-2">
                       <ProtectedAction module="Comercial" section="Pedido" action="exportar" mode="disable">
-                        <Button variant="outline" data-permission="Comercial.Pedido.exportar" onClick={() => { exportarPedidosCSV(filteredPedidos.filter(p => selectedPedidos.includes(p.id))); try { base44.entities.AuditLog.create({ acao: 'Exportação', modulo: 'Comercial', entidade: 'Pedido', descricao: `Exportados ${selectedPedidos.length} pedidos`, data_hora: new Date().toISOString() }); } catch { } }}>
+                        <Button variant="outline" onClick={() => { exportarPedidosCSV(filteredPedidos.filter(p => selectedPedidos.includes(p.id))); try { base44.entities.AuditLog.create({ acao: 'Exportação', modulo: 'Comercial', entidade: 'Pedido', descricao: `Exportados ${selectedPedidos.length} pedidos`, data_hora: new Date().toISOString() }); } catch { } }}>
                           <Download className="w-4 h-4 mr-2" /> Exportar CSV
                         </Button>
                       </ProtectedAction>
-                      <Button variant="outline" data-permission="Comercial.Pedido.notificar" onClick={() => notifyWhatsAppPendentes(selectedPedidos)}>WhatsApp</Button>
-                      <Button variant="outline" data-permission="Comercial.Pedido.notificar" onClick={() => notifyEmailPendentes(selectedPedidos)}>Email</Button>
+                      <Button variant="outline" onClick={() => notifyWhatsAppPendentes(selectedPedidos)}>WhatsApp</Button>
+                      <Button variant="outline" onClick={() => notifyEmailPendentes(selectedPedidos)}>Email</Button>
                       <Button variant="ghost" onClick={() => setSelectedPedidos([])}>Limpar Seleção</Button>
                     </div>
                   </AlertDescription>

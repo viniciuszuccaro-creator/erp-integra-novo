@@ -210,7 +210,6 @@ export default function CadastrosTableUniversal({
                               title="Editar"
                               data-permission={permissaoEditar}
                               data-action={`Cadastros.${entityName}.editar`}
-                              data-sensitive="true"
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -219,7 +218,6 @@ export default function CadastrosTableUniversal({
                             <Button
                               size="sm"
                               variant="ghost"
-                              data-permission="Cadastros.Visualizador.excluir"
                               onClick={async () => {
                                 const ok = await confirmDel({ title: 'Confirmar Exclusão', description: `Regra-Mae: confirma excluir este registro de ${entityName}? Esta ação será auditada.`, confirmText: 'Excluir' });
                                 if (ok) onDelete(item);
@@ -229,7 +227,6 @@ export default function CadastrosTableUniversal({
                               title="Deletar"
                               data-permission={permissaoExcluir}
                               data-action={`Cadastros.${entityName}.excluir`}
-                              data-sensitive="true"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>

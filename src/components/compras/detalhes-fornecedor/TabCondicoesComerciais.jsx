@@ -42,7 +42,7 @@ export default function TabCondicoesComerciais({ fornecedor, prazoMedioEntrega, 
       )}
 
       {canEdit('compras', 'fornecedores') && (
-        <Button className="w-full" data-permission="Compras.Fornecedor.editar" data-action="Compras.Fornecedor.editarCondicoes">
+        <Button className="w-full">
           <Edit className="w-4 h-4 mr-2" />
           Editar Condições Comerciais
         </Button>

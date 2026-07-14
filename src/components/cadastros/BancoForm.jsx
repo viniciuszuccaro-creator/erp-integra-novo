@@ -225,8 +225,6 @@ export default function BancoForm({ banco, item, data, initialData, defaultValue
         <Button
           type="submit"
           disabled={isSubmitting || (dadosIniciais?.id ? !podeEditar : !podeCriar)}
-          data-permission="Cadastros.Banco.salvar"
-          data-sensitive
         >
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {dadosIniciais ? 'Atualizar Banco' : 'Criar Banco'}

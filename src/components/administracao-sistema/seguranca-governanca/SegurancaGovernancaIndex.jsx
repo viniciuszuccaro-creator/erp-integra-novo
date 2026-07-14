@@ -32,10 +32,10 @@ export default function SegurancaGovernancaIndex() {
     <div className="w-full h-full min-h-0 flex flex-col overflow-auto">
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full h-full min-h-0">
         <TabsList className="flex flex-wrap gap-2">
-          <TabsTrigger value="politicas" data-action="Seguranca.tab.politicas">Políticas</TabsTrigger>
-          <TabsTrigger value="manutencao" data-action="Seguranca.tab.manutencao">Monitoramento & Manutenção</TabsTrigger>
-          <TabsTrigger value="compliance" data-action="Seguranca.tab.compliance">Compliance IA</TabsTrigger>
-          <TabsTrigger value="ia" data-action="Seguranca.tab.ia" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">✦ IA & Otimização</TabsTrigger>
+          <TabsTrigger value="politicas">Políticas</TabsTrigger>
+          <TabsTrigger value="manutencao">Monitoramento & Manutenção</TabsTrigger>
+          <TabsTrigger value="compliance">Compliance IA</TabsTrigger>
+          <TabsTrigger value="ia" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">✦ IA & Otimização</TabsTrigger>
         </TabsList>
 
         <TabsContent value="politicas" className="mt-4 w-full h-full min-h-0">

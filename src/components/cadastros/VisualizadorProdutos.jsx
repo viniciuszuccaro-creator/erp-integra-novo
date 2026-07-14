@@ -106,8 +106,6 @@ export default function VisualizadorProdutos(props) {
             <Button
               onClick={handleUpdateSetor}
               disabled={!targetSetorId || updateSetorMutation.isPending || !contextoValido || !podeEditarProduto}
-              data-permission="Cadastros.Produto.editar"
-              data-sensitive
             >
               {updateSetorMutation.isPending ? 'Atualizando...' : 'Atualizar Produtos'}
             </Button>

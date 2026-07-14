@@ -41,7 +41,7 @@ export default function NotasFiscaisToolbar({
             </SelectContent>
           </Select>
           {onCreateNFe && hasPermission('Fiscal', 'NotaFiscal', 'criar') && (
-            <Button className="bg-blue-600 hover:bg-blue-700" data-permission="Fiscal.NotaFiscal.criar" onClick={onCreateNFe}>
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={onCreateNFe}>
               <Plus className="w-4 h-4 mr-2" /> Nova NF-e
             </Button>
           )}

@@ -147,8 +147,6 @@ export default function LocalEstoqueForm({
                 <Switch
                   checked={formData.estrutura_fisica?.tem_corredores}
                   disabled={!podeSalvar}
-                  data-permission="Cadastros.LocalEstoque.editar"
-                  data-sensitive="true"
                   onCheckedChange={(checked) => setFormData({
                     ...formData,
                     estrutura_fisica: { ...formData.estrutura_fisica, tem_corredores: checked }
@@ -178,8 +176,6 @@ export default function LocalEstoqueForm({
                 <Switch
                   checked={formData.estrutura_fisica?.tem_prateleiras}
                   disabled={!podeSalvar}
-                  data-permission="Cadastros.LocalEstoque.editar"
-                  data-sensitive="true"
                   onCheckedChange={(checked) => setFormData({
                     ...formData,
                     estrutura_fisica: { ...formData.estrutura_fisica, tem_prateleiras: checked }
@@ -192,8 +188,6 @@ export default function LocalEstoqueForm({
                 <Switch
                   checked={formData.controla_temperatura}
                   disabled={!podeSalvar}
-                  data-permission="Cadastros.LocalEstoque.editar"
-                  data-sensitive="true"
                   onCheckedChange={(checked) => setFormData({
                     ...formData,
                     controla_temperatura: checked
@@ -217,8 +211,6 @@ export default function LocalEstoqueForm({
               <Switch
                 checked={formData.ativo}
                 disabled={!podeSalvar}
-                data-permission="Cadastros.LocalEstoque.alterarStatus"
-                data-sensitive="true"
                 onCheckedChange={(checked) => setFormData({ ...formData, ativo: checked })}
               />
               <Label>Local Ativo</Label>
@@ -234,8 +226,6 @@ export default function LocalEstoqueForm({
                 type="submit"
                 className="bg-blue-600 hover:bg-blue-700"
                 disabled={!contextoValido || !podeSalvar}
-                data-permission="Cadastros.LocalEstoque.salvar"
-                data-sensitive="true"
               >
                 <Warehouse className="w-4 h-4 mr-2" />
                 {dadosIniciais ? 'Atualizar' : 'Criar'} Local

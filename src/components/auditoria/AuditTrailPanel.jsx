@@ -95,7 +95,7 @@ export default function AuditTrailPanel({ modulo = null, limit = 50, entidade = 
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Select value={escopo} onValueChange={setEscopo} disabled={!isAdmin()}>
-            <SelectTrigger className="w-40" data-action="AuditTrail.filtroEscopo">
+            <SelectTrigger className="w-40">
               <SelectValue placeholder="Escopo" />
             </SelectTrigger>
             <SelectContent>
@@ -106,7 +106,7 @@ export default function AuditTrailPanel({ modulo = null, limit = 50, entidade = 
 
           {isAdmin() && escopo === 'todos' && (
             <Select value={usuarioId} onValueChange={setUsuarioId}>
-              <SelectTrigger className="w-56" data-action="AuditTrail.filtroUsuario">
+              <SelectTrigger className="w-56">
                 <SelectValue placeholder="Usuário" />
               </SelectTrigger>
               <SelectContent>
@@ -151,7 +151,7 @@ export default function AuditTrailPanel({ modulo = null, limit = 50, entidade = 
                   <TableCell className="whitespace-nowrap">{l.usuario}</TableCell>
                   <TableCell className="whitespace-nowrap">
                     {isAdmin() ? (
-                      <Button variant="outline" size="sm" onClick={() => { setSelected(l); setOpen(true); }} data-action="AuditTrail.verDetalhes">
+                      <Button variant="outline" size="sm" onClick={() => { setSelected(l); setOpen(true); }}>
                         Ver {l?.dados_novos?.__sensitive ? <span className="ml-2 inline-flex items-center text-red-600">• sensível</span> : null}
                       </Button>
                     ) : (

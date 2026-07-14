@@ -167,8 +167,8 @@ export default function IAOtimizacaoIndex({ initialTab }) {
     <div className="w-full h-full flex flex-col">
       <Tabs value={tab} onValueChange={handleTabChange} className="w-full h-full">
         <TabsList className="flex flex-wrap gap-2 h-auto">
-          <TabsTrigger value="ia" data-action="IAOtimizacao.tab.ia"><Brain className="w-4 h-4 mr-2" /> IA e Modelos</TabsTrigger>
-          <TabsTrigger value="otimizacao" data-action="IAOtimizacao.tab.otimizacao"><Zap className="w-4 h-4 mr-2" /> OtimizaÃ§Ã£o</TabsTrigger>
+          <TabsTrigger value="ia"><Brain className="w-4 h-4 mr-2" /> IA e Modelos</TabsTrigger>
+          <TabsTrigger value="otimizacao"><Zap className="w-4 h-4 mr-2" /> OtimizaÃ§Ã£o</TabsTrigger>
         </TabsList>
 
         <TabsContent value="ia" className="mt-4">
@@ -223,9 +223,6 @@ export default function IAOtimizacaoIndex({ initialTab }) {
                       variant="outline"
                       disabled={!contextoValido || !podeCriarIA || criarConfigsPadraoMutation.isPending}
                       onClick={() => criarConfigsPadraoMutation.mutate()}
-                      data-action="IAOtimizacao.configsPadrao.criar"
-                      data-permission="Sistema.IA e Otimizacao.criar"
-                      data-sensitive="true"
                     >
                       <RefreshCw className={`w-4 h-4 mr-2 ${criarConfigsPadraoMutation.isPending ? "animate-spin" : ""}`} />
                       {criarConfigsPadraoMutation.isPending ? "Criando..." : "Criar Padroes"}

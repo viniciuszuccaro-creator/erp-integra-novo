@@ -150,8 +150,6 @@ export default function GrupoProdutoForm({ grupo, grupoProduto, item, data, init
           checked={formData.ativo}
           onCheckedChange={(v) => setFormData({...formData, ativo: v})}
           disabled={!podeSalvar}
-          data-permission="Cadastros.GrupoProduto.alterarStatus"
-          data-sensitive="true"
         />
       </div>
 
@@ -163,8 +161,6 @@ export default function GrupoProdutoForm({ grupo, grupoProduto, item, data, init
               variant="outline"
               onClick={handleAlternarStatus}
               disabled={!podeSalvar}
-              data-permission="Cadastros.GrupoProduto.alterarStatus"
-              data-sensitive="true"
               className={formData.ativo ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}
             >
               {formData.ativo ? (
@@ -176,11 +172,8 @@ export default function GrupoProdutoForm({ grupo, grupoProduto, item, data, init
             <Button
               type="button"
               variant="destructive"
-              data-permission="Cadastros.GrupoProduto.excluir"
               onClick={handleExcluir}
               disabled={!podeExcluir}
-              data-permission="Cadastros.GrupoProduto.excluir"
-              data-sensitive="true"
             >
               <Trash2 className="w-4 h-4 mr-2" />Excluir
             </Button>
@@ -189,8 +182,6 @@ export default function GrupoProdutoForm({ grupo, grupoProduto, item, data, init
         <Button
           type="submit"
           disabled={isSubmitting || !contextoValido || !podeSalvar}
-          data-permission="Cadastros.GrupoProduto.salvar"
-          data-sensitive="true"
         >
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {dadosIniciais ? 'Atualizar' : 'Criar Grupo'}

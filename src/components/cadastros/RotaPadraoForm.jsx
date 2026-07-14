@@ -114,8 +114,6 @@ export default function RotaPadraoForm({ rota, rotaPadrao, onSubmit, windowMode 
         <Switch
           checked={formData.ativo}
           disabled={!podeSalvar}
-          data-permission="Cadastros.RotaPadrao.alterarStatus"
-          data-sensitive="true"
           onCheckedChange={(v) => setFormData({ ...formData, ativo: v })}
         />
       </div>
@@ -124,8 +122,6 @@ export default function RotaPadraoForm({ rota, rotaPadrao, onSubmit, windowMode 
         type="submit"
         className="w-full bg-orange-600 hover:bg-orange-700"
         disabled={!contextoValido || !podeSalvar}
-        data-permission="Cadastros.RotaPadrao.salvar"
-        data-sensitive="true"
       >
         {dadosIniciais ? 'Atualizar' : 'Criar Rota Padrão'}
       </Button>

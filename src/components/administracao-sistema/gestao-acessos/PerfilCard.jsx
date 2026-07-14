@@ -60,8 +60,6 @@ export default function PerfilCard({
               className="h-7 px-2 text-xs"
               disabled={!canEdit}
               onClick={onEdit}
-              data-action="RBAC.Perfil.editar"
-              data-permission="Sistema.Controle de Acesso.editar"
             >
               <Edit className="w-3 h-3 mr-1" />
               Editar
@@ -70,11 +68,8 @@ export default function PerfilCard({
               size="sm"
               variant="destructive"
               className="h-7 px-2"
-              data-permission="Administracao.PerfilAcesso.excluir"
               disabled={!canDelete || usuariosCount > 0}
               onClick={onDelete}
-              data-action="RBAC.Perfil.excluir"
-              data-permission="Sistema.Controle de Acesso.excluir"
               title={usuariosCount > 0 ? "Não pode deletar perfil em uso" : ""}
             >
               <Trash2 className="w-3 h-3" />

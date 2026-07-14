@@ -190,8 +190,6 @@ export default function MovimentacoesTab({ movimentacoes, produtos }) {
         {canCreateMovimentacao && (
           <Button 
             className="bg-indigo-600 hover:bg-indigo-700"
-            data-permission="Estoque.Movimentacoes.criar"
-            data-sensitive="true"
             disabled={!contextoValido}
             onClick={() => openWindow(MovimentacaoForm, {
             windowMode: true,

@@ -190,8 +190,6 @@ export default function VeiculoForm({ veiculo, item, data, initialData, defaultV
           checked={formData.rastreador_instalado}
           onCheckedChange={(v) => setFormData({...formData, rastreador_instalado: v})}
           disabled={!podeSalvar}
-          data-permission="Cadastros.Veiculo.editar"
-          data-sensitive="true"
         />
       </div>
 
@@ -199,8 +197,6 @@ export default function VeiculoForm({ veiculo, item, data, initialData, defaultV
         <Button
           type="submit"
           disabled={isSubmitting || !contextoValido || !podeSalvar}
-          data-permission="Cadastros.Veiculo.salvar"
-          data-sensitive="true"
         >
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {dadosIniciais ? 'Atualizar Veículo' : 'Cadastrar Veículo'}

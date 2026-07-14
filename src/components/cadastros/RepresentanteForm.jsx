@@ -117,7 +117,7 @@ export default function RepresentanteForm({ representante, onSubmit, isSubmittin
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="submit" data-permission="Cadastros.Representante.salvar" disabled={isSubmitting || !podeSalvar}>
+        <Button type="submit" disabled={isSubmitting || !podeSalvar}>
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {representante ? 'Atualizar' : 'Criar Representante'}
         </Button>

@@ -191,8 +191,6 @@ export default function MotoristaForm({ motorista, item, data, initialData, defa
         <Button
           type="submit"
           disabled={isSubmitting || !contextoValido || !podeSalvar}
-          data-permission="Cadastros.Motorista.salvar"
-          data-sensitive="true"
         >
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {dadosIniciais ? 'Atualizar' : 'Cadastrar Motorista'}

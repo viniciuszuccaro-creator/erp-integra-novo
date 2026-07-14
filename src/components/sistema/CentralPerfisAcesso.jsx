@@ -229,9 +229,6 @@ export default function CentralPerfisAcesso() {
           }}
           disabled={!contextoValido || !podeCriarPerfil}
           className="bg-blue-600 hover:bg-blue-700"
-          data-action="RBAC.Perfil.novo"
-          data-permission="Sistema.Controle de Acesso.criar"
-          data-sensitive="true"
         >
           <Plus className="w-4 h-4 mr-2" />
           Novo Perfil

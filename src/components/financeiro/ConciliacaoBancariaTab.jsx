@@ -160,7 +160,6 @@ Retorne sugestões de conciliação baseadas em valor, data, histórico e simila
 
           <div className="flex gap-3">
             <Button 
-              data-permission="Financeiro.Conciliacao.gerar"
               onClick={() => {
                 const contaId = contaSelecionadaId || contas[0]?.id;
                 if (contaId) {
@@ -175,7 +174,7 @@ Retorne sugestões de conciliação baseadas em valor, data, histórico e simila
               Gerar Conciliação com IA
             </Button>
 
-            <Button variant="outline" disabled={controlesDesabilitados} data-permission="Financeiro.Conciliacao.importar">
+            <Button variant="outline" disabled={controlesDesabilitados}>
               <Upload className="w-4 h-4 mr-2" />
               Importar Extrato OFX
             </Button>

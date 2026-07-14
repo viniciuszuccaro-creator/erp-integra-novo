@@ -71,8 +71,6 @@ export default function CentroResultadoForm({ centro, centroResultado, item, dat
         type="submit"
         className="w-full bg-teal-600 hover:bg-teal-700"
         disabled={dadosIniciais?.id ? !podeEditar : !podeCriar}
-        data-permission="Cadastros.CentroResultado.salvar"
-        data-sensitive
       >
         {dadosIniciais ? 'Atualizar' : 'Criar Centro de Resultado'}
       </Button>

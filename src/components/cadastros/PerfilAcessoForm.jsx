@@ -249,8 +249,6 @@ export default function PerfilAcessoForm({ perfil, onSubmit, isSubmitting, windo
               variant="outline"
               onClick={handleAlternarStatus}
               disabled={!podeEditar}
-              data-permission="Cadastros.PerfilAcesso.alterarStatus"
-              data-sensitive
               className={formData.ativo ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}
             >
               {formData.ativo ? (
@@ -268,11 +266,8 @@ export default function PerfilAcessoForm({ perfil, onSubmit, isSubmitting, windo
             <Button
               type="button"
               variant="destructive"
-              data-permission="Administracao.PerfilAcesso.excluir"
               onClick={handleExcluir}
               disabled={!podeExcluir}
-              data-permission="Cadastros.PerfilAcesso.excluir"
-              data-sensitive
             >
               <Trash2 className="w-4 h-4 mr-2" />
               Excluir
@@ -282,8 +277,6 @@ export default function PerfilAcessoForm({ perfil, onSubmit, isSubmitting, windo
         <Button
           type="submit"
           disabled={isSubmitting || bloqueioSoD || (perfil ? !podeEditar : !podeCriar)}
-          data-permission="Cadastros.PerfilAcesso.salvar"
-          data-sensitive
         >
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {bloqueioSoD && <XCircle className="w-4 h-4 mr-2 text-red-600" />}

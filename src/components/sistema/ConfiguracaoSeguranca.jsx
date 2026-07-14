@@ -172,10 +172,10 @@ export default function ConfiguracaoSeguranca({ empresaId, grupoId }) {
 
       <Tabs defaultValue="jwt" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="jwt" data-action="Seguranca.tab.jwt"><Key className="w-4 h-4 mr-2" />JWT</TabsTrigger>
-          <TabsTrigger value="sessoes" data-action="Seguranca.tab.sessoes"><Clock className="w-4 h-4 mr-2" />Sessões</TabsTrigger>
-          <TabsTrigger value="mfa" data-action="Seguranca.tab.mfa"><Smartphone className="w-4 h-4 mr-2" />MFA</TabsTrigger>
-          <TabsTrigger value="senhas" data-action="Seguranca.tab.senhas"><Lock className="w-4 h-4 mr-2" />Senhas</TabsTrigger>
+          <TabsTrigger value="jwt"><Key className="w-4 h-4 mr-2" />JWT</TabsTrigger>
+          <TabsTrigger value="sessoes"><Clock className="w-4 h-4 mr-2" />Sessões</TabsTrigger>
+          <TabsTrigger value="mfa"><Smartphone className="w-4 h-4 mr-2" />MFA</TabsTrigger>
+          <TabsTrigger value="senhas"><Lock className="w-4 h-4 mr-2" />Senhas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="jwt" className="space-y-6 mt-6">
@@ -197,13 +197,9 @@ export default function ConfiguracaoSeguranca({ empresaId, grupoId }) {
 
       <div className="flex justify-end gap-3">
         <Button
-          data-permission="Sistema.Seguranca.salvar"
           onClick={handleSalvar}
           disabled={salvando || salvarMutation.isPending || controlesDesabilitados}
           className="bg-blue-600 hover:bg-blue-700"
-          data-action="Seguranca.Configuracao.salvar"
-          data-permission="Sistema.Seguranca.editar"
-          data-sensitive="true"
         >
           {salvando || salvarMutation.isPending ? (
             <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />Salvando...</>

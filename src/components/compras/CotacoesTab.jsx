@@ -48,7 +48,7 @@ export default function CotacoesTab({ windowMode = false }) {
           <p className="text-sm text-slate-600">Cote com múltiplos fornecedores e escolha a melhor proposta</p>
         </div>
         {hasPermission("Compras", "Cotacao", "criar") && (
-          <Button data-permission="Compras.Cotacoes.criar" className="bg-cyan-600 hover:bg-cyan-700" onClick={() => openWindow(CotacaoForm, {
+          <Button className="bg-cyan-600 hover:bg-cyan-700" onClick={() => openWindow(CotacaoForm, {
             windowMode: true,
             onSubmit: async (data) => {
               try { await criarCotacaoMutation.mutateAsync(data); sonnerToast.success("✅ Cotação criada e enviada!"); }
@@ -75,7 +75,7 @@ export default function CotacoesTab({ windowMode = false }) {
                     <span className="text-xs text-slate-600">Limite: {new Date(cotacao.data_limite).toLocaleDateString("pt-BR")}</span>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" data-permission="Compras.Cotacao.visualizar" onClick={() => setComparativoModal(cotacao)}>
+                <Button variant="outline" size="sm" onClick={() => setComparativoModal(cotacao)}>
                   <Eye className="w-4 h-4 mr-2" />Ver Propostas ({cotacao.propostas_recebidas}/{cotacao.fornecedores_convidados})
                 </Button>
               </div>
@@ -111,7 +111,7 @@ export default function CotacoesTab({ windowMode = false }) {
               <TrendingUp className="w-12 h-12 text-slate-300 mx-auto mb-3" />
               <h3 className="text-base font-semibold text-slate-700 mb-2">Nenhuma Cotação</h3>
               <p className="text-xs text-slate-500 mb-3">Compare propostas de fornecedores</p>
-              <Button size="sm" data-permission="Compras.Cotacao.criar" onClick={() => setDialogOpen(true)} className="bg-cyan-600 hover:bg-cyan-700">
+              <Button size="sm" onClick={() => setDialogOpen(true)} className="bg-cyan-600 hover:bg-cyan-700">
                 <Plus className="w-3 h-3 mr-1" />Criar Cotação
               </Button>
             </CardContent>

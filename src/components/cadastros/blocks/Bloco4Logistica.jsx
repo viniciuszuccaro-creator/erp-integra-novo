@@ -76,9 +76,7 @@ export default function Bloco4Logistica({ allCounts, isLoading, searchTerm = "" 
                 {k === 'Motorista' && (
                   <Button variant="outline" size="sm" className="rounded-sm text-xs h-7"
                     onClick={() => openWindow(AppEntregasMotorista, {}, { title: 'App Motorista', width: 420, height: 800 })}
-                    disabled={!canViewEntity(k)}
-                    data-permission="Cadastros.Motorista.visualizar"
-                    data-action="Cadastros.Motorista.app">
+                    disabled={!canViewEntity(k)}>
                     App
                   </Button>
                 )}

@@ -25,7 +25,6 @@ export default function RecebimentoTab({ recebimentos, ordensCompra, produtos })
         />
         {canCreate("Estoque", "Recebimento") && (
           <Button
-            data-permission="Estoque.Recebimento.criar"
             className="bg-green-600 hover:bg-green-700"
             onClick={() =>
               openWindow(

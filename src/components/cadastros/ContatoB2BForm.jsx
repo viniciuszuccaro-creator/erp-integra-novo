@@ -151,7 +151,7 @@ export default function ContatoB2BForm({ contato, contatoB2B, item, data, onSubm
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="submit" disabled={isSubmitting || !podeSalvar} data-permission="Cadastros.ContatoB2B.salvar">
+        <Button type="submit" disabled={isSubmitting || !podeSalvar}>
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {dadosIniciais ? 'Atualizar' : 'Criar Contato'}
         </Button>

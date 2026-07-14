@@ -41,10 +41,10 @@ export default function MonitoramentoManutencaoIndex({ initialTab = "monitoramen
     <div className="w-full h-full flex flex-col">
       <Tabs value={tab} onValueChange={handleTabChange} className="w-full h-full">
         <TabsList className="flex flex-wrap gap-2">
-          <TabsTrigger value="monitoramento" data-action="Monitoramento.tab.monitoramento">Monitoramento</TabsTrigger>
-          <TabsTrigger value="backup" data-action="Monitoramento.tab.backup">Backup</TabsTrigger>
-          <TabsTrigger value="acesso" data-action="Monitoramento.tab.acesso">Acesso em Tempo Real</TabsTrigger>
-          <TabsTrigger value="governanca" data-action="Monitoramento.tab.governanca">Governança</TabsTrigger>
+          <TabsTrigger value="monitoramento">Monitoramento</TabsTrigger>
+          <TabsTrigger value="backup">Backup</TabsTrigger>
+          <TabsTrigger value="acesso">Acesso em Tempo Real</TabsTrigger>
+          <TabsTrigger value="governanca">Governança</TabsTrigger>
         </TabsList>
 
         <TabsContent value="monitoramento" className="mt-4">

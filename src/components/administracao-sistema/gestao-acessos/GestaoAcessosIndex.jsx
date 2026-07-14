@@ -132,39 +132,39 @@ export default function GestaoAcessosIndex() {
       <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
         <div className="w-full overflow-x-auto pb-1 -mx-1 px-1">
           <TabsList className="inline-flex h-auto gap-1 flex-nowrap min-w-max bg-slate-100 p-1 rounded-lg">
-            <TabsTrigger value="governanca" data-action="RBAC.tab.governanca" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <TabsTrigger value="governanca" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
               Governança
             </TabsTrigger>
-            <TabsTrigger value="perfis" data-action="RBAC.tab.perfis" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <TabsTrigger value="perfis" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Shield className="w-3.5 h-3.5 mr-1" />
               Perfis RBAC
               <Badge className="ml-1.5 text-[9px] bg-blue-100 text-blue-700 px-1">{perfisAtivos}</Badge>
             </TabsTrigger>
-            <TabsTrigger value="usuarios" data-action="RBAC.tab.usuarios" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <TabsTrigger value="usuarios" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Users className="w-3.5 h-3.5 mr-1" />
               Usuários
               {usuariosSemPerfil > 0 && (
                 <Badge className="ml-1.5 text-[9px] bg-amber-100 text-amber-700 px-1">{usuariosSemPerfil} ⚠</Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="sod" data-action="RBAC.tab.sod" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <TabsTrigger value="sod" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <AlertTriangle className="w-3.5 h-3.5 mr-1" />
               SoD
             </TabsTrigger>
-            <TabsTrigger value="relatorios" data-action="RBAC.tab.relatorios" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <TabsTrigger value="relatorios" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <BarChart3 className="w-3.5 h-3.5 mr-1" />
               Relatórios
             </TabsTrigger>
-            <TabsTrigger value="auditoria" data-action="RBAC.tab.auditoria" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <TabsTrigger value="auditoria" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Activity className="w-3.5 h-3.5 mr-1" />
               Auditoria
               <Badge className="ml-1.5 text-[9px] bg-slate-200 text-slate-700 px-1">{auditoriasAcesso.length}</Badge>
             </TabsTrigger>
-            <TabsTrigger value="mapa-rbac" data-action="RBAC.tab.mapa" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <TabsTrigger value="mapa-rbac" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               🗺 Mapa RBAC
             </TabsTrigger>
-            <TabsTrigger value="ia-acesso" data-action="RBAC.tab.ia" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-purple-600 data-[state=active]:text-white">
+            <TabsTrigger value="ia-acesso" className="text-xs px-2.5 sm:px-4 py-1.5 whitespace-nowrap rounded-md data-[state=active]:bg-purple-600 data-[state=active]:text-white">
               ✦ IA
             </TabsTrigger>
           </TabsList>

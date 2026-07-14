@@ -237,7 +237,7 @@ Retorne a rota otimizada com:
 
               {/* Ações */}
               <div className="flex gap-3">
-                <Button data-permission="Logistica.MapaRoteirizacaoIA.gerar"
+                <Button
                   onClick={gerarLinkGoogleMaps}
                   className="flex-1 bg-green-600 hover:bg-green-700"
                 >

@@ -71,7 +71,7 @@ export default function B2BOrderManagement() {
         <h2 className="text-3xl font-bold text-slate-900 flex items-center gap-2">
           📦 Gerenciamento de Pedidos
         </h2>
-        <Button data-permission="Comercial.Pedido.criar" disabled={!canCreate} className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2">
+        <Button disabled={!canCreate} className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2">
           <Plus className="w-4 h-4" />
           Novo Pedido
         </Button>
@@ -88,11 +88,11 @@ export default function B2BOrderManagement() {
               className="bg-transparent text-sm outline-none flex-1"
             />
           </div>
-          <Button variant="outline" className="flex items-center gap-2" disabled data-permission="Comercial.Pedido.listar" data-action="Comercial.Pedido.filtrar">
+          <Button variant="outline" className="flex items-center gap-2" disabled>
             <Filter className="w-4 h-4" />
             Filtrar
           </Button>
-          <Button variant="outline" className="flex items-center gap-2" disabled data-permission="Comercial.Pedido.exportar" data-action="Comercial.Pedido.exportar" data-sensitive="true">
+          <Button variant="outline" className="flex items-center gap-2" disabled>
             <Download className="w-4 h-4" />
             Exportar
           </Button>
@@ -148,13 +148,13 @@ export default function B2BOrderManagement() {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" disabled data-permission="Comercial.Pedido.visualizar" data-action="Comercial.Pedido.visualizar">
+                  <Button size="sm" variant="outline" disabled>
                    Visualizar
                   </Button>
-                   <Button size="sm" variant="outline" disabled data-permission="Comercial.Pedido.editar" data-action="Comercial.Pedido.editar" data-sensitive="true">
+                   <Button size="sm" variant="outline" disabled>
                    Editar
                   </Button>
-                   <Button size="sm" variant="outline" disabled data-permission="Comercial.Pedido.exportar" data-action="Comercial.Pedido.exportar" data-sensitive="true">
+                   <Button size="sm" variant="outline" disabled>
                    Download
                   </Button>
                 </div>

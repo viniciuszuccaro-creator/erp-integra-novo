@@ -34,7 +34,7 @@ async function stockAudit(base44, user, { acao, entidade, registro_id, descricao
       dados_novos: Object.keys(merged).length ? merged : null,
       duracao_ms,
     }, meta);
-  } catch (_) {}
+  } catch (auditErr) { console.error('estoque/auditUtils: AuditLog falhou:', auditErr); }
 }
 
 // Health-check — _lib functions need Deno.serve to deploy

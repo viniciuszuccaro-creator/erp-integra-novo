@@ -225,7 +225,7 @@ async function stockAudit(base44, user, { acao, entidade, registro_id, descricao
       dados_novos: Object.keys(merged).length ? merged : null,
       data_hora: new Date().toISOString(),
     });
-  } catch (_) {}
+  } catch (auditErr) { console.error('applyInventoryAdjustments: AuditLog falhou:', auditErr); }
 }
 
 // === Inlined from _lib/notificationService ===
@@ -235,7 +235,7 @@ async function notify(base44, notif) {
     if (base44?.asServiceRole?.entities?.Notificacao?.create) {
       await base44.asServiceRole.entities.Notificacao.create({ titulo, mensagem, tipo, categoria, prioridade, empresa_id, dados });
     }
-  } catch (_) {}
+  } catch (notifErr) { console.error('applyInventoryAdjustments: Notificação falhou:', notifErr); }
 }
 
 Deno.serve(async (req) => {

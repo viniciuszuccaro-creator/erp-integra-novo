@@ -255,7 +255,7 @@ Deno.serve(async (req) => {
           dados_novos: { entidade, tipoEvento, dur },
           data_hora: new Date().toISOString(),
         });
-      } catch (_) {}
+      } catch (perfAuditErr) { console.error('auditEntityEvents: AuditLog de performance falhou:', perfAuditErr); }
     }
 
     return Response.json({ ok: true });

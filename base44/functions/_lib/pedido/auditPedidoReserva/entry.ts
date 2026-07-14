@@ -11,7 +11,7 @@ async function stockAudit(base44, user, { acao, entidade, registro_id, descricao
       dados_novos: dados_novos || null,
       data_hora: new Date().toISOString(),
     });
-  } catch (_) {}
+  } catch (auditErr) { console.error('auditPedidoReserva: AuditLog de estoque falhou:', auditErr); }
 }
 
 // Helper: auditoria padronizada para reservas/movimentos gerados a partir do Pedido

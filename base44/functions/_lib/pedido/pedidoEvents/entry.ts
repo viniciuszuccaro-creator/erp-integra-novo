@@ -7,7 +7,7 @@ async function notify(base44, notif, options = {}) {
     if (base44?.asServiceRole?.entities?.Notificacao?.create) {
       await base44.asServiceRole.entities.Notificacao.create({ titulo, mensagem, tipo, categoria, prioridade, empresa_id, dados });
     }
-  } catch (_) {}
+  } catch (notifErr) { console.error('pedidoEvents: Notificação falhou:', notifErr); }
 }
 
 // Emite notificação padrão quando movimentos/reservas são gerados a partir do Pedido

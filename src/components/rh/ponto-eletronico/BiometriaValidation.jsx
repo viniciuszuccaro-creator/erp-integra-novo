@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import RBACButton from "@/components/lib/RBACButton";
 import { Badge } from "@/components/ui/badge";
 import {
   Camera,
@@ -39,16 +40,16 @@ export default function BiometriaValidation({
             <div className="space-y-3">
               <video ref={videoRef} autoPlay className="w-full rounded border" />
               <div className="flex gap-2">
-                <Button
-                  data-permission="RH.Ponto.registrar"
+                <RBACButton
+                  module="RH"
+                  action="criar"
                   onClick={onCapturarFoto}
                   className="flex-1 bg-green-600 hover:bg-green-700"
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Capturar
-                </Button>
+                </RBACButton>
                 <Button
-                  data-permission="RH.Ponto.registrar"
                   onClick={() => setCameraAtiva(false)}
                   variant="outline"
                 >
@@ -69,15 +70,16 @@ export default function BiometriaValidation({
               </Badge>
             </div>
           ) : (
-            <Button
-              data-permission="RH.Ponto.registrar"
+            <RBACButton
+              module="RH"
+              action="criar"
               onClick={onAtivarCamera}
               className="w-full"
               variant="outline"
             >
               <Camera className="w-4 h-4 mr-2" />
               Ativar Câmera
-            </Button>
+            </RBACButton>
           )}
         </div>
 
@@ -87,8 +89,9 @@ export default function BiometriaValidation({
             <Fingerprint className="w-8 h-8 mx-auto text-slate-600 mb-2" />
             <div className="font-medium">Biometria Digital</div>
           </div>
-          <Button
-            data-permission="RH.Ponto.registrar"
+          <RBACButton
+            module="RH"
+            action="criar"
             onClick={onSimularBiometria}
             className="w-full"
             variant={registroPonto.biometria_validada ? "default" : "outline"}
@@ -105,7 +108,7 @@ export default function BiometriaValidation({
                 Validar Digital
               </>
             )}
-          </Button>
+          </RBACButton>
         </div>
 
         {/* GPS */}
@@ -114,8 +117,9 @@ export default function BiometriaValidation({
             <MapPin className="w-8 h-8 mx-auto text-slate-600 mb-2" />
             <div className="font-medium">Geolocalização</div>
           </div>
-          <Button
-            data-permission="RH.Ponto.registrar"
+          <RBACButton
+            module="RH"
+            action="criar"
             onClick={onCapturarLocalizacao}
             className="w-full"
             variant="outline"
@@ -131,7 +135,7 @@ export default function BiometriaValidation({
                 Capturar Localização
               </>
             )}
-          </Button>
+          </RBACButton>
         </div>
       </CardContent>
     </Card>

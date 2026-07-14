@@ -57,7 +57,7 @@ async function auditPedidoReserva(base44, user, { pedido, movimentos }) {
       dados_novos: { quantidade_movimentos: Array.isArray(movimentos) ? movimentos.length : 0 },
       data_hora: new Date().toISOString(),
     });
-  } catch (_) {}
+  } catch (auditErr) { console.error('onPedidoCreatedHandler: AuditLog de movimentações falhou:', auditErr); }
 }
 
 // Inlined: emitPedidoMovementsGenerated
@@ -73,7 +73,7 @@ async function emitPedidoMovementsGenerated(base44, { pedido, movimentos, valida
         empresa_id, dados: { pedido_id: pedido?.id, movimentos_count: count, validation },
       });
     }
-  } catch (_) {}
+  } catch (notifErr) { console.error('onPedidoCreatedHandler: Notificação de reserva falhou:', notifErr); }
 }
 
 // Handler focado e reutilizável para criação de reservas a partir do Pedido

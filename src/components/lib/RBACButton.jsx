@@ -9,7 +9,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-export default function RBACButton({
+const RBACButton = React.forwardRef(function RBACButton({
   module,
   section = null,
   action = 'ver',
@@ -18,7 +18,7 @@ export default function RBACButton({
   disabled = false,
   showTooltip = true,
   ...props
-}) {
+}, ref) {
   const { hasPermission } = usePermissions();
   const allowed = hasPermission(module, section, action);
 
@@ -31,6 +31,7 @@ export default function RBACButton({
           <TooltipTrigger asChild>
             <div>
               <Button
+                ref={ref}
                 disabled={true}
                 className={`opacity-50 cursor-not-allowed ${className}`}
                 {...props}
@@ -49,6 +50,7 @@ export default function RBACButton({
 
   return (
     <Button
+      ref={ref}
       disabled={disabled}
       className={className}
       {...props}
@@ -56,4 +58,6 @@ export default function RBACButton({
       {children}
     </Button>
   );
-}
+});
+
+export default RBACButton;

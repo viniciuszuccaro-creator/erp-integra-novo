@@ -82,7 +82,7 @@ export default function usePedidosColumns({
           <RBACButton module="Comercial" action="editar" variant="ghost" size="sm"
             disabled={pedido.status_aprovacao === 'pendente' && !(canApprove && canApprove('Comercial', 'Pedido'))}
             onClick={async () => {
-              try { await base44.entities.AuditLog.create({ acao: 'Edição', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Abrir editor de pedido', data_hora: new Date().toISOString() }); } catch { }
+              try { await base44.entities.AuditLog.create({ acao: 'Edição', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Abrir editor de pedido', data_hora: new Date().toISOString() }); } catch (auditErr) { console.error('Falha ao registrar auditoria:', auditErr); }
               onEditPedido(pedido);
             }}
             title={pedido.status_aprovacao === 'pendente' ? 'Edição bloqueada até aprovação' : 'Editar Pedido'} className="h-8 px-2">
@@ -105,7 +105,7 @@ export default function usePedidosColumns({
               <RBACButton module="Comercial" action="gerarNFe" variant="ghost" size="sm"
                 onClick={async () => {
                   toast({ title: '🚀 Gerando NF-e...' });
-                  try { await base44.entities.AuditLog.create({ acao: 'Emissão NF-e', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada geração de NF-e', data_hora: new Date().toISOString() }); } catch { }
+                  try { await base44.entities.AuditLog.create({ acao: 'Emissão NF-e', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada geração de NF-e', data_hora: new Date().toISOString() }); } catch (auditErr) { console.error('Falha ao registrar auditoria:', auditErr); }
                 }}
                 title="Gerar NF-e" className="h-8 px-2 text-green-600">
                 <FileText className="w-3 h-3 mr-1" /><span className="text-xs">NF-e</span>
@@ -117,7 +117,7 @@ export default function usePedidosColumns({
             <RBACButton module="Comercial" action="gerarNFe" variant="ghost" size="sm"
               onClick={async () => {
                 toast({ title: '🚀 Gerando NF-e...' });
-                try { await base44.entities.AuditLog.create({ acao: 'Emissão NF-e', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada geração de NF-e', data_hora: new Date().toISOString() }); } catch { }
+                try { await base44.entities.AuditLog.create({ acao: 'Emissão NF-e', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada geração de NF-e', data_hora: new Date().toISOString() }); } catch (auditErr) { console.error('Falha ao registrar auditoria:', auditErr); }
               }}
               title="Gerar NF-e" className="h-8 px-2 text-green-600">
               <FileText className="w-3 h-3 mr-1" /><span className="text-xs">NF-e</span>
@@ -128,7 +128,7 @@ export default function usePedidosColumns({
             <RBACButton module="Comercial" action="criarEntrega" variant="ghost" size="sm"
               onClick={async () => {
                 toast({ title: '📦 Criando entrega...' });
-                try { await base44.entities.AuditLog.create({ acao: 'Criação Entrega', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada criação de entrega', data_hora: new Date().toISOString() }); } catch { }
+                try { await base44.entities.AuditLog.create({ acao: 'Criação Entrega', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada criação de entrega', data_hora: new Date().toISOString() }); } catch (auditErr) { console.error('Falha ao registrar auditoria:', auditErr); }
               }}
               title="Criar Entrega" className="h-8 px-2 text-blue-600">
               <Truck className="w-3 h-3 mr-1" /><span className="text-xs">Entrega</span>
@@ -139,7 +139,7 @@ export default function usePedidosColumns({
             <RBACButton module="Comercial" action="gerarOP" variant="ghost" size="sm"
               onClick={async () => {
                 toast({ title: '🏭 Criando OP...' });
-                try { await base44.entities.AuditLog.create({ acao: 'Gerar OP', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada geração de OP', data_hora: new Date().toISOString() }); } catch { }
+                try { await base44.entities.AuditLog.create({ acao: 'Gerar OP', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada geração de OP', data_hora: new Date().toISOString() }); } catch (auditErr) { console.error('Falha ao registrar auditoria:', auditErr); }
               }}
               title="Gerar Ordem de Produção" className="h-8 px-2 text-purple-600">
               <Factory className="w-3 h-3 mr-1" /><span className="text-xs">OP</span>
@@ -149,7 +149,7 @@ export default function usePedidosColumns({
           <RBACButton module="Comercial" action="imprimir" variant="ghost" size="sm"
             onClick={async () => {
               const empresa = empresas?.find(e => e.id === pedido.empresa_id);
-              try { await base44.entities.AuditLog.create({ acao: 'Impressão', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Imprimir pedido', data_hora: new Date().toISOString() }); } catch { }
+              try { await base44.entities.AuditLog.create({ acao: 'Impressão', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Imprimir pedido', data_hora: new Date().toISOString() }); } catch (auditErr) { console.error('Falha ao registrar auditoria:', auditErr); }
               ImprimirPedido({ pedido, empresa });
             }}
             title="Imprimir Pedido" className="h-8 px-2 text-slate-600">
@@ -158,7 +158,7 @@ export default function usePedidosColumns({
 
           <RBACButton module="Comercial" action="visualizar" variant="ghost" size="sm"
             onClick={async () => {
-              try { await base44.entities.AuditLog.create({ acao: 'Visualização', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Abrir visualização do pedido', data_hora: new Date().toISOString() }); } catch { }
+              try { await base44.entities.AuditLog.create({ acao: 'Visualização', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Abrir visualização do pedido', data_hora: new Date().toISOString() }); } catch (auditErr) { console.error('Falha ao registrar auditoria:', auditErr); }
               onEditPedido(pedido);
             }}
             title="Visualizar" className="h-8 px-2">
@@ -177,7 +177,7 @@ export default function usePedidosColumns({
             onClick={async () => {
               const ok = await confirm({ title: "Excluir Pedido", description: "Deseja realmente excluir este pedido?", variant: "danger", confirmText: "Excluir" });
               if (ok) {
-                try { await base44.entities.AuditLog.create({ acao: 'Exclusão', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Exclusão solicitada via UI', data_hora: new Date().toISOString() }); } catch { }
+                try { await base44.entities.AuditLog.create({ acao: 'Exclusão', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Exclusão solicitada via UI', data_hora: new Date().toISOString() }); } catch (auditErr) { console.error('Falha ao registrar auditoria:', auditErr); }
                 deleteMutation.mutate(pedido.id);
               }
             }}
@@ -192,18 +192,18 @@ export default function usePedidosColumns({
 
 export function buildMenuItems({ pedido, empresas, toast, confirm, onEditPedido, openWindow, deleteMutation }) {
   const items = [];
-  items.push({ key: 'ver', label: 'Visualizar', action: async () => { try { await base44.entities.AuditLog.create({ acao: 'Visualização', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Abrir visualização do pedido', data_hora: new Date().toISOString() }); } catch { } onEditPedido(pedido); } });
-  items.push({ key: 'imprimir', label: 'Imprimir', action: async () => { const empresa = empresas?.find(e => e.id === pedido.empresa_id); try { await base44.entities.AuditLog.create({ acao: 'Impressão', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Imprimir pedido', data_hora: new Date().toISOString() }); } catch { } ImprimirPedido({ pedido, empresa }); } });
+  items.push({ key: 'ver', label: 'Visualizar', action: async () => { try { await base44.entities.AuditLog.create({ acao: 'Visualização', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Abrir visualização do pedido', data_hora: new Date().toISOString() }); } catch (auditErr) { console.error('Falha ao registrar auditoria:', auditErr); } onEditPedido(pedido); } });
+  items.push({ key: 'imprimir', label: 'Imprimir', action: async () => { const empresa = empresas?.find(e => e.id === pedido.empresa_id); try { await base44.entities.AuditLog.create({ acao: 'Impressão', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Imprimir pedido', data_hora: new Date().toISOString() }); } catch (auditErr) { console.error('Falha ao registrar auditoria:', auditErr); } ImprimirPedido({ pedido, empresa }); } });
   if (pedido.status === 'Aprovado' || pedido.status === 'Pronto para Faturar') {
-    items.push({ key: 'nfe', label: 'Gerar NF-e', action: async () => { toast({ title: '🚀 Gerando NF-e...' }); try { await base44.entities.AuditLog.create({ acao: 'Emissão NF-e', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada geração de NF-e', data_hora: new Date().toISOString() }); } catch { } } });
+    items.push({ key: 'nfe', label: 'Gerar NF-e', action: async () => { toast({ title: '🚀 Gerando NF-e...' }); try { await base44.entities.AuditLog.create({ acao: 'Emissão NF-e', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada geração de NF-e', data_hora: new Date().toISOString() }); } catch (auditErr) { console.error('Falha ao registrar auditoria:', auditErr); } } });
   }
   if (pedido.status === 'Faturado') {
-    items.push({ key: 'entrega', label: 'Criar Entrega', action: async () => { toast({ title: '📦 Criando entrega...' }); try { await base44.entities.AuditLog.create({ acao: 'Criação Entrega', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada criação de entrega', data_hora: new Date().toISOString() }); } catch { } } });
+    items.push({ key: 'entrega', label: 'Criar Entrega', action: async () => { toast({ title: '📦 Criando entrega...' }); try { await base44.entities.AuditLog.create({ acao: 'Criação Entrega', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada criação de entrega', data_hora: new Date().toISOString() }); } catch (auditErr) { console.error('Falha ao registrar auditoria:', auditErr); } } });
   }
   if ((pedido.tipo_pedido === 'Produção Sob Medida' || pedido.itens_corte_dobra?.length > 0 || pedido.itens_armado_padrao?.length > 0) && pedido.status !== 'Cancelado') {
-    items.push({ key: 'op', label: 'Gerar OP', action: async () => { toast({ title: '🏭 Criando OP...' }); try { await base44.entities.AuditLog.create({ acao: 'Gerar OP', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada geração de OP', data_hora: new Date().toISOString() }); } catch { } } });
+    items.push({ key: 'op', label: 'Gerar OP', action: async () => { toast({ title: '🏭 Criando OP...' }); try { await base44.entities.AuditLog.create({ acao: 'Gerar OP', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Acionada geração de OP', data_hora: new Date().toISOString() }); } catch (auditErr) { console.error('Falha ao registrar auditoria:', auditErr); } } });
   }
-  items.push({ key: 'excluir', label: 'Excluir', action: async () => { const ok = await confirm({ title: "Excluir Pedido", description: "Deseja realmente excluir este pedido?", variant: "danger", confirmText: "Excluir" }); if (ok) { try { await base44.entities.AuditLog.create({ acao: 'Exclusão', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Exclusão solicitada via UI', data_hora: new Date().toISOString() }); } catch { } deleteMutation.mutate(pedido.id); } } });
+  items.push({ key: 'excluir', label: 'Excluir', action: async () => { const ok = await confirm({ title: "Excluir Pedido", description: "Deseja realmente excluir este pedido?", variant: "danger", confirmText: "Excluir" }); if (ok) { try { await base44.entities.AuditLog.create({ acao: 'Exclusão', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido.id, descricao: 'Exclusão solicitada via UI', data_hora: new Date().toISOString() }); } catch (auditErr) { console.error('Falha ao registrar auditoria:', auditErr); } deleteMutation.mutate(pedido.id); } } });
   if (pedido.status_aprovacao === 'pendente') {
     items.push({ key: 'aprovar', label: 'Analisar Aprovação', action: () => openWindow(CentralAprovacoesManager, { windowMode: true, initialTab: 'descontos' }, { title: '🔐 Central de Aprovações', width: 1200, height: 700 }) });
   }

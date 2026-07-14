@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Printer, Eye, Edit, CheckCircle2, Send, Star } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import RBACButton from "@/components/lib/RBACButton";
 
 export default function OCTabela({
   ocs,
@@ -76,34 +77,34 @@ export default function OCTabela({
             </TableCell>
             <TableCell>
               <div className="flex gap-1">
-                <Button variant="ghost" size="sm" data-permission="Compras.OrdemCompra.imprimir" onClick={() => onImprimir(oc)} title="Imprimir OC" className="text-slate-600">
+                <RBACButton module="Compras" section="OrdemCompra" action="imprimir" variant="ghost" size="sm" onClick={() => onImprimir(oc)} title="Imprimir OC" className="text-slate-600">
                   <Printer className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="sm" data-permission="Compras.OrdemCompra.visualizar" onClick={() => onVer(oc)} title="Ver Detalhes">
+                </RBACButton>
+                <RBACButton module="Compras" section="OrdemCompra" action="visualizar" variant="ghost" size="sm" onClick={() => onVer(oc)} title="Ver Detalhes">
                   <Eye className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="sm" data-permission="Compras.OrdemCompra.editar" onClick={() => onEditar(oc)} title="Editar OC">
+                </RBACButton>
+                <RBACButton module="Compras" section="OrdemCompra" action="editar" variant="ghost" size="sm" onClick={() => onEditar(oc)} title="Editar OC">
                   <Edit className="w-4 h-4" />
-                </Button>
+                </RBACButton>
                 {oc.status === 'Solicitada' && (
-                  <Button variant="ghost" size="sm" data-permission="Compras.OrdemCompra.aprovar" data-sensitive="true" onClick={() => onAprovar(oc)} className="text-purple-600">
+                  <RBACButton module="Compras" section="OrdemCompra" action="aprovar" variant="ghost" size="sm" onClick={() => onAprovar(oc)} className="text-purple-600">
                     <CheckCircle2 className="w-4 h-4" />
-                  </Button>
+                  </RBACButton>
                 )}
                 {oc.status === 'Aprovada' && (
-                  <Button variant="ghost" size="sm" data-permission="Compras.OrdemCompra.enviar_fornecedor" onClick={() => onEnviar(oc)} className="text-indigo-600">
+                  <RBACButton module="Compras" section="OrdemCompra" action="enviar" variant="ghost" size="sm" onClick={() => onEnviar(oc)} className="text-indigo-600">
                     <Send className="w-4 h-4" />
-                  </Button>
+                  </RBACButton>
                 )}
                 {(oc.status === 'Enviada ao Fornecedor' || oc.status === 'Em Processo') && (
-                  <Button variant="ghost" size="sm" data-permission="Compras.OrdemCompra.receber" data-sensitive="true" onClick={() => onReceber(oc)} className="text-green-600">
+                  <RBACButton module="Compras" section="OrdemCompra" action="receber" variant="ghost" size="sm" onClick={() => onReceber(oc)} className="text-green-600">
                     <CheckCircle2 className="w-4 h-4" />
-                  </Button>
+                  </RBACButton>
                 )}
                 {oc.status === 'Recebida' && !oc.avaliacao_fornecedor?.realizada && (
-                  <Button variant="ghost" size="sm" data-permission="Compras.OrdemCompra.avaliar_fornecedor" onClick={() => onAvaliar(oc)} className="text-amber-600">
+                  <RBACButton module="Compras" section="OrdemCompra" action="avaliar" variant="ghost" size="sm" onClick={() => onAvaliar(oc)} className="text-amber-600">
                     <Star className="w-4 h-4" />
-                  </Button>
+                  </RBACButton>
                 )}
               </div>
             </TableCell>

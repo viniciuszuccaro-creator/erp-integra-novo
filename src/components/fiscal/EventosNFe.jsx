@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/use-toast";
+import RBACButton from "@/components/lib/RBACButton";
 import { 
   XCircle, 
   FileEdit, 
@@ -161,16 +162,18 @@ export default function EventosNFe({ nfe }) {
       {podeSerCancelada && (
         <Dialog open={dialogCancelamento} onOpenChange={setDialogCancelamento}>
           <DialogTrigger asChild>
-            <Button
+            <RBACButton
+              module="Fiscal"
+              section="NFe"
+              action="cancelar"
               variant="outline"
               className="w-full border-red-300 text-red-700 hover:bg-red-50"
               disabled={!dentroDoPrazo}
-              data-permission="Fiscal.NFe.cancelar"
             >
               <XCircle className="w-4 h-4 mr-2" />
               Cancelar NF-e
               {!dentroDoPrazo && " (Fora do prazo)"}
-            </Button>
+            </RBACButton>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -210,14 +213,16 @@ export default function EventosNFe({ nfe }) {
                 >
                   Voltar
                 </Button>
-                <Button
-                  data-permission="Fiscal.NotaFiscal.cancelar"
+                <RBACButton
+                  module="Fiscal"
+                  section="NotaFiscal"
+                  action="cancelar"
                   onClick={() => cancelarMutation.mutate(motivoCancelamento)}
                   disabled={motivoCancelamento.length < 15 || cancelarMutation.isPending}
                   className="flex-1 bg-red-600 hover:bg-red-700"
                 >
                   {cancelarMutation.isPending ? 'Cancelando...' : 'Confirmar'}
-                </Button>
+                </RBACButton>
               </div>
             </div>
           </DialogContent>
@@ -228,11 +233,11 @@ export default function EventosNFe({ nfe }) {
       {nfe.status === "Autorizada" && (
         <Dialog open={dialogCartaCorrecao} onOpenChange={setDialogCartaCorrecao}>
           <DialogTrigger asChild>
-            <Button variant="outline" className="w-full border-blue-300 text-blue-700 hover:bg-blue-50" data-permission="Fiscal.NFe.corrigir">
+            <RBACButton module="Fiscal" section="NFe" action="corrigir" variant="outline" className="w-full border-blue-300 text-blue-700 hover:bg-blue-50">
               <FileEdit className="w-4 h-4 mr-2" />
               Carta de Correção
               {nfe.carta_correcao?.length > 0 && ` (${nfe.carta_correcao.length}/20)`}
-            </Button>
+            </RBACButton>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
@@ -259,22 +264,24 @@ export default function EventosNFe({ nfe }) {
               </div>
 
               <div className="flex gap-3">
-                <Button data-permission="Fiscal.NFe.evento"
+                <RBACButton module="Fiscal" section="NFe" action="evento"
                   type="button"
                   variant="outline"
                   onClick={() => setDialogCartaCorrecao(false)}
                   className="flex-1"
                 >
                   Cancelar
-                </Button>
-                <Button
+                </RBACButton>
+                <RBACButton
+                  module="Fiscal"
+                  section="NFe"
+                  action="corrigir"
                   onClick={() => cartaCorrecaoMutation.mutate(textoCorrecao)}
                   disabled={textoCorrecao.length < 15 || cartaCorrecaoMutation.isPending}
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
-                  data-permission="Fiscal.NFe.corrigir"
                 >
                   {cartaCorrecaoMutation.isPending ? 'Emitindo...' : 'Emitir CC-e'}
-                </Button>
+                </RBACButton>
               </div>
             </div>
           </DialogContent>
@@ -283,16 +290,16 @@ export default function EventosNFe({ nfe }) {
 
       {/* Downloads */}
       {nfe.xml_nfe && (
-        <Button data-permission="Fiscal.EventosNFe.exportar" variant="outline" className="w-full">
+        <RBACButton module="Fiscal" section="EventosNFe" action="exportar" variant="outline" className="w-full">
           <Download className="w-4 h-4 mr-2" />
           Download XML
-        </Button>
+        </RBACButton>
       )}
       {nfe.pdf_danfe && (
-        <Button data-permission="Fiscal.EventosNFe.exportar" variant="outline" className="w-full">
+        <RBACButton module="Fiscal" section="EventosNFe" action="exportar" variant="outline" className="w-full">
           <Download className="w-4 h-4 mr-2" />
           Download DANFE
-        </Button>
+        </RBACButton>
       )}
 
       {/* Histórico de Eventos */}

@@ -11,6 +11,7 @@ import { z } from 'zod';
 import FormWrapper from '@/components/common/FormWrapper';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import usePermissions from '@/components/lib/usePermissions';
+import RBACButton from '@/components/lib/RBACButton';
 
 export default function InventarioForm({ windowMode = true }) { // w-full/h-full garantidos no container pai
   const { carimbarContexto, empresaAtual, grupoAtual, createInContext, updateInContext } = useContextoVisual();
@@ -51,7 +52,7 @@ export default function InventarioForm({ windowMode = true }) { // w-full/h-full
           sucesso: true,
           data_hora: new Date().toISOString(),
         });
-      } catch (_) {}
+      } catch (auditErr) { console.error('Falha ao registrar auditoria do inventário:', auditErr); }
       setInv(res);
       toast.success('Inventário salvo');
     } catch (e) {
@@ -101,8 +102,8 @@ export default function InventarioForm({ windowMode = true }) { // w-full/h-full
         <InventarioContagem itens={inv.itens} disabled={controlesDesabilitados} onChange={(itens)=>setInv({ ...inv, itens })} />
 
         <div className="flex justify-end gap-2 pt-2 border-t">
-          <Button variant="outline" type="submit" data-permission="Estoque.Inventario.criar" disabled={controlesDesabilitados}>Salvar</Button>
-          <Button onClick={aprovar} data-permission="Estoque.Inventario.aprovar" className="bg-green-600 hover:bg-green-700" disabled={salvando || inv.status==='Concluído' || !contextoValido || !podeAprovar}>Aprovar e Aplicar Ajustes</Button>
+          <RBACButton module="Estoque" section="Inventario" action="criar" variant="outline" type="submit" disabled={controlesDesabilitados}>Salvar</RBACButton>
+          <RBACButton module="Estoque" section="Inventario" action="aprovar" onClick={aprovar} className="bg-green-600 hover:bg-green-700" disabled={salvando || inv.status==='Concluído' || !contextoValido || !podeAprovar}>Aprovar e Aplicar Ajustes</RBACButton>
         </div>
       </CardContent>
       </FormWrapper>

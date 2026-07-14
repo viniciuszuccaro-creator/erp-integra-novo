@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 import { useUser } from "@/components/lib/UserContext";
 import {
   UserPlus,
@@ -34,12 +35,14 @@ export default function GestaoUsuariosAvancada({
 }) {
   const queryClient = useQueryClient();
   const { empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const { hasPermission } = usePermissions();
   const { user: operador } = useUser();
   const accessScope = getAccessScope({ contexto, empresaAtual, grupoAtual });
   const groupId = accessScope.groupId;
   const empresaId = accessScope.empresaId;
   const contextoValido = accessScope.contextoValido;
-  const controlesDesabilitados = !contextoValido || !canEdit;
+  const podeEditarAcessos = hasPermission('Sistema', 'Controle de Acesso', 'editar');
+  const controlesDesabilitados = !contextoValido || !canEdit || !podeEditarAcessos;
   const [formData, setFormData] = useState({
     perfil_acesso_id: usuario?.perfil_acesso_id || "sem-perfil",
     empresas_vinculadas: normalizeEmpresaIds(usuario?.empresas_vinculadas),
@@ -170,8 +173,8 @@ export default function GestaoUsuariosAvancada({
                 onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
                 placeholder="Ex: Vendedor"
                 className="mt-1"
-                data-permission="Sistema.Controle de Acesso.editar"
-                data-action="RBAC.Usuario.cargo"
+               
+               
               />
             </div>
             <div>
@@ -182,8 +185,8 @@ export default function GestaoUsuariosAvancada({
                 onChange={(e) => setFormData({ ...formData, departamento: e.target.value })}
                 placeholder="Ex: Comercial"
                 className="mt-1"
-                data-permission="Sistema.Controle de Acesso.editar"
-                data-action="RBAC.Usuario.departamento"
+               
+               
               />
             </div>
             <div>
@@ -194,8 +197,8 @@ export default function GestaoUsuariosAvancada({
                 onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
                 placeholder="(00) 00000-0000"
                 className="mt-1"
-                data-permission="Sistema.Controle de Acesso.editar"
-                data-action="RBAC.Usuario.telefone"
+               
+               
               />
             </div>
             <div className="flex items-center gap-2 mt-6">
@@ -203,8 +206,8 @@ export default function GestaoUsuariosAvancada({
                 checked={formData.autenticacao_dois_fatores}
                 disabled={controlesDesabilitados}
                 onCheckedChange={(v) => setFormData({ ...formData, autenticacao_dois_fatores: v })}
-                data-permission="Sistema.Controle de Acesso.editar"
-                data-action="RBAC.Usuario.2fa"
+               
+               
               />
               <Label className="cursor-pointer flex items-center gap-2">
                 <Fingerprint className="w-4 h-4 text-green-600" />
@@ -230,7 +233,7 @@ export default function GestaoUsuariosAvancada({
             disabled={controlesDesabilitados}
             onValueChange={(v) => setFormData({ ...formData, perfil_acesso_id: v })}
           >
-            <SelectTrigger className="mt-1" data-permission="Sistema.Controle de Acesso.editar" data-action="RBAC.Usuario.perfil">
+            <SelectTrigger className="mt-1">
               <SelectValue placeholder="Selecionar perfil" />
             </SelectTrigger>
             <SelectContent>
@@ -274,8 +277,6 @@ export default function GestaoUsuariosAvancada({
                     checked={vinculado}
                     disabled={controlesDesabilitados}
                     onCheckedChange={() => toggleEmpresa(empresa.id)}
-                    data-permission="Sistema.Controle de Acesso.editar"
-                    data-action={`RBAC.Usuario.empresa.${empresa.id}`}
                   />
                   <div className="flex-1">
                     <p className="font-medium text-sm">{empresa.nome_fantasia || empresa.razao_social}</p>
@@ -315,8 +316,8 @@ export default function GestaoUsuariosAvancada({
                   pode_ver_apenas_proprios_registros: v
                 }
               })}
-              data-permission="Sistema.Controle de Acesso.editar"
-              data-action="RBAC.Usuario.restricao.proprios"
+             
+             
             />
           </div>
 
@@ -335,8 +336,8 @@ export default function GestaoUsuariosAvancada({
               })}
               className="mt-1"
               placeholder="0.00"
-              data-permission="Sistema.Controle de Acesso.editar"
-              data-action="RBAC.Usuario.limiteAprovacao"
+             
+             
             />
           </div>
         </CardContent>
@@ -344,16 +345,13 @@ export default function GestaoUsuariosAvancada({
 
       {/* Botões */}
       <div className="flex justify-end gap-3 sticky bottom-0 bg-white pt-4 border-t">
-        <Button type="button" variant="outline" onClick={onClose} data-action="RBAC.Usuario.cancelar">
+        <Button type="button" variant="outline" onClick={onClose}>
           Cancelar
         </Button>
         <Button
           type="submit"
           disabled={atualizarUsuarioMutation.isPending || controlesDesabilitados}
           className="bg-blue-600 hover:bg-blue-700"
-          data-action="RBAC.Usuario.salvar"
-          data-permission="Sistema.Controle de Acesso.editar"
-          data-sensitive="true"
         >
           {atualizarUsuarioMutation.isPending ? 'Salvando...' : 'Salvar Configurações'}
         </Button>

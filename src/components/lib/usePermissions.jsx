@@ -126,27 +126,35 @@ export default function usePermissions() {
       'enviar': ['enviar', 'send'],
       'editar': ['editar', 'update', 'edit', 'corrigir', 'gerenciar', 'executar', 'registrar', 'atualizar', 'configurar', 'config'],
       'excluir': ['excluir', 'delete', 'remove', 'apagar', 'destroy'],
-      'aprovar': ['aprovar', 'approve', 'rejeitar', 'validar'],
+      // Vol 3.4: aprovar e rejeitar são ações SEPARADAS — backward compat: aprovar no perfil também concede rejeitar
+      'aprovar': ['aprovar', 'approve', 'validar'],
+      'rejeitar': ['rejeitar', 'aprovar', 'approve', 'validar'],
       'exportar': ['exportar', 'export', 'imprimir', 'print'],
       'cancelar': ['cancelar', 'cancel'],
       'configurar': ['configurar', 'config', 'editar', 'update'],
       'auditar': ['auditar', 'audit', 'visualizar'],
       'backup': ['backup', 'executar'],
       'seguranca': ['seguranca', 'segurança', 'configurar'],
-      'liquidar': ['liquidar', 'pagar', 'receber', 'conciliar'],
+      // Vol 3.4: pagar, receber, conciliar, estornar são ações SEPARADAS — backward compat: liquidar no perfil concede todas
+      'liquidar': ['liquidar'],
+      'pagar': ['pagar', 'liquidar'],
+      'receber': ['receber', 'liquidar'],
+      'conciliar': ['conciliar', 'liquidar'],
+      'estornar': ['estornar', 'liquidar'],
+      'abrir': ['abrir'],
+      'fechar': ['fechar', 'concluir'],
       'transferir': ['transferir', 'mover'],
       'rastrear': ['rastrear', 'track'],
       'roteirizar': ['roteirizar', 'otimizar'],
       'apontar': ['apontar', 'registrar'],
-      'concluir': ['concluir', 'finalizar', 'fechar'],
+      'concluir': ['concluir', 'finalizar'],
       'inventario': ['inventario', 'contar', 'ajustar'],
-      'desconto': ['desconto', 'aprovar'],
+      'desconto': ['desconto', 'aprovar', 'approve'],
       'assinar': ['assinar', 'assinatura'],
       'renovar': ['renovar', 'prorrogar'],
       'responder': ['responder', 'reply'],
       'duplicar': ['duplicar', 'clonar', 'copiar'],
       'testar': ['testar', 'test'],
-      'receber': ['receber', 'recebimento'],
       'desativar': ['desativar', 'bloquear'],
       'atualizar': ['atualizar', 'refresh', 'editar'],
     };
@@ -216,8 +224,9 @@ export default function usePermissions() {
         emitir: 'emitir', enviar: 'enviar',
         // editar
         update: 'editar', edit: 'editar', carta: 'editar', corrigir: 'editar', gerenciar: 'editar', executar: 'editar', editar: 'editar', registrar: 'editar', atualizar: 'editar',
-        // aprovar
-        approve: 'aprovar', aprovar: 'aprovar', approvar: 'aprovar', rejeitar: 'aprovar', validar: 'aprovar',
+        // aprovar — Vol 3.4: rejeitar é ação separada
+        approve: 'aprovar', aprovar: 'aprovar', approvar: 'aprovar', validar: 'aprovar',
+        rejeitar: 'rejeitar', reject: 'rejeitar',
         // exportar
         export: 'exportar', exportar: 'exportar', imprimir: 'exportar', print: 'exportar',
         // configurar (Sistema)
@@ -228,12 +237,13 @@ export default function usePermissions() {
         backup: 'backup',
         // seguranca (Sistema)
         seguranca: 'seguranca', segurança: 'seguranca',
-        // financeiro
-        liquidar: 'liquidar', pagar: 'liquidar', receber: 'liquidar', conciliar: 'liquidar',
+        // financeiro — Vol 3.4: ações SEPARADAS, não mapeadas para liquidar
+        liquidar: 'liquidar', pagar: 'pagar', receber: 'receber', conciliar: 'conciliar', estornar: 'estornar',
         // especial
         transferir: 'transferir', rastrear: 'rastrear', roteirizar: 'roteirizar', apontar: 'apontar', concluir: 'concluir',
         inventario: 'inventario', desconto: 'desconto', assinar: 'assinar', renovar: 'renovar',
         responder: 'responder', duplicar: 'duplicar', testar: 'testar',
+        rejeitar: 'rejeitar',
         // subsection actions
         separar: 'separar', conferir: 'conferir', expedir: 'expedir', entregar: 'entregar',
         contar: 'contar', ajustar: 'ajustar', parar: 'parar', inspecionar: 'inspecionar',

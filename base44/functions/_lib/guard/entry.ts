@@ -10,7 +10,9 @@ async function getUserAndPerfil(base44) {
     if (user?.perfil_acesso_id) {
       perfil = await base44.asServiceRole.entities.PerfilAcesso.get(user.perfil_acesso_id);
     }
-  } catch {}
+  } catch (e) {
+    console.error('[guard] Falha ao carregar perfil de acesso:', e?.message || e);
+  }
   return { user, perfil };
 }
 
@@ -55,15 +57,16 @@ export function backendHasPermission(perfil, moduleName, section, action = 'visu
     cursor = cursor[key];
   }
   if (!cursor) return false;
+  const actionSynonyms = ACTION_SYNONYMS[desired] || [desired];
   if (Array.isArray(cursor)) {
-    return cursor.includes(desired) || (desired === 'visualizar' && cursor.includes('ver'));
+    return actionSynonyms.some((s) => cursor.includes(s)) || (desired === 'visualizar' && cursor.includes('ver'));
   }
   if (typeof cursor === 'object') {
     const stack = [cursor];
     while (stack.length) {
       const node = stack.pop();
       if (Array.isArray(node)) {
-        if (node.includes(desired) || (desired === 'visualizar' && node.includes('ver'))) return true;
+        if (actionSynonyms.some((s) => node.includes(s)) || (desired === 'visualizar' && node.includes('ver'))) return true;
       } else if (node && typeof node === 'object') {
         Object.values(node).forEach((v) => stack.push(v));
       }
@@ -83,7 +86,9 @@ export async function assertPermission(base44, { user, perfil }, moduleName, sec
         descricao: `Ação negada no backend: ${moduleName}/${section || '-'} → ${action}`,
         data_hora: new Date().toISOString(),
       });
-    } catch {}
+    } catch (e) {
+      console.error('[guard] Falha ao auditar bloqueio de permissão:', e?.message || e);
+    }
     return Response.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -105,10 +110,14 @@ export async function assertPermission(base44, { user, perfil }, moduleName, sec
           descricao: `Bloqueio SoD: ${moduleName}/${section || '-'} → ${action}`,
           data_hora: new Date().toISOString(),
         });
-      } catch {}
+      } catch (e) {
+        console.error('[guard] Falha ao auditar bloqueio SoD:', e?.message || e);
+      }
       return Response.json({ error: 'Forbidden: Bloqueado por regra SoD' }, { status: 403 });
     }
-  } catch {}
+  } catch (e) {
+    console.error('[guard] Falha na verificação SoD:', e?.message || e);
+  }
 
   return null;
 }
@@ -136,7 +145,7 @@ export function extractRequestMeta(req) {
   }
 }
 
-export async function ensureContextFields(base44, data, requireEmpresa = true) {
+export async function ensureContextFields(base44, data, requireEmpresa = true, verifyUserAccess = false) {
   try {
     if (!data) return data;
     let enriched = { ...data };
@@ -148,8 +157,26 @@ export async function ensureContextFields(base44, data, requireEmpresa = true) {
       const emp = Array.isArray(empresas) ? empresas[0] : null;
       if (emp?.group_id) enriched.group_id = emp.group_id;
     }
+    // Vol 3.5: Verifica se o usuário tem relação real com o grupo/empresa informado
+    if (verifyUserAccess && (enriched.empresa_id || enriched.group_id)) {
+      const user = await base44.auth.me().catch(() => null);
+      if (user && user.role !== 'admin') {
+        const userGroupId = user.group_id || user.grupo_id;
+        if (enriched.group_id && userGroupId && enriched.group_id !== userGroupId) {
+          return Response.json({ error: 'Acesso negado: grupo não pertence ao usuário' }, { status: 403 });
+        }
+        if (enriched.empresa_id && userGroupId) {
+          const userEmpresas = await base44.asServiceRole.entities.Empresa.filter({ group_id: userGroupId }, undefined, 100);
+          const empresaIds = Array.isArray(userEmpresas) ? userEmpresas.map((e) => e.id) : [];
+          if (!empresaIds.includes(enriched.empresa_id)) {
+            return Response.json({ error: 'Acesso negado: empresa não pertence ao grupo do usuário' }, { status: 403 });
+          }
+        }
+      }
+    }
     return enriched;
-  } catch (_) {
+  } catch (e) {
+    console.error('[guard] Falha em ensureContextFields:', e?.message || e);
     return data;
   }
 }
@@ -168,7 +195,9 @@ async function audit(base44, user, { acao = 'Ação', modulo = 'Sistema', entida
       dados_novos: Object.keys(payloadDados).length ? payloadDados : null,
       data_hora: new Date().toISOString(),
     });
-  } catch {}
+  } catch (e) {
+    console.error('[guard] Falha ao registrar auditoria:', e?.message || e);
+  }
 }
 
 // Health-check endpoint — _lib functions need Deno.serve to deploy

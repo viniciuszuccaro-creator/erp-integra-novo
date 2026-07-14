@@ -75,30 +75,57 @@ import Relatorios from './pages/Relatorios';
 import __Layout from './Layout.jsx';
 
 
+// === Classificação de Páginas (Vol 3.2 — Auditoria) ===
+// [INTERNA]       — Página administrativa, requer RBAC + EmpresaSelectorGuard
+// [MOBILE]        — Página otimizada para app mobile, requer RBAC + EmpresaSelectorGuard
+// [PORTAL]        — Página do Portal do Cliente, autenticação por token (portalToken)
+// [PUBLICA]       — Página pública/site, sem autenticação obrigatória
 export const PAGES = {
+    // --- INTERNA (RBAC: Sistema) ---
     "AdministracaoSistema": AdministracaoSistema,
+    // --- INTERNA (RBAC: Agenda) ---
     "Agenda": Agenda,
+    // --- INTERNA (RBAC: CRM) ---
     "CRM": CRM,
+    // --- INTERNA (RBAC: Cadastros) ---
     "Cadastros": Cadastros,
+    // --- INTERNA (RBAC: Comercial) ---
     "Comercial": Comercial,
+    // --- INTERNA (RBAC: Compras) ---
     "Compras": Compras,
+    // --- INTERNA (RBAC: Sistema) ---
     "ConfiguracoesUsuario": ConfiguracoesUsuario,
+    // --- INTERNA (RBAC: Contratos) ---
     "Contratos": Contratos,
+    // --- INTERNA (RBAC: Dashboard) ---
     "Dashboard": Dashboard,
-
+    // --- INTERNA (RBAC: Sistema) ---
     "Documentacao": Documentacao,
+    // --- MOBILE (RBAC: Expedicao) — acessada via app mobile, sem sidebar ---
     "EntregasMobile": EntregasMobile,
+    // --- INTERNA (RBAC: Estoque) ---
     "Estoque": Estoque,
+    // --- INTERNA (RBAC: Expedicao) ---
     "Expedicao": Expedicao,
+    // --- INTERNA (RBAC: Financeiro) ---
     "Financeiro": Financeiro,
+    // --- INTERNA (RBAC: Fiscal) ---
     "Fiscal": Fiscal,
+    // --- PUBLICA (landing/redirect) ---
     "Home": Home,
+    // --- INTERNA (RBAC: HubAtendimento) ---
     "HubAtendimento": HubAtendimento,
+    // --- PUBLICA (orçamento do site, sem login obrigatório) ---
     "OrcamentoSite": OrcamentoSite,
+    // --- PORTAL (token-based auth, isolado do ERP interno) ---
     "PortalCliente": PortalCliente,
+    // --- INTERNA (RBAC: Producao) ---
     "Producao": Producao,
+    // --- MOBILE (RBAC: Producao) — acessada via app mobile, sem sidebar ---
     "ProducaoMobile": ProducaoMobile,
+    // --- INTERNA (RBAC: RH) ---
     "RH": RH,
+    // --- INTERNA (RBAC: Relatorios) ---
     "Relatorios": Relatorios,
 }
 

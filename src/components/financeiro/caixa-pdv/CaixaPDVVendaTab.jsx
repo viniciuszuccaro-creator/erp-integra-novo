@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CheckCircle2, Trash2, Plus, Truck, Store, ShoppingCart } from "lucide-react";
+import RBACButton from "@/components/lib/RBACButton";
 
 export default function CaixaPDVVendaTab({
   carrinho, setCarrinho, clienteSelecionado, setClienteSelecionado,
@@ -61,9 +62,9 @@ export default function CaixaPDVVendaTab({
                   <div className="flex-1 mr-2">
                     <p className="text-sm font-medium truncate">{item.descricao}</p>
                     <div className="flex gap-2 mt-1">
-                      <Button size="sm" variant="outline" data-permission="Financeiro.CaixaPDV.editar" disabled={controlesDesabilitados} onClick={() => setCarrinho(carrinho.map(i => i.id === item.id ? {...i, quantidade: i.quantidade - 1} : i).filter(i => i.quantidade > 0))} className="h-7 w-7 p-0">-</Button>
+                      <RBACButton module="Financeiro" section="CaixaPDV" action="editar" size="sm" variant="outline" disabled={controlesDesabilitados} onClick={() => setCarrinho(carrinho.map(i => i.id === item.id ? {...i, quantidade: i.quantidade - 1} : i).filter(i => i.quantidade > 0))} className="h-7 w-7 p-0">-</RBACButton>
                       <span className="font-bold w-8 text-center">{item.quantidade}</span>
-                      <Button size="sm" variant="outline" data-permission="Financeiro.CaixaPDV.editar" disabled={controlesDesabilitados} onClick={() => setCarrinho(carrinho.map(i => i.id === item.id ? {...i, quantidade: i.quantidade + 1} : i))} className="h-7 w-7 p-0">+</Button>
+                      <RBACButton module="Financeiro" section="CaixaPDV" action="editar" size="sm" variant="outline" disabled={controlesDesabilitados} onClick={() => setCarrinho(carrinho.map(i => i.id === item.id ? {...i, quantidade: i.quantidade + 1} : i))} className="h-7 w-7 p-0">+</RBACButton>
                     </div>
                   </div>
                   <div className="text-right">
@@ -131,12 +132,12 @@ export default function CaixaPDVVendaTab({
                   <Truck className="w-4 h-4" /> Tipo de Entrega
                 </Label>
                 <div className="grid grid-cols-2 gap-2">
-                  <Button data-permission="Financeiro.CaixaPDVVenda.criar" type="button" variant={tipoEntrega === "Retirada" ? "default" : "outline"} onClick={() => setTipoEntrega("Retirada")} className={`h-16 flex-col gap-1 ${tipoEntrega === "Retirada" ? "bg-blue-600 hover:bg-blue-700" : ""}`}>
+                  <RBACButton module="Financeiro" section="CaixaPDV" action="criar" type="button" variant={tipoEntrega === "Retirada" ? "default" : "outline"} onClick={() => setTipoEntrega("Retirada")} className={`h-16 flex-col gap-1 ${tipoEntrega === "Retirada" ? "bg-blue-600 hover:bg-blue-700" : ""}`}>
                     <Store className="w-6 h-6" /><span className="text-xs font-semibold">RETIRADA</span>
-                  </Button>
-                  <Button data-permission="Financeiro.CaixaPDVVenda.criar" type="button" variant={tipoEntrega === "Entrega" ? "default" : "outline"} onClick={() => setTipoEntrega("Entrega")} className={`h-16 flex-col gap-1 ${tipoEntrega === "Entrega" ? "bg-blue-600 hover:bg-blue-700" : ""}`}>
+                  </RBACButton>
+                  <RBACButton module="Financeiro" section="CaixaPDV" action="criar" type="button" variant={tipoEntrega === "Entrega" ? "default" : "outline"} onClick={() => setTipoEntrega("Entrega")} className={`h-16 flex-col gap-1 ${tipoEntrega === "Entrega" ? "bg-blue-600 hover:bg-blue-700" : ""}`}>
                     <Truck className="w-6 h-6" /><span className="text-xs font-semibold">ENTREGA</span>
-                  </Button>
+                  </RBACButton>
                 </div>
                 {tipoEntrega === "Entrega" && !clienteSelecionado && <div className="bg-yellow-100 border border-yellow-300 rounded p-2 text-xs text-yellow-900">⚠️ Selecione um cliente para criar a entrega automaticamente</div>}
                 {tipoEntrega === "Entrega" && clienteSelecionado && <div className="bg-green-100 border border-green-300 rounded p-2 text-xs text-green-900">✅ Entrega criada automaticamente</div>}
@@ -172,16 +173,16 @@ export default function CaixaPDVVendaTab({
                       <Input type="number" min="1" max={configForma?.max_parcelas || 12} value={fp.parcelas || 1} onChange={(e) => { const novas = [...formasPagamentoVenda]; novas[idx].parcelas = parseInt(e.target.value) || 1; setFormasPagamentoVenda(novas); }} placeholder="Parc" className="h-8 w-16" />
                     )}
                     {formasPagamentoVenda.length > 1 && (
-                      <Button size="sm" variant="ghost" data-permission="Financeiro.CaixaPDV.editar" onClick={() => setFormasPagamentoVenda(formasPagamentoVenda.filter((_, i) => i !== idx))} className="h-8 w-8 p-0">
+                      <RBACButton module="Financeiro" section="CaixaPDV" action="editar" size="sm" variant="ghost" onClick={() => setFormasPagamentoVenda(formasPagamentoVenda.filter((_, i) => i !== idx))} className="h-8 w-8 p-0">
                         <Trash2 className="w-4 h-4 text-red-600" />
-                      </Button>
+                      </RBACButton>
                     )}
                   </div>
                 );
               })}
-              <Button size="sm" variant="outline" data-permission="Financeiro.CaixaPDV.editar" onClick={() => setFormasPagamentoVenda([...formasPagamentoVenda, { forma_id: null, forma_descricao: "Selecione", valor: 0, parcelas: 1 }])} className="w-full">
+              <RBACButton module="Financeiro" section="CaixaPDV" action="editar" size="sm" variant="outline" onClick={() => setFormasPagamentoVenda([...formasPagamentoVenda, { forma_id: null, forma_descricao: "Selecione", valor: 0, parcelas: 1 }])} className="w-full">
                 <Plus className="w-4 h-4 mr-1" /> Adicionar Forma
-              </Button>
+              </RBACButton>
             </div>
 
             {totalPago !== totalVenda && (
@@ -194,12 +195,12 @@ export default function CaixaPDVVendaTab({
               </div>
             )}
 
-            <Button data-permission="Financeiro.CaixaPDV.criar" onClick={() => finalizarVenda.mutate()} disabled={controlesDesabilitados || finalizarVenda.isPending || carrinho.length === 0 || totalPago < totalVenda} className="w-full bg-emerald-600 h-10">
+            <RBACButton module="Financeiro" section="CaixaPDV" action="criar" onClick={() => finalizarVenda.mutate()} disabled={controlesDesabilitados || finalizarVenda.isPending || carrinho.length === 0 || totalPago < totalVenda} className="w-full bg-emerald-600 h-10">
               <CheckCircle2 className="w-4 h-4 mr-2" /> Finalizar Venda
-            </Button>
-            <Button data-permission="Financeiro.CaixaPDV.editar" onClick={() => { setCarrinho([]); setClienteSelecionado(null); setFormasPagamentoVenda([{ forma_id: null, forma_descricao: "Selecione", valor: 0, parcelas: 1 }]); setDesconto(0); setAcrescimo(0); }} variant="outline" className="w-full">
+            </RBACButton>
+            <RBACButton module="Financeiro" section="CaixaPDV" action="editar" onClick={() => { setCarrinho([]); setClienteSelecionado(null); setFormasPagamentoVenda([{ forma_id: null, forma_descricao: "Selecione", valor: 0, parcelas: 1 }]); setDesconto(0); setAcrescimo(0); }} variant="outline" className="w-full">
               <Trash2 className="w-4 h-4 mr-2" /> Limpar
-            </Button>
+            </RBACButton>
           </div>
         </CardContent>
       </Card>

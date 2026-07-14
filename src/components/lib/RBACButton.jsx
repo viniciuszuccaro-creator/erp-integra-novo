@@ -11,6 +11,7 @@ import {
 
 export default function RBACButton({
   module,
+  section = null,
   action = 'ver',
   children,
   className = '',
@@ -19,7 +20,7 @@ export default function RBACButton({
   ...props
 }) {
   const { hasPermission } = usePermissions();
-  const allowed = hasPermission(module, null, action);
+  const allowed = hasPermission(module, section, action);
 
   if (!allowed) {
     if (!showTooltip) return null;

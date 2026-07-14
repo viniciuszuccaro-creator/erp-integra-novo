@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Building2, Printer, Shield, CheckCircle, Edit2, DollarSign } from 'lucide-react';
 import { ProtectedAction } from '@/components/ProtectedAction';
+import RBACButton from '@/components/lib/RBACButton';
 import StatusBadge from '../../StatusBadge';
 import ERPDataTable from '@/components/ui/erp/DataTable';
 
@@ -58,21 +59,21 @@ export default function TabelaPagar({
         const vencida = r.status === 'Pendente' && new Date(r.data_vencimento) < new Date();
         return (
           <div className="flex gap-1 justify-center">
-            <Button data-permission="Financeiro.ContasPagar.exportar" variant="ghost" size="icon" onClick={() => onPrint(r, emp)} title="Imprimir" className="h-7 w-7">
+            <RBACButton module="Financeiro" section="ContasPagar" action="exportar" variant="ghost" size="icon" onClick={() => onPrint(r, emp)} title="Imprimir" className="h-7 w-7">
               <Printer className="w-3 h-3" />
-            </Button>
-            <Button data-permission="Financeiro.ContasPagar.editar" data-sensitive variant="ghost" size="icon" onClick={() => onEdit(r)} title="Editar" className="h-7 w-7">
+            </RBACButton>
+            <RBACButton module="Financeiro" section="ContasPagar" action="editar" variant="ghost" size="icon" onClick={() => onEdit(r)} title="Editar" className="h-7 w-7">
               <Edit2 className="w-3 h-3" />
-            </Button>
+            </RBACButton>
             {r.status === 'Pendente' && (
-              <Button data-permission="Financeiro.ContasPagar.aprovar" data-sensitive variant="ghost" size="icon" onClick={() => onAprovar(r.id)} disabled={aprovarPending} title="Aprovar" className="h-7 w-7">
+              <RBACButton module="Financeiro" section="ContasPagar" action="aprovar" variant="ghost" size="icon" onClick={() => onAprovar(r.id)} disabled={aprovarPending} title="Aprovar" className="h-7 w-7">
                 <Shield className="w-3 h-3 text-blue-600" />
-              </Button>
+              </RBACButton>
             )}
             {r.status === 'Aprovado' && (
-              <Button data-permission="Financeiro.ContasPagar.baixar" data-sensitive variant="ghost" size="icon" onClick={() => onBaixar(r)} title="Pagar" className="h-7 w-7">
+              <RBACButton module="Financeiro" section="ContasPagar" action="pagar" variant="ghost" size="icon" onClick={() => onBaixar(r)} title="Pagar" className="h-7 w-7">
                 <CheckCircle className="w-3 h-3 text-green-600" />
-              </Button>
+              </RBACButton>
             )}
           </div>
         );

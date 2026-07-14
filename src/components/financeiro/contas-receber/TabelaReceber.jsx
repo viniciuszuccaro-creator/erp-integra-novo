@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Building2, Printer, Eye, Edit, CreditCard, QrCode, FileText, MessageSquare, CheckCircle2, Wallet, Zap, DollarSign } from 'lucide-react';
 import { ProtectedAction } from '@/components/ProtectedAction';
+import RBACButton from '@/components/lib/RBACButton';
 
 import EstagiosRecebimentoWidget from '../EstagiosRecebimentoWidget';
 import ERPDataTable from '@/components/ui/erp/DataTable';
@@ -82,28 +83,28 @@ export default function TabelaReceber({
         const temConfig = config && config.ativo;
         return (
           <div className="flex flex-col gap-1 items-start">
-            <Button data-permission="Financeiro.ContasReceber.exportar" variant="ghost" size="sm" onClick={() => onPrint(r, emp)} className="justify-start h-6 px-2 text-xs">
+            <RBACButton module="Financeiro" section="ContasReceber" action="exportar" variant="ghost" size="sm" onClick={() => onPrint(r, emp)} className="justify-start h-6 px-2 text-xs">
               <Printer className="w-3 h-3 mr-1" /> Imprimir
-            </Button>
-            <Button data-permission="Financeiro.ContasReceber.visualizar" variant="ghost" size="sm" onClick={() => onEdit(r)} className="justify-start h-6 px-2 text-xs">
+            </RBACButton>
+            <RBACButton module="Financeiro" section="ContasReceber" action="visualizar" variant="ghost" size="sm" onClick={() => onEdit(r)} className="justify-start h-6 px-2 text-xs">
               <Eye className="w-3 h-3 mr-1" /> Detalhes
-            </Button>
+            </RBACButton>
             {r.status === 'Pendente' && (
               <>
                 {!r.status_cobranca && temConfig && (
                   <>
-                    <Button data-permission="Financeiro.ContasReceber.gerar_cobranca" variant="ghost" size="sm" onClick={() => onGerarCobranca(r)} className="justify-start h-6 px-2 text-xs">
+                    <RBACButton module="Financeiro" section="ContasReceber" action="gerar_cobranca" variant="ghost" size="sm" onClick={() => onGerarCobranca(r)} className="justify-start h-6 px-2 text-xs">
                       <CreditCard className="w-3 h-3 mr-1" /> Cobrança
-                    </Button>
-                    <Button data-permission="Financeiro.ContasReceber.gerar_link_pagamento" variant="ghost" size="sm" onClick={() => onGerarLink(r)} className="justify-start h-6 px-2 text-xs text-purple-600">
+                    </RBACButton>
+                    <RBACButton module="Financeiro" section="ContasReceber" action="gerar_link_pagamento" variant="ghost" size="sm" onClick={() => onGerarLink(r)} className="justify-start h-6 px-2 text-xs text-purple-600">
                       <Wallet className="w-3 h-3 mr-1" /> Link
-                    </Button>
+                    </RBACButton>
                   </>
                 )}
                 {r.boleto_url && (
-                  <Button data-permission="Financeiro.elaReceber.copiar" variant="ghost" size="sm" onClick={() => onVerBoleto(r)} className="justify-start h-6 px-2 text-xs">
+                  <RBACButton module="Financeiro" section="ContasReceber" action="visualizar" variant="ghost" size="sm" onClick={() => onVerBoleto(r)} className="justify-start h-6 px-2 text-xs">
                     <FileText className="w-3 h-3 mr-1" /> Boleto
-                  </Button>
+                  </RBACButton>
                 )}
                 {r.pix_copia_cola && (
                   <Button variant="ghost" size="sm" onClick={() => onCopiarPix(r)} className="justify-start h-6 px-2 text-xs">
@@ -111,23 +112,23 @@ export default function TabelaReceber({
                   </Button>
                 )}
                 {(r.boleto_url || r.pix_copia_cola) && (
-                  <Button data-permission="Financeiro.ContasReceber.enviar_cobranca_whatsapp" variant="ghost" size="sm" onClick={() => onEnviarWhatsApp(r)} className="justify-start h-6 px-2 text-xs">
+                  <RBACButton module="Financeiro" section="ContasReceber" action="enviar" variant="ghost" size="sm" onClick={() => onEnviarWhatsApp(r)} className="justify-start h-6 px-2 text-xs">
                     <MessageSquare className="w-3 h-3 mr-1" /> WhatsApp
-                  </Button>
+                  </RBACButton>
                 )}
                 {r.status_cobranca === 'gerada_simulada' && (
-                  <Button data-permission="Financeiro.ContasReceber.simular_pagamento" variant="ghost" size="sm" onClick={() => onSimularPagamento(r)} className="justify-start h-6 px-2 text-xs text-green-600">
+                  <RBACButton module="Financeiro" section="ContasReceber" action="simular_pagamento" variant="ghost" size="sm" onClick={() => onSimularPagamento(r)} className="justify-start h-6 px-2 text-xs text-green-600">
                     <Zap className="w-3 h-3 mr-1" /> Simular
-                  </Button>
+                  </RBACButton>
                 )}
-                <Button data-permission="Financeiro.ContasReceber.baixar" variant="ghost" size="sm" onClick={() => onBaixar(r)} className="justify-start h-6 px-2 text-xs text-green-700">
+                <RBACButton module="Financeiro" section="ContasReceber" action="receber" variant="ghost" size="sm" onClick={() => onBaixar(r)} className="justify-start h-6 px-2 text-xs text-green-700">
                   <CheckCircle2 className="w-3 h-3 mr-1" /> Baixar
-                </Button>
+                </RBACButton>
               </>
             )}
-            <Button data-permission="Financeiro.ContasReceber.editar" variant="ghost" size="sm" onClick={() => onEdit(r, true)} className="justify-start h-6 px-2 text-xs">
+            <RBACButton module="Financeiro" section="ContasReceber" action="editar" variant="ghost" size="sm" onClick={() => onEdit(r, true)} className="justify-start h-6 px-2 text-xs">
               <Edit className="w-3 h-3 mr-1" /> Editar
-            </Button>
+            </RBACButton>
           </div>
         );
       }

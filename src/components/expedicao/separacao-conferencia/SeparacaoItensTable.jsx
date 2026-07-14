@@ -12,6 +12,8 @@ import usePermissions from "@/components/lib/usePermissions";
  * Tabela de itens para conferência (extraído de SeparacaoConferencia)
  */
 export default function SeparacaoItensTable({ itens, onAtualizarItem }) {
+  const { hasPermission } = usePermissions();
+  const podeConferir = hasPermission('Expedicao', 'Separacao', 'conferir');
   return (
     <Card className="border-0 shadow-md">
       <CardHeader className="bg-slate-50 border-b">
@@ -48,7 +50,8 @@ export default function SeparacaoItensTable({ itens, onAtualizarItem }) {
                 <TableCell>
                   <Input type="number" value={item.quantidade_separada}
                     onChange={(e) => onAtualizarItem(idx, "quantidade_separada", parseFloat(e.target.value) || 0)}
-                    className="text-center font-semibold h-10" data-permission="Expedicao.Separacao.conferir" />
+                    disabled={!podeConferir}
+                    className="text-center font-semibold h-10" />
                 </TableCell>
                 <TableCell>
                   {item.divergencia ? (

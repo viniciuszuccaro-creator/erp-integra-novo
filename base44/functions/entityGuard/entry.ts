@@ -25,11 +25,18 @@ const normalize = (a) => {
     approve: 'aprovar', aprovar: 'aprovar', approvar: 'aprovar', rejeitar: 'aprovar', validar: 'aprovar',
     export: 'exportar', exportar: 'exportar', imprimir: 'exportar', print: 'exportar',
     cancel: 'cancelar', cancelar: 'cancelar',
-    liquidar: 'liquidar', pagar: 'liquidar', receber: 'liquidar', conciliar: 'liquidar',
+    // Vol 3.1: Receber, pagar, liquidar e conciliar são permissões SEPARADAS (manual proíbe colapsar)
+    liquidar: 'liquidar', baixar: 'liquidar',
+    pagar: 'pagar',
+    receber: 'receber', cobrar: 'receber',
+    conciliar: 'conciliar',
+    inativar: 'inativar', desativar: 'inativar', suspender: 'inativar',
+    restaurar: 'restaurar', reativar: 'restaurar',
+    desfazer: 'desfazer', estornar: 'desfazer', reverter: 'desfazer',
     transferir: 'transferir', rastrear: 'rastrear', roteirizar: 'roteirizar',
     apontar: 'apontar', concluir: 'concluir', inventario: 'inventario',
     desconto: 'desconto', assinar: 'assinar', renovar: 'renovar', responder: 'responder',
-    duplicar: 'duplicar', testar: 'testar', receber: 'receber',
+    duplicar: 'duplicar', testar: 'testar',
     configurar: 'configurar', config: 'configurar',
     auditar: 'auditar', audit: 'auditar', backup: 'backup',
     seguranca: 'seguranca',
@@ -93,6 +100,118 @@ const ADMIN_ONLY_READ_ENTITIES = new Set([
   'AuditoriaAcesso', 'AuditoriaGPS', 'AuditoriaIA', 'AuditoriaGlobal',
   'MonitoramentoSistema', 'AlertaPerformance',
 ]);
+
+// === Vol 2.1: Classificação de dados por entidade ===
+// Determina leitura, escrita, compartilhamento, consolidação, propagação e retenção.
+const ENTITY_DATA_CLASSIFICATION = {
+  // Dados mestre compartilhados (Cadastro Gerais) — group_id obrigatório, empresa_id opcional
+  MASTER_SHARED: new Set([
+    'Cliente', 'Fornecedor', 'Transportadora', 'Representante', 'ContatoB2B',
+    'Produto', 'Servico', 'KitProduto', 'GrupoProduto', 'Marca', 'SetorAtividade',
+    'UnidadeMedida', 'TabelaNCM', 'CondicaoComercial', 'SegmentoCliente',
+    'RegiaoAtendimento', 'Cargo', 'Departamento', 'Turno', 'MoedaIndice',
+    'TipoDespesa', 'TipoFrete', 'Banco', 'LocalEstoque', 'RotaPadrao',
+    'Veiculo', 'Motorista', 'CentroResultado', 'CentroOperacao',
+    'CentroCusto', 'PlanoDeContas', 'FormaPagamento', 'TabelaPreco',
+    'TabelaPrecoItem', 'GrupoEmpresarial', 'Empresa',
+  ]),
+  // Parâmetros com variação empresarial — empresa_id obrigatório
+  PARAMETER_COMPANY: new Set([
+    'ConfiguracaoNFe', 'ConfiguracaoSistema', 'GatewayPagamento',
+    'ConfiguracaoBoletos', 'ConfiguracaoWhatsApp', 'ConfiguracaoCobrancaEmpresa',
+    'ConfigFiscalEmpresa', 'ConfiguracaoCanal', 'ConfiguracaoProducao',
+    'ConfiguracaoMonitoramento', 'ConfiguracaoSeguranca', 'ConfiguracaoBackup',
+    'ConfiguracaoDespesaRecorrente', 'ConfiguracaoIntegracaoMarketplace',
+    'ConfiguracaoGatewayPagamento', 'ParametroPortalCliente',
+    'ParametroConciliacaoBancaria', 'ParametroRoteirizacao',
+    'ParametroCaixaDiario', 'ParametroRecebimentoNFe',
+    'PermissaoEmpresaModulo', 'ContaBancariaEmpresa',
+  ]),
+  // Dados operacionais — empresa_id obrigatório, consolidados no grupo
+  OPERATIONAL: new Set([
+    'Pedido', 'OrcamentoCliente', 'OrdemCompra', 'SolicitacaoCompra',
+    'ContaReceber', 'ContaPagar', 'CaixaMovimento', 'MovimentacaoEstoque',
+    'TransferenciaFilial', 'Inventario', 'Entrega', 'Romaneio', 'Rota',
+    'OrdemProducao', 'ApontamentoProducao', 'SeparacaoConferencia',
+    'ConciliacaoPedido', 'RateioFinanceiro', 'ExtratoBancario',
+    'ConciliacaoBancaria', 'MovimentoCartao', 'CaixaOrdemLiquidacao',
+    'LancamentoContabil', 'DRE', 'SPEDFiscal', 'Comissao',
+    'Oportunidade', 'Interacao', 'Campanha', 'Evento', 'Contrato',
+    'ImportacaoXMLNFe', 'PedidoExterno', 'PedidoEtapa', 'EntregaItens',
+    'InspecaoQualidade', 'OperadorCaixa',
+  ]),
+  // Dados fiscais — empresa_id obrigatório, retenção longa
+  FISCAL: new Set(['NotaFiscal', 'TabelaFiscal', 'TabelaDIFAL', 'LogFiscal']),
+  // Dados confidenciais — acesso restrito, LGPD
+  CONFIDENTIAL: new Set([
+    'Colaborador', 'Ferias', 'Ponto', 'MonitoramentoRH',
+    'SessaoUsuario', 'TokenRefresh',
+  ]),
+  // Logs imutáveis — sem exclusão, sem edição
+  IMMUTABLE_LOG: new Set([
+    'AuditLog', 'AuditoriaAcesso', 'AuditoriaGPS', 'AuditoriaIA',
+    'AuditoriaGlobal', 'LogCobranca', 'LogsIA', 'LogPerformance',
+    'AlertaPerformance', 'MonitoramentoSistema', 'BackupAutomatico',
+    'SyncReport', 'SyncMap',
+  ]),
+  // Dados de tecnologia/configuração — admin only
+  TECHNOLOGY: new Set([
+    'ApiExterna', 'Webhook', 'JobAgendado', 'EventoNotificacao',
+    'ModeloDocumento', 'ModeloDocumentoLogistico', 'ChatbotCanal',
+    'ChatbotIntent', 'ChatbotIntents', 'ChatbotInteracao',
+    'IAConfig', 'CatalogoWeb', 'PerfilAcesso', 'GovernancaEmpresa',
+    'ConversaOmnicanal', 'MensagemOmnicanal', 'PagamentoOmnichannel',
+    'BaseConhecimento', 'DocumentacaoTecnica',
+  ]),
+};
+
+// Retorna a classificação de uma entidade
+function getEntityClassification(entityName) {
+  for (const [category, set] of Object.entries(ENTITY_DATA_CLASSIFICATION)) {
+    if (set.has(entityName)) return category;
+  }
+  return 'OPERATIONAL'; // default: operacional
+}
+
+// === Vol 2.2: Validação de contexto multiempresa baseada em classificação ===
+function validateMultiempresaContext(entityName, data, user, desired) {
+  const classification = getEntityClassification(entityName);
+  const isWrite = ['criar', 'editar', 'excluir'].includes(desired);
+  if (!isWrite) return { valid: true, classification };
+
+  const groupId = data?.group_id || null;
+  const empresaId = data?.empresa_id || null;
+
+  // MASTER_SHARED: group_id obrigatório, empresa_id opcional
+  if (classification === 'MASTER_SHARED') {
+    if (!groupId) return { valid: false, classification, reason: 'Dados mestre requerem group_id' };
+    return { valid: true, classification };
+  }
+
+  // PARAMETER_COMPANY: empresa_id obrigatório
+  if (classification === 'PARAMETER_COMPANY') {
+    if (!empresaId && !groupId) return { valid: false, classification, reason: 'Parâmetros requerem empresa_id ou group_id' };
+    return { valid: true, classification };
+  }
+
+  // OPERACIONAL, FISCAL, CONFIDENTIAL: empresa_id obrigatório
+  if (['OPERATIONAL', 'FISCAL', 'CONFIDENTIAL'].includes(classification)) {
+    if (!empresaId && !groupId) return { valid: false, classification, reason: `${classification} requer empresa_id ou group_id` };
+    return { valid: true, classification };
+  }
+
+  // IMMUTABLE_LOG: bloqueia escrita (exceto admin, já verificado antes)
+  if (classification === 'IMMUTABLE_LOG') {
+    return { valid: false, classification, reason: 'Logs imutáveis não podem ser alterados' };
+  }
+
+  // TECHNOLOGY: admin only (já verificado antes, mas fail-closed)
+  if (classification === 'TECHNOLOGY') {
+    return { valid: false, classification, reason: 'Configurações de tecnologia requerem admin' };
+  }
+
+  return { valid: true, classification };
+}
 
 Deno.serve(async (req) => {
   try {
@@ -296,6 +415,28 @@ Deno.serve(async (req) => {
             });
           } catch {}
         }
+      }
+    }
+
+    // === Vol 2.2: Validação de contexto multiempresa baseada em classificação de dados ===
+    if (allowed && ['criar', 'editar', 'excluir'].includes(desired) && targetEntity) {
+      const ctxCheck = validateMultiempresaContext(targetEntity, body, user, desired);
+      if (!ctxCheck.valid) {
+        allowed = false;
+        try {
+          await base44.asServiceRole.entities.AuditLog.create({
+            usuario: user.full_name || user.email || 'Usuário',
+            usuario_id: user.id,
+            acao: 'Bloqueio',
+            modulo: moduleName,
+            tipo_auditoria: 'seguranca',
+            entidade: targetEntity,
+            descricao: `Multiempresa: ${ctxCheck.reason} (${ctxCheck.classification})`,
+            empresa_id: body?.empresa_id || null,
+            group_id: body?.group_id || null,
+            data_hora: new Date().toISOString(),
+          });
+        } catch {}
       }
     }
 

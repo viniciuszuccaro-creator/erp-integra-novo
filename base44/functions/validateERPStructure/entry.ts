@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 /**
  * validateERPStructure v1.0
@@ -46,6 +46,19 @@ Deno.serve(async (req) => {
 
     // ===== 6. MULTIEMPRESA =====
     diagnosis.multiempresa = await validateMultiempresa(base44);
+
+    // ===== 6.5 CLASSIFICAÇÃO DE DADOS (Vol 2.1) =====
+    diagnosis.classificacaoDados = {
+      MASTER_SHARED: 'Cadastros mestres únicos (Clientes, Produtos, Fornecedores, etc) — group_id obrigatório',
+      PARAMETER_COMPANY: 'Parâmetros com variação empresarial (Configurações, Gateways, Certificados) — empresa_id obrigatório',
+      OPERATIONAL: 'Dados operacionais (Pedidos, Contas, Movimentações) — empresa_id obrigatório, consolidados no grupo',
+      FISCAL: 'Documentos fiscais (NF-e, Tabelas) — retenção longa, empresa_id obrigatório',
+      CONFIDENTIAL: 'Dados confidenciais LGPD (Colaborador, Ponto, Férias) — acesso restrito',
+      IMMUTABLE_LOG: 'Logs imutáveis (AuditLog, Auditoria) — sem exclusão ou edição',
+      TECHNOLOGY: 'Configurações de tecnologia (APIs, Webhooks, Jobs) — admin only',
+      entidadeGuard: 'entityGuard valida classificação em cada escrita (fail-closed)',
+      auditEntityEvents: 'auditEntityEvents registra classificação no log de auditoria',
+    };
 
     // ===== 7. PERFORMANCE =====
     diagnosis.performance = {

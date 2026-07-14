@@ -1,23 +1,72 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // auditEntityEvents: registra em AuditLog todos os eventos de entidade (create/update/delete)
 // Payload recebido por automação de entidade:
 // { event:{type, entity_name, entity_id}, data, old_data, payload_too_large }
 // Sem imports locais (função autônoma) e com foco em multiempresa + segurança
 
-// Mapeia entidade -> módulo (granular para RBAC/auditoria)
+// Mapeia entidade -> módulo (granular para RBAC/auditoria) — sincronizado com centralizedAuditLogger
 function getModuleForEntity(entity) {
   const map = {
-    Cliente: 'CRM', Oportunidade: 'CRM', Interacao: 'CRM',
-    Pedido: 'Comercial', Comissao: 'Comercial',
-    NotaFiscal: 'Fiscal',
-    Entrega: 'Expedição', Romaneio: 'Expedição',
+    Cliente: 'CRM', Oportunidade: 'CRM', Interacao: 'CRM', Campanha: 'CRM',
+    Pedido: 'Comercial', OrcamentoCliente: 'Comercial', Comissao: 'Comercial',
+    NotaFiscal: 'Fiscal', TabelaFiscal: 'Fiscal', ImportacaoXMLNFe: 'Fiscal',
+    Entrega: 'Expedição', Romaneio: 'Expedição', Rota: 'Expedição',
     Fornecedor: 'Compras', SolicitacaoCompra: 'Compras', OrdemCompra: 'Compras',
     Produto: 'Estoque', MovimentacaoEstoque: 'Estoque', Inventario: 'Estoque',
+    TransferenciaFilial: 'Estoque', SeparacaoConferencia: 'Estoque',
     ContaPagar: 'Financeiro', ContaReceber: 'Financeiro', CentroCusto: 'Financeiro',
-    Evento: 'Agenda', User: 'Controle de Acesso', PerfilAcesso: 'Controle de Acesso'
+    CaixaMovimento: 'Financeiro', ConciliacaoBancaria: 'Financeiro',
+    LancamentoContabil: 'Financeiro', RateioFinanceiro: 'Financeiro',
+    ExtratoBancario: 'Financeiro', MovimentoCartao: 'Financeiro',
+    Evento: 'Agenda', Contrato: 'Contratos',
+    User: 'Controle de Acesso', PerfilAcesso: 'Controle de Acesso',
+    Colaborador: 'RH', Ferias: 'RH', Ponto: 'RH',
+    OrdemProducao: 'Produção', ApontamentoProducao: 'Produção',
+    InspecaoQualidade: 'Produção',
+    ConfiguracaoSistema: 'Sistema', ApiExterna: 'Sistema',
+    Webhook: 'Sistema', JobAgendado: 'Sistema',
+    AuditLog: 'Sistema', AuditoriaAcesso: 'Sistema',
   };
   return map[entity] || 'Sistema';
+}
+
+// Vol 2.1: Classificação de dados para auditoria (simplificada — mirror de entityGuard)
+function getEntityClassification(entity) {
+  const MASTER = new Set([
+    'Cliente','Fornecedor','Transportadora','Representante','ContatoB2B',
+    'Produto','Servico','KitProduto','GrupoProduto','Marca','SetorAtividade',
+    'UnidadeMedida','TabelaNCM','CondicaoComercial','SegmentoCliente',
+    'RegiaoAtendimento','Cargo','Departamento','Turno','MoedaIndice',
+    'TipoDespesa','TipoFrete','Banco','LocalEstoque','RotaPadrao',
+    'Veiculo','Motorista','CentroResultado','CentroOperacao',
+    'CentroCusto','PlanoDeContas','FormaPagamento','TabelaPreco',
+    'TabelaPrecoItem','GrupoEmpresarial','Empresa',
+  ]);
+  const PARAM = new Set([
+    'ConfiguracaoNFe','ConfiguracaoSistema','GatewayPagamento',
+    'ConfiguracaoBoletos','ConfiguracaoWhatsApp','ConfiguracaoCobrancaEmpresa',
+    'ConfigFiscalEmpresa','ConfiguracaoCanal','ConfiguracaoProducao',
+    'ConfiguracaoMonitoramento','ConfiguracaoSeguranca','ConfiguracaoBackup',
+    'ConfiguracaoDespesaRecorrente','ConfiguracaoIntegracaoMarketplace',
+    'ConfiguracaoGatewayPagamento','ParametroPortalCliente',
+    'ParametroConciliacaoBancaria','ParametroRoteirizacao',
+    'ParametroCaixaDiario','ParametroRecebimentoNFe',
+    'PermissaoEmpresaModulo','ContaBancariaEmpresa',
+  ]);
+  const FISCAL = new Set(['NotaFiscal','TabelaFiscal','TabelaDIFAL','LogFiscal']);
+  const CONFIDENTIAL = new Set(['Colaborador','Ferias','Ponto','MonitoramentoRH','SessaoUsuario','TokenRefresh']);
+  const IMMUTABLE = new Set([
+    'AuditLog','AuditoriaAcesso','AuditoriaGPS','AuditoriaIA','AuditoriaGlobal',
+    'LogCobranca','LogsIA','LogPerformance','AlertaPerformance','MonitoramentoSistema',
+    'BackupAutomatico','SyncReport','SyncMap',
+  ]);
+  if (MASTER.has(entity)) return 'MASTER_SHARED';
+  if (PARAM.has(entity)) return 'PARAMETER_COMPANY';
+  if (FISCAL.has(entity)) return 'FISCAL';
+  if (CONFIDENTIAL.has(entity)) return 'CONFIDENTIAL';
+  if (IMMUTABLE.has(entity)) return 'IMMUTABLE_LOG';
+  return 'OPERATIONAL';
 }
 
 // Remove campos potencialmente perigosos e limita tamanho de payloads (anti-log bloat)
@@ -176,7 +225,7 @@ Deno.serve(async (req) => {
           tipo_auditoria,
           entidade: entidade,
           registro_id: event.entity_id,
-          descricao: `${entidade} • ${acao}${acaoNegocio ? ' • ação: ' + acaoNegocio : ''}${paramKey ? ' • param: ' + paramKey : ''} • risco ${risk.level}${gaps.length ? ' • gaps: ' + gaps.join(',') : ''}${diffSensitive.length ? ' • mudança sensível' : ''}${resumoValor}`,
+          descricao: `${entidade} • ${acao}${acaoNegocio ? ' • ação: ' + acaoNegocio : ''}${paramKey ? ' • param: ' + paramKey : ''} • classificação: ${getEntityClassification(entidade)} • risco ${risk.level}${gaps.length ? ' • gaps: ' + gaps.join(',') : ''}${diffSensitive.length ? ' • mudança sensível' : ''}${resumoValor}`,
           empresa_id: empresa_id || null,
           group_id: group_id || null,
           dados_anteriores: tipoEvento !== 'create' ? safeTrimPayload(previousData) : null,

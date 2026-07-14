@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Zap, CheckCircle2, X, CreditCard, QrCode } from "lucide-react";
+import RBACButton from "@/components/lib/RBACButton";
 import { useUser } from "@/components/lib/UserContext";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -258,21 +259,21 @@ export default function SimularPagamentoModal({ isOpen, onClose, contaReceber })
               <div className="flex gap-3 pt-4 border-t">
                 <Button
                   variant="outline"
-                  data-permission="Financeiro.ContaReceber.visualizar"
                   onClick={onClose}
                   className="flex-1"
                 >
                   Cancelar
                 </Button>
-                <Button
-                  data-permission="Financeiro.ContaReceber.baixar"
+                <RBACButton
+                  module="Financeiro"
+                  action="baixar"
                   onClick={() => simularPagamentoMutation.mutate()}
                   className="flex-1 bg-green-600 hover:bg-green-700"
                   disabled={processando}
                 >
                   <Zap className="w-4 h-4 mr-2" />
                   {processando ? "Processando..." : "Simular Pagamento"}
-                </Button>
+                </RBACButton>
               </div>
             </>
           ) : (

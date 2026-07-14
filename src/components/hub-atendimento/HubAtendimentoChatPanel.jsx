@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, User, Bot, Paperclip, Send, UserPlus, ArrowRightLeft, CheckCircle, MoreVertical, Tag } from "lucide-react";
+import RBACButton from "@/components/lib/RBACButton";
 import { toast } from "sonner";
 
 export default function HubAtendimentoChatPanel({
@@ -65,16 +66,16 @@ export default function HubAtendimentoChatPanel({
 
           <div className="flex items-center gap-1 lg:gap-2">
             {conversaSelecionada.atendente_id !== user.id && (
-              <Button size="sm" data-permission="Chatbot.Atendimento.assumir" onClick={() => assumirConversaMutation.mutate(conversaSelecionada.id)} disabled={assumirConversaMutation.isPending} className="bg-green-600 hover:bg-green-700">
+              <RBACButton size="sm" module="HubAtendimento" action="editar" onClick={() => assumirConversaMutation.mutate(conversaSelecionada.id)} disabled={assumirConversaMutation.isPending} className="bg-green-600 hover:bg-green-700">
                 <UserPlus className="w-4 h-4 lg:mr-2" /><span className="hidden lg:inline">Assumir</span>
-              </Button>
+              </RBACButton>
             )}
-            <Button size="sm" variant="outline" data-permission="Chatbot.Atendimento.transferir" onClick={() => setExibirTransferir(true)} title="Transferir">
+            <RBACButton size="sm" variant="outline" module="HubAtendimento" action="editar" onClick={() => setExibirTransferir(true)} title="Transferir">
               <ArrowRightLeft className="w-4 h-4" />
-            </Button>
-            <Button size="sm" variant="outline" data-permission="Chatbot.Atendimento.resolver" onClick={() => resolverConversaMutation.mutate(conversaSelecionada.id)} disabled={resolverConversaMutation.isPending} className="text-green-600 hover:text-green-700">
+            </RBACButton>
+            <RBACButton size="sm" variant="outline" module="HubAtendimento" action="editar" onClick={() => resolverConversaMutation.mutate(conversaSelecionada.id)} disabled={resolverConversaMutation.isPending} className="text-green-600 hover:text-green-700">
               <CheckCircle className="w-4 h-4 lg:mr-2" /><span className="hidden lg:inline">Resolver</span>
-            </Button>
+            </RBACButton>
             <Button size="sm" variant="outline" onClick={() => setExibirPainelLateral(!exibirPainelLateral)}>
               <MoreVertical className="w-4 h-4" />
             </Button>
@@ -134,7 +135,7 @@ export default function HubAtendimentoChatPanel({
           <Button variant="outline" size="icon" onClick={() => { setExibirPainelLateral(true); setPainelLateralConteudo("respostas"); }} title="Respostas Rápidas">
             <MessageCircle className="w-4 h-4" />
           </Button>
-          <Button onClick={handleSend} data-permission="HubAtendimento.Atendimento.criar"
+          <Button onClick={handleSend}
             disabled={(!mensagemAtendente.trim() && !arquivoAnexo) || enviarMensagemMutation.isPending} className="bg-blue-600 hover:bg-blue-700">
             <Send className="w-4 h-4" />
           </Button>

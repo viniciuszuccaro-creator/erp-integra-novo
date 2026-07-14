@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { User, FileText, CheckCircle2, XCircle, DollarSign, Printer } from "lucide-react";
 import { ImprimirComissao } from "@/components/lib/ImprimirComissao";
 import { useWindow } from "@/components/lib/useWindow";
+import RBACButton from "@/components/lib/RBACButton";
 import DetalhesComissao from "../DetalhesComissao";
 
 const statusColors = {
@@ -52,33 +53,33 @@ export default function ComissoesTable({ comissoes, onAprovar, onRecusar, onPaga
                   <TableCell><Badge className={statusColors[comissao.status]}>{comissao.status}</Badge></TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" data-permission="Comercial.Comissao.imprimir"
+                      <RBACButton module="Comercial" section="Comissao" action="exportar" variant="ghost" size="icon"
                         onClick={() => { const empresa = empresas?.find(e => e.id === comissao.empresa_id); ImprimirComissao({ comissao, empresa, pedidos }); }}
                         title="Imprimir Comissão" className="text-slate-600">
                         <Printer className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" data-permission="Comercial.Comissao.visualizar"
+                      </RBACButton>
+                      <RBACButton module="Comercial" section="Comissao" action="visualizar" variant="ghost" size="icon"
                         onClick={() => openWindow(DetalhesComissao, { comissao, windowMode: true }, { title: `💰 ${comissao.vendedor} - ${comissao.numero_pedido}`, width: 800, height: 600 })}
                         title="Ver detalhes">
                         <FileText className="w-4 h-4" />
-                      </Button>
+                      </RBACButton>
                       {comissao.status === 'Pendente' && (
                         <>
-                          <Button variant="ghost" size="icon" data-permission="Comercial.Comissao.aprovar"
+                          <RBACButton module="Comercial" section="Comissao" action="aprovar" variant="ghost" size="icon"
                             onClick={() => onAprovar(comissao)} title="Aprovar" className="text-green-600 hover:text-green-700">
                             <CheckCircle2 className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" data-permission="Comercial.Comissao.aprovar"
+                          </RBACButton>
+                          <RBACButton module="Comercial" section="Comissao" action="rejeitar" variant="ghost" size="icon"
                             onClick={() => onRecusar(comissao)} title="Recusar" className="text-red-600 hover:text-red-700">
                             <XCircle className="w-4 h-4" />
-                          </Button>
+                          </RBACButton>
                         </>
                       )}
                       {comissao.status === 'Aprovada' && (
-                        <Button variant="ghost" size="icon" data-permission="Comercial.Comissao.pagar"
+                        <RBACButton module="Comercial" section="Comissao" action="pagar" variant="ghost" size="icon"
                           onClick={() => onPagar(comissao)} title="Gerar Pagamento" className="text-blue-600 hover:text-blue-700">
                           <DollarSign className="w-4 h-4" />
-                        </Button>
+                        </RBACButton>
                       )}
                     </div>
                   </TableCell>

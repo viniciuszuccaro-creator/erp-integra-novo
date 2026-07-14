@@ -21,6 +21,7 @@ import RegistroOcorrenciaLogistica from "../logistica/RegistroOcorrenciaLogistic
 import IntegracaoRomaneio from "../logistica/IntegracaoRomaneio";
 import PainelMetricasRealtime from "../logistica/PainelMetricasRealtime";
 import { useWindow } from "@/components/lib/useWindow";
+import RBACButton from "@/components/lib/RBACButton";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { usePermissoesLogistica } from "../logistica/ControleAcessoLogistica";
 import PedidosEntregaKPIs from "./pedidos-entrega/PedidosEntregaKPIs";
@@ -115,23 +116,23 @@ export default function PedidosEntregaTab({ windowMode = false }) {
             <p className="text-slate-600 text-sm">Pedidos aprovados aguardando entrega</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button data-permission="Expedicao.Entrega.visualizar" variant="outline" className="border-green-300 text-green-700 hover:bg-green-50"
+            <RBACButton module="Expedição" section="Entrega" action="visualizar" variant="outline" className="border-green-300 text-green-700 hover:bg-green-50"
               onClick={() => openWindow(PainelMetricasRealtime, { windowMode: true }, { title: '⚡ Métricas em Tempo Real', width: 1100, height: 650 })}>
               <Zap className="w-4 h-4 mr-2" /> Tempo Real
-            </Button>
-            <Button data-permission="Expedicao.Entrega.visualizar" variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-50"
+            </RBACButton>
+            <RBACButton module="Expedição" section="Entrega" action="visualizar" variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-50"
               onClick={() => openWindow(DashboardLogisticaInteligente, { windowMode: true }, { title: '📊 Dashboard Logística IA', width: 1200, height: 700 })}>
               <BarChart3 className="w-4 h-4 mr-2" /> Analytics IA
-            </Button>
-            <Button data-permission="Expedicao.Roteirizacao.criar" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            </RBACButton>
+            <RBACButton module="Expedição" section="Roteirizacao" action="criar" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
               onClick={() => openWindow(MapaRoteirizacaoIA, { windowMode: true }, { title: '🗺️ Roteirização Inteligente', width: 1000, height: 700 })}>
               <Route className="w-4 h-4 mr-2" /> 🤖 Otimizar Rotas
-            </Button>
+            </RBACButton>
             {permissoes.podeCriarRomaneio && (
-              <Button data-permission="Expedicao.Romaneio.criar" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+              <RBACButton module="Expedição" section="Romaneio" action="criar" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
                 onClick={() => setRomaneioOpen(true)}>
                 <FileText className="w-4 h-4 mr-2" /> Criar Romaneio
-              </Button>
+              </RBACButton>
             )}
           </div>
         </div>
@@ -178,19 +179,19 @@ export default function PedidosEntregaTab({ windowMode = false }) {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button size="sm" variant="outline" data-permission="Comercial.Pedido.visualizar" onClick={() => handleVerDetalhes(pedido)}>
+                          <RBACButton module="Comercial" section="Pedido" action="visualizar" size="sm" variant="outline" onClick={() => handleVerDetalhes(pedido)}>
                             <Eye className="w-4 h-4 mr-1" /> Ver
-                          </Button>
-                          <Button size="sm" variant="outline" data-permission="Comercial.Pedido.notificar"
+                          </RBACButton>
+                          <RBACButton module="Comercial" section="Pedido" action="enviar" size="sm" variant="outline"
                             className="border-green-300 text-green-700 hover:bg-green-50"
                             onClick={() => { setEntregaSelecionada({ pedido, entrega }); setNotificadorOpen(true); }}>
                             <Bell className="w-4 h-4 mr-1" /> Notificar
-                          </Button>
+                          </RBACButton>
                           {pedido.status === 'Em Trânsito' && permissoes.podeConfirmarEntrega && (
-                            <Button data-permission="Comercial.PedidosEntrega.confirmar" size="sm" className="bg-green-600 hover:bg-green-700 text-white"
+                            <RBACButton module="Comercial" section="PedidosEntrega" action="concluir" size="sm" className="bg-green-600 hover:bg-green-700 text-white"
                               onClick={() => { setEntregaSelecionada({ pedido, entrega }); setComprovanteOpen(true); }}>
                               <CheckCircle2 className="w-4 h-4 mr-1" /> Confirmar
-                            </Button>
+                            </RBACButton>
                           )}
                         </div>
                       </TableCell>

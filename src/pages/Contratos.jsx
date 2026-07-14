@@ -24,6 +24,7 @@ import SemEmpresaBanner from "@/components/common/SemEmpresaBanner";
 import IAContextualModulo from "@/components/ia/IAContextualModulo";
 import { useContratoActions } from "@/components/contratos/useContratoActions";
 import ProtectedSection from "@/components/security/ProtectedSection";
+import RBACButton from "@/components/lib/RBACButton";
 
 export default function ContratosPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -175,9 +176,11 @@ export default function ContratosPage() {
           <div className="mt-2"><IAContextualModulo modulo="Contratos" compact /></div>
         </div>
 
-        <Button
+        <RBACButton
+          module="Contratos"
+          section="Contrato"
+          action="criar"
           className="bg-emerald-600 hover:bg-emerald-700"
-          data-permission="Contratos.Contrato.criar"
           onClick={() => openWindow(ContratoForm, {
             windowMode: true, clientes, fornecedores,
             onSubmit: async (data) => {
@@ -204,7 +207,7 @@ export default function ContratosPage() {
           }, { title: '📄 Novo Contrato', width: 1100, height: 700 })}
         >
           <Plus className="w-4 h-4 mr-2" /> Novo Contrato
-        </Button>
+        </RBACButton>
       </div>
 
       <ContratosKPIs contratos={contratosContexto} />
@@ -274,10 +277,10 @@ export default function ContratosPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1 flex-wrap">
-                          <Button variant="ghost" size="icon" data-permission="Contratos.Contrato.ver" onClick={() => setViewingContrato(contrato)} title="Ver detalhes">
+                          <RBACButton module="Contratos" section="Contrato" action="visualizar" variant="ghost" size="icon" onClick={() => setViewingContrato(contrato)} title="Ver detalhes">
                             <FileText className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" data-permission="Contratos.Contrato.editar"
+                          </RBACButton>
+                          <RBACButton module="Contratos" section="Contrato" action="editar" variant="ghost" size="icon"
                             onClick={() => openWindow(ContratoForm, {
                               contrato, windowMode: true, clientes, fornecedores,
                               onSubmit: async (data) => {
@@ -293,30 +296,30 @@ export default function ContratosPage() {
                               }
                             }, { title: `✏️ Editar: ${contrato.numero_contrato}`, width: 1100, height: 700 })} title="Editar">
                             <Edit className="w-4 h-4" />
-                          </Button>
+                          </RBACButton>
                           {podeAssinar(contrato) && (
-                            <Button variant="ghost" size="icon" data-permission="Contratos.Contrato.assinar" onClick={() => abrirAssinatura(contrato)} title="Assinar Eletronicamente" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+                            <RBACButton module="Contratos" section="Contrato" action="assinar" variant="ghost" size="icon" onClick={() => abrirAssinatura(contrato)} title="Assinar Eletronicamente" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
                               <PenTool className="w-4 h-4" />
-                            </Button>
+                            </RBACButton>
                           )}
                           {contrato.gerar_cobranca_automatica && contrato.status === 'Vigente' && (
-                            <Button variant="ghost" size="icon" data-permission="Contratos.Cobranca.criar" onClick={() => gerarCobrancasMutation.mutate(contrato)} title="Gerar Cobrança" className="text-purple-600 hover:text-purple-700" disabled={gerarCobrancasMutation.isPending}>
+                            <RBACButton module="Contratos" section="Cobranca" action="criar" variant="ghost" size="icon" onClick={() => gerarCobrancasMutation.mutate(contrato)} title="Gerar Cobrança" className="text-purple-600 hover:text-purple-700" disabled={gerarCobrancasMutation.isPending}>
                               <Receipt className="w-4 h-4" />
-                            </Button>
+                            </RBACButton>
                           )}
                           {((contrato.status === 'Vigente' && diasVencer <= 0) || (contrato.status === 'Vencido' && contrato.renovacao_automatica)) && (
-                            <Button variant="ghost" size="icon" data-permission="Contratos.Contrato.renovar" onClick={() => renovarContratoMutation.mutate(contrato)} title="Renovar Contrato" className="text-green-600 hover:text-green-700" disabled={renovarContratoMutation.isPending}>
+                            <RBACButton module="Contratos" section="Contrato" action="renovar" variant="ghost" size="icon" onClick={() => renovarContratoMutation.mutate(contrato)} title="Renovar Contrato" className="text-green-600 hover:text-green-700" disabled={renovarContratoMutation.isPending}>
                               <RefreshCw className="w-4 h-4" />
-                            </Button>
+                            </RBACButton>
                           )}
                           {(contrato.historico_renovacoes?.length > 0 || contrato.alertas_enviados?.length > 0) && (
-                            <Button variant="ghost" size="icon" data-permission="Contratos.Contrato.visualizar" onClick={() => { setContratoHistorico(contrato); setHistoricoDialogOpen(true); }} title="Ver Histórico" className="text-indigo-600">
+                            <RBACButton module="Contratos" section="Contrato" action="visualizar" variant="ghost" size="icon" onClick={() => { setContratoHistorico(contrato); setHistoricoDialogOpen(true); }} title="Ver Histórico" className="text-indigo-600">
                               <History className="w-4 h-4" />
-                            </Button>
+                            </RBACButton>
                           )}
-                          <Button variant="ghost" size="icon" data-permission="Contratos.Contrato.excluir" onClick={() => handleDelete(contrato)} className="text-red-600 hover:text-red-700" title="Excluir">
+                          <RBACButton module="Contratos" section="Contrato" action="excluir" variant="ghost" size="icon" onClick={() => handleDelete(contrato)} className="text-red-600 hover:text-red-700" title="Excluir">
                             <Trash2 className="w-4 h-4" />
-                          </Button>
+                          </RBACButton>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -344,10 +347,10 @@ export default function ContratosPage() {
             Deseja realmente excluir o contrato <strong>{contratoParaExcluir?.numero_contrato}</strong>? Esta ação não pode ser desfeita.
           </p>
           <div className="flex justify-end gap-3 pt-4">
-            <Button data-permission="Sistema.Contratos.cancelar" variant="outline" onClick={() => setContratoParaExcluir(null)}>Cancelar</Button>
-            <Button data-permission="Sistema.Contratos.excluir" className="bg-red-600 hover:bg-red-700" onClick={confirmarExclusao} disabled={deleteMutation.isPending}>
+            <RBACButton module="Contratos" section="Contrato" action="cancelar" variant="outline" onClick={() => setContratoParaExcluir(null)}>Cancelar</RBACButton>
+            <RBACButton module="Contratos" section="Contrato" action="excluir" className="bg-red-600 hover:bg-red-700" onClick={confirmarExclusao} disabled={deleteMutation.isPending}>
               {deleteMutation.isPending ? 'Excluindo...' : 'Excluir'}
-            </Button>
+            </RBACButton>
           </div>
         </DialogContent>
       </Dialog>

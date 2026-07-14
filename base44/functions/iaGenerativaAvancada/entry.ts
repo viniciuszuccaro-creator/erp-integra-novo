@@ -13,10 +13,13 @@ Deno.serve(async (req) => {
 
     const promptCompleto = `[Módulo: ${modulo}] [Tipo: ${tipo}] ${prompt}. Contexto adicional: ${JSON.stringify(contexto || {})}`;
 
+    // Modelos compatíveis com add_context_from_internet (web search):
+    // apenas 'gemini_3_flash' e 'gemini_3_1_pro'
+    // claude_opus_4_6 NÃO suporta web search — usar gemini_3_1_pro para IA generativa com contexto web
     const response = await base44.integrations.Core.InvokeLLM({
       prompt: promptCompleto,
       add_context_from_internet: true,
-      model: 'claude_opus_4_6'
+      model: 'gemini_3_1_pro'
     });
 
     // Auditoria

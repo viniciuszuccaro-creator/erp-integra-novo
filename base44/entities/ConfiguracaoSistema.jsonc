@@ -10,13 +10,17 @@
       "type": "string",
       "description": "ID da empresa"
     },
+    "tenant_id": {
+      "type": "string",
+      "description": "Vol 20.1: ID do tenant SaaS (isolamento de clientes em comercializa\u00e7\u00e3o)"
+    },
     "chave": {
       "type": "string",
       "description": "Chave \u00fanica da configura\u00e7\u00e3o (ex: notif_pedido_aprovado, fiscal_cfop_interno)"
     },
     "categoria": {
       "type": "string",
-      "description": "Categoria da configura\u00e7\u00e3o (Notificacoes, Fiscal, Integracoes, etc.)"
+      "description": "Categoria da configura\u00e7\u00e3o (Notificacoes, Fiscal, Integracoes, SaaS, WhiteLabel, etc.)"
     },
     "ativa": {
       "type": "boolean",
@@ -31,10 +35,126 @@
       "type": "number",
       "description": "Valor num\u00e9rico da configura\u00e7\u00e3o"
     },
+    "valor_json": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Valor estruturado em JSON (pol\u00edticas, al\u00e7adas, etc.)"
+    },
     "dados": {
       "type": "object",
       "additionalProperties": true,
       "description": "Dados extras em formato livre"
+    },
+    "plano_assinatura": {
+      "type": "string",
+      "enum": [
+        "Free",
+        "Starter",
+        "Pro",
+        "Enterprise",
+        "Custom"
+      ],
+      "description": "Vol 20.1: Plano da assinatura SaaS"
+    },
+    "limites_plano": {
+      "type": "object",
+      "properties": {
+        "max_usuarios": {
+          "type": "number",
+          "default": 0
+        },
+        "max_empresas": {
+          "type": "number",
+          "default": 0
+        },
+        "max_armazenamento_gb": {
+          "type": "number",
+          "default": 0
+        },
+        "max_integracoes": {
+          "type": "number",
+          "default": 0
+        },
+        "permite_api": {
+          "type": "boolean",
+          "default": false
+        },
+        "permite_marketplace": {
+          "type": "boolean",
+          "default": false
+        },
+        "permite_white_label": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "description": "Vol 20.1: Limites do plano contratado"
+    },
+    "white_label": {
+      "type": "object",
+      "properties": {
+        "nome_marca": {
+          "type": "string"
+        },
+        "logo_url": {
+          "type": "string"
+        },
+        "cor_primaria": {
+          "type": "string"
+        },
+        "cor_secundaria": {
+          "type": "string"
+        },
+        "dominio_custom": {
+          "type": "string"
+        },
+        "email_remetente": {
+          "type": "string"
+        },
+        "suporte_email": {
+          "type": "string"
+        }
+      },
+      "description": "Vol 20.2: Configura\u00e7\u00e3o de white label por tenant"
+    },
+    "periodo_trial": {
+      "type": "object",
+      "properties": {
+        "em_trial": {
+          "type": "boolean",
+          "default": false
+        },
+        "data_inicio_trial": {
+          "type": "string",
+          "format": "date"
+        },
+        "data_fim_trial": {
+          "type": "string",
+          "format": "date"
+        },
+        "dias_restantes": {
+          "type": "number",
+          "default": 0
+        }
+      },
+      "description": "Vol 20.1: Per\u00edodo de teste (trial)"
+    },
+    "status_tenant": {
+      "type": "string",
+      "enum": [
+        "Ativo",
+        "Trial",
+        "Suspenso",
+        "Cancelado",
+        "Bloqueado"
+      ],
+      "default": "Ativo",
+      "description": "Vol 20.1: Status do tenant (suspens\u00e3o controlada sem perda de dados)"
+    },
+    "feature_flags": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Vol 20.3: Feature flags por tenant (canary release, rollout gradual)"
     },
     "integracao_nfe": {
       "type": "object",

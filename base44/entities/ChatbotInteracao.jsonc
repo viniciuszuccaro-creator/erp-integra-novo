@@ -20,7 +20,10 @@
         "WhatsApp",
         "Portal",
         "Site",
-        "App"
+        "App",
+        "Telegram",
+        "Messenger",
+        "Instagram"
       ],
       "description": "Canal de origem"
     },
@@ -31,6 +34,11 @@
     "cliente_nome": {
       "type": "string",
       "description": "Nome do cliente"
+    },
+    "contato_pendente_cadastro": {
+      "type": "boolean",
+      "default": false,
+      "description": "Vol 15.1: Se o contato ainda n\u00e3o foi cadastrado no CRM"
     },
     "autenticado": {
       "type": "boolean",
@@ -61,6 +69,37 @@
       "type": "string",
       "description": "Resposta gerada pelo bot"
     },
+    "acao_executada": {
+      "type": "string",
+      "enum": [
+        "nenhuma",
+        "consultar_boleto",
+        "consultar_pedido",
+        "criar_orcamento",
+        "falar_vendedor",
+        "consultar_estoque",
+        "enviar_boleto",
+        "enviar_pix",
+        "enviar_link_pagamento",
+        "enviar_documento",
+        "criar_chamado",
+        "criar_lead"
+      ],
+      "default": "nenhuma",
+      "description": "Vol 15.2/15.3: A\u00e7\u00e3o autom\u00e1tica executada pelo bot"
+    },
+    "oportunidade_gerada_id": {
+      "type": "string",
+      "description": "Vol 15.3: ID da oportunidade CRM gerada (Lead alimenta CRM)"
+    },
+    "pedido_gerado_id": {
+      "type": "string",
+      "description": "Vol 15.3: ID do pedido gerado a partir da conversa"
+    },
+    "chamado_gerado_id": {
+      "type": "string",
+      "description": "Vol 15.3: ID do chamado gerado (Ocorr\u00eancia cria chamado)"
+    },
     "sentimento_detectado": {
       "type": "string",
       "enum": [
@@ -83,9 +122,47 @@
       "default": false,
       "description": "Se foi transferido para atendente humano"
     },
+    "motivo_transferencia": {
+      "type": "string",
+      "enum": [
+        "solicitado_usuario",
+        "risco_detectado",
+        "frustracao",
+        "regra_intencao",
+        "limite_tentativas",
+        "manual"
+      ],
+      "description": "Vol 15.2: Motivo da transfer\u00eancia para humano"
+    },
     "vendedor_notificado_id": {
       "type": "string",
       "description": "ID do vendedor notificado (transbordo)"
+    },
+    "fila_atendimento": {
+      "type": "string",
+      "enum": [
+        "nao_atribuida",
+        "pendente",
+        "em_atendimento",
+        "aguardando_cliente",
+        "encerrada",
+        "escalada"
+      ],
+      "default": "nao_atribuida",
+      "description": "Vol 15.1: Status da conversa na inbox unificada"
+    },
+    "atendente_id": {
+      "type": "string",
+      "description": "Vol 15.1: ID do atendente humano respons\u00e1vel"
+    },
+    "sla_minutos": {
+      "type": "number",
+      "description": "Vol 15.4: SLA de resposta em minutos"
+    },
+    "data_primeira_resposta": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Vol 15.4: Quando o atendente respondeu pela primeira vez"
     },
     "data_hora": {
       "type": "string",

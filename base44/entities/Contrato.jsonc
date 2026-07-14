@@ -43,6 +43,75 @@
       "type": "string",
       "description": "Descri\u00e7\u00e3o detalhada"
     },
+    "modelo_documento_id": {
+      "type": "string",
+      "description": "Vol 13.1: ID do modelo de documento autorizado usado como base"
+    },
+    "versao_atual": {
+      "type": "number",
+      "default": 1,
+      "description": "Vol 13.1: N\u00famero da vers\u00e3o atual do contrato"
+    },
+    "versoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "numero_versao": {
+            "type": "number"
+          },
+          "data_versao": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "usuario_id": {
+            "type": "string"
+          },
+          "usuario_nome": {
+            "type": "string"
+          },
+          "conteudo_anterior": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Snapshot antes da altera\u00e7\u00e3o"
+          },
+          "conteudo_novo": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Snapshot ap\u00f3s a altera\u00e7\u00e3o"
+          },
+          "motivo_alteracao": {
+            "type": "string"
+          },
+          "arquivo_pdf_url": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Vol 13.1: Hist\u00f3rico de vers\u00f5es com antes/depois para auditoria"
+    },
+    "clausulas_sensiveis": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "identificador": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "perfis_autorizados": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Perfis que podem visualizar/editar esta cl\u00e1usula"
+          }
+        }
+      },
+      "description": "Vol 13.2: Permiss\u00f5es por cl\u00e1usula sens\u00edvel"
+    },
     "valor_mensal": {
       "type": "number",
       "description": "Valor mensal do contrato"
@@ -147,7 +216,8 @@
         "Vigente",
         "Vencido",
         "Rescindido",
-        "Renovado"
+        "Renovado",
+        "Arquivado"
       ],
       "default": "Rascunho"
     },

@@ -10,6 +10,10 @@
       "type": "string",
       "description": "ID da empresa (se espec\u00edfico)"
     },
+    "tenant_id": {
+      "type": "string",
+      "description": "Vol 20.1/23.3: ID do tenant SaaS"
+    },
     "timestamp": {
       "type": "string",
       "format": "date-time",
@@ -25,9 +29,15 @@
         "Erros",
         "Uptime",
         "Database",
-        "Storage"
+        "Storage",
+        "Integra\u00e7\u00f5es",
+        "Jobs"
       ],
       "description": "Tipo de m\u00e9trica"
+    },
+    "modulo": {
+      "type": "string",
+      "description": "Vol 23.3: M\u00f3dulo monitorado (Comercial, Financeiro, Estoque, etc.) para erros por m\u00f3dulo"
     },
     "cpu_uso_percent": {
       "type": "number",
@@ -49,6 +59,10 @@
       "type": "number",
       "description": "Lat\u00eancia percentil 95 em ms"
     },
+    "latencia_p99_ms": {
+      "type": "number",
+      "description": "Vol 23.3: Lat\u00eancia percentil 99 em ms (outliers)"
+    },
     "requisicoes_por_segundo": {
       "type": "number",
       "description": "Taxa de requisi\u00e7\u00f5es/segundo"
@@ -68,6 +82,36 @@
     "taxa_erro_percent": {
       "type": "number",
       "description": "% de taxa de erro"
+    },
+    "erros_por_modulo": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Vol 23.3: Contagem de erros por m\u00f3dulo (ex: {Comercial: 5, Financeiro: 2})"
+    },
+    "consultas_lentas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "query_id": {
+            "type": "string"
+          },
+          "tempo_ms": {
+            "type": "number"
+          },
+          "modulo": {
+            "type": "string"
+          },
+          "entidade": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "Vol 23.3: Consultas lentas registradas"
     },
     "uptime_percent": {
       "type": "number",
@@ -109,6 +153,53 @@
       "type": "number",
       "description": "% de acerto do cache"
     },
+    "jobs_atrasados": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string"
+          },
+          "nome_job": {
+            "type": "string"
+          },
+          "data_prevista": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "minutos_atraso": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Vol 23.3: Jobs agendados atrasados"
+    },
+    "apis_indisponiveis": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nome_api": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "ultima_verificacao": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status_code": {
+            "type": "number"
+          },
+          "erro": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Vol 23.3: APIs externas indispon\u00edveis no momento da coleta"
+    },
     "alertas_gerados": {
       "type": "array",
       "items": {
@@ -131,6 +222,13 @@
           },
           "valor_metrica": {
             "type": "number"
+          },
+          "modulo": {
+            "type": "string"
+          },
+          "acao_recomendada": {
+            "type": "string",
+            "description": "Vol 23.3: A\u00e7\u00e3o recomendada para resolver o alerta"
           }
         }
       },

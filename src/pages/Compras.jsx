@@ -223,7 +223,7 @@ export default function Compras() {
               size="sm"
               disabled={!contextoValido || !podeCriarOC}
               onClick={handleNovaOC}
-              data-permission="Compras.Ordens de Compra.criar"
+
             >
               Nova OC
             </Button>

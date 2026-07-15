@@ -48,7 +48,7 @@ export default function IntegracaoInstrucoes() {
             const Icon = inst.icon;
             return (
               <div key={idx} className={`flex items-start gap-3 p-3 bg-${inst.cor}-50 rounded-lg border border-${inst.cor}-200`}>
-                <Icon className={`w-5 h-5 text-${inst.cor}-600 flex-shrink-0 mt-0 />
+                <Icon className={`w-5 h-5 text-${inst.cor}-600 flex-shrink-0 mt-0`} />
                 <div>
                   <p className={`font-semibold text-${inst.cor}-900`}>{inst.title}</p>
                   <p className={`text-sm text-${inst.cor}-700 mt-1`}>

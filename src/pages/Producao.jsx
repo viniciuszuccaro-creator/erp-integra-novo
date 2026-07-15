@@ -226,7 +226,7 @@ export default function Producao() {
         actions={<div className="flex items-center gap-2">
           <Button
             size="sm"
-            data-permission="Produção.OrdensProducao.criar"
+
             onClick={() => openWindow(FormularioOrdemProducao, {
               windowMode: true,
               empresa_id: empresaAtual?.id || null,

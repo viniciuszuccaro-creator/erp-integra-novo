@@ -75,7 +75,7 @@ export default function Bloco3Financeiro({ allCounts, isLoading, searchTerm = ""
           key={k}
           className="rounded-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-150 cursor-pointer group border"
           onClick={canViewEntity(k) ? openList(k, t, Icon, c, FormComp) : undefined}
-          data-action={`Cadastros.${k}
+          data-action={`Cadastros.${k}.abrir`}
         >
           <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b pb-3">
             <div className="flex items-center justify-between">
@@ -91,7 +91,7 @@ export default function Bloco3Financeiro({ allCounts, isLoading, searchTerm = ""
                 className="bg-blue-600 hover:bg-blue-700 rounded-sm text-xs h-7"
                 onClick={(e) => { e.stopPropagation(); openList(k, t, Icon, c, FormComp)(); }}
                 disabled={!canViewEntity(k)}
-                data-action={`Cadastros.${k}
+                data-action={`Cadastros.${k}.abrir`}
               >
                 Abrir
               </Button>

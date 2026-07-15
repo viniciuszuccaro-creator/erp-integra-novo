@@ -3,7 +3,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Bot, AlertTriangle, User, Timer, Phone, Shield } from "lucide-react";
 
-export default function ChatMessages({ interacoes, clienteAutenticado }) {
+function ChatMessages({ interacoes, clienteAutenticado }) {
   return (
     <div className="space-y-4 mb-4 h-96 overflow-y-auto border rounded-lg p-4 bg-slate-50">
       {interacoes.map((inter) => (
@@ -64,6 +64,8 @@ export function ChatTransbordoAlert({ vendedorAtendendo }) {
   );
 }
 
+export { ChatMessages };
+export default ChatMessages;
 export function ChatIntentsConfig({ intentsConfig }) {
   const autenticadas = intentsConfig.filter(i => i.requer_autenticacao);
   const publicas = intentsConfig.filter(i => !i.requer_autenticacao);

@@ -203,7 +203,7 @@ export default function FiscalPage() {
       <ModuleLayout title="Fiscal e Tributário" subtitle="NF-e, tributos e relatórios" actions={<div className="flex items-center gap-2">
           <Button
             size="sm"
-            data-permission="Fiscal.NotaFiscal.criar"
+
             onClick={() => openWindow(NotaFiscalFormCompleto, {
               windowMode: true,
               empresa_id: empresaAtual?.id || null,

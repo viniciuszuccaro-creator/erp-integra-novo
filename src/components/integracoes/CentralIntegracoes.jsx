@@ -240,7 +240,7 @@ export default function CentralIntegracoes() {
                       variant="outline"
                       onClick={() => setAtivo(integracao.key, !ativo)}
                       disabled={!chaveIntegracoes || salvando}
-                      data-action={`Integracoes.${integracao.key}
+                      data-action={`Integracoes.${integracao.key}.abrir`}
                     >
                       {salvando ? "Salvando..." : ativo ? "Desativar" : "Ativar"}
                     </Button>
@@ -251,7 +251,7 @@ export default function CentralIntegracoes() {
                     variant="outline"
                     className="ml-auto"
                     disabled={!chaveIntegracoes}
-                    data-action={`Integracoes.${integracao.key || integracao.nome}
+                    data-action={`Integracoes.${integracao.key || integracao.nome}.abrir`}
                     onClick={() => {
                       if (!chaveIntegracoes) {
                         toast({ title: "Selecione um grupo ou empresa", variant: "destructive" });

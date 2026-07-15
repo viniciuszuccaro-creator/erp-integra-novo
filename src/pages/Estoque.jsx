@@ -268,7 +268,7 @@ export default function Estoque() {
             disabled={!contextoValido || !canExportEstoque} 
             variant="outline" 
             className="gap-2"
-            data-permission="Estoque.Relatórios.exportar"
+
           >
             <Download className="w-3 h-3" /> Exportar Aço (PDF)
           </Button>
@@ -299,7 +299,7 @@ export default function Estoque() {
               className="bg-purple-600 hover:bg-purple-700 mb-2"
               disabled={!contextoValido || !canTransferirEstoque}
               size="sm"
-              data-permission="Estoque.Transferências.criar"
+  
             >
               <ArrowLeftRight className="w-3 h-3 mr-2" />
               Transferir entre Empresas

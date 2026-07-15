@@ -124,7 +124,7 @@ export default function CadastrosTableUniversal({
             setCurrentPage(1);
           }}
           className="pl-10 bg-white border-slate-200"
-          data-action={`Cadastros.${entityName}
+          data-action={`Cadastros.${entityName}.abrir`}
         />
       </div>
 
@@ -193,7 +193,7 @@ export default function CadastrosTableUniversal({
                               onClick={() => onView(item)}
                               className="h-8 w-8 p-0 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-sm"
                               title="Visualizar"
-                              data-action={`Cadastros.${entityName}
+                              data-action={`Cadastros.${entityName}.abrir`}
                             >
                               <Eye className="w-4 h-4" />
                             </Button>
@@ -206,7 +206,7 @@ export default function CadastrosTableUniversal({
                               disabled={!podeEditar}
                               className="h-8 w-8 p-0 text-slate-600 hover:text-green-600 hover:bg-green-50 rounded-sm"
                               title="Editar"
-                              data-action={`Cadastros.${entityName}
+                              data-action={`Cadastros.${entityName}.abrir`}
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -222,7 +222,7 @@ export default function CadastrosTableUniversal({
                               disabled={!podeExcluir}
                               className="h-8 w-8 p-0 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-sm"
                               title="Deletar"
-                              data-action={`Cadastros.${entityName}
+                              data-action={`Cadastros.${entityName}.abrir`}
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>

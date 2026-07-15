@@ -79,8 +79,8 @@ export default function Cadastros() {
         <div className="overflow-x-auto pb-1">
           <div className="flex items-center gap-3 mb-2 flex-wrap">
             <TabsList className="inline-flex flex-nowrap min-w-max gap-2">
-              <TabsTrigger value="cadastros" data-permission="Cadastros.visualizar">📋 Cadastros Gerais</TabsTrigger>
-              <TabsTrigger value="apps-externos" data-permission="Sistema.Integracoes.visualizar">📱 Apps, Portais & Ambientes Externos</TabsTrigger>
+              <TabsTrigger value="cadastros">📋 Cadastros Gerais</TabsTrigger>
+              <TabsTrigger value="apps-externos">📱 Apps, Portais & Ambientes Externos</TabsTrigger>
             </TabsList>
             <IAContextualModulo modulo="Cadastros" compact />
           </div>

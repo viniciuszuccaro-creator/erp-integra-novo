@@ -78,7 +78,7 @@ export default function ChatbotAtendimento() {
                 placeholder="Digite sua mensagem..."
                 disabled={h.enviarMensagemMutation.isPending}
               />
-              <Button data-permission="Sistema.ChatbotAtendimento.enviar"
+              <Button
                 onClick={h.handleEnviar}
                 disabled={!h.mensagem.trim() || h.enviarMensagemMutation.isPending}
               >

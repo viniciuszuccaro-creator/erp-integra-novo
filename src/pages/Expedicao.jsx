@@ -271,7 +271,7 @@ export default function Expedicao() {
       <ModuleLayout title="Expedição e Logística" subtitle="Entregas, romaneios e rotas" actions={<div className="flex items-center gap-2">
           <Button
             size="sm"
-            data-permission="Expedição.Entregas.criar"
+
             onClick={() => openWindow(FormularioEntrega, {
               windowMode: true,
               empresa_id: empresaAtual?.id || null,

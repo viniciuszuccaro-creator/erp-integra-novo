@@ -228,7 +228,6 @@ export default function RH() {
             <Button
               size="sm"
               className="bg-purple-600 hover:bg-purple-700"
-              data-permission="RH.Colaboradores.criar"
               onClick={() => openWindow(ColaboradorForm, {
                 windowMode: true,
                 empresa_id: empresaAtual?.id || null,

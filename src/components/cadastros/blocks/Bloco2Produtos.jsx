@@ -92,7 +92,7 @@ export default function Bloco2Produtos({ allCounts, isLoading, searchTerm = "" }
       {filteredTiles.map(({ k, title, Icon, campos, form: FormComp }) => (
         <Card key={k} className="rounded-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-150 cursor-pointer group border"
           onClick={canViewEntity(k) ? openList(k, title, Icon, campos, FormComp) : undefined}
-          data-action={`Cadastros.${k}>
+          data-action={`Cadastros.${k}.abrir`}>
           <CardHeader className="bg-gradient-to-r from-slate-50 to-white border-b pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-semibold flex items-center gap-2 text-slate-700">
@@ -105,7 +105,7 @@ export default function Bloco2Produtos({ allCounts, isLoading, searchTerm = "" }
               <Button size="sm" className="bg-blue-600 hover:bg-blue-700 rounded-sm text-xs h-7"
                 onClick={(e) => { e.stopPropagation(); openList(k, title, Icon, campos, FormComp)(); }}
                 disabled={!canViewEntity(k)}
-                data-action={`Cadastros.${k}>
+                data-action={`Cadastros.${k}.abrir`}>
                 Abrir
               </Button>
             </div>

@@ -81,7 +81,7 @@ export default function IA360IntelligentDashboard() {
                   fill="none"
                   stroke="#4f46e5"
                   strokeWidth="8"
-                  strokeDasharray={`${healthScore * 2.827} 282
+                  strokeDasharray={`${healthScore * 2.827} 282`}
                   strokeLinecap="round"
                   transform="rotate(-90 50 50)"
                 />

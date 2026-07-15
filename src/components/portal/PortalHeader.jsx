@@ -24,7 +24,7 @@ export default function PortalHeader({ cliente, spotlight }) {
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-lg font-bold truncate">{nome}</h2>
               {classABC && (
-                <Badge className={`${abcColor} border-0 text-[10px] font-bold px-1>
+                <Badge className={`${abcColor} border-0 text-[10px] font-bold px-1`}>
                   <Star className="w-2.5 h-2.5 mr-0.5" /> {classABC}
                 </Badge>
               )}

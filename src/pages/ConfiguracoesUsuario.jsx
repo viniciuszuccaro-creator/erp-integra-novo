@@ -28,7 +28,7 @@ export default function ConfiguracoesUsuario() {
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Configurações do Usuário</h1>
           <p className="text-slate-600">Personalize suas preferências e notificações</p>
         </div>
-        <Button data-permission="Sistema.ConfiguracoesUsuario.salvar" onClick={handleSave} disabled={updateUserMutation.isPending}
+        <Button onClick={handleSave} disabled={updateUserMutation.isPending}
           className={`${saveSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
           {saveSuccess ? <><CheckCircle className="w-4 h-4 mr-2" />Salvo!</> : <><Save className="w-4 h-4 mr-2" />{updateUserMutation.isPending ? 'Salvando...' : 'Salvar Alterações'}</>}
         </Button>
@@ -76,7 +76,7 @@ export default function ConfiguracoesUsuario() {
       </Tabs>
 
       <div className="fixed bottom-6 right-6 z-50">
-        <Button data-permission="Sistema.ConfiguracoesUsuario.salvar" onClick={handleSave} disabled={updateUserMutation.isPending} size="lg"
+        <Button onClick={handleSave} disabled={updateUserMutation.isPending} size="lg"
           className={`shadow-lg ${saveSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
           {saveSuccess ? <><CheckCircle className="w-5 h-5 mr-2" />Salvo!</> : <><Save className="w-5 h-5 mr-2" />{updateUserMutation.isPending ? 'Salvando...' : 'Salvar Configurações'}</>}
         </Button>

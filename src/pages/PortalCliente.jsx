@@ -16,6 +16,30 @@ import EntregasList from '../components/portal/EntregasList';
 import BoletosList from '../components/portal/BoletosList';
 import ChamadosWidget from '../components/portal/ChamadosWidget';
 import OrcamentosList from '../components/portal/OrcamentosList';
+
+// Timeout wrapper: impede carregamento infinito se o servidor não responder
+const QUERY_TIMEOUT_MS = 15000;
+const withTimeout = (fn, ms = QUERY_TIMEOUT_MS) => async (context) => {
+  const signal = context?.signal;
+  let timer;
+  const timeoutPromise = new Promise((_, reject) => {
+    timer = setTimeout(
+      () => reject(new Error('Tempo limite excedido. Tente novamente.')),
+      ms
+    );
+    if (signal) {
+      signal.addEventListener('abort', () => {
+        clearTimeout(timer);
+        reject(new Error('Consulta cancelada.'));
+      });
+    }
+  });
+  try {
+    return await Promise.race([fn(context), timeoutPromise]);
+  } finally {
+    clearTimeout(timer);
+  }
+};
 import DownloadsDocumentos from '../components/portal/DownloadsDocumentos';
 
 const TABS = [
@@ -49,7 +73,7 @@ export default function PortalCliente() {
   const { data: user } = useQuery({
     queryKey: ['me'],
     enabled: !!isAuthenticated,
-    queryFn: () => base44.auth.me(),
+    queryFn: withTimeout(() => base44.auth.me()),
     staleTime: 60000,
     gcTime: 300000,
     retry: 2,
@@ -61,10 +85,10 @@ export default function PortalCliente() {
   const { data: cliente, isLoading: carregandoCliente, isError: erroCliente } = useQuery({
     queryKey: ['cliente-portal', user?.id],
     enabled: !!user?.id && !isNonPortalRole,
-    queryFn: async () => {
+    queryFn: withTimeout(async () => {
       const list = await filterInContext('Cliente', { portal_usuario_id: user.id }, '-updated_date', 1);
       return list?.[0] || null;
-    },
+    }),
     staleTime: 30000,
     gcTime: 300000,
     retry: 2,
@@ -74,7 +98,7 @@ export default function PortalCliente() {
   const { data: notasFiscais = [], isError: erroNotas } = useQuery({
     queryKey: ['portal-nfs', cliente?.id, `${grupoAtual?.id||'g'}-${empresaAtual?.id||'e'}`],
     enabled: !!cliente?.id,
-    queryFn: async () => filterInContext('NotaFiscal', { cliente_fornecedor_id: cliente.id }, '-data_emissao', 100),
+    queryFn: withTimeout(async () => filterInContext('NotaFiscal', { cliente_fornecedor_id: cliente.id }, '-data_emissao', 100)),
     staleTime: 60000,
     gcTime: 300000,
     retry: 2,
@@ -84,12 +108,12 @@ export default function PortalCliente() {
   const { data: spotlight } = useQuery({
     queryKey: ['portal-token', token],
     enabled: !!token && !!isAuthenticated,
-    queryFn: async () => {
+    queryFn: withTimeout(async () => {
       const res = await base44.functions.invoke('portalToken', { action: 'validate', token });
       const exp = res?.data?.exp;
       const expMin = exp ? Math.max(0, Math.round((exp * 1000 - Date.now()) / 60000)) : null;
       return { raw: res?.data, exp_minutes_remaining: expMin };
-    },
+    }),
     staleTime: 30000,
     gcTime: 120000,
     retry: 1,
@@ -212,7 +236,19 @@ export default function PortalCliente() {
         <TabsContent value="boletos"    className="mt-3"><BoletosList cliente={cliente} /></TabsContent>
         <TabsContent value="orcamentos" className="mt-3"><OrcamentosList cliente={cliente} /></TabsContent>
         <TabsContent value="chamados"   className="mt-3"><ChamadosWidget cliente={cliente} /></TabsContent>
-        <TabsContent value="documentos" className="mt-3"><DownloadsDocumentos clienteId={cliente.id} notasFiscais={notasFiscais} /></TabsContent>
+        <TabsContent value="documentos" className="mt-3">
+          {erroNotas ? (
+            <Card className="max-w-md mx-auto">
+              <CardContent className="p-6 text-center space-y-3">
+                <AlertCircle className="w-8 h-8 mx-auto text-amber-500" />
+                <div className="text-sm text-muted-foreground">Não foi possível carregar seus documentos. Tente novamente.</div>
+                <button onClick={() => window.location.reload()} className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">Tentar novamente</button>
+              </CardContent>
+            </Card>
+          ) : (
+            <DownloadsDocumentos clienteId={cliente.id} notasFiscais={notasFiscais} />
+          )}
+        </TabsContent>
       </Tabs>
 
       {spotlight?.raw && (

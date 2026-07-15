@@ -10,6 +10,10 @@
       "type": "string",
       "description": "ID da empresa"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo sequencial \u00fanico da configura\u00e7\u00e3o"
+    },
     "empresa_nome": {
       "type": "string"
     },
@@ -59,38 +63,31 @@
     },
     "habilitar_boleto": {
       "type": "boolean",
-      "default": true,
-      "description": "Permite gerar boleto"
+      "default": true
     },
     "habilitar_pix": {
       "type": "boolean",
-      "default": true,
-      "description": "Permite gerar PIX"
+      "default": true
     },
     "habilitar_cartao": {
       "type": "boolean",
-      "default": false,
-      "description": "Permite cobran\u00e7a via cart\u00e3o"
+      "default": false
     },
     "dias_vencimento_padrao": {
       "type": "number",
-      "default": 3,
-      "description": "Dias ap\u00f3s emiss\u00e3o para vencimento"
+      "default": 3
     },
     "multa_pos_vencimento_percent": {
       "type": "number",
-      "default": 2,
-      "description": "% de multa ap\u00f3s vencimento"
+      "default": 2
     },
     "juros_ao_dia_percent": {
       "type": "number",
-      "default": 0.033,
-      "description": "% de juros por dia de atraso"
+      "default": 0.033
     },
     "desconto_antecipacao_percent": {
       "type": "number",
-      "default": 0,
-      "description": "% de desconto para pagamento antecipado"
+      "default": 0
     },
     "mensagem_padrao_boleto": {
       "type": "string",
@@ -101,42 +98,33 @@
       "default": "PIX v\u00e1lido por 24h"
     },
     "webhook_url": {
-      "type": "string",
-      "description": "URL para receber notifica\u00e7\u00f5es de pagamento"
+      "type": "string"
     },
     "webhook_token": {
-      "type": "string",
-      "description": "Token de seguran\u00e7a do webhook"
+      "type": "string"
     },
     "enviar_email_automatico": {
       "type": "boolean",
-      "default": true,
-      "description": "Enviar e-mail ao gerar cobran\u00e7a"
+      "default": true
     },
     "enviar_whatsapp_automatico": {
       "type": "boolean",
-      "default": false,
-      "description": "Enviar WhatsApp ao gerar cobran\u00e7a"
+      "default": false
     },
     "modelo_email_boleto": {
-      "type": "string",
-      "description": "Template de e-mail para boleto"
+      "type": "string"
     },
     "modelo_email_pix": {
-      "type": "string",
-      "description": "Template de e-mail para PIX"
+      "type": "string"
     },
     "modelo_whatsapp_boleto": {
-      "type": "string",
-      "description": "Template WhatsApp para boleto"
+      "type": "string"
     },
     "modelo_whatsapp_pix": {
-      "type": "string",
-      "description": "Template WhatsApp para PIX"
+      "type": "string"
     },
     "pix_chave": {
-      "type": "string",
-      "description": "Chave PIX da empresa"
+      "type": "string"
     },
     "pix_tipo": {
       "type": "string",
@@ -146,28 +134,23 @@
         "Email",
         "Telefone",
         "Aleatoria"
-      ],
-      "description": "Tipo da chave PIX"
+      ]
     },
     "modo_simulacao": {
       "type": "boolean",
-      "default": true,
-      "description": "Se true, n\u00e3o chama API real (mock)"
+      "default": true
     },
     "split_ativo": {
       "type": "boolean",
-      "default": false,
-      "description": "Se usa split de pagamento (marketplace)"
+      "default": false
     },
     "split_config": {
       "type": "object",
-      "additionalProperties": true,
-      "description": "Configura\u00e7\u00e3o de split entre empresas"
+      "additionalProperties": true
     },
     "ultima_sincronizacao": {
       "type": "string",
-      "format": "date-time",
-      "description": "\u00daltima vez que sincronizou com a API"
+      "format": "date-time"
     },
     "status_conexao": {
       "type": "string",

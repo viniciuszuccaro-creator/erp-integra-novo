@@ -10,6 +10,10 @@
       "type": "string",
       "description": "ID da empresa (null se configura\u00e7\u00e3o do grupo)"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo sequencial \u00fanico da configura\u00e7\u00e3o"
+    },
     "ativo": {
       "type": "boolean",
       "default": true,
@@ -23,13 +27,11 @@
         "Quinzenal",
         "Mensal"
       ],
-      "default": "Di\u00e1rio",
-      "description": "Frequ\u00eancia dos backups"
+      "default": "Di\u00e1rio"
     },
     "horario_execucao": {
       "type": "string",
-      "default": "02:00",
-      "description": "Hor\u00e1rio de execu\u00e7\u00e3o (HH:MM)"
+      "default": "02:00"
     },
     "dia_semana": {
       "type": "string",
@@ -41,12 +43,10 @@
         "Quinta",
         "Sexta",
         "S\u00e1bado"
-      ],
-      "description": "Dia da semana (se frequ\u00eancia semanal)"
+      ]
     },
     "dia_mes": {
       "type": "number",
-      "description": "Dia do m\u00eas (1-31) se frequ\u00eancia mensal",
       "minimum": 1,
       "maximum": 31
     },
@@ -57,8 +57,7 @@
         "Incremental",
         "Diferencial"
       ],
-      "default": "Completo",
-      "description": "Tipo padr\u00e3o de backup"
+      "default": "Completo"
     },
     "backup_completo_frequencia": {
       "type": "string",
@@ -67,23 +66,19 @@
         "Quinzenal",
         "Mensal"
       ],
-      "default": "Semanal",
-      "description": "Frequ\u00eancia de backups completos (se usar incrementais)"
+      "default": "Semanal"
     },
     "retencao_dias": {
       "type": "number",
-      "default": 30,
-      "description": "Dias de reten\u00e7\u00e3o dos backups"
+      "default": 30
     },
     "retencao_backups_completos": {
       "type": "number",
-      "default": 4,
-      "description": "Quantidade de backups completos a manter"
+      "default": 4
     },
     "retencao_backups_incrementais": {
       "type": "number",
-      "default": 30,
-      "description": "Quantidade de backups incrementais a manter"
+      "default": 30
     },
     "provider_storage": {
       "type": "string",
@@ -94,8 +89,7 @@
         "Azure Blob",
         "Local"
       ],
-      "default": "Base44 Cloud",
-      "description": "Provedor de armazenamento"
+      "default": "Base44 Cloud"
     },
     "aws_s3_config": {
       "type": "object",
@@ -117,12 +111,11 @@
           "enum": [
             "STANDARD",
             "GLACIER",
-            "DEEP_ARCHIVE"
+            "DEEP ARCHIVE"
           ],
           "default": "STANDARD"
         }
-      },
-      "description": "Configura\u00e7\u00e3o AWS S3"
+      }
     },
     "google_cloud_config": {
       "type": "object",
@@ -146,8 +139,7 @@
           ],
           "default": "STANDARD"
         }
-      },
-      "description": "Configura\u00e7\u00e3o Google Cloud Storage"
+      }
     },
     "azure_blob_config": {
       "type": "object",
@@ -170,52 +162,44 @@
           ],
           "default": "Cool"
         }
-      },
-      "description": "Configura\u00e7\u00e3o Azure Blob Storage"
+      }
     },
     "criptografia_ativa": {
       "type": "boolean",
-      "default": true,
-      "description": "Se criptografa os backups"
+      "default": true
     },
     "algoritmo_criptografia": {
       "type": "string",
-      "default": "AES-256-GCM",
-      "description": "Algoritmo de criptografia"
+      "default": "AES-256-GCM"
     },
     "chave_criptografia": {
-      "type": "string",
-      "description": "Chave de criptografia (armazenada criptografada)"
+      "type": "string"
     },
     "compressao_ativa": {
       "type": "boolean",
-      "default": true,
-      "description": "Se comprime os backups"
+      "default": true
     },
     "algoritmo_compressao": {
       "type": "string",
-      "default": "gzip",
       "enum": [
         "gzip",
         "bzip2",
         "lz4",
         "zstd"
       ],
-      "description": "Algoritmo de compress\u00e3o"
+      "default": "gzip"
     },
     "nivel_compressao": {
       "type": "number",
       "default": 6,
       "minimum": 1,
-      "maximum": 9,
-      "description": "N\u00edvel de compress\u00e3o (1-9)"
+      "maximum": 9
     },
     "modulos_incluir": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "M\u00f3dulos a incluir (vazio = todos)",
       "default": []
     },
     "modulos_excluir": {
@@ -223,126 +207,102 @@
       "items": {
         "type": "string"
       },
-      "description": "M\u00f3dulos a excluir",
       "default": []
     },
     "incluir_anexos": {
       "type": "boolean",
-      "default": true,
-      "description": "Se inclui arquivos anexados (PDFs, imagens, etc.)"
+      "default": true
     },
     "incluir_logs": {
       "type": "boolean",
-      "default": false,
-      "description": "Se inclui logs de auditoria"
+      "default": false
     },
     "incluir_configuracoes": {
       "type": "boolean",
-      "default": true,
-      "description": "Se inclui configura\u00e7\u00f5es do sistema"
+      "default": true
     },
     "notificar_email": {
       "type": "boolean",
-      "default": true,
-      "description": "Se envia e-mail ao concluir"
+      "default": true
     },
     "emails_notificacao": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "E-mails para notifica\u00e7\u00e3o",
       "default": []
     },
     "notificar_apenas_erro": {
       "type": "boolean",
-      "default": false,
-      "description": "Notificar apenas em caso de erro"
+      "default": false
     },
     "webhook_url": {
-      "type": "string",
-      "description": "URL de webhook para notifica\u00e7\u00f5es"
+      "type": "string"
     },
     "webhook_token": {
-      "type": "string",
-      "description": "Token de seguran\u00e7a do webhook"
+      "type": "string"
     },
     "validar_integridade": {
       "type": "boolean",
-      "default": true,
-      "description": "Se valida integridade ap\u00f3s backup"
+      "default": true
     },
     "testar_restauracao": {
       "type": "boolean",
-      "default": false,
-      "description": "Se testa restaura\u00e7\u00e3o automaticamente"
+      "default": false
     },
     "replicacao_geografica": {
       "type": "boolean",
-      "default": false,
-      "description": "Se replica para m\u00faltiplas regi\u00f5es"
+      "default": false
     },
     "regioes_replicacao": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Regi\u00f5es para replica\u00e7\u00e3o (us-east-1, sa-east-1, etc.)"
+      }
     },
     "ultimo_backup_id": {
-      "type": "string",
-      "description": "ID do \u00faltimo backup executado"
+      "type": "string"
     },
     "ultimo_backup_sucesso": {
       "type": "string",
-      "format": "date-time",
-      "description": "Data/hora do \u00faltimo backup bem-sucedido"
+      "format": "date-time"
     },
     "ultimo_backup_erro": {
       "type": "string",
-      "format": "date-time",
-      "description": "Data/hora do \u00faltimo erro"
+      "format": "date-time"
     },
     "total_backups_executados": {
       "type": "number",
-      "default": 0,
-      "description": "Total de backups executados"
+      "default": 0
     },
     "total_backups_sucesso": {
       "type": "number",
-      "default": 0,
-      "description": "Total de backups bem-sucedidos"
+      "default": 0
     },
     "total_backups_erro": {
       "type": "number",
-      "default": 0,
-      "description": "Total de backups com erro"
+      "default": 0
     },
     "taxa_sucesso_percentual": {
-      "type": "number",
-      "description": "% de taxa de sucesso"
+      "type": "number"
     },
     "espaco_total_usado_gb": {
       "type": "number",
-      "default": 0,
-      "description": "Espa\u00e7o total usado em GB"
+      "default": 0
     },
     "proximo_backup_agendado": {
       "type": "string",
-      "format": "date-time",
-      "description": "Data/hora do pr\u00f3ximo backup agendado"
+      "format": "date-time"
     },
     "configurado_por": {
-      "type": "string",
-      "description": "Usu\u00e1rio que configurou"
+      "type": "string"
     },
     "configurado_por_id": {
       "type": "string"
     },
     "data_configuracao": {
       "type": "string",
-      "format": "date-time",
-      "description": "Data da configura\u00e7\u00e3o"
+      "format": "date-time"
     },
     "historico_alteracoes": {
       "type": "array",
@@ -366,12 +326,10 @@
             "type": "string"
           }
         }
-      },
-      "description": "Hist\u00f3rico de altera\u00e7\u00f5es na configura\u00e7\u00e3o"
+      }
     },
     "observacoes": {
-      "type": "string",
-      "description": "Observa\u00e7\u00f5es sobre a configura\u00e7\u00e3o"
+      "type": "string"
     }
   },
   "required": [

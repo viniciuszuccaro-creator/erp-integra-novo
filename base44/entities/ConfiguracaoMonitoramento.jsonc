@@ -10,6 +10,10 @@
       "type": "string",
       "description": "ID da empresa (null se configura\u00e7\u00e3o do grupo)"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo sequencial \u00fanico da configura\u00e7\u00e3o"
+    },
     "ativo": {
       "type": "boolean",
       "default": true,
@@ -23,28 +27,23 @@
         "Avan\u00e7ado",
         "Completo"
       ],
-      "default": "Intermedi\u00e1rio",
-      "description": "N\u00edvel de detalhamento do monitoramento"
+      "default": "Intermedi\u00e1rio"
     },
     "coleta_automatica": {
       "type": "boolean",
-      "default": true,
-      "description": "Se coleta m\u00e9tricas automaticamente"
+      "default": true
     },
     "intervalo_coleta_segundos": {
       "type": "number",
-      "default": 60,
-      "description": "Intervalo de coleta de m\u00e9tricas"
+      "default": 60
     },
     "retencao_logs_dias": {
       "type": "number",
-      "default": 30,
-      "description": "Dias de reten\u00e7\u00e3o dos logs"
+      "default": 30
     },
     "retencao_logs_criticos_dias": {
       "type": "number",
-      "default": 365,
-      "description": "Dias de reten\u00e7\u00e3o de logs cr\u00edticos"
+      "default": 365
     },
     "thresholds": {
       "type": "object",
@@ -81,87 +80,71 @@
           "type": "number",
           "default": 99
         }
-      },
-      "description": "Limites para gerar alertas"
+      }
     },
     "monitorar_queries": {
       "type": "boolean",
-      "default": true,
-      "description": "Se monitora queries do banco"
+      "default": true
     },
     "monitorar_apis": {
       "type": "boolean",
-      "default": true,
-      "description": "Se monitora chamadas de API"
+      "default": true
     },
     "monitorar_integracao": {
       "type": "boolean",
-      "default": true,
-      "description": "Se monitora integra\u00e7\u00f5es externas"
+      "default": true
     },
     "monitorar_exports": {
       "type": "boolean",
-      "default": true,
-      "description": "Se monitora exporta\u00e7\u00f5es (PDF/Excel)"
+      "default": true
     },
     "detectar_anomalias_ia": {
       "type": "boolean",
-      "default": false,
-      "description": "Se usa IA para detectar anomalias"
+      "default": false
     },
     "ia_confianca_minima": {
       "type": "number",
-      "default": 75,
-      "description": "% m\u00ednimo de confian\u00e7a da IA"
+      "default": 75
     },
     "gerar_alertas_automaticos": {
       "type": "boolean",
-      "default": true,
-      "description": "Se gera alertas automaticamente"
+      "default": true
     },
     "alertar_apenas_criticos": {
       "type": "boolean",
-      "default": false,
-      "description": "Alertar apenas severidade Critical"
+      "default": false
     },
     "notificar_email": {
       "type": "boolean",
-      "default": true,
-      "description": "Se envia e-mail em alertas"
+      "default": true
     },
     "emails_notificacao": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "E-mails para receber alertas",
       "default": []
     },
     "notificar_slack": {
       "type": "boolean",
-      "default": false,
-      "description": "Se envia para Slack"
+      "default": false
     },
     "slack_webhook_url": {
-      "type": "string",
-      "description": "URL do webhook do Slack"
+      "type": "string"
     },
     "agrupar_alertas_similares": {
       "type": "boolean",
-      "default": true,
-      "description": "Se agrupa alertas similares"
+      "default": true
     },
     "janela_agrupamento_minutos": {
       "type": "number",
-      "default": 15,
-      "description": "Janela de tempo para agrupar alertas"
+      "default": 15
     },
     "modulos_monitorados": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "M\u00f3dulos a monitorar (vazio = todos)",
       "default": []
     },
     "modulos_ignorados": {
@@ -169,30 +152,25 @@
       "items": {
         "type": "string"
       },
-      "description": "M\u00f3dulos a ignorar",
       "default": []
     },
     "samplear_requisicoes": {
       "type": "boolean",
-      "default": false,
-      "description": "Se amostra apenas % das requisi\u00e7\u00f5es"
+      "default": false
     },
     "taxa_amostragem_percent": {
       "type": "number",
-      "default": 100,
-      "description": "% de requisi\u00e7\u00f5es a monitorar (1-100)"
+      "default": 100
     },
     "profiling_ativo": {
       "type": "boolean",
-      "default": false,
-      "description": "Se profiling detalhado est\u00e1 ativo"
+      "default": false
     },
     "profiling_funcoes": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Fun\u00e7\u00f5es espec\u00edficas para profiling"
+      }
     },
     "integracao_apm_externa": {
       "type": "object",
@@ -229,51 +207,41 @@
           "type": "boolean",
           "default": false
         }
-      },
-      "description": "Integra\u00e7\u00e3o com APM externo"
+      }
     },
     "dashboard_publico": {
       "type": "boolean",
-      "default": false,
-      "description": "Se o dashboard de status \u00e9 p\u00fablico"
+      "default": false
     },
     "dashboard_url": {
-      "type": "string",
-      "description": "URL do dashboard p\u00fablico"
+      "type": "string"
     },
     "ultimo_alerta_id": {
-      "type": "string",
-      "description": "ID do \u00faltimo alerta gerado"
+      "type": "string"
     },
     "ultimo_alerta_data": {
       "type": "string",
-      "format": "date-time",
-      "description": "Data do \u00faltimo alerta"
+      "format": "date-time"
     },
     "total_alertas_gerados": {
       "type": "number",
-      "default": 0,
-      "description": "Total de alertas gerados"
+      "default": 0
     },
     "total_alertas_resolvidos": {
       "type": "number",
-      "default": 0,
-      "description": "Total de alertas resolvidos"
+      "default": 0
     },
     "mttr_horas": {
-      "type": "number",
-      "description": "Mean Time To Resolution em horas"
+      "type": "number"
     },
     "configurado_por": {
-      "type": "string",
-      "description": "Usu\u00e1rio que configurou"
+      "type": "string"
     },
     "configurado_por_id": {
       "type": "string"
     },
     "observacoes": {
-      "type": "string",
-      "description": "Observa\u00e7\u00f5es sobre a configura\u00e7\u00e3o"
+      "type": "string"
     }
   },
   "required": [

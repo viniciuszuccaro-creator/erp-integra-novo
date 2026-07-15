@@ -10,6 +10,10 @@
       "type": "string",
       "description": "ID da empresa"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo sequencial \u00fanico da configura\u00e7\u00e3o"
+    },
     "canal": {
       "type": "string",
       "enum": [
@@ -49,16 +53,13 @@
       "type": "string"
     },
     "mensagem_fila_espera": {
-      "type": "string",
-      "description": "V21.6: Mensagem quando entra na fila"
+      "type": "string"
     },
     "mensagem_transferencia": {
-      "type": "string",
-      "description": "V21.6: Mensagem ao transferir para humano"
+      "type": "string"
     },
     "mensagem_encerramento": {
-      "type": "string",
-      "description": "V21.6: Mensagem ao encerrar conversa"
+      "type": "string"
     },
     "tempo_timeout_minutos": {
       "type": "number",
@@ -66,8 +67,7 @@
     },
     "tempo_inatividade_aviso_minutos": {
       "type": "number",
-      "default": 20,
-      "description": "V21.6: Tempo para aviso de inatividade"
+      "default": 20
     },
     "horario_atendimento": {
       "type": "object",
@@ -178,8 +178,7 @@
       "items": {
         "type": "string",
         "format": "date"
-      },
-      "description": "V21.6: Datas de feriados sem atendimento"
+      }
     },
     "sla_config": {
       "type": "object",
@@ -204,8 +203,7 @@
           "type": "boolean",
           "default": true
         }
-      },
-      "description": "V21.6: Configura\u00e7\u00e3o de SLA"
+      }
     },
     "roteamento": {
       "type": "object",
@@ -232,22 +230,19 @@
           "type": "boolean",
           "default": true
         }
-      },
-      "description": "V21.6: Configura\u00e7\u00e3o de roteamento inteligente"
+      }
     },
     "equipe_atendimento_ids": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "IDs dos atendentes autorizados"
+      }
     },
     "departamentos_destino": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "V21.6: Departamentos que podem receber conversas"
+      }
     },
     "acoes_automaticas": {
       "type": "array",
@@ -299,22 +294,19 @@
             "type": "boolean"
           }
         }
-      },
-      "description": "V21.6: Regras de transbordo configur\u00e1veis"
+      }
     },
     "intents_transbordo_automatico": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "V21.6: Intents que transferem automaticamente"
+      }
     },
     "palavras_chave_urgente": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "V21.6: Palavras que marcam como urgente"
+      }
     },
     "base_conhecimento": {
       "type": "array",
@@ -382,8 +374,7 @@
             "type": "boolean"
           }
         }
-      },
-      "description": "V21.6: Templates de mensagem para respostas r\u00e1pidas"
+      }
     },
     "webhook_url": {
       "type": "string"
@@ -412,8 +403,7 @@
         "verify_token": {
           "type": "string"
         }
-      },
-      "description": "Credenciais do canal (criptografadas)"
+      }
     },
     "personalizacao": {
       "type": "object",
@@ -441,8 +431,7 @@
             "auto"
           ]
         }
-      },
-      "description": "V21.6: Personaliza\u00e7\u00e3o visual do widget"
+      }
     },
     "ia_config": {
       "type": "object",
@@ -478,8 +467,7 @@
           "type": "boolean",
           "default": false
         }
-      },
-      "description": "V21.6: Configura\u00e7\u00e3o avan\u00e7ada da IA"
+      }
     },
     "notificacoes": {
       "type": "object",
@@ -512,18 +500,15 @@
             ]
           }
         }
-      },
-      "description": "V21.6: Configura\u00e7\u00e3o de notifica\u00e7\u00f5es"
+      }
     },
     "metricas_habilitadas": {
       "type": "boolean",
-      "default": true,
-      "description": "V21.6: Coletar m\u00e9tricas detalhadas"
+      "default": true
     },
     "gravacao_habilitada": {
       "type": "boolean",
-      "default": false,
-      "description": "V21.6: Gravar \u00e1udio de chamadas VoIP"
+      "default": false
     }
   },
   "required": [

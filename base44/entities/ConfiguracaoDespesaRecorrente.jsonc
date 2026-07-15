@@ -10,6 +10,10 @@
       "type": "string",
       "description": "Empresa que ter\u00e1 a despesa"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo sequencial \u00fanico da configura\u00e7\u00e3o"
+    },
     "origem": {
       "type": "string",
       "enum": [
@@ -35,12 +39,10 @@
       "description": "Categoria da despesa (snapshot do TipoDespesa)"
     },
     "fornecedor_id": {
-      "type": "string",
-      "description": "ID do fornecedor (se aplic\u00e1vel)"
+      "type": "string"
     },
     "fornecedor_nome": {
-      "type": "string",
-      "description": "Nome do fornecedor (snapshot)"
+      "type": "string"
     },
     "valor_base": {
       "type": "number",
@@ -48,8 +50,7 @@
     },
     "ajuste_inflacao": {
       "type": "boolean",
-      "default": false,
-      "description": "Se o valor deve ser ajustado pela infla\u00e7\u00e3o (IPCA)"
+      "default": false
     },
     "indice_ajuste": {
       "type": "string",
@@ -64,8 +65,7 @@
     },
     "percentual_ajuste_anual": {
       "type": "number",
-      "default": 0,
-      "description": "% de ajuste anual previsto"
+      "default": 0
     },
     "periodicidade": {
       "type": "string",
@@ -94,8 +94,7 @@
         "Sexta",
         "S\u00e1bado",
         "Domingo"
-      ],
-      "description": "Dia da semana (para periodicidade semanal)"
+      ]
     },
     "meses_aplicacao": {
       "type": "array",
@@ -103,22 +102,18 @@
         "type": "number",
         "minimum": 1,
         "maximum": 12
-      },
-      "description": "Meses do ano que a despesa se aplica (1-12)"
+      }
     },
     "data_inicio": {
       "type": "string",
-      "format": "date",
-      "description": "Data de in\u00edcio da recorr\u00eancia"
+      "format": "date"
     },
     "data_fim": {
       "type": "string",
-      "format": "date",
-      "description": "Data de fim da recorr\u00eancia (se houver)"
+      "format": "date"
     },
     "forma_pagamento_id": {
-      "type": "string",
-      "description": "Forma de pagamento padr\u00e3o"
+      "type": "string"
     },
     "forma_pagamento_nome": {
       "type": "string"
@@ -130,51 +125,41 @@
       "type": "string"
     },
     "conta_contabil_id": {
-      "type": "string",
-      "description": "ID da conta cont\u00e1bil (herda de TipoDespesa ou espec\u00edfica)"
+      "type": "string"
     },
     "conta_contabil_nome": {
-      "type": "string",
-      "description": "Nome da conta cont\u00e1bil (snapshot)"
+      "type": "string"
     },
     "centro_resultado_id": {
-      "type": "string",
-      "description": "ID do centro de resultado (herda de TipoDespesa ou espec\u00edfica)"
+      "type": "string"
     },
     "centro_resultado_nome": {
-      "type": "string",
-      "description": "Nome do centro de resultado (snapshot)"
+      "type": "string"
     },
     "projeto_obra": {
-      "type": "string",
-      "description": "Projeto ou obra relacionada"
+      "type": "string"
     },
     "gerar_automaticamente": {
       "type": "boolean",
-      "default": true,
-      "description": "Se deve gerar automaticamente as contas a pagar"
+      "default": true
     },
     "antecedencia_dias": {
       "type": "number",
-      "default": 5,
-      "description": "Quantos dias antes do vencimento deve gerar o t\u00edtulo"
+      "default": 5
     },
     "notificar_criacao": {
       "type": "boolean",
-      "default": true,
-      "description": "Se deve notificar ao criar o t\u00edtulo automaticamente"
+      "default": true
     },
     "usuarios_notificacao": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "IDs dos usu\u00e1rios a serem notificados"
+      }
     },
     "rateio_automatico": {
       "type": "boolean",
-      "default": false,
-      "description": "Se deve ratear automaticamente entre empresas"
+      "default": false
     },
     "empresas_rateio": {
       "type": "array",
@@ -191,8 +176,7 @@
             "type": "number"
           }
         }
-      },
-      "description": "Configura\u00e7\u00e3o de rateio entre empresas"
+      }
     },
     "historico_geracao": {
       "type": "array",
@@ -216,13 +200,21 @@
             "type": "string"
           }
         }
-      },
-      "description": "Hist\u00f3rico de t\u00edtulos gerados automaticamente"
+      }
     },
     "ativa": {
       "type": "boolean",
       "default": true,
       "description": "Se a configura\u00e7\u00e3o est\u00e1 ativa"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Ativa",
+        "Pausada",
+        "Encerrada"
+      ],
+      "default": "Ativa"
     },
     "observacoes": {
       "type": "string"

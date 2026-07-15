@@ -10,6 +10,10 @@
       "type": "string",
       "description": "ID da empresa"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo sequencial \u00fanico do par\u00e2metro"
+    },
     "portal_ativo": {
       "type": "boolean",
       "default": false,

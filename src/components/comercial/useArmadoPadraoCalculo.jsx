@@ -85,12 +85,14 @@ export function useArmadoPadraoCalculo({ formData, setFormData, onNext }) {
     }
 
     resultado.descricao_automatica = gerarDescricaoTecnica(resultado);
-    const pesoEstimado = estimarPeso(resultado);
+    const { peso: pesoEstimado, memoria } = estimarPesoComMemoria(resultado);
     resultado.peso_total_kg = pesoEstimado;
-    const precoPorKg = 8.50;
+    // V21.4: Preço por KG configurável (fallback 8.50 se não informado)
+    const precoPorKg = parseFloat(formData?.preco_kg_armado) || 8.50;
     resultado.preco_venda_total = pesoEstimado * precoPorKg;
-    // Vol 5.3: Memória de cálculo do peso
-    resultado.memoria_calculo = `Peso = ${pesoEstimado.toFixed(2)} kg (peso médio 1.5 kg/m × comprimento × ferros × qty + estribos)`;
+    resultado.preco_kg_armado = precoPorKg;
+    // Vol 5.3: Memória de cálculo detalhada do peso por bitola
+    resultado.memoria_calculo = `Peso total = ${pesoEstimado.toFixed(2)} kg\n${memoria.join('\n')}\nPreço: ${pesoEstimado.toFixed(2)} kg × R$ ${precoPorKg.toFixed(2)}/kg = R$ ${resultado.preco_venda_total.toFixed(2)}`;
     return resultado;
   };
 
@@ -115,29 +117,67 @@ export function useArmadoPadraoCalculo({ formData, setFormData, onNext }) {
     return peca.identificador;
   };
 
-  const estimarPeso = (peca) => {
-    const pesoMedioPorMetro = 1.5;
+  // Tabela de peso teórico (kg/m) por diâmetro de bitola — CA-50/CA-60
+  // Fonte: NBR 7480 (valores aproximados para cálculo de armação)
+  const PESO_TEORICO_BITOLAS = {
+    4.2: 0.109, 5.0: 0.154, 5.5: 0.187, 6.0: 0.222, 6.3: 0.245,
+    8.0: 0.395, 10.0: 0.617, 12.5: 0.963, 16.0: 1.578, 20.0: 2.466,
+    25.0: 3.853, 32.0: 6.313,
+  };
+
+  const getPesoBitola = (bitola) => {
+    if (!bitola) return 0.395; // padrão 8mm
+    const b = parseFloat(String(bitola).replace(/[^\d.]/g, ''));
+    if (isNaN(b)) return 0.395;
+    // Busca exata ou mais próxima
+    if (PESO_TEORICO_BITOLAS[b]) return PESO_TEORICO_BITOLAS[b];
+    const chaves = Object.keys(PESO_TEORICO_BITOLAS).map(Number).sort((a, c) => a - c);
+    const maisProxima = chaves.reduce((prev, curr) =>
+      Math.abs(curr - b) < Math.abs(prev - b) ? curr : prev
+    );
+    return PESO_TEORICO_BITOLAS[maisProxima];
+  };
+
+  const estimarPesoComMemoria = (peca) => {
     let pesoTotal = 0;
+    const memoriaPartes = [];
+
     if (peca.tipo_peca === 'coluna' || peca.tipo_peca === 'viga' || peca.tipo_peca === 'estaca') {
       const comprimento = peca.comprimento || 0;
       const qtdePecas = peca.quantidade || 1;
       const qtdeFerros = peca.quantidade_ferros_principais || 4;
-      pesoTotal += comprimento * qtdeFerros * qtdePecas * pesoMedioPorMetro;
+      const pesoBitolaPrincipal = getPesoBitola(peca.bitola_principal);
+      const pesoFerros = comprimento * qtdeFerros * qtdePecas * pesoBitolaPrincipal;
+      pesoTotal += pesoFerros;
+      memoriaPartes.push(`Ferros: ${qtdeFerros}×${comprimento}m × ${pesoBitolaPrincipal.toFixed(3)}kg/m × ${qtdePecas}pç = ${pesoFerros.toFixed(2)}kg`);
+
       if (peca.reforco_bitola && peca.reforco_quantidade) {
-        pesoTotal += comprimento * peca.reforco_quantidade * qtdePecas * pesoMedioPorMetro;
+        const pesoReforcoBitola = getPesoBitola(peca.reforco_bitola);
+        const pesoReforco = comprimento * peca.reforco_quantidade * qtdePecas * pesoReforcoBitola;
+        pesoTotal += pesoReforco;
+        memoriaPartes.push(`Reforço: ${peca.reforco_quantidade}×${comprimento}m × ${pesoReforcoBitola.toFixed(3)}kg/m = ${pesoReforco.toFixed(2)}kg`);
       }
+
       const perimetroEstribo = peca.tipo_peca === 'estaca'
         ? Math.PI * (peca.estribo_diametro || 30) / 100
         : 2 * ((peca.estribo_largura || 15) + (peca.estribo_altura || 25)) / 100;
-      pesoTotal += perimetroEstribo * (peca.quantidade_estribos || 0) * 0.5;
+      const pesoEstriboBitola = getPesoBitola(peca.estribo_bitola);
+      const pesoEstribos = perimetroEstribo * (peca.quantidade_estribos || 0) * pesoEstriboBitola;
+      pesoTotal += pesoEstribos;
+      memoriaPartes.push(`Estribos: ${(peca.quantidade_estribos || 0)}×${perimetroEstribo.toFixed(2)}m × ${pesoEstriboBitola.toFixed(3)}kg/m = ${pesoEstribos.toFixed(2)}kg`);
     }
+
     if (peca.tipo_peca === 'bloco') {
       const comprimentoM = (peca.comprimento || 0) / 100;
       const larguraM = (peca.largura || 0) / 100;
       const ferrosTotal = (peca.ferros_lado1 || 0) + (peca.ferros_lado2 || 0) + (peca.costelas_quantidade || 0);
-      pesoTotal += (comprimentoM + larguraM) * ferrosTotal * (peca.quantidade || 1) * pesoMedioPorMetro;
+      const pesoBitola = getPesoBitola(peca.bitola_principal);
+      const comprimentoTotalFerro = (comprimentoM * (peca.ferros_lado2 || 0 + peca.costelas_quantidade || 0)) + (larguraM * (peca.ferros_lado1 || 0));
+      pesoTotal += comprimentoTotalFerro * pesoBitola * (peca.quantidade || 1);
+      memoriaPartes.push(`Malha: ${ferrosTotal} ferros × ${pesoBitola.toFixed(3)}kg/m × ${peca.quantidade || 1}pç = ${(comprimentoTotalFerro * pesoBitola * (peca.quantidade || 1)).toFixed(2)}kg`);
     }
-    return pesoTotal;
+
+    return { peso: pesoTotal, memoria: memoriaPartes };
   };
 
   const adicionarOuEditarPeca = () => {

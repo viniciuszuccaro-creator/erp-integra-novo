@@ -22,7 +22,7 @@ export default function useEntregasMotorista() {
   const [reversaQtd, setReversaQtd] = useState(0);
   const [reversaValor, setReversaValor] = useState(0);
 
-  const { data: minhasEntregas = [], refetch } = useQuery({
+  const { data: minhasEntregas = [], isLoading: carregandoEntregas, isError: erroEntregas, refetch } = useQuery({
     queryKey: ["entregas-motorista", `${grupoAtual?.id || 'g'}-${empresaAtual?.id || 'e'}`],
     queryFn: async () => {
       const todas = await filterInContext("Entrega", { motorista_id: user?.id }, "-data_saida", 200);
@@ -30,6 +30,10 @@ export default function useEntregasMotorista() {
     },
     enabled: !!user && !!(empresaAtual?.id || grupoAtual?.id),
     refetchInterval: 30000,
+    staleTime: 15000,
+    gcTime: 120000,
+    retry: 2,
+    retryDelay: 1500,
   });
 
   useEffect(() => {
@@ -87,15 +91,24 @@ export default function useEntregasMotorista() {
   };
 
   const iniciarEntrega = async (entrega) => {
+    if (!entrega?.id) { toast.error("Entrega inválida"); return; }
     setEntregaAtual(entrega);
-    await base44.entities.Entrega.update(entrega.id, {
-      status: "Em Trânsito",
-      historico_status: [...(entrega.historico_status || []), { status: "Em Trânsito", data_hora: new Date().toISOString(), usuario: user.full_name, localizacao }],
-    });
-    try { await base44.entities.AuditLog.create({ usuario: user?.full_name || user?.email || "Motorista", usuario_id: user?.id, empresa_id: entrega.empresa_id || null, group_id: entrega.group_id || null, acao: "Edição", modulo: "Expedição", tipo_auditoria: "ui", entidade: "Entrega", registro_id: entrega.id, descricao: "Entrega iniciada no app do motorista", data_hora: new Date().toISOString() }); } catch (e) { console.error('[mobile] catch:', e); }
-    refetch();
-    toast.success("🚚 Entrega iniciada!");
+    try {
+      await base44.entities.Entrega.update(entrega.id, {
+        status: "Em Trânsito",
+        historico_status: [...(entrega.historico_status || []), { status: "Em Trânsito", data_hora: new Date().toISOString(), usuario: user.full_name, localizacao }],
+      });
+      try { await base44.entities.AuditLog.create({ usuario: user?.full_name || user?.email || "Motorista", usuario_id: user?.id, empresa_id: entrega.empresa_id || null, group_id: entrega.group_id || null, acao: "Edição", modulo: "Expedição", tipo_auditoria: "ui", entidade: "Entrega", registro_id: entrega.id, descricao: "Entrega iniciada no app do motorista", data_hora: new Date().toISOString() }); } catch (e) { console.error('[mobile] audit catch:', e); }
+      refetch();
+      toast.success("🚚 Entrega iniciada!");
+    } catch (err) {
+      console.error('[mobile] iniciarEntrega:', err);
+      toast.error("Erro ao iniciar entrega. Verifique a conexão e tente novamente.");
+      setEntregaAtual(null);
+    }
   };
+
+  const [enviandoFoto, setEnviandoFoto] = useState(false);
 
   const tirarFoto = async () => {
     const input = document.createElement("input");
@@ -103,53 +116,81 @@ export default function useEntregasMotorista() {
     input.onchange = async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      try { const { file_url } = await base44.integrations.Core.UploadFile({ file }); setFotoComprovante(file_url); toast.success("✅ Foto capturada!"); }
-      catch (error) { toast.error("Erro ao fazer upload da foto"); }
+      setEnviandoFoto(true);
+      try {
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        setFotoComprovante(file_url);
+        toast.success("✅ Foto capturada!");
+      } catch (error) {
+        console.error('[mobile] uploadFoto:', error);
+        toast.error("Erro ao enviar foto. Verifique a conexão e tente novamente.");
+      } finally {
+        setEnviandoFoto(false);
+      }
     };
     input.click();
   };
 
   const confirmarEntrega = async () => {
+    if (!entregaAtual?.id) { toast.error("Nenhuma entrega ativa"); return; }
     if (!nomeRecebedor) { toast.error("Informe o nome de quem recebeu"); return; }
     if (!fotoComprovante) { toast.error("Tire uma foto do comprovante"); return; }
     let assinatura = assinaturaBase64;
-    try { const canvas = document.getElementById("assinatura-canvas"); if (canvas) assinatura = canvas.toDataURL("image/png"); } catch (e) { console.error('[mobile] catch:', e); }
+    try { const canvas = document.getElementById("assinatura-canvas"); if (canvas) assinatura = canvas.toDataURL("image/png"); } catch (e) { console.error('[mobile] assinatura catch:', e); }
 
-    await base44.entities.Entrega.update(entregaAtual.id, {
-      status: "Entregue", data_entrega: new Date().toISOString(),
-      comprovante_entrega: { foto_comprovante: fotoComprovante, assinatura_digital: assinatura, nome_recebedor: nomeRecebedor, documento_recebedor: documentoRecebedor, data_hora_recebimento: new Date().toISOString(), latitude_entrega: localizacao?.latitude, longitude_entrega: localizacao?.longitude },
-      historico_status: [...(entregaAtual.historico_status || []), { status: "Entregue", data_hora: new Date().toISOString(), usuario: user.full_name, localizacao, observacao: `Recebido por: ${nomeRecebedor}` }],
-    });
+    try {
+      await base44.entities.Entrega.update(entregaAtual.id, {
+        status: "Entregue", data_entrega: new Date().toISOString(),
+        comprovante_entrega: { foto_comprovante: fotoComprovante, assinatura_digital: assinatura, nome_recebedor: nomeRecebedor, documento_recebedor: documentoRecebedor, data_hora_recebimento: new Date().toISOString(), latitude_entrega: localizacao?.latitude, longitude_entrega: localizacao?.longitude },
+        historico_status: [...(entregaAtual.historico_status || []), { status: "Entregue", data_hora: new Date().toISOString(), usuario: user.full_name, localizacao, observacao: `Recebido por: ${nomeRecebedor}` }],
+      });
 
-    setEntregaAtual(null); setFotoComprovante(null); setAssinaturaBase64(null); setNomeRecebedor(""); setDocumentoRecebedor("");
-    try { await base44.entities.AuditLog.create({ usuario: user?.full_name || user?.email || "Motorista", usuario_id: user?.id, empresa_id: entregaAtual?.empresa_id || null, group_id: entregaAtual?.group_id || null, acao: "Edição", modulo: "Expedição", tipo_auditoria: "ui", entidade: "Entrega", registro_id: entregaAtual?.id, descricao: "Entrega confirmada (foto + assinatura) no app do motorista", data_hora: new Date().toISOString() }); } catch (e) { console.error('[mobile] catch:', e); }
-    refetch();
-    toast.success("✅ Entrega confirmada com sucesso!");
+      try { await base44.entities.AuditLog.create({ usuario: user?.full_name || user?.email || "Motorista", usuario_id: user?.id, empresa_id: entregaAtual?.empresa_id || null, group_id: entregaAtual?.group_id || null, acao: "Edição", modulo: "Expedição", tipo_auditoria: "ui", entidade: "Entrega", registro_id: entregaAtual?.id, descricao: "Entrega confirmada (foto + assinatura) no app do motorista", data_hora: new Date().toISOString() }); } catch (e) { console.error('[mobile] audit catch:', e); }
+
+      setEntregaAtual(null); setFotoComprovante(null); setAssinaturaBase64(null); setNomeRecebedor(""); setDocumentoRecebedor("");
+      refetch();
+      toast.success("✅ Entrega confirmada com sucesso!");
+    } catch (err) {
+      console.error('[mobile] confirmarEntrega:', err);
+      toast.error("Erro ao confirmar entrega. Verifique a conexão e tente novamente.");
+    }
   };
 
   const registrarOcorrencia = async (motivo) => {
-    await base44.entities.Entrega.update(entregaAtual.id, {
-      status: "Entrega Frustrada",
-      entrega_frustrada: { motivo, detalhes: "", tentativa_numero: 1, reagendamento: null, foto_ocorrencia: fotoComprovante },
-      historico_status: [...(entregaAtual.historico_status || []), { status: "Entrega Frustrada", data_hora: new Date().toISOString(), usuario: user.full_name, localizacao, observacao: motivo }],
-    });
-    setEntregaAtual(null); refetch();
-    toast.error("❌ Ocorrência registrada");
+    if (!entregaAtual?.id) { toast.error("Nenhuma entrega ativa"); return; }
+    try {
+      await base44.entities.Entrega.update(entregaAtual.id, {
+        status: "Entrega Frustrada",
+        entrega_frustrada: { motivo, detalhes: "", tentativa_numero: 1, reagendamento: null, foto_ocorrencia: fotoComprovante },
+        historico_status: [...(entregaAtual.historico_status || []), { status: "Entrega Frustrada", data_hora: new Date().toISOString(), usuario: user.full_name, localizacao, observacao: motivo }],
+      });
+      setEntregaAtual(null); refetch();
+      toast.error("❌ Ocorrência registrada");
+    } catch (err) {
+      console.error('[mobile] registrarOcorrencia:', err);
+      toast.error("Erro ao registrar ocorrência. Verifique a conexão.");
+    }
   };
 
   const registrarReversa = async () => {
-    await base44.entities.Entrega.update(entregaAtual.id, {
-      status: "Devolvido",
-      logistica_reversa: { ativada: true, motivo: reversaMotivo, quantidade_devolvida: reversaQtd, valor_devolvido: reversaValor },
-      historico_status: [...(entregaAtual.historico_status || []), { status: "Devolvido", data_hora: new Date().toISOString(), usuario: user.full_name, observacao: reversaMotivo }],
-    });
-    setEntregaAtual(null); refetch();
-    toast.success("🔁 Logística reversa registrada");
+    if (!entregaAtual?.id) { toast.error("Nenhuma entrega ativa"); return; }
+    try {
+      await base44.entities.Entrega.update(entregaAtual.id, {
+        status: "Devolvido",
+        logistica_reversa: { ativada: true, motivo: reversaMotivo, quantidade_devolvida: reversaQtd, valor_devolvido: reversaValor },
+        historico_status: [...(entregaAtual.historico_status || []), { status: "Devolvido", data_hora: new Date().toISOString(), usuario: user.full_name, observacao: reversaMotivo }],
+      });
+      setEntregaAtual(null); refetch();
+      toast.success("🔁 Logística reversa registrada");
+    } catch (err) {
+      console.error('[mobile] registrarReversa:', err);
+      toast.error("Erro ao registrar logística reversa. Verifique a conexão.");
+    }
   };
 
   return {
-    user, minhasEntregas, refetch, entregaAtual, setEntregaAtual, localizacao, isOffline, smsNumero, setSmsNumero,
-    fotoComprovante, setFotoComprovante, nomeRecebedor, setNomeRecebedor, documentoRecebedor, setDocumentoRecebedor,
+    user, minhasEntregas, refetch, carregandoEntregas, erroEntregas, entregaAtual, setEntregaAtual, localizacao, isOffline, smsNumero, setSmsNumero,
+    fotoComprovante, setFotoComprovante, enviandoFoto, nomeRecebedor, setNomeRecebedor, documentoRecebedor, setDocumentoRecebedor,
     assinaturaBase64, setAssinaturaBase64, reversaMotivo, setReversaMotivo, reversaQtd, setReversaQtd, reversaValor, setReversaValor,
     iniciarEntrega, tirarFoto, confirmarEntrega, registrarOcorrencia, registrarReversa,
   };

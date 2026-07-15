@@ -10,9 +10,13 @@
       "type": "string",
       "description": "ID da empresa"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo sequencial \u00fanico da rota"
+    },
     "nome_rota": {
       "type": "string",
-      "description": "Nome da rota"
+      "description": "Nome da rota \u2014 \u00fanico por grupo"
     },
     "descricao": {
       "type": "string"

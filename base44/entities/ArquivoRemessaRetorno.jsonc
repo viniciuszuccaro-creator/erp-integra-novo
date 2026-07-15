@@ -10,6 +10,10 @@
       "type": "string",
       "description": "ID da empresa"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo sequencial \u00fanico do arquivo"
+    },
     "banco_id": {
       "type": "string",
       "description": "ID do banco vinculado"

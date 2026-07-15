@@ -10,9 +10,13 @@
       "type": "string",
       "description": "ID da empresa respons\u00e1vel"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo sequencial \u00fanico do centro operacional"
+    },
     "nome_centro": {
       "type": "string",
-      "description": "Nome do centro (Ex: CD Guarulhos, Obra Cliente X)"
+      "description": "Nome do centro \u2014 \u00fanico por grupo (Ex: CD Guarulhos, Obra Cliente X)"
     },
     "tipo": {
       "type": "string",

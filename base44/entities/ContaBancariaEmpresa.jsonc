@@ -10,6 +10,10 @@
       "type": "string",
       "description": "ID da empresa propriet\u00e1ria"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo sequencial \u00fanico da conta banc\u00e1ria"
+    },
     "banco_id": {
       "type": "string",
       "description": "ID do banco"

@@ -10,9 +10,13 @@
       "type": "string",
       "description": "ID da empresa"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo sequencial \u00fanico do modelo"
+    },
     "nome_modelo": {
       "type": "string",
-      "description": "Nome do modelo"
+      "description": "Nome do modelo \u2014 \u00fanico por grupo"
     },
     "tipo_documento": {
       "type": "string",

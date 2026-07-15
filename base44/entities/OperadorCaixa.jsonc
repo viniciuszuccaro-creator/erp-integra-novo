@@ -10,6 +10,10 @@
       "type": "string",
       "description": "ID da empresa"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo sequencial \u00fanico do operador"
+    },
     "usuario_id": {
       "type": "string",
       "description": "ID do usu\u00e1rio do sistema"
@@ -24,7 +28,7 @@
     },
     "codigo_operador": {
       "type": "string",
-      "description": "C\u00f3digo \u00fanico do operador"
+      "description": "C\u00f3digo do operador (legado)"
     },
     "nome_caixa": {
       "type": "string",
@@ -100,7 +104,7 @@
           "Fechamento Caixa"
         ]
       },
-      "description": "Permiss\u00f5es especiais do operador"
+      "description": "Permiss\u00f5es especiais do operadores"
     },
     "pode_emitir_nfe": {
       "type": "boolean",

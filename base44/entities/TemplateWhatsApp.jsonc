@@ -10,8 +10,13 @@
       "type": "string",
       "description": "ID da empresa propriet\u00e1ria"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo sequencial \u00fanico do template"
+    },
     "nome": {
-      "type": "string"
+      "type": "string",
+      "description": "Nome do template \u2014 \u00fanico por grupo"
     },
     "categoria": {
       "type": "string",

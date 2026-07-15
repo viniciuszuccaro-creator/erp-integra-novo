@@ -10,8 +10,13 @@
       "type": "string",
       "description": "ID da empresa propriet\u00e1ria"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo sequencial \u00fanico do artigo"
+    },
     "titulo": {
-      "type": "string"
+      "type": "string",
+      "description": "T\u00edtulo do artigo \u2014 \u00fanico por grupo"
     },
     "slug": {
       "type": "string",

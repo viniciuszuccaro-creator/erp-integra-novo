@@ -181,12 +181,24 @@ export default function PropagacaoIndex() {
   return (
     <div className="w-full h-full space-y-4 pb-8">
 
+      {/* ── Banner: automação ativa ── */}
+      <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-xl p-3">
+        <div className="flex-shrink-0 w-2 h-2 rounded-full bg-green-500 mt-1.5 animate-pulse"></div>
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-green-800">✅ Propagação automática ativa</p>
+          <p className="text-xs text-green-700 mt-0.5">
+            A sincronização Grupo ↔ Empresas ocorre automaticamente via eventos do sistema (syncBidirectional + sanitizeOnWrite).
+            Use os botões abaixo apenas para <strong>reprocessamento manual</strong> em caso de inconsistência ou recuperação.
+          </p>
+        </div>
+      </div>
+
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
         <div>
           <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
             <ArrowDownUp className="w-5 h-5 text-blue-600" />
-            Propagação Grupo ↔ Empresas
+            Monitoramento e Reprocessamento
           </h2>
           <p className="text-sm text-slate-500 mt-0.5">
             <span className="font-semibold text-blue-700">{grupoAtual.nome_do_grupo}</span>
@@ -199,13 +211,13 @@ export default function PropagacaoIndex() {
         <div className="flex gap-2 flex-wrap">
           <RBACButton module="Sistema" action="editar" onClick={() => runAll("both")} disabled={globalLoading} size="sm" className="gap-2 bg-purple-600 hover:bg-purple-700">
             {globalLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-            🚀 Inicializar Histórico (Tudo)
+            🔄 Reprocessar Tudo
           </RBACButton>
           <RBACButton module="Sistema" action="editar" onClick={() => runAll("down")} disabled={globalLoading} variant="outline" size="sm" className="gap-2 border-blue-300 text-blue-700 hover:bg-blue-50">
-            <ArrowDown className="w-4 h-4" /> Grupo → Empresas
+            <ArrowDown className="w-4 h-4" /> Reprocessar: Grupo → Empresas
           </RBACButton>
           <RBACButton module="Sistema" action="editar" onClick={() => runAll("up")} disabled={globalLoading} variant="outline" size="sm" className="gap-2 border-indigo-300 text-indigo-700 hover:bg-indigo-50">
-            <ArrowUp className="w-4 h-4" /> Empresas → Grupo
+            <ArrowUp className="w-4 h-4" /> Reprocessar: Empresas → Grupo
           </RBACButton>
           <RBACButton module="Sistema" action="editar" onClick={resetAll} disabled={globalLoading} variant="ghost" size="sm" className="text-slate-500">
             Resetar

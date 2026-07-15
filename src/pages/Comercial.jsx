@@ -127,11 +127,26 @@ export default function Comercial() {
     valorFaturado,
     valorPendenteFaturamento,
     pesoTotalVendido,
+    pesoFaturado,
+    pesoPendenteFaturamento,
     pedidosFaturados,
     pedidosFaturamentoParcial,
     pedidosCancelados,
     margemBruta,
     margemPercentual,
+    margemFaturada,
+    totalEtapasEntrega,
+    etapasFaturadas,
+    etapasPendentes,
+    pedidosComProducao,
+    pedidosSomenteRevenda,
+    percentualFaturado,
+    ticketFaturado,
+    pedidosEmProducao,
+    pedidosProntoFaturar,
+    pedidosEmExpedicao,
+    pedidosEmTransito,
+    pedidosEntregues,
   } = useComercialDerivedData({ pedidos, clientes, pedidosExternos });
 
   // Vol 3.3: Contagens server-side precisas (não limitadas pelo batch carregado)
@@ -333,6 +348,10 @@ export default function Comercial() {
        pendente: modules.find(m => m.title === 'Pedidos'),
        peso: modules.find(m => m.title === 'Pedidos'),
        margem: modules.find(m => m.title === 'Pedidos'),
+       // V21.4: Novos drill-downs
+       etapas: modules.find(m => m.title === 'Pedidos'),
+       producao: modules.find(m => m.title === 'Pedidos'),
+       expedicao: modules.find(m => m.title === 'Logística Entrega'),
      };
      const targetModule = moduleMap[dataKey];
      if (targetModule) {
@@ -399,11 +418,26 @@ export default function Comercial() {
                    valorFaturado={valorFaturado}
                    valorPendenteFaturamento={valorPendenteFaturamento}
                    pesoTotalVendido={pesoTotalVendido}
+                   pesoFaturado={pesoFaturado}
+                   pesoPendenteFaturamento={pesoPendenteFaturamento}
                    pedidosFaturados={pedidosFaturados}
                    pedidosFaturamentoParcial={pedidosFaturamentoParcial}
                    pedidosCancelados={pedidosCancelados}
                    margemBruta={margemBruta}
                    margemPercentual={margemPercentual}
+                   margemFaturada={margemFaturada}
+                   totalEtapasEntrega={totalEtapasEntrega}
+                   etapasFaturadas={etapasFaturadas}
+                   etapasPendentes={etapasPendentes}
+                   pedidosComProducao={pedidosComProducao}
+                   pedidosSomenteRevenda={pedidosSomenteRevenda}
+                   percentualFaturado={percentualFaturado}
+                   ticketFaturado={ticketFaturado}
+                   pedidosEmProducao={pedidosEmProducao}
+                   pedidosProntoFaturar={pedidosProntoFaturar}
+                   pedidosEmExpedicao={pedidosEmExpedicao}
+                   pedidosEmTransito={pedidosEmTransito}
+                   pedidosEntregues={pedidosEntregues}
                    onDrillDown={handleKPIDrillDown}
                    />
                 {pedidosExternosPendentes > 0 && (

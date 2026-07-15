@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Package, Truck, Receipt, MessageSquare, FileText, LayoutDashboard, Download } from 'lucide-react';
+import { Loader2, Package, Truck, Receipt, MessageSquare, FileText, LayoutDashboard, Download, AlertCircle } from 'lucide-react';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 import PortalHeader from '../components/portal/PortalHeader';
@@ -50,23 +50,35 @@ export default function PortalCliente() {
     queryKey: ['me'],
     enabled: !!isAuthenticated,
     queryFn: () => base44.auth.me(),
+    staleTime: 60000,
+    gcTime: 300000,
+    retry: 2,
+    retryDelay: 1000,
   });
 
   const isNonPortalRole = !!(user && user.role && user.role !== 'user');
 
-  const { data: cliente, isLoading: carregandoCliente } = useQuery({
+  const { data: cliente, isLoading: carregandoCliente, isError: erroCliente } = useQuery({
     queryKey: ['cliente-portal', user?.id],
     enabled: !!user?.id && !isNonPortalRole,
     queryFn: async () => {
       const list = await filterInContext('Cliente', { portal_usuario_id: user.id }, '-updated_date', 1);
       return list?.[0] || null;
-    }
+    },
+    staleTime: 30000,
+    gcTime: 300000,
+    retry: 2,
+    retryDelay: 1500,
   });
 
-  const { data: notasFiscais = [] } = useQuery({
+  const { data: notasFiscais = [], isError: erroNotas } = useQuery({
     queryKey: ['portal-nfs', cliente?.id, `${grupoAtual?.id||'g'}-${empresaAtual?.id||'e'}`],
     enabled: !!cliente?.id,
-    queryFn: async () => filterInContext('NotaFiscal', { cliente_fornecedor_id: cliente.id }, '-data_emissao', 100)
+    queryFn: async () => filterInContext('NotaFiscal', { cliente_fornecedor_id: cliente.id }, '-data_emissao', 100),
+    staleTime: 60000,
+    gcTime: 300000,
+    retry: 2,
+    retryDelay: 1500,
   });
 
   const { data: spotlight } = useQuery({
@@ -77,7 +89,11 @@ export default function PortalCliente() {
       const exp = res?.data?.exp;
       const expMin = exp ? Math.max(0, Math.round((exp * 1000 - Date.now()) / 60000)) : null;
       return { raw: res?.data, exp_minutes_remaining: expMin };
-    }
+    },
+    staleTime: 30000,
+    gcTime: 120000,
+    retry: 1,
+    retryDelay: 2000,
   });
 
   if (isLoadingAuth) {
@@ -111,6 +127,28 @@ export default function PortalCliente() {
         <Card className="max-w-lg w-full">
           <CardContent className="p-6 text-center text-sm text-muted-foreground">
             Este painel é exclusivo para clientes. Acesse os módulos internos pelo menu lateral.
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (erroCliente) {
+    return (
+      <div className="w-full h-full p-4 flex items-center justify-center">
+        <Card className="max-w-lg w-full">
+          <CardContent className="p-6 text-center space-y-3">
+            <AlertCircle className="w-10 h-10 mx-auto text-amber-500" />
+            <div className="text-lg font-semibold text-slate-900">Erro ao carregar dados</div>
+            <div className="text-sm text-muted-foreground">
+              Não foi possível carregar seus dados no momento. Tente novamente em alguns instantes.
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            >
+              Tentar novamente
+            </button>
           </CardContent>
         </Card>
       </div>

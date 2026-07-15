@@ -27,19 +27,51 @@ export default function useComercialDerivedData({ pedidos = [], clientes = [], p
 
   // Vol 5.1: Margem (usa custo_medio dos itens quando disponível)
   let custoTotalEstimado = 0;
+  let custoTotalFaturado = 0;
   for (const p of pedidosValidos) {
     const tiposItem = ['itens_revenda', 'itens_armado_padrao', 'itens_corte_dobra'];
+    const fatorFaturado = totalVendas > 0 ? safeNumber(p?.valor_faturado) / safeNumber(p?.valor_total, 1) : 0;
     for (const tipo of tiposItem) {
       const itens = p?.[tipo] || [];
       for (const item of itens) {
         const qtd = safeNumber(item?.quantidade);
         const custo = safeNumber(item?.custo_unitario || item?.custo_medio);
         custoTotalEstimado += qtd * custo;
+        custoTotalFaturado += qtd * custo * fatorFaturado;
       }
     }
   }
   const margemBruta = totalVendas - custoTotalEstimado;
   const margemPercentual = totalVendas > 0 ? (margemBruta / totalVendas) * 100 : 0;
+  const margemFaturada = valorFaturado - custoTotalFaturado;
+
+  // V21.4: Análise de etapas de entrega/faturamento parcial
+  const totalEtapasEntrega = pedidosValidos.reduce((sum, p) => sum + safeArray(p?.etapas_entrega).length, 0);
+  const etapasFaturadas = pedidosValidos.reduce(
+    (sum, p) => sum + safeArray(p?.etapas_entrega).filter(e => e?.faturada).length, 0
+  );
+  const etapasPendentes = totalEtapasEntrega - etapasFaturadas;
+  const valorMedioPorEtapa = totalEtapasEntrega > 0 ? valorFaturado / totalEtapasEntrega : 0;
+
+  // V21.4: Análise de produção vinculada
+  const pedidosComProducao = pedidosValidos.filter(
+    p => safeArray(p?.itens_armado_padrao).length > 0 || safeArray(p?.itens_corte_dobra).length > 0
+  ).length;
+  const pedidosSomenteRevenda = pedidosValidos.filter(
+    p => safeArray(p?.itens_armado_padrao).length === 0 && safeArray(p?.itens_corte_dobra).length === 0
+  ).length;
+
+  // V21.4: Análise de faturamento
+  const percentualFaturado = totalVendas > 0 ? (valorFaturado / totalVendas) * 100 : 0;
+  const pesoPendenteFaturamento = pesoTotalVendido - pesoFaturado;
+  const ticketFaturado = pedidosFaturados > 0 ? valorFaturado / pedidosFaturados : 0;
+
+  // V21.4: Análise de entrega
+  const pedidosEmProducao = pedidosValidos.filter(p => p?.status === 'Em Produção').length;
+  const pedidosProntoFaturar = pedidosValidos.filter(p => p?.status === 'Pronto para Faturar').length;
+  const pedidosEmExpedicao = pedidosValidos.filter(p => p?.status === 'Em Expedição').length;
+  const pedidosEmTransito = pedidosValidos.filter(p => p?.status === 'Em Trânsito').length;
+  const pedidosEntregues = pedidosValidos.filter(p => p?.status === 'Entregue').length;
 
   return {
     pedidosExternosPendentes,
@@ -54,10 +86,29 @@ export default function useComercialDerivedData({ pedidos = [], clientes = [], p
     valorPendenteFaturamento,
     pesoTotalVendido,
     pesoFaturado,
+    pesoPendenteFaturamento,
     pedidosFaturados,
     pedidosFaturamentoParcial,
     pedidosCancelados,
     margemBruta,
     margemPercentual,
+    margemFaturada,
+    // V21.4: Análise de etapas
+    totalEtapasEntrega,
+    etapasFaturadas,
+    etapasPendentes,
+    valorMedioPorEtapa,
+    // V21.4: Análise de produção
+    pedidosComProducao,
+    pedidosSomenteRevenda,
+    // V21.4: Análise de faturamento
+    percentualFaturado,
+    ticketFaturado,
+    // V21.4: Análise de entrega
+    pedidosEmProducao,
+    pedidosProntoFaturar,
+    pedidosEmExpedicao,
+    pedidosEmTransito,
+    pedidosEntregues,
   };
 }

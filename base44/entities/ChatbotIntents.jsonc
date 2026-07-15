@@ -10,13 +10,17 @@
       "type": "string",
       "description": "ID da empresa"
     },
+    "codigo": {
+      "type": "string",
+      "description": "Código sequencial único"
+    },
     "nome_intent": {
       "type": "string",
-      "description": "Nome \u00fanico do intent (ex: 2_via_boleto, rastrear_entrega)"
+      "description": "Nome único do intent (ex: 2_via_boleto, rastrear_entrega)"
     },
     "descricao": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o do que o intent faz"
+      "description": "Descrição do que o intent faz"
     },
     "palavras_chave": {
       "type": "array",
@@ -29,7 +33,7 @@
       "type": "string",
       "enum": [
         "consulta",
-        "transa\u00e7\u00e3o",
+        "transação",
         "suporte",
         "comercial"
       ],
@@ -50,7 +54,7 @@
         "consultar_estoque",
         "nenhuma"
       ],
-      "description": "A\u00e7\u00e3o a ser executada automaticamente"
+      "description": "Ação a ser executada automaticamente"
     },
     "entidade_vinculada": {
       "type": "string",
@@ -58,12 +62,12 @@
     },
     "resposta_padrao": {
       "type": "string",
-      "description": "Resposta padr\u00e3o quando detectado"
+      "description": "Resposta padrão quando detectado"
     },
     "escalar_vendedor": {
       "type": "boolean",
       "default": false,
-      "description": "Se deve escalar para vendedor respons\u00e1vel"
+      "description": "Se deve escalar para vendedor responsável"
     },
     "prioridade": {
       "type": "string",

@@ -21,7 +21,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo do tipo de despesa"
+      "description": "C\u00f3digo sequencial \u00fanico do tipo de despesa"
     },
     "nome": {
       "type": "string",

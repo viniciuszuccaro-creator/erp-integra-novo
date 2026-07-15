@@ -10,35 +10,39 @@
       "type": "string",
       "description": "ID da empresa"
     },
+    "codigo": {
+      "type": "string",
+      "description": "Código sequencial único"
+    },
     "tipo_caixa": {
       "type": "string",
       "enum": [
-        "Caixa F\u00edsico",
+        "Caixa Físico",
         "Caixa Loja",
         "Caixa Obra",
         "Caixa Virtual"
       ],
-      "default": "Caixa F\u00edsico"
+      "default": "Caixa Físico"
     },
     "conta_contabil_caixa_id": {
       "type": "string",
-      "description": "ID da conta cont\u00e1bil de caixa"
+      "description": "ID da conta contábil de caixa"
     },
     "conta_contabil_suprimento_id": {
       "type": "string",
-      "description": "ID da conta cont\u00e1bil para suprimentos"
+      "description": "ID da conta contábil para suprimentos"
     },
     "conta_contabil_sangria_id": {
       "type": "string",
-      "description": "ID da conta cont\u00e1bil para sangrias"
+      "description": "ID da conta contábil para sangrias"
     },
     "conta_contabil_desconto_id": {
       "type": "string",
-      "description": "ID da conta cont\u00e1bil para descontos"
+      "description": "ID da conta contábil para descontos"
     },
     "conta_contabil_acrescimo_id": {
       "type": "string",
-      "description": "ID da conta cont\u00e1bil para acr\u00e9scimos"
+      "description": "ID da conta contábil para acréscimos"
     },
     "politica_arredondamento": {
       "type": "string",
@@ -60,7 +64,7 @@
     "desconto_maximo_percentual": {
       "type": "number",
       "default": 10,
-      "description": "% m\u00e1ximo de desconto permitido"
+      "description": "% máximo de desconto permitido"
     },
     "acrescimo_maximo_percentual": {
       "type": "number",
@@ -86,12 +90,12 @@
       "items": {
         "type": "string"
       },
-      "description": "IDs das formas de pagamento dispon\u00edveis"
+      "description": "IDs das formas de pagamento disponíveis"
     },
     "exige_autorizacao_sangria_acima": {
       "type": "number",
       "default": 0,
-      "description": "Valor acima do qual exige autoriza\u00e7\u00e3o para sangria"
+      "description": "Valor acima do qual exige autorização para sangria"
     },
     "exige_autorizacao_suprimento_acima": {
       "type": "number",
@@ -100,7 +104,7 @@
     "permite_baixa_lote": {
       "type": "boolean",
       "default": true,
-      "description": "Se permite baixa em lote de t\u00edtulos"
+      "description": "Se permite baixa em lote de títulos"
     },
     "ativo": {
       "type": "boolean",

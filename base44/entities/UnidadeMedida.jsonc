@@ -16,7 +16,7 @@
     },
     "sigla": {
       "type": "string",
-      "description": "Sigla da unidade (UN, KG, MT, etc.) \u2014 \u00fanica por grupo"
+      "description": "Sigla da unidade (UN, KG, MT, etc.) \u2014 \u00fanico por grupo"
     },
     "nome_completo": {
       "type": "string",

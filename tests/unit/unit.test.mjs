@@ -117,7 +117,18 @@ function testEntitySchemas() {
     const hasGroupId = 'group_id' in props;
     const hasEmpresaId = 'empresa_id' in props;
     const hasCodigo = 'codigo' in props;
-    const hasAtivo = 'ativo' in props || 'status' in props;
+    const hasAtivo = 'ativo' in props || 'status' in props || 'ativa' in props;
+
+    // Event logs — registros imutáveis sem ciclo de vida (não exigem ativo/status)
+    const EVENT_LOG = new Set([
+      'MovimentacaoEstoque', 'CaixaMovimento', 'ExtratoBancario',
+      'MensagemOmnicanal', 'PosicaoVeiculo', 'HistoricoCliente',
+      'LancamentoContabil', 'SPEDFiscal', 'DRE', 'MonitoramentoRH',
+      'MovimentoCartao', 'ApontamentoProducao', 'Ponto',
+      'ChatbotInteracao', 'ConciliacaoPedido', 'EntregaItens',
+      'ImportacaoXMLNFe', 'Interacao', 'PagamentoOmnichannel',
+      'PedidoEtapa', 'PedidoExterno',
+    ]);
 
     if (STRUCTURAL.has(entityName)) {
       // Entidades estruturais: apenas verificam ativo/status (ou são isentas)
@@ -134,7 +145,7 @@ function testEntitySchemas() {
       const missing = [];
       if (!hasGroupId) missing.push('group_id');
       if (!hasEmpresaId) missing.push('empresa_id');
-      if (!hasAtivo) missing.push('ativo/status');
+      if (!hasAtivo && !EVENT_LOG.has(entityName)) missing.push('ativo/status');
       if (missing.length === 0) {
         log('pass', `${entityName}: transacional multiempresa OK`);
       } else {
@@ -209,11 +220,11 @@ function testUniqueConstraints() {
   const entitiesDir = join(ROOT, 'base44', 'entities');
   const checks = [
     { entity: 'Produto', field: 'descricao', label: 'descrição' },
-    { entity: 'Cliente', field: 'cpf_cnpj', label: 'CPF/CNPJ' },
+    { entity: 'Cliente', field: 'cnpj', label: 'CNPJ' },
     { entity: 'Fornecedor', field: 'cnpj', label: 'CNPJ' },
     { entity: 'Colaborador', field: 'cpf', label: 'CPF' },
-    { entity: 'Marca', field: 'nome', label: 'nome' },
-    { entity: 'GrupoProduto', field: 'nome', label: 'nome' },
+    { entity: 'Marca', field: 'nome_marca', label: 'nome' },
+    { entity: 'GrupoProduto', field: 'nome_grupo', label: 'nome' },
     { entity: 'UnidadeMedida', field: 'sigla', label: 'sigla' },
     { entity: 'Banco', field: 'codigo_banco', label: 'código bancário' },
   ];

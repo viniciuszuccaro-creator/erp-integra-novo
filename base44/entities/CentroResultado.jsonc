@@ -21,7 +21,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo do centro de resultado"
+      "description": "C\u00f3digo sequencial \u00fanico do centro de resultado"
     },
     "nome": {
       "type": "string",

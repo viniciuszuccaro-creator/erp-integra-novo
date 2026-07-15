@@ -6,13 +6,17 @@
       "type": "string",
       "description": "ID do grupo empresarial (global)"
     },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
+    },
     "nome_grupo": {
       "type": "string",
-      "description": "Nome do grupo (Ex: Ferragens, Bitolas, Materiais El\u00e9tricos)"
+      "description": "Nome do grupo \u2014 \u00fanico por grupo (Ex: Ferragens, Bitolas, Materiais El\u00e9tricos)"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo do grupo"
+      "description": "C\u00f3digo sequencial \u00fanico do grupo"
     },
     "natureza": {
       "type": "string",

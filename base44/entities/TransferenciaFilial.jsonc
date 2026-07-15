@@ -6,6 +6,10 @@
       "type": "string",
       "description": "ID do grupo empresarial"
     },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa origem da transfer\u00eancia"
+    },
     "numero_transferencia": {
       "type": "string",
       "description": "N\u00famero \u00fanico da transfer\u00eancia"

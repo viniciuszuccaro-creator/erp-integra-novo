@@ -82,6 +82,10 @@
       "type": "string",
       "description": "Grupo empresarial"
     },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa emissora da NF"
+    },
     "data_emissao": {
       "type": "string",
       "format": "date"

@@ -6,6 +6,10 @@
       "type": "string",
       "description": "ID do grupo empresarial"
     },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa que originou o rateio"
+    },
     "tipo_documento": {
       "type": "string",
       "enum": [
@@ -107,6 +111,18 @@
     },
     "observacoes": {
       "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "aprovado",
+        "rejeitado",
+        "concluido",
+        "cancelado"
+      ],
+      "default": "pendente",
+      "description": "Status do rateio"
     },
     "status_consolidacao": {
       "type": "string",

@@ -6,19 +6,25 @@
       "type": "string",
       "description": "ID do grupo empresarial"
     },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
+    },
     "empresa_alocada_id": {
       "type": "string",
       "description": "Empresa onde trabalha atualmente"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo \u00fanico do colaborador"
+      "description": "C\u00f3digo sequencial \u00fanico do colaborador"
     },
     "nome_completo": {
-      "type": "string"
+      "type": "string",
+      "description": "Nome completo do colaborador \u2014 \u00fanico por grupo"
     },
     "cpf": {
-      "type": "string"
+      "type": "string",
+      "description": "CPF \u00fanico do colaborador"
     },
     "rg": {
       "type": "string"

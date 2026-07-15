@@ -6,17 +6,25 @@
       "type": "string",
       "description": "ID do grupo empresarial"
     },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
+    },
     "empresa_dona_id": {
       "type": "string",
       "description": "Empresa que cadastrou o kit"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo sequencial \u00fanico do kit"
+    },
     "codigo_kit": {
       "type": "string",
-      "description": "C\u00f3digo do kit"
+      "description": "C\u00f3digo do kit (legado)"
     },
     "nome_kit": {
       "type": "string",
-      "description": "Nome do kit"
+      "description": "Nome do kit \u2014 \u00fanico por grupo"
     },
     "descricao": {
       "type": "string",

@@ -3,7 +3,12 @@
   "type": "object",
   "properties": {
     "group_id": {
-      "type": "string"
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
     },
     "empresa_dona_id": {
       "type": "string"
@@ -16,7 +21,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo \u00fanico do representante"
+      "description": "C\u00f3digo sequencial \u00fanico do representante"
     },
     "tipo_representante": {
       "type": "string",
@@ -40,16 +45,19 @@
       "default": "Pessoa F\u00edsica"
     },
     "nome": {
-      "type": "string"
+      "type": "string",
+      "description": "Nome completo do representante \u2014 \u00fanico por grupo"
     },
     "razao_social": {
       "type": "string"
     },
     "cpf": {
-      "type": "string"
+      "type": "string",
+      "description": "CPF \u00fanico do representante"
     },
     "cnpj": {
-      "type": "string"
+      "type": "string",
+      "description": "CNPJ \u00fanico do representante"
     },
     "crea_cau": {
       "type": "string"

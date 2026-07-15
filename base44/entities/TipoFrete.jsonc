@@ -6,13 +6,17 @@
       "type": "string",
       "description": "ID do grupo empresarial"
     },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
+    },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo do tipo de frete"
+      "description": "C\u00f3digo sequencial \u00fanico do tipo de frete"
     },
     "nome": {
       "type": "string",
-      "description": "Nome do tipo de frete"
+      "description": "Nome do tipo de frete \u2014 \u00fanico por grupo"
     },
     "descricao": {
       "type": "string"

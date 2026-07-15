@@ -6,6 +6,10 @@
       "type": "string",
       "description": "ID do grupo empresarial"
     },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
+    },
     "empresa_dona_id": {
       "type": "string",
       "description": "Empresa que cadastrou"
@@ -18,7 +22,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo \u00fanico da transportadora"
+      "description": "C\u00f3digo sequencial \u00fanico da transportadora"
     },
     "razao_social": {
       "type": "string"
@@ -27,7 +31,8 @@
       "type": "string"
     },
     "cnpj": {
-      "type": "string"
+      "type": "string",
+      "description": "CNPJ \u00fanico da transportadora"
     },
     "inscricao_estadual": {
       "type": "string"

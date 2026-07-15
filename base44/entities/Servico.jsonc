@@ -6,6 +6,10 @@
       "type": "string",
       "description": "ID do grupo empresarial"
     },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
+    },
     "empresa_dona_id": {
       "type": "string",
       "description": "Empresa que cadastrou o servi\u00e7o"
@@ -17,13 +21,17 @@
       },
       "description": "Empresas que podem usar este servi\u00e7o"
     },
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo sequencial \u00fanico do servi\u00e7o"
+    },
     "codigo_servico": {
       "type": "string",
-      "description": "C\u00f3digo interno do servi\u00e7o"
+      "description": "C\u00f3digo interno do servi\u00e7o (legado)"
     },
     "descricao": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o do servi\u00e7o"
+      "description": "Descri\u00e7\u00e3o do servi\u00e7o \u2014 \u00fanica por grupo"
     },
     "descricao_detalhada": {
       "type": "string",

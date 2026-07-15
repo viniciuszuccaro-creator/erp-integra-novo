@@ -3,7 +3,12 @@
   "type": "object",
   "properties": {
     "group_id": {
-      "type": "string"
+      "type": "string",
+      "description": "ID do grupo empresarial"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
     },
     "codigo": {
       "type": "string",
@@ -11,7 +16,7 @@
     },
     "codigo_banco": {
       "type": "string",
-      "description": "C\u00f3digo oficial do banco (ex: 001, 237, 341)"
+      "description": "C\u00f3digo oficial do banco (ex: 001, 237, 341) \u2014 \u00fanico por grupo"
     },
     "nome_banco": {
       "type": "string"

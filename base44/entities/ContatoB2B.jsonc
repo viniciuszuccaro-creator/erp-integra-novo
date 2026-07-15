@@ -6,13 +6,17 @@
       "type": "string",
       "description": "ID do grupo empresarial"
     },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
+    },
     "empresa_vinculada_id": {
       "type": "string",
       "description": "ID da empresa (cliente/fornecedor) a qual este contato pertence"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo \u00fanico do contato"
+      "description": "C\u00f3digo sequencial \u00fanico do contato"
     },
     "tipo_vinculo": {
       "type": "string",

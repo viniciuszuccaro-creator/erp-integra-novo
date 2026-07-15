@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { MapPin, Navigation, Package, Phone, Truck } from "lucide-react";
 
-export default function EntregaListaView({ minhasEntregas, localizacao, isOffline, smsNumero, setSmsNumero, iniciarEntrega, user }) {
+export default function EntregaListaView({ minhasEntregas, localizacao, isOffline, smsNumero, setSmsNumero, iniciarEntrega, user, operacoesPendentes = 0 }) {
   return (
     <div className="w-full h-full overflow-auto bg-gradient-to-br from-blue-50 to-slate-100 p-4">
       <Card className="mb-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white border-0">
@@ -28,6 +28,9 @@ export default function EntregaListaView({ minhasEntregas, localizacao, isOfflin
       {isOffline && (
         <Alert className="mb-4 border-amber-300 bg-amber-50">
           <AlertDescription className="text-sm text-amber-800">
+            {operacoesPendentes > 0
+              ? `📴 Modo offline — ${operacoesPendentes} operação(ões) na fila de sincronização. `
+              : ''}
             Sem conexão: você pode enviar sua localização por SMS para o centro de operações.
             <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2">
               <Input placeholder="Número do gateway SMS (ex.: 28900)" value={smsNumero} onChange={(e) => setSmsNumero(e.target.value)} />

@@ -93,6 +93,19 @@ async function runTests() {
     'ContaReceber', 'ContaPagar', 'MovimentacaoEstoque', 'Entrega',
     'OrdemCompra', 'Colaborador', 'Contrato', 'Oportunidade',
     'OrdemProducao', 'Romaneio', 'ApontamentoProducao',
+    // Cadastros Gerais — Pessoas
+    'Transportadora', 'Representante', 'ContatoB2B', 'SegmentoCliente', 'RegiaoAtendimento',
+    // Cadastros Gerais — Produtos
+    'Marca', 'GrupoProduto', 'UnidadeMedida', 'TabelaNCM', 'TabelaPreco', 'SetorAtividade', 'KitProduto', 'Servico',
+    // Cadastros Gerais — Financeiro
+    'Banco', 'GatewayPagamento', 'FormaPagamento', 'CondicaoComercial', 'PlanoDeContas', 'CentroCusto', 'CentroResultado', 'MoedaIndice', 'TipoDespesa',
+    // Cadastros Gerais — Logística
+    'Veiculo', 'Motorista', 'RotaPadrao', 'TipoFrete', 'LocalEstoque', 'CentroOperacao',
+    // Cadastros Gerais — Organizacional
+    'Cargo', 'Departamento', 'Turno',
+    // Cadastros Gerais — Sistema
+    'PerfilAcesso', 'ApiExterna', 'Webhook', 'EventoNotificacao', 'ModeloDocumento', 'ChatbotCanal', 'ChatbotIntent',
+    'ConfiguracaoNFe', 'TabelaFiscal', 'IAConfig', 'ConfiguracaoSistema',
   ];
   for (const entity of criticalEntities) {
     await testEntityStructure(entity);
@@ -105,6 +118,31 @@ async function runTests() {
   await testBackendFunction('entityListSorted', { entity: 'Pedido', sort: '-created_date', limit: 1 });
   await testBackendFunction('validateERPStructure', {});
   await testBackendFunction('sodValidator', {});
+  await testBackendFunction('entityGuard', { module: 'Comercial', action: 'ver' });
+  await testBackendFunction('sanitizeOnWrite', { entity_name: 'Pedido', data: { valor_total: 100 } });
+  await testBackendFunction('securityPoliciesValidator', {});
+
+  // ── 2b. Verificação de Duplicidade de Códigos ──
+  console.log(`\n${COLORS.bold}🔍 2b. Duplicidade de Códigos em Cadastros${COLORS.reset}`);
+  const entitiesWithCodigo = ['Cliente', 'Fornecedor', 'Produto', 'Transportadora', 'Colaborador', 'Representante'];
+  for (const entity of entitiesWithCodigo) {
+    try {
+      const records = await base44.entities[entity]?.list?.('-created_date', 100);
+      if (!records || records.length === 0) {
+        log('skip', `${entity}: sem registros para verificar duplicidade`);
+        continue;
+      }
+      const codigos = records.map(r => r?.codigo).filter(Boolean);
+      const duplicados = codigos.filter((c, i) => codigos.indexOf(c) !== i);
+      if (duplicados.length === 0) {
+        log('pass', `${entity}: ${codigos.length} código(s) único(s) — sem duplicidade`);
+      } else {
+        log('fail', `${entity}: ${duplicados.length} código(s) duplicado(s): ${duplicados.slice(0, 3).join(', ')}`);
+      }
+    } catch (err) {
+      log('skip', `${entity}: ${err.message}`);
+    }
+  }
 
   // ── 3. Automações (via listagem) ──
   console.log(`\n${COLORS.bold}🔄 3. Status de Automações${COLORS.reset}`);

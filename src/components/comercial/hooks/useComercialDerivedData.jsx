@@ -73,6 +73,58 @@ export default function useComercialDerivedData({ pedidos = [], clientes = [], p
   const pedidosEmTransito = pedidosValidos.filter(p => p?.status === 'Em Trânsito').length;
   const pedidosEntregues = pedidosValidos.filter(p => p?.status === 'Entregue').length;
 
+  // V21.4: Análise de quantidades por tipo de item
+  const tiposItem = ['itens_revenda', 'itens_armado_padrao', 'itens_corte_dobra'];
+  const quantidadesPorTipo = tiposItem.reduce((acc, tipo) => {
+    const qtd = pedidosValidos.reduce((sum, p) => {
+      const itens = safeArray(p?.[tipo]);
+      return sum + itens.reduce((s, i) => s + safeNumber(i?.quantidade), 0);
+    }, 0);
+    const valor = pedidosValidos.reduce((sum, p) => {
+      const itens = safeArray(p?.[tipo]);
+      return sum + itens.reduce((s, i) => s + safeNumber(i?.valor_total), 0);
+    }, 0);
+    acc[tipo] = { quantidade: qtd, valor, ticket: qtd > 0 ? valor / qtd : 0 };
+    return acc;
+  }, {});
+  const quantidadeTotalItens = tiposItem.reduce((sum, tipo) => sum + quantidadesPorTipo[tipo].quantidade, 0);
+
+  // V21.4: Margem por tipo de item
+  const margemPorTipo = tiposItem.reduce((acc, tipo) => {
+    let custo = 0, receita = 0;
+    for (const p of pedidosValidos) {
+      const itens = safeArray(p?.[tipo]);
+      for (const item of itens) {
+        const qtd = safeNumber(item?.quantidade);
+        const custoItem = safeNumber(item?.custo_unitario || item?.custo_medio);
+        const preco = safeNumber(item?.valor_total || (item?.preco_unitario * qtd));
+        custo += qtd * custoItem;
+        receita += preco;
+      }
+    }
+    acc[tipo] = { receita, custo, margem: receita - custo, margemPercent: receita > 0 ? ((receita - custo) / receita) * 100 : 0 };
+    return acc;
+  }, {});
+
+  // V21.4: Performance de entrega (taxa de sucesso)
+  const totalPedidosFinalizados = pedidosEntregues + pedidosCancelados;
+  const taxaEntregaSucesso = totalPedidosFinalizados > 0 ? (pedidosEntregues / totalPedidosFinalizados) * 100 : 0;
+  const taxaCancelamento = pedidosValidos.length > 0 ? (pedidosCancelados / (pedidosValidos.length + pedidosCancelados)) * 100 : 0;
+
+  // V21.4: Funil de status (pipeline visual)
+  const funilStatus = [
+    { status: 'Rascunho', count: listaPedidos.filter(p => p?.status === 'Rascunho').length },
+    { status: 'Aguardando Aprovação', count: listaPedidos.filter(p => p?.status === 'Aguardando Aprovação').length },
+    { status: 'Aprovado', count: listaPedidos.filter(p => p?.status === 'Aprovado').length },
+    { status: 'Em Produção', count: pedidosEmProducao },
+    { status: 'Pronto para Faturar', count: pedidosProntoFaturar },
+    { status: 'Faturado', count: pedidosFaturados },
+    { status: 'Em Expedição', count: pedidosEmExpedicao },
+    { status: 'Em Trânsito', count: pedidosEmTransito },
+    { status: 'Entregue', count: pedidosEntregues },
+    { status: 'Cancelado', count: pedidosCancelados },
+  ];
+
   return {
     pedidosExternosPendentes,
     totalVendas,
@@ -110,5 +162,15 @@ export default function useComercialDerivedData({ pedidos = [], clientes = [], p
     pedidosEmExpedicao,
     pedidosEmTransito,
     pedidosEntregues,
+    // V21.4: Análise de quantidades por tipo
+    quantidadesPorTipo,
+    quantidadeTotalItens,
+    // V21.4: Margem por tipo de item
+    margemPorTipo,
+    // V21.4: Performance de entrega
+    taxaEntregaSucesso,
+    taxaCancelamento,
+    // V21.4: Funil de status
+    funilStatus,
   };
 }

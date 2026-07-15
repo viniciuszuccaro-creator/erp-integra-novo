@@ -21,6 +21,51 @@ export default function useEntregasMotorista() {
   const [reversaMotivo, setReversaMotivo] = useState("Recusa Total");
   const [reversaQtd, setReversaQtd] = useState(0);
   const [reversaValor, setReversaValor] = useState(0);
+  const [filaOffline, setFilaOffline] = useState(() => {
+    try {
+      const saved = localStorage.getItem('erp_zuccaro_fila_offline');
+      return saved ? JSON.parse(saved) : [];
+    } catch (_) { return []; }
+  });
+
+  // Persiste fila offline no localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('erp_zuccaro_fila_offline', JSON.stringify(filaOffline));
+    } catch (_) {}
+  }, [filaOffline]);
+
+  // Sincroniza fila offline quando volta online
+  useEffect(() => {
+    if (!isOffline && filaOffline.length > 0) {
+      (async () => {
+        const pendentes = [...filaOffline];
+        const resolvidos = [];
+        for (const op of pendentes) {
+          try {
+            if (op.tipo === 'update_entrega') {
+              await base44.entities.Entrega.update(op.entregaId, op.dados);
+            }
+            resolvidos.push(op.id);
+          } catch (err) {
+            console.error('[mobile] sync offline falhou:', op.id, err);
+            break; // para na primeira falha — tenta novamente depois
+          }
+        }
+        if (resolvidos.length > 0) {
+          setFilaOffline(prev => prev.filter(op => !resolvidos.includes(op.id)));
+          toast.success(`📤 ${resolvidos.length} operação(ões) sincronizada(s)`);
+          refetch();
+        }
+      })();
+    }
+  }, [isOffline]); // eslint-disable-line
+
+  const enfileirarOperacao = (tipo, entregaId, dados) => {
+    const op = { id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, tipo, entregaId, dados, criadoEm: new Date().toISOString() };
+    setFilaOffline(prev => [...prev, op]);
+    return op;
+  };
 
   const { data: minhasEntregas = [], isLoading: carregandoEntregas, isError: erroEntregas, refetch } = useQuery({
     queryKey: ["entregas-motorista", `${grupoAtual?.id || 'g'}-${empresaAtual?.id || 'e'}`],
@@ -93,11 +138,17 @@ export default function useEntregasMotorista() {
   const iniciarEntrega = async (entrega) => {
     if (!entrega?.id) { toast.error("Entrega inválida"); return; }
     setEntregaAtual(entrega);
+    const dados = {
+      status: "Em Trânsito",
+      historico_status: [...(entrega.historico_status || []), { status: "Em Trânsito", data_hora: new Date().toISOString(), usuario: user.full_name, localizacao }],
+    };
+    if (isOffline) {
+      enfileirarOperacao('update_entrega', entrega.id, dados);
+      toast.info("📴 Sem conexão — operação enfileirada para sincronização");
+      return;
+    }
     try {
-      await base44.entities.Entrega.update(entrega.id, {
-        status: "Em Trânsito",
-        historico_status: [...(entrega.historico_status || []), { status: "Em Trânsito", data_hora: new Date().toISOString(), usuario: user.full_name, localizacao }],
-      });
+      await base44.entities.Entrega.update(entrega.id, dados);
       try { await base44.entities.AuditLog.create({ usuario: user?.full_name || user?.email || "Motorista", usuario_id: user?.id, empresa_id: entrega.empresa_id || null, group_id: entrega.group_id || null, acao: "Edição", modulo: "Expedição", tipo_auditoria: "ui", entidade: "Entrega", registro_id: entrega.id, descricao: "Entrega iniciada no app do motorista", data_hora: new Date().toISOString() }); } catch (e) { console.error('[mobile] audit catch:', e); }
       refetch();
       toast.success("🚚 Entrega iniciada!");
@@ -138,12 +189,21 @@ export default function useEntregasMotorista() {
     let assinatura = assinaturaBase64;
     try { const canvas = document.getElementById("assinatura-canvas"); if (canvas) assinatura = canvas.toDataURL("image/png"); } catch (e) { console.error('[mobile] assinatura catch:', e); }
 
+    const dados = {
+      status: "Entregue", data_entrega: new Date().toISOString(),
+      comprovante_entrega: { foto_comprovante: fotoComprovante, assinatura_digital: assinatura, nome_recebedor: nomeRecebedor, documento_recebedor: documentoRecebedor, data_hora_recebimento: new Date().toISOString(), latitude_entrega: localizacao?.latitude, longitude_entrega: localizacao?.longitude },
+      historico_status: [...(entregaAtual.historico_status || []), { status: "Entregue", data_hora: new Date().toISOString(), usuario: user.full_name, localizacao, observacao: `Recebido por: ${nomeRecebedor}` }],
+    };
+
+    if (isOffline) {
+      enfileirarOperacao('update_entrega', entregaAtual.id, dados);
+      toast.info("📴 Sem conexão — entrega enfileirada para sincronização");
+      setEntregaAtual(null); setFotoComprovante(null); setAssinaturaBase64(null); setNomeRecebedor(""); setDocumentoRecebedor("");
+      return;
+    }
+
     try {
-      await base44.entities.Entrega.update(entregaAtual.id, {
-        status: "Entregue", data_entrega: new Date().toISOString(),
-        comprovante_entrega: { foto_comprovante: fotoComprovante, assinatura_digital: assinatura, nome_recebedor: nomeRecebedor, documento_recebedor: documentoRecebedor, data_hora_recebimento: new Date().toISOString(), latitude_entrega: localizacao?.latitude, longitude_entrega: localizacao?.longitude },
-        historico_status: [...(entregaAtual.historico_status || []), { status: "Entregue", data_hora: new Date().toISOString(), usuario: user.full_name, localizacao, observacao: `Recebido por: ${nomeRecebedor}` }],
-      });
+      await base44.entities.Entrega.update(entregaAtual.id, dados);
 
       try { await base44.entities.AuditLog.create({ usuario: user?.full_name || user?.email || "Motorista", usuario_id: user?.id, empresa_id: entregaAtual?.empresa_id || null, group_id: entregaAtual?.group_id || null, acao: "Edição", modulo: "Expedição", tipo_auditoria: "ui", entidade: "Entrega", registro_id: entregaAtual?.id, descricao: "Entrega confirmada (foto + assinatura) no app do motorista", data_hora: new Date().toISOString() }); } catch (e) { console.error('[mobile] audit catch:', e); }
 
@@ -193,5 +253,6 @@ export default function useEntregasMotorista() {
     fotoComprovante, setFotoComprovante, enviandoFoto, nomeRecebedor, setNomeRecebedor, documentoRecebedor, setDocumentoRecebedor,
     assinaturaBase64, setAssinaturaBase64, reversaMotivo, setReversaMotivo, reversaQtd, setReversaQtd, reversaValor, setReversaValor,
     iniciarEntrega, tirarFoto, confirmarEntrega, registrarOcorrencia, registrarReversa,
+    filaOffline, operacoesPendentes: filaOffline.length,
   };
 }

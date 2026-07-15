@@ -16,6 +16,7 @@ export default function AppEntregasMotorista() {
         setSmsNumero={hook.setSmsNumero}
         iniciarEntrega={hook.iniciarEntrega}
         user={hook.user}
+        operacoesPendentes={hook.operacoesPendentes}
       />
     );
   }

@@ -147,6 +147,12 @@ export default function Comercial() {
     pedidosEmExpedicao,
     pedidosEmTransito,
     pedidosEntregues,
+    quantidadesPorTipo,
+    quantidadeTotalItens,
+    margemPorTipo,
+    taxaEntregaSucesso,
+    taxaCancelamento,
+    funilStatus,
   } = useComercialDerivedData({ pedidos, clientes, pedidosExternos });
 
   // Vol 3.3: Contagens server-side precisas (não limitadas pelo batch carregado)
@@ -438,6 +444,12 @@ export default function Comercial() {
                    pedidosEmExpedicao={pedidosEmExpedicao}
                    pedidosEmTransito={pedidosEmTransito}
                    pedidosEntregues={pedidosEntregues}
+                   quantidadesPorTipo={quantidadesPorTipo}
+                   quantidadeTotalItens={quantidadeTotalItens}
+                   margemPorTipo={margemPorTipo}
+                   taxaEntregaSucesso={taxaEntregaSucesso}
+                   taxaCancelamento={taxaCancelamento}
+                   funilStatus={funilStatus}
                    onDrillDown={handleKPIDrillDown}
                    />
                 {pedidosExternosPendentes > 0 && (

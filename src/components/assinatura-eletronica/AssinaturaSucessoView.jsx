@@ -35,7 +35,7 @@ export default function AssinaturaSucessoView({ dadosAssinatura, onBaixarComprov
       </Card>
 
       <div className="flex justify-center gap-3">
-        <Button type="button" variant="outline" data-permission="Sistema.AssinaturaEletronica.baixar" onClick={onBaixarComprovante}>
+        <Button type="button" variant="outline" onClick={onBaixarComprovante}>
           <Download className="w-4 h-4 mr-2" />Baixar Comprovante
         </Button>
       </div>

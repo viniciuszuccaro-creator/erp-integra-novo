@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
           destination: { lat, lng }
         });
         if (r?.data?.eta_minutes != null) etaMin = r.data.eta_minutes;
-      } catch {}
+      } catch (e) { console.error('[notifyProximity] catch:', e); }
 
       // Notificação ao usuário do portal, se existir
       const portalUserId = entrega?.portal_usuario_id || entrega?.cliente_portal_usuario_id || null;
@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
             canal: 'Sistema',
             lida: false
           });
-        } catch {}
+        } catch (e) { console.error('[notifyProximity] catch:', e); }
       }
 
       // Marca controle em Entrega
@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
           mensagem: `ETA ~${etaMin} min`
         });
         await base44.asServiceRole.entities.Entrega.update(entrega.id, { notificacoes_enviadas: historico });
-      } catch {}
+      } catch (e) { console.error('[notifyProximity] catch:', e); }
 
       return Response.json({ notified: true, dist_km: distKm, eta_min: etaMin });
     }

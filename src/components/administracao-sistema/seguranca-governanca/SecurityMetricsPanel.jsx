@@ -162,7 +162,7 @@ export default function SecurityMetricsPanel() {
       const perfis = await base44.asServiceRole.entities.PerfilAcesso.filter(scope, "-updated_date", 100).catch(() => []);
       const comConflito = (perfis || []).filter(p => (p.conflitos_sod_detectados || []).length > 0);
       setSodPerfis(comConflito);
-    } catch {} finally { setSodLoading(false); }
+    } catch (e) { console.error('[seguranca-governanca] catch:', e); } finally { setSodLoading(false); }
   };
 
   const loadHistorico = async () => {
@@ -172,7 +172,7 @@ export default function SecurityMetricsPanel() {
         "-data_hora", 50
       );
       setHistorico(logs || []);
-    } catch {}
+    } catch (e) { console.error('[seguranca-governanca] catch:', e); }
   };
 
   const forceSodScan = async () => {
@@ -180,7 +180,7 @@ export default function SecurityMetricsPanel() {
     try {
       await base44.functions.invoke("sodValidator", { force: true, ...scope });
       await loadSod();
-    } catch {} finally { setSodLoading(false); }
+    } catch (e) { console.error('[seguranca-governanca] catch:', e); } finally { setSodLoading(false); }
   };
 
   useEffect(() => {
@@ -198,7 +198,7 @@ export default function SecurityMetricsPanel() {
           <h3 className="font-semibold text-slate-800">Segurança em Tempo Real</h3>
           {lastRun && <span className="text-xs text-slate-400">Atualizado: {lastRun}</span>}
         </div>
-        <Button data-permission="Sistema.Seguranca.visualizar" variant="outline" size="sm" onClick={loadMetrics} disabled={loading}>
+        <Button variant="outline" size="sm" onClick={loadMetrics} disabled={loading}>
           <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} /> Analisar
         </Button>
       </div>
@@ -268,7 +268,7 @@ export default function SecurityMetricsPanel() {
               <CardTitle className="text-sm">
                 {sodPerfis.length === 0 ? "Nenhum conflito SoD detectado" : `${sodPerfis.length} perfil(is) com conflito`}
               </CardTitle>
-              <Button data-permission="Sistema.Seguranca.executar" variant="outline" size="sm" onClick={forceSodScan} disabled={sodLoading}>
+              <Button variant="outline" size="sm" onClick={forceSodScan} disabled={sodLoading}>
                 <Search className={`w-3.5 h-3.5 mr-1.5 ${sodLoading ? "animate-pulse" : ""}`} /> Forçar Scan
               </Button>
             </CardHeader>
@@ -285,7 +285,7 @@ export default function SecurityMetricsPanel() {
           <Card className="h-full">
             <CardHeader className="pb-2 pt-3 px-4 flex flex-row items-center justify-between">
               <CardTitle className="text-sm">Últimos 50 eventos de segurança</CardTitle>
-              <Button data-permission="Sistema.Seguranca.visualizar" variant="ghost" size="sm" onClick={loadHistorico}>
+              <Button variant="ghost" size="sm" onClick={loadHistorico}>
                 <RefreshCw className="w-3.5 h-3.5" />
               </Button>
             </CardHeader>

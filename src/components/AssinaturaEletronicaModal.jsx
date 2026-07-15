@@ -199,7 +199,6 @@ export default function AssinaturaEletronicaModal({
                 type="button"
                 variant="outline"
                 onClick={fechar}
-                data-permission="Comercial.AssinaturaEletronica.cancelar"
                 data-action="Comercial.AssinaturaEletronica.cancelar"
               >
                 Cancelar
@@ -209,7 +208,6 @@ export default function AssinaturaEletronicaModal({
                 onClick={assinarDocumento}
                 disabled={assinando}
                 className="bg-blue-600 hover:bg-blue-700"
-                data-permission="Comercial.AssinaturaEletronica.assinar"
                 data-action="Comercial.AssinaturaEletronica.assinar"
                 data-sensitive="true"
               >

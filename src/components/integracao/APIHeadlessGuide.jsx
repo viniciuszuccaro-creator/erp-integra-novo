@@ -54,7 +54,7 @@ export default function APIHeadlessGuide() {
           <div key={idx} className="bg-white border rounded-lg overflow-hidden">
             <div className="bg-slate-100 px-3 py-2 flex items-center justify-between">
               <p className="text-sm font-medium">{ex.titulo}</p>
-              <Button data-permission="Sistema.APIHeadlessGuide.copiar"
+              <Button
                 size="sm"
                 variant="ghost"
                 onClick={() => copiar(idx, ex.codigo)}

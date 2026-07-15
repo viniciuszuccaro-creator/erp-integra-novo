@@ -101,7 +101,7 @@ export default function BaixaContaPagarDialog({
 
           <div className="flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-            <Button type="submit" data-permission="Financeiro.ContaPagar.baixar" disabled={isPending} className="bg-green-600">
+            <Button type="submit" disabled={isPending} className="bg-green-600">
               {isPending ? 'Registrando...' : 'Confirmar'}
             </Button>
           </div>

@@ -82,14 +82,14 @@ function ProdutoFormV22_Completo({ produto, onSubmit, onSuccess, isSubmitting, w
         <div className="flex gap-2">
           {produto && (
             <>
-              <Button type="button" variant="outline" data-permission="Cadastros.Produto.alterarStatus" data-sensitive onClick={handleAlternarStatus} disabled={!podeEditar || !contextoValido} className={formData.status === 'Ativo' ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}>
+              <Button type="button" variant="outline" data-sensitive onClick={handleAlternarStatus} disabled={!podeEditar || !contextoValido} className={formData.status === 'Ativo' ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}>
                 {formData.status === 'Ativo' ? <><PowerOff className="w-4 h-4 mr-2" />Inativar</> : <><Power className="w-4 h-4 mr-2" />Ativar</>}
               </Button>
-              <Button type="button" variant="destructive" data-permission="Cadastros.Produto.excluir" data-sensitive onClick={handleExcluir} disabled={!podeExcluir || !contextoValido}><Trash2 className="w-4 h-4 mr-2" />Excluir</Button>
+              <Button type="button" variant="destructive" data-sensitive onClick={handleExcluir} disabled={!podeExcluir || !contextoValido}><Trash2 className="w-4 h-4 mr-2" />Excluir</Button>
             </>
           )}
         </div>
-        <Button type="submit" data-permission="Cadastros.Produto.salvar" data-sensitive disabled={isSubmitting || !contextoValido || (produto?.id ? !podeEditar : !podeCriar)} className="bg-purple-600 hover:bg-purple-700 px-8">
+        <Button type="submit" data-sensitive disabled={isSubmitting || !contextoValido || (produto?.id ? !podeEditar : !podeCriar)} className="bg-purple-600 hover:bg-purple-700 px-8">
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}{!isSubmitting && <Save className="w-4 h-4 mr-2" />}{produto ? 'Atualizar Produto' : 'Criar Produto'}
         </Button>
       </div>

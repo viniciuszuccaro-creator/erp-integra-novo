@@ -117,7 +117,6 @@ export default function NotificationCenter() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  data-permission="Sistema.Notificacao.marcar_lida"
                   onClick={() => marcarTodasComoLidasMutation.mutate()}
                   disabled={marcarTodasComoLidasMutation.isPending}
                 >
@@ -163,7 +162,6 @@ export default function NotificationCenter() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                data-permission="Sistema.Notificacao.arquivar"
                                 className="h-6 w-6 flex-shrink-0"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -224,7 +222,6 @@ export default function NotificationCenter() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                data-permission="Sistema.Notificacao.arquivar"
                                 className="h-6 w-6 flex-shrink-0"
                                 onClick={(e) => {
                                   e.stopPropagation();

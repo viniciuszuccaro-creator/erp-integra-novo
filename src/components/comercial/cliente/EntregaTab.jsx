@@ -18,7 +18,7 @@ export default function EntregaTab({
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="font-semibold">Endereços de Entrega</h3>
-        <Button data-permission="Comercial.Cliente.editar" type="button" variant="outline" onClick={onAddLocal}>
+        <Button type="button" variant="outline" onClick={onAddLocal}>
           <Plus className="w-4 h-4 mr-2" />
           Adicionar Local
         </Button>
@@ -28,7 +28,7 @@ export default function EntregaTab({
         <Card className="p-8 text-center">
           <MapPinned className="w-12 h-12 text-slate-300 mx-auto mb-3" />
           <p className="text-slate-500">Nenhum local de entrega cadastrado</p>
-          <Button data-permission="Comercial.Cliente.editar" type="button" variant="outline" onClick={onAddLocal} className="mt-4">
+          <Button type="button" variant="outline" onClick={onAddLocal} className="mt-4">
             <Plus className="w-4 h-4 mr-2" />
             Adicionar Primeiro Local
           </Button>

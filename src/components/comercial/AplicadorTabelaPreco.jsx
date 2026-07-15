@@ -97,7 +97,6 @@ export default function AplicadorTabelaPreco({
             type="button"
             variant="ghost"
             size="sm"
-            data-permission="Comercial.TabelaPreco.remover"
             onClick={handleRemoverTabela}
             className="text-xs text-red-600 hover:text-red-700"
           >

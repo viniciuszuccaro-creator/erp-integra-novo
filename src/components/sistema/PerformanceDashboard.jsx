@@ -17,7 +17,7 @@ function getWebVitals() {
     paint.forEach(p => {
       if (p.name === 'first-contentful-paint') metrics.fcp = Math.round(p.startTime);
     });
-  } catch {}
+  } catch (e) { console.error('[sistema] catch:', e); }
   return metrics;
 }
 
@@ -32,7 +32,7 @@ export default function PerformanceDashboard() {
     try {
       const keys = JSON.parse(localStorage.getItem('rq_index_keys') || '[]');
       setQueryCount(keys.length);
-    } catch {}
+    } catch (e) { console.error('[sistema] catch:', e); }
   }, []);
 
   const refresh = () => setMetrics(getWebVitals());

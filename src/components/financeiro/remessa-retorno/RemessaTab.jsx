@@ -26,7 +26,6 @@ export default function RemessaTab({
               <p className="text-xs text-blue-700">Total: R$ {valorTotalSelecionado.toFixed(2)}</p>
             </div>
             <Button
-              data-permission="Financeiro.Remessa.gerar"
               data-action="Financeiro.Remessa.gerar"
               onClick={onGerarRemessa}
               disabled={!contextoValido || !podeGerarRemessa}

@@ -64,7 +64,6 @@ export default function PainelDinamicoCliente({ cliente, isOpen, onClose, window
           <Button
             onClick={handleEditarCadastro}
             className="bg-blue-600 hover:bg-blue-700"
-            data-permission="Cadastros.Cliente.editar"
           >
             <Edit className="w-4 h-4 mr-2" />
             Editar no Cadastro Geral

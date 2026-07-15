@@ -109,7 +109,7 @@ export default function useSeparacaoConferencia({ entregaId, pedido, empresaId }
           dados_novos: separacao,
           data_hora: new Date().toISOString()
         });
-      } catch {}
+      } catch (e) { console.error('[separacao-conferencia] catch:', e); }
       queryClient.invalidateQueries({ queryKey: ['entregas'] });
       queryClient.invalidateQueries({ queryKey: ['separacoes'] });
       toast({ title: "✅ Conferência concluída!", description: "Itens conferidos com sucesso" });

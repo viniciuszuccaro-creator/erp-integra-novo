@@ -69,7 +69,7 @@ export function useActionState(options = {}) {
             timestamp: new Date().toISOString(),
             result: result
           });
-        } catch {}
+        } catch (e) { console.error('[lib] catch:', e); }
       }
 
       return result;
@@ -97,7 +97,7 @@ export function useActionState(options = {}) {
             timestamp: new Date().toISOString(),
             error: err?.message || String(err)
           });
-        } catch {}
+        } catch (e) { console.error('[lib] catch:', e); }
       }
 
       throw err;

@@ -77,7 +77,7 @@ export default function useModuleEventBus({ moduleTarget, enabled = true } = {})
     try {
       await base44.functions.invoke("moduleEventBus", { action: "mark_processed", event_id: eventId });
       setEvents(prev => prev.map(e => e.id === eventId ? { ...e, processed: true } : e));
-    } catch (_) {}
+    } catch (_) { console.error('[lib] catch:', _); }
   }, []);
 
   const clearEvents = useCallback(() => setEvents([]), []);

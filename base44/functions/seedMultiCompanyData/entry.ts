@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
       } else {
         empresasDoGrupo = await base44.asServiceRole.entities.Empresa.filter({ group_id: groupId }, undefined, 1000);
       }
-    } catch (_) {}
+    } catch (_) { console.error('[seedMultiCompanyData] catch:', _); }
 
     // 1) Fallback: se não houver nenhuma empresa e também não veio group_id, permite criar grupo+empresas (primeira inicialização)
     let criouGrupoAgora = false;
@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
           const plano = await base44.asServiceRole.entities.PlanoDeContas.create({ group_id: groupId, codigo: '1', descricao: 'Plano Padrão Grupo', tipo: 'Misto' }).catch(() => null);
           if (plano?.id) createdGroupConfigs.PlanoDeContas++;
         }
-      } catch (_) {}
+      } catch (_) { console.error('[seedMultiCompanyData] catch:', _); }
       try {
         const needed = [
           { codigo: 'ADM', descricao: 'Administrativo', tipo: 'Despesa' },
@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
             createdGroupConfigs.CentroCusto++;
           }
         }
-      } catch (_) {}
+      } catch (_) { console.error('[seedMultiCompanyData] catch:', _); }
     }
 
     // 3) Dados por empresa (Clientes, Produtos, Fornecedores) nas EMPRESAS EXISTENTES do grupo
@@ -185,7 +185,7 @@ Deno.serve(async (req) => {
         dados_novos: { group_id: groupId, empresas: empresasDoGrupo.map(e => e.id), counts, createdGroupConfigs, perEmpresa, propagation, criouGrupoAgora },
         data_hora: new Date().toISOString(),
       });
-    } catch {}
+    } catch (e) { console.error('[seedMultiCompanyData] catch:', e); }
 
     return Response.json({
       ok: true,

@@ -68,7 +68,7 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
         finalSortField = sf;
         finalSortDirection = sd;
       }
-    } catch (_) {}
+    } catch (_) { console.error('[lib] catch:', _); }
     if (!finalSortField || !finalSortDirection) {
       finalSortField = DEFAULT_SORTS[entityName]?.field || 'updated_date';
       finalSortDirection = DEFAULT_SORTS[entityName]?.direction || 'desc';
@@ -128,7 +128,7 @@ export default function useEntityListSorted(entityName, criterios = {}, options 
           try {
             const idbFallback = await idbGet(idbKey);
             if (Array.isArray(idbFallback)) return idbFallback;
-          } catch (_2) {}
+          } catch (_2) { console.error('[lib] catch:', _2); }
           return [];
         }
       };

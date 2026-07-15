@@ -37,7 +37,7 @@ function loadHistory() {
 function saveHistory(entries) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries.slice(-MAX_ENTRIES)));
-  } catch {}
+  } catch (e) { console.error('[lib] catch:', e); }
 }
 
 /**

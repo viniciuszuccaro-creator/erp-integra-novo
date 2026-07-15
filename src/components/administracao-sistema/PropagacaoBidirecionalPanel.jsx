@@ -137,7 +137,6 @@ export default function PropagacaoBidirecionalPanel() {
         {/* Botão */}
         <div className="flex items-center gap-3">
           <Button
-            data-permission="Administracao.Propagacao.propagar"
             onClick={handlePropagar}
             disabled={loading || !canRun}
             className="bg-blue-600 hover:bg-blue-700 text-white"

@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
       if (guard?.data && guard.data.allowed === false) {
         return Response.json({ error: 'Permissão negada' }, { status: 403 });
       }
-    } catch (_) {}
+    } catch (_) { console.error('[onPedidoReadyToInvoice] catch:', _); }
 
     // Dispara webhook ERP (se configurado) antes da emissão
     try {
@@ -61,9 +61,9 @@ Deno.serve(async (req) => {
           acao: 'Execução', modulo: 'Integrações', tipo_auditoria: 'integracao', entidade: 'ERP',
           descricao: 'Webhook disparado (Pedido→ERP)', empresa_id: empresaId, group_id: groupId,
           dados_novos: { pedido: data?.id, status: data?.status }
-        }); } catch {}
+        }); } catch (e) { console.error('[onPedidoReadyToInvoice] catch:', e); }
       }
-    } catch (_) {}
+    } catch (_) { console.error('[onPedidoReadyToInvoice] catch:', _); }
 
     // Monta itens para NF
     const itens = [];
@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
       descricao: `NF-e disparada automaticamente a partir do Pedido ${data.numero_pedido}`,
       empresa_id: empresaId, group_id: groupId,
       dados_novos: { nfe, retorno: res?.data }
-    }); } catch {}
+    }); } catch (e) { console.error('[onPedidoReadyToInvoice] catch:', e); }
 
     return Response.json({ ok: true, retorno: res?.data || null });
   } catch (error) {

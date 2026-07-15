@@ -37,7 +37,7 @@ export default function OtimizadorCorte({ itens, onOtimizacaoCalculada }) {
               <p className="text-xs text-slate-500 mt-1">Padrão: 1200cm (12 metros)</p>
             </div>
             <div className="flex items-end">
-              <Button onClick={calcularOtimizacao} disabled={calculando} data-permission="Producao.OtimizadorCorte.calcular"
+              <Button onClick={calcularOtimizacao} disabled={calculando}
                 className="w-full bg-emerald-600 hover:bg-emerald-700">
                 {calculando ? (
                   <><Calculator className="w-4 h-4 mr-2 animate-spin" />Calculando...</>

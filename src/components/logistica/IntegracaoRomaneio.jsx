@@ -261,7 +261,7 @@ export default function IntegracaoRomaneio({ pedidosSelecionados = [], onClose, 
           <Button variant="outline" onClick={onClose} className="flex-1">
             Cancelar
           </Button>
-          <Button data-permission="Logistica.IntegracaoRomaneio.criar"
+          <Button
             onClick={() => criarRomaneioMutation.mutate()}
             disabled={
               !motorista.trim() || 

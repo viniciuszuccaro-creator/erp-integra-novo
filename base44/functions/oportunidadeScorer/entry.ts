@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
         dados_novos: patch,
         duracao_ms: Date.now() - t0,
       });
-    } catch {}
+    } catch (e) { console.error('[oportunidadeScorer] catch:', e); }
 
     return Response.json({ success: true, updated: patch });
   } catch (error) {

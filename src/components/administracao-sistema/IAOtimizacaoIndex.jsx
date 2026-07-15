@@ -102,7 +102,7 @@ export default function IAOtimizacaoIndex({ initialTab }) {
         sucesso: true,
         data_hora: new Date().toISOString(),
       });
-    } catch {}
+    } catch (e) { console.error('[administracao-sistema] catch:', e); }
   };
 
   React.useEffect(() => { if (initialTab) setTab(initialTab); }, [initialTab]);

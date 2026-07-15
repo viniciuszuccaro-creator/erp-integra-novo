@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
           descricao: `Colaborador ${colaborador.nome} propagado para ${ok} empresas`,
           data_hora: new Date().toISOString(),
         });
-      } catch (_) {}
+      } catch (_) { console.error('[onColaboradorGroupReplication] catch:', _); }
 
       return Response.json({ success: true, direction: 'down', ok, fail });
     }
@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
           group_id: colaborador.group_id, descricao: `Colaborador ${colaborador.nome} sincronizado empresa→grupo`,
           data_hora: new Date().toISOString(),
         });
-      } catch (_) {}
+      } catch (_) { console.error('[onColaboradorGroupReplication] catch:', _); }
 
       return Response.json({ success: true, direction: 'up', synced_fields: Object.keys(patch) });
     }

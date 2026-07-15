@@ -54,7 +54,7 @@ export default function TwoFactorAuthPrompt({ open, onClose, contexto = {}, onSu
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>Cancelar</Button>
-          <Button onClick={submit} disabled={loading} data-permission="Sistema.Seguranca.executar" data-sensitive>
+          <Button onClick={submit} disabled={loading} data-sensitive>
             {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Validando...</> : 'Validar código'}
           </Button>
         </DialogFooter>

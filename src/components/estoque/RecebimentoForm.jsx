@@ -227,7 +227,7 @@ export default function RecebimentoForm({ recebimento, onSubmit, windowMode = fa
       </Card>
 
       <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
-        <Button type="submit" data-permission="Estoque.Recebimento.salvar" className="bg-green-600 hover:bg-green-700">
+        <Button type="submit" className="bg-green-600 hover:bg-green-700">
           <Save className="w-4 h-4 mr-2" />
           Confirmar Recebimento
         </Button>

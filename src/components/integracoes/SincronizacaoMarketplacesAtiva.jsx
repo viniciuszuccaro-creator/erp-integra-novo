@@ -200,7 +200,6 @@ export default function SincronizacaoMarketplacesAtiva() {
               Sincronização de Marketplaces
             </CardTitle>
             <Button
-            data-permission="Integracoes.Marketplace.sincronizar"
             onClick={sincronizarTodos}
             disabled={sincronizando}
               size="sm"
@@ -274,7 +273,7 @@ export default function SincronizacaoMarketplacesAtiva() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2 justify-center">
-                        <Button data-permission="Integracoes.SincronizacaoMarketplacesAtiva.importar"
+                        <Button
                           size="sm"
                           onClick={() => importarPedidoMutation.mutate(pe)}
                           disabled={importarPedidoMutation.isPending}

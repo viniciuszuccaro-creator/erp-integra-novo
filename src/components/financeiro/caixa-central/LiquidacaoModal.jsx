@@ -97,9 +97,8 @@ export default function LiquidacaoModal({
           </div>
 
           <div className="flex gap-3">
-            <Button onClick={onClose} variant="outline" className="flex-1" data-permission="Financeiro.Caixa.cancelar" data-action="Financeiro.Caixa.cancelar">Cancelar</Button>
+            <Button onClick={onClose} variant="outline" className="flex-1" data-action="Financeiro.Caixa.cancelar">Cancelar</Button>
             <Button
-              data-permission="Financeiro.Caixa.liquidar"
               data-action="Financeiro.Caixa.liquidar"
               data-sensitive="true"
               onClick={onConfirm}

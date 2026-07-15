@@ -96,7 +96,7 @@ export default function IAContextualModulo({ modulo, contextoExtra = {}, compact
             {erro && (
               <div className="text-sm text-red-600 py-2 flex items-center justify-between gap-2">
                 <span>{erro}</span>
-                <Button data-permission="Sistema.IA.visualizar" size="sm" variant="ghost" onClick={buscarSugestoes}>Tentar novamente</Button>
+                <Button size="sm" variant="ghost" onClick={buscarSugestoes}>Tentar novamente</Button>
               </div>
             )}
             {!loading && sugestoes && (
@@ -112,7 +112,7 @@ export default function IAContextualModulo({ modulo, contextoExtra = {}, compact
                     </div>
                   ))
                 }
-                <Button data-permission="Sistema.IAContextualModulo.atualizar"
+                <Button
                   size="sm"
                   variant="outline"
                   className="mt-2 border-purple-200 text-purple-700"

@@ -46,7 +46,7 @@ export default function AdminTabs({ initialTab, isAdmin, empresaAtual, grupoAtua
       const url = new URL(window.location.href);
       url.searchParams.set("tab", val);
       window.history.replaceState({}, "", url.toString());
-    } catch (_) {}
+    } catch (_) { console.error('[administracao-sistema] catch:', _); }
   };
 
   const canAccess = (perm) => isAdminUser || hasPermission('Sistema', perm, 'visualizar');

@@ -105,7 +105,6 @@ export default function PedidosEntregaDetalhesDialog({
             <CardContent className="space-y-3">
               {(pedido.status === 'Aprovado' || pedido.status === 'Pronto para Faturar') && (
                 <Button
-                  data-permission="Comercial.Pedido.expedir"
                   onClick={() => {
                     atualizarStatusMutation.mutate(
                       { pedidoId: pedido.id, novoStatus: 'Em Expedição' },
@@ -120,7 +119,6 @@ export default function PedidosEntregaDetalhesDialog({
 
               {(pedido.status === 'Em Expedição' || pedido.status === 'Faturado') && (
                 <Button
-                  data-permission="Comercial.Pedido.expedir"
                   onClick={() => {
                     atualizarStatusMutation.mutate(
                       { pedidoId: pedido.id, novoStatus: 'Em Trânsito' },
@@ -135,7 +133,6 @@ export default function PedidosEntregaDetalhesDialog({
 
               {pedido.status === 'Em Trânsito' && permissoes.podeConfirmarEntrega && (
                 <Button
-                  data-permission="Comercial.Pedido.expedir"
                   onClick={handleConfirmarEntrega}
                   className="bg-green-600 hover:bg-green-700 w-full"
                 >

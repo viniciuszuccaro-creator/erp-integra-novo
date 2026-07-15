@@ -15,7 +15,7 @@ async function audit(base44, user, { acao = 'Ação', modulo = 'Sistema', entida
       dados_novos: Object.keys(payloadDados).length ? payloadDados : null,
       data_hora: new Date().toISOString(),
     });
-  } catch {}
+  } catch (e) { console.error('[auditUtils] catch:', e); }
 }
 
 // Auditoria padronizada para operações de Estoque

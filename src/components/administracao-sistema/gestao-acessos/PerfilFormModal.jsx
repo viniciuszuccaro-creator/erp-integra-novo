@@ -279,7 +279,6 @@ export default function PerfilFormModal({
                 }
                 className="bg-blue-600 hover:bg-blue-700"
                 data-action="RBAC.Perfil.salvar"
-                data-permission="Sistema.Controle de Acesso.editar"
                 data-sensitive="true"
               >
                 {isSaving ? (

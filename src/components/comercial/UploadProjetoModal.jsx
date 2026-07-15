@@ -83,15 +83,15 @@ export default function UploadProjetoModal({ isOpen, onClose, onPecasExtraidas }
         <div className="flex justify-end gap-3 pt-4 border-t">
           {resultado ? (
             <>
-              <Button type="button" variant="outline" data-permission="Comercial.Pedido.visualizar" onClick={resetar}>Analisar Outro Projeto</Button>
-              <Button type="button" data-permission="Comercial.Pedido.criar" onClick={confirmarPecas} className="bg-green-600 hover:bg-green-700">
+              <Button type="button" variant="outline" onClick={resetar}>Analisar Outro Projeto</Button>
+              <Button type="button" onClick={confirmarPecas} className="bg-green-600 hover:bg-green-700">
                 <CheckCircle className="w-4 h-4 mr-2" />Confirmar e Importar Peças
               </Button>
             </>
           ) : (
             <>
-              <Button type="button" variant="outline" data-permission="Comercial.Pedido.visualizar" onClick={onClose}>Cancelar</Button>
-              <Button type="button" data-permission="Comercial.Pedido.criar" onClick={processarComIA} disabled={!arquivo || processando} className="bg-purple-600 hover:bg-purple-700">
+              <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+              <Button type="button" onClick={processarComIA} disabled={!arquivo || processando} className="bg-purple-600 hover:bg-purple-700">
                 {processando ? (
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processando...</>
                 ) : (

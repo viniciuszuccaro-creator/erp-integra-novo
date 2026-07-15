@@ -55,7 +55,7 @@ export default function GuardRails({ children, currentPageName }) {
           descricao: `GuardRails bloqueou acesso a ${currentPageName}`,
           data_hora: new Date().toISOString(),
         });
-      } catch {}
+      } catch (e) { console.error('[lib] catch:', e); }
     }
   }, [denied, mod, currentPageName, user?.id, empresaAtual?.id]);
 

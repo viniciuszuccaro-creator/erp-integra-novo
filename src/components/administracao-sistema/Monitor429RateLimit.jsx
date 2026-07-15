@@ -43,7 +43,7 @@ export default function Monitor429RateLimit() {
         setCircuitState(cbState.state || 'CLOSED');
         setFailureCount(cbState.failureCount || 0);
         setNextAttemptTime(cbState.nextAttempt ? new Date(cbState.nextAttempt) : null);
-      } catch (_) {}
+      } catch (_) { console.error('[administracao-sistema] catch:', _); }
     }, 1000);
 
     return () => clearInterval(interval);

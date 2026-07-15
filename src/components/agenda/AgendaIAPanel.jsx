@@ -79,7 +79,7 @@ export default function AgendaIAPanel({ eventos = [] }) {
           </div>
         )}
 
-        <Button size="sm" variant="outline" data-permission="Agenda.IA.analisar" className="w-full border-purple-200 text-purple-700 hover:bg-purple-50" onClick={handleAnalise} disabled={loading}>
+        <Button size="sm" variant="outline" className="w-full border-purple-200 text-purple-700 hover:bg-purple-50" onClick={handleAnalise} disabled={loading}>
           {loading ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" />Analisando...</> : <><Sparkles className="w-3 h-3 mr-1" />Análise IA</>}
         </Button>
       </CardContent>

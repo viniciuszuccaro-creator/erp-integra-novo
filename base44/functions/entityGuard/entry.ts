@@ -296,7 +296,7 @@ Deno.serve(async (req) => {
       if (kept.length > __MAX_REQ) {
         return Response.json({ allowed: false, error: 'rate_limited' }, { status: 429 });
       }
-    } catch {}
+    } catch (e) { console.error('[entityGuard] catch:', e); }
 
     // Autenticação — usa cache para não consumir créditos a cada chamada
     let user = null;
@@ -316,7 +316,7 @@ Deno.serve(async (req) => {
           }
         }
       }
-    } catch {}
+    } catch (e) { console.error('[entityGuard] catch:', e); }
 
     if (!user) return Response.json({ allowed: false, error: 'Unauthorized' }, { status: 401 });
 
@@ -340,7 +340,7 @@ Deno.serve(async (req) => {
           group_id: body?.group_id || null,
           data_hora: new Date().toISOString(),
         });
-      } catch {}
+      } catch (e) { console.error('[entityGuard] catch:', e); }
       return Response.json({ allowed: false, reason: 'Módulo Sistema requer perfil admin' }, { status: 403 });
     }
 
@@ -364,7 +364,7 @@ Deno.serve(async (req) => {
           group_id: body?.group_id || null,
           data_hora: new Date().toISOString(),
         });
-      } catch {}
+      } catch (e) { console.error('[entityGuard] catch:', e); }
       return Response.json({ allowed: false, reason: `${targetEntity} requer perfil admin` }, { status: 403 });
     }
     // Entidades de leitura sensível: só admin pode ler
@@ -488,7 +488,7 @@ Deno.serve(async (req) => {
             group_id: body?.group_id || null,
             data_hora: new Date().toISOString(),
           });
-        } catch {}
+        } catch (e) { console.error('[entityGuard] catch:', e); }
       }
     }
 

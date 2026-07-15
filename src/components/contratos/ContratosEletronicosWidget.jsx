@@ -57,7 +57,7 @@ export default function ContratosEletronicosWidget() {
               <div key={contrato.id} className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50">
                 <div className="flex items-start justify-between mb-1">
                   <div className="flex items-start gap-2 flex-1">
-                    <Icon className={`w-4 h-4 ${Config.color} mt-0.5`} />
+                    <Icon className={`w-4 h-4 ${Config.color} mt-0 />
                     <div className="min-w-0">
                       <div className="font-medium text-sm truncate">{contrato.titulo}</div>
                       <div className="text-xs text-slate-500">{contrato.assinante}</div>

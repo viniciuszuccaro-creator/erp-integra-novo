@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
         dados_novos: resultados,
         data_hora: new Date().toISOString(),
       });
-    } catch (_) {}
+    } catch (_) { console.error('[auditMultiempresaValidator] catch:', _); }
 
     return Response.json({
       success: true,

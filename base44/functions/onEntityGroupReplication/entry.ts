@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
         descricao: `Propagação down: ${entity_name} ${entity_id}`,
         data_hora: new Date().toISOString(),
       });
-    } catch (_) {}
+    } catch (_) { console.error('[onEntityGroupReplication] catch:', _); }
 
     return Response.json({ success: true, direction: 'down', entity: entity_name, result: result?.data });
   } catch (error) {

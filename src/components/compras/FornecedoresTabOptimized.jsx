@@ -169,7 +169,7 @@ export default function FornecedoresTabOptimized({ onEdit, onCreate }) {
           <option value="Bloqueado">Bloqueado</option>
         </select>
         {onCreate && (
-          <Button onClick={onCreate} className="bg-cyan-600 hover:bg-cyan-700" data-permission="Compras.Fornecedores.criar" data-sensitive>
+          <Button onClick={onCreate} className="bg-cyan-600 hover:bg-cyan-700" data-sensitive>
             <Plus className="w-4 h-4 mr-2" />
             Novo Fornecedor
           </Button>
@@ -222,7 +222,6 @@ export default function FornecedoresTabOptimized({ onEdit, onCreate }) {
                         variant="ghost"
                         size="sm"
                         onClick={() => onEdit(fornecedor)}
-                        data-permission="Compras.Fornecedores.editar"
                         data-sensitive
                       >
                         <Edit className="w-4 h-4 text-cyan-600" />

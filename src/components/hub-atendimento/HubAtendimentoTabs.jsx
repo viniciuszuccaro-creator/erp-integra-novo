@@ -26,7 +26,6 @@ export default function HubAtendimentoTabs({ abaAtiva, setAbaAtiva, layoutExpand
       {TABS.map((tab) => (
         <Button
           key={tab.id}
-          data-permission={tab.permission}
           variant={abaAtiva === tab.id ? "default" : "outline"}
           onClick={() => setAbaAtiva(tab.id)}
           size="sm"

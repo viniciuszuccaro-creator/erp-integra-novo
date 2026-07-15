@@ -203,7 +203,7 @@ export default function PontoForm({ ponto, onSubmit, windowMode = false }) {
       </Card>
 
       <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
-        <Button type="submit" data-permission="RH.Ponto.criar" className="bg-pink-600 hover:bg-pink-700">
+        <Button type="submit" className="bg-pink-600 hover:bg-pink-700">
           <Save className="w-4 h-4 mr-2" />
           {ponto ? 'Atualizar' : 'Registrar'} Ponto
         </Button>

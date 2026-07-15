@@ -84,7 +84,7 @@ export default function usePedidosTab({ pedidos, empresaId }) {
     try {
       await base44.functions.invoke('whatsappSend', { template: 'aprovacao_pendente', pedido_ids: alvo });
       toast({ title: '📲 WhatsApp enviado', description: `${alvo.length} pedido(s)` });
-      try { await base44.entities.AuditLog.create({ acao: 'Notificação', modulo: 'Comercial', entidade: 'Pedido', descricao: `WhatsApp aprovação pendente (${alvo.length})`, data_hora: new Date().toISOString() }); } catch { }
+      try { await base44.entities.AuditLog.create({ acao: 'Notificação', modulo: 'Comercial', entidade: 'Pedido', descricao: `WhatsApp aprovação pendente (${alvo.length})`, data_hora: new Date().toISOString() }); } catch (e) { console.error('[pedidos-tab] catch:', e); }
     } catch { toast({ title: 'Falha ao notificar WhatsApp', variant: 'destructive' }); }
   };
 
@@ -94,7 +94,7 @@ export default function usePedidosTab({ pedidos, empresaId }) {
     try {
       await base44.functions.invoke('sendEmailProvider', { tipo: 'aprovacao_pendente', pedido_ids: alvo });
       toast({ title: '✉️ E-mails enviados', description: `${alvo.length} pedido(s)` });
-      try { await base44.entities.AuditLog.create({ acao: 'Notificação', modulo: 'Comercial', entidade: 'Pedido', descricao: `Email aprovação pendente (${alvo.length})`, data_hora: new Date().toISOString() }); } catch { }
+      try { await base44.entities.AuditLog.create({ acao: 'Notificação', modulo: 'Comercial', entidade: 'Pedido', descricao: `Email aprovação pendente (${alvo.length})`, data_hora: new Date().toISOString() }); } catch (e) { console.error('[pedidos-tab] catch:', e); }
     } catch { toast({ title: 'Falha ao notificar por email', variant: 'destructive' }); }
   };
 

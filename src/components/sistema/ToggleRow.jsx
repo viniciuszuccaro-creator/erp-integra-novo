@@ -40,7 +40,6 @@ export default function ToggleRow({
           checked={checked}
           onCheckedChange={() => onToggle && onToggle(chave, categoria, !checked)}
           disabled={disabled || isSaving}
-          data-permission="Sistema.Configuracao.editar"
         />
       </div>
     </div>

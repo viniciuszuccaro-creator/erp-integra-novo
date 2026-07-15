@@ -152,7 +152,7 @@ export default function ChatbotIntentForm({ chatbotIntent, onSubmit, isSubmittin
       </Card>
 
       <div className="flex justify-end gap-3">
-        <Button type="submit" className="bg-purple-600 hover:bg-purple-700" disabled={isSubmitting} data-permission="Cadastros.ChatbotIntent.salvar">
+        <Button type="submit" className="bg-purple-600 hover:bg-purple-700" disabled={isSubmitting}>
           <Save className="w-4 h-4 mr-2" />
           {isSubmitting ? 'Salvando...' : chatbotIntent ? 'Atualizar' : 'Criar'}
         </Button>

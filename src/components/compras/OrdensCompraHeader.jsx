@@ -16,7 +16,7 @@ export default function OrdensCompraHeader({ searchTerm, onSearchChange, onNovaO
           className="pl-7 h-8 text-sm"
         />
       </div>
-      <Button data-permission="Compras.OrdemCompra.criar" onClick={onNovaOC} size="sm">
+      <Button onClick={onNovaOC} size="sm">
         <Plus className="w-3 h-3 mr-1" />
         Nova OC
       </Button>

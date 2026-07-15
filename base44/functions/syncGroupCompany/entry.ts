@@ -17,7 +17,7 @@ async function listEmpresasByGroup(base44, groupId) {
   try {
     const empresas = await base44.asServiceRole.entities.Empresa.filter({ group_id: groupId }, undefined, 500);
     if (Array.isArray(empresas) && empresas.length) return empresas;
-  } catch (_) {}
+  } catch (_) { console.error('[syncGroupCompany] catch:', _); }
   return [];
 }
 
@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
     if (!record && eventType !== 'delete') {
       try {
         record = await base44.asServiceRole.entities[entityName]?.get?.(entityId);
-      } catch (_) {}
+      } catch (_) { console.error('[syncGroupCompany] catch:', _); }
     }
 
     const groupId = record?.group_id || body?.data?.group_id || body?.old_data?.group_id || null;
@@ -104,8 +104,8 @@ Deno.serve(async (req) => {
     if (eventType === 'delete') {
       for (const m of mapsById) {
         const counterpartId = (m.source_id === entityId) ? m.target_id : m.source_id;
-        try { await base44.asServiceRole.entities[entityName]?.delete?.(counterpartId); } catch (_) {}
-        try { await base44.asServiceRole.entities.SyncMap.delete(m.id); } catch (_) {}
+        try { await base44.asServiceRole.entities[entityName]?.delete?.(counterpartId); } catch (_) { console.error('[syncGroupCompany] catch:', _); }
+        try { await base44.asServiceRole.entities.SyncMap.delete(m.id); } catch (_) { console.error('[syncGroupCompany] catch:', _); }
       }
       return Response.json({ ok: true, deleted: mapsById.length });
     }

@@ -444,7 +444,7 @@ export function useContextoVisual() {
             try {
               const s = { ...sort, sortField: normalizeSortField(entityName, sort?.sortField) };
               localStorage.setItem(`sort_${entityName}`, JSON.stringify(s));
-            } catch {}
+            } catch (e) { console.error('[lib] catch:', e); }
           };
 
           const filterInContext = async (entityName, criterios = {}, order = undefined, limit = undefined, campo = 'empresa_id') => {
@@ -464,7 +464,7 @@ export function useContextoVisual() {
                      const props = sch?.properties || {};
                      hasGroupField = Object.prototype.hasOwnProperty.call(props, 'group_id');
                      hasCtxField = Object.prototype.hasOwnProperty.call(props, ctxCampo);
-                   } catch {}
+                   } catch (e) { console.error('[lib] catch:', e); }
                    const noContext = !hasGroupField && !hasCtxField;
 
                    if (!groupId && !empresaId && !noContext) return [];

@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
         data_hora: new Date().toISOString(),
         duracao_ms: Date.now() - t0,
       });
-    } catch {}
+    } catch (e) { console.error('[optimizerOrchestrator] catch:', e); }
 
     return Response.json({ ok: true, ...aggregate, duracao_ms: Date.now() - t0 });
   } catch (error) {

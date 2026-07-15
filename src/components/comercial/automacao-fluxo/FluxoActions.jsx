@@ -21,7 +21,6 @@ export default function FluxoActions({ executando, progresso, permitido, onExecu
           <Button
             onClick={onExecutar}
             disabled={executando || progresso === 100 || !permitido}
-            data-permission="Comercial.Pedido.fechamento"
             data-action="Comercial.Pedido.fechamento"
             data-sensitive="true"
             className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 px-8 shadow-lg"

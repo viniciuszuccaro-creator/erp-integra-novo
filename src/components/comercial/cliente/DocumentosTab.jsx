@@ -59,7 +59,7 @@ export default function DocumentosTab({ formData, setFormData, handleUploadDocum
                   {doc.data_validade && <p className="text-xs text-slate-500 mt-1">⚠️ Alerta 30 dias antes</p>}
                 </div>
                 <div className="flex gap-1 justify-end">
-                  <Button data-permission="Comercial.Documentos.exportar" type="button" variant="ghost" size="icon">
+                  <Button type="button" variant="ghost" size="icon">
                     <Download className="w-4 h-4" />
                   </Button>
                   <Button type="button" variant="ghost" size="icon" onClick={() => removerDocumento(index)}>

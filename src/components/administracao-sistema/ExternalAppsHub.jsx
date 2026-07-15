@@ -53,7 +53,7 @@ export default function ExternalAppsHub() {
                 <p className="text-xs text-slate-500 mt-0.5">{it.desc}</p>
               </div>
               <div className="flex gap-2 mt-auto pt-1 flex-wrap">
-                <Button type="button" variant="outline" size="sm" onClick={it.action} className="h-auto text-xs px-2 py-1 rounded-md bg-white/80 border-white/60 hover:bg-white transition-colors font-medium text-slate-700" data-action={`ExternalApps.${it.title}.janela`}>
+                <Button type="button" variant="outline" size="sm" onClick={it.action} className="h-auto text-xs px-2 py-1 rounded-md bg-white/80 border-white/60 hover:bg-white transition-colors font-medium text-slate-700" data-action={`ExternalApps.${it.title}>
                   🪟 Janela
                 </Button>
                 {it.route && (

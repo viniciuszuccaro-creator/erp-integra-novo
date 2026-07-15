@@ -80,11 +80,11 @@ export default function RegiaoAtendimentoForm({ regiaoId, regiaoAtendimento, ite
           {regiaoId && (
             <>
               <Button type="button" variant={formData.ativo ? "outline" : "default"} onClick={handleAlternarStatus}>{formData.ativo ? "Inativar" : "Ativar"}</Button>
-              <Button type="button" variant="destructive" data-permission="Cadastros.RegiaoAtendimento.excluir" onClick={handleExcluir}>Excluir</Button>
+              <Button type="button" variant="destructive" onClick={handleExcluir}>Excluir</Button>
             </>
           )}
         </div>
-        <Button type="submit" data-permission="Cadastros.Regiao.salvar">{regiaoId || dadosIniciaisProps ? "Atualizar" : "Criar"} Região</Button>
+        <Button type="submit">{regiaoId || dadosIniciaisProps ? "Atualizar" : "Criar"} Região</Button>
       </div>
     </form>
   );

@@ -252,7 +252,7 @@ export default function ChatVendedor({ clienteId }) {
             className="flex-1"
             disabled={enviarMensagemMutation.isPending}
           />
-          <Button data-permission="Portal.ChatVendedor.salvar"
+          <Button
             type="submit"
             disabled={!mensagem.trim() || enviarMensagemMutation.isPending}
             className="bg-blue-600 hover:bg-blue-700"

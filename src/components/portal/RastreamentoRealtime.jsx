@@ -67,7 +67,7 @@ export default function RastreamentoRealtime() {
       unsubscribe = base44.entities.Entrega.subscribe(() => {
         refetch();
       });
-    } catch {}
+    } catch (e) { console.error('[portal] catch:', e); }
 
     return () => {
       clearInterval(autoRefresh);
@@ -88,7 +88,7 @@ export default function RastreamentoRealtime() {
                 Última atualização: {currentTime.toLocaleTimeString('pt-BR')}
               </p>
             </div>
-            <Button data-permission="Portal.RastreamentoRealtime.atualizar"
+            <Button
               onClick={() => refetch()}
               variant="secondary"
               size="sm"
@@ -209,7 +209,7 @@ export default function RastreamentoRealtime() {
                     </Button>
                   )}
                   {entrega.link_publico_rastreamento && (
-                    <Button data-permission="Portal.RastreamentoRealtime.copiar"
+                    <Button
                       variant="outline"
                       className="flex-1"
                       onClick={() => {

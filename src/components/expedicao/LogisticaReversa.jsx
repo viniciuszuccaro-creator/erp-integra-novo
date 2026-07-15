@@ -102,7 +102,7 @@ export default function LogisticaReversa({ entrega, onConcluido }) {
           acao: 'Edição', modulo: 'Expedição', entidade: 'Entrega', registro_id: entrega?.id,
           descricao: `Logística Reversa processada (motivo: ${motivo}, ação: ${acao})`
         });
-      } catch (_) {}
+      } catch (_) { console.error('[expedicao] catch:', _); }
       return true;
     },
     onSuccess: () => {

@@ -46,7 +46,7 @@ export default function DashboardAlertsBar({
   });
 
   const handleDismiss = () => {
-    try { localStorage.setItem('alerts_dismissed_at', String(Date.now())); } catch (_) {}
+    try { localStorage.setItem('alerts_dismissed_at', String(Date.now())); } catch (_) { console.error('[dashboard] catch:', _); }
     setDismissed(true);
   };
 

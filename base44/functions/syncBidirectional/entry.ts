@@ -290,7 +290,7 @@ Deno.serve(async (req) => {
     try {
       const entityName = (await req.clone().json().catch(() => ({}))).entity_name || 'unknown';
       _inflight.delete(makeKey(entityName, undefined, 'auto'));
-    } catch (_) {}
+    } catch (_) { console.error('[syncBidirectional] catch:', _); }
     return Response.json({ error: error.message }, { status: 500 });
   }
 });

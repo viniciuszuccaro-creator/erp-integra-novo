@@ -49,11 +49,11 @@ export default function NotasFiscaisDetailsDialog({ viewingDetails, setViewingDe
           )}
           <div className="flex gap-2 pt-4">
             {viewingDetails.danfe_url && (
-              <Button data-permission="Fiscal.NotaFiscal.baixar_pdf" onClick={() => window.open(viewingDetails.danfe_url, '_blank')}>
+              <Button onClick={() => window.open(viewingDetails.danfe_url, '_blank')}>
                 <Download className="w-4 h-4 mr-2" /> Baixar DANFE
               </Button>
             )}
-            <Button variant="outline" data-permission="Fiscal.NotaFiscal.visualizar" onClick={() => setViewingDetails(null)}>Fechar</Button>
+            <Button variant="outline" onClick={() => setViewingDetails(null)}>Fechar</Button>
           </div>
         </div>
       </DialogContent>

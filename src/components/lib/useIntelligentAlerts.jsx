@@ -54,7 +54,7 @@ export default function useIntelligentAlerts(counts = {}, enabled = true) {
             dados_novos: { count, threshold },
             data_hora: new Date().toISOString(),
           });
-        } catch (_) {}
+        } catch (_) { console.error('[lib] catch:', _); }
       }
       // Alerta de aviso
       else if (count >= threshold.warning && !wasAlerted && count < threshold.critical) {

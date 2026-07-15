@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
       if (body && body.filtros && (body.filtros.group_id || body.filtros.empresa_id)) {
         filtros = body.filtros;
       }
-    } catch (_) {}
+    } catch (_) { console.error('[groupConsolidation] catch:', _); }
 
     if (user.role !== 'admin' && !filtros.group_id && !filtros.empresa_id) {
       return Response.json({ error: 'empresa_id ou group_id obrigatório' }, { status: 403 });
@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
         data_hora: new Date().toISOString(),
         });
       }
-    } catch (_) {}
+    } catch (_) { console.error('[groupConsolidation] catch:', _); }
 
     const durationMs = Date.now() - t0;
     if (durationMs > 1500) {
@@ -126,11 +126,11 @@ Deno.serve(async (req) => {
           data_hora: new Date().toISOString(),
           });
         }
-      } catch (_) {}
+      } catch (_) { console.error('[groupConsolidation] catch:', _); }
     }
 
     const resp = { ok: true, groups: summary.length, summary };
-    try { CACHE.set(key, { t: Date.now(), resp }); } catch (_) {}
+    try { CACHE.set(key, { t: Date.now(), resp }); } catch (_) { console.error('[groupConsolidation] catch:', _); }
     return Response.json(resp);
   } catch (error) {
     return Response.json({ error: String(error?.message || error) }, { status: 500 });

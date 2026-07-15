@@ -108,7 +108,7 @@ export default function ConfiguracaoSeguranca({ empresaId, grupoId }) {
           sucesso: true,
           data_hora: new Date().toISOString()
         });
-      } catch {}
+      } catch (e) { console.error('[sistema] catch:', e); }
       return result;
     },
     onSuccess: () => {

@@ -239,7 +239,7 @@ export default function ConfigWhatsAppBusiness({ empresaId }) {
               )}
             </Button>
 
-            <Button data-permission="Integracoes.ConfigWhatsAppBusiness.salvar"
+            <Button
               onClick={() => salvarMutation.mutate(config)}
               disabled={salvarMutation.isPending}
               className="flex-1 bg-green-600 hover:bg-green-700"

@@ -154,7 +154,7 @@ export default function CampanhaForm({ campanha, onSubmit, windowMode = false })
         </div>
       </div>
       <div className="flex justify-end gap-3 pt-4">
-        <Button type="submit" data-permission="CRM.Campanha.salvar" className="bg-blue-600 hover:bg-blue-700">
+        <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
           {campanha ? 'Atualizar' : 'Criar Campanha'}
         </Button>
       </div>

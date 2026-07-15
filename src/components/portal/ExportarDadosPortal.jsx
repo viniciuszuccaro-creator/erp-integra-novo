@@ -50,7 +50,7 @@ export default function ExportarDadosPortal({ clienteId }) {
       toast.success(`✅ ${nomeArquivo} exportado com sucesso!`);
     } catch (error) {
       toast.error('Erro ao exportar dados');
-      console.error(error);
+      console.error('[components/portal/ExportarDadosPortal.jsx] Error:', error);
     } finally {
       setExportando(null);
     }
@@ -88,7 +88,7 @@ export default function ExportarDadosPortal({ clienteId }) {
       </CardHeader>
       <CardContent className="p-6 w-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Button data-permission="Portal.ExportarDadosPortal.exportar"
+          <Button
             onClick={handleExportPedidos}
             disabled={exportando === 'Meus_Pedidos' || pedidos.length === 0}
             variant="outline"
@@ -105,7 +105,7 @@ export default function ExportarDadosPortal({ clienteId }) {
             </div>
           </Button>
 
-          <Button data-permission="Portal.ExportarDadosPortal.exportar"
+          <Button
             onClick={handleExportBoletos}
             disabled={exportando === 'Minhas_Financas' || contasReceber.length === 0}
             variant="outline"

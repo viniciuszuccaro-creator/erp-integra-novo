@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
       if (guard?.data && guard.data.allowed === false) {
         return Response.json({ error: 'Forbidden' }, { status: 403 });
       }
-    } catch (_) {}
+    } catch (_) { console.error('[conflictPolicy] catch:', _); }
 
     const raw = await req.json().catch(() => ({}));
     const Schema = z.object({
@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
         dados_novos: merged,
         data_hora: new Date().toISOString()
       });
-    } catch (_) {}
+    } catch (_) { console.error('[conflictPolicy] catch:', _); }
 
     return Response.json({ ok: true, merged, policy: { entity_name, source, preferIncoming } });
   } catch (error) {

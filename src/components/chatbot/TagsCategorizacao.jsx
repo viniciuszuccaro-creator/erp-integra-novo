@@ -92,7 +92,6 @@ export default function TagsCategorizacao({ conversa }) {
           size="sm"
           onClick={() => setEditando(!editando)}
           className="text-xs"
-          data-permission="HubAtendimento.Conversa.editar_tags"
         >
           {editando ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
         </Button>
@@ -138,7 +137,6 @@ export default function TagsCategorizacao({ conversa }) {
               onClick={() => adicionarTag(novaTag)}
               disabled={!novaTag.trim()}
               className="h-7 px-2"
-              data-permission="HubAtendimento.Conversa.editar_tags"
             >
               <Plus className="w-3 h-3" />
             </Button>

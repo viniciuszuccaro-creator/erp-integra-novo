@@ -79,7 +79,7 @@ export default function useVisualizadorCRUD({
       if (!canDeleteCadastro) throw new Error("Sem permissão para excluir.");
       if (formData.id) {
         const dadosAntes = { id: formData.id, ...formData };
-        try { await deleteInContext(ENTITY, formData.id); } catch (_) {}
+        try { await deleteInContext(ENTITY, formData.id); } catch (_) { console.error('[hooks] catch:', _); }
         auditarAcao({ acao: 'Exclusão', ENTITY, registroId: formData.id, empresaId, groupId, dadosAntes, descricao: `Exclusão via formulário: ${ENTITY}` });
       }
       handleCloseForm(true);

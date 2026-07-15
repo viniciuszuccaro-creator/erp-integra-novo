@@ -129,7 +129,7 @@ export function ProtectedAction({
             },
           },
         });
-      } catch {}
+      } catch (e) { console.error('[components] catch:', e); }
     }
 
     if (mode === "hide") {

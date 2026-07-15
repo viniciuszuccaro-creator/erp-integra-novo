@@ -67,8 +67,8 @@ export default function DashboardLogistico({ empresaId, entregas: entregasProp =
   });
 
   const handleEntregaUpdated = (e) => {
-    try { setSelected(e); } catch (_) {}
-    try { queryClient.invalidateQueries({ queryKey: ['painel-logistico-entregas', empresaId] }); } catch (_) {}
+    try { setSelected(e); } catch (_) { console.error('[expedicao] catch:', _); }
+    try { queryClient.invalidateQueries({ queryKey: ['painel-logistico-entregas', empresaId] }); } catch (_) { console.error('[expedicao] catch:', _); }
   };
 
   const filtradas = React.useMemo(() => {

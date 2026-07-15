@@ -34,7 +34,7 @@ export default function useMultiempresaOps(entityName) {
           group_id: grupoAtual?.id,
           empresa_id: empresaAtual?.id,
         });
-      } catch (_) {}
+      } catch (_) { console.error('[lib] catch:', _); }
     }, 0);
 
     return result;
@@ -57,7 +57,7 @@ export default function useMultiempresaOps(entityName) {
           group_id: grupoAtual?.id,
           empresa_id: empresaAtual?.id,
         });
-      } catch (_) {}
+      } catch (_) { console.error('[lib] catch:', _); }
     }, 0);
 
     return result;
@@ -80,7 +80,7 @@ export default function useMultiempresaOps(entityName) {
           group_id: grupoAtual?.id,
           empresa_id: empresaAtual?.id,
         });
-      } catch (_) {}
+      } catch (_) { console.error('[lib] catch:', _); }
     }, 0);
 
     return result;

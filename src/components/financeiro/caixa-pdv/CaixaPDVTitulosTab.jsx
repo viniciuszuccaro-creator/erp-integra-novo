@@ -25,8 +25,8 @@ export default function CaixaPDVTitulosTab({ tipo, titulos, liquidarTitulo, cont
                 <TableCell className={`font-bold ${isTipoReceber ? 'text-green-600' : 'text-red-600'}`}>R$ {(c.valor || 0).toFixed(2)}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
-                    <Button size="sm" data-permission="Financeiro.Caixa.liquidar" className={isTipoReceber ? "bg-green-600" : "bg-red-600"} disabled={!contextoValido || !podeLiquidarTitulos || liquidarTitulo.isPending} onClick={() => liquidarTitulo.mutate({ titulo: c, tipo, forma: 'Dinheiro' })}>💵</Button>
-                    <Button size="sm" data-permission="Financeiro.Caixa.liquidar" className={isTipoReceber ? "bg-green-600" : "bg-red-600"} disabled={!contextoValido || !podeLiquidarTitulos || liquidarTitulo.isPending} onClick={() => liquidarTitulo.mutate({ titulo: c, tipo, forma: 'PIX' })}>PIX</Button>
+                    <Button size="sm" className={isTipoReceber ? "bg-green-600" : "bg-red-600"} disabled={!contextoValido || !podeLiquidarTitulos || liquidarTitulo.isPending} onClick={() => liquidarTitulo.mutate({ titulo: c, tipo, forma: 'Dinheiro' })}>💵</Button>
+                    <Button size="sm" className={isTipoReceber ? "bg-green-600" : "bg-red-600"} disabled={!contextoValido || !podeLiquidarTitulos || liquidarTitulo.isPending} onClick={() => liquidarTitulo.mutate({ titulo: c, tipo, forma: 'PIX' })}>PIX</Button>
                   </div>
                 </TableCell>
               </TableRow>

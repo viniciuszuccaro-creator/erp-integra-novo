@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
         });
         ok ? migrated.acesso++ : migrated.skipped++;
       }
-    } catch (_) {}
+    } catch (_) { console.error('[migrateAuditoriasToAuditLog] catch:', _); }
 
     // AuditoriaGPS -> AuditLog (tipo_auditoria: 'gps')
     try {
@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
         });
         ok ? migrated.gps++ : migrated.skipped++;
       }
-    } catch (_) {}
+    } catch (_) { console.error('[migrateAuditoriasToAuditLog] catch:', _); }
 
     // AuditoriaIA -> AuditLog (tipo_auditoria: 'ia')
     try {
@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
         });
         ok ? migrated.ia++ : migrated.skipped++;
       }
-    } catch (_) {}
+    } catch (_) { console.error('[migrateAuditoriasToAuditLog] catch:', _); }
 
     // AuditoriaGlobal -> AuditLog (tipo_auditoria: 'global')
     try {
@@ -159,7 +159,7 @@ Deno.serve(async (req) => {
         });
         ok ? migrated.global++ : migrated.skipped++;
       }
-    } catch (_) {}
+    } catch (_) { console.error('[migrateAuditoriasToAuditLog] catch:', _); }
 
     return Response.json({ success: true, migrated });
   } catch (error) {

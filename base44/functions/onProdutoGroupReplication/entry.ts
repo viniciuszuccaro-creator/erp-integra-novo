@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
           descricao: `Produto ${produto.codigo} - ${produto.descricao} propagado para ${ok} empresas`,
           data_hora: new Date().toISOString(),
         });
-      } catch (_) {}
+      } catch (_) { console.error('[onProdutoGroupReplication] catch:', _); }
 
       return Response.json({ success: true, direction: 'down', ok, fail });
     }

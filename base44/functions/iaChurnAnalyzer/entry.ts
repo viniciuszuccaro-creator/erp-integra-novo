@@ -11,7 +11,7 @@ async function assertPermission(base44, ctx, module, entity, action) {
     if (res?.data && res.data.allowed === false) {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
-  } catch (_) {}
+  } catch (_) { console.error('[iaChurnAnalyzer] catch:', _); }
   return null;
 }
 // Inlined churnUtils
@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
           prioridade: 'Média',
           empresa_id: o?.empresa_id
         });
-      } catch {}
+      } catch (e) { console.error('[iaChurnAnalyzer] catch:', e); }
     }
 
 // Perfil Cliente (pagadores lentos, alto valor)
@@ -107,7 +107,7 @@ try {
       empresa_id: (filtros?.empresa_id ?? null)
     });
   }
-} catch {}
+} catch (e) { console.error('[iaChurnAnalyzer] catch:', e); }
 
 return Response.json({ ok: true, sinalizadas: flagged.length, sugeridas });
   } catch (error) {

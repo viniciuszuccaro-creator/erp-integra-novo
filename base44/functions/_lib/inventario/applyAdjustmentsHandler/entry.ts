@@ -57,7 +57,7 @@ async function audit(base44, user, { acao = 'Ação', modulo = 'Sistema', entida
       dados_novos: dados_novos || null,
       data_hora: new Date().toISOString(),
     });
-  } catch {}
+  } catch (e) { console.error('[applyAdjustmentsHandler] catch:', e); }
 }
 
 // Handler pequeno e reutilizável para aplicar ajustes de inventário

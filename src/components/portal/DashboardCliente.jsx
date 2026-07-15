@@ -307,28 +307,28 @@ export default function DashboardCliente({ clienteId: propClienteId, adminMode =
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <Link to={'/PortalCliente?tab=orcamentos'}>
-              <Button data-permission="Portal.Orcamento.visualizar" variant="outline" className="w-full">
+              <Button variant="outline" className="w-full">
                 <FileText className="w-4 h-4 mr-2" />
                 Aprovar Orçamentos
               </Button>
             </Link>
 
             <Link to={'/PortalCliente?tab=documentos'}>
-              <Button data-permission="Portal.Documento.upload" variant="outline" className="w-full">
+              <Button variant="outline" className="w-full">
                 <Upload className="w-4 h-4 mr-2" />
                 Enviar Projeto
               </Button>
             </Link>
 
             <Link to={'/PortalCliente?tab=chamados'}>
-              <Button data-permission="Portal.Chamado.criar" variant="outline" className="w-full">
+              <Button variant="outline" className="w-full">
                 <MessageSquare className="w-4 h-4 mr-2" />
                 Abrir Chamado
               </Button>
             </Link>
 
             <Link to={'/PortalCliente?tab=documentos'}>
-              <Button data-permission="Portal.Documento.visualizar" variant="outline" className="w-full">
+              <Button variant="outline" className="w-full">
                 <Download className="w-4 h-4 mr-2" />
                 Baixar Documentos
               </Button>

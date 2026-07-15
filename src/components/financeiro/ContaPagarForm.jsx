@@ -172,7 +172,6 @@ export default function ContaPagarForm({ conta, onSubmit, isSubmitting, windowMo
           type="submit" 
           disabled={isSubmitting} 
           className="bg-red-600 hover:bg-red-700 px-8"
-          data-permission="Financeiro.ContaPagar.criar"
           data-sensitive
         >
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}

@@ -87,7 +87,7 @@ export default function CaixaHeader({ ordensLiquidacao, filtros, setFiltros, ord
                   Valor total: R$ {ordensLiquidacao.filter(o => ordensSelecionadas.includes(o.id)).reduce((sum, o) => sum + (o.valor_total || 0), 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}
                 </p>
               </div>
-              <Button data-permission="Financeiro.Caixa.liquidar" data-action="Financeiro.Caixa.liquidar" data-sensitive="true" onClick={onLiquidar} disabled={!contextoValido || !podeLiquidar} className="bg-blue-600 hover:bg-blue-700">
+              <Button data-action="Financeiro.Caixa.liquidar" data-sensitive="true" onClick={onLiquidar} disabled={!contextoValido || !podeLiquidar} className="bg-blue-600 hover:bg-blue-700">
                 Liquidar Selecionadas
               </Button>
             </div>

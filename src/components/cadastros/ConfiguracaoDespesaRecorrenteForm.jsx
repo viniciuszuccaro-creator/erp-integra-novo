@@ -51,7 +51,7 @@ export default function ConfiguracaoDespesaRecorrenteForm({ config, windowMode =
 
         <div className={windowMode ? "border-t bg-slate-50 p-4" : "mt-6"}>
           <div className="flex justify-end gap-3">
-            <Button type="submit" className="bg-purple-600 hover:bg-purple-700" data-permission="Cadastros.ConfiguracaoDespesaRecorrente.salvar" data-action="Cadastros.ConfiguracaoDespesaRecorrente.salvar" data-sensitive="true">
+            <Button type="submit" className="bg-purple-600 hover:bg-purple-700" data-action="Cadastros.ConfiguracaoDespesaRecorrente.salvar" data-sensitive="true">
               <Repeat className="w-4 h-4 mr-2" />
               {config ? 'Atualizar Configuração' : 'Criar Configuração'}
             </Button>

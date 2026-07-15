@@ -46,7 +46,7 @@ export default function ProdutoForm({ produto, onSubmit, isSubmitting }) {
       <ProdutoPrecificacaoFiscalSection formData={formData} setFormData={setFormData} sugestoesIA={logic.sugestoesIA} handleDadosNCM={logic.handleDadosNCM} />
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="submit" data-permission="Cadastros.Produto.salvar" disabled={isSubmitting} className="bg-purple-600 hover:bg-purple-700">
+        <Button type="submit" disabled={isSubmitting} className="bg-purple-600 hover:bg-purple-700">
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {produto ? 'Atualizar Produto' : 'Criar Produto'}
         </Button>

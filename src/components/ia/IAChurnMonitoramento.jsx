@@ -226,15 +226,15 @@ export default function IAChurnMonitoramento() {
                 </div>
                 
                 <div className="flex gap-2 mt-3">
-                  <Button data-permission="CRM.IA.visualizar" size="sm" variant="outline" className="flex-1">
+                  <Button size="sm" variant="outline" className="flex-1">
                     <Phone className="w-4 h-4 mr-2" />
                     Ligar
                   </Button>
-                  <Button data-permission="CRM.IA.visualizar" size="sm" variant="outline" className="flex-1">
+                  <Button size="sm" variant="outline" className="flex-1">
                     <MessageSquare className="w-4 h-4 mr-2" />
                     WhatsApp
                   </Button>
-                  <Button data-permission="CRM.IA.visualizar" size="sm" variant="outline" className="flex-1">
+                  <Button size="sm" variant="outline" className="flex-1">
                     <Mail className="w-4 h-4 mr-2" />
                     E-mail
                   </Button>

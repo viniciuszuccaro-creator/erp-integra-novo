@@ -36,7 +36,7 @@ export default function ConfiguracaoProducao({ empresaId }) {
                 <p className="text-sm text-red-700">Bloqueado por {config.bloqueado_por} em {new Date(config.bloqueado_em).toLocaleString("pt-BR")}</p>
               </div>
             </div>
-            {isAdmin && <Button data-permission="Producao.Configuracao.bloquear" onClick={() => toggleBloquear.mutate(false)} variant="outline" className="border-red-300"><Unlock className="w-4 h-4 mr-2" />Desbloquear</Button>}
+            {isAdmin && <Button onClick={() => toggleBloquear.mutate(false)} variant="outline" className="border-red-300"><Unlock className="w-4 h-4 mr-2" />Desbloquear</Button>}
           </div>
         ) : isAdmin ? (
           <div className="p-4 bg-blue-50 border border-blue-200 rounded flex items-center justify-between">
@@ -47,7 +47,7 @@ export default function ConfiguracaoProducao({ empresaId }) {
                 <p className="text-sm text-blue-700">Todos os usuários podem editar estas configurações</p>
               </div>
             </div>
-            <Button data-permission="Producao.Configuracao.bloquear" onClick={() => toggleBloquear.mutate(true)} variant="outline" className="border-blue-300"><Lock className="w-4 h-4 mr-2" />Bloquear Edição</Button>
+            <Button onClick={() => toggleBloquear.mutate(true)} variant="outline" className="border-blue-300"><Lock className="w-4 h-4 mr-2" />Bloquear Edição</Button>
           </div>
         ) : null}
         <ProducaoTabPerdas formData={formData} setFormData={setFormData} isDisabled={isDisabled} />
@@ -89,7 +89,7 @@ export default function ConfiguracaoProducao({ empresaId }) {
       )}
 
       <div className="flex justify-end">
-        <Button data-permission="Producao.ConfiguracaoProducao.salvar" onClick={handleSalvar} disabled={isDisabled || saveMutation.isPending} className="bg-green-600 hover:bg-green-700 min-w-[200px]">
+        <Button onClick={handleSalvar} disabled={isDisabled || saveMutation.isPending} className="bg-green-600 hover:bg-green-700 min-w-[200px]">
           <Save className="w-4 h-4 mr-2" />{saveMutation.isPending ? "Salvando..." : "Salvar Configurações"}
         </Button>
       </div>

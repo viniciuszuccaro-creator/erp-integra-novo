@@ -133,7 +133,7 @@ export default function RelatorioPedidosPorOrigem({ empresaId, windowMode = fals
             </TabsTrigger>
           </TabsList>
 
-          <Button data-permission="Relatorios.RelatorioPedidosPorOrigem.exportar" onClick={handleExportar} variant="outline">
+          <Button onClick={handleExportar} variant="outline">
             <Download className="w-4 h-4 mr-2" />
             Exportar CSV
           </Button>

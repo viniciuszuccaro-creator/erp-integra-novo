@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
       } else {
         cfg = await base44.entities.ConfiguracaoSistema.create({ ...filtro, valor_json: policies });
       }
-      try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: empresa_id || null, group_id: group_id || null, acao: 'Edição', modulo: 'Sistema', entidade: 'ConfiguracaoSistema', registro_id: cfg.id, descricao: 'Atualização de políticas de aprovação', dados_novos: policies, data_hora: new Date().toISOString() }); } catch {}
+      try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: empresa_id || null, group_id: group_id || null, acao: 'Edição', modulo: 'Sistema', entidade: 'ConfiguracaoSistema', registro_id: cfg.id, descricao: 'Atualização de políticas de aprovação', dados_novos: policies, data_hora: new Date().toISOString() }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
       return Response.json({ sucesso: true, id: cfg.id });
     }
 
@@ -110,9 +110,9 @@ Deno.serve(async (req) => {
         data_solicitacao: new Date().toISOString()
       });
 
-      try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: empresa_id || null, group_id: group_id || null, acao: 'Criação', modulo: 'Comercial', entidade: 'SolicitacaoAprovacao', registro_id: record.id, descricao: `Solicitação (${tipo_solicitacao}) para ${entidade_alvo}#${entidade_alvo_id}`, dados_novos: record, data_hora: new Date().toISOString() }); } catch {}
-      try { await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId: empresa_id || null, groupId: group_id || null, intent: 'aprovacao_criada', vars: { entidade: entidade_alvo, id: entidade_alvo_id || 'novo' } }); } catch {}
-      try { await base44.asServiceRole.functions.invoke('sendEmailProvider', { empresaId: empresa_id || null, assunto: 'Aprovação criada', destinatario: user.email || 'noreply@local', mensagem: `Solicitação de aprovação (${tipo_solicitacao}) aberta para ${entidade_alvo} ${entidade_alvo_id || 'novo'}.` }); } catch {}
+      try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: empresa_id || null, group_id: group_id || null, acao: 'Criação', modulo: 'Comercial', entidade: 'SolicitacaoAprovacao', registro_id: record.id, descricao: `Solicitação (${tipo_solicitacao}) para ${entidade_alvo}#${entidade_alvo_id}`, dados_novos: record, data_hora: new Date().toISOString() }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
+      try { await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId: empresa_id || null, groupId: group_id || null, intent: 'aprovacao_criada', vars: { entidade: entidade_alvo, id: entidade_alvo_id || 'novo' } }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
+      try { await base44.asServiceRole.functions.invoke('sendEmailProvider', { empresaId: empresa_id || null, assunto: 'Aprovação criada', destinatario: user.email || 'noreply@local', mensagem: `Solicitação de aprovação (${tipo_solicitacao}) aberta para ${entidade_alvo} ${entidade_alvo_id || 'novo'}.` }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
       return Response.json(record);
     }
 
@@ -150,14 +150,14 @@ Deno.serve(async (req) => {
             for (const w of whatsapps) {
               await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId: s.empresa_id || null, groupId: s.group_id || null, numero: String(w), mensagem: `Aprovação pendente (nível ${nextIndex + 1}/${niveis.length || 1}): ${s.entidade_alvo} ${s.entidade_alvo_id || 'novo'} • Valor: R$ ${Number(s?.dados_propostos?.valor||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}` });
             }
-          } catch {}
+          } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
           return Response.json({ escalated_to_level: nextIndex + 1 });
         }
       }
 
-      try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: s.empresa_id || null, group_id: s.group_id || null, acao: action === 'approve' ? 'Aprovação' : 'Rejeição', modulo: 'Comercial', entidade: 'SolicitacaoAprovacao', registro_id: solicitacao_id, descricao: `${novoStatus} para ${s.entidade_alvo}#${s.entidade_alvo_id}`, dados_anteriores: s, dados_novos: updated, data_hora: new Date().toISOString() }); } catch {}
-      try { await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId: s.empresa_id || null, groupId: s.group_id || null, intent: novoStatus === 'aprovado' ? 'aprovacao_concedida' : 'aprovacao_recusada', vars: { entidade: s.entidade_alvo, id: s.entidade_alvo_id || 'novo' } }); } catch {}
-      try { await base44.asServiceRole.functions.invoke('sendEmailProvider', { empresaId: s.empresa_id || null, assunto: `Solicitação ${novoStatus}`, destinatario: user.email || 'noreply@local', mensagem: `Sua solicitação ${solicitacao_id} foi ${novoStatus}.` }); } catch {}
+      try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: s.empresa_id || null, group_id: s.group_id || null, acao: action === 'approve' ? 'Aprovação' : 'Rejeição', modulo: 'Comercial', entidade: 'SolicitacaoAprovacao', registro_id: solicitacao_id, descricao: `${novoStatus} para ${s.entidade_alvo}#${s.entidade_alvo_id}`, dados_anteriores: s, dados_novos: updated, data_hora: new Date().toISOString() }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
+      try { await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId: s.empresa_id || null, groupId: s.group_id || null, intent: novoStatus === 'aprovado' ? 'aprovacao_concedida' : 'aprovacao_recusada', vars: { entidade: s.entidade_alvo, id: s.entidade_alvo_id || 'novo' } }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
+      try { await base44.asServiceRole.functions.invoke('sendEmailProvider', { empresaId: s.empresa_id || null, assunto: `Solicitação ${novoStatus}`, destinatario: user.email || 'noreply@local', mensagem: `Sua solicitação ${solicitacao_id} foi ${novoStatus}.` }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
 
       // Aplicações automáticas simples (ex.: desconto de pedido)
       if (novoStatus === 'aprovado' && s.tipo_solicitacao === 'desconto_pedido' && s.entidade_alvo === 'Pedido') {
@@ -167,7 +167,7 @@ Deno.serve(async (req) => {
             const merged = { ...pedidoAtual, ...s.dados_propostos, status: 'Aprovado' };
             await base44.entities.Pedido.update(pedidoAtual.id, merged);
           }
-        } catch {}
+        } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
       }
 
       return Response.json(updated);
@@ -190,14 +190,14 @@ Deno.serve(async (req) => {
         observacoes_publicas: (pedido.observacoes_publicas ? (pedido.observacoes_publicas + '\n') : '') + `Aceito pelo cliente via Portal: ${user.full_name || user.email}${comments ? ' — ' + comments : ''}`
       });
 
-      try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: pedido.empresa_id || null, group_id: pedido.group_id || null, acao: 'Aprovação', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido_id, descricao: 'Orçamento aceito pelo cliente no Portal', dados_anteriores: pedido, dados_novos: updated, data_hora: new Date().toISOString() }); } catch {}
+      try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: pedido.empresa_id || null, group_id: pedido.group_id || null, acao: 'Aprovação', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido_id, descricao: 'Orçamento aceito pelo cliente no Portal', dados_anteriores: pedido, dados_novos: updated, data_hora: new Date().toISOString() }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
 
       // Notificações (melhor esforço)
       try {
         const vars = { cliente: pedido.cliente_nome || '', pedido: pedido.numero_pedido || pedido.id, valor_total: pedido.valor_total };
         await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId: pedido.empresa_id || null, groupId: pedido.group_id || null, intent: 'orcamento_aceito', vars, pedidoId: pedido.id });
         await base44.asServiceRole.functions.invoke('sendEmailProvider', { empresaId: pedido.empresa_id || null, destinatario: (user.email || 'noreply@local'), assunto: `Orçamento #${pedido.numero_pedido || pedido.id} aceito`, mensagem: `O cliente aceitou o orçamento ${pedido.numero_pedido || pedido.id}.` });
-      } catch {}
+      } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
 
       return Response.json({ sucesso: true, pedido: updated });
     }
@@ -217,12 +217,12 @@ Deno.serve(async (req) => {
         observacoes_publicas: (pedido.observacoes_publicas ? (pedido.observacoes_publicas + '\n') : '') + `Revisão solicitada pelo cliente via Portal: ${comments || ''}`
       });
 
-      try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: pedido.empresa_id || null, group_id: pedido.group_id || null, acao: 'Criação', modulo: 'Comercial', entidade: 'SolicitacaoAprovacao', registro_id: pedido.id, descricao: 'Cliente solicitou revisão de orçamento via Portal', dados_novos: { pedido_id, comments }, data_hora: new Date().toISOString() }); } catch {}
+      try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: pedido.empresa_id || null, group_id: pedido.group_id || null, acao: 'Criação', modulo: 'Comercial', entidade: 'SolicitacaoAprovacao', registro_id: pedido.id, descricao: 'Cliente solicitou revisão de orçamento via Portal', dados_novos: { pedido_id, comments }, data_hora: new Date().toISOString() }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
       try {
         const vars = { cliente: pedido.cliente_nome || '', pedido: pedido.numero_pedido || pedido.id };
         await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId: pedido.empresa_id || null, groupId: pedido.group_id || null, intent: 'orcamento_revisao', vars, pedidoId: pedido.id });
         await base44.asServiceRole.functions.invoke('sendEmailProvider', { empresaId: pedido.empresa_id || null, destinatario: (user.email || 'noreply@local'), assunto: `Revisão solicitada • Orçamento #${pedido.numero_pedido || pedido.id}`, mensagem: `O cliente solicitou revisão do orçamento ${pedido.numero_pedido || pedido.id}. Comentários: ${comments || ''}` });
-      } catch {}
+      } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
 
       return Response.json({ sucesso: true, pedido: updated });
     }
@@ -253,7 +253,7 @@ Deno.serve(async (req) => {
             else if (entity_name === 'NotaFiscal') valorBase = reg.valor_total || reg.valor_produtos || 0;
           }
         }
-      } catch {}
+      } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
       if (valorBase == null) valorBase = 0;
 
       // Carrega políticas (empresa > grupo)
@@ -263,7 +263,7 @@ Deno.serve(async (req) => {
         const byGrupo = (!byEmpresa?.length && group_id) ? await base44.entities.ConfiguracaoSistema.filter({ chave: 'aprovacao_politicas', group_id }, undefined, 1) : [];
         const cfg = (byEmpresa?.[0] || byGrupo?.[0]) || null;
         politicas = cfg?.valor_json || cfg?.politicas || null; // aceita tanto valor_json quanto politicas
-      } catch {}
+      } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
       const ranges = (politicas && politicas[entity_name]) || [];
 
       // Encontra a faixa
@@ -295,10 +295,10 @@ Deno.serve(async (req) => {
           data_solicitacao: new Date().toISOString(),
           perfil_aprovador_necessario: 'aprovar',
         });
-        try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: empresa_id || null, group_id: group_id || null, acao: 'Criação', modulo: moduleName, entidade: 'SolicitacaoAprovacao', registro_id: rec.id, descricao: `Avaliação de aprovação criada (${entity_name} ${entity_id || ''})`, dados_novos: rec, data_hora: new Date().toISOString() }); } catch {}
+        try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: empresa_id || null, group_id: group_id || null, acao: 'Criação', modulo: moduleName, entidade: 'SolicitacaoAprovacao', registro_id: rec.id, descricao: `Avaliação de aprovação criada (${entity_name} ${entity_id || ''})`, dados_novos: rec, data_hora: new Date().toISOString() }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
         // Notifica solicitante
-        try { await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId: empresa_id || null, groupId: group_id || null, intent: 'aprovacao_pendente', vars: { entidade: entity_name, id: entity_id || 'novo', valor: valorBase } }); } catch {}
-        try { await base44.asServiceRole.functions.invoke('sendEmailProvider', { empresaId: empresa_id || null, assunto: 'Aprovação pendente', destinatario: user.email || 'noreply@local', mensagem: `Gerada solicitação de aprovação para ${entity_name} (${entity_id || 'novo'}), valor ${valorBase}.` }); } catch {}
+        try { await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId: empresa_id || null, groupId: group_id || null, intent: 'aprovacao_pendente', vars: { entidade: entity_name, id: entity_id || 'novo', valor: valorBase } }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
+        try { await base44.asServiceRole.functions.invoke('sendEmailProvider', { empresaId: empresa_id || null, assunto: 'Aprovação pendente', destinatario: user.email || 'noreply@local', mensagem: `Gerada solicitação de aprovação para ${entity_name} (${entity_id || 'novo'}), valor ${valorBase}.` }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
         // Notifica gestores (configuração por empresa/grupo: chave 'gestores_financeiros')
         try {
           const cfgEmp = empresa_id ? await base44.entities.ConfiguracaoSistema.filter({ chave: 'gestores_financeiros', empresa_id }, undefined, 1) : [];
@@ -310,7 +310,7 @@ Deno.serve(async (req) => {
               if (g?.email) { await base44.asServiceRole.functions.invoke('sendEmailProvider', { empresaId: empresa_id || null, destinatario: g.email, assunto: 'Aprovação pendente', mensagem: `Existe uma solicitação de aprovação para ${entity_name} (${entity_id || 'novo'}) no valor de R$ ${Number(valorBase).toLocaleString('pt-BR',{minimumFractionDigits:2})}.` }); }
             }
           }
-        } catch {}
+        } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
         return Response.json({ required: true, solicitacao_id: rec.id });
       }
 
@@ -332,9 +332,9 @@ Deno.serve(async (req) => {
           data_solicitacao: new Date().toISOString(),
           perfil_aprovador_necessario: 'aprovar',
         });
-        try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: empresa_id || null, group_id: group_id || null, acao: 'Criação', modulo: moduleName, entidade: 'SolicitacaoAprovacao', registro_id: rec.id, descricao: `Solicitação por valor (${valorBase}) para ${entity_name} ${entity_id || ''} • Nível ${nivel_index + 1}/${niveis.length || 1}` , dados_novos: rec, data_hora: new Date().toISOString() }); } catch {}
+        try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: empresa_id || null, group_id: group_id || null, acao: 'Criação', modulo: moduleName, entidade: 'SolicitacaoAprovacao', registro_id: rec.id, descricao: `Solicitação por valor (${valorBase}) para ${entity_name} ${entity_id || ''} • Nível ${nivel_index + 1}/${niveis.length || 1}` , dados_novos: rec, data_hora: new Date().toISOString() }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
         // Notifica solicitante (melhor esforço)
-        try { await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId: empresa_id || null, groupId: group_id || null, intent: 'aprovacao_pendente', vars: { entidade: entity_name, id: entity_id || 'novo', valor: valorBase } }); } catch {}
+        try { await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId: empresa_id || null, groupId: group_id || null, intent: 'aprovacao_pendente', vars: { entidade: entity_name, id: entity_id || 'novo', valor: valorBase } }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
         
         // Notifica aprovadores do nível atual, se definidos na política; senão, cai no fallback de gestores_financeiros
         let notified = false;
@@ -350,7 +350,7 @@ Deno.serve(async (req) => {
             notified = true;
             await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId: empresa_id || null, groupId: group_id || null, numero: String(w), mensagem: `Aprovação pendente (nível ${nivel_index + 1}/${niveis.length || 1}): ${entity_name} ${entity_id || 'novo'} • Valor: R$ ${Number(valorBase).toLocaleString('pt-BR',{minimumFractionDigits:2})}` });
           }
-        } catch {}
+        } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
         
         // Fallback para gestores financeiros cadastrados por empresa/grupo
         if (!notified) {
@@ -364,7 +364,7 @@ Deno.serve(async (req) => {
                 if (g?.email) { await base44.asServiceRole.functions.invoke('sendEmailProvider', { empresaId: empresa_id || null, destinatario: g.email, assunto: 'Aprovação pendente', mensagem: `Existe uma solicitação de aprovação para ${entity_name} (${entity_id || 'novo'}) no valor de R$ ${Number(valorBase).toLocaleString('pt-BR',{minimumFractionDigits:2})}.` }); }
               }
             }
-          } catch {}
+          } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
         }
         return Response.json({ required: true, solicitacao_id: rec.id, nivel_index, niveis_total: niveis.length });
       }

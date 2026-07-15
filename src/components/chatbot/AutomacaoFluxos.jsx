@@ -96,7 +96,7 @@ export default function AutomacaoFluxos({ canalConfig }) {
           </div>
         ))}
 
-        <Button data-permission="Chatbot.Automacao.salvar" onClick={() => salvarMutation.mutate()} className="w-full bg-purple-600 hover:bg-purple-700">
+        <Button onClick={() => salvarMutation.mutate()} className="w-full bg-purple-600 hover:bg-purple-700">
           <Workflow className="w-4 h-4 mr-2" />
           Salvar Automações
         </Button>

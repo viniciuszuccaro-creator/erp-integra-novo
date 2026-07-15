@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
           descricao: `${entityName}: scanned=${result.scanned} toUpdate=${result.toUpdate} ${apply ? 'updated='+result.updated : '(dry-run)'} skipped=${result.skipped}`,
           data_hora: new Date().toISOString(),
         });
-      } catch {}
+      } catch (e) { console.error('[backfillGroupEmpresa] catch:', e); }
     }
 
     return Response.json({ ok: true, dryRun: forceDryRun ? true : dryRun, apply, summary });

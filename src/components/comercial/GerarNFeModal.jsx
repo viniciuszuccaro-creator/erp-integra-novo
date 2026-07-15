@@ -218,11 +218,9 @@ export default function GerarNFeModal({ open, onClose, pedidoData, onEmitir, win
           </Button>
         )}
         <Button
-          data-permission="Fiscal.NotaFiscal.emitir"
           onClick={handleEmitir}
           className="bg-purple-600 hover:bg-purple-700"
           disabled={escopo === 'etapa_especifica' && !etapaSelecionada}
-          data-permission="Fiscal.NFe.emitir"
         >
           <Receipt className="w-4 h-4 mr-2" />
           Gerar NF-e

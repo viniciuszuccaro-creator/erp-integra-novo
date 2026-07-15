@@ -118,7 +118,7 @@ Taxa de Recuperação,${data.metricas.recoveryRate}%
       </p>
 
       <div className="flex gap-2">
-        <Button data-permission="Sistema.HealthReportGenerator.exportar"
+        <Button
           onClick={() => generateReport('csv')}
           disabled={isGenerating}
           className="bg-blue-600 hover:bg-blue-700"
@@ -126,7 +126,7 @@ Taxa de Recuperação,${data.metricas.recoveryRate}%
           <Download className="w-4 h-4 mr-2" />
           CSV
         </Button>
-        <Button data-permission="Sistema.HealthReportGenerator.exportar"
+        <Button
           onClick={() => generateReport('json')}
           disabled={isGenerating}
           variant="outline"

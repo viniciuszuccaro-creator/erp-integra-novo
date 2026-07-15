@@ -212,7 +212,6 @@ export default function AdicionarItemRevendaModal({
                   ? "bg-orange-600 hover:bg-orange-700"
                   : "bg-blue-600 hover:bg-blue-700"
               }
-              data-permission="Comercial.ItemRevenda.adicionar"
             >
               {h.calculo?.margem_violada
                 ? "Adicionar (Aguardando Aprovação)"

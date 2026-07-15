@@ -120,7 +120,7 @@ export default function useAprovacaoOrcamento({ clienteId }) {
           empresa_id: cli?.empresa_id || undefined,
           group_id: cli?.group_id || undefined
         });
-      } catch (_) {}
+      } catch (_) { console.error('[aprovacao-assinatura] catch:', _); }
 
       await base44.entities.OrcamentoCliente.update(orcamento.id, {
         pedido_gerado_id: pedido.id,
@@ -137,7 +137,7 @@ export default function useAprovacaoOrcamento({ clienteId }) {
           empresa_id: cli?.empresa_id || undefined,
           group_id: cli?.group_id || undefined
         });
-      } catch (_) {}
+      } catch (_) { console.error('[aprovacao-assinatura] catch:', _); }
 
       try {
         await base44.functions.invoke('sendEmailProvider', {
@@ -145,14 +145,14 @@ export default function useAprovacaoOrcamento({ clienteId }) {
           subject: `Orçamento aprovado • ${orcamento.numero_orcamento}`,
           body: `O orçamento ${orcamento.numero_orcamento} foi aprovado. Pedido ${pedido.numero_pedido} criado e aguarda aprovação.`
         });
-      } catch (_) {}
+      } catch (_) { console.error('[aprovacao-assinatura] catch:', _); }
 
       try {
         await base44.functions.invoke('whatsappSend', {
           to: orcamento.whatsapp_contato || '',
           message: `✅ Orçamento ${orcamento.numero_orcamento} aprovado. Pedido ${pedido.numero_pedido} gerado e aguardando aprovação.`
         });
-      } catch (_) {}
+      } catch (_) { console.error('[aprovacao-assinatura] catch:', _); }
 
       return { orcamento, pedido, assinaturaUrl: file_url };
     },
@@ -179,11 +179,11 @@ export default function useAprovacaoOrcamento({ clienteId }) {
             dados_novos: { pontos_fidelidade: novo },
             data_hora: new Date().toISOString()
           });
-        } catch {}
-      } catch (_) {}
+        } catch (e) { console.error('[aprovacao-assinatura] catch:', e); }
+      } catch (_) { console.error('[aprovacao-assinatura] catch:', _); }
 
-      try { await queryClient.invalidateQueries({ queryKey: ['cliente-portal'] }); } catch {}
-      try { await queryClient.invalidateQueries({ queryKey: ['orcamentos-aprovados-flag'] }); } catch {}
+      try { await queryClient.invalidateQueries({ queryKey: ['cliente-portal'] }); } catch (e) { console.error('[aprovacao-assinatura] catch:', e); }
+      try { await queryClient.invalidateQueries({ queryKey: ['orcamentos-aprovados-flag'] }); } catch (e) { console.error('[aprovacao-assinatura] catch:', e); }
 
       toast.success(`✅ Orçamento aprovado! Pedido ${pedido.numero_pedido} criado.`);
     },
@@ -207,20 +207,20 @@ export default function useAprovacaoOrcamento({ clienteId }) {
           dados_novos: { comentario_revisao: motivo },
           data_hora: new Date().toISOString()
         });
-      } catch (_) {}
+      } catch (_) { console.error('[aprovacao-assinatura] catch:', _); }
       try {
         await base44.functions.invoke('sendEmailProvider', {
           to: orcamento.email_contato || orcamento.cliente_email || 'noreply@invalid.local',
           subject: `Revisão solicitada • ${orcamento.numero_orcamento}`,
           body: `O cliente solicitou revisão do orçamento ${orcamento.numero_orcamento}.\nMotivo: ${motivo || 'Não informado'}`
         });
-      } catch (_) {}
+      } catch (_) { console.error('[aprovacao-assinatura] catch:', _); }
       try {
         await base44.functions.invoke('whatsappSend', {
           to: orcamento.whatsapp_contato || '',
           message: `⚠️ Revisão solicitada no orçamento ${orcamento.numero_orcamento}. Motivo: ${motivo || 'Não informado'}`
         });
-      } catch (_) {}
+      } catch (_) { console.error('[aprovacao-assinatura] catch:', _); }
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['orcamentos-aprovacao']);

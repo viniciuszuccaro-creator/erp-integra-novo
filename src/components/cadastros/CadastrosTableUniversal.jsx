@@ -124,8 +124,7 @@ export default function CadastrosTableUniversal({
             setCurrentPage(1);
           }}
           className="pl-10 bg-white border-slate-200"
-          data-permission={permissaoVisualizar}
-          data-action={`Cadastros.${entityName}.buscar`}
+          data-action={`Cadastros.${entityName}
         />
       </div>
 
@@ -194,8 +193,7 @@ export default function CadastrosTableUniversal({
                               onClick={() => onView(item)}
                               className="h-8 w-8 p-0 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-sm"
                               title="Visualizar"
-                              data-permission={permissaoVisualizar}
-                              data-action={`Cadastros.${entityName}.visualizar`}
+                              data-action={`Cadastros.${entityName}
                             >
                               <Eye className="w-4 h-4" />
                             </Button>
@@ -208,8 +206,7 @@ export default function CadastrosTableUniversal({
                               disabled={!podeEditar}
                               className="h-8 w-8 p-0 text-slate-600 hover:text-green-600 hover:bg-green-50 rounded-sm"
                               title="Editar"
-                              data-permission={permissaoEditar}
-                              data-action={`Cadastros.${entityName}.editar`}
+                              data-action={`Cadastros.${entityName}
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -225,8 +222,7 @@ export default function CadastrosTableUniversal({
                               disabled={!podeExcluir}
                               className="h-8 w-8 p-0 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-sm"
                               title="Deletar"
-                              data-permission={permissaoExcluir}
-                              data-action={`Cadastros.${entityName}.excluir`}
+                              data-action={`Cadastros.${entityName}
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>

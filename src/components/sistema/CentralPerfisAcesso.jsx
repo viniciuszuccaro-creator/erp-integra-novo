@@ -92,7 +92,7 @@ export default function CentralPerfisAcesso() {
             dadosNovos: result || formPerfil,
           })
         );
-      } catch {}
+      } catch (e) { console.error('[sistema] catch:', e); }
       setTimeout(() => {
         setPerfilAberto(null);
         setFormPerfil(FORM_INICIAL);
@@ -122,7 +122,7 @@ export default function CentralPerfisAcesso() {
             descricao: "Perfil de acesso excluído",
           })
         );
-      } catch {}
+      } catch (e) { console.error('[sistema] catch:', e); }
     },
     onError: (error) => toast.error("Erro: " + error.message),
   });

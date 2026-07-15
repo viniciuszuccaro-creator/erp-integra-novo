@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
         if (!emp.group_id && !emp.grupo_id) {
           try {
             await api.entities.Empresa.update(emp.id, { group_id: grupoId });
-          } catch (_) {}
+          } catch (_) { console.error('[fase2Check] catch:', _); }
         }
       }
     }

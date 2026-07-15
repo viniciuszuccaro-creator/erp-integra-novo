@@ -149,7 +149,7 @@ export default function ImportadorProdutosPlanilha({ onConcluido, closeSelf }) {
               const novo = produtosAlvo.find(p => makeKey(p.empresa_id, p.codigo) === k);
               duplics.push({ empresa_id: empId, codigo: code, existente: encontrados[0], novo });
             }
-          } catch (_) {}
+          } catch (_) { console.error('[estoque] catch:', _); }
           return null;
         }));
         await sleep(250);
@@ -206,7 +206,7 @@ export default function ImportadorProdutosPlanilha({ onConcluido, closeSelf }) {
       const b = new Uint8Array(buf);
       if (b[0] === 0xFF && b[1] === 0xFE) return 'UTF-16LE';
       if (b[0] === 0xFE && b[1] === 0xFF) return 'UTF-16BE';
-    } catch (_) {}
+    } catch (_) { console.error('[estoque] catch:', _); }
     return 'UTF-8';
   };
 
@@ -384,7 +384,7 @@ export default function ImportadorProdutosPlanilha({ onConcluido, closeSelf }) {
 
         <div className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={() => closeSelf && closeSelf()} disabled={processando}>Cancelar</Button>
-          <Button type="button" data-permission="Estoque.Produto.importar" onClick={importar} disabled={processando || !arquivo || (!empresaId && !grupoId) || checando} className="gap-2 bg-indigo-600 hover:bg-indigo-700">
+          <Button type="button" onClick={importar} disabled={processando || !arquivo || (!empresaId && !grupoId) || checando} className="gap-2 bg-indigo-600 hover:bg-indigo-700">
             {processando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
             {processando ? "Importando..." : "Importar Agora"}
           </Button>

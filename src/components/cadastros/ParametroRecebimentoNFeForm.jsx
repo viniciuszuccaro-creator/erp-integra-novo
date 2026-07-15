@@ -96,7 +96,7 @@ export default function ParametroRecebimentoNFeForm({ parametro, onSubmit, windo
         </Card>
 
         <div className="flex justify-end gap-3">
-          <Button type="submit" data-permission="Cadastros.ParametroRecebimento.salvar" className="bg-green-600 hover:bg-green-700">
+          <Button type="submit" className="bg-green-600 hover:bg-green-700">
             <Save className="w-4 h-4 mr-2" />
             Salvar Parâmetros
           </Button>

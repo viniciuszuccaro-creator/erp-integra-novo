@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
           const ped = await base44.asServiceRole.entities.Pedido.get(registro.pedido_id);
           empresaPedido = ped?.empresa_id || ped?.empresa_faturamento_id || null;
         }
-      } catch (_) {}
+      } catch (_) { console.error('[fiscalValidation] catch:', _); }
       if (empresaPedido && empresaNota && empresaNota !== empresaPedido) {
         try {
           const prev = registro?.validacao_ia_pre_emissao || {};
@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
               ]
             }
           });
-        } catch (_) {}
+        } catch (_) { console.error('[fiscalValidation] catch:', _); }
         try {
           await base44.asServiceRole.entities.AuditLog.create({
             usuario: 'automacao', acao: 'Bloqueio', modulo: 'Fiscal', tipo_auditoria: 'ia', entidade: 'NotaFiscal', registro_id: entityId,
@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
             empresa_id: empresaNota || null, group_id: registro?.group_id || null,
             data_hora: new Date().toISOString(), sucesso: true
           });
-        } catch (_) {}
+        } catch (_) { console.error('[fiscalValidation] catch:', _); }
         return Response.json({ success: false, blocked: true, reason: 'empresa_origem_mismatch' });
       }
       // OK quando não há divergência
@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
           },
         });
         consulta = llm;
-      } catch (_) {}
+      } catch (_) { console.error('[fiscalValidation] catch:', _); }
     }
 
     const patch = {};
@@ -137,7 +137,7 @@ Deno.serve(async (req) => {
         dados_novos: patch,
         duracao_ms: Date.now() - start,
       });
-    } catch {}
+    } catch (e) { console.error('[fiscalValidation] catch:', e); }
 
     return Response.json({ success: true, updated: patch });
   } catch (error) {

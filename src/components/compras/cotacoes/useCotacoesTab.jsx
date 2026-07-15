@@ -50,7 +50,7 @@ export default function useCotacoesTab({ cotacoes, setCotacoes }) {
           empresa_id: empresaId || null, group_id: groupId || null,
           dados_novos: novaCotacao, data_hora: new Date().toISOString(),
         });
-      } catch {}
+      } catch (e) { console.error('[cotacoes] catch:', e); }
       return novaCotacao;
     },
     onSuccess: () => {
@@ -82,7 +82,7 @@ export default function useCotacoesTab({ cotacoes, setCotacoes }) {
           empresa_id: empresaId || null, group_id: groupId || null,
           dados_novos: { fornecedor: proposta.fornecedor_nome, valor: proposta.valor_total }, data_hora: new Date().toISOString(),
         });
-      } catch {}
+      } catch (e) { console.error('[cotacoes] catch:', e); }
       return result;
     },
     onSuccess: () => {

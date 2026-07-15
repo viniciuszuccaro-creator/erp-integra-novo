@@ -62,7 +62,6 @@ export default function RemessaDialog({
           <div className="flex justify-end gap-3 pt-4">
             <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
             <Button
-              data-permission="Financeiro.Remessa.gerar"
               data-action="Financeiro.Remessa.gerar"
               data-sensitive="true"
               onClick={() => {

@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     let body = {};
-    try { body = await req.json(); } catch (_) {}
+    try { body = await req.json(); } catch (_) { console.error('[getEntityRecord] catch:', _); }
 
     const { entityName, id, filter, limit, sortField, nocache } = body;
     if (!entityName) {
@@ -50,13 +50,13 @@ Deno.serve(async (req) => {
 
       let record = null;
       if (typeof api.get === 'function') {
-        try { record = await api.get(id); } catch (_) {}
+        try { record = await api.get(id); } catch (_) { console.error('[getEntityRecord] catch:', _); }
       }
       if (!record && typeof api.filter === 'function') {
         try {
           const res = await api.filter({ id }, '-updated_date', 1);
           if (Array.isArray(res) && res.length > 0) record = res[0];
-        } catch (_) {}
+        } catch (_) { console.error('[getEntityRecord] catch:', _); }
       }
       if (!record) return Response.json({ error: 'Registro não encontrado' }, { status: 404 });
       const resp = { record, _ts: Date.now() };

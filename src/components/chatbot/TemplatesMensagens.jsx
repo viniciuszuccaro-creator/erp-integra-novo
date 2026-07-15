@@ -135,7 +135,7 @@ export default function TemplatesMensagens({ onSelecionarTemplate }) {
               <option value="Todas">Todas Categorias</option>
               {CATEGORIAS.map(cat => <option key={cat} value={cat}>{cat}</option>)}
             </select>
-            <Button data-permission="HubAtendimento.Templates.criar" onClick={() => setExibirForm(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => setExibirForm(true)} className="bg-blue-600 hover:bg-blue-700">
               <Plus className="w-4 h-4 mr-2" />Novo
             </Button>
           </div>

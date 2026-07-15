@@ -127,7 +127,7 @@ export default function HistoricoImportacoesXML({ empresaId }) {
                         <Eye className="w-4 h-4" />
                       </Button>
                       {imp.arquivo_xml_url && (
-                        <Button data-permission="Fiscal.HistoricoImportacoesXML.exportar"
+                        <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => window.open(imp.arquivo_xml_url, '_blank')}

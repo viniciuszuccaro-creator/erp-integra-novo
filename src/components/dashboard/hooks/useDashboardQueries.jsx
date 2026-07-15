@@ -140,7 +140,7 @@ export function useDashboardQueries({ canSeeFinanceiro, canSeeCRM, canSeeComerci
   useEffect(() => {
     if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return;
     const subs = [];
-    const add = (api, key) => { if (!api?.subscribe) return; const un = api.subscribe(() => { try { queryClient.invalidateQueries({ queryKey: [key], exact: false }); } catch (_) {} }); subs.push(un); };
+    const add = (api, key) => { if (!api?.subscribe) return; const un = api.subscribe(() => { try { queryClient.invalidateQueries({ queryKey: [key], exact: false }); } catch (_) { console.error('[hooks] catch:', _); } }); subs.push(un); };
     add(base44.entities?.Pedido, 'Pedido');
     add(base44.entities?.ContaReceber, 'ContaReceber');
     add(base44.entities?.ContaPagar, 'ContaPagar');
@@ -152,12 +152,12 @@ export function useDashboardQueries({ canSeeFinanceiro, canSeeCRM, canSeeComerci
     add(base44.entities?.OrdemProducao, 'OrdemProducao');
     add(base44.entities?.NotaFiscal, 'NotaFiscal');
     // Invalida contagens de cadastro quando entidades mudam
-    const invCad = () => { try { queryClient.invalidateQueries({ queryKey: ['dash-cadastro-counts'], exact: false }); } catch (_) {} };
+    const invCad = () => { try { queryClient.invalidateQueries({ queryKey: ['dash-cadastro-counts'], exact: false }); } catch (_) { console.error('[hooks] catch:', _); } };
     if (base44.entities?.Cliente?.subscribe) subs.push(base44.entities.Cliente.subscribe(invCad));
     if (base44.entities?.Colaborador?.subscribe) subs.push(base44.entities.Colaborador.subscribe(invCad));
     if (base44.entities?.Produto?.subscribe) subs.push(base44.entities.Produto.subscribe(invCad));
     if (base44.entities?.Fornecedor?.subscribe) subs.push(base44.entities.Fornecedor.subscribe(invCad));
-    return () => { subs.forEach(u => { try { u && u(); } catch (_) {} }); };
+    return () => { subs.forEach(u => { try { u && u(); } catch (_) { console.error('[hooks] catch:', _); } }); };
   }, [empresaAtual?.id, grupoAtual?.id, estaNoGrupo]);
 
   return { pedidos, contasReceber, contasPagar, entregas, colaboradores, produtos, clientes, ordensProducao, notasFiscais, iaConsolidado, loadingAnomIA, ccMetrics, botMetrics, hasContextoAtivo, cadastroCounts };

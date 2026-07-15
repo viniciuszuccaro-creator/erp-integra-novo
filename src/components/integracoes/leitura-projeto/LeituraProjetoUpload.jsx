@@ -75,7 +75,7 @@ export default function LeituraProjetoUpload({
                 <p className="text-xs text-slate-600">{(arquivo.size / 1024 / 1024).toFixed(2)} MB</p>
               </div>
             </div>
-            <Button onClick={processarArquivo} disabled={processando} className="bg-purple-600 hover:bg-purple-700" data-permission="Producao.IALeituraProjeto.processar">
+            <Button onClick={processarArquivo} disabled={processando} className="bg-purple-600 hover:bg-purple-700">
               {processando ? (
                 <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processando...</>
               ) : (

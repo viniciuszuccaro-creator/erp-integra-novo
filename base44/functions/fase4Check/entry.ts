@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
 
     // ── 8. Chatbot multicanal (intent engine) ────────────────────
     let intents = [];
-    try { intents = await api.entities.ChatbotIntent.filter({}, undefined, 20); } catch (_) {}
+    try { intents = await api.entities.ChatbotIntent.filter({}, undefined, 20); } catch (_) { console.error('[fase4Check] catch:', _); }
     results.chatbot_multicanal = {
       ok: true,
       detail: `ChatbotOmnicanal+IntentEngine+AutomacaoFluxos ativos · ${intents.length} intent(s) cadastrada(s) · ChatbotInteracao: ${chatbots.length} interação(ões)`,

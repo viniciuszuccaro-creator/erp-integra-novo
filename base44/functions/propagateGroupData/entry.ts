@@ -154,7 +154,7 @@ Deno.serve(async (req) => {
         group_id: groupId || null,
         data_hora: timestamp,
       });
-    } catch {}
+    } catch (e) { console.error('[propagateGroupData] catch:', e); }
 
     return Response.json({
       success: true,

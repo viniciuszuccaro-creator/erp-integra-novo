@@ -50,7 +50,7 @@ export default function ConfiguracaoBackup({ empresaId, grupoId }) {
               <Button onClick={handleExecutarBackup}
                 disabled={executarBackupManualMutation.isPending || !contextoValido || !podeExecutarBackup}
                 variant="outline" className="bg-white"
-                data-action="Backup.executarManual" data-permission="Sistema.Backup.executar" data-sensitive="true">
+                data-action="Backup.executarManual" data-sensitive="true">
                 {executarBackupManualMutation.isPending ? (
                   <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2" />Executando...</>
                 ) : (
@@ -88,7 +88,7 @@ export default function ConfiguracaoBackup({ empresaId, grupoId }) {
         <Button onClick={handleSalvar}
           disabled={salvando || salvarMutation.isPending || !contextoValido || !podeEditarBackup}
           className="bg-blue-600 hover:bg-blue-700"
-          data-action="Backup.Configuracao.salvar" data-permission="Sistema.Backup.editar" data-sensitive="true">
+          data-action="Backup.Configuracao.salvar" data-sensitive="true">
           {salvando || salvarMutation.isPending ? (
             <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />Salvando...</>
           ) : (

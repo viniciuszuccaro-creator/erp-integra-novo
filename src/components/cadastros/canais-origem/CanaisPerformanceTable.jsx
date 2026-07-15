@@ -30,7 +30,6 @@ export default function CanaisPerformanceTable({ metricas, totalGeralPedidos, CO
             }))}
             filename="performance-canais-origem"
             className="bg-green-600 hover:bg-green-700"
-            data-permission="Cadastros.ParametroOrigemPedido.exportar"
             data-action="Cadastros.ParametroOrigemPedido.exportar"
             data-sensitive="true"
           >

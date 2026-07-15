@@ -188,7 +188,7 @@ export default async function ConsultarCNPJ({ cnpj, cfg }) {
         dados_novos: { sucesso: !!result?.sucesso, fonte: result?.fonte || null },
         data_hora: new Date().toISOString(),
       });
-    } catch (_) {}
+    } catch (_) { console.error('[ConsultarCNPJ] catch:', _); }
 
     return Response.json(result);
   } catch (error) {

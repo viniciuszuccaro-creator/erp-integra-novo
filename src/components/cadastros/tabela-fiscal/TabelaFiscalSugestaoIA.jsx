@@ -23,8 +23,7 @@ export default function TabelaFiscalSugestaoIA({ sugestaoIA, onAplicar, podeSalv
               <p className="text-xs mt-2 text-purple-700"><strong>Base Legal:</strong> {sugestaoIA.legislacao}</p>
             )}
           </div>
-          <Button type="button" size="sm" onClick={onAplicar} disabled={!podeSalvar}
-            data-permission="Cadastros.TabelaFiscal.ia" data-sensitive="true"
+          <Button type="button" size="sm" onClick={onAplicar} disabled={!podeSalvar} data-sensitive="true"
             className="ml-4 bg-purple-600 hover:bg-purple-700">
             Aplicar Sugestões
           </Button>

@@ -22,7 +22,6 @@ export default function ChatbotWidget({
       <button
         onClick={() => setAberto(true)}
         className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all z-50 flex items-center gap-2"
-        data-permission="Chatbot.Widget.acessar"
       >
         <MessageCircle className="w-6 h-6" />
         <div className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></div>

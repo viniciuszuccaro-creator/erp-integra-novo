@@ -50,7 +50,6 @@ export default function ConciliacaoManualModal({ movimento, onConfirm, onClose, 
           <div className="flex gap-3">
             <Button onClick={onClose} variant="outline" className="flex-1">Cancelar</Button>
             <Button
-              data-permission="Financeiro.ConciliacaoBancaria.conciliar"
               onClick={() => onConfirm({ valor: parseFloat(valorExtrato) || movimento.valor, data: dataCredito || new Date().toISOString() })}
               className="flex-1 bg-green-600 hover:bg-green-700"
               disabled={isPending}

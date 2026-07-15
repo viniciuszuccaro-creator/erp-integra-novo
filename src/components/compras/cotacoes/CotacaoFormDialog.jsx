@@ -33,7 +33,7 @@ export default function CotacaoFormDialog({
           <div>
             <div className="flex justify-between items-center mb-3">
               <Label>Itens para Cotação *</Label>
-              <Button type="button" size="sm" variant="outline" data-permission="Compras.Cotacao.criar" onClick={adicionarItem}>
+              <Button type="button" size="sm" variant="outline" onClick={adicionarItem}>
                 <Plus className="w-4 h-4 mr-2" />Adicionar Item
               </Button>
             </div>
@@ -76,7 +76,7 @@ export default function CotacaoFormDialog({
                   </div>
                   <div className="col-span-1 flex items-center justify-center">
                     {formCotacao.itens.length > 1 && (
-                      <Button type="button" variant="ghost" size="icon" onClick={() => removerItem(idx)} data-permission="Compras.Cotacao.editar" className="text-red-600">×</Button>
+                      <Button type="button" variant="ghost" size="icon" onClick={() => removerItem(idx)} className="text-red-600">×</Button>
                     )}
                   </div>
                 </div>
@@ -109,7 +109,7 @@ export default function CotacaoFormDialog({
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button type="submit" data-permission="Compras.Cotacao.criar" disabled={criarCotacaoMutation.isPending || formCotacao.fornecedores_selecionados.length < 2} className="bg-cyan-600 hover:bg-cyan-700">
+            <Button type="submit" disabled={criarCotacaoMutation.isPending || formCotacao.fornecedores_selecionados.length < 2} className="bg-cyan-600 hover:bg-cyan-700">
               <Send className="w-4 h-4 mr-2" />{criarCotacaoMutation.isPending ? "Enviando..." : "Criar e Enviar"}
             </Button>
           </div>

@@ -60,7 +60,7 @@ export default function ChatbotPortal({ cliente }) {
           origem: 'Portal/Chatbot',
           status: 'Aberto'
         });
-        try { await base44.entities.AuditLog.create({ acao: 'Criação', modulo: 'CRM', tipo_auditoria: 'entidade', entidade: 'Chamado', registro_id: ch.id, descricao: 'Chamado criado via Chatbot no Portal', data_hora: new Date().toISOString() }); } catch {}
+        try { await base44.entities.AuditLog.create({ acao: 'Criação', modulo: 'CRM', tipo_auditoria: 'entidade', entidade: 'Chamado', registro_id: ch.id, descricao: 'Chamado criado via Chatbot no Portal', data_hora: new Date().toISOString() }); } catch (e) { console.error('[portal] catch:', e); }
         setMessages((m) => [...m, { role: 'assistant', content: `Chamado aberto com sucesso (#${ch.id}). Em breve nossa equipe entrará em contato.` }]);
       } else if (intent === 'query_order_status') {
         const numero = String(data.numero_pedido || '').trim();
@@ -116,7 +116,7 @@ export default function ChatbotPortal({ cliente }) {
         </div>
         <div className="flex gap-2">
           <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Digite sua pergunta..." onKeyDown={(e) => e.key==='Enter' ? onSend() : null} />
-          <Button data-permission="Portal.ChatbotPortal.enviar" onClick={onSend} className="gap-2"><Send className="w-4 h-4" /> Enviar</Button>
+          <Button onClick={onSend} className="gap-2"><Send className="w-4 h-4" /> Enviar</Button>
         </div>
       </CardContent>
     </Card>

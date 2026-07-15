@@ -19,7 +19,7 @@ export default function CortePontasReutilizaveis({ pontas, onSave }) {
             <Save className="w-5 h-5 text-green-600" />
             Pontas para Reaproveitamento
           </CardTitle>
-          <Button size="sm" onClick={onSave} data-permission="Producao.OtimizadorCorte.salvar"
+          <Button size="sm" onClick={onSave}
             className="bg-green-600 hover:bg-green-700">
             <Save className="w-4 h-4 mr-1" />
             Salvar no Estoque

@@ -59,7 +59,7 @@ export function CorteDobraListaPosicoes({ formData, removerPosicao }) {
                   <td className="p-2">{FORMATOS_FERRO.find((f) => f.value === pos.formato)?.label}</td>
                   <td className="p-2 text-right">{pos.peso_unitario.toFixed(2)} kg</td>
                   <td className="p-2 text-right font-bold text-green-600">{pos.peso_total.toFixed(2)} kg</td>
-                  <td className="p-2 text-center"><Button size="icon" variant="ghost" data-permission="Producao.CorteDobra.editar" onClick={() => removerPosicao(index)}><Trash2 className="w-4 h-4 text-red-500" /></Button></td>
+                  <td className="p-2 text-center"><Button size="icon" variant="ghost" onClick={() => removerPosicao(index)}><Trash2 className="w-4 h-4 text-red-500" /></Button></td>
                 </tr>
               ))}
             </tbody>

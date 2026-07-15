@@ -68,7 +68,7 @@ export function fmtValue(value, col, extraColors = {}) {
   }
 
   if (DATE_FIELDS.has(col.field) || col.type === "date") {
-    try { const d = new Date(value); if (!isNaN(d.getTime())) return d.toLocaleDateString("pt-BR"); } catch (_) {}
+    try { const d = new Date(value); if (!isNaN(d.getTime())) return d.toLocaleDateString("pt-BR"); } catch (_) { console.error('[utils] catch:', _); }
   }
 
   if (MONEY_FIELDS.has(col.field) || col.type === "currency") {

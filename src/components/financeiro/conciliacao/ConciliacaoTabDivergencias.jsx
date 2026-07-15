@@ -38,7 +38,6 @@ export default function ConciliacaoTabDivergencias({ divergencias, onResolver, p
                   <Button
                     size="sm"
                     variant="outline"
-                    data-permission="Financeiro.ConciliacaoBancaria.resolver"
                     onClick={() => onResolver(conc.id)}
                     disabled={!podeEditar}
                   >

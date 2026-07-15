@@ -62,7 +62,7 @@ export default function ProdutoIdentificacaoSection({
                       {iaSugestao.unidades_secundarias?.length > 0 && <p>• <strong>Unidades Habilitadas:</strong> {iaSugestao.unidades_secundarias.join(', ')}</p>}
                     </div>
                   </div>
-                  <Button size="sm" data-permission="Cadastros.Produto.editar" onClick={aplicarSugestaoIA} className="bg-purple-600">Aplicar Tudo</Button>
+                  <Button size="sm" onClick={aplicarSugestaoIA} className="bg-purple-600">Aplicar Tudo</Button>
                 </div>
               </AlertDescription>
             </Alert>
@@ -102,7 +102,7 @@ export default function ProdutoIdentificacaoSection({
                     <p className="font-semibold text-sm text-orange-900 mb-1">🏭 Usar este produto na Produção?</p>
                     <p className="text-xs text-orange-700">Converte para Matéria-Prima e habilita uso em Ordens de Produção</p>
                   </div>
-                  <Button type="button" variant="outline" data-permission="Cadastros.Produto.enviarProducao" className="bg-orange-600 text-white hover:bg-orange-700 border-orange-600" onClick={enviarParaProducao}><Factory className="w-4 h-4 mr-2" /> Enviar para Produção</Button>
+                  <Button type="button" variant="outline" className="bg-orange-600 text-white hover:bg-orange-700 border-orange-600" onClick={enviarParaProducao}><Factory className="w-4 h-4 mr-2" /> Enviar para Produção</Button>
                 </div>
               </AlertDescription>
             </Alert>

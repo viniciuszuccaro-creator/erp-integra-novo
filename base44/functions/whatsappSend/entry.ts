@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
           const p = await base44.asServiceRole.entities.Pedido.filter({ id: pedidoId }, undefined, 1);
           empresaId = p?.[0]?.empresa_id || null;
         }
-      } catch (_) {}
+      } catch (_) { console.error('[whatsappSend] catch:', _); }
     }
 
     // Resolve configuração WhatsApp
@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
           const contato = Array.isArray(cli?.contatos) ? cli.contatos.find(c => /whatsapp|celular|telefone/i.test(c?.tipo || '') && c?.valor) : null;
           destinatario = contato?.valor || '';
         }
-      } catch (_) {}
+      } catch (_) { console.error('[whatsappSend] catch:', _); }
     }
     destinatario = String(destinatario || '').replace(/\D/g, '');
 
@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
         acao: 'Criação', modulo: 'Integrações', tipo_auditoria: 'integracao', entidade: 'WhatsApp',
         descricao: 'Envio simulado (sem configuração)', empresa_id: empresaId || null, group_id: groupId || null,
         dados_novos: { numero: destinatario, mensagem }
-      }); } catch {}
+      }); } catch (e) { console.error('[whatsappSend] catch:', e); }
       return Response.json({ sucesso: true, modo: 'simulado', messageId: `SIM_${Date.now()}`, status: 'sent' });
     }
 
@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
         acao: 'Criação', modulo: 'Integrações', tipo_auditoria: 'integracao', entidade: 'WhatsApp',
         descricao: 'Mídia enviada', empresa_id: empresaId || null, group_id: groupId || null,
         dados_novos: { numero: destinatario, action: 'sendMedia' }
-      }); } catch {}
+      }); } catch (e) { console.error('[whatsappSend] catch:', e); }
       return Response.json({ sucesso: true, messageId: res.key?.id, status: 'sent', modo: 'real' });
     }
 
@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
       acao: 'Criação', modulo: 'Integrações', tipo_auditoria: 'integracao', entidade: 'WhatsApp',
       descricao: 'Texto enviado', empresa_id: empresaId || null, group_id: groupId || null,
       dados_novos: { numero: destinatario, mensagem }
-    }); } catch {}
+    }); } catch (e) { console.error('[whatsappSend] catch:', e); }
 
     return Response.json({ sucesso: true, messageId: res.key?.id, status: 'sent', modo: 'real' });
   } catch (error) {

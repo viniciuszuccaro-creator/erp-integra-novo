@@ -49,7 +49,7 @@ export default function RelatorioVendasPorRegiao() {
           </h2>
           <p className="text-sm text-slate-600 mt-1">Análise de desempenho comercial segmentado por região de atendimento</p>
         </div>
-        <Button onClick={exportarCSV} variant="outline" data-permission="Relatorios.VendasRegiao.exportar">
+        <Button onClick={exportarCSV} variant="outline">
           <FileDown className="w-4 h-4 mr-2" />Exportar CSV
         </Button>
       </div>

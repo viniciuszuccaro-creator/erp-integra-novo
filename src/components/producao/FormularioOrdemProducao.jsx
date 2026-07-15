@@ -63,8 +63,8 @@ export default function FormularioOrdemProducao({ op, onClose }) {
         </div>
 
         <div className="border-t p-4 bg-slate-50 flex items-center justify-end gap-3">
-          <Button type="button" variant="outline" data-permission="Producao.OrdemProducao.visualizar" onClick={onClose}>Cancelar</Button>
-          <Button type="submit" disabled={saveMutation.isPending} data-permission="Producao.OrdemProducao.criar" className="bg-purple-600 hover:bg-purple-700">
+          <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" disabled={saveMutation.isPending} className="bg-purple-600 hover:bg-purple-700">
             <Save className="w-4 h-4 mr-2" />
             {saveMutation.isPending ? "Salvando..." : "Salvar OP"}
           </Button>

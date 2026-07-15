@@ -74,7 +74,6 @@ function DashboardOperacionalBI({ windowMode = false }) {
               <Button
                 size="sm"
                 variant="outline"
-                data-permission="Dashboard.atualizar"
                 onClick={() => queryClient.invalidateQueries({ predicate: () => true })}
               >
                 Tentar novamente
@@ -89,7 +88,6 @@ function DashboardOperacionalBI({ windowMode = false }) {
               <Button
                 size="sm"
                 variant="outline"
-                data-permission="Dashboard.atualizar"
                 onClick={() => queryClient.invalidateQueries({ predicate: () => true })}
               >
                 Atualizar

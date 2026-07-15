@@ -163,7 +163,7 @@ export default function ChatCliente({ clienteId, clienteNome }) {
             disabled={enviarMensagemMutation.isPending}
             className="flex-1"
           />
-          <Button data-permission="Portal.ChatCliente.salvar"
+          <Button
             type="submit"
             disabled={!mensagem.trim() || enviarMensagemMutation.isPending}
             className="bg-blue-600 hover:bg-blue-700"

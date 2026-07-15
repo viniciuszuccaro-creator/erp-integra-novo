@@ -294,7 +294,7 @@ export default function GeradorRelatorios({ empresaId }) {
               </CardHeader>
               <CardContent className="p-4">
                 <div className="flex gap-2">
-                  <Button data-permission="Sistema.GeradorRelatorios.exportar"
+                  <Button
                     onClick={() => handleExportarExcel(relatorio)}
                     disabled={isGerando}
                     data-action={`Relatorios.exportar.${relatorio.id}`}

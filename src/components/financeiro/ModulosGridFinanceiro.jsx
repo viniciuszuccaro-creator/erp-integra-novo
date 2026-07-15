@@ -27,7 +27,7 @@ export default function ModulosGridFinanceiro({ modules, onModuleClick }) {
               color={module.color}
               badge={module.badge}
               dataPermission={module.permissionKey}
-              dataAction={`Financeiro.${module.sectionKey || module.title}.abrir`}
+              dataAction={`Financeiro.${module.sectionKey || module.title}
               onClick={() => onModuleClick(module)}
             />
           ))}

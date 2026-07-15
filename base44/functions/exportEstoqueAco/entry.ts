@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     if (permErr) return permErr;
 
     let body = {};
-    try { body = await req.json(); } catch {}
+    try { body = await req.json(); } catch (e) { console.error('[exportEstoqueAco] catch:', e); }
 
     const filtros = body?.filtros || {};
 
@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
         empresa_id: filtros?.empresa_id || null,
         data_hora: new Date().toISOString(),
       });
-    } catch {}
+    } catch (e) { console.error('[exportEstoqueAco] catch:', e); }
 
     return new Response(pdfBytes, {
       status: 200,

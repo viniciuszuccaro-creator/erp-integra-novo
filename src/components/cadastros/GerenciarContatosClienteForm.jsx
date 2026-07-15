@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import RBACButton from "@/components/lib/RBACButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -90,10 +91,10 @@ export default function GerenciarContatosClienteForm({ contatos = [], onChange }
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Contatos ({contatos.length})</h3>
-        <Button onClick={() => { resetForm(); setDialogAberto(true); }} data-permission="Cadastros.Cliente.editar" size="sm">
+        <RBACButton onClick={() => { resetForm(); setDialogAberto(true); }} module="Cadastros" action="editar" size="sm">
           <Plus className="w-4 h-4 mr-2" />
           Adicionar Contato
-        </Button>
+        </RBACButton>
       </div>
 
       {contatos.length > 0 ? (
@@ -122,21 +123,22 @@ export default function GerenciarContatosClienteForm({ contatos = [], onChange }
                   </div>
                 </div>
                 <div className="flex gap-1">
-                  <Button data-permission="Cadastros.GerenciarContatosCliente.editar"
+                  <RBACButton
+                    module="Cadastros" action="editar"
                     variant="ghost"
                     size="icon"
                     onClick={() => handleEditarContato(idx)}
                   >
                     <Edit className="w-4 h-4 text-blue-600" />
-                  </Button>
-                  <Button
+                  </RBACButton>
+                  <RBACButton
                     variant="ghost"
                     size="icon"
-                    data-permission="Cadastros.ClienteContato.excluir"
+                    module="Cadastros" action="excluir"
                     onClick={() => handleExcluirContato(idx)}
                   >
                     <Trash2 className="w-4 h-4 text-red-600" />
-                  </Button>
+                  </RBACButton>
                 </div>
               </div>
             </div>
@@ -233,10 +235,10 @@ export default function GerenciarContatosClienteForm({ contatos = [], onChange }
               <Button variant="outline" onClick={() => { setDialogAberto(false); resetForm(); }}>
                 Cancelar
               </Button>
-              <Button onClick={handleSalvarContato} data-permission="Cadastros.Cliente.editar">
+              <RBACButton onClick={handleSalvarContato} module="Cadastros" action="editar">
                 <Check className="w-4 h-4 mr-2" />
                 Salvar
-              </Button>
+              </RBACButton>
             </div>
           </div>
         </DialogContent>

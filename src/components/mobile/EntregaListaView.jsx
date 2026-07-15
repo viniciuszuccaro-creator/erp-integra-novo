@@ -31,7 +31,7 @@ export default function EntregaListaView({ minhasEntregas, localizacao, isOfflin
             Sem conexão: você pode enviar sua localização por SMS para o centro de operações.
             <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2">
               <Input placeholder="Número do gateway SMS (ex.: 28900)" value={smsNumero} onChange={(e) => setSmsNumero(e.target.value)} />
-              <Button variant="outline" data-permission="Expedicao.Entrega.editar" onClick={() => {
+              <Button variant="outline" onClick={() => {
                 const lat = localizacao?.latitude?.toFixed(6) || "LAT";
                 const lng = localizacao?.longitude?.toFixed(6) || "LNG";
                 const entrega = minhasEntregas?.[0]?.id || "ENTREGA";
@@ -76,11 +76,11 @@ export default function EntregaListaView({ minhasEntregas, localizacao, isOfflin
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button onClick={() => iniciarEntrega(entrega)} data-permission="Expedicao.Entrega.criar" className="flex-1 bg-blue-600 hover:bg-blue-700">
+                <Button onClick={() => iniciarEntrega(entrega)} className="flex-1 bg-blue-600 hover:bg-blue-700">
                   <Navigation className="w-4 h-4 mr-2" />Iniciar Entrega
                 </Button>
                 {entrega.endereco_entrega_completo?.mapa_url && (
-                  <Button variant="outline" data-permission="Expedicao.Entrega.visualizar" onClick={() => window.open(entrega.endereco_entrega_completo.mapa_url, "_blank")}>
+                  <Button variant="outline" onClick={() => window.open(entrega.endereco_entrega_completo.mapa_url, "_blank")}>
                     <MapPin className="w-4 h-4" />
                   </Button>
                 )}

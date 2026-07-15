@@ -36,11 +36,11 @@ Deno.serve(async (req) => {
         try {
           const ccs = await base44.asServiceRole.entities.CentroCusto.filter({ descricao: 'Logística', empresa_id: data.empresa_id });
           centroId = ccs?.[0]?.id || null;
-        } catch {}
+        } catch (e) { console.error('[onEntregaUpdated] catch:', e); }
         try {
           const pcs = await base44.asServiceRole.entities.PlanoDeContas.filter({ descricao: 'Frete', empresa_id: data.empresa_id });
           planoId = pcs?.[0]?.id || null;
-        } catch {}
+        } catch (e) { console.error('[onEntregaUpdated] catch:', e); }
 
         if (centroId && planoId) {
           try {
@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
         try {
           const existentes = await base44.asServiceRole.entities.MovimentacaoEstoque.filter({ origem_documento_id: data.id }, '-created_date', 1);
           jaExiste = Array.isArray(existentes) && existentes.length > 0;
-        } catch {}
+        } catch (e) { console.error('[onEntregaUpdated] catch:', e); }
         if (!jaExiste) {
           const qtyKg = Number(data?.peso_total_kg || 0);
           const mov = await base44.asServiceRole.entities.MovimentacaoEstoque.create({

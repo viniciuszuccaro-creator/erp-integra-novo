@@ -24,7 +24,7 @@ export default function OrcamentosList({ cliente }) {
     mutationFn: async (p) => base44.functions.invoke('solicitacoesAprovacao', { action: 'acceptBudget', pedido_id: p.id }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['portal-orcamentos', cliente?.id] });
-      try { window.dispatchEvent(new CustomEvent('portal:setTab', { detail: 'pedidos' })); } catch {}
+      try { window.dispatchEvent(new CustomEvent('portal:setTab', { detail: 'pedidos' })); } catch (e) { console.error('[portal] catch:', e); }
     }
   });
 
@@ -44,10 +44,10 @@ export default function OrcamentosList({ cliente }) {
             </div>
             <div className="text-sm text-muted-foreground">Valor: R$ {Number(p.valor_total || 0).toFixed(2)} • Validade: {p.data_validade || '—'}</div>
             <div className="flex gap-2">
-              <Button onClick={() => aceitar.mutate(p)} disabled={!cliente?.pode_aprovar_orcamento_portal} className="gap-2" data-permission="portal.orcamento.aceitar">
+              <Button onClick={() => aceitar.mutate(p)} disabled={!cliente?.pode_aprovar_orcamento_portal} className="gap-2">
                 <CheckCircle2 className="w-4 h-4" /> Aceitar
               </Button>
-              <Button variant="outline" onClick={() => { setRevisaoPedido(p); setRevisaoComentario(''); }} className="gap-2" data-permission="portal.orcamento.revisao">
+              <Button variant="outline" onClick={() => { setRevisaoPedido(p); setRevisaoComentario(''); }} className="gap-2">
                 <XCircle className="w-4 h-4" /> Solicitar Revisão
               </Button>
             </div>
@@ -56,8 +56,8 @@ export default function OrcamentosList({ cliente }) {
                 <label className="text-xs font-medium text-muted-foreground">Descreva o que deseja revisar (opcional):</label>
                 <Textarea value={revisaoComentario} onChange={(e) => setRevisaoComentario(e.target.value)} placeholder="Ex: Alterar quantidade do item 2..." className="text-sm" rows={2} />
                 <div className="flex gap-2 justify-end">
-                  <Button data-permission="Portal.Orcamentos.cancelar" variant="ghost" size="sm" onClick={() => setRevisaoPedido(null)}>Cancelar</Button>
-                  <Button data-permission="Portal.Orcamentos.confirmar" size="sm" onClick={() => { solicitarRevisao.mutate({ p, comment: revisaoComentario }); setRevisaoPedido(null); }} disabled={solicitarRevisao.isPending}>
+                  <Button variant="ghost" size="sm" onClick={() => setRevisaoPedido(null)}>Cancelar</Button>
+                  <Button size="sm" onClick={() => { solicitarRevisao.mutate({ p, comment: revisaoComentario }); setRevisaoPedido(null); }} disabled={solicitarRevisao.isPending}>
                     {solicitarRevisao.isPending ? 'Enviando...' : 'Confirmar Revisão'}
                   </Button>
                 </div>

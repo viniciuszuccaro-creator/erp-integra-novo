@@ -175,7 +175,6 @@ export default function LimiteCreditoWidget({
                   variant="outline"
                   className="w-full border-red-300 text-red-700 hover:bg-red-50"
                   disabled
-                  data-permission="Financeiro.Cliente.solicitar_limite"
                   data-action="Financeiro.Cliente.solicitar_limite"
                 >
                   Solicitar Aumento de Limite

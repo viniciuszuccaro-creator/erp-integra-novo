@@ -106,7 +106,7 @@ export default function ParametroConciliacaoBancariaForm({ parametro, onSubmit, 
         </Card>
 
         <div className="flex justify-end gap-3">
-          <Button type="submit" data-permission="Financeiro.ParametroConciliacao.salvar" className="bg-cyan-600 hover:bg-cyan-700">
+          <Button type="submit" className="bg-cyan-600 hover:bg-cyan-700">
             <Save className="w-4 h-4 mr-2" />
             Salvar Parâmetros
           </Button>

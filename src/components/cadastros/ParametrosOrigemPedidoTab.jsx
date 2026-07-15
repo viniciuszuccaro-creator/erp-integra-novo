@@ -141,7 +141,7 @@ export default function ParametrosOrigemPedidoTab() {
                   className="pl-10"
                 />
               </div>
-              <Button data-permission="Cadastros.ParametroOrigemPedido.criar" onClick={handleNovo}>
+              <Button onClick={handleNovo}>
                 <Plus className="w-4 h-4 mr-2" />
                 Novo Canal
               </Button>
@@ -167,7 +167,7 @@ export default function ParametrosOrigemPedidoTab() {
             <p className="text-sm text-slate-500 mt-1">
               Crie seu primeiro canal de origem de pedidos
             </p>
-            <Button data-permission="Cadastros.ParametrosOrigemPedido.criar" onClick={handleNovo} className="mt-4">
+            <Button onClick={handleNovo} className="mt-4">
               <Plus className="w-4 h-4 mr-2" />
               Criar Primeiro Canal
             </Button>
@@ -240,7 +240,7 @@ export default function ParametrosOrigemPedidoTab() {
                   </div>
 
                   <div className="flex justify-end mt-3 pt-3 border-t">
-                    <Button data-permission="Cadastros.ParametrosOrigemPedido.editar" 
+                    <Button 
                       size="sm" 
                       variant="ghost"
                       onClick={(e) => {

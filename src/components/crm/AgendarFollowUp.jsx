@@ -180,7 +180,7 @@ Posso ajudar em algo? 😊`,
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
-            <Button type="submit" data-permission="CRM.FollowUp.salvar" className="bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
               <Calendar className="w-4 h-4 mr-2" />
               Agendar Follow-up
             </Button>

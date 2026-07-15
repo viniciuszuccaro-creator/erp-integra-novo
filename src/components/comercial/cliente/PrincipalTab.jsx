@@ -265,7 +265,7 @@ export default function PrincipalTab({
       <div className="border-t pt-4">
         <div className="flex justify-between mb-3">
           <h3 className="font-semibold">Contatos</h3>
-          <Button data-permission="Comercial.Cliente.editar" type="button" variant="outline" size="sm" onClick={adicionarContato}>
+          <Button type="button" variant="outline" size="sm" onClick={adicionarContato}>
             <Plus className="w-4 h-4 mr-2" />
             Adicionar
           </Button>
@@ -324,7 +324,6 @@ export default function PrincipalTab({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  data-permission="Cadastros.Cliente.editar"
                   onClick={() => removerContato(index)}
                   >
                     <Trash2 className="w-4 h-4 text-red-500" />

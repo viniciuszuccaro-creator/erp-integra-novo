@@ -156,7 +156,7 @@ export default function SimularPagamentoModal({ isOpen, onClose, contaReceber })
               <Zap className="w-5 h-5 text-green-600" />
               Simular Pagamento (Webhook Gateway)
             </CardTitle>
-            <Button variant="ghost" size="icon" data-permission="Financeiro.ContaReceber.visualizar" onClick={onClose}>
+            <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="w-4 h-4" />
             </Button>
           </div>
@@ -316,7 +316,6 @@ export default function SimularPagamentoModal({ isOpen, onClose, contaReceber })
               </Card>
 
               <Button
-                data-permission="Financeiro.ContaReceber.visualizar"
                 onClick={onClose}
                 className="w-full bg-blue-600 hover:bg-blue-700"
               >

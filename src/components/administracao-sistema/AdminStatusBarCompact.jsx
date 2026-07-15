@@ -89,7 +89,7 @@ export default function AdminStatusBarCompact() {
           ))}
         </div>
 
-        <Button data-permission="Sistema.AdminStatusBarCompact.atualizar" variant="ghost" size="sm" className="h-6 w-6 p-0 ml-auto" onClick={() => refetch()} title="Atualizar">
+        <Button variant="ghost" size="sm" className="h-6 w-6 p-0 ml-auto" onClick={() => refetch()} title="Atualizar">
           <RefreshCw className={`w-3 h-3 ${isFetching ? "animate-spin" : ""}`} />
         </Button>
       </div>

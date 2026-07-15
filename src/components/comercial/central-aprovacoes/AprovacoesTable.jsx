@@ -78,7 +78,6 @@ export default function AprovacoesTable({ pendentes, historico, permitido, onApr
                       <div className="flex gap-2">
                         <Button
                           size="sm"
-                          data-permission="Comercial.Pedido.aprovar"
                           onClick={() => abrirAnalise(pedido, false)}
                           className="bg-orange-600 hover:bg-orange-700"
                           disabled={!permitido}
@@ -87,7 +86,6 @@ export default function AprovacoesTable({ pendentes, historico, permitido, onApr
                         </Button>
                         <Button
                           size="sm"
-                          data-permission="Comercial.Pedido.aprovar"
                           onClick={() => abrirAnalise(pedido, true)}
                           className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
                           disabled={!permitido}

@@ -193,11 +193,10 @@ export default function LiquidacaoEmLote({ onClose }) {
             </Badge>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" data-permission="Financeiro.ContaReceber.visualizar" onClick={onClose}>
+            <Button variant="outline" onClick={onClose}>
               Cancelar
             </Button>
             <Button
-              data-permission="Financeiro.ContaReceber.baixar"
               onClick={() => liquidarMutation.mutate()}
               disabled={selecionados.length === 0 || liquidarMutation.isPending}
               className="bg-green-600 hover:bg-green-700"

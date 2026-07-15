@@ -129,7 +129,7 @@ export default function CotacaoForm({ cotacao, onSubmit, windowMode = false }) {
                 <div className="col-span-5">
                   <Controller
                     control={control}
-                    name={`itens.${idx}.produto_descricao`}
+                    name={`itens.${idx}
                     render={({ field }) => (
                       <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger>
@@ -157,7 +157,7 @@ export default function CotacaoForm({ cotacao, onSubmit, windowMode = false }) {
                 <div className="col-span-2">
                   <Controller
                     control={control}
-                    name={`itens.${idx}.unidade`}
+                    name={`itens.${idx}
                     render={({ field }) => (
                       <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger>
@@ -188,7 +188,6 @@ export default function CotacaoForm({ cotacao, onSubmit, windowMode = false }) {
                       type="button"
                       variant="ghost"
                       size="icon"
-                      data-permission="Compras.Cotacao.editar"
                       onClick={() => removerItem(idx)}
                     >
                       <Trash2 className="w-4 h-4 text-red-600" />
@@ -241,7 +240,7 @@ export default function CotacaoForm({ cotacao, onSubmit, windowMode = false }) {
       </Card>
 
       <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
-        <Button data-permission="Compras.Cotacao.criar" 
+        <Button 
           type="submit" 
           className="bg-cyan-600 hover:bg-cyan-700"
           disabled={selecionados.length < 2}

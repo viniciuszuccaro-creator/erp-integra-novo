@@ -98,7 +98,7 @@ export default function BaseConhecimento() {
           </h2>
           <p className="text-sm text-slate-600 mt-1">Treine o chatbot com perguntas frequentes</p>
         </div>
-        <Button data-permission="Chatbot.BaseConhecimento.criar" onClick={() => setDialogAberto(true)} className="bg-blue-600">
+        <Button onClick={() => setDialogAberto(true)} className="bg-blue-600">
           <Plus className="w-4 h-4 mr-2" />
           Adicionar
         </Button>
@@ -124,7 +124,7 @@ export default function BaseConhecimento() {
                   <Badge className="mt-2 text-xs">{item.categoria}</Badge>
                 </div>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" data-permission="Chatbot.BaseConhecimento.editar" className="h-8 w-8" onClick={() => {
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
                     setEditando(item);
                     setForm(item);
                     setDialogAberto(true);
@@ -177,8 +177,8 @@ export default function BaseConhecimento() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" data-permission="Chatbot.BaseConhecimento.visualizar" onClick={resetForm}>Cancelar</Button>
-            <Button data-permission="Chatbot.BaseConhecimento.criar" onClick={() => salvarMutation.mutate(form)} className="bg-blue-600">
+            <Button variant="outline" onClick={resetForm}>Cancelar</Button>
+            <Button onClick={() => salvarMutation.mutate(form)} className="bg-blue-600">
               Salvar
             </Button>
           </DialogFooter>

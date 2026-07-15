@@ -20,7 +20,7 @@ export default function GerenciarEnderecosClienteForm({ enderecos = [], onChange
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Endereços de Entrega ({enderecos.length})</h3>
-        <Button onClick={abrirNovo} data-permission="Cadastros.Cliente.editar" size="sm">
+        <Button onClick={abrirNovo} size="sm">
           <Plus className="w-4 h-4 mr-2" />Adicionar Endereço
         </Button>
       </div>
@@ -29,7 +29,7 @@ export default function GerenciarEnderecosClienteForm({ enderecos = [], onChange
 
       {enderecos.length === 0 && (
         <div className="text-center">
-          <Button data-permission="Cadastros.GerenciarEnderecosCliente.salvar" onClick={abrirNovo} variant="outline" size="sm" className="mt-3">
+          <Button onClick={abrirNovo} variant="outline" size="sm" className="mt-3">
             <Plus className="w-4 h-4 mr-2" />Adicionar Primeiro Endereço
           </Button>
         </div>

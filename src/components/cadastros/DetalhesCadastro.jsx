@@ -53,7 +53,7 @@ export default function DetalhesCadastro({ tipo, registro, onClose, onUpdate, wi
             <h2 className="text-xl font-bold text-slate-900">
               {tipo === 'cliente' ? 'Histórico Completo do Cliente' : 'Detalhes'}
             </h2>
-            <Button data-permission="Cadastros.Detalhes.visualizar" variant="ghost" size="icon" onClick={onClose}>
+            <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="w-5 h-5" />
             </Button>
           </div>
@@ -143,7 +143,7 @@ export default function DetalhesCadastro({ tipo, registro, onClose, onUpdate, wi
                         R$ {pedido.valor_total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </TableCell>
                       <TableCell>
-                        <Button data-permission="Cadastros.Detalhes.visualizar" variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm">
                           <Eye className="w-4 h-4" />
                         </Button>
                       </TableCell>
@@ -256,7 +256,7 @@ export default function DetalhesCadastro({ tipo, registro, onClose, onUpdate, wi
                         <Badge variant="outline">{entrega.status}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Button data-permission="Cadastros.Detalhes.visualizar" variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm">
                           <Eye className="w-4 h-4" />
                         </Button>
                       </TableCell>
@@ -305,7 +305,7 @@ export default function DetalhesCadastro({ tipo, registro, onClose, onUpdate, wi
                         <Badge variant="outline">{nf.status}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Button data-permission="Cadastros.Detalhes.visualizar" variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm">
                           <Eye className="w-4 h-4" />
                         </Button>
                       </TableCell>

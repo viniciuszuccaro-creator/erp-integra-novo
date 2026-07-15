@@ -55,8 +55,8 @@ export default function TemplateFormCard({
           )}
 
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" data-permission="HubAtendimento.Templates.editar" onClick={onReset}>Cancelar</Button>
-            <Button onClick={onSalvar} data-permission="HubAtendimento.Templates.criar" disabled={!novoTemplate.nome || !novoTemplate.conteudo || isPending} className="bg-blue-600 hover:bg-blue-700">
+            <Button variant="outline" onClick={onReset}>Cancelar</Button>
+            <Button onClick={onSalvar} disabled={!novoTemplate.nome || !novoTemplate.conteudo || isPending} className="bg-blue-600 hover:bg-blue-700">
               <Check className="w-4 h-4 mr-2" />
               {editando ? 'Atualizar' : 'Criar'}
             </Button>

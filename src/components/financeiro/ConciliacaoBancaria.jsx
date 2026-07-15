@@ -74,7 +74,6 @@ export default function ConciliacaoBancaria({ windowMode = false }) {
                 variant="outline"
                 size="sm"
                 className="h-8"
-                data-permission="Financeiro.ConciliacaoBancaria.importar"
                 data-sensitive
                 onClick={() => fileInputRef.current?.click()}
                 disabled={!podeImportar || importando || !contextoValido}

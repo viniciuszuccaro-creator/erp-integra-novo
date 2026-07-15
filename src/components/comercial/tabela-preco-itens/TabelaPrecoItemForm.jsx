@@ -71,8 +71,8 @@ export default function TabelaPrecoItemForm({
         </div>
       </div>
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="button" variant="outline" data-permission="Comercial.TabelaPreco.visualizar" onClick={() => { setShowItemForm(false); setEditingItem(null); }}>Cancelar</Button>
-        <Button type="submit" data-permission="Comercial.TabelaPreco.criar" disabled={createItemMutation.isPending || updateItemMutation.isPending} className="bg-green-600 hover:bg-green-700">
+        <Button type="button" variant="outline" onClick={() => { setShowItemForm(false); setEditingItem(null); }}>Cancelar</Button>
+        <Button type="submit" disabled={createItemMutation.isPending || updateItemMutation.isPending} className="bg-green-600 hover:bg-green-700">
           {editingItem ? "Atualizar" : "Adicionar"}
         </Button>
       </div>

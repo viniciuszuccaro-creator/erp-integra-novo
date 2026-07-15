@@ -153,7 +153,6 @@ export default function IAPrevisaoLogistica({ windowMode = false }) {
           </div>
 
           <Button
-            data-permission="Integracoes.IAPrevisao.gerar"
             onClick={gerarPrevisao}
             disabled={analisando}
             className="w-full bg-indigo-600 hover:bg-indigo-700"
@@ -246,7 +245,6 @@ export default function IAPrevisaoLogistica({ windowMode = false }) {
                             <Button
                               size="sm"
                               variant="outline"
-                              data-permission="Integracoes.IA.aplicar"
                               onClick={() => aplicarOtimizacao(alerta)}
                             >
                               {alerta.acao}

@@ -136,7 +136,7 @@ export default function AdminStatusBar() {
               {propagando ? "Propagando…" : "Propagação Rápida"}
             </Button>
           )}
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" data-permission="Sistema.Status.visualizar" onClick={() => refetch()}>
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => refetch()}>
             <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? "animate-spin" : ""}`} />
           </Button>
         </div>

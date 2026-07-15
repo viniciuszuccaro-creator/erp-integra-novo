@@ -62,7 +62,6 @@ export default function CanalOrigemCard({ param, metricas, onToggle, isPending, 
               checked={param.ativo}
               onCheckedChange={onToggle}
               disabled={isPending || !isAdmin}
-              data-permission="Cadastros.CanalOrigem.toggleAtivo"
             />
           </div>
         </div>

@@ -23,7 +23,6 @@ export default function FreteCard({
           <Button
             size="sm"
             variant="outline"
-            data-permission="Comercial.Pedido.editar"
             onClick={onCalcularFrete}
           >
             <Calculator className="w-4 h-4 mr-2" />
@@ -80,7 +79,6 @@ export default function FreteCard({
               <Button
                 size="sm"
                 variant="ghost"
-                data-permission="Comercial.Pedido.editar"
                 onClick={() => {
                   const diasProducao =
                     (formData?.itens_armado_padrao?.length || 0) > 0 ||

@@ -10,7 +10,7 @@ async function assertPermission(base44, ctx, module, entity, action){
     if (res?.data && res.data.allowed === false) {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
-  } catch(_) {}
+  } catch (_) { console.error('[paymentStatusManager] catch:', _); }
   return null;
 }
 async function audit(base44, user, log){
@@ -30,7 +30,7 @@ async function audit(base44, user, log){
       dados_novos: log.dados_novos || null,
       data_hora: new Date().toISOString()
     });
-  } catch(_) {}
+  } catch (_) { console.error('[paymentStatusManager] catch:', _); }
 }
 // Inline minimal compute helpers (avoid external local imports)
 function computeUpdatesForContaPagar(action, justificativa, registro){
@@ -179,7 +179,7 @@ Deno.serve(async (req) => {
       try {
         await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId, groupId, clienteId: cr.cliente_id || null, mensagem, internal_token: Deno.env.get('DEPLOY_AUDIT_TOKEN') || '' });
         await audit(base44, { id: 'Service' }, { acao: 'Criação', modulo: 'Financeiro', entidade: 'ContaReceber', registro_id: cr.id, descricao: 'Lembrete de cobrança enviado (automação)', empresa_id: empresaId, group_id: groupId, dados_novos: { diffDays } });
-      } catch (_) {}
+      } catch (_) { console.error('[paymentStatusManager] catch:', _); }
       return Response.json({ ok: true, reminder: true, diffDays });
     }
 
@@ -216,7 +216,7 @@ Deno.serve(async (req) => {
             await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId: eid, groupId: groupIdIn || r.group_id || null, clienteId: r.cliente_id || null, mensagem: msg, internal_token: Deno.env.get('DEPLOY_AUDIT_TOKEN') || '' });
             await audit(base44, { id: 'Service' }, { acao: 'Criação', modulo: 'Financeiro', entidade: 'ContaReceber', registro_id: r.id, descricao: 'Lembrete de cobrança enviado (varredura)', empresa_id: eid, group_id: groupIdIn || r.group_id || null, dados_novos: { diffDays: diff } });
             enviados++;
-          } catch (_) {}
+          } catch (_) { console.error('[paymentStatusManager] catch:', _); }
         }
       }
       return Response.json({ ok: true, enviados });
@@ -236,7 +236,7 @@ Deno.serve(async (req) => {
       try {
         const cfgs = await base44.asServiceRole.entities.ConfiguracaoGatewayPagamento.filter({ empresa_id: empresaId, ativo: true }, undefined, 1);
         cfg = cfgs?.[0] || null;
-      } catch (_) {}
+      } catch (_) { console.error('[paymentStatusManager] catch:', _); }
       // Gera link de pagamento via função existente (emitirBoleto como fallback)
       let url_fatura = null;
       try {
@@ -250,7 +250,7 @@ Deno.serve(async (req) => {
         };
         const res = await base44.functions.invoke('emitirBoleto', payload);
         url_fatura = res?.data?.url || res?.data?.url_boleto || res?.data?.pix_qrcode || null;
-      } catch (_) {}
+      } catch (_) { console.error('[paymentStatusManager] catch:', _); }
       // Atualiza CR com link (se houver)
       try {
         if (url_fatura) {
@@ -260,7 +260,7 @@ Deno.serve(async (req) => {
             data_envio_cobranca: new Date().toISOString()
           });
         }
-      } catch (_) {}
+      } catch (_) { console.error('[paymentStatusManager] catch:', _); }
       // Auditoria
       try {
         await audit(base44, user, {
@@ -272,7 +272,7 @@ Deno.serve(async (req) => {
           empresa_id: empresaId,
           dados_novos: { conta_receber_id: contaReceberId, valor, url_fatura }
         });
-      } catch (_) {}
+      } catch (_) { console.error('[paymentStatusManager] catch:', _); }
       return Response.json({ ok: true, url_fatura });
     }
 
@@ -301,7 +301,7 @@ Deno.serve(async (req) => {
           if (quitado && pedidoId) {
             await base44.functions.invoke('nfeActions', { action: 'emitir_pos_pagamento', pedido_id: pedidoId, empresa_id: empresaId });
           }
-        } catch (_) {}
+        } catch (_) { console.error('[paymentStatusManager] catch:', _); }
         await audit(base44, user, {
           acao: 'Edição',
           modulo: 'Financeiro',

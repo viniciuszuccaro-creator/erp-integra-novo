@@ -154,12 +154,12 @@ Deno.serve(async (req) => {
                   if (!refApi) continue;
                   const depRecords = await refApi.filter({ [ref.field]: event.entity_id }, '-id', 200) || [];
                   for (const r of depRecords) {
-                    try { await refApi.update(r.id, { [ref.field]: existingDup.id }); } catch {}
+                    try { await refApi.update(r.id, { [ref.field]: existingDup.id }); } catch (e) { console.error('[sanitizeOnWrite] catch:', e); }
                   }
-                } catch {}
+                } catch (e) { console.error('[sanitizeOnWrite] catch:', e); }
               }
               // Hard-delete o duplicado recém-criado
-              try { await api.delete(event.entity_id); } catch {}
+              try { await api.delete(event.entity_id); } catch (e) { console.error('[sanitizeOnWrite] catch:', e); }
             }
 
             // Auditoria (create: bloqueio+remoção; update: alerta)
@@ -180,7 +180,7 @@ Deno.serve(async (req) => {
                   : { conflict_id: existingDup.id, action: 'duplicate_alert_update' },
                 data_hora: new Date().toISOString(),
               });
-            } catch {}
+            } catch (e) { console.error('[sanitizeOnWrite] catch:', e); }
 
             if (event.type === 'create') {
               return Response.json({ ok: true, action: 'duplicate_blocked', deleted_id: event.entity_id, kept_id: existingDup.id });
@@ -199,7 +199,7 @@ Deno.serve(async (req) => {
             group_id: data?.group_id || null,
             data_hora: new Date().toISOString(),
           });
-        } catch {}
+        } catch (e) { console.error('[sanitizeOnWrite] catch:', e); }
       }
     }
 
@@ -216,7 +216,7 @@ Deno.serve(async (req) => {
             enriched = { ...enriched, group_id: emp.group_id };
           }
         }
-      } catch {}
+      } catch (e) { console.error('[sanitizeOnWrite] catch:', e); }
 
       // Enforce multiempresa apenas para entidades não-catálogo
       if (!enriched?.empresa_id && !enriched?.group_id) {
@@ -232,7 +232,7 @@ Deno.serve(async (req) => {
             dados_novos: { entity_id: event.entity_id },
             data_hora: new Date().toISOString(),
           });
-        } catch {}
+        } catch (e) { console.error('[sanitizeOnWrite] catch:', e); }
         return Response.json({ error: 'escopo_multiempresa_obrigatorio' }, { status: 400 });
       }
     }
@@ -342,7 +342,7 @@ Deno.serve(async (req) => {
           dados_novos: { ...patch, group_id: enriched?.group_id || data?.group_id || null },
           data_hora: new Date().toISOString(),
         });
-      } catch {}
+      } catch (e) { console.error('[sanitizeOnWrite] catch:', e); }
     }
 
     return Response.json({ ok: true, changed: Object.keys(patch).length });

@@ -45,7 +45,7 @@ export default function RecebimentoTable({ recebimentos, searchTerm, setSearchTe
                   <TableCell>{rec.responsavel_recebimento || "-"}</TableCell>
                   <TableCell><Badge className={statusColors[rec.status] || "bg-slate-100"}>{rec.status}</Badge></TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="icon" data-permission="Estoque.Recebimento.visualizar" onClick={() => setViewingRecebimento(rec)}>
+                    <Button variant="ghost" size="icon" onClick={() => setViewingRecebimento(rec)}>
                       <Eye className="w-4 h-4" />
                     </Button>
                   </TableCell>

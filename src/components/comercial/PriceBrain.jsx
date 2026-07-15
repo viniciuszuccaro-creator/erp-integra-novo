@@ -230,7 +230,6 @@ RETORNE em JSON:
 
         {sugestao.estrategia !== 'manter_preco' && (
           <Button
-            data-permission="Comercial.Pedido.aplicarPreco"
             onClick={aplicarSugestao}
             className="w-full bg-purple-600 hover:bg-purple-700"
           >

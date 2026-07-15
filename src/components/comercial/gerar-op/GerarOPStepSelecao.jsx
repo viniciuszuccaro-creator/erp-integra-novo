@@ -86,7 +86,6 @@ export default function GerarOPStepSelecao({ pedido, itensSelecionados, toggleIt
         <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
         <Button
           type="button"
-          data-permission="Producao.OrdemProducao.criar"
           onClick={avancarParaConfig}
           disabled={itensSelecionados.filter(i => i.selecionado).length === 0}
           className="bg-amber-600 hover:bg-amber-700"

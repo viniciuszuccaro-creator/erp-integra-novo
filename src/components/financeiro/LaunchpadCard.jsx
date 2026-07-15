@@ -28,7 +28,6 @@ export default function LaunchpadCard({
   return (
     <Card
       onClick={onClick}
-      data-permission={dataPermission}
       data-action={dataAction}
       className={`
         min-w-[280px] min-h-[140px] 

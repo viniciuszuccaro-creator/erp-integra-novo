@@ -30,7 +30,7 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
         const ctx = contextRef.current;
         if (ctx.grupoAtual?.id && !out.group_id) out.group_id = ctx.grupoAtual.id;
         if (ctx.contexto !== "grupo" && ctx.empresaAtual?.id && !out.empresa_id) out.empresa_id = ctx.empresaAtual.id;
-      } catch {}
+      } catch (e) { console.error('[layout] catch:', e); }
       return out;
     };
 
@@ -41,7 +41,7 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
         if (ctx.grupoAtual?.id) scope.group_id = ctx.grupoAtual.id;
         if (ctx.contexto !== "grupo" && ctx.empresaAtual?.id) scope.empresa_id = ctx.empresaAtual.id;
         if (ctx.contexto !== "grupo" && !ctx.empresaAtual?.id) scope.__blocked = true;
-      } catch {}
+      } catch (e) { console.error('[layout] catch:', e); }
       return scope;
     };
 
@@ -157,7 +157,7 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
           await checkRBAC(name, "criar");
           const result = await orig.create(stamp(sanitizeOnWrite(data)));
           if (PII_ENTITIES.has(name) && result?.id) {
-            try { base44.functions.invoke("piiEncryptor", { entity_name: name, id: result.id, action: "encrypt" }); } catch {}
+            try { base44.functions.invoke("piiEncryptor", { entity_name: name, id: result.id, action: "encrypt" }); } catch (e) { console.error('[layout] catch:', e); }
           }
           return result;
         };
@@ -173,7 +173,7 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
           await checkRBAC(name, "editar");
           const result = await orig.update(id, stamp(sanitizeOnWrite(data)));
           if (PII_ENTITIES.has(name) && id) {
-            try { base44.functions.invoke("piiEncryptor", { entity_name: name, id, action: "encrypt" }); } catch {}
+            try { base44.functions.invoke("piiEncryptor", { entity_name: name, id, action: "encrypt" }); } catch (e) { console.error('[layout] catch:', e); }
           }
           return result;
         };
@@ -219,7 +219,7 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
 
     try {
       Object.keys(base44.entities).forEach((name) => wrapEntity(base44.entities[name], name));
-    } catch {}
+    } catch (e) { console.error('[layout] catch:', e); }
 
     // Cleanup: restaura todos os métodos originais ao desmontar/re-executar
     return () => {
@@ -228,7 +228,7 @@ export default function LayoutRBACWrapper({ user, empresaAtual, grupoAtual, cont
           const api = base44.entities[name];
           if (api) restoreEntity(api);
         });
-      } catch {}
+      } catch (e) { console.error('[layout] catch:', e); }
     };
 
   }, [user?.id, empresaAtual?.id, grupoAtual?.id, contexto]);

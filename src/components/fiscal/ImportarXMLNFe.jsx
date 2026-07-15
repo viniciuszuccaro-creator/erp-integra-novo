@@ -142,7 +142,7 @@ export default function ImportarXMLNFe({ empresaId }) {
               disabled={processando}
             />
             <label htmlFor="xml-upload">
-              <Button asChild className="bg-blue-600 hover:bg-blue-700" data-permission="Fiscal.ImportarXMLNFe.importar">
+              <Button asChild className="bg-blue-600 hover:bg-blue-700">
                 <span>
                   {processando ? (
                     <>
@@ -283,7 +283,7 @@ export default function ImportarXMLNFe({ empresaId }) {
 
           {/* Ações */}
           <div className="flex justify-end gap-3">
-            <Button data-permission="Fiscal.NFe.importar"
+            <Button
               variant="outline"
               onClick={() => { setDadosNFe(null); setArquivo(null); setErros([]); setAvisos([]); }}
             >
@@ -293,7 +293,6 @@ export default function ImportarXMLNFe({ empresaId }) {
               onClick={() => importarMutation.mutate()}
               disabled={importarMutation.isPending}
               className="bg-green-600 hover:bg-green-700"
-              data-permission="Fiscal.ImportarXMLNFe.confirmar"
             >
               {importarMutation.isPending ? (
                 <>

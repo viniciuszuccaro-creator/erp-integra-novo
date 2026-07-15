@@ -136,7 +136,7 @@ export default function AutomationBuilder() {
             </div>
           )}
 
-          <Button data-permission="Integracoes.Automacao.criar" onClick={handleAddAutomacao} className="w-full bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center gap-2">
+          <Button onClick={handleAddAutomacao} className="w-full bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center gap-2">
             <Plus className="w-5 h-5" />
             Criar Automação
           </Button>
@@ -169,8 +169,8 @@ export default function AutomationBuilder() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button data-permission="Integracoes.Automacao.ativar" className="text-xs bg-purple-600 hover:bg-purple-700 text-white">Ativar</Button>
-                  <Button data-permission="Integracoes.Automacao.excluir" className="text-xs bg-slate-300 hover:bg-slate-400">Deletar</Button>
+                  <Button className="text-xs bg-purple-600 hover:bg-purple-700 text-white">Ativar</Button>
+                  <Button className="text-xs bg-slate-300 hover:bg-slate-400">Deletar</Button>
                 </div>
               </div>
             ))}

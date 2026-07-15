@@ -44,7 +44,7 @@ export default function RouteOptimizerPanel({ entregas = [], empresaId, groupId,
         }) : []
       };
       setRota(view);
-      try { window.dispatchEvent(new CustomEvent('logistica:route', { detail: view })); } catch {}
+      try { window.dispatchEvent(new CustomEvent('logistica:route', { detail: view })); } catch (e) { console.error('[painel-logistico] catch:', e); }
     } finally {
       setLoading(false);
     }

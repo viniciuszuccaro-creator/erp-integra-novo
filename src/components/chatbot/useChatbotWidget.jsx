@@ -162,7 +162,7 @@ export default function useChatbotWidget({ clienteId, canal = 'Portal', conversa
           dados_novos: { intent: resultado.intent, confianca: resultado.confianca, sentimento: resultado.sentimento },
           data_hora: new Date().toISOString(),
         });
-      } catch (_) {}
+      } catch (_) { console.error('[chatbot] catch:', _); }
 
       return { ...resultado, acao: acaoResultado };
     },

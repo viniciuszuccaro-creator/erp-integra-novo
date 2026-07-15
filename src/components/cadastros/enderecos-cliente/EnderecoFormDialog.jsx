@@ -113,7 +113,7 @@ export default function EnderecoFormDialog({
 
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button variant="outline" onClick={() => { setDialogAberto(false); resetForm(); }}>Cancelar</Button>
-            <Button onClick={handleSalvarEndereco} data-permission="Cadastros.Cliente.editar">
+            <Button onClick={handleSalvarEndereco}>
               <Check className="w-4 h-4 mr-2" />Salvar
             </Button>
           </div>

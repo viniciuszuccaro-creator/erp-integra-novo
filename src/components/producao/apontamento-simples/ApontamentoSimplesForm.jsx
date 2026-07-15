@@ -97,7 +97,7 @@ export default function ApontamentoSimplesForm({ form, setForm, itensDisponiveis
             </div>
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button type="submit" disabled={isPending} className="bg-blue-600 hover:bg-blue-700" data-permission="Producao.Apontamento.criar">
+            <Button type="submit" disabled={isPending} className="bg-blue-600 hover:bg-blue-700">
               {isPending ? "Salvando..." : "Registrar Apontamento"}
             </Button>
           </div>

@@ -91,7 +91,6 @@ export default function TabelaPrecoCalculoTab({
 
           <Button
             type="button"
-            data-permission="Cadastros.TabelaPreco.editar"
             onClick={handleRecalcularPrecos}
             disabled={calculando || itensTabela.length === 0}
             className="w-full bg-blue-600 hover:bg-blue-700"
@@ -122,7 +121,6 @@ export default function TabelaPrecoCalculoTab({
 
           <Button
             type="button"
-            data-permission="Cadastros.TabelaPreco.editar"
             onClick={handleSugerirPrecosIA}
             disabled={calculando || itensTabela.length === 0}
             className="w-full bg-purple-600 hover:bg-purple-700"

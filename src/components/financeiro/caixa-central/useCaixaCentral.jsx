@@ -81,7 +81,7 @@ export default function useCaixaCentral() {
             dados_novos: { status: "Liquidado", valor_liquido: valorLiquido, forma_pagamento: dados.forma_pagamento },
             data_hora: new Date().toISOString(),
           });
-        } catch {}
+        } catch (e) { console.error('[caixa-central] catch:', e); }
         resultados.push({ ordemId, success: true });
       }
       return resultados;

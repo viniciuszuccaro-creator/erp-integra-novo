@@ -54,7 +54,7 @@ export default function CanalTabBasico({ canalSelecionado, configAtual, onSave, 
             <div><Label>Tempo de Timeout (minutos)</Label><Input type="number" value={formData.tempo_timeout_minutos} onChange={(e) => setFormData({ ...formData, tempo_timeout_minutos: parseInt(e.target.value) || 30 })} className="mt-1 w-32" /></div>
             {canalSelecionado === 'WhatsApp' && <Alert className="bg-green-50 border-green-200"><AlertDescription className="text-sm text-green-800">⚠️ Integração WhatsApp Business API requer <strong>Backend Functions</strong></AlertDescription></Alert>}
             <div className="flex justify-end pt-4 border-t">
-              <Button type="submit" disabled={isSaving} data-permission="Chatbot.ConfiguracaoCanal.salvar" className="bg-blue-600 hover:bg-blue-700">
+              <Button type="submit" disabled={isSaving} className="bg-blue-600 hover:bg-blue-700">
                 {isSaving ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}Salvar Configuração
               </Button>
             </div>

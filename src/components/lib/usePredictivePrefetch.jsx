@@ -38,7 +38,7 @@ export function usePredictivePrefetch() {
       // Prefetch em sequência com delay para não sobrecarregar
       predicted.forEach((module, idx) => {
         setTimeout(() => {
-          try { prefetch(module); } catch (_) {}
+          try { prefetch(module); } catch (_) { console.error('[lib] catch:', _); }
         }, idx * 800); // 800ms entre cada módulo
       });
     };

@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
         const rowsG = await base44.asServiceRole.entities.ConfiguracaoSistema.filter({ chave: 'log_finance_cfg_global' }, undefined, 1);
         cfg = rowsG?.[0]?.valor_json || null;
       }
-    } catch (_) {}
+    } catch (_) { console.error('[financeLinkLogistica] catch:', _); }
 
     const centro_custo_id = cfg?.centro_custo_id || null;
     const plano_contas_id = cfg?.plano_contas_id || null;

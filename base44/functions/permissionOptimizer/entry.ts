@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     // Apenas admin pode invocar manualmente; automação usa service role
     let user = null;
-    try { user = await base44.auth.me(); } catch {}
+    try { user = await base44.auth.me(); } catch (e) { console.error('[permissionOptimizer] catch:', e); }
     if (user && user.role !== 'admin') {
       return Response.json({ error: 'Forbidden: Admin required' }, { status: 403 });
     }
@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
         dados_novos: sugestoes,
         duracao_ms: Date.now() - t0,
       });
-    } catch {}
+    } catch (e) { console.error('[permissionOptimizer] catch:', e); }
 
     return Response.json({ success: true, perfis_atualizados: Object.keys(sugestoes).length });
   } catch (error) {

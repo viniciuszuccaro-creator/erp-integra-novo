@@ -127,7 +127,6 @@ export default function SincronizacaoMarketplaces({ empresaId }) {
                       <Button
                       size="sm"
                       variant="outline"
-                      data-permission="Integracoes.Marketplace.sincronizar"
                       onClick={() => sincronizarMutation.mutate(mp.nome)}
                       disabled={sincronizarMutation.isPending}
                       >

@@ -359,7 +359,6 @@ export default function FormularioArmadoCompleto({ onSalvar, onCancelar, itemIni
           </Card>
 
           <Button
-            data-permission="Producao.Armado.calcular"
             onClick={tipoSelecionado === "Bloco" ? calcularBloco : calcularElemento}
             className="w-full h-16 text-lg bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
           >
@@ -374,10 +373,10 @@ export default function FormularioArmadoCompleto({ onSalvar, onCancelar, itemIni
       )}
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="button" variant="outline" data-permission="Producao.Armado.cancelar" onClick={onCancelar}>
+        <Button type="button" variant="outline" onClick={onCancelar}>
           Cancelar
         </Button>
-        <Button type="button" onClick={handleSalvar} disabled={!resumo} data-permission="Producao.ItemProducao.criar" className="bg-blue-600 hover:bg-blue-700">
+        <Button type="button" onClick={handleSalvar} disabled={!resumo} className="bg-blue-600 hover:bg-blue-700">
           <Save className="w-4 h-4 mr-2" />
           Adicionar Item
         </Button>

@@ -377,7 +377,7 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     let body = {};
-    try { body = await req.json(); } catch (_) { }
+    try { body = await req.json(); } catch (_) { console.error('[entityListSorted] catch:', _); }
 
     // MODO LOTE: { queries: [...] }
     const queries = Array.isArray(body?.queries) ? body.queries : null;

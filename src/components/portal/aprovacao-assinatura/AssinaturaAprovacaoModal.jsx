@@ -91,7 +91,7 @@ export default function AssinaturaAprovacaoModal({
             <Button variant="outline" onClick={() => { setAssinaturaModal(false); setNomeAssinante(''); }} className="flex-1" disabled={isAprovando}>
               Cancelar
             </Button>
-            <Button data-permission="Portal.Orcamentos.aprovar" onClick={onAprovar} disabled={isAprovando} className="flex-1 bg-green-600 hover:bg-green-700">
+            <Button onClick={onAprovar} disabled={isAprovando} className="flex-1 bg-green-600 hover:bg-green-700">
               {isAprovando ? (
                 <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Processando...</>
               ) : (
@@ -132,7 +132,6 @@ export function RevisaoModal({
               Cancelar
             </Button>
             <Button
-              data-permission="Portal.Orcamentos.revisar"
               onClick={onConfirmar}
               disabled={isRejeitando}
               className="flex-1 bg-amber-600 hover:bg-amber-700"

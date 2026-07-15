@@ -60,7 +60,7 @@ export default function EnderecosLista({ enderecos, onEditar, onExcluir }) {
               <Button variant="ghost" size="icon" onClick={() => onEditar(idx)}>
                 <Edit className="w-4 h-4 text-blue-600" />
               </Button>
-              <Button variant="ghost" size="icon" data-permission="Cadastros.ClienteEndereco.excluir" onClick={() => onExcluir(idx)}>
+              <Button variant="ghost" size="icon" onClick={() => onExcluir(idx)}>
                 <Trash2 className="w-4 h-4 text-red-600" />
               </Button>
             </div>

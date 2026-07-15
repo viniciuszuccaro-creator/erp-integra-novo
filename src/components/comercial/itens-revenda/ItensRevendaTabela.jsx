@@ -56,7 +56,7 @@ export default function ItensRevendaTabela({ itensRevenda, removerItem, onNext }
                       }>{item.margem_percentual?.toFixed(1)}%</Badge>
                     </TableCell>
                     <TableCell className="text-center">
-                      <Button variant="ghost" size="icon" onClick={() => removerItem(index)} data-permission="Comercial.Pedido.editar" className="text-red-600 hover:text-red-700">
+                      <Button variant="ghost" size="icon" onClick={() => removerItem(index)} className="text-red-600 hover:text-red-700">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </TableCell>
@@ -76,7 +76,7 @@ export default function ItensRevendaTabela({ itensRevenda, removerItem, onNext }
 
       {itensRevenda && itensRevenda.length > 0 && (
         <div className="flex justify-end">
-          <Button onClick={onNext} data-permission="Comercial.Pedido.visualizar" className="bg-blue-600">
+          <Button onClick={onNext} className="bg-blue-600">
             Próximo: Armado Padrão<ChevronRight className="w-4 h-4 ml-2" />
           </Button>
         </div>

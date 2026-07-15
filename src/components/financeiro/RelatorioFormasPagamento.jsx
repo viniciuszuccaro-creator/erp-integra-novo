@@ -129,7 +129,7 @@ export default function RelatorioFormasPagamento() {
             90 dias
           </Button>
         </div>
-        <Button data-permission="Financeiro.FormasPagamento.exportar" onClick={exportarCSV} className="bg-green-600 hover:bg-green-700">
+        <Button onClick={exportarCSV} className="bg-green-600 hover:bg-green-700">
           <Download className="w-4 h-4 mr-2" />
           Exportar CSV
         </Button>

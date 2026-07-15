@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
         dados_novos: { from_empresa_id: fromId, to_empresa_id: toId, valor, descricao },
         data_hora: new Date().toISOString(),
       });
-    } catch {}
+    } catch (e) { console.error('[intercompanyTransfer] catch:', e); }
 
     await audit(base44, user, { acao: 'Criação', modulo: 'Financeiro', entidade: 'Intercompany', registro_id: pagar.id, descricao: 'Transferência interempresas criada', dados_novos: { from_empresa_id: fromId, to_empresa_id: toId, valor } });
     return Response.json({ ok: true, pagar_id: pagar.id, receber_id: receber.id });

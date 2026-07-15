@@ -18,7 +18,7 @@ export default function ChamadoFormDialog({
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button data-permission="Portal.Suporte.criar" className="bg-blue-600 hover:bg-blue-700">
+        <Button className="bg-blue-600 hover:bg-blue-700">
           <Plus className="w-4 h-4 mr-2" />
           Novo Chamado
         </Button>
@@ -64,7 +64,7 @@ export default function ChamadoFormDialog({
           </div>
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button type="submit" data-permission="Portal.Chamado.salvar" disabled={criarChamadoMutation.isPending} className="bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" disabled={criarChamadoMutation.isPending} className="bg-blue-600 hover:bg-blue-700">
               {criarChamadoMutation.isPending ? "Abrindo..." : "Abrir Chamado"}
             </Button>
           </div>

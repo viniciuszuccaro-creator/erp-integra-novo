@@ -11,12 +11,12 @@ function readContextoCache() {
   try {
     const cached = JSON.parse(sessionStorage.getItem(CONTEXTO_CACHE_KEY) || 'null');
     if (cached?.ts && Date.now() - cached.ts < CONTEXTO_CACHE_TTL_MS) return cached;
-  } catch {}
+  } catch (e) { console.error('[lib] catch:', e); }
   return null;
 }
 
 function writeContextoCache(data) {
-  try { sessionStorage.setItem(CONTEXTO_CACHE_KEY, JSON.stringify({ ...data, ts: Date.now() })); } catch {}
+  try { sessionStorage.setItem(CONTEXTO_CACHE_KEY, JSON.stringify({ ...data, ts: Date.now() })); } catch (e) { console.error('[lib] catch:', e); }
 }
 
 export function useContextoGrupoEmpresa() {
@@ -40,7 +40,7 @@ export function useContextoGrupoEmpresa() {
       const grupos = await base44.entities.GrupoEmpresarial.filter({ id: grupoId });
       if (grupos[0]) {
         setGrupoAtual(grupos[0]);
-        try { localStorage.setItem('group_atual_id', grupos[0].id); } catch {}
+        try { localStorage.setItem('group_atual_id', grupos[0].id); } catch (e) { console.error('[lib] catch:', e); }
         return grupos[0];
       }
     }
@@ -50,7 +50,7 @@ export function useContextoGrupoEmpresa() {
       const ativo = todos.find(g => g.status === 'Ativo') || todos[0];
       if (ativo) {
         setGrupoAtual(ativo);
-        try { localStorage.setItem('group_atual_id', ativo.id); } catch {}
+        try { localStorage.setItem('group_atual_id', ativo.id); } catch (e) { console.error('[lib] catch:', e); }
         return ativo;
       }
     }
@@ -101,7 +101,7 @@ export function useContextoGrupoEmpresa() {
       const ctx = currentUser.contexto_atual || ctxPersistido || 'empresa';
       loadedContexto = ctx;
       setContexto(ctx);
-      try { localStorage.setItem('contexto_atual', ctx); } catch {}
+      try { localStorage.setItem('contexto_atual', ctx); } catch (e) { console.error('[lib] catch:', e); }
 
       if (ctx === 'grupo') {
         // Tenta user > localStorage
@@ -122,7 +122,7 @@ export function useContextoGrupoEmpresa() {
             if (ativa) {
               loadedEmpresa = ativa;
               setEmpresaAtual(ativa);
-              try { localStorage.setItem('empresa_atual_id', ativa.id); } catch {}
+              try { localStorage.setItem('empresa_atual_id', ativa.id); } catch (e) { console.error('[lib] catch:', e); }
             }
           }
         } else if (isRemoteApiKeyMode || currentUser?.role === 'admin') {
@@ -131,7 +131,7 @@ export function useContextoGrupoEmpresa() {
           if (ativa) {
             loadedEmpresa = ativa;
             setEmpresaAtual(ativa);
-            try { localStorage.setItem('empresa_atual_id', ativa.id); } catch {}
+            try { localStorage.setItem('empresa_atual_id', ativa.id); } catch (e) { console.error('[lib] catch:', e); }
           }
         }
       }
@@ -207,9 +207,9 @@ export function useContextoGrupoEmpresa() {
       setGrupoAtual(grupo);
       setEmpresaAtual(null);
       setUser((prev) => prev ? { ...prev, contexto_atual: 'grupo', grupo_atual_id: grupo?.id || prev.grupo_atual_id } : prev);
-      try { localStorage.setItem('contexto_atual', 'grupo'); } catch {}
-      try { if (grupo?.id) localStorage.setItem('group_atual_id', grupo.id); } catch {}
-      try { sessionStorage.removeItem(CONTEXTO_CACHE_KEY); } catch {}
+      try { localStorage.setItem('contexto_atual', 'grupo'); } catch (e) { console.error('[lib] catch:', e); }
+      try { if (grupo?.id) localStorage.setItem('group_atual_id', grupo.id); } catch (e) { console.error('[lib] catch:', e); }
+      try { sessionStorage.removeItem(CONTEXTO_CACHE_KEY); } catch (e) { console.error('[lib] catch:', e); }
       queryClient.invalidateQueries();
       // Evitar reload completo; atualizar queries e deixar GuardRails liberar
     },
@@ -259,9 +259,9 @@ export function useContextoGrupoEmpresa() {
       setContexto('empresa');
       setEmpresaAtual(empresa);
       setUser((prev) => prev ? { ...prev, contexto_atual: 'empresa', empresa_atual_id: empresa?.id || prev.empresa_atual_id } : prev);
-      try { localStorage.setItem('contexto_atual', 'empresa'); } catch {}
-      try { if (empresa?.id) localStorage.setItem('empresa_atual_id', empresa.id); } catch {}
-      try { sessionStorage.removeItem(CONTEXTO_CACHE_KEY); } catch {}
+      try { localStorage.setItem('contexto_atual', 'empresa'); } catch (e) { console.error('[lib] catch:', e); }
+      try { if (empresa?.id) localStorage.setItem('empresa_atual_id', empresa.id); } catch (e) { console.error('[lib] catch:', e); }
+      try { sessionStorage.removeItem(CONTEXTO_CACHE_KEY); } catch (e) { console.error('[lib] catch:', e); }
       queryClient.invalidateQueries();
       // Sem reload completo
     },
@@ -281,7 +281,7 @@ export function useContextoGrupoEmpresa() {
           grupo_id: grupoAtual.id,
           status: 'Ativa'
         });
-        try { sessionStorage.setItem(`empresas_grupo_${grupoAtual.id}`, JSON.stringify(empresas || [])); } catch {}
+        try { sessionStorage.setItem(`empresas_grupo_${grupoAtual.id}`, JSON.stringify(empresas || [])); } catch (e) { console.error('[lib] catch:', e); }
         return empresas || [];
       } catch (error) {
         if (error?.status === 429 || error?.response?.status === 429 || String(error?.message || '').includes('Rate limit')) {

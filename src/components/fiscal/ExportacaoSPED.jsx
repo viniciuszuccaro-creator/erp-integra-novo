@@ -174,7 +174,7 @@ export default function ExportacaoSPED({ empresaId }) {
             </div>
           </div>
 
-          <Button data-permission="Fiscal.SPED.exportar"
+          <Button
             onClick={handleGerar}
             disabled={gerando}
             className="w-full bg-purple-600 hover:bg-purple-700 h-12"

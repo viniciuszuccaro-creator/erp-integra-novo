@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import RBACButton from "@/components/lib/RBACButton";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -266,7 +267,7 @@ export default function GrupoEmpresarialForm({ grupo, onSubmit, isSubmitting, wi
             <span className="text-sm text-red-900 font-medium">Confirmar exclusão do grupo "{formData.nome}"?</span>
             <div className="flex gap-2">
               <Button type="button" size="sm" variant="outline" onClick={() => setConfirmandoExclusao(false)}>Cancelar</Button>
-              <Button type="button" size="sm" variant="destructive" data-permission="Cadastros.GrupoEmpresarial.excluir" data-action="Cadastros.GrupoEmpresarial.excluir" data-sensitive="true" onClick={confirmarExclusaoDefinitiva}>Excluir</Button>
+              <RBACButton type="button" size="sm" variant="destructive" module="Cadastros" action="excluir" onClick={confirmarExclusaoDefinitiva}>Excluir</RBACButton>
             </div>
           </AlertDescription>
         </Alert>
@@ -275,10 +276,11 @@ export default function GrupoEmpresarialForm({ grupo, onSubmit, isSubmitting, wi
       <div className="flex justify-end gap-3 pt-4 border-t">
         {grupo && (
           <>
-            <Button
+            <RBACButton
               type="button"
               variant="outline"
-              data-permission="Cadastros.GrupoEmpresarial.alternarStatus"
+              module="Cadastros"
+              action="editar"
               onClick={handleAlternarStatus}
               className={formData.status === 'Ativo' ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}
             >
@@ -287,16 +289,16 @@ export default function GrupoEmpresarialForm({ grupo, onSubmit, isSubmitting, wi
               ) : (
                 <><Power className="w-4 h-4 mr-2" />Ativar</>
               )}
-            </Button>
-            <Button type="button" variant="destructive" data-permission="Cadastros.GrupoEmpresarial.excluir" onClick={handleExcluir}>
+            </RBACButton>
+            <RBACButton type="button" variant="destructive" module="Cadastros" action="excluir" onClick={handleExcluir}>
               <Trash2 className="w-4 h-4 mr-2" />Excluir
-            </Button>
+            </RBACButton>
           </>
         )}
-        <Button type="submit" data-permission="Cadastros.GrupoEmpresarial.salvar" disabled={isSubmitting}>
+        <RBACButton type="submit" module="Cadastros" action="editar" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {grupo ? 'Atualizar Grupo' : 'Criar Grupo'}
-        </Button>
+        </RBACButton>
       </div>
     </form>
   );

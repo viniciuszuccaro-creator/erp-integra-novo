@@ -72,7 +72,7 @@ export default function DashboardIAGerador() {
         </div>
       </div>
 
-      <Button data-permission="Dashboard.DashboardIAGerador.gerar" onClick={gerar} disabled={gerando} className="w-full">
+      <Button onClick={gerar} disabled={gerando} className="w-full">
         {gerando ? 'Gerando...' : 'Gerar Relatório'}
       </Button>
 
@@ -83,7 +83,7 @@ export default function DashboardIAGerador() {
           ) : (
             <>
               <pre className="bg-white p-3 rounded text-xs overflow-auto max-h-40 border whitespace-pre-wrap">{relatorio.conteudo}</pre>
-              <Button data-permission="Dashboard.DashboardIAGerador.exportar" onClick={exportarPDF} size="sm" variant="outline" className="w-full gap-1">
+              <Button onClick={exportarPDF} size="sm" variant="outline" className="w-full gap-1">
                 <Download className="w-4 h-4" /> Exportar
               </Button>
             </>

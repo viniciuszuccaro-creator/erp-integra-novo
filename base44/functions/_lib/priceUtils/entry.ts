@@ -153,7 +153,7 @@ function computeOptimizedPrice(produto, quotes, cfg) {
         if (precoSugerido < precoMinSeg) precoSugerido = precoMinSeg;
       }
     }
-  } catch (_) {}
+  } catch (_) { console.error('[priceUtils] catch:', _); }
 
   precoSugerido = Math.max(0, Number(precoSugerido?.toFixed(2) || 0));
 

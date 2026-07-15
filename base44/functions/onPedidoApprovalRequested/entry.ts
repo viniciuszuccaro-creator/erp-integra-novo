@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
       let aprovador = null;
       try {
         aprovador = await base44.asServiceRole.entities.User.get(data.usuario_aprovador_id);
-      } catch {}
+      } catch (e) { console.error('[onPedidoApprovalRequested] catch:', e); }
 
       const to = aprovador?.email || user?.email;
       if (to) {

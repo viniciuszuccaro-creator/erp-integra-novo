@@ -64,7 +64,7 @@ async function countSingle(entityName, filter) {
     if (!api?.filter) return 0;
     const rows = await api.filter(filter || {}, '-created_date', 9999);
     return Array.isArray(rows) ? rows.length : 0;
-  } catch (_) {}
+  } catch (_) { console.error('[lib] catch:', _); }
   return 0;
 }
 

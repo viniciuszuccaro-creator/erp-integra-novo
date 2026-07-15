@@ -89,7 +89,6 @@ export default function AprovacaoComAssinatura({ clienteId }) {
 
                     <div className="flex gap-3">
                       <Button
-                        data-permission="Portal.Orcamentos.aprovar"
                         onClick={() => { h.setOrcamentoSelecionado(orc); h.setAssinaturaModal(true); }}
                         className="flex-1 bg-green-600 hover:bg-green-700 text-lg py-6"
                       >
@@ -98,7 +97,6 @@ export default function AprovacaoComAssinatura({ clienteId }) {
                       </Button>
 
                       <Button
-                        data-permission="Portal.Orcamentos.revisar"
                         variant="outline"
                         onClick={() => { h.setOrcamentoSelecionado(orc); h.setRevisaoModal(true); }}
                         className="border-2 border-amber-300 hover:bg-amber-50"

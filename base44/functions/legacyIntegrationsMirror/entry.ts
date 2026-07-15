@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
         const ped = await base44.asServiceRole.entities.Pedido.filter(q, undefined, 1).then(r => r?.[0] || null);
         if (!ped) return Response.json({ ok: false, error: 'pedido_nao_encontrado' }, { status: 404 });
         const resumo = { id: ped.id, numero_pedido: ped.numero_pedido, status: ped.status, data_prevista_entrega: ped.data_prevista_entrega, cliente: ped.cliente_nome };
-        try { await base44.asServiceRole.entities.AuditLog.create({ usuario: user?.full_name || 'Service', acao: 'Visualização', modulo: 'Comercial', tipo_auditoria: 'integracao', entidade: 'status_pedido', descricao: 'Consulta status pedido (API)', empresa_id, group_id, dados_novos: { pedido_id: resumo.id }, data_hora: new Date().toISOString() }); } catch {}
+        try { await base44.asServiceRole.entities.AuditLog.create({ usuario: user?.full_name || 'Service', acao: 'Visualização', modulo: 'Comercial', tipo_auditoria: 'integracao', entidade: 'status_pedido', descricao: 'Consulta status pedido (API)', empresa_id, group_id, dados_novos: { pedido_id: resumo.id }, data_hora: new Date().toISOString() }); } catch (e) { console.error('[legacyIntegrationsMirror] catch:', e); }
         return Response.json({ ok: true, pedido: resumo });
       }
 
@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
         const filtro = { empresa_id };
         const prods = await base44.asServiceRole.entities.Produto.filter(filtro, '-updated_date', 50).then(arr => (arr || []).filter(p => p.eh_bitola === true));
         const itens = prods.map(p => ({ id: p.id, descricao: p.descricao, tipo_aco: p.tipo_aco, bitola_mm: p.bitola_diametro_mm, preco_venda: p.preco_venda, estoque_disponivel: (p.estoque_disponivel ?? (p.estoque_atual - (p.estoque_reservado || 0))) }));
-        try { await base44.asServiceRole.entities.AuditLog.create({ usuario: user?.full_name || 'Service', acao: 'Visualização', modulo: 'Comercial', tipo_auditoria: 'integracao', entidade: 'cotar_aco', descricao: 'Cotação via API', empresa_id, group_id, dados_novos: { itens: itens.slice(0, 5) }, data_hora: new Date().toISOString() }); } catch {}
+        try { await base44.asServiceRole.entities.AuditLog.create({ usuario: user?.full_name || 'Service', acao: 'Visualização', modulo: 'Comercial', tipo_auditoria: 'integracao', entidade: 'cotar_aco', descricao: 'Cotação via API', empresa_id, group_id, dados_novos: { itens: itens.slice(0, 5) }, data_hora: new Date().toISOString() }); } catch (e) { console.error('[legacyIntegrationsMirror] catch:', e); }
         return Response.json({ ok: true, itens });
       }
 
@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
     const trusted = !!(expected && hdrToken === expected);
     const empresa_id = payload.empresa_id || payload.company_id || null;
     const group_id = payload.group_id || null;
-    try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Criação', modulo: 'Integrações', tipo_auditoria: 'integracao', entidade: prov, descricao: `Webhook recebido`, empresa_id, group_id, dados_novos: { payload, trusted }, data_hora: new Date().toISOString(), sucesso: true }); } catch {}
+    try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Criação', modulo: 'Integrações', tipo_auditoria: 'integracao', entidade: prov, descricao: `Webhook recebido`, empresa_id, group_id, dados_novos: { payload, trusted }, data_hora: new Date().toISOString(), sucesso: true }); } catch (e) { console.error('[legacyIntegrationsMirror] catch:', e); }
 
     if (prov === 'asaas') {
       const p = payload?.payment || payload?.data || payload || {};
@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
             updates.detalhes_pagamento = { ...(cr.detalhes_pagamento||{}), forma_pagamento: 'Boleto/PIX', numero_autorizacao: p?.transactionReceipt || null, status_compensacao: 'Conciliado' };
           }
           await base44.asServiceRole.entities.ContaReceber.update(cr.id, updates);
-          try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Edição', modulo: 'Financeiro', tipo_auditoria: 'integracao', entidade: 'Asaas', descricao: `Atualização cobrança ${extId}`, empresa_id, group_id, dados_novos: updates, data_hora: new Date().toISOString(), sucesso: true }); } catch {}
+          try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Edição', modulo: 'Financeiro', tipo_auditoria: 'integracao', entidade: 'Asaas', descricao: `Atualização cobrança ${extId}`, empresa_id, group_id, dados_novos: updates, data_hora: new Date().toISOString(), sucesso: true }); } catch (e) { console.error('[legacyIntegrationsMirror] catch:', e); }
         }
       }
       return Response.json({ ok: true, action: 'asaas_webhook_processed' });
@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
             updates.detalhes_pagamento = { ...(cr.detalhes_pagamento||{}), forma_pagamento: 'Boleto', status_compensacao: 'Conciliado' };
           }
           await base44.asServiceRole.entities.ContaReceber.update(cr.id, updates);
-          try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Edição', modulo: 'Financeiro', tipo_auditoria: 'integracao', entidade: 'Juno', descricao: `Atualização cobrança ${extId}`, empresa_id, group_id, dados_novos: updates, data_hora: new Date().toISOString(), sucesso: true }); } catch {}
+          try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Edição', modulo: 'Financeiro', tipo_auditoria: 'integracao', entidade: 'Juno', descricao: `Atualização cobrança ${extId}`, empresa_id, group_id, dados_novos: updates, data_hora: new Date().toISOString(), sucesso: true }); } catch (e) { console.error('[legacyIntegrationsMirror] catch:', e); }
         }
       }
       return Response.json({ ok: true, action: 'juno_webhook_processed' });
@@ -124,9 +124,9 @@ Deno.serve(async (req) => {
         const nfStatus = map[statusKey] || status;
         await base44.asServiceRole.entities.NotaFiscal.update(nfId, { status: nfStatus, mensagem_sefaz: payload?.mensagem || null, codigo_status_sefaz: String(payload?.codigo || payload?.statusCode || ''), xml_nfe: payload?.xmlUrl || payload?.xml || null, pdf_danfe: payload?.pdfUrl || payload?.danfeUrl || null, chave_acesso: payload?.chave || payload?.chaveAcesso || null });
         if (/autorizad/i.test(nfStatus)) {
-          try { await base44.asServiceRole.functions.invoke('onNotaFiscalAuthorized', { nota_fiscal_id: nfId, empresa_id }); } catch(_) {}
+          try { await base44.asServiceRole.functions.invoke('onNotaFiscalAuthorized', { nota_fiscal_id: nfId, empresa_id }); } catch (_) { console.error('[legacyIntegrationsMirror] catch:', _); }
         }
-        try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Edição', modulo: 'Fiscal', tipo_auditoria: 'integracao', entidade: prov, descricao: `Atualização NF-e ${nfId}`, empresa_id, group_id, dados_novos: { status: nfStatus }, data_hora: new Date().toISOString(), sucesso: true }); } catch {}
+        try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Edição', modulo: 'Fiscal', tipo_auditoria: 'integracao', entidade: prov, descricao: `Atualização NF-e ${nfId}`, empresa_id, group_id, dados_novos: { status: nfStatus }, data_hora: new Date().toISOString(), sucesso: true }); } catch (e) { console.error('[legacyIntegrationsMirror] catch:', e); }
       }
       return Response.json({ ok: true, action: 'nfe_webhook_processed' });
     }
@@ -149,7 +149,7 @@ Deno.serve(async (req) => {
         const expected = Deno.env.get('DEPLOY_AUDIT_TOKEN') || null;
         const trusted = !!(expected && hdrToken === expected);
         if (!trusted) {
-          try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Bloqueio', modulo: 'Integrações', tipo_auditoria: 'seguranca', entidade: prov, descricao: 'Token inválido no webhook', dados_novos: { headers: { hasToken: !!hdrToken } }, data_hora: new Date().toISOString(), sucesso: false }); } catch {}
+          try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Bloqueio', modulo: 'Integrações', tipo_auditoria: 'seguranca', entidade: prov, descricao: 'Token inválido no webhook', dados_novos: { headers: { hasToken: !!hdrToken } }, data_hora: new Date().toISOString(), sucesso: false }); } catch (e) { console.error('[legacyIntegrationsMirror] catch:', e); }
           return Response.json({ error: 'unauthorized_webhook' }, { status: 401 });
         }
 
@@ -161,7 +161,7 @@ Deno.serve(async (req) => {
         };
         const safeNum = (n, d=0) => { const x = Number(n); return isFinite(x) ? x : d; };
 
-        try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Criação', modulo: 'Integrações', tipo_auditoria: 'integracao', entidade: prov, descricao: `Webhook recebido: ${payload.event || 'evento'}`, empresa_id, group_id, dados_novos: { provider: prov }, data_hora: new Date().toISOString(), sucesso: true }); } catch {}
+        try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Criação', modulo: 'Integrações', tipo_auditoria: 'integracao', entidade: prov, descricao: `Webhook recebido: ${payload.event || 'evento'}`, empresa_id, group_id, dados_novos: { provider: prov }, data_hora: new Date().toISOString(), sucesso: true }); } catch (e) { console.error('[legacyIntegrationsMirror] catch:', e); }
 
         // 1) Pedido (order) - upsert por origem_externa_id
         const order = payload.order || payload.pedido || null;
@@ -194,7 +194,7 @@ Deno.serve(async (req) => {
               });
               pedidoResult = { action: 'create', id: novo.id };
             }
-            try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: pedidoResult.action === 'create' ? 'Criação' : 'Edição', modulo: 'Comercial', tipo_auditoria: 'integracao', entidade: prov, descricao: `Sync pedido ${extId}`, empresa_id, group_id, dados_novos: { pedidoResult }, data_hora: new Date().toISOString(), sucesso: true }); } catch {}
+            try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: pedidoResult.action === 'create' ? 'Criação' : 'Edição', modulo: 'Comercial', tipo_auditoria: 'integracao', entidade: prov, descricao: `Sync pedido ${extId}`, empresa_id, group_id, dados_novos: { pedidoResult }, data_hora: new Date().toISOString(), sucesso: true }); } catch (e) { console.error('[legacyIntegrationsMirror] catch:', e); }
           }
         }
 
@@ -215,10 +215,10 @@ Deno.serve(async (req) => {
                   await base44.asServiceRole.entities.Produto.update(target.id, { estoque_atual: qtd });
                   invCount++;
                 }
-              } catch(_){}
+              } catch (_) { console.error('[legacyIntegrationsMirror] catch:', _); }
             }
           }
-          try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Edição', modulo: 'Estoque', tipo_auditoria: 'integracao', entidade: prov, descricao: `Atualização de estoque (${invCount})`, empresa_id, group_id, dados_novos: { invCount }, data_hora: new Date().toISOString(), sucesso: true }); } catch {}
+          try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Edição', modulo: 'Estoque', tipo_auditoria: 'integracao', entidade: prov, descricao: `Atualização de estoque (${invCount})`, empresa_id, group_id, dados_novos: { invCount }, data_hora: new Date().toISOString(), sucesso: true }); } catch (e) { console.error('[legacyIntegrationsMirror] catch:', e); }
         }
 
         // 3) Preços (pricing)
@@ -237,10 +237,10 @@ Deno.serve(async (req) => {
                 if (pid) target = await base44.asServiceRole.entities.Produto.filter({ id: pid, empresa_id }, undefined, 1).then(r=>r?.[0]||null);
                 if (!target && codigo) target = await base44.asServiceRole.entities.Produto.filter({ codigo, empresa_id }, undefined, 1).then(r=>r?.[0]||null);
                 if (target) { await base44.asServiceRole.entities.Produto.update(target.id, patch); priceCount++; }
-              } catch(_){}
+              } catch (_) { console.error('[legacyIntegrationsMirror] catch:', _); }
             }
           }
-          try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Edição', modulo: 'Integrações', tipo_auditoria: 'integracao', entidade: prov, descricao: `Atualização de preços (${priceCount})`, empresa_id, group_id, dados_novos: { priceCount }, data_hora: new Date().toISOString(), sucesso: true }); } catch {}
+          try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Edição', modulo: 'Integrações', tipo_auditoria: 'integracao', entidade: prov, descricao: `Atualização de preços (${priceCount})`, empresa_id, group_id, dados_novos: { priceCount }, data_hora: new Date().toISOString(), sucesso: true }); } catch (e) { console.error('[legacyIntegrationsMirror] catch:', e); }
         }
 
         return Response.json({ ok: true, action: 'marketplace_webhook_processed', provider: prov, results: { pedido: pedidoResult, invCount, priceCount } });
@@ -260,8 +260,8 @@ Deno.serve(async (req) => {
       if (empresaId && minimo > 0 && disp <= minimo) {
         const internal_token = Deno.env.get('DEPLOY_AUDIT_TOKEN') || '';
         const vars = { produto: data.descricao || data.codigo || data.id, disponivel: disp, minimo };
-        try { await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId, groupId, templateKey: 'estoque_baixo', vars, internal_token }); } catch (_) {}
-        try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Criação', modulo: 'Estoque', tipo_auditoria: 'integracao', entidade: 'WhatsApp', descricao: 'Alerta de estoque baixo enviado', empresa_id: empresaId, group_id: groupId, dados_novos: { produto_id: data.id, descricao: data.descricao, disponivel: disp, minimo }, data_hora: new Date().toISOString(), sucesso: true }); } catch {}
+        try { await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId, groupId, templateKey: 'estoque_baixo', vars, internal_token }); } catch (_) { console.error('[legacyIntegrationsMirror] catch:', _); }
+        try { await base44.asServiceRole.entities.AuditLog.create({ usuario: 'Webhook', acao: 'Criação', modulo: 'Estoque', tipo_auditoria: 'integracao', entidade: 'WhatsApp', descricao: 'Alerta de estoque baixo enviado', empresa_id: empresaId, group_id: groupId, dados_novos: { produto_id: data.id, descricao: data.descricao, disponivel: disp, minimo }, data_hora: new Date().toISOString(), sucesso: true }); } catch (e) { console.error('[legacyIntegrationsMirror] catch:', e); }
       }
     }
 

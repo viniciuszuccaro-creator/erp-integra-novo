@@ -96,7 +96,7 @@ export default function RelatorioDRE() {
         <CardHeader className="pb-2">
           <div className="flex justify-between items-center">
             <CardTitle className="text-base">DRE Resumida — {filtros.data_inicio} a {filtros.data_fim}</CardTitle>
-            <Button data-permission="Relatorios.RelatorioDRE.exportar" size="sm" variant="outline" onClick={() => exportarCSV(linhasDRE.map(l=>({descricao:l.label, valor:l.valor, margem:l.margem})), 'dre_resumida')}>
+            <Button size="sm" variant="outline" onClick={() => exportarCSV(linhasDRE.map(l=>({descricao:l.label, valor:l.valor, margem:l.margem})), 'dre_resumida')}>
               <Download className="w-3 h-3 mr-1" /> CSV
             </Button>
           </div>
@@ -149,7 +149,7 @@ export default function RelatorioDRE() {
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <CardTitle className="text-base">DRE Mensal (Receita × CMV × EBITDA)</CardTitle>
-              <Button data-permission="Relatorios.RelatorioDRE.exportar" size="sm" variant="outline" onClick={() => exportarCSV(dreMensal, 'dre_mensal')}>
+              <Button size="sm" variant="outline" onClick={() => exportarCSV(dreMensal, 'dre_mensal')}>
                 <Download className="w-3 h-3 mr-1" /> CSV
               </Button>
             </div>
@@ -176,7 +176,7 @@ export default function RelatorioDRE() {
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <CardTitle className="text-base">Despesas por Categoria</CardTitle>
-              <Button data-permission="Relatorios.RelatorioDRE.exportar" size="sm" variant="outline" onClick={() => exportarCSV(despesasPorCategoria, 'despesas_categoria')}>
+              <Button size="sm" variant="outline" onClick={() => exportarCSV(despesasPorCategoria, 'despesas_categoria')}>
                 <Download className="w-3 h-3 mr-1" /> CSV
               </Button>
             </div>

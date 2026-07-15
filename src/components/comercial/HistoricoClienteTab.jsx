@@ -112,7 +112,7 @@ export default function HistoricoClienteTab({ formData, setFormData, onAdicionar
                       <span>Última: <strong>{new Date(produto.ultima_compra).toLocaleDateString('pt-BR')}</strong></span>
                     </div>
                   </div>
-                  <Button size="sm" variant="outline" data-permission="Comercial.Pedido.adicionarItem" onClick={() => onAdicionarItemAoPedido && onAdicionarItemAoPedido(produto)}>
+                  <Button size="sm" variant="outline" onClick={() => onAdicionarItemAoPedido && onAdicionarItemAoPedido(produto)}>
                     <Plus className="w-3 h-3 mr-1" /> Adicionar
                   </Button>
                 </div>

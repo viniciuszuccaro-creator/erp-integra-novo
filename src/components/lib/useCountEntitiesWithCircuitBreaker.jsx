@@ -19,7 +19,7 @@ function readCache(key) {
   try { return JSON.parse(localStorage.getItem(`cb_cache_${key}`) || 'null'); } catch { return null; }
 }
 function writeCache(key, value) {
-  try { localStorage.setItem(`cb_cache_${key}`, JSON.stringify({ v: value, ts: Date.now() })); } catch {}
+  try { localStorage.setItem(`cb_cache_${key}`, JSON.stringify({ v: value, ts: Date.now() })); } catch (e) { console.error('[lib] catch:', e); }
 }
 
 // Estado do circuit breaker persistido
@@ -27,7 +27,7 @@ function readCBState() {
   try { return JSON.parse(localStorage.getItem('circuitBreakerState') || '{}'); } catch { return {}; }
 }
 function writeCBState(state, failureCount, nextAttempt) {
-  try { localStorage.setItem('circuitBreakerState', JSON.stringify({ state, failureCount, nextAttempt })); } catch {}
+  try { localStorage.setItem('circuitBreakerState', JSON.stringify({ state, failureCount, nextAttempt })); } catch (e) { console.error('[lib] catch:', e); }
 }
 
 export default function useCountEntitiesWithCircuitBreaker() {

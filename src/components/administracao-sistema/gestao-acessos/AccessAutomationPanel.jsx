@@ -43,7 +43,6 @@ export default function AccessAutomationPanel({ accessScope }) {
             disabled={!!running || !accessScope?.contextoValido}
             onClick={() => runAutomation("Otimizador de permissões", "permissionOptimizer")}
             data-action="RBAC.automation.permissionOptimizer"
-            data-permission="Sistema.Controle de Acesso.editar"
             data-sensitive="true"
           >
             <Sparkles className="w-4 h-4 mr-2" />
@@ -54,7 +53,6 @@ export default function AccessAutomationPanel({ accessScope }) {
             disabled={!!running || !accessScope?.contextoValido}
             onClick={() => runAutomation("Alertas de segurança", "securityAlerts")}
             data-action="RBAC.automation.securityAlerts"
-            data-permission="Sistema.Segurança.visualizar"
             data-sensitive="true"
           >
             <ShieldCheck className="w-4 h-4 mr-2" />

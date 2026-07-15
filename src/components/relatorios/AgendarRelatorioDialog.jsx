@@ -98,7 +98,7 @@ export default function AgendarRelatorioDialog({ open, onOpenChange, selectedRep
 
               <div className="flex gap-3 justify-end pt-4">
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-                <Button type="submit" data-permission="Relatorios.Agendamento.salvar" disabled={isPending} className="bg-blue-600 hover:bg-blue-700">
+                <Button type="submit" disabled={isPending} className="bg-blue-600 hover:bg-blue-700">
                   {isPending ? 'Agendando...' : 'Agendar'}
                 </Button>
               </div>

@@ -210,11 +210,9 @@ Retorne apenas os índices (0, 1, 2...) dos produtos que DEVEM ir para produçã
         </Button>
 
         <Button
-          data-permission="Cadastros.Produto.converter"
           onClick={converterProdutos}
           disabled={processando || produtosSelecionados.length === 0}
           className="bg-orange-600 hover:bg-orange-700 ml-auto"
-          data-permission="Cadastros.Produto.converter"
         >
           {processando ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />

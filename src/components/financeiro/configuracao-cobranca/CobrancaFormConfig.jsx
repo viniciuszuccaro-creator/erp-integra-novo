@@ -198,7 +198,7 @@ export default function CobrancaFormConfig({ config, setConfig, empresaSeleciona
       </Card>
 
       <div className="flex justify-end">
-        <Button type="submit" disabled={salvarMutation.isPending} data-permission="Financeiro.ConfiguracaoCobranca.salvar"
+        <Button type="submit" disabled={salvarMutation.isPending}
           className="bg-blue-600 hover:bg-blue-700">
           {salvarMutation.isPending ? 'Salvando...' : 'Salvar Configuração'}
         </Button>

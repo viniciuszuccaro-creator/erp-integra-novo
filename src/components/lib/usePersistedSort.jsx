@@ -17,7 +17,7 @@ export default function usePersistedSort(entityName, defaultField = 'updated_dat
         if (sf) setSortField(sf);
         if (sd) setSortDirection(sd);
       }
-    } catch {}
+    } catch (e) { console.error('[lib] catch:', e); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entityName]);
 
@@ -25,7 +25,7 @@ export default function usePersistedSort(entityName, defaultField = 'updated_dat
   useEffect(() => {
     try {
       localStorage.setItem(`sort_${entityName}`, JSON.stringify({ sortField, sortDirection }));
-    } catch {}
+    } catch (e) { console.error('[lib] catch:', e); }
   }, [entityName, sortField, sortDirection]);
 
   return [sortField, setSortField, sortDirection, setSortDirection];

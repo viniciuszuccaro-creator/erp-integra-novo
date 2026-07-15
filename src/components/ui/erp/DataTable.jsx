@@ -70,7 +70,7 @@ export default function ERPDataTable({
     columns.filter(c => {
       if (hiddenColumns.has(c.key)) return false;
       if (c.permission) {
-        try { if (!hasPermissionKey(c.permission)) return false; } catch {}
+        try { if (!hasPermissionKey(c.permission)) return false; } catch (e) { console.error('[erp] catch:', e); }
       }
       return true;
     })
@@ -152,7 +152,7 @@ export default function ERPDataTable({
       } else {
         localStorage.removeItem(`sort_${entityName}`);
       }
-    } catch {}
+    } catch (e) { console.error('[erp] catch:', e); }
   }, [autoPersistSort, entityName, sortField, sortDirection]);
 
   // Restaura sort salvo quando não vier definido
@@ -167,7 +167,7 @@ export default function ERPDataTable({
         const sd = parsed.direction || parsed.sortDirection;
         if (sf && sd) onSortChange(sf, sd);
       }
-    } catch {}
+    } catch (e) { console.error('[erp] catch:', e); }
   }, [autoPersistSort, entityName, sortField]);
 
   const totalPages = Math.max(1, Math.ceil((totalItems || 0) / (pageSize || 20)));
@@ -229,12 +229,12 @@ export default function ERPDataTable({
           <div className="text-sm font-medium">{selectedSet.size} selecionado(s)</div>
           <div className="flex items-center gap-2">
             {audited.onBulkExportSelected && (
-              <Button data-permission="Sistema.Datale.excluir" variant="outline" size="sm" onClick={() => audited.onBulkExportSelected && audited.onBulkExportSelected(Array.from(selectedSet))}>
+              <Button variant="outline" size="sm" onClick={() => audited.onBulkExportSelected && audited.onBulkExportSelected(Array.from(selectedSet))}>
                 Exportar selecionados
               </Button>
             )}
             {audited.onBulkDeleteSelected && (
-              <Button data-permission="Sistema.Datale.excluir" variant="destructive" size="sm" onClick={() => audited.onBulkDeleteSelected && audited.onBulkDeleteSelected(Array.from(selectedSet))}>
+              <Button variant="destructive" size="sm" onClick={() => audited.onBulkDeleteSelected && audited.onBulkDeleteSelected(Array.from(selectedSet))}>
                 Excluir selecionados
               </Button>
             )}

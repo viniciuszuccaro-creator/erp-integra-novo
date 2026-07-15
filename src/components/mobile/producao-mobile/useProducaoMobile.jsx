@@ -103,7 +103,7 @@ export default function useProducaoMobile() {
           dados_novos: novoApontamento,
           data_hora: new Date().toISOString()
         });
-      } catch {}
+      } catch (e) { console.error('[producao-mobile] catch:', e); }
 
       return { sucesso: true };
     },
@@ -159,7 +159,7 @@ export default function useProducaoMobile() {
           empresa_id: op.empresa_id,
           data_hora: new Date().toISOString()
         });
-      } catch {}
+      } catch (e) { console.error('[producao-mobile] catch:', e); }
 
       return novaEntrega;
     },

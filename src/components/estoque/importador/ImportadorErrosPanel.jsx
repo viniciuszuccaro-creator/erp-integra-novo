@@ -13,7 +13,7 @@ export default function ImportadorErrosPanel({ checando, validationErrors, downl
         <CardTitle className="text-sm flex items-center justify-between w-full">
           <span>{checando ? 'Validando produtos…' : `Erros de validação (${validationErrors.length})`}</span>
           {!checando && validationErrors.length > 0 && (
-            <Button data-permission="Estoque.ImportadorErros.baixar" variant="outline" size="sm" onClick={downloadErrosCSV} className="gap-2">
+            <Button variant="outline" size="sm" onClick={downloadErrosCSV} className="gap-2">
               <Download className="w-4 h-4" /> Baixar CSV
             </Button>
           )}

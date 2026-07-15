@@ -173,7 +173,7 @@ export default function ClientesTabOptimized({ onEdit, onCreate }) {
           <option value="Bloqueado">Bloqueado</option>
         </select>
         {onCreate && (
-          <Button onClick={onCreate} className="bg-blue-600 hover:bg-blue-700" data-permission="CRM.Clientes.criar" data-sensitive>
+          <Button onClick={onCreate} className="bg-blue-600 hover:bg-blue-700" data-sensitive>
             <Plus className="w-4 h-4 mr-2" />
             Novo Cliente
           </Button>
@@ -222,14 +222,13 @@ export default function ClientesTabOptimized({ onEdit, onCreate }) {
                           variant="ghost"
                           size="sm"
                           onClick={() => onEdit(cliente)}
-                          data-permission="CRM.Clientes.editar"
                           data-sensitive
                         >
                           <Edit className="w-4 h-4 text-blue-600" />
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" data-permission="CRM.Clientes.visualizar">
+                            <Button variant="ghost" size="icon" className="h-7 w-7">
                               <MoreVertical className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>

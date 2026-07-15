@@ -30,13 +30,13 @@ export default function SistemaHealthPanel() {
       try {
         const maps = await base44.entities.SyncMap.filter(grupoAtual?.id ? { group_id: grupoAtual.id } : {}, '-updated_date', 1);
         syncMaps = Array.isArray(maps) ? maps.length : 0;
-      } catch {}
+      } catch (e) { console.error('[administracao-sistema] catch:', e); }
 
       let cfgCount = 0;
       try {
         const cfgs = await base44.entities.ConfiguracaoSistema.filter(grupoAtual?.id ? { group_id: grupoAtual.id } : {}, '-updated_date', 1);
         cfgCount = Array.isArray(cfgs) ? cfgs.length : 0;
-      } catch {}
+      } catch (e) { console.error('[administracao-sistema] catch:', e); }
 
       return {
         errors: errors.length,

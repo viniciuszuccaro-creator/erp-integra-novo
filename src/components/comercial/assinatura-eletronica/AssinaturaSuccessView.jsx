@@ -46,14 +46,12 @@ export default function AssinaturaSuccessView({ dadosAssinatura, onBaixar, onCon
           type="button"
           variant="outline"
           onClick={onBaixar}
-          data-permission="Comercial.Assinatura.visualizar"
         >
           <Download className="w-4 h-4 mr-2" />
           Baixar Comprovante
         </Button>
         <Button
           onClick={onConcluir}
-          data-permission="Comercial.Assinatura.criar"
           className="bg-green-600 hover:bg-green-700"
         >
           <CheckCircle className="w-4 h-4 mr-2" />

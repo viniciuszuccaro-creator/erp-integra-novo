@@ -60,7 +60,7 @@ export default function ConfigFiscalAutomatica({ empresaId, groupId }) {
       </Tabs>
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="submit" disabled={salvarMutation.isPending || !empresaId} data-permission="Fiscal.ConfigFiscal.salvar" data-sensitive="true" className="bg-green-600 hover:bg-green-700 min-w-[200px]">
+        <Button type="submit" disabled={salvarMutation.isPending || !empresaId} data-sensitive="true" className="bg-green-600 hover:bg-green-700 min-w-[200px]">
           {salvarMutation.isPending ? 'Salvando...' : 'Salvar Configurações'}
         </Button>
       </div>

@@ -97,7 +97,7 @@ export default function PedidosTab({ pedidos, clientes, isLoading, empresas, onC
                     <div className="text-blue-900 font-semibold">{selectedPedidos.length} pedido(s) selecionado(s)</div>
                     <div className="flex gap-2">
                       <ProtectedAction module="Comercial" section="Pedido" action="exportar" mode="disable">
-                        <Button variant="outline" onClick={() => { exportarPedidosCSV(filteredPedidos.filter(p => selectedPedidos.includes(p.id))); try { base44.entities.AuditLog.create({ acao: 'Exportação', modulo: 'Comercial', entidade: 'Pedido', descricao: `Exportados ${selectedPedidos.length} pedidos`, data_hora: new Date().toISOString() }); } catch { } }}>
+                        <Button variant="outline" onClick={() => { exportarPedidosCSV(filteredPedidos.filter(p => selectedPedidos.includes(p.id))); try { base44.entities.AuditLog.create({ acao: 'Exportação', modulo: 'Comercial', entidade: 'Pedido', descricao: `Exportados ${selectedPedidos.length} pedidos`, data_hora: new Date().toISOString() }); } catch (e) { console.error('[comercial] catch:', e); } }}>
                           <Download className="w-4 h-4 mr-2" /> Exportar CSV
                         </Button>
                       </ProtectedAction>

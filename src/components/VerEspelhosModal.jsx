@@ -207,9 +207,7 @@ export default function VerEspelhosModal({ open, onClose, documento, tipo = "Con
         {!todosPagos && (
           <Button
           className="bg-blue-600 hover:bg-blue-700"
-          data-permission="Cadastros.Empresa.baixarGrupo"
           onClick={() => onBaixarGrupo?.(documento)}
-            data-permission={tipo === 'ContaPagar' ? 'Financeiro.ContaPagar.baixar' : 'Financeiro.ContaReceber.baixar'}
             data-action={tipo === 'ContaPagar' ? 'Financeiro.ContaPagar.baixar' : 'Financeiro.ContaReceber.baixar'}
             data-sensitive="true"
           >

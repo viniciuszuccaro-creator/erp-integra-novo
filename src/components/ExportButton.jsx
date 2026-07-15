@@ -79,7 +79,7 @@ export default function ExportButton({ data = [], filename = "export", columns =
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button data-permission="Sistema.Export.exportar" variant="outline" size="sm">
+        <Button variant="outline" size="sm">
           <Download className="w-4 h-4 mr-2" />
           Exportar
         </Button>

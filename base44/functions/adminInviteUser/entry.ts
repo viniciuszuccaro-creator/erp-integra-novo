@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
         dados_novos: { email, role },
         data_hora: new Date().toISOString(),
       });
-    } catch {}
+    } catch (e) { console.error('[adminInviteUser] catch:', e); }
 
     return Response.json({ ok: true });
   } catch (error) {

@@ -137,8 +137,7 @@ export default function ConciliacaoAutomaticaIA({ empresaId }) {
             </div>
           </div>
 
-          <Button 
-            data-permission="Financeiro.Conciliacao.executar"
+          <Button
             onClick={executarConciliacaoIA}
             disabled={processando || extratos.length === 0}
             className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
@@ -233,7 +232,6 @@ export default function ConciliacaoAutomaticaIA({ empresaId }) {
 
             {resultados.conciliados > 0 && (
               <Button
-                data-permission="Financeiro.Conciliacao.aplicar"
                 onClick={() => aplicarConciliacoes.mutate()}
                 disabled={aplicarConciliacoes.isPending}
                 className="w-full bg-green-600 hover:bg-green-700"

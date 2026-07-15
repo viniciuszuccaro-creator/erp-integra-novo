@@ -42,7 +42,7 @@ export default function useCacheCleanup() {
       if (cbState.nextAttempt && cbState.nextAttempt < now) {
         localStorage.removeItem('circuitBreakerState');
       }
-    } catch (_) {}
+    } catch (_) { console.error('[lib] catch:', _); }
 
     // Limpar sort prefs antigas
     for (let i = 0; i < localStorage.length; i++) {
@@ -53,7 +53,7 @@ export default function useCacheCleanup() {
           if (data.lastUsed && (now - data.lastUsed) > 2592000000) { // 30 dias
             localStorage.removeItem(key);
           }
-        } catch (_) {}
+        } catch (_) { console.error('[lib] catch:', _); }
       }
     }
   }, [queryClient]);

@@ -89,15 +89,15 @@ export default function RelatorioPersonalizado() {
           <div className="flex items-center justify-between">
             <CardTitle>Relatório Personalizado</CardTitle>
             <div className="flex gap-2">
-              <Button data-permission="Relatorios.Personalizado.configurar" variant="outline" size="sm" onClick={() => setShowConfig(!showConfig)}>
+              <Button variant="outline" size="sm" onClick={() => setShowConfig(!showConfig)}>
                 {showConfig ? 'Ocultar' : 'Mostrar'} Configurações
               </Button>
               {!showConfig && (
                 <>
-                  <Button data-permission="Relatorios.Personalizado.exportar" variant="outline" size="sm" onClick={handleExportarCSV}>
+                  <Button variant="outline" size="sm" onClick={handleExportarCSV}>
                     <Download className="w-4 h-4 mr-2" />CSV
                   </Button>
-                  <Button data-permission="Relatorios.Personalizado.exportar" variant="outline" size="sm" onClick={() => { handleExportarCSV(); toast.info('Para exportar para Excel real, integre com biblioteca xlsx'); }}>
+                  <Button variant="outline" size="sm" onClick={() => { handleExportarCSV(); toast.info('Para exportar para Excel real, integre com biblioteca xlsx'); }}>
                     <FileText className="w-4 h-4 mr-2" />Excel
                   </Button>
                 </>

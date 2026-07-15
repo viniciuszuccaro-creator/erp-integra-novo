@@ -56,7 +56,7 @@ export default function RelatoriosIAInsights({ pedidos = [], contas = [], empres
           <CardTitle className="text-sm flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-indigo-600" /> Insights IA
           </CardTitle>
-          <Button data-permission="Relatorios.RelatoriosIAInsights.gerar" size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={analisarComIA} disabled={loading}>
+          <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={analisarComIA} disabled={loading}>
             {loading ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
             {loading ? "Gerando..." : "Gerar Análise"}
           </Button>

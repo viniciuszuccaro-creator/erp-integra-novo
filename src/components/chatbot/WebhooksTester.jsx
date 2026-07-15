@@ -75,7 +75,7 @@ export default function WebhooksTester({ canalConfig }) {
           />
         </div>
 
-        <Button data-permission="Chatbot.WebhooksTester.enviar"
+        <Button
           onClick={() => testarMutation.mutate()}
           disabled={testarMutation.isPending || !canalConfig?.webhook_url}
           className="w-full bg-blue-600"

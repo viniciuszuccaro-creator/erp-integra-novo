@@ -83,18 +83,18 @@ const ACOES_5_ETAPAS = [
       // Limpa estado do Circuit Breaker e cache de queries com erro
       const cbKeys = ['circuitBreakerState', 'cb_entity_counts', 'rq_circuit_breaker', 'cb_state', 'rq_index_keys'];
       let cleared = 0;
-      cbKeys.forEach(k => { try { if (localStorage.getItem(k)) { localStorage.removeItem(k); cleared++; } } catch (_) {} });
+      cbKeys.forEach(k => { try { if (localStorage.getItem(k)) { localStorage.removeItem(k); cleared++; } } catch (_) { console.error('[configuracoes-gerais] catch:', _); } });
       // Limpa também as queries RQ indexadas
       try {
         const idxRaw = localStorage.getItem('rq_index_keys');
         const idx = JSON.parse(idxRaw || '[]');
-        idx.forEach(k => { try { localStorage.removeItem(k); cleared++; } catch (_) {} });
+        idx.forEach(k => { try { localStorage.removeItem(k); cleared++; } catch (_) { console.error('[configuracoes-gerais] catch:', _); } });
         localStorage.removeItem('rq_index_keys');
-      } catch (_) {}
+      } catch (_) { console.error('[configuracoes-gerais] catch:', _); }
       // Limpa window.__layoutRbacCache para forçar re-verificação RBAC
-      try { if (window.__layoutRbacCache) window.__layoutRbacCache.clear(); } catch (_) {}
+      try { if (window.__layoutRbacCache) window.__layoutRbacCache.clear(); } catch (_) { console.error('[configuracoes-gerais] catch:', _); }
       // Limpa cache de inflight do functions
-      try { if (window.base44?.functions?.__inflight) window.base44.functions.__inflight.clear(); } catch (_) {}
+      try { if (window.base44?.functions?.__inflight) window.base44.functions.__inflight.clear(); } catch (_) { console.error('[configuracoes-gerais] catch:', _); }
       return { data: 'CLOSED', cleared: Math.max(cleared, cbKeys.length) };
     },
     buildMsg: (d) => `CB → CLOSED · ${d?.cleared || 5} chave(s) limpas · RBAC cache resetado`,
@@ -166,7 +166,7 @@ function AcoesRapidasEtapas() {
       try {
         await exec(acao);
         successCount++;
-      } catch (_) {}
+      } catch (_) { console.error('[configuracoes-gerais] catch:', _); }
     }
     setRunningAll(false);
     if (successCount === ACOES_5_ETAPAS.length) {

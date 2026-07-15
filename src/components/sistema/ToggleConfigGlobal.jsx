@@ -80,7 +80,6 @@ export default function ToggleConfigGlobal({
           checked={checked}
           onCheckedChange={() => onToggle && onToggle(chaveFinal, categoria, !checked)}
           disabled={disabled || isSaving}
-          data-permission="Sistema.Configuracao.editar"
         />
       </div>
     </div>

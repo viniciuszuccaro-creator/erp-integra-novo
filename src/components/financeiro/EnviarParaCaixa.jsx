@@ -70,7 +70,7 @@ export default function EnviarParaCaixa({
             Total: R$ {totalValor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
         </div>
-        <Button data-permission="Financeiro.EnviarParaCaixa.enviar"
+        <Button
           onClick={() => enviarMutation.mutate()}
           disabled={enviarMutation.isPending}
           className={`bg-${tipo === 'receber' ? 'emerald' : 'red'}-600 hover:bg-${tipo === 'receber' ? 'emerald' : 'red'}-700`}

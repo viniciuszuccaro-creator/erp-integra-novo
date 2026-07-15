@@ -44,7 +44,7 @@ export default function CadastrosPageLayout() {
                 <CountBadgeSimplificado entities={[selectedEntity]} />
               </Badge>
             </div>
-            <Button className="gap-2 rounded-sm" data-permission={`Cadastros.${selectedEntity}.criar`} data-action={`Cadastros.${selectedEntity}.criar`} disabled>
+            <Button className="gap-2 rounded-sm" data-action={`Cadastros.${selectedEntity} disabled>
               <Plus className="w-4 h-4" />
               Novo
             </Button>

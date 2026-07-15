@@ -199,7 +199,7 @@ export default function MovimentacaoForm({ movimentacao, onSubmit, windowMode = 
       </Card>
 
       <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
-        <Button type="submit" data-permission="Estoque.Movimentacao.criar" disabled={controlesDesabilitados} className="bg-indigo-600 hover:bg-indigo-700">
+        <Button type="submit" disabled={controlesDesabilitados} className="bg-indigo-600 hover:bg-indigo-700">
           <Save className="w-4 h-4 mr-2" />
           Registrar Movimentação
         </Button>

@@ -62,7 +62,7 @@ export default function FormaPagamentoFormCompleto({ formaPagamento, item, data,
       </Card>
 
       <div className="flex justify-end gap-3 pt-6 border-t mt-6">
-        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 px-8" disabled={!contextoValido || !podeSalvar} data-permission="Cadastros.FormaPagamento.salvar" data-sensitive="true">
+        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 px-8" disabled={!contextoValido || !podeSalvar} data-sensitive="true">
           <CheckCircle2 className="w-4 h-4 mr-2" />{formaPagamentoNorm ? 'Atualizar Forma' : 'Criar Forma'}
         </Button>
       </div>

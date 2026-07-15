@@ -21,14 +21,14 @@ export default function ChatbotInputArea({
       <div className="flex gap-2">
         <input ref={fileInputRef} type="file" className="hidden" onChange={handleAnexarArquivo}
           accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
-        <Button data-permission="Chatbot.ChatbotInputArea.enviar" type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}
+        <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}
           disabled={processando} className="flex-shrink-0">
           <Paperclip className="w-4 h-4" />
         </Button>
         <Input value={mensagemAtual} onChange={(e) => setMensagemAtual(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleEnviar()}
           placeholder="Digite sua mensagem..." disabled={processando} className="flex-1" />
-        <Button data-permission="Chatbot.ChatbotInputArea.enviar" onClick={handleEnviar} disabled={processando || (!mensagemAtual.trim() && !arquivoAnexo)}
+        <Button onClick={handleEnviar} disabled={processando || (!mensagemAtual.trim() && !arquivoAnexo)}
           className="bg-blue-600 hover:bg-blue-700 flex-shrink-0">
           <Send className="w-4 h-4" />
         </Button>

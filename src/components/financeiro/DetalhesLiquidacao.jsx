@@ -213,7 +213,6 @@ export default function DetalhesLiquidacao({ item, onClose }) {
             Cancelar
           </Button>
           <Button
-            data-permission="Financeiro.Liquidacao.liquidar"
             onClick={() => liquidarMutation.mutate()}
             disabled={!dados.forma_pagamento || !dados.data_recebimento_caixa || liquidarMutation.isPending}
             className="bg-green-600 hover:bg-green-700"

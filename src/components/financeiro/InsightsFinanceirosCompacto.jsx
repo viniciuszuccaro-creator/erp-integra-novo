@@ -72,7 +72,7 @@ export default function InsightsFinanceirosCompacto({
             const Icon = insight.icon;
             return (
               <div key={idx} className="flex items-start gap-1.5 p-1.5 bg-white rounded-lg border border-purple-100 min-h-[32px]">
-                <Icon className={`w-3 h-3 ${insight.color} flex-shrink-0 mt-0.5`} />
+                <Icon className={`w-3 h-3 ${insight.color} flex-shrink-0 mt-0 />
                 <p className="text-xs text-slate-700 leading-tight truncate">{insight.text}</p>
               </div>
             );

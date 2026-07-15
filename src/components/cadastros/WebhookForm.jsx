@@ -103,7 +103,7 @@ export default function WebhookForm({ webhook, onSubmit, windowMode = false }) {
         />
       </div>
 
-      <Button type="submit" data-permission="Sistema.Webhook.salvar" className="w-full bg-indigo-600 hover:bg-indigo-700">
+      <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
         {dadosIniciais ? 'Atualizar' : 'Criar Webhook'}
       </Button>
     </form>

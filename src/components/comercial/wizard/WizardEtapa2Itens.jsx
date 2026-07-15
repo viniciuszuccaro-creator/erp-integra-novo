@@ -76,7 +76,6 @@ export default function WizardEtapa2Itens({ dados, onChange }) {
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8 text-red-600"
-                      data-permission="Comercial.Pedido.editar"
                       onClick={() => removerItemRevenda(idx)}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -117,7 +116,6 @@ export default function WizardEtapa2Itens({ dados, onChange }) {
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8 text-red-600"
-                      data-permission="Comercial.Pedido.editar"
                       onClick={() => removerItemProducao(idx)}
                       >
                         <Trash2 className="w-4 h-4" />

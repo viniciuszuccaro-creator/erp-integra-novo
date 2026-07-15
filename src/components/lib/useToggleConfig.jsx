@@ -26,7 +26,7 @@ export function canEditConfigByPermission(hasPermission, chave, categoria) {
   const rule = CONFIG_PERMISSION_RULES.find(item => item.match(chave, categoria));
   try {
     if (hasPermission(getConfigPermissionKey(chave, categoria))) return true;
-  } catch {}
+  } catch (e) { console.error('[lib] catch:', e); }
   return (rule?.permissions || []).some(([modulo, secao, acao]) => {
     try { return hasPermission(modulo, secao, acao); } catch { return false; }
   });
@@ -79,7 +79,7 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
     try {
       const key = `tc_confirmed_${empresaId || 'sem'}_${grupoId || 'sem'}`;
       localStorage.setItem(key, JSON.stringify(confirmedMap));
-    } catch {}
+    } catch (e) { console.error('[lib] catch:', e); }
   }, [confirmedMap, empresaId, grupoId]);
 
   // Reset ao trocar empresa/grupo
@@ -297,7 +297,7 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
           sucesso: true,
           data_hora: new Date().toISOString()
         });
-      } catch {}
+      } catch (e) { console.error('[lib] catch:', e); }
 
       return true;
     } catch (err) {

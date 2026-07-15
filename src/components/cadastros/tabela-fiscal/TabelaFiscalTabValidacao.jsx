@@ -33,8 +33,7 @@ export default function TabelaFiscalTabValidacao({
             </AlertDescription>
           </Alert>
         )}
-        <Button type="button" onClick={onValidarIA} disabled={validandoIA || !podeUsarIA}
-          data-permission="Cadastros.TabelaFiscal.ia" data-sensitive="true"
+        <Button type="button" onClick={onValidarIA} disabled={validandoIA || !podeUsarIA} data-sensitive="true"
           className="w-full" variant="outline">
           <Sparkles className="w-4 h-4 mr-2" />
           {validandoIA ? "Validando com IA..." : "Validar com IA Fiscal"}

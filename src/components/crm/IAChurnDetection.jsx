@@ -97,7 +97,7 @@ export default function IAChurnDetection({ clientes = [] }) {
 
     } catch (error) {
       toast.error('Erro na análise de churn');
-      console.error(error);
+      console.error('[components/crm/IAChurnDetection.jsx] Error:', error);
     } finally {
       setExecutando(false);
     }

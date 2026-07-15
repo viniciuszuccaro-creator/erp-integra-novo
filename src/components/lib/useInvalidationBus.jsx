@@ -184,7 +184,7 @@ export function useInvalidationBus(entities = [], options = {}) {
           keys.forEach((qk) => {
             try {
               queryClient.invalidateQueries({ queryKey: qk, exact: false });
-            } catch (_) {}
+            } catch (_) { console.error('[lib] catch:', _); }
           });
         }, 0);
       });

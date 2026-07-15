@@ -26,7 +26,7 @@ export default function CanalTabSLA({ config, onSave, isSaving }) {
           <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"><span className="text-sm">Escalar automaticamente</span><Switch checked={slaConfig.escalar_automaticamente} onCheckedChange={(c) => setSlaConfig({ ...slaConfig, escalar_automaticamente: c })} /></div>
         </div>
         <div className="flex justify-end pt-4">
-          <Button data-permission="Chatbot.ConfiguracaoCanal.salvar" onClick={handleSave} disabled={isSaving} className="bg-red-600">
+          <Button onClick={handleSave} disabled={isSaving} className="bg-red-600">
             {isSaving ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}Salvar SLA
           </Button>
         </div>

@@ -81,7 +81,7 @@ export default function IA360IntelligentDashboard() {
                   fill="none"
                   stroke="#4f46e5"
                   strokeWidth="8"
-                  strokeDasharray={`${healthScore * 2.827} 282.7`}
+                  strokeDasharray={`${healthScore * 2.827} 282
                   strokeLinecap="round"
                   transform="rotate(-90 50 50)"
                 />
@@ -102,7 +102,7 @@ export default function IA360IntelligentDashboard() {
                 <p className="text-sm text-slate-600 mb-1">Problemas Previstos</p>
                 <p className="text-2xl font-bold text-red-600">{predictedIssues.length}</p>
               </div>
-              <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" disabled data-permission="Sistema.IA.otimizar" data-action="Sistema.IA.otimizar" data-sensitive="true">
+              <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" disabled data-action="Sistema.IA.otimizar" data-sensitive="true">
                 <Zap className="w-4 h-4 mr-2" />
                 Auto-Otimizar Tudo
               </Button>

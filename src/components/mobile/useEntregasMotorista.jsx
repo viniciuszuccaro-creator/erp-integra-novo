@@ -52,7 +52,7 @@ export default function useEntregasMotorista() {
     let drawing = false; let lastX = 0; let lastY = 0;
     const start = (x, y) => { drawing = true; lastX = x; lastY = y; };
     const move = (x, y) => { if (!drawing) return; ctx.strokeStyle = "#111"; ctx.lineWidth = 2; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke(); lastX = x; lastY = y; };
-    const end = () => { drawing = false; try { setAssinaturaBase64(canvas.toDataURL("image/png")); } catch {} };
+    const end = () => { drawing = false; try { setAssinaturaBase64(canvas.toDataURL("image/png")); } catch (e) { console.error('[mobile] catch:', e); } };
     const getPos = (e) => { if (e.touches?.[0]) { const rect = canvas.getBoundingClientRect(); return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top }; } const rect = canvas.getBoundingClientRect(); return { x: e.offsetX ?? 0, y: e.offsetY ?? 0 }; };
     const mdown = (e) => { const p = getPos(e); start(p.x, p.y); };
     const mmove = (e) => { const p = getPos(e); move(p.x, p.y); e.preventDefault(); };
@@ -92,7 +92,7 @@ export default function useEntregasMotorista() {
       status: "Em Trânsito",
       historico_status: [...(entrega.historico_status || []), { status: "Em Trânsito", data_hora: new Date().toISOString(), usuario: user.full_name, localizacao }],
     });
-    try { await base44.entities.AuditLog.create({ usuario: user?.full_name || user?.email || "Motorista", usuario_id: user?.id, empresa_id: entrega.empresa_id || null, group_id: entrega.group_id || null, acao: "Edição", modulo: "Expedição", tipo_auditoria: "ui", entidade: "Entrega", registro_id: entrega.id, descricao: "Entrega iniciada no app do motorista", data_hora: new Date().toISOString() }); } catch {}
+    try { await base44.entities.AuditLog.create({ usuario: user?.full_name || user?.email || "Motorista", usuario_id: user?.id, empresa_id: entrega.empresa_id || null, group_id: entrega.group_id || null, acao: "Edição", modulo: "Expedição", tipo_auditoria: "ui", entidade: "Entrega", registro_id: entrega.id, descricao: "Entrega iniciada no app do motorista", data_hora: new Date().toISOString() }); } catch (e) { console.error('[mobile] catch:', e); }
     refetch();
     toast.success("🚚 Entrega iniciada!");
   };
@@ -113,7 +113,7 @@ export default function useEntregasMotorista() {
     if (!nomeRecebedor) { toast.error("Informe o nome de quem recebeu"); return; }
     if (!fotoComprovante) { toast.error("Tire uma foto do comprovante"); return; }
     let assinatura = assinaturaBase64;
-    try { const canvas = document.getElementById("assinatura-canvas"); if (canvas) assinatura = canvas.toDataURL("image/png"); } catch {}
+    try { const canvas = document.getElementById("assinatura-canvas"); if (canvas) assinatura = canvas.toDataURL("image/png"); } catch (e) { console.error('[mobile] catch:', e); }
 
     await base44.entities.Entrega.update(entregaAtual.id, {
       status: "Entregue", data_entrega: new Date().toISOString(),
@@ -122,7 +122,7 @@ export default function useEntregasMotorista() {
     });
 
     setEntregaAtual(null); setFotoComprovante(null); setAssinaturaBase64(null); setNomeRecebedor(""); setDocumentoRecebedor("");
-    try { await base44.entities.AuditLog.create({ usuario: user?.full_name || user?.email || "Motorista", usuario_id: user?.id, empresa_id: entregaAtual?.empresa_id || null, group_id: entregaAtual?.group_id || null, acao: "Edição", modulo: "Expedição", tipo_auditoria: "ui", entidade: "Entrega", registro_id: entregaAtual?.id, descricao: "Entrega confirmada (foto + assinatura) no app do motorista", data_hora: new Date().toISOString() }); } catch {}
+    try { await base44.entities.AuditLog.create({ usuario: user?.full_name || user?.email || "Motorista", usuario_id: user?.id, empresa_id: entregaAtual?.empresa_id || null, group_id: entregaAtual?.group_id || null, acao: "Edição", modulo: "Expedição", tipo_auditoria: "ui", entidade: "Entrega", registro_id: entregaAtual?.id, descricao: "Entrega confirmada (foto + assinatura) no app do motorista", data_hora: new Date().toISOString() }); } catch (e) { console.error('[mobile] catch:', e); }
     refetch();
     toast.success("✅ Entrega confirmada com sucesso!");
   };

@@ -64,7 +64,7 @@ export default function DadosGeraisTab({
                       <Badge className="mt-2 bg-purple-600 text-white">Confiança: {iaSugestao.confianca}%</Badge>
                     )}
                   </div>
-                  <Button size="sm" data-permission="Cadastros.Produto.editar" onClick={aplicarSugestaoIA} className="bg-purple-600">
+                  <Button size="sm" onClick={aplicarSugestaoIA} className="bg-purple-600">
                     Aplicar Tudo
                   </Button>
                 </div>
@@ -204,7 +204,6 @@ export default function DadosGeraisTab({
                 {!modoManual && (
                   <Button
                     type="button" size="sm"
-                    data-permission="Cadastros.Produto.editar"
                     onClick={gerarImagemIA}
                     disabled={uploadingFoto}
                     className="bg-purple-600 hover:bg-purple-700"

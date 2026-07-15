@@ -61,7 +61,7 @@ export default function RHIAPanel({ colaboradores = [], pontos = [], ferias = []
           <CardTitle className="text-sm flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-purple-600" /> IA Recursos Humanos
           </CardTitle>
-          <Button data-permission="RH.RHIA.gerar" size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={analisarComIA} disabled={loading}>
+          <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={analisarComIA} disabled={loading}>
             {loading ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
             {loading ? "Analisando..." : "Gerar Insights"}
           </Button>

@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
             group_id:   p?.group_id   || group_id   || null,
             data_hora:  new Date().toISOString(),
           });
-        } catch (_) {}
+        } catch (_) { console.error('[orderFlowAuditor] catch:', _); }
       }
     }
 

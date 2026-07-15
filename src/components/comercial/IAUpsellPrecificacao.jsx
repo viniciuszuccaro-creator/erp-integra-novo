@@ -146,7 +146,6 @@ export default function IAUpsellPrecificacao({ clienteId, pedidoAtual }) {
                         className="mt-3"
                         variant="outline"
                         disabled
-                        data-permission="Comercial.Pedido.upsell"
                         data-action="Comercial.Pedido.upsell"
                       >
                         {sug.acao}

@@ -73,7 +73,7 @@ export default function useRecebimentoTab(recebimentos, ordensCompra, produtos) 
           data_hora: new Date().toISOString(),
           sucesso: true,
         });
-      } catch (_) {}
+      } catch (_) { console.error('[recebimento-tab] catch:', _); }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["movimentacoes"] });

@@ -21,7 +21,7 @@ export default function PedidosAprovacaoStats({
               </p>
               <p className="text-xs text-orange-700 mt-1">Pedidos com descontos ou outras pendências financeiras aguardam sua análise.</p>
             </div>
-            <Button data-permission="Comercial.Pedido.aprovar" onClick={onGerenciarAprovacoes} className="bg-orange-600 hover:bg-orange-600/90">
+            <Button onClick={onGerenciarAprovacoes} className="bg-orange-600 hover:bg-orange-600/90">
               <ShieldCheck className="w-4 h-4 mr-2" />Gerenciar Aprovações
             </Button>
           </AlertDescription>
@@ -33,9 +33,9 @@ export default function PedidosAprovacaoStats({
           <CardContent className="p-4 flex items-center justify-between">
             <div className="text-sm text-slate-700">Há <span className="font-semibold">{pendentes.length}</span> pedido(s) aguardando aprovação.</div>
             <div className="flex items-center gap-2">
-              <Button data-permission="Comercial.Pedido.aprovar" onClick={onGerenciarAprovacoes} className="bg-orange-600 hover:bg-orange-600/90">Central de Aprovações</Button>
-              <Button variant="outline" data-permission="Comercial.Pedido.notificar" onClick={onNotifyWhatsApp}>Notificar WhatsApp</Button>
-              <Button variant="outline" data-permission="Comercial.Pedido.notificar" onClick={onNotifyEmail}>Notificar Email</Button>
+              <Button onClick={onGerenciarAprovacoes} className="bg-orange-600 hover:bg-orange-600/90">Central de Aprovações</Button>
+              <Button variant="outline" onClick={onNotifyWhatsApp}>Notificar WhatsApp</Button>
+              <Button variant="outline" onClick={onNotifyEmail}>Notificar Email</Button>
             </div>
           </CardContent>
         </Card>

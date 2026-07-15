@@ -63,7 +63,7 @@ export default function useConfigBackup({ empresaId, grupoId }) {
           descricao: 'Configuracao de backup atualizada', dados_novos: stamped, sucesso: true,
           data_hora: new Date().toISOString()
         });
-      } catch {}
+      } catch (e) { console.error('[backup] catch:', e); }
       return result;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['config-backup', scopeId] }); toast.success('✅ Configuração salva com sucesso!'); },
@@ -90,7 +90,7 @@ export default function useConfigBackup({ empresaId, grupoId }) {
           descricao: `Backup manual iniciado (${numeroBackup})`, dados_novos: backup, sucesso: true,
           data_hora: new Date().toISOString()
         });
-      } catch {}
+      } catch (e) { console.error('[backup] catch:', e); }
       setTimeout(async () => {
         await base44.entities.BackupAutomatico.update(backup.id, {
           status: 'Concluído', data_hora_fim: new Date().toISOString(), duracao_segundos: 3,
@@ -108,7 +108,7 @@ export default function useConfigBackup({ empresaId, grupoId }) {
             descricao: `Backup manual concluido (${numeroBackup})`, dados_novos: { status: 'Concluido', numero_backup: numeroBackup },
             sucesso: true, data_hora: new Date().toISOString()
           });
-        } catch {}
+        } catch (e) { console.error('[backup] catch:', e); }
         queryClient.invalidateQueries({ queryKey: ['backups', scopeId] });
         toast.success('✅ Backup concluído com sucesso!');
       }, 3000);

@@ -44,15 +44,15 @@ export default function RepresentanteFormCompleto({ representante: representante
           <div className="flex items-center gap-2">
             {representante?.id && (
               <>
-                <Button variant="outline" onClick={handleAlternarStatus} disabled={!podeEditar || !contextoValido} data-permission="Cadastros.Representante.alterarStatus" data-sensitive className={formData.status === 'Ativo' ? 'border-orange-300' : 'border-green-300'}>
+                <Button variant="outline" onClick={handleAlternarStatus} disabled={!podeEditar || !contextoValido} data-sensitive className={formData.status === 'Ativo' ? 'border-orange-300' : 'border-green-300'}>
                   {formData.status === 'Ativo' ? <><PowerOff className="w-4 h-4 mr-2" />Inativar</> : <><Power className="w-4 h-4 mr-2" />Ativar</>}
                 </Button>
-                <Button variant="destructive" onClick={handleExcluir} disabled={deleteMutation.isPending || !podeExcluir || !contextoValido} data-permission="Cadastros.Representante.excluir" data-sensitive>
+                <Button variant="destructive" onClick={handleExcluir} disabled={deleteMutation.isPending || !podeExcluir || !contextoValido} data-sensitive>
                   <Trash2 className="w-4 h-4 mr-2" />{deleteMutation.isPending ? 'Excluindo...' : 'Excluir'}
                 </Button>
               </>
             )}
-            <Button onClick={handleSave} disabled={saveMutation.isPending || !contextoValido || (representante?.id ? !podeEditar : !podeCriar)} data-permission="Cadastros.Representante.salvar" data-sensitive className="bg-purple-600 hover:bg-purple-700">
+            <Button onClick={handleSave} disabled={saveMutation.isPending || !contextoValido || (representante?.id ? !podeEditar : !podeCriar)} data-sensitive className="bg-purple-600 hover:bg-purple-700">
               <Save className="w-4 h-4 mr-2" />{saveMutation.isPending ? 'Salvando...' : 'Salvar'}
             </Button>
           </div>

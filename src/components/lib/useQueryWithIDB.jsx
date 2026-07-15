@@ -54,7 +54,7 @@ export function useQueryWithIDB(idbKey, queryOptions, options = {}) {
       if (val !== undefined) {
         idbDataRef.current = val;
         // Atualiza também o LS bridge para velocidade
-        try { localStorage.setItem(lsKey, JSON.stringify(val)); } catch {}
+        try { localStorage.setItem(lsKey, JSON.stringify(val)); } catch (e) { console.error('[lib] catch:', e); }
       }
     }).catch(() => {});
   }, [idbKey]);
@@ -64,7 +64,7 @@ export function useQueryWithIDB(idbKey, queryOptions, options = {}) {
     if (result.data === undefined || result.data === null) return;
     if (!result.isSuccess) return;
     idbSet(idbKey, result.data, ttlMs).catch(() => {});
-    try { localStorage.setItem(lsKey, JSON.stringify(result.data)); } catch {}
+    try { localStorage.setItem(lsKey, JSON.stringify(result.data)); } catch (e) { console.error('[lib] catch:', e); }
   }, [result.data, result.isSuccess, idbKey, ttlMs]);
 
   return result;

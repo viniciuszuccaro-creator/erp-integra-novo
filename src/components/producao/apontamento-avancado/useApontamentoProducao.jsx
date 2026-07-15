@@ -104,7 +104,7 @@ export default function useApontamentoProducao(opId, opNumero, onClose) {
             sucesso: true,
           });
         }
-      } catch (_) {}
+      } catch (_) { console.error('[apontamento-avancado] catch:', _); }
       queryClient.invalidateQueries(["apontamentos-producao"]);
       queryClient.invalidateQueries(["ordem-producao"]);
       onClose?.();

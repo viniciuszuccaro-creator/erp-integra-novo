@@ -55,7 +55,7 @@ export default function ConfiguracaoMonitoramento({ empresaId, grupoId }) {
 
       <div className="flex justify-end gap-3">
         <Button onClick={handleSalvar} disabled={salvando || salvarMutation.isPending || !contextoValido || !podeEditar}
-          className="bg-blue-600 hover:bg-blue-700" data-action="Monitoramento.Configuracao.salvar" data-permission="Sistema.Monitoramento.editar" data-sensitive="true">
+          className="bg-blue-600 hover:bg-blue-700" data-action="Monitoramento.Configuracao.salvar" data-sensitive="true">
           {salvando || salvarMutation.isPending ? (<><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />Salvando...</>) : (<><Save className="w-4 h-4 mr-2" />Salvar Configuração</>)}
         </Button>
       </div>

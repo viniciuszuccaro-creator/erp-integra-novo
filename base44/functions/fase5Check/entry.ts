@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
 
     // ── 7. PedidoExterno (sync de pedidos externos) ───────────────
     let pedidosExt = [];
-    try { pedidosExt = await api.entities.PedidoExterno.filter({}, '-updated_date', 20); } catch (_) {}
+    try { pedidosExt = await api.entities.PedidoExterno.filter({}, '-updated_date', 20); } catch (_) { console.error('[fase5Check] catch:', _); }
     results.pedido_externo_sync = {
       ok: true,
       detail: `PedidoExterno entity disponível · ${pedidosExt.length} pedido(s) externo(s) · ValidarPedidosExternos+applyOrderStockMovements com multiempresa group_id+empresa_id`,
@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
 
     // ── 8. Catálogo web + e-commerce ─────────────────────────────
     let catalogos = [];
-    try { catalogos = await api.entities.CatalogoWeb.filter({}, undefined, 10); } catch (_) {}
+    try { catalogos = await api.entities.CatalogoWeb.filter({}, undefined, 10); } catch (_) { console.error('[fase5Check] catch:', _); }
     const produtosEcommerce = produtos.filter(p => p.exibir_no_site === true);
     results.catalogo_ecommerce = {
       ok: true,

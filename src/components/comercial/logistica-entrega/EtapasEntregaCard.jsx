@@ -23,7 +23,6 @@ export default function EtapasEntregaCard({
           </CardTitle>
           <Button
             onClick={onCriarEtapa}
-            data-permission="Comercial.Pedido.editar"
             size="sm"
             className="bg-blue-600 hover:bg-blue-700"
           >
@@ -102,7 +101,6 @@ export default function EtapasEntregaCard({
                 <div className="flex justify-end gap-2">
                   <Button
                     onClick={() => onRemoverEtapa(etapa.id)}
-                    data-permission="Comercial.Pedido.editar"
                     size="sm"
                     variant="outline"
                     className="text-red-600 border-red-300"

@@ -23,7 +23,6 @@ export default function AssinaturaCanvas({
           type="button"
           variant="ghost"
           size="sm"
-          data-permission="Comercial.Assinatura.assinar"
           onClick={onLimpar}
           disabled={assinaturaVazia}
         >

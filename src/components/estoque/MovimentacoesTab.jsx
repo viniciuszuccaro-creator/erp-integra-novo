@@ -127,7 +127,7 @@ export default function MovimentacoesTab({ movimentacoes, produtos }) {
             data_hora: new Date().toISOString(), sucesso: true
           });
         }
-      } catch (_) {}
+      } catch (_) { console.error('[estoque] catch:', _); }
     },
   });
 

@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
         try {
           records = await api.entities[entityName].filter({ group_id, e_replicado: false }, null, 200);
         } catch (_) {
-          try { records = await api.entities[entityName].filter({ group_id }, null, 200); } catch (_2) {}
+          try { records = await api.entities[entityName].filter({ group_id }, null, 200); } catch (_2) { console.error('[propagateAllEntities] catch:', _2); }
         }
 
         if (!records || records.length === 0) {
@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
         try {
           empresas = await api.entities.Empresa.filter({ group_id }, null, 100);
           if (targetEmpresaId) empresas = empresas.filter(e => e.id === targetEmpresaId);
-        } catch (_) {}
+        } catch (_) { console.error('[propagateAllEntities] catch:', _); }
 
         if (!empresas.length) {
           summary.push({ entity: entityName, skipped: true, reason: 'no_empresas' });
@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
               let existing = [];
               try {
                 existing = await api.entities[entityName].filter({ documento_grupo_id: recId, empresa_id: emp.id }, null, 1);
-              } catch (_) {}
+              } catch (_) { console.error('[propagateAllEntities] catch:', _); }
 
               if (existing.length > 0) {
                 await api.entities[entityName].update(existing[0].id, newData);
@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
         group_id,
         data_hora: new Date().toISOString(),
       });
-    } catch (_) {}
+    } catch (_) { console.error('[propagateAllEntities] catch:', _); }
 
     return Response.json({
       ok: true,

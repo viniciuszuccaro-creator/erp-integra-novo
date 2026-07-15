@@ -309,7 +309,6 @@ function ColaboradorForm({ colaborador: colaboradorProp, item, data, onSubmit, o
               <Button
                 type="button"
                 variant="outline"
-                data-permission="RH.Colaborador.alterarStatus"
                 data-sensitive
                 onClick={handleAlternarStatus}
                 className={formData.status === 'Ativo' ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}
@@ -329,7 +328,6 @@ function ColaboradorForm({ colaborador: colaboradorProp, item, data, onSubmit, o
               <Button
                                 type="button"
                                 variant="destructive"
-                                data-permission="RH.Colaborador.excluir"
                                 data-sensitive
                                 onClick={handleExcluir}
                               >
@@ -338,7 +336,7 @@ function ColaboradorForm({ colaborador: colaboradorProp, item, data, onSubmit, o
               </Button>
             </>
           )}
-          <Button type="submit" data-permission="RH.Colaborador.salvar" data-sensitive className="bg-pink-600 hover:bg-pink-700">
+          <Button type="submit" data-sensitive className="bg-pink-600 hover:bg-pink-700">
             <Save className="w-4 h-4 mr-2" />
             {colaborador ? 'Atualizar' : 'Criar'} Colaborador
           </Button>

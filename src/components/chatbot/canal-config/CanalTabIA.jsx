@@ -29,7 +29,7 @@ export default function CanalTabIA({ config, onSave, isSaving }) {
           <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"><span className="text-sm">Detectar idioma</span><Switch checked={iaConfig.detectar_idioma} onCheckedChange={(c) => setIaConfig({ ...iaConfig, detectar_idioma: c })} /></div>
         </div>
         <div className="flex justify-end pt-4">
-          <Button data-permission="Chatbot.ConfiguracaoCanal.salvar" onClick={handleSave} disabled={isSaving} className="bg-purple-600">
+          <Button onClick={handleSave} disabled={isSaving} className="bg-purple-600">
             {isSaving ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}Salvar IA
           </Button>
         </div>

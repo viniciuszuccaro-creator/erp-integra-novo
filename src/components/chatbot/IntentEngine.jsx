@@ -59,7 +59,7 @@ const IntentEngine = {
           }
         }
       }
-    } catch (_) {}
+    } catch (_) { console.error('[chatbot] catch:', _); }
 
     // 3. Fallback via IA se confiança baixa
     if (confianca < 50) {
@@ -70,7 +70,7 @@ const IntentEngine = {
           confianca = Math.round(byIA.confianca);
           melhorMatch = { prioridade: 3, requer_humano: !!byIA.necessita_atendente };
         }
-      } catch (_) {}
+      } catch (_) { console.error('[chatbot] catch:', _); }
     }
 
     const sentimento = analisarSentimento(mensagemLower);

@@ -70,13 +70,11 @@ export default function RetiradaConfirmDialog({
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button
                 variant="outline"
-                data-permission="Comercial.Pedido.visualizar"
                 onClick={() => { setDetalhesOpen(false); }}
               >
                 Cancelar
               </Button>
               <Button
-                data-permission="Comercial.Pedido.baixar"
                 className="bg-green-600 hover:bg-green-700"
                 onClick={handleConfirmarRetirada}
                 disabled={confirmarRetiradaMutation.isPending}

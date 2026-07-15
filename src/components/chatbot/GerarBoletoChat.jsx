@@ -237,7 +237,6 @@ export default function GerarBoletoChat({ conversa, clienteId, onBoletoEnviado }
                         size="sm"
                         variant="outline"
                         onClick={copiarLinhaDigitavel}
-                        data-permission="Financeiro.ContaReceber.visualizar"
                       >
                         {copiado ? (
                           <Check className="w-4 h-4 text-green-600" />
@@ -255,7 +254,6 @@ export default function GerarBoletoChat({ conversa, clienteId, onBoletoEnviado }
                     onClick={() => enviarBoletoMutation.mutate(tituloSelecionado)}
                     disabled={enviarBoletoMutation.isPending}
                     className="bg-green-600 hover:bg-green-700"
-                    data-permission="Financeiro.ContaReceber.gerar_boleto"
                   >
                     {enviarBoletoMutation.isPending ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
@@ -271,7 +269,6 @@ export default function GerarBoletoChat({ conversa, clienteId, onBoletoEnviado }
                     <Button
                       variant="outline"
                       onClick={() => window.open(tituloSelecionado.url_boleto_pdf, '_blank')}
-                      data-permission="Financeiro.ContaReceber.visualizar"
                     >
                       <ExternalLink className="w-4 h-4 mr-2" />
                       Ver PDF

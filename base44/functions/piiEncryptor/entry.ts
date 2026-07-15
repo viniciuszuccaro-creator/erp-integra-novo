@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
     if (!entity || !id) return Response.json({ error: 'Missing entity_name/id' }, { status: 400 });
 
     // RBAC soft-guard via existing guard (best-effort)
-    try { await base44.functions.invoke('entityGuard', { module: 'Sistema', section: 'Seguranca', action: 'executar', function_name: 'piiEncryptor' }); } catch {}
+    try { await base44.functions.invoke('entityGuard', { module: 'Sistema', section: 'Seguranca', action: 'executar', function_name: 'piiEncryptor' }); } catch (e) { console.error('[piiEncryptor] catch:', e); }
 
     const key = await getKey();
     const rec = await base44.asServiceRole.entities[entity].get(id);
@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
       usuario: user.full_name || user.email || 'Usuário', usuario_id: user.id,
       acao: 'Edição', modulo: 'Sistema', tipo_auditoria: 'seguranca', entidade: entity, registro_id: id,
       descricao: `PII ${action} aplicada em ${entity}`, dados_novos: Object.keys(updated), data_hora: new Date().toISOString()
-    }); } catch {}
+    }); } catch (e) { console.error('[piiEncryptor] catch:', e); }
 
     return Response.json({ ok: true, updated: Object.keys(updated), data: res });
   } catch (error) {

@@ -117,7 +117,7 @@ export default function RateioMultiempresa({ empresas, grupoId, windowMode = fal
           <div className="border-t pt-4">
             <div className="flex justify-between items-center mb-4">
               <Label className="text-base font-semibold">Distribuição por Empresa</Label>
-              <Button type="button" variant="outline" size="sm" data-permission="Financeiro.Rateio.distribuirIgual" onClick={distribuirIgual}>
+              <Button type="button" variant="outline" size="sm" onClick={distribuirIgual}>
                 <Shuffle className="w-4 h-4 mr-2" />Distribuir Igual
               </Button>
             </div>
@@ -144,8 +144,8 @@ export default function RateioMultiempresa({ empresas, grupoId, windowMode = fal
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button type="button" variant="outline" data-permission="Financeiro.Rateio.limpar" onClick={() => setFormRateio(initialForm(empresas))}>Limpar</Button>
-            <Button type="submit" data-permission="Financeiro.Rateio.criar" disabled={criarRateioMutation.isPending} className="bg-purple-600 hover:bg-purple-700">
+            <Button type="button" variant="outline" onClick={() => setFormRateio(initialForm(empresas))}>Limpar</Button>
+            <Button type="submit" disabled={criarRateioMutation.isPending} className="bg-purple-600 hover:bg-purple-700">
               {criarRateioMutation.isPending ? (
                 <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />Criando...</>
               ) : (

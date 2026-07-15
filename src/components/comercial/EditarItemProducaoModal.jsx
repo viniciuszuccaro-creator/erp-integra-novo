@@ -244,7 +244,6 @@ export default function EditarItemProducaoModal({ open, onClose, item, onSave, w
               type="button"
               size="sm"
               variant="outline"
-              data-permission="Producao.ItemProducao.editar"
               onClick={calcularPesos}
               className="mt-2"
             >
@@ -305,7 +304,6 @@ export default function EditarItemProducaoModal({ open, onClose, item, onSave, w
               type="button"
               size="sm"
               variant="outline"
-              data-permission="Producao.ItemProducao.editar"
               onClick={calcularCustos}
               className="mt-2"
             >
@@ -367,10 +365,10 @@ export default function EditarItemProducaoModal({ open, onClose, item, onSave, w
 
           {/* Botões */}
           <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button type="button" variant="outline" data-permission="Producao.ItemProducao.visualizar" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
-            <Button data-permission="Producao.ItemProducao.editar" onClick={handleSave} className="bg-green-600 hover:bg-green-700">
+            <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
               <Save className="w-4 h-4 mr-2" />
               Salvar Item
             </Button>

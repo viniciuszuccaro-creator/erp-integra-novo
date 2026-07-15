@@ -14,7 +14,7 @@ export default function ProdutoFormHeader({ produto, onImportarNFe, onImportarLo
 
       {!produto && (
         <div className="flex gap-2">
-          <Button data-permission="Cadastros.ProdutoHeader.importar"
+          <Button
             variant="outline"
             onClick={onImportarNFe}
             className="border-purple-300"
@@ -22,7 +22,7 @@ export default function ProdutoFormHeader({ produto, onImportarNFe, onImportarLo
             <FileText className="w-4 h-4 mr-2" />
             Via NF-e
           </Button>
-          <Button data-permission="Cadastros.ProdutoHeader.importar"
+          <Button
             variant="outline"
             onClick={onImportarLote}
             className="border-green-300"

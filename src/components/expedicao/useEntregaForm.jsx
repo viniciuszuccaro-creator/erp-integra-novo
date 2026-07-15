@@ -55,7 +55,7 @@ export default function useEntregaForm({ formData, setFormData, onCancel, isEdit
           acao: 'Criação', modulo: 'Expedição', entidade: 'Entrega', registro_id: entregaCriada?.id,
           descricao: 'Entrega criada via formulário', dados_novos: entregaCriada, data_hora: new Date().toISOString(), sucesso: true
         });
-      } catch (_) {}
+      } catch (_) { console.error('[expedicao] catch:', _); }
       onCancel();
     },
     onError: (error) => { toastHook({ title: "❌ Erro ao criar entrega", description: error.message, variant: "destructive" }); }
@@ -74,7 +74,7 @@ export default function useEntregaForm({ formData, setFormData, onCancel, isEdit
           acao: 'Edição', modulo: 'Expedição', entidade: 'Entrega', registro_id: entregaAtualizada?.id,
           descricao: 'Entrega atualizada via formulário', dados_novos: entregaAtualizada, data_hora: new Date().toISOString(), sucesso: true
         });
-      } catch (_) {}
+      } catch (_) { console.error('[expedicao] catch:', _); }
       onCancel();
     },
     onError: (error) => { toastHook({ title: "❌ Erro ao atualizar entrega", description: error.message, variant: "destructive" }); }

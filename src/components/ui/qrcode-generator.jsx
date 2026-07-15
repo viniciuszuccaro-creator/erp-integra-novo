@@ -50,7 +50,7 @@ export default function QRCodeGenerator({
               <p className="text-xs font-medium text-slate-700 mb-2">{label}</p>
             )}
             {showDownload && (
-              <Button data-permission="Sistema.qrcode-generator.baixar" 
+              <Button 
                 size="sm" 
                 variant="outline" 
                 onClick={downloadQR}

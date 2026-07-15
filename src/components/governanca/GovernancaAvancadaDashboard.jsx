@@ -90,7 +90,7 @@ export default function GovernancaAvancadaDashboard() {
                 cx="50" cy="50" r="45" fill="none"
                 stroke={score >= 90 ? '#16a34a' : score >= 70 ? '#f59e0b' : '#dc2626'}
                 strokeWidth="8"
-                strokeDasharray={`${score * 2.827} 282.7`}
+                strokeDasharray={`${score * 2.827} 282
                 strokeLinecap="round"
                 transform="rotate(-90 50 50)"
               />

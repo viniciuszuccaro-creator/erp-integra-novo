@@ -74,7 +74,7 @@ export default function UsuariosTab() {
           descricao: `Convite enviado para usuário ${email}`,
           dadosNovos: { email, role: "user", contexto, empresa_id: empresaAtual?.id || null, group_id: grupoAtivoId || null }
         }));
-      } catch {}
+      } catch (e) { console.error('[gestao-acessos] catch:', e); }
       toast.success(`Convite enviado para ${email}`);
       qc.invalidateQueries({ queryKey: ["usuarios-gestao", scopeKey] });
     } catch (e) {

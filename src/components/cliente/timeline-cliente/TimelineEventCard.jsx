@@ -111,8 +111,7 @@ export default function TimelineEventCard({ evento, isLast }) {
 
                 {evento.anexo_url && (
                   <div className="mt-3">
-                    <Button variant="outline" size="sm" onClick={() => window.open(evento.anexo_url, '_blank')}
-                      data-permission="Comercial.ClienteHistorico.visualizar">
+                    <Button variant="outline" size="sm" onClick={() => window.open(evento.anexo_url, '_blank')}>
                       <Download className="w-3 h-3 mr-2" />Baixar {evento.anexo_tipo || 'Anexo'}
                     </Button>
                   </div>

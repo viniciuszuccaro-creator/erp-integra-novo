@@ -151,7 +151,6 @@ export default function EnviarProducaoParaItensButton({
             <Button
               onClick={() => setDialogAberto(true)}
               className="bg-blue-600 hover:bg-blue-700"
-              data-permission="Comercial.ItemProducao.enviar"
             >
               <ArrowRight className="w-4 h-4 mr-2" />
               Enviar para Itens
@@ -294,14 +293,14 @@ export default function EnviarProducaoParaItensButton({
             )}
 
             <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button data-permission="Producao.Item.enviar"
+              <Button
                 type="button"
                 variant="outline"
                 onClick={() => setDialogAberto(false)}
               >
                 Cancelar
               </Button>
-              <Button data-permission="Comercial.EnviarProducaoParaItens.enviar"
+              <Button
                 type="button"
                 onClick={handleEnviarSelecionados}
                 disabled={itensSelecionados.length === 0 || precoPorKgCustom <= 0}

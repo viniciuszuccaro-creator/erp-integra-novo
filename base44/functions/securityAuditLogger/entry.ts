@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
             new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 4000))
           ]);
           recordData = Array.isArray(rows) ? (rows[0] || recordData) : recordData;
-        } catch (_) {}
+        } catch (_) { console.error('[securityAuditLogger] catch:', _); }
       }
 
       const moduleMap = {

@@ -50,7 +50,6 @@ export default function EcommerceTab({ formData, setFormData, modoManual, gerarD
               <h3 className="font-bold text-green-900">📝 Descrição SEO</h3>
               <Button
                 type="button" size="sm"
-                data-permission="Cadastros.Produto.editar"
                 onClick={gerarDescricaoSEO}
                 disabled={gerandoDescricaoSEO || modoManual}
                 className="bg-green-600 hover:bg-green-700"

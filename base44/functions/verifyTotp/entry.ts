@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
         acao: ok ? 'Visualização' : 'Bloqueio', modulo: moduleName, tipo_auditoria: 'seguranca', entidade: '2FA.Verify',
         descricao: ok ? '2FA verificado' : '2FA inválido', dados_novos: { empresa_id: empresaId || null, group_id: groupId || null, section }, data_hora: new Date().toISOString()
       });
-    } catch {}
+    } catch (e) { console.error('[verifyTotp] catch:', e); }
 
     if (!ok) return Response.json({ ok: false }, { status: 403 });
     return Response.json({ ok: true });

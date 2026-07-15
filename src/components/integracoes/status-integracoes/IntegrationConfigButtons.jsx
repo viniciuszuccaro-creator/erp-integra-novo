@@ -66,8 +66,7 @@ export default function IntegrationConfigButtons({ integracao, empresaId, groupI
         onClick={integracao.onVerificar}
         disabled={integracao.verificando}
         className="flex-1"
-        data-action={`IntegracoesStatus.${integracao.id}.verificar`}
-        data-permission={`Integracoes.${integracao.id}.verificar`}
+        data-action={`IntegracoesStatus.${integracao.id}
       >
         {integracao.verificando ? 'Verificando...' : 'Verificar'}
       </Button>
@@ -75,8 +74,7 @@ export default function IntegrationConfigButtons({ integracao, empresaId, groupI
         size="sm"
         onClick={handleConfigurar}
         className="flex-1"
-        data-action={`IntegracoesStatus.${integracao.id}.configurar`}
-        data-permission={`Integracoes.${integracao.id}.configurar`}
+        data-action={`IntegracoesStatus.${integracao.id}
       >
         <Settings className="w-4 h-4 mr-1" />
         Configurar

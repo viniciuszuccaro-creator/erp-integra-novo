@@ -36,15 +36,15 @@ export default function CadastroFornecedorCompleto({ fornecedor: fornecedorProp,
           <div className="flex items-center gap-2">
             {fornecedor?.id && (
               <>
-                <Button type="button" variant="outline" data-permission="Cadastros.Fornecedor.alterarStatus" data-sensitive onClick={handleAlternarStatus} disabled={!contextoValido} className={formData.status === 'Ativo' ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}>
+                <Button type="button" variant="outline" data-sensitive onClick={handleAlternarStatus} disabled={!contextoValido} className={formData.status === 'Ativo' ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}>
                   {formData.status === 'Ativo' ? <><PowerOff className="w-4 h-4 mr-2" />Inativar</> : <><Power className="w-4 h-4 mr-2" />Ativar</>}
                 </Button>
-                <Button type="button" variant="destructive" data-permission="Cadastros.Fornecedor.excluir" data-sensitive onClick={handleExcluir} disabled={deleteMutation.isPending || !podeExcluir || !contextoValido}>
+                <Button type="button" variant="destructive" data-sensitive onClick={handleExcluir} disabled={deleteMutation.isPending || !podeExcluir || !contextoValido}>
                   <Trash2 className="w-4 h-4 mr-2" />{deleteMutation.isPending ? 'Excluindo...' : 'Excluir'}
                 </Button>
               </>
             )}
-            <Button onClick={handleSave} data-permission="Cadastros.Fornecedor.salvar" data-sensitive disabled={saveMutation.isPending || !contextoValido || (fornecedor?.id ? !podeEditar : !podeCriar)} className="bg-cyan-600 hover:bg-cyan-700">
+            <Button onClick={handleSave} data-sensitive disabled={saveMutation.isPending || !contextoValido || (fornecedor?.id ? !podeEditar : !podeCriar)} className="bg-cyan-600 hover:bg-cyan-700">
               <Save className="w-4 h-4 mr-2" />{saveMutation.isPending ? 'Salvando...' : 'Salvar Fornecedor'}
             </Button>
           </div>

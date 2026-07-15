@@ -57,14 +57,13 @@ export default function AgendaToolbar({
 
       {/* Ações */}
       <div className="flex items-center gap-2">
-        <Button size="sm" onClick={onNovoEvento} data-permission="Agenda.Evento.criar">
+        <Button size="sm" onClick={onNovoEvento}>
           <Plus className="w-4 h-4 mr-1" /> Novo Evento
         </Button>
         {eventoSelecionado && (
           <Button
             size="sm"
             variant="destructive"
-            data-permission="Agenda.Evento.excluir"
             onClick={onDeleteEvento}
           >
             <Trash2 className="w-4 h-4 mr-1" /> Deletar

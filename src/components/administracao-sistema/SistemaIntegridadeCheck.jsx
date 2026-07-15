@@ -37,7 +37,6 @@ export default function SistemaIntegridadeCheck() {
           </div>
           <div className="flex gap-1.5 flex-wrap">
             <Button
-              data-permission="Sistema.Integridade.executar"
               onClick={() => runAll(false)}
               disabled={anyLoading}
               size="sm"
@@ -47,7 +46,6 @@ export default function SistemaIntegridadeCheck() {
               {anyLoading ? "Verificando…" : "Verificar Tudo"}
             </Button>
             <Button
-              data-permission="Sistema.Integridade.visualizar"
               onClick={() => runAll(true)}
               disabled={anyLoading}
               size="sm"
@@ -59,7 +57,6 @@ export default function SistemaIntegridadeCheck() {
               100%
             </Button>
             <Button
-              data-permission="Sistema.Integridade.configurar"
               onClick={resetCB}
               size="sm"
               variant="outline"

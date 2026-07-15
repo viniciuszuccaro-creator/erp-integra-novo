@@ -73,7 +73,7 @@ async function notify(base44, notif, options = {}) {
       const podeWhats = whats && whats.ativo !== false && (whats.enviar_cobranca === true || whats.enviar_cobranca === undefined);
       const numeroAlvo = whats?.numero_whatsapp;
       if (podeWhats && numeroAlvo) { const msg = `[${categoria}] ${titulo}: ${mensagem}`; await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', numero: numeroAlvo, mensagem: msg, empresaId: empresa_id }); }
-    } catch (_) {}
+    } catch (_) { console.error('[iaFinanceAnomalyScan] catch:', _); }
   }
 }
 
@@ -209,11 +209,11 @@ Deno.serve(async (req) => {
 
     // Ferro & Aço: detectar órfãos/inconsistências de estoque/produto + contexto ampliado
     let produtos = [], movs = [], fornecedores = [], pedidos = [], entregas = [];
-    try { produtos = await base44.asServiceRole.entities.Produto.filter(filtros, '-updated_date', 300); } catch(_) {}
-    try { movs = await base44.asServiceRole.entities.MovimentacaoEstoque.filter(filtros, '-updated_date', 300); } catch(_) {}
-    try { fornecedores = await base44.asServiceRole.entities.Fornecedor.filter(filtros, '-updated_date', 200); } catch(_) {}
-    try { pedidos = await base44.asServiceRole.entities.Pedido.filter(filtros, '-updated_date', 200); } catch(_) {}
-    try { entregas = await base44.asServiceRole.entities.Entrega.filter(filtros, '-updated_date', 200); } catch(_) {}
+    try { produtos = await base44.asServiceRole.entities.Produto.filter(filtros, '-updated_date', 300); } catch (_) { console.error('[iaFinanceAnomalyScan] catch:', _); }
+    try { movs = await base44.asServiceRole.entities.MovimentacaoEstoque.filter(filtros, '-updated_date', 300); } catch (_) { console.error('[iaFinanceAnomalyScan] catch:', _); }
+    try { fornecedores = await base44.asServiceRole.entities.Fornecedor.filter(filtros, '-updated_date', 200); } catch (_) { console.error('[iaFinanceAnomalyScan] catch:', _); }
+    try { pedidos = await base44.asServiceRole.entities.Pedido.filter(filtros, '-updated_date', 200); } catch (_) { console.error('[iaFinanceAnomalyScan] catch:', _); }
+    try { entregas = await base44.asServiceRole.entities.Entrega.filter(filtros, '-updated_date', 200); } catch (_) { console.error('[iaFinanceAnomalyScan] catch:', _); }
 
     const orphanProdutos = produtos.filter(p => p.eh_bitola === true && !p.empresa_id);
     const estoqueSemFilial = movs.filter(m => !m.empresa_id || !m.localizacao_destino);
@@ -231,7 +231,7 @@ Deno.serve(async (req) => {
         m?.produto_id
       ));
       bigSteel.forEach(m => issues.push({ entidade: 'MovimentacaoEstoque', tipo: 'estoque_aco_grande_variacao', severity: 'alto', id: m.id, data: { id: m.id, quantidade: m.quantidade, produto: m.produto_descricao } }));
-    } catch (_) {}
+    } catch (_) { console.error('[iaFinanceAnomalyScan] catch:', _); }
 
     // Tentativas repetidas (ajustes frequentes por responsável nas últimas 48h)
     try {
@@ -242,7 +242,7 @@ Deno.serve(async (req) => {
       Object.entries(byResp).forEach(([resp, cnt]) => {
         if (cnt >= 5) issues.push({ entidade: 'MovimentacaoEstoque', tipo: 'ajustes_repetidos_responsavel', severity: 'medio', responsavel: resp, quantidade: cnt });
       });
-    } catch (_) {}
+    } catch (_) { console.error('[iaFinanceAnomalyScan] catch:', _); }
 
     // Regras configuráveis + detecções já existentes
           const cfg = await loadAnomalyConfig(base44);
@@ -251,19 +251,19 @@ Deno.serve(async (req) => {
           try {
             const r1 = detectSteelPriceOscillation(produtos, fornecedores);
             issues = issues.concat(r1.issues); sugestoes = sugestoes.concat(r1.sugestoes);
-          } catch(_) {}
+          } catch (_) { console.error('[iaFinanceAnomalyScan] catch:', _); }
           try {
             const r2 = analyzeObraConsumption(pedidos, movs);
             issues = issues.concat(r2.issues); sugestoes = sugestoes.concat(r2.sugestoes);
-          } catch(_) {}
+          } catch (_) { console.error('[iaFinanceAnomalyScan] catch:', _); }
           try {
             const r3 = analyzeLogistics(entregas);
             issues = issues.concat(r3.issues); sugestoes = sugestoes.concat(r3.sugestoes);
-          } catch(_) {}
+          } catch (_) { console.error('[iaFinanceAnomalyScan] catch:', _); }
           try {
             const r4 = profileClients(receber);
             issues = issues.concat(r4.issues); sugestoes = sugestoes.concat(r4.sugestoes);
-          } catch(_) {}
+          } catch (_) { console.error('[iaFinanceAnomalyScan] catch:', _); }
 
           // 2.0: Persistir flags em títulos de Pagar quando aplicável (service role)
           try {
@@ -455,7 +455,7 @@ Deno.serve(async (req) => {
             groupId: filtros?.group_id || null,
           });
         }
-      } catch (_) {}
+      } catch (_) { console.error('[iaFinanceAnomalyScan] catch:', _); }
     }
 
     const durationMs = Date.now() - t0;

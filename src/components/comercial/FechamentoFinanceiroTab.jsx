@@ -71,7 +71,7 @@ export default function FechamentoFinanceiroTab({ formData, setFormData, onNext 
             )}
 
             {/* V21.1: Botão Emitir NF-e com Escopo */}
-            <Button data-permission="Comercial.Pedido.faturar"
+            <Button
               onClick={() => setModalNFeOpen(true)}
               className="w-full bg-purple-600 hover:bg-purple-700"
               size="lg"

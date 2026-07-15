@@ -65,7 +65,7 @@ export default function OPTabMateriaPrima({
         </Alert>
       )}
 
-      <Button type="button" onClick={() => setSeletorProdutoAberto(true)} data-permission="Producao.OrdemProducao.editar" variant="outline"
+      <Button type="button" onClick={() => setSeletorProdutoAberto(true)} variant="outline"
         className="w-full border-dashed border-2 border-blue-300 hover:bg-blue-50">
         <Package className="w-4 h-4 mr-2" /> Adicionar Matéria-Prima
       </Button>
@@ -93,8 +93,7 @@ export default function OPTabMateriaPrima({
                         <p className="text-xs text-slate-600">Disponível</p>
                         <p className={`font-bold ${estoqueInsuficiente ? 'text-red-600' : 'text-green-600'}`}>{item.estoque_disponivel} {item.unidade}</p>
                       </div>
-                      <Button type="button" variant="ghost" size="sm" onClick={() => removerItem(idx)}
-                        data-permission="Producao.OrdemProducao.editar" className="text-red-600 hover:bg-red-50">✕</Button>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => removerItem(idx)} className="text-red-600 hover:bg-red-50">✕</Button>
                     </div>
                     {estoqueInsuficiente && (
                       <Alert className="border-red-300 bg-red-100 mt-2">
@@ -116,7 +115,7 @@ export default function OPTabMateriaPrima({
           <CardHeader className="border-b bg-blue-100">
             <div className="flex justify-between items-center">
               <CardTitle className="text-base">Selecionar Produtos de Produção</CardTitle>
-              <Button type="button" variant="outline" size="sm" data-permission="Producao.OrdemProducao.visualizar" onClick={() => setSeletorProdutoAberto(false)}>Fechar</Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => setSeletorProdutoAberto(false)}>Fechar</Button>
             </div>
           </CardHeader>
           <CardContent className="p-4"><SeletorProdutosProducao onSelecionarProduto={adicionarProduto} /></CardContent>

@@ -329,7 +329,7 @@ export default function ContratoForm({ contrato, onSubmit, clientes = [], fornec
       </div>
 
       <div className="flex justify-end gap-3 pt-4">
-        <Button type="submit" data-permission="Contratos.Contrato.criar" className="bg-emerald-600 hover:bg-emerald-700">
+        <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700">
           {contrato ? 'Atualizar' : 'Criar Contrato'}
         </Button>
       </div>

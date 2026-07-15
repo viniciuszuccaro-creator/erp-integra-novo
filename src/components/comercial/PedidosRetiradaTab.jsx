@@ -94,7 +94,6 @@ export default function PedidosRetiradaTab({ windowMode = false }) {
                           {pedido.status !== "Pronto para Retirada" && (
                             <Button
                               size="sm"
-                              data-permission="Comercial.Pedido.editar"
                               onClick={() => h.atualizarStatusMutation.mutate({ pedidoId: pedido.id, novoStatus: "Pronto para Retirada" })}
                               className="bg-blue-600 hover:bg-blue-700"
                             >
@@ -103,7 +102,6 @@ export default function PedidosRetiradaTab({ windowMode = false }) {
                           )}
                           <Button
                             size="sm"
-                            data-permission="Comercial.Pedido.editar"
                             onClick={() => { h.setPedidoSelecionado(pedido); h.setDetalhesOpen(true); }}
                             className="bg-green-600 hover:bg-green-700"
                           >

@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     let body = {};
-    try { body = await req.json(); } catch (_) {}
+    try { body = await req.json(); } catch (_) { console.error('[upsertConfig] catch:', _); }
 
     // Retrocompatibilidade com API antiga: { key, value, operation: "read"|"write" }
     let { id, chave, data, scope } = body;
@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
       try {
         const rows = await api.filter({ id }, '-updated_date', 1);
         existing = Array.isArray(rows) ? (rows[0] || null) : null;
-      } catch (_) {}
+      } catch (_) { console.error('[upsertConfig] catch:', _); }
 
       if (!existing) {
         return Response.json({ error: `Registro ${id} não encontrado` }, { status: 404 });
@@ -195,7 +195,7 @@ Deno.serve(async (req) => {
           dados_novos: updated,
           data_hora: new Date().toISOString(),
         });
-      } catch (_) {}
+      } catch (_) { console.error('[upsertConfig] catch:', _); }
 
       // ─── AUTO-PROPAGAÇÃO: config de grupo → todas as empresas (SEMPRE ATIVA) ───
       // Propaga TODAS as mudanças de grupo para empresas, não só ativa
@@ -230,16 +230,16 @@ Deno.serve(async (req) => {
             const toCreate = toSync.filter(r => !r.id);
             if (toUpdate.length) {
               for (let i = 0; i < toUpdate.length; i += 500) {
-                try { await api.bulkUpdate(toUpdate.slice(i, i + 500)); } catch (_) {}
+                try { await api.bulkUpdate(toUpdate.slice(i, i + 500)); } catch (_) { console.error('[upsertConfig] catch:', _); }
               }
             }
             if (toCreate.length) {
               for (let i = 0; i < toCreate.length; i += 100) {
-                try { await api.bulkCreate(toCreate.slice(i, i + 100)); } catch (_) {}
+                try { await api.bulkCreate(toCreate.slice(i, i + 100)); } catch (_) { console.error('[upsertConfig] catch:', _); }
               }
             }
           }
-        } catch (_) {}
+        } catch (_) { console.error('[upsertConfig] catch:', _); }
       }
 
       // ─── PROPAGAÇÃO REVERSA: empresa → grupo (Regra-Mãe 9) ───
@@ -259,7 +259,7 @@ Deno.serve(async (req) => {
             groupPayload.id = groupRec.id;
             groupPayload.empresa_id = null;
             groupPayload.group_id = gId;
-            try { await api.update(groupRec.id, groupPayload); } catch (_) {}
+            try { await api.update(groupRec.id, groupPayload); } catch (_) { console.error('[upsertConfig] catch:', _); }
           } else {
             // Cria registro de nível de grupo
             const groupCreate = {};
@@ -269,9 +269,9 @@ Deno.serve(async (req) => {
             groupCreate.chave = chave;
             groupCreate.empresa_id = null;
             groupCreate.group_id = gId;
-            try { await api.create(groupCreate); } catch (_) {}
+            try { await api.create(groupCreate); } catch (_) { console.error('[upsertConfig] catch:', _); }
           }
-        } catch (_) {}
+        } catch (_) { console.error('[upsertConfig] catch:', _); }
       }
 
       return Response.json({ record: updated, id: updated.id || match.id, mode: 'update', propagated: !!(gId && !eId), reversePropagated: !!(eId && gId), _ts: Date.now() });
@@ -299,7 +299,7 @@ Deno.serve(async (req) => {
           dados_novos: created,
           data_hora: new Date().toISOString(),
         });
-      } catch (_) {}
+      } catch (_) { console.error('[upsertConfig] catch:', _); }
 
       // ─── AUTO-PROPAGAÇÃO: config de grupo criada → propaga para empresas (SEMPRE ATIVA) ───
       if (gId && !eId) {
@@ -314,10 +314,10 @@ Deno.serve(async (req) => {
             }));
             toCreateEmp.forEach(r => { delete r.id; });
             for (let i = 0; i < toCreateEmp.length; i += 100) {
-              try { await api.bulkCreate(toCreateEmp.slice(i, i + 100)); } catch (_) {}
+              try { await api.bulkCreate(toCreateEmp.slice(i, i + 100)); } catch (_) { console.error('[upsertConfig] catch:', _); }
             }
           }
-        } catch (_) {}
+        } catch (_) { console.error('[upsertConfig] catch:', _); }
       }
 
       // ─── PROPAGAÇÃO REVERSA: empresa criou config → cria no nível de grupo (Regra-Mãe 9) ───
@@ -330,9 +330,9 @@ Deno.serve(async (req) => {
             delete groupCreate.id;
             groupCreate.empresa_id = null;
             groupCreate.group_id = gId;
-            try { await api.create(groupCreate); } catch (_) {}
+            try { await api.create(groupCreate); } catch (_) { console.error('[upsertConfig] catch:', _); }
           }
-        } catch (_) {}
+        } catch (_) { console.error('[upsertConfig] catch:', _); }
       }
 
       return Response.json({ record: created, id: created.id, mode: 'create', propagated: !!(gId && !eId), reversePropagated: !!(eId && gId), _ts: Date.now() });

@@ -29,11 +29,11 @@ export function logUIAction({ component, action, status, meta }) {
     if (status === 'start') {
       // noop (evitar ruído)
     } else if (status === 'success' && meta?.toastSuccess) {
-      try { toast.success(`${action} concluído`); } catch {}
+      try { toast.success(`${action} concluído`); } catch (e) { console.error('[lib] catch:', e); }
     } else if (status === 'error') {
-      try { toast.error(`Falha em ${action}`, { description: meta?.error || '' }); } catch {}
+      try { toast.error(`Falha em ${action}`, { description: meta?.error || '' }); } catch (e) { console.error('[lib] catch:', e); }
     }
-  } catch {}
+  } catch (e) { console.error('[lib] catch:', e); }
 
   try {
     const descricao = `[${component}] ${action} • ${status}`;
@@ -123,7 +123,7 @@ function uiAuditWrapLegacy(actionName, handler, baseMeta = {}) {
       Promise.resolve().then(() => {
         if (AUDIT_VERBOSE) logUIAction({ component: inferComponent(actionName), action: actionName, status: "success", meta: baseMeta });
         if (baseMeta && baseMeta.toastSuccess) {
-          try { toast.success(`${actionName} concluído`); } catch (_) {}
+          try { toast.success(`${actionName} concluído`); } catch (_) { console.error('[lib] catch:', _); }
         }
       });
       
@@ -133,7 +133,7 @@ function uiAuditWrapLegacy(actionName, handler, baseMeta = {}) {
       
       // Log de erro não-bloqueante
       Promise.resolve().then(() => {
-        try { toast.error(`Falha: ${actionName}`, { description: msg }); } catch (_) {}
+        try { toast.error(`Falha: ${actionName}`, { description: msg }); } catch (_) { console.error('[lib] catch:', _); }
         if (AUDIT_VERBOSE) logUIAction({ component: inferComponent(actionName), action: actionName, status: "error", meta: { ...baseMeta, error: msg } });
       });
       
@@ -153,13 +153,13 @@ export function uiAuditWrap(actionName, handler, baseMeta = {}) {
         logUIAction({ component: inferComponent(actionName), action: actionName, status: "success", meta: baseMeta });
       }
       if (baseMeta?.toastSuccess) {
-        try { toast.success(baseMeta.successMessage || `${actionName} concluido`); } catch (_) {}
+        try { toast.success(baseMeta.successMessage || `${actionName} concluido`); } catch (_) { console.error('[lib] catch:', _); }
       }
     };
 
     const logError = (error) => {
       const msg = String(error?.message || error) || 'Erro';
-      try { toast.error(`Falha: ${actionName}`, { description: msg }); } catch (_) {}
+      try { toast.error(`Falha: ${actionName}`, { description: msg }); } catch (_) { console.error('[lib] catch:', _); }
       if (AUDIT_VERBOSE || shouldPersistUIAudit(actionName, baseMeta)) {
         logUIAction({ component: inferComponent(actionName), action: actionName, status: "error", meta: { ...baseMeta, error: msg } });
       }

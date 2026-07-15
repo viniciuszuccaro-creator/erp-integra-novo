@@ -34,7 +34,7 @@ export default function FormaPagamentoTabParcelamento({ formData, setFormData, h
             <Card className="border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-cyan-50">
               <CardHeader className="bg-blue-100 border-b border-blue-200"><CardTitle className="text-base flex items-center gap-2 text-blue-900"><CreditCard className="w-5 h-5" />💳 Configuração Individual por Parcela - Cartão de Crédito</CardTitle><p className="text-xs text-blue-700 mt-1">Configure dias de vencimento e taxa específica para cada parcela</p></CardHeader>
               <CardContent className="p-4">
-                {!formData.configuracao_parcelas_cartao?.length && (<div className="text-center py-4"><Button data-permission="Cadastros.FormaPagamento.editar" onClick={() => setFormData({ ...formData, configuracao_parcelas_cartao: gerarConfiguracaoParcelas(formData.maximo_parcelas) })} className="bg-blue-600 hover:bg-blue-700"><Zap className="w-4 h-4 mr-2" />Gerar Configuração Padrão</Button></div>)}
+                {!formData.configuracao_parcelas_cartao?.length && (<div className="text-center py-4"><Button onClick={() => setFormData({ ...formData, configuracao_parcelas_cartao: gerarConfiguracaoParcelas(formData.maximo_parcelas) })} className="bg-blue-600 hover:bg-blue-700"><Zap className="w-4 h-4 mr-2" />Gerar Configuração Padrão</Button></div>)}
                 {formData.configuracao_parcelas_cartao?.length > 0 && (
                   <div className="space-y-3 max-h-96 overflow-y-auto">
                     {formData.configuracao_parcelas_cartao.sort((a, b) => a.numero_parcela - b.numero_parcela).map((parcela) => (

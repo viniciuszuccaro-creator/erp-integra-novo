@@ -54,7 +54,7 @@ export default function HubAtendimentoIAPanel() {
         }
       });
       if (res?.insights?.length) setInsights(res.insights);
-    } catch (_) {}
+    } catch (_) { console.error('[hub-atendimento] catch:', _); }
     setLoading(false);
   };
 

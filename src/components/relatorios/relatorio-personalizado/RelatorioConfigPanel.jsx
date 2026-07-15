@@ -85,7 +85,7 @@ export default function RelatorioConfigPanel({
       )}
 
       <div className="flex justify-end pt-4">
-        <Button data-permission="Relatorios.Personalizado.gerar" onClick={onGerar}>
+        <Button onClick={onGerar}>
           <Filter className="w-4 h-4 mr-2" />Gerar Relatório
         </Button>
       </div>

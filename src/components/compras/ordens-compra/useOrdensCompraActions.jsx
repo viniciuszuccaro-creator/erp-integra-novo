@@ -25,7 +25,7 @@ export default function useOrdensCompraActions({ fornecedores, authUser }) {
       });
     },
     onSuccess: async () => {
-      try { await base44.entities.AuditLog.create({ acao: 'Aprovação', modulo: 'Compras', entidade: 'OrdemCompra', usuario: authUser?.email, usuario_id: authUser?.id, descricao: 'OC aprovada', data_hora: new Date().toISOString() }); } catch(_) {}
+      try { await base44.entities.AuditLog.create({ acao: 'Aprovação', modulo: 'Compras', entidade: 'OrdemCompra', usuario: authUser?.email, usuario_id: authUser?.id, descricao: 'OC aprovada', data_hora: new Date().toISOString() }); } catch (_) { console.error('[ordens-compra] catch:', _); }
     }
   });
 
@@ -38,7 +38,7 @@ export default function useOrdensCompraActions({ fornecedores, authUser }) {
       });
     },
     onSuccess: async () => {
-      try { await base44.entities.AuditLog.create({ acao: 'Edição', modulo: 'Compras', entidade: 'OrdemCompra', usuario: authUser?.email, usuario_id: authUser?.id, descricao: 'OC enviada ao fornecedor', data_hora: new Date().toISOString() }); } catch(_) {}
+      try { await base44.entities.AuditLog.create({ acao: 'Edição', modulo: 'Compras', entidade: 'OrdemCompra', usuario: authUser?.email, usuario_id: authUser?.id, descricao: 'OC enviada ao fornecedor', data_hora: new Date().toISOString() }); } catch (_) { console.error('[ordens-compra] catch:', _); }
     }
   });
 
@@ -79,7 +79,7 @@ export default function useOrdensCompraActions({ fornecedores, authUser }) {
       return { leadTimeReal, fornecedorNome: oc.fornecedor_nome };
     },
     onSuccess: async ({ leadTimeReal }) => {
-      try { await base44.entities.AuditLog.create({ acao: 'Edição', modulo: 'Compras', entidade: 'OrdemCompra', usuario: authUser?.email, usuario_id: authUser?.id, descricao: 'Recebimento registrado', dados_novos: { lead_time_real: leadTimeReal }, data_hora: new Date().toISOString() }); } catch(_) {}
+      try { await base44.entities.AuditLog.create({ acao: 'Edição', modulo: 'Compras', entidade: 'OrdemCompra', usuario: authUser?.email, usuario_id: authUser?.id, descricao: 'Recebimento registrado', dados_novos: { lead_time_real: leadTimeReal }, data_hora: new Date().toISOString() }); } catch (_) { console.error('[ordens-compra] catch:', _); }
     }
   });
 

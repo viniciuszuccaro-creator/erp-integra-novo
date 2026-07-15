@@ -36,7 +36,7 @@ export default function LiveMap({ posicao, entregaId, height = 340 }) {
         });
         const data = res?.data;
         if (!cancelled && data?.eta_minutes != null) setEta(data.eta_minutes);
-      } catch (_) {}
+      } catch (_) { console.error('[painel-logistico] catch:', _); }
     })();
     return () => { cancelled = true; };
   }, [posicao?.latitude, posicao?.longitude, destino?.lat, destino?.lng]);

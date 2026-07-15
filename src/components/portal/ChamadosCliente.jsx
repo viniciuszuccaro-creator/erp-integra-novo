@@ -30,7 +30,7 @@ export default function ChamadosCliente({ clienteId, clienteNome }) {
           handleSubmit={h.handleSubmit}
           criarChamadoMutation={h.criarChamadoMutation}
         />
-        <Button variant="outline" data-permission="Portal.Suporte.chat" onClick={() => h.setChatOpen(true)}>
+        <Button variant="outline" onClick={() => h.setChatOpen(true)}>
           Atendimento via Chat
         </Button>
       </div>

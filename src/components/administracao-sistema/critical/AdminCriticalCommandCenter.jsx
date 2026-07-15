@@ -113,7 +113,6 @@ export default function AdminCriticalCommandCenter() {
                 onClick={() => runAction(action)}
                 disabled={runningAction === action.id}
                 data-action={`AdminCritical.${action.id}`}
-                data-permission={action.permission}
                 data-sensitive={action.sensitive ? 'true' : undefined}
                 className="w-full"
               >

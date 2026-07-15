@@ -65,7 +65,7 @@ export default function PrecosSection({ formData, setFormData }) {
           </div>
         </div>
         <div className="flex justify-end pt-2">
-          <Button data-permission="Comercial.Produto.otimizarPreco" onClick={handleOptimize} disabled={!canOptimize || optimizing} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={handleOptimize} disabled={!canOptimize || optimizing} className="bg-blue-600 hover:bg-blue-700">
             {optimizing ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Otimizando...</>) : 'Otimizar Preço (Políticas)'}
           </Button>
         </div>

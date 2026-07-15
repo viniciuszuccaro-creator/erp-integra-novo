@@ -87,7 +87,6 @@ export default function TabelaPrecoItensTab({
                     type="button"
                     size="sm"
                     variant="outline"
-                    data-permission="Cadastros.TabelaPreco.editar"
                     onClick={() => handleAdicionarProdutoIndividual(produto)}
                   >
                     <Plus className="w-3 h-3" />
@@ -182,7 +181,7 @@ export default function TabelaPrecoItensTab({
                 </Select>
               </div>
             </div>
-            <Button type="button" data-permission="Cadastros.TabelaPreco.editar"
+            <Button type="button"
               onClick={handleAdicionarProdutosLote}
               className="w-full bg-purple-600 hover:bg-purple-700"
               disabled={produtosDisponiveis.length === 0}>
@@ -251,7 +250,6 @@ export default function TabelaPrecoItensTab({
                     )}
                   </div>
                   <Button type="button" size="sm" variant="ghost"
-                    data-permission="Cadastros.TabelaPreco.editar"
                     onClick={() => handleRemoverItem(idx)}>
                     <X className="w-4 h-4 text-red-600" />
                   </Button>

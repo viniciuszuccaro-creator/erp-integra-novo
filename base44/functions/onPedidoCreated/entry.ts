@@ -12,15 +12,15 @@ async function audit(base44,user,{acao='Ação',modulo='Sistema',entidade='-',re
 // Inlined validationUtils
 function ensureEventType(event,expectedType){return event?.type===expectedType;}
 // Inlined estoque/auditUtils
-async function stockAudit(base44,user,{acao,entidade,registro_id,descricao,empresa_id=null,empresa_nome=null,dados_novos=null,duracao_ms=null},meta=null){try{const merged=dados_novos&&typeof dados_novos==='object'?{...dados_novos}:{};if(meta)merged._meta=meta;await audit(base44,user||{full_name:'Sistema'},{acao,modulo:'Estoque',entidade,registro_id,descricao,empresa_id,empresa_nome,dados_novos:Object.keys(merged).length?merged:null,duracao_ms},meta);}catch(_){}}
+async function stockAudit(base44,user,{acao,entidade,registro_id,descricao,empresa_id=null,empresa_nome=null,dados_novos=null,duracao_ms=null},meta=null){try{const merged=dados_novos&&typeof dados_novos==='object'?{...dados_novos}:{};if(meta)merged._meta=meta;await audit(base44,user||{full_name:'Sistema'},{acao,modulo:'Estoque',entidade,registro_id,descricao,empresa_id,empresa_nome,dados_novos:Object.keys(merged).length?merged:null,duracao_ms},meta);}catch (_) { console.error('[onPedidoCreated] catch:', _); }}
 // Inlined notificationService
-async function notify(base44,notif,options={}){const{whatsapp=false}=options;const{titulo,mensagem,tipo='alerta',categoria='Sistema',prioridade='Normal',empresa_id=null,dados=null}=notif||{};try{if(base44?.asServiceRole?.entities?.Notificacao?.create)await base44.asServiceRole.entities.Notificacao.create({titulo,mensagem,tipo,categoria,prioridade,empresa_id,dados});}catch(_){}if(whatsapp&&empresa_id){try{const cfgs=await base44.asServiceRole.entities?.ConfiguracaoWhatsApp?.filter?.({empresa_id},'-updated_date',1);const whats=Array.isArray(cfgs)&&cfgs.length?cfgs[0]:null;if(whats&&whats.ativo!==false&&whats.numero_whatsapp){await base44.asServiceRole.functions.invoke('whatsappSend',{action:'sendText',numero:whats.numero_whatsapp,mensagem:`[${categoria}] ${titulo}: ${mensagem}`,empresaId:empresa_id});}}catch(_){}}}
+async function notify(base44,notif,options={}){const{whatsapp=false}=options;const{titulo,mensagem,tipo='alerta',categoria='Sistema',prioridade='Normal',empresa_id=null,dados=null}=notif||{};try{if(base44?.asServiceRole?.entities?.Notificacao?.create)await base44.asServiceRole.entities.Notificacao.create({titulo,mensagem,tipo,categoria,prioridade,empresa_id,dados});}catch (_) { console.error('[onPedidoCreated] catch:', _); }if(whatsapp&&empresa_id){try{const cfgs=await base44.asServiceRole.entities?.ConfiguracaoWhatsApp?.filter?.({empresa_id},'-updated_date',1);const whats=Array.isArray(cfgs)&&cfgs.length?cfgs[0]:null;if(whats&&whats.ativo!==false&&whats.numero_whatsapp){await base44.asServiceRole.functions.invoke('whatsappSend',{action:'sendText',numero:whats.numero_whatsapp,mensagem:`[${categoria}] ${titulo}: ${mensagem}`,empresaId:empresa_id});}}catch (_) { console.error('[onPedidoCreated] catch:', _); }}}
 // Inlined pedido/onPedidoCreatedHandler (includes processReservas, auditPedidoReserva, emitPedidoMovementsGenerated)
 function validatePedidoForReserva(pedido){const itensRev=Array.isArray(pedido?.itens_revenda)?pedido.itens_revenda:[];const itensArm=Array.isArray(pedido?.itens_armado_padrao)?pedido.itens_armado_padrao:[];const itensCD=Array.isArray(pedido?.itens_corte_dobra)?pedido.itens_corte_dobra:[];const totalItens=itensRev.length+itensArm.length+itensCD.length;const warnings=[];if(totalItens===0)warnings.push('sem_itens');if(!pedido?.empresa_id)warnings.push('sem_empresa_id');if(!pedido?.cliente_id)warnings.push('sem_cliente');return{ok:warnings.length===0,total_itens:totalItens,warnings};}
 const ITEM_KEYS=['itens_revenda','itens_armado_padrao','itens_corte_dobra'];
 async function processReservas(base44,data,user){const movimentos=[];for(const key of ITEM_KEYS){const itens=Array.isArray(data?.[key])?data[key]:[];for(const it of itens){const produtoId=it?.produto_id;const quantidade=Number(it?.quantidade||0);if(!produtoId||quantidade<=0)continue;const [produto]=await base44.asServiceRole.entities.Produto.filter({id:produtoId});const podeSomar=produto&&(produto.unidade_estoque===it?.unidade||!it?.unidade);if(podeSomar){const novoReservado=Number(produto?.estoque_reservado||0)+Number(quantidade||0);await base44.asServiceRole.entities.Produto.update(produto.id,{estoque_reservado:novoReservado});}const movRecord={origem_movimento:'pedido',tipo_movimento:'reserva',produto_id:it?.produto_id,produto_descricao:produto?.descricao,quantidade,unidade_medida:it?.unidade||produto?.unidade_estoque||'UN',empresa_id:data?.empresa_id||null,group_id:data?.group_id||null,data_movimentacao:new Date().toISOString(),motivo:`Reserva para Pedido ${data?.numero_pedido||data?.id}`,valor_total:0,responsavel:user?.full_name||user?.email,responsavel_id:user?.id};const mov=await base44.asServiceRole.entities.MovimentacaoEstoque.create(movRecord);if(mov?.id)movimentos.push(mov.id);}}return movimentos;}
-async function auditPedidoReserva(base44,user,{pedido,movimentos}){try{await base44.asServiceRole.entities.AuditLog.create({usuario:user?.full_name||user?.email||'Sistema',acao:'Criação',modulo:'Estoque',entidade:'MovimentacaoEstoque',registro_id:pedido?.id||null,descricao:`Movimentações geradas a partir do Pedido ${pedido?.numero_pedido||pedido?.id||''}`,empresa_id:pedido?.empresa_id||null,dados_novos:{quantidade_movimentos:Array.isArray(movimentos)?movimentos.length:0},data_hora:new Date().toISOString()});}catch(_){}}
-async function emitPedidoMovementsGenerated(base44,{pedido,movimentos,validation}){const empresa_id=pedido?.empresa_id||null;const count=Array.isArray(movimentos)?movimentos.length:0;try{if(base44?.asServiceRole?.entities?.Notificacao?.create)await base44.asServiceRole.entities.Notificacao.create({titulo:'Reserva de Estoque',mensagem:`${count} movimentações geradas para o pedido ${pedido?.numero_pedido||pedido?.id||''}`,tipo:'info',categoria:'Comercial',prioridade:count>0?'Normal':'Baixa',empresa_id,dados:{pedido_id:pedido?.id,movimentos_count:count,validation}});}catch(_){}}
+async function auditPedidoReserva(base44,user,{pedido,movimentos}){try{await base44.asServiceRole.entities.AuditLog.create({usuario:user?.full_name||user?.email||'Sistema',acao:'Criação',modulo:'Estoque',entidade:'MovimentacaoEstoque',registro_id:pedido?.id||null,descricao:`Movimentações geradas a partir do Pedido ${pedido?.numero_pedido||pedido?.id||''}`,empresa_id:pedido?.empresa_id||null,dados_novos:{quantidade_movimentos:Array.isArray(movimentos)?movimentos.length:0},data_hora:new Date().toISOString()});}catch (_) { console.error('[onPedidoCreated] catch:', _); }}
+async function emitPedidoMovementsGenerated(base44,{pedido,movimentos,validation}){const empresa_id=pedido?.empresa_id||null;const count=Array.isArray(movimentos)?movimentos.length:0;try{if(base44?.asServiceRole?.entities?.Notificacao?.create)await base44.asServiceRole.entities.Notificacao.create({titulo:'Reserva de Estoque',mensagem:`${count} movimentações geradas para o pedido ${pedido?.numero_pedido||pedido?.id||''}`,tipo:'info',categoria:'Comercial',prioridade:count>0?'Normal':'Baixa',empresa_id,dados:{pedido_id:pedido?.id,movimentos_count:count,validation}});}catch (_) { console.error('[onPedidoCreated] catch:', _); }}
 async function handleOnPedidoCreated(base44,ctx,data,user){const validation=validatePedidoForReserva(data);const movimentos=await processReservas(base44,data,user);await auditPedidoReserva(base44,user,{pedido:data,movimentos});await emitPedidoMovementsGenerated(base44,{pedido:data,movimentos,validation});return{movimentos,validation};}
 
 Deno.serve(async (req) => {
@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
           action: 'sendText', empresaId, groupId, clienteId, pedidoId: dataEnriched?.id,
           templateKey: 'pedido_criado', vars, internal_token
         });
-      } catch (_) {}
+      } catch (_) { console.error('[onPedidoCreated] catch:', _); }
 
       // WhatsApp proativo: alerta de estoque baixo para itens do pedido (envio para admin - multiempresa)
       try {
@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
             });
           }
         }
-      } catch (_) {}
+      } catch (_) { console.error('[onPedidoCreated] catch:', _); }
 
       // Otimização de rota logística (multiempresa) ao criar pedido
       try {
@@ -125,8 +125,8 @@ Deno.serve(async (req) => {
             empresa_id: dataEnriched?.empresa_id || null, group_id: dataEnriched?.group_id || null,
             dados_novos: { pedido_id: dataEnriched?.id }, data_hora: new Date().toISOString(), sucesso: true
           });
-        } catch (_) {}
-      } catch (_) {}
+        } catch (_) { console.error('[onPedidoCreated] catch:', _); }
+      } catch (_) { console.error('[onPedidoCreated] catch:', _); }
 
       // API-First: webhook e-commerce (create)
       try {
@@ -137,10 +137,10 @@ Deno.serve(async (req) => {
           const url = cfg?.webhook_url; const secret = cfg?.shared_secret;
           if (url) {
             await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-shared-secret': secret || '' }, body: JSON.stringify({ type: 'pedido_created', empresa_id: empresaId, group_id: dataEnriched?.group_id || null, pedido: { id: dataEnriched?.id, numero_pedido: dataEnriched?.numero_pedido, valor_total: dataEnriched?.valor_total } }) });
-            try { await base44.asServiceRole.entities.AuditLog.create({ usuario: user.full_name || 'Sistema', usuario_id: user.id, acao: 'Criação', modulo: 'Integrações', tipo_auditoria: 'integracao', entidade: 'site_webhook', descricao: 'Pedido criado enviado ao site', empresa_id: empresaId, data_hora: new Date().toISOString(), sucesso: true }); } catch {}
+            try { await base44.asServiceRole.entities.AuditLog.create({ usuario: user.full_name || 'Sistema', usuario_id: user.id, acao: 'Criação', modulo: 'Integrações', tipo_auditoria: 'integracao', entidade: 'site_webhook', descricao: 'Pedido criado enviado ao site', empresa_id: empresaId, data_hora: new Date().toISOString(), sucesso: true }); } catch (e) { console.error('[onPedidoCreated] catch:', e); }
           }
         }
-      } catch (_) {}
+      } catch (_) { console.error('[onPedidoCreated] catch:', _); }
     }
 
     if (event.type === 'update') {
@@ -156,8 +156,8 @@ Deno.serve(async (req) => {
         const vars = { cliente: novo.cliente_nome || '', pedido: novo.numero_pedido || novo.id || '', data_prevista: novo.data_prevista_entrega || '', rastreio: novo.link_rastreamento || '' };
         try {
           await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId, groupId, clienteId, pedidoId: novo.id, templateKey: 'pedido_em_transito', vars, internal_token });
-        } catch (_) {}
-        try { await base44.asServiceRole.entities.AuditLog.create({ usuario: user.full_name || 'Sistema', usuario_id: user.id, acao: 'Criação', modulo: 'Comercial', tipo_auditoria: 'integracao', entidade: 'WhatsApp', descricao: 'Aviso de pedido em trânsito enviado', empresa_id: empresaId, group_id: groupId, dados_novos: { pedido_id: novo.id, numero_pedido: novo.numero_pedido }, data_hora: new Date().toISOString(), sucesso: true }); } catch {}
+        } catch (_) { console.error('[onPedidoCreated] catch:', _); }
+        try { await base44.asServiceRole.entities.AuditLog.create({ usuario: user.full_name || 'Sistema', usuario_id: user.id, acao: 'Criação', modulo: 'Comercial', tipo_auditoria: 'integracao', entidade: 'WhatsApp', descricao: 'Aviso de pedido em trânsito enviado', empresa_id: empresaId, group_id: groupId, dados_novos: { pedido_id: novo.id, numero_pedido: novo.numero_pedido }, data_hora: new Date().toISOString(), sucesso: true }); } catch (e) { console.error('[onPedidoCreated] catch:', e); }
 
         // API-First: webhook e-commerce (status update)
         try {
@@ -169,7 +169,7 @@ Deno.serve(async (req) => {
               await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-shared-secret': secret || '' }, body: JSON.stringify({ type: 'pedido_status', empresa_id: empresaId, group_id: groupId || null, pedido: { id: novo.id, numero_pedido: novo.numero_pedido, status: statusNovo } }) });
             }
           }
-        } catch (_) {}
+        } catch (_) { console.error('[onPedidoCreated] catch:', _); }
         }
 
         // 2) Em Expedição / Pronto para Expedir → mensagem explícita
@@ -179,8 +179,8 @@ Deno.serve(async (req) => {
         const empresaId = novo.empresa_id || null;
         const groupId = novo.group_id || null;
         const mensagem = `Olá ${novo.cliente_nome || ''}! Seu pedido ${novo.numero_pedido || novo.id || ''} está em expedição.`.trim();
-        try { await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId, groupId, clienteId, pedidoId: novo.id, mensagem, internal_token }); } catch (_) {}
-        try { await base44.asServiceRole.entities.AuditLog.create({ usuario: user.full_name || 'Sistema', usuario_id: user.id, acao: 'Criação', modulo: 'Comercial', tipo_auditoria: 'integracao', entidade: 'WhatsApp', descricao: 'Aviso de pedido em expedição enviado', empresa_id: empresaId, group_id: groupId, dados_novos: { pedido_id: novo.id, numero_pedido: novo.numero_pedido }, data_hora: new Date().toISOString(), sucesso: true }); } catch {}
+        try { await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId, groupId, clienteId, pedidoId: novo.id, mensagem, internal_token }); } catch (_) { console.error('[onPedidoCreated] catch:', _); }
+        try { await base44.asServiceRole.entities.AuditLog.create({ usuario: user.full_name || 'Sistema', usuario_id: user.id, acao: 'Criação', modulo: 'Comercial', tipo_auditoria: 'integracao', entidade: 'WhatsApp', descricao: 'Aviso de pedido em expedição enviado', empresa_id: empresaId, group_id: groupId, dados_novos: { pedido_id: novo.id, numero_pedido: novo.numero_pedido }, data_hora: new Date().toISOString(), sucesso: true }); } catch (e) { console.error('[onPedidoCreated] catch:', e); }
         }
 
         // 3) Entregue/Concluído → mensagem explícita
@@ -190,8 +190,8 @@ Deno.serve(async (req) => {
         const empresaId = novo.empresa_id || null;
         const groupId = novo.group_id || null;
         const mensagem = `Olá ${novo.cliente_nome || ''}! Seu pedido ${novo.numero_pedido || novo.id || ''} foi entregue. Obrigado pela preferência!`.trim();
-        try { await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId, groupId, clienteId, pedidoId: novo.id, mensagem, internal_token }); } catch (_) {}
-        try { await base44.asServiceRole.entities.AuditLog.create({ usuario: user.full_name || 'Sistema', usuario_id: user.id, acao: 'Criação', modulo: 'Comercial', tipo_auditoria: 'integracao', entidade: 'WhatsApp', descricao: 'Aviso de pedido entregue enviado', empresa_id: empresaId, group_id: groupId, dados_novos: { pedido_id: novo.id, numero_pedido: novo.numero_pedido }, data_hora: new Date().toISOString(), sucesso: true }); } catch {}
+        try { await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId, groupId, clienteId, pedidoId: novo.id, mensagem, internal_token }); } catch (_) { console.error('[onPedidoCreated] catch:', _); }
+        try { await base44.asServiceRole.entities.AuditLog.create({ usuario: user.full_name || 'Sistema', usuario_id: user.id, acao: 'Criação', modulo: 'Comercial', tipo_auditoria: 'integracao', entidade: 'WhatsApp', descricao: 'Aviso de pedido entregue enviado', empresa_id: empresaId, group_id: groupId, dados_novos: { pedido_id: novo.id, numero_pedido: novo.numero_pedido }, data_hora: new Date().toISOString(), sucesso: true }); } catch (e) { console.error('[onPedidoCreated] catch:', e); }
         }
         }
 

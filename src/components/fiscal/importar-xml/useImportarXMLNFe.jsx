@@ -145,7 +145,7 @@ export function useImportarXMLNFe({ arquivo, dadosNFe, opcoes, empresaId }) {
             const mapFornecedor = mapa[chave] || {};
             centro_custo_id = mapFornecedor?.centro_custo_id || null;
             plano_contas_id = mapFornecedor?.plano_contas_id || null;
-          } catch {}
+          } catch (e) { console.error('[importar-xml] catch:', e); }
           const conta = await createInContext('ContaPagar', {
             descricao: `NF-e ${dadosNFe.numeroNFe} - Parcela ${duplicata.numero}`,
             fornecedor: dadosNFe.fornecedor.razao_social,

@@ -229,7 +229,7 @@ export default function ConfiguracoesPortal() {
 
           {/* Botão Salvar */}
           <div className="flex justify-end pt-4 border-t">
-            <Button data-permission="Portal.ConfiguracoesPortal.salvar"
+            <Button
               onClick={handleSalvar}
               disabled={salvando}
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"

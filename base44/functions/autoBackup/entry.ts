@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
         dados_novos: { file_uri: up?.file_uri, scope: payload.scope },
         data_hora: new Date().toISOString(),
       });
-    } catch (_) {}
+    } catch (_) { console.error('[autoBackup] catch:', _); }
 
     return Response.json({ ok: true, file_uri: up?.file_uri, name });
   } catch (error) {

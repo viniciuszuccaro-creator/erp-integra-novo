@@ -43,7 +43,6 @@ export default function HistoricoTab({ arquivos }) {
                   <Button
                     size="sm"
                     variant="outline"
-                    data-permission="Financeiro.Remessa.baixar"
                     data-action="Financeiro.Remessa.baixar"
                     onClick={() => {
                       const blob = new Blob([arquivo.conteudo_arquivo], { type: 'text/plain' });

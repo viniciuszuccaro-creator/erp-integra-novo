@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
       if (guard?.data && guard.data.allowed === false) {
         return Response.json({ error: 'Forbidden' }, { status: 403 });
       }
-    } catch (_) {}
+    } catch (_) { console.error('[optimizeDeliveryRoute] catch:', _); }
 
     // Carregar entregas alvo com filtros e restrições (inclui janelas, prioridade, capacidade)
     const constraints = body?.constraints || {};
@@ -156,12 +156,12 @@ Deno.serve(async (req) => {
                   e.regiao_entrega_id = r.id; // atualiza em memória
                   e.regiao_entrega_nome = r.nome || r.descricao || null;
                   // melhor esforço: persistir
-                  try { await base44.asServiceRole.entities.Entrega.update(e.id, { regiao_entrega_id: r.id, regiao_entrega_nome: e.regiao_entrega_nome }); } catch (_) {}
+                  try { await base44.asServiceRole.entities.Entrega.update(e.id, { regiao_entrega_id: r.id, regiao_entrega_nome: e.regiao_entrega_nome }); } catch (_) { console.error('[optimizeDeliveryRoute] catch:', _); }
                 }
               }
             }
           }
-        } catch (_) {}
+        } catch (_) { console.error('[optimizeDeliveryRoute] catch:', _); }
 
         const groups = new Map();
         for (const e of entregas) {
@@ -203,7 +203,7 @@ Deno.serve(async (req) => {
             await base44.asServiceRole.entities.Entrega.update(e.id, { regiao_entrega_id: regiaoId, regiao_entrega_nome: reg?.nome || reg?.descricao || null });
           }
         }
-      } catch (_) {}
+      } catch (_) { console.error('[optimizeDeliveryRoute] catch:', _); }
     }
 
     if (!entregas || entregas.length === 0) {
@@ -362,7 +362,7 @@ Deno.serve(async (req) => {
           ]
         });
       }
-    } catch (_) {}
+    } catch (_) { console.error('[optimizeDeliveryRoute] catch:', _); }
 
     // Auditoria
     try {
@@ -380,7 +380,7 @@ Deno.serve(async (req) => {
         data_hora: new Date().toISOString(),
         sucesso: true
       });
-    } catch {}
+    } catch (e) { console.error('[optimizeDeliveryRoute] catch:', e); }
 
     return Response.json({ ok: true, total_distance_m, total_duration_s, ordered, api_mode: modo, unassigned });
   } catch (error) {

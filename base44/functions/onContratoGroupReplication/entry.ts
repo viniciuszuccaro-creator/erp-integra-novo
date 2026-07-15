@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
           descricao: `Contrato ${contrato.numero_contrato} propagado para ${ok} empresas (${fail} falhas)`,
           data_hora: new Date().toISOString(),
         });
-      } catch (_) {}
+      } catch (_) { console.error('[onContratoGroupReplication] catch:', _); }
 
       return Response.json({ success: true, direction: 'down', ok, fail });
     }
@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
           descricao: `Contrato ${contrato.numero_contrato} sincronizado empresa→grupo`,
           data_hora: new Date().toISOString(),
         });
-      } catch (_) {}
+      } catch (_) { console.error('[onContratoGroupReplication] catch:', _); }
 
       return Response.json({ success: true, direction: 'up', synced_fields: Object.keys(patch) });
     }

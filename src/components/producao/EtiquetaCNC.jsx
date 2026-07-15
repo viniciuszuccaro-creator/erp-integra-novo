@@ -26,11 +26,11 @@ export default function EtiquetaCNC({ item, pedido }) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end gap-2 no-print">
-        <Button data-permission="Producao.EtiquetaCNC.exportar" onClick={handleImprimir} className="bg-blue-600">
+        <Button onClick={handleImprimir} className="bg-blue-600">
           <Printer className="w-4 h-4 mr-2" />
           Imprimir
         </Button>
-        <Button data-permission="Producao.EtiquetaCNC.exportar" onClick={handleDownloadPDF} variant="outline">
+        <Button onClick={handleDownloadPDF} variant="outline">
           <Download className="w-4 h-4 mr-2" />
           Download PDF
         </Button>

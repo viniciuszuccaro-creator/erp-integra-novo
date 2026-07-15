@@ -90,13 +90,13 @@ export default function TabelaPrecoFormCompleto({ tabela, onSubmit, windowMode =
         <div className="flex gap-2">
           {tabela && (
             <>
-              <Button type="button" variant="outline" data-permission="Cadastros.TabelaPreco.alterarStatus" onClick={handleAlternarStatus} disabled={!podeEditar || !contextoValido} className={formData.ativo ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}>
+              <Button type="button" variant="outline" onClick={handleAlternarStatus} disabled={!podeEditar || !contextoValido} className={formData.ativo ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}>
                 {formData.ativo ? <><PowerOff className="w-4 h-4 mr-2" />Inativar</> : <><Power className="w-4 h-4 mr-2" />Ativar</>}
               </Button>
-              <Button type="button" variant="destructive" data-permission="Cadastros.TabelaPreco.excluir" onClick={handleExcluir} disabled={!podeExcluir || !contextoValido}><Trash2 className="w-4 h-4 mr-2" />Excluir</Button>
+              <Button type="button" variant="destructive" onClick={handleExcluir} disabled={!podeExcluir || !contextoValido}><Trash2 className="w-4 h-4 mr-2" />Excluir</Button>
             </>
           )}
-          <Button type="button" data-permission="Comercial.TabelaPreco.salvar" onClick={handleSalvar} disabled={salvando || !podeAvancar || !contextoValido || (tabela?.id ? !podeEditar : !podeCriar)} className="bg-green-600 hover:bg-green-700 min-w-[180px]" data-permission="Comercial.TabelaPreco.editar">
+          <Button type="button" onClick={handleSalvar} disabled={salvando || !podeAvancar || !contextoValido || (tabela?.id ? !podeEditar : !podeCriar)} className="bg-green-600 hover:bg-green-700 min-w-[180px]">
             {salvando && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}{!salvando && <Save className="w-4 h-4 mr-2" />}{tabela ? 'Salvar Alterações' : 'Criar Tabela'}
           </Button>
         </div>

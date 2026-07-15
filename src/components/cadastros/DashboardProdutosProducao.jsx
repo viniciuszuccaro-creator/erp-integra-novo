@@ -97,7 +97,6 @@ export default function DashboardProdutosProducao({ onAbrirConversao }) {
         
         {onAbrirConversao && (
           <Button
-            data-permission="Cadastros.Produto.converter"
             onClick={onAbrirConversao}
             className="bg-orange-600 hover:bg-orange-700"
           >

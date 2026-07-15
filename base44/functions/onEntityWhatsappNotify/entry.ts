@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
           acao: 'Erro', modulo: 'Integrações', tipo_auditoria: 'integracao', entidade: 'WhatsApp',
           descricao: e?.message || String(e), empresa_id: empresaId || null, group_id: groupId || null,
           data_hora: new Date().toISOString()
-        }); } catch {}
+        }); } catch (e) { console.error('[onEntityWhatsappNotify] catch:', e); }
         return { error: e?.message || String(e) };
       }
     }

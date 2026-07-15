@@ -22,7 +22,7 @@ export default function usePermissions() {
         const status = err?.response?.status || err?.status;
         // Perfil órfão (404): limpa referência e para loop
         if (status === 404 || /not found/i.test(err?.message || '')) {
-          try { await base44.auth.updateMe({ perfil_acesso_id: null }); } catch (_) {}
+          try { await base44.auth.updateMe({ perfil_acesso_id: null }); } catch (_) { console.error('[lib] catch:', _); }
           return null;
         }
         // Qualquer outro erro: retorna null sem bloquear (fail-open)

@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
         dados_novos: { ok, totalOrfaos },
         data_hora: new Date().toISOString(),
       });
-    } catch (_) {}
+    } catch (_) { console.error('[validatePropagationBidirectional] catch:', _); }
 
     return Response.json({
       success: true,

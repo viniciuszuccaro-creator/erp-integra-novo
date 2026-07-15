@@ -63,7 +63,7 @@ export default function useAdvancedNotifications() {
               <p><strong>Data:</strong> ${new Date().toLocaleString('pt-BR')}</p>
             `,
           });
-        } catch (_) {}
+        } catch (_) { console.error('[lib] catch:', _); }
       }, config.delay);
     }
 
@@ -75,7 +75,7 @@ export default function useAdvancedNotifications() {
             phone: empresaAtual?.admin_whatsapp,
             message: `🚨 *${title}*\n\n${description}\n\nNível: ${level}\nData: ${new Date().toLocaleString('pt-BR')}`,
           });
-        } catch (_) {}
+        } catch (_) { console.error('[lib] catch:', _); }
       }, config.delay);
     }
 
@@ -99,7 +99,7 @@ export default function useAdvancedNotifications() {
               }),
             });
           }
-        } catch (_) {}
+        } catch (_) { console.error('[lib] catch:', _); }
       }, config.delay);
     }
 
@@ -116,7 +116,7 @@ export default function useAdvancedNotifications() {
         empresa_id: empresaAtual?.id,
         data_hora: new Date().toISOString(),
       });
-    } catch (_) {}
+    } catch (_) { console.error('[lib] catch:', _); }
 
     notificationHistoryRef.current.set(notificationKey, Date.now());
   }, [toast, empresaAtual?.id, empresaAtual?.admin_email, empresaAtual?.admin_whatsapp, empresaAtual?.webhook_url]);

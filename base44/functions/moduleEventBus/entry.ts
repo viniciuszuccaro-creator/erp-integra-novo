@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
           group_id: group_id || null,
           data_hora: new Date().toISOString(),
         });
-      } catch (_) {}
+      } catch (_) { console.error('[moduleEventBus] catch:', _); }
 
       return Response.json({ ok: true, event_id: eventId, event });
     }

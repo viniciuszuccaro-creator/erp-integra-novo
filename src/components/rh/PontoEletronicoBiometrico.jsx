@@ -65,7 +65,6 @@ export default function PontoEletronicoBiometrico() {
                   variant={h.colaboradorSelecionado?.id === colab.id ? "default" : "outline"}
                   className="justify-start h-auto py-3"
                   onClick={() => h.setColaboradorSelecionado(colab)}
-                  data-permission="RH.Ponto.visualizar"
                 >
                   <div className="flex items-center gap-3 w-full">
                     <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
@@ -113,7 +112,6 @@ export default function PontoEletronicoBiometrico() {
               return (
                 <Button
                   key={action.tipo}
-                  data-permission="RH.Ponto.registrar"
                   onClick={() => h.handleRegistrarPonto(action.tipo)}
                   disabled={!h.colaboradorSelecionado}
                   className={`h-24 flex-col gap-2 ${action.color}`}

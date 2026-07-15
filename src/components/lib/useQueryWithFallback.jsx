@@ -41,7 +41,7 @@ export function useQueryWithFallback(storageKey, queryOptions, emptyValue = []) 
   if (result.data !== undefined && result.data !== null) {
     try {
       localStorage.setItem(`qfb_${storageKey}`, JSON.stringify(result.data));
-    } catch (_) {}
+    } catch (_) { console.error('[lib] catch:', _); }
   }
 
   return result;

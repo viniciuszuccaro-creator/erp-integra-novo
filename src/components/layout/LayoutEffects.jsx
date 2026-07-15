@@ -83,12 +83,12 @@ export default function LayoutEffects({
                   empresa_id: empresaAtual?.id || null, group_id: grupoAtual?.id || null,
                 });
               }
-            } catch {} })();
+            } catch (e) { console.error('[layout] catch:', e); } })();
           },
         },
         mutations: { retry: 0 },
       });
-    } catch {}
+    } catch (e) { console.error('[layout] catch:', e); }
   }, [user?.id, empresaAtual?.id, grupoAtual?.id, moduleName, currentPageName]);
 
   // 5. Auditoria de navegação (throttle: 1 log por rota por sessão)
@@ -111,7 +111,7 @@ export default function LayoutEffects({
           data_hora: new Date().toISOString(),
         });
       }
-    } catch {} })();
+    } catch (e) { console.error('[layout] catch:', e); } })();
   }, [location.pathname, user?.id, empresaAtual?.id, moduleName]);
 
   // 6. Auditoria de bloqueio de módulo — limpa cache de sessão ao trocar empresa/grupo
@@ -119,7 +119,7 @@ export default function LayoutEffects({
     // P5: reseta auditorias de bloqueio ao mudar contexto multiempresa
     try {
       Object.keys(sessionStorage).filter(k => k.startsWith('audit_block_')).forEach(k => sessionStorage.removeItem(k));
-    } catch {}
+    } catch (e) { console.error('[layout] catch:', e); }
   }, [empresaAtual?.id, grupoAtual?.id]);
 
   useEffect(() => {
@@ -140,7 +140,7 @@ export default function LayoutEffects({
           data_hora: new Date().toISOString(),
         });
       }
-    } catch {}
+    } catch (e) { console.error('[layout] catch:', e); }
   }, [moduleName, currentPageName, user?.id, empresaAtual?.id, grupoAtual?.id]);
 
   // 7. Entity subscriptions para auditoria + stamping
@@ -194,13 +194,13 @@ export default function LayoutEffects({
             }
             if ("empresa_id" in data && !data?.empresa_id && empresaAtual?.id) patch.empresa_id = empresaAtual.id;
             if (Object.keys(patch).length > 0) {
-              try { await base44.entities?.[name]?.update?.(evt.id, patch); } catch {}
+              try { await base44.entities?.[name]?.update?.(evt.id, patch); } catch (e) { console.error('[layout] catch:', e); }
             }
           }
           (queryMap[name] || []).forEach((qk) => {
-            try { queryClient.invalidateQueries({ queryKey: qk }); } catch {}
+            try { queryClient.invalidateQueries({ queryKey: qk }); } catch (e) { console.error('[layout] catch:', e); }
           });
-        } catch {}
+        } catch (e) { console.error('[layout] catch:', e); }
       });
     }).filter(Boolean);
 
@@ -209,7 +209,7 @@ export default function LayoutEffects({
 
   // 8. IDB cleanup on idle
   useEffect(() => {
-    const cleanup = () => { try { idbClearExpired(); } catch {} };
+    const cleanup = () => { try { idbClearExpired(); } catch (e) { console.error('[layout] catch:', e); } };
     if ("requestIdleCallback" in window) window.requestIdleCallback(cleanup, { timeout: 10000 });
     else setTimeout(cleanup, 8000);
   }, []);
@@ -224,8 +224,8 @@ export default function LayoutEffects({
         if (await base44.auth.isAuthenticated()) {
           await base44.functions.invoke("deployAudit", { event: "app_loaded", module: moduleName || "Sistema", page: currentPageName });
         }
-      } catch {} })(); }, 2000); // atraso para não bloquear carregamento inicial
-    } catch {}
+      } catch (e) { console.error('[layout] catch:', e); } })(); }, 2000); // atraso para não bloquear carregamento inicial
+    } catch (e) { console.error('[layout] catch:', e); }
   }, [user?.id]);
 
   // 10. Offline cache hydration
@@ -238,11 +238,11 @@ export default function LayoutEffects({
           const val = JSON.parse(localStorage.getItem(k) || "null");
           if (val != null) {
             const match = k.match(/^rq_(.*)_/);
-            if (match) { try { queryClient.setQueryData(JSON.parse(match[1]), val); } catch {} }
+            if (match) { try { queryClient.setQueryData(JSON.parse(match[1]), val); } catch (e) { console.error('[layout] catch:', e); } }
           }
-        } catch {}
+        } catch (e) { console.error('[layout] catch:', e); }
       });
-    } catch {}
+    } catch (e) { console.error('[layout] catch:', e); }
   }, [isOffline]);
 
   // 11. PWA manifest injection + service worker registration
@@ -282,21 +282,21 @@ export default function LayoutEffects({
         csp.setAttribute("http-equiv", "Content-Security-Policy");
         csp.setAttribute("content", "upgrade-insecure-requests; default-src 'self' https: data: blob:; connect-src 'self' https: wss:; img-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https:; frame-ancestors 'self'; object-src 'none'");
         if (!csp.parentElement) document.head.appendChild(csp);
-      } catch {}
+      } catch (e) { console.error('[layout] catch:', e); }
 
       try {
         if (window.location.protocol === "http:" && window.location.hostname !== "localhost") {
           window.location.replace("https://" + window.location.host + window.location.pathname + window.location.search + window.location.hash);
         }
-      } catch {}
-    } catch {}
+      } catch (e) { console.error('[layout] catch:', e); }
+    } catch (e) { console.error('[layout] catch:', e); }
 
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
         fetch("/functions/pwaSw", { method: "HEAD" }).then((res) => {
           if (!res.ok) return;
           navigator.serviceWorker.register("/functions/pwaSw").then((reg) => {
-            if (reg && reg.waiting) { try { reg.waiting.postMessage({ type: "SKIP_WAITING" }); } catch {} }
+            if (reg && reg.waiting) { try { reg.waiting.postMessage({ type: "SKIP_WAITING" }); } catch (e) { console.error('[layout] catch:', e); } }
             reg.onupdatefound = () => {
               const nw = reg.installing;
               if (!nw) return;
@@ -311,11 +311,11 @@ export default function LayoutEffects({
                         empresa_id: empresaAtual?.id || null, group_id: grupoAtual?.id || null,
                       });
                     }
-                  } catch {} })();
+                  } catch (e) { console.error('[layout] catch:', e); } })();
                 }
               };
             };
-            try { setInterval(() => { try { reg.update(); } catch {} }, 60 * 60 * 1000); } catch {}
+            try { setInterval(() => { try { reg.update(); } catch (e) { console.error('[layout] catch:', e); } }, 60 * 60 * 1000); } catch (e) { console.error('[layout] catch:', e); }
             try {
               navigator.serviceWorker.addEventListener("controllerchange", () => {
                 (async () => { try {
@@ -327,9 +327,9 @@ export default function LayoutEffects({
                       empresa_id: empresaAtual?.id || null, group_id: grupoAtual?.id || null,
                     });
                   }
-                } catch {} })();
+                } catch (e) { console.error('[layout] catch:', e); } })();
               });
-            } catch {}
+            } catch (e) { console.error('[layout] catch:', e); }
           }).catch(() => {});
         }).catch(() => {});
       });
@@ -344,7 +344,7 @@ export default function LayoutEffects({
       try {
         const curr = JSON.parse(localStorage.getItem(indexKey) || "[]");
         if (!curr.includes(k)) { curr.push(k); localStorage.setItem(indexKey, JSON.stringify(curr)); }
-      } catch {}
+      } catch (e) { console.error('[layout] catch:', e); }
     };
     const sub = cache.subscribe((event) => {
       try {
@@ -353,7 +353,7 @@ export default function LayoutEffects({
         if (state?.data === undefined) return;
         const sk = `rq_${JSON.stringify(q.queryKey)}_${empresaAtual?.id || ""}_${grupoAtual?.id || ""}`;
         localStorage.setItem(sk, JSON.stringify(state.data)); addToIndex(sk);
-      } catch {}
+      } catch (e) { console.error('[layout] catch:', e); }
     });
     return () => { if (typeof sub === "function") sub(); };
   }, [queryClient, empresaAtual?.id, grupoAtual?.id]);

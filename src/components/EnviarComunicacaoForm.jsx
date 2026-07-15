@@ -283,7 +283,6 @@ export default function EnviarComunicacaoForm({ pedido, tipo = "manual", onEnvia
           type="button"
           onClick={handleEnviar}
           disabled={enviando}
-          data-permission="Comercial.Comunicacao.enviar"
           className={canal === "email" ? "bg-blue-600" : "bg-green-600"}
         >
           {enviando ? (

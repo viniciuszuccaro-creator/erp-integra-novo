@@ -8,7 +8,7 @@ async function getUserAndPerfil(base44) {
     if (user?.perfil_acesso_id) {
       perfil = await base44.asServiceRole.entities.PerfilAcesso.get(user.perfil_acesso_id);
     }
-  } catch {}
+  } catch (e) { console.error('[applyInventoryAdjustments] catch:', e); }
   return { user, perfil };
 }
 
@@ -78,7 +78,7 @@ async function assertPermission(base44, ctx, moduleName, section, action) {
         descricao: `Ação negada no backend: ${moduleName}/${section || '-'} → ${action}`,
         data_hora: new Date().toISOString(),
       });
-    } catch {}
+    } catch (e) { console.error('[applyInventoryAdjustments] catch:', e); }
     return Response.json({ error: 'Forbidden' }, { status: 403 });
   }
   return null;
@@ -206,7 +206,7 @@ async function handleApplyInventoryAdjustments(base44, ctx, inv, user) {
       dados_novos: { movimentos: produtoIds },
       data_hora: new Date().toISOString(),
     });
-  } catch {}
+  } catch (e) { console.error('[applyInventoryAdjustments] catch:', e); }
 
   return { movimentos: produtoIds, movimentos_count: produtoIds.length, skipped: false };
 }
@@ -291,7 +291,7 @@ Deno.serve(async (req) => {
           entrega_ids: payload?.entrega_ids || []
         });
       }
-    } catch (_) {}
+    } catch (_) { console.error('[applyInventoryAdjustments] catch:', _); }
 
     return Response.json({ ok: true, movimentos_count: result.movimentos_count });
   } catch (e) {

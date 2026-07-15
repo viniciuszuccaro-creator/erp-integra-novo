@@ -154,7 +154,7 @@ export default function AgendamentoRelatorios({ empresaId }) {
           </>
         )}
 
-        <Button data-permission="Relatorios.AgendamentoRelatorios.salvar"
+        <Button
           onClick={() => salvarMutation.mutate(agendamento)}
           disabled={salvarMutation.isPending}
           className="w-full"

@@ -8,7 +8,7 @@ async function getUserAndPerfil(base44) {
     if (user?.perfil_acesso_id) {
       perfil = await base44.asServiceRole.entities.PerfilAcesso.get(user.perfil_acesso_id);
     }
-  } catch {}
+  } catch (e) { console.error('[applyOrderStockMovements] catch:', e); }
   return { user, perfil };
 }
 
@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
           user_agent: userAgent,
           data_hora: new Date().toISOString(),
         });
-      } catch (_) {}
+      } catch (_) { console.error('[applyOrderStockMovements] catch:', _); }
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 

@@ -55,13 +55,13 @@ Deno.serve(async (req) => {
         empresa_id: entityData.empresa_id,
       });
       syncResult = res?.data;
-    } catch (_) {}
+    } catch (_) { console.error('[syncEmpresaToGroup] catch:', _); }
 
     // 3. Sync direto no documento-pai (via documento_grupo_id) como fallback
     if (entityData.documento_grupo_id && Object.keys(updates).length > 0) {
       try {
         await base44.asServiceRole.entities[entity_name].update(entityData.documento_grupo_id, updates);
-      } catch (_) {}
+      } catch (_) { console.error('[syncEmpresaToGroup] catch:', _); }
     }
 
     // Audit
@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
         dados_novos: updates,
         data_hora: new Date().toISOString(),
       });
-    } catch (_) {}
+    } catch (_) { console.error('[syncEmpresaToGroup] catch:', _); }
 
     return Response.json({
       success: true,

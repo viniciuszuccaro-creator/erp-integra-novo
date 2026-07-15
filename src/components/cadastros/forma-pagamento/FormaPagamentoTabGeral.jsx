@@ -18,7 +18,7 @@ export default function FormaPagamentoTabGeral({ formData, setFormData, podeSalv
       <div><Label>Ícone</Label><Select value={formData.icone} onValueChange={(v) => setFormData({ ...formData, icone: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{ICONES.map(({ icon, label }) => <SelectItem key={icon} value={icon}>{icon} {label}</SelectItem>)}</SelectContent></Select></div>
       <div><Label>Cor (Hex)</Label><Input value={formData.cor} onChange={(e) => setFormData({ ...formData, cor: e.target.value })} placeholder="#10b981" /></div>
       <div><Label>Ordem Exibição</Label><Input type="number" value={formData.ordem_exibicao} onChange={(e) => setFormData({ ...formData, ordem_exibicao: parseInt(e.target.value) || 0 })} /></div>
-      <div className="flex items-center gap-2 pt-6"><Switch checked={formData.ativa} onCheckedChange={(v) => setFormData({ ...formData, ativa: v })} disabled={!podeSalvar} data-permission="Cadastros.FormaPagamento.alterarStatus" data-sensitive="true" /><Label>Ativa</Label></div>
+      <div className="flex items-center gap-2 pt-6"><Switch checked={formData.ativa} onCheckedChange={(v) => setFormData({ ...formData, ativa: v })} disabled={!podeSalvar} data-sensitive="true" /><Label>Ativa</Label></div>
     </div>
   );
 }

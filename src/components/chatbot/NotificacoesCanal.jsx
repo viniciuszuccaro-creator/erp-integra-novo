@@ -195,7 +195,7 @@ export default function NotificacoesCanal({ canalConfig }) {
         </div>
 
         {/* Salvar */}
-        <Button data-permission="Chatbot.NotificacoesCanal.salvar"
+        <Button
           onClick={() => salvarMutation.mutate()}
           disabled={salvarMutation.isPending}
           className="w-full bg-blue-600 hover:bg-blue-700"

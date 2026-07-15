@@ -145,7 +145,7 @@ export default function ChatbotMulticanal() {
             </h1>
             <p className="text-slate-600 mt-1">Gerencie todos os canais de comunicação</p>
           </div>
-          <Button data-permission="Chatbot.ChatbotMulticanal.atualizar" onClick={() => queryClient.invalidateQueries({ queryKey: ['configs-canais-multi'] })}>
+          <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['configs-canais-multi'] })}>
             <RefreshCw className="w-4 h-4 mr-2" />
             Atualizar
           </Button>

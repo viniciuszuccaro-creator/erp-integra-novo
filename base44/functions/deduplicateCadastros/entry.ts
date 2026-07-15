@@ -332,7 +332,7 @@ async function auditEntity(base44, entityName, groupId) {
               if (ref[refField]) referencedIds.add(ref[refField]);
             }
           }
-        } catch {}
+        } catch (e) { console.error('[deduplicateCadastros] catch:', e); }
       }
 
       registrosSemUso = activeRecords
@@ -358,7 +358,7 @@ async function auditEntity(base44, entityName, groupId) {
               });
             }
           }
-        } catch {}
+        } catch (e) { console.error('[deduplicateCadastros] catch:', e); }
       }
     }
 
@@ -654,7 +654,7 @@ async function auditConsumoRegistros(base44, targetEntities) {
             quebrados: totalBroken,
           });
           if (totalValid > 0) referenciasValidas.push(ref);
-        } catch {}
+        } catch (e) { console.error('[deduplicateCadastros] catch:', e); }
       }
 
       const hasProblemas = problemas.length > 0 || camposComDados.some(c => c.quebrados > 0);
@@ -725,14 +725,14 @@ async function auditDependencias(base44, targetEntities) {
         if (!refApi) continue;
         // Verifica se existe pelo menos 1 registro que referencia
         let sample = [];
-        try { sample = await refApi.filter({}, '-id', 1) || []; } catch {}
+        try { sample = await refApi.filter({}, '-id', 1) || []; } catch (e) { console.error('[deduplicateCadastros] catch:', e); }
         relacionamentos.push({
           entidade_consumidora: ref.entity,
           campo: ref.field,
           integro: true,
           total_modulos_que_usam: modulos.length,
         });
-      } catch {}
+      } catch (e) { console.error('[deduplicateCadastros] catch:', e); }
     }
 
     resultado[entityName] = {
@@ -762,7 +762,7 @@ async function auditModulosOperacionais(base44) {
         if (!api) { entidadesStatus.push({ entidade: entityName, status: 'Erro', error: 'not found' }); continue; }
         let count = 0;
         let batch = [];
-        try { batch = await api.list('-id', 1, 0) || []; } catch {}
+        try { batch = await api.list('-id', 1, 0) || []; } catch (e) { console.error('[deduplicateCadastros] catch:', e); }
         // Não conseguimos count direto, mas se list retorna algo, está acessível
         entidadesStatus.push({
           entidade: entityName,
@@ -805,7 +805,7 @@ async function auditSyncGrupoEmpresa(base44, targetEntities) {
       if (batch.length < 200) break;
       skip += 200;
     }
-  } catch {}
+  } catch (e) { console.error('[deduplicateCadastros] catch:', e); }
 
   const grupoIds = [...new Set(empresas.map(e => e.group_id).filter(Boolean))];
   const empresaIds = empresas.map(e => e.id);
@@ -909,7 +909,7 @@ async function auditIntegridadeOperacoes(base44) {
       if (!api) { resultado.push({ ...step, status: 'Erro', error: 'Entity not found' }); continue; }
 
       let sample = [];
-      try { sample = await api.list('-created_date', 50, 0) || []; } catch {}
+      try { sample = await api.list('-created_date', 50, 0) || []; } catch (e) { console.error('[deduplicateCadastros] catch:', e); }
 
       const camposValidados = [];
       const camposComProblema = [];
@@ -1062,9 +1062,9 @@ Deno.serve(async (req) => {
                     if (!refApi) continue;
                     const refs = await refApi.filter({ [ref.field]: dup.id }, '-id', 500) || [];
                     for (const r of refs) {
-                      try { await refApi.update(r.id, { [ref.field]: keepRec.id }); entityRefsUpdated++; } catch {}
+                      try { await refApi.update(r.id, { [ref.field]: keepRec.id }); entityRefsUpdated++; } catch (e) { console.error('[deduplicateCadastros] catch:', e); }
                     }
-                  } catch {}
+                  } catch (e) { console.error('[deduplicateCadastros] catch:', e); }
                 }
 
                 // Hard-delete o duplicado
@@ -1083,7 +1083,7 @@ Deno.serve(async (req) => {
                     dados_novos: { kept_id: keepRec.id, kept_name: getNome(keepRec) },
                     data_hora: new Date().toISOString(),
                   });
-                } catch {}
+                } catch (e) { console.error('[deduplicateCadastros] catch:', e); }
               } catch (err) {
                 errorsList.push({ id: dup.id, error: err.message });
                 totalErrors++;
@@ -1138,14 +1138,14 @@ Deno.serve(async (req) => {
               if (!refApi) continue;
               const refs = await refApi.filter({ [ref.field]: removeId }, '-id', 500) || [];
               for (const r of refs) {
-                try { await refApi.update(r.id, { [ref.field]: keepId }); refsUpdated++; } catch {}
+                try { await refApi.update(r.id, { [ref.field]: keepId }); refsUpdated++; } catch (e) { console.error('[deduplicateCadastros] catch:', e); }
               }
-            } catch {}
+            } catch (e) { console.error('[deduplicateCadastros] catch:', e); }
           }
 
           try {
             await api.update(removeId, { ativo: false, status: 'Inativo', _merged_into: keepId });
-          } catch {}
+          } catch (e) { console.error('[deduplicateCadastros] catch:', e); }
 
           try {
             await base44.asServiceRole.entities.AuditLog.create({
@@ -1158,7 +1158,7 @@ Deno.serve(async (req) => {
               dados_novos: { id: keepId, refs_updated: refsUpdated },
               data_hora: new Date().toISOString(),
             });
-          } catch {}
+          } catch (e) { console.error('[deduplicateCadastros] catch:', e); }
 
           merged.push({ ...dup, refs_updated: refsUpdated });
         } catch (error) {
@@ -1232,7 +1232,7 @@ Deno.serve(async (req) => {
           dados_novos: { summary712, entities_count: targetEntitiesFor712.length, passos: [7,8,9,10,11,12] },
           data_hora: new Date().toISOString(),
         });
-      } catch {}
+      } catch (e) { console.error('[deduplicateCadastros] catch:', e); }
 
       return Response.json({
         ok: true,
@@ -1333,7 +1333,7 @@ Deno.serve(async (req) => {
         dados_novos: { summary, entities_count: targetEntities.length, passos: [1,2,3,4,5,6] },
         data_hora: new Date().toISOString(),
       });
-    } catch {}
+    } catch (e) { console.error('[deduplicateCadastros] catch:', e); }
 
     return Response.json({
       ok: true,

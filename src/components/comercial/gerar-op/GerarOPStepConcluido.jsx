@@ -58,7 +58,7 @@ export default function GerarOPStepConcluido({ opsGeradas, onFechar }) {
       </Card>
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="button" onClick={onFechar} data-permission="Producao.OrdemProducao.criar" className="bg-green-600 hover:bg-green-700">
+        <Button type="button" onClick={onFechar} className="bg-green-600 hover:bg-green-700">
           <CheckCircle className="w-4 h-4 mr-2" />
           Concluir
         </Button>

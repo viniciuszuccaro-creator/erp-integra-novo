@@ -93,7 +93,7 @@ async function criarPedido(clienteId, entidades, contexto) {
     if (contexto?.empresaId) clienteFiltro.empresa_id = contexto.empresaId;
     const c = await base44.entities.Cliente.filter(clienteFiltro);
     if (c?.[0]?.nome) clienteNome = c[0].nome;
-  } catch {}
+  } catch (e) { console.error('[intentEngine] catch:', e); }
 
   const numero = `WEB-${Date.now()}`;
   const valor = Number(entidades?.valor || 0);
@@ -120,7 +120,7 @@ async function criarPedido(clienteId, entidades, contexto) {
       empresa_id: contexto?.empresaId || null,
       data_hora: new Date().toISOString(),
     });
-  } catch {}
+  } catch (e) { console.error('[intentEngine] catch:', e); }
 
   return {
     tipo: 'pedido_criado',
@@ -146,7 +146,7 @@ async function gerarBoleto(clienteId, entidades, contexto) {
       sortField: 'updated_date', sortDirection: 'desc', limit: 1,
     });
     centroId = centros?.data?.[0]?.id || centros?.[0]?.id;
-  } catch {}
+  } catch (e) { console.error('[intentEngine] catch:', e); }
   try {
     const planos = await base44.functions.invoke('entityListSorted', {
       entityName: 'PlanoDeContas',
@@ -154,7 +154,7 @@ async function gerarBoleto(clienteId, entidades, contexto) {
       sortField: 'updated_date', sortDirection: 'desc', limit: 5,
     });
     planoId = planos?.data?.[0]?.id || planos?.[0]?.id;
-  } catch {}
+  } catch (e) { console.error('[intentEngine] catch:', e); }
 
   if (!centroId || !planoId) {
     return { tipo: 'erro', mensagem: 'Não consegui emitir boleto: configure Centro de Custo e Plano de Contas padrão para a empresa.' };
@@ -181,7 +181,7 @@ async function gerarBoleto(clienteId, entidades, contexto) {
     if (data?.url) {
       await base44.entities.ContaReceber.update(cr.id, { url_boleto_pdf: data.url });
     }
-  } catch {}
+  } catch (e) { console.error('[intentEngine] catch:', e); }
 
   try {
     await base44.entities.AuditLog.create({
@@ -192,7 +192,7 @@ async function gerarBoleto(clienteId, entidades, contexto) {
       empresa_id: contexto?.empresaId || null,
       data_hora: new Date().toISOString(),
     });
-  } catch {}
+  } catch (e) { console.error('[intentEngine] catch:', e); }
 
   return {
     tipo: 'boleto_gerado',

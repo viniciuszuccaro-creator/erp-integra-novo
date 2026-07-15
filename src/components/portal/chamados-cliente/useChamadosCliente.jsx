@@ -85,7 +85,7 @@ export default function useChamadosCliente(clienteId, clienteNome) {
           descricao: "Chamado aberto via Portal",
           data_hora: new Date().toISOString(),
         });
-      } catch (_) {}
+      } catch (_) { console.error('[chamados-cliente] catch:', _); }
     },
   });
 
@@ -113,10 +113,10 @@ export default function useChamadosCliente(clienteId, clienteNome) {
             dados_novos: { pontos_fidelidade: novo },
             data_hora: new Date().toISOString(),
           });
-        } catch {}
-      } catch (_) {}
-      try { await queryClient.invalidateQueries({ queryKey: ["portal-has-feedback"] }); } catch {}
-      try { await queryClient.invalidateQueries({ queryKey: ["cliente-portal"] }); } catch {}
+        } catch (e) { console.error('[chamados-cliente] catch:', e); }
+      } catch (_) { console.error('[chamados-cliente] catch:', _); }
+      try { await queryClient.invalidateQueries({ queryKey: ["portal-has-feedback"] }); } catch (e) { console.error('[chamados-cliente] catch:', e); }
+      try { await queryClient.invalidateQueries({ queryKey: ["cliente-portal"] }); } catch (e) { console.error('[chamados-cliente] catch:', e); }
     },
   });
 

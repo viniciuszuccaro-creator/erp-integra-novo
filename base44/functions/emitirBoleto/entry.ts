@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
       const cList = await base44.entities.Cliente.filter({ portal_usuario_id: me.id }, undefined, 1);
       const c = cList?.[0] || null;
       isPortalSelfAccess = !!(c && cr.cliente_id === c.id && cr.visivel_no_portal === true);
-    } catch (_) {}
+    } catch (_) { console.error('[emitirBoleto] catch:', _); }
 
     if (!isPortalSelfAccess) {
       try {

@@ -109,7 +109,7 @@ export default function CicloExecucaoPanel() {
         </div>
         <div className="flex items-center gap-2">
           {!inicializado && (
-            <Button data-permission="Sistema.PlanoMelhoria.executar" onClick={iniciarCiclo21} className="bg-green-600 hover:bg-green-700 text-white">
+            <Button onClick={iniciarCiclo21} className="bg-green-600 hover:bg-green-700 text-white">
               <Zap className="w-4 h-4 mr-2" /> Iniciar Ciclo 21
             </Button>
           )}

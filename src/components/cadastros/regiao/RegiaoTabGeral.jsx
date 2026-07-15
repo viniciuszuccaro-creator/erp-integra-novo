@@ -68,7 +68,7 @@ export default function RegiaoTabGeral({ formData, setFormData, novaCidade, setN
               {formData.cidades_abrangidas.map((cidade, index) => (
                 <div key={index} className="flex items-center justify-between bg-slate-50 p-2 rounded">
                   <span className="text-sm">{cidade.cidade} - {cidade.estado}{cidade.cep_inicial && ` (${cidade.cep_inicial} - ${cidade.cep_final})`}</span>
-                  <Button type="button" variant="ghost" size="sm" data-permission="Cadastros.RegiaoAtendimento.editar" onClick={() => removerCidade(index)}><Trash2 className="w-4 h-4 text-red-500" /></Button>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => removerCidade(index)}><Trash2 className="w-4 h-4 text-red-500" /></Button>
                 </div>
               ))}
             </div>

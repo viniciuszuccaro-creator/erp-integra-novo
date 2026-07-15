@@ -48,7 +48,7 @@ export default function ComissoesTab({ comissoes, pedidos, empresas = [] }) {
                   <SelectItem value="Cancelada">Cancelada</SelectItem>
                 </SelectContent>
               </Select>
-              <Button data-permission="Comercial.Comissao.criar" className="bg-purple-600 hover:bg-purple-700"
+              <Button className="bg-purple-600 hover:bg-purple-700"
                 onClick={async () => {
                   const { default: CalcularComissoesForm } = await import('./CalcularComissoesForm');
                   openWindow(CalcularComissoesForm, { pedidos: pedidos || [], onSubmit: () => queryClient.invalidateQueries({ queryKey: ['comissoes'] }), onCancel: () => {} }, { title: '📊 Calcular Comissões', width: 900, height: 700 });

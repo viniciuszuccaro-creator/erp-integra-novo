@@ -50,7 +50,7 @@ export default function HubAtendimentoFiltros({
             <option value="Baixa">⚪ Baixa</option>
           </select>
 
-          <Button variant="outline" size="sm" data-permission="HubAtendimento.Atendimento.visualizar" onClick={onRefresh} title="Atualizar">
+          <Button variant="outline" size="sm" onClick={onRefresh} title="Atualizar">
             <RefreshCw className="w-4 h-4" />
           </Button>
         </div>

@@ -103,7 +103,7 @@ export default function RelatorioVendas() {
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <CardTitle className="text-base">Faturamento Mensal</CardTitle>
-              <Button data-permission="Relatorios.RelatorioVendas.exportar" size="sm" variant="outline" onClick={() => exportarCSV(vendasMensais, 'vendas_mensais')}>
+              <Button size="sm" variant="outline" onClick={() => exportarCSV(vendasMensais, 'vendas_mensais')}>
                 <Download className="w-3 h-3 mr-1" /> CSV
               </Button>
             </div>
@@ -148,7 +148,7 @@ export default function RelatorioVendas() {
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <CardTitle className="text-base">Top 10 Clientes por Faturamento</CardTitle>
-              <Button data-permission="Relatorios.RelatorioVendas.exportar" size="sm" variant="outline" onClick={() => exportarCSV(top10Clientes, 'top_clientes')}>
+              <Button size="sm" variant="outline" onClick={() => exportarCSV(top10Clientes, 'top_clientes')}>
                 <Download className="w-3 h-3 mr-1" /> CSV
               </Button>
             </div>

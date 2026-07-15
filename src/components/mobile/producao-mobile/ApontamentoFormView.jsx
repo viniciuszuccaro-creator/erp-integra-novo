@@ -124,7 +124,7 @@ export default function ApontamentoFormView({
             <Button type="button" variant="outline" className="flex-1 h-14 bg-white text-lg" onClick={onCancel}>
               Cancelar
             </Button>
-            <Button type="submit" data-permission="Producao.Apontamento.salvar" className="flex-1 h-14 bg-green-600 hover:bg-green-700 text-lg" disabled={isSaving || !podeApontar}>
+            <Button type="submit" className="flex-1 h-14 bg-green-600 hover:bg-green-700 text-lg" disabled={isSaving || !podeApontar}>
               {isSaving ? 'Salvando...' : 'Registrar'}
             </Button>
           </div>

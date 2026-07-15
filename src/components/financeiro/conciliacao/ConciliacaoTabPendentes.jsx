@@ -34,7 +34,6 @@ export default function ConciliacaoTabPendentes({ extratosPendentes, onConciliar
                   <Button
                     size="sm"
                     variant="outline"
-                    data-permission="Financeiro.ConciliacaoBancaria.conciliar"
                     onClick={() => onConciliar(extrato)}
                     disabled={!podeEditar}
                   >

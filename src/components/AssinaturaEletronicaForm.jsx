@@ -65,7 +65,7 @@ export default function AssinaturaEletronicaForm({ documento, tipo = "contrato",
           <div>
             <div className="flex justify-between items-center mb-2">
               <Label>Desenhe sua assinatura *</Label>
-              <Button type="button" variant="ghost" size="sm" data-permission="Sistema.AssinaturaEletronica.assinar" onClick={limparAssinatura} disabled={assinaturaVazia}>
+              <Button type="button" variant="ghost" size="sm" onClick={limparAssinatura} disabled={assinaturaVazia}>
                 <Trash2 className="w-4 h-4 mr-2" />Limpar
               </Button>
             </div>
@@ -106,7 +106,7 @@ export default function AssinaturaEletronicaForm({ documento, tipo = "contrato",
           </Card>
 
           <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
-            <Button type="button" data-permission="Sistema.AssinaturaEletronica.assinar" onClick={assinarDocumento} disabled={assinando} className="bg-blue-600 hover:bg-blue-700">
+            <Button type="button" onClick={assinarDocumento} disabled={assinando} className="bg-blue-600 hover:bg-blue-700">
               {assinando ? (
                 <><Shield className="w-4 h-4 mr-2 animate-pulse" />Registrando...</>
               ) : (

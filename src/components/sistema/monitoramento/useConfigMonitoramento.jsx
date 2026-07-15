@@ -57,7 +57,7 @@ export default function useConfigMonitoramento({ empresaId, grupoId }) {
           descricao: "Configuração de monitoramento atualizada", dados_novos: stamped,
           sucesso: true, data_hora: new Date().toISOString(),
         });
-      } catch {}
+      } catch (e) { console.error('[monitoramento] catch:', e); }
       return result;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["config-monitoramento", scopeId] }); toast.success("✅ Configuração salva!"); },

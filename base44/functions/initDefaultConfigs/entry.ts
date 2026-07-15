@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
     if (group_id) {
       try {
         empresasDoGrupo = await base44.asServiceRole.entities.Empresa.filter({ group_id }, null, 50);
-      } catch (_) {}
+      } catch (_) { console.error('[initDefaultConfigs] catch:', _); }
     }
 
     // Contextos para salvar: global sempre + grupo (se informado) + todas empresas do grupo
@@ -157,7 +157,7 @@ Deno.serve(async (req) => {
         empresa_id: empresa_id || null,
         data_hora: new Date().toISOString(),
       });
-    } catch (_) {}
+    } catch (_) { console.error('[initDefaultConfigs] catch:', _); }
 
     return Response.json({
       ok: true,

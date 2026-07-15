@@ -148,7 +148,7 @@ Deno.serve(async (req) => {
           detalhes: `${criticos.length} perfil(is) com conflito de Segregação de Funções crítico: ${criticos.map(p => p.nome_perfil || p.id).slice(0,3).join(', ')}`
         });
       }
-    } catch {}
+    } catch (e) { console.error('[securityAlerts] catch:', e); }
 
     // 11) Tentativas de escrita em entidades admin-only por não-admin
     const adminOnlyBlocks = recent.filter((l) =>
@@ -181,7 +181,7 @@ Deno.serve(async (req) => {
         dados_novos: { suspicious, totais: byAction, analisados: recent.length },
         data_hora: new Date().toISOString(),
       });
-    } catch {}
+    } catch (e) { console.error('[securityAlerts] catch:', e); }
 
     // Obter admins para notificar
     const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' }, undefined, 20);
@@ -229,7 +229,7 @@ Deno.serve(async (req) => {
           } catch (_) { /* sem Slack conectado, segue sem erro */ }
         }
       }
-    } catch (_) {}
+    } catch (_) { console.error('[securityAlerts] catch:', _); }
 
     // WhatsApp opcional para gestores via Configuração do Sistema
     try {
@@ -243,7 +243,7 @@ Deno.serve(async (req) => {
           empresa_id: filtros?.empresa_id || null,
         });
       }
-    } catch (_) {}
+    } catch (_) { console.error('[securityAlerts] catch:', _); }
 
     return Response.json({ ok: true, alerts: suspicious.length, recipients: toList.length });
   } catch (error) {

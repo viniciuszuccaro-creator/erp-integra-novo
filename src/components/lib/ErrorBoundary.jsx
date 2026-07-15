@@ -25,7 +25,7 @@ export default class ErrorBoundary extends React.Component {
         dados_novos: { info },
         data_hora: new Date().toISOString(),
       });
-    } catch (_) {}
+    } catch (_) { console.error('[lib] catch:', _); }
   }
 
   handleRetry = () => {

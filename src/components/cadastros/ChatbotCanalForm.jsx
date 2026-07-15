@@ -134,7 +134,7 @@ export default function ChatbotCanalForm({ chatbotCanal, onSubmit, isSubmitting,
       </Card>
 
       <div className="flex justify-end gap-3">
-        <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={isSubmitting} data-permission="Cadastros.ChatbotCanal.salvar">
+        <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={isSubmitting}>
           <Save className="w-4 h-4 mr-2" />
           {isSubmitting ? 'Salvando...' : dadosIniciais ? 'Atualizar' : 'Criar'}
         </Button>

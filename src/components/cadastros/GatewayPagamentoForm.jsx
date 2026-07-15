@@ -262,7 +262,7 @@ export default function GatewayPagamentoForm({ gateway, windowMode = false, onSu
 
         <div className={windowMode ? "border-t bg-slate-50 p-4" : "mt-6"}>
           <div className="flex justify-end gap-3">
-            <Button type="submit" data-permission="Cadastros.GatewayPagamento.salvar" className="bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
               <CreditCard className="w-4 h-4 mr-2" />
               {gateway ? 'Atualizar Gateway' : 'Cadastrar Gateway'}
             </Button>

@@ -53,7 +53,7 @@ export default function GestaoAcessosIndex() {
         descricao: `Aba visualizada: ${next}`,
         data_hora: new Date().toISOString(),
       });
-    } catch {}
+    } catch (e) { console.error('[gestao-acessos] catch:', e); }
   };
 
   // Hooks SEMPRE antes de qualquer return condicional

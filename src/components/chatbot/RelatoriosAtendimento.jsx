@@ -187,7 +187,7 @@ export default function RelatoriosAtendimento() {
               <option value="90dias">Últimos 90 dias</option>
             </select>
 
-            <Button onClick={exportarRelatorio} variant="outline" data-permission="Chatbot.Relatorios.exportar">
+            <Button onClick={exportarRelatorio} variant="outline">
               <Download className="w-4 h-4 mr-2" />
               Exportar
             </Button>

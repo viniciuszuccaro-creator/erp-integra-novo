@@ -69,10 +69,10 @@ export default function TabelaPrecoItensTable({
               {podeEditar && (
                 <TableCell>
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" data-permission="Comercial.TabelaPreco.editar" onClick={() => handleEditItem(item)} title="Editar">
+                    <Button variant="ghost" size="icon" onClick={() => handleEditItem(item)} title="Editar">
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" data-permission="Comercial.TabelaPreco.excluir" onClick={() => handleDeleteItem(item)} title="Remover">
+                    <Button variant="ghost" size="icon" onClick={() => handleDeleteItem(item)} title="Remover">
                       <Trash2 className="w-4 h-4 text-red-600" />
                     </Button>
                   </div>
@@ -87,7 +87,7 @@ export default function TabelaPrecoItensTable({
           <Package className="w-16 h-16 text-slate-300 mx-auto mb-4" />
           <p className="text-slate-500">Nenhum produto cadastrado nesta tabela</p>
           {podeEditar && (
-            <Button onClick={() => setShowItemForm(true)} data-permission="Comercial.TabelaPreco.criar" className="mt-4 bg-green-600">
+            <Button onClick={() => setShowItemForm(true)} className="mt-4 bg-green-600">
               <Plus className="w-4 h-4 mr-2" /> Adicionar Primeiro Produto
             </Button>
           )}

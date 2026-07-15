@@ -17,12 +17,12 @@ export function loadCachedResults() {
     if (!raw) return {};
     const { ts, data } = JSON.parse(raw);
     if (Date.now() - ts < 60 * 60_000) return data;
-  } catch (_) {}
+  } catch (_) { console.error('[integridade-check] catch:', _); }
   return {};
 }
 
 export function saveCachedResults(data) {
-  try { localStorage.setItem(RESULT_CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch (_) {}
+  try { localStorage.setItem(RESULT_CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch (_) { console.error('[integridade-check] catch:', _); }
 }
 
 const PERFECT_ITEMS = {

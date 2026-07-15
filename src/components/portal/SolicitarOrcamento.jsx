@@ -44,7 +44,7 @@ export default function SolicitarOrcamento() {
       try {
         const c = await filterInContext('Cliente', { portal_usuario_id: user.id }, undefined, 1);
         if (Array.isArray(c) && c[0]) { empresaId = c[0].empresa_id || null; groupId = c[0].group_id || null; }
-      } catch {}
+      } catch (e) { console.error('[portal] catch:', e); }
       return await createInContext('Oportunidade', {
         titulo: data.titulo,
         descricao: data.descricao,
@@ -83,7 +83,7 @@ export default function SolicitarOrcamento() {
     },
     onError: (error) => {
       toast.error('Erro ao solicitar orçamento');
-      console.error(error);
+      console.error('[components/portal/SolicitarOrcamento.jsx] Error:', error);
     },
   });
 
@@ -102,7 +102,7 @@ export default function SolicitarOrcamento() {
       toast.success(`${files.length} arquivo(s) enviado(s)`);
     } catch (error) {
       toast.error('Erro ao enviar arquivos');
-      console.error(error);
+      console.error('[components/portal/SolicitarOrcamento.jsx] Error:', error);
     } finally {
       setUploadingFiles(false);
     }
@@ -242,7 +242,7 @@ export default function SolicitarOrcamento() {
           </div>
 
           <div className="flex gap-3">
-            <Button data-permission="Portal.SolicitarOrcamento.criar"
+            <Button
               type="submit"
               disabled={criarOportunidadeMutation.isPending}
               className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"

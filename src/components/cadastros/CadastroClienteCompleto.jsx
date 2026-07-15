@@ -72,7 +72,7 @@ export default function CadastroClienteCompleto({ cliente: clienteProp, item, da
           const col = colaboradores.find(c => c.email === user.email);
           if (col) setFormData(prev => ({ ...prev, vendedor_responsavel_id: col.id, vendedor_responsavel: col.nome_completo }));
         }
-      } catch (_) {}
+      } catch (_) { console.error('[cadastros] catch:', _); }
     };
     carregarUsuario();
   }, [colaboradores, cliente?.id]);
@@ -177,7 +177,7 @@ export default function CadastroClienteCompleto({ cliente: clienteProp, item, da
                         dados_antes: { status: statusAnterior }, dados_depois: { status: novoStatus },
                         data_hora: new Date().toISOString()
                       });
-                    } catch (_) {}
+                    } catch (_) { console.error('[cadastros] catch:', _); }
                   }}
                   className={formData.status === 'Ativo' ? 'border-orange-300 text-orange-700' : 'border-green-300 text-green-700'}
                 >
@@ -196,7 +196,7 @@ export default function CadastroClienteCompleto({ cliente: clienteProp, item, da
                         registro_id: cliente?.id, descricao: `Cliente "${formData.nome}" — Excluído`,
                         dados_antes: { status: formData.status, nome: formData.nome }, data_hora: new Date().toISOString()
                       });
-                    } catch (_) {}
+                    } catch (_) { console.error('[cadastros] catch:', _); }
                     deleteMutation.mutate(cliente.id);
                   }}
                   disabled={deleteMutation.isPending || !podeExcluir || !contextoValido}
@@ -216,7 +216,7 @@ export default function CadastroClienteCompleto({ cliente: clienteProp, item, da
                     registro_id: cliente?.id, descricao: `Cliente "${formData.nome}" — ${cliente?.id ? 'Atualizado' : 'Criado'}`,
                     data_hora: new Date().toISOString()
                   });
-                } catch (_) {}
+                } catch (_) { console.error('[cadastros] catch:', _); }
                 handleSave();
               }}
               disabled={saveMutation.isPending || !contextoValido || (cliente?.id ? !podeEditar : !podeCriar)}

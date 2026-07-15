@@ -53,7 +53,7 @@ export default function OportunidadesListagem({ oportunidades: propOps = [], win
     <div className="h-full w-full flex flex-col gap-4 p-4 overflow-auto">
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-xl font-bold flex items-center gap-2"><TrendingUp className="w-5 h-5 text-blue-600" /> Oportunidades</h2>
-        <Button size="sm" data-permission="CRM.Oportunidade.criar" onClick={() => openWindow(OportunidadeForm, { windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['oportunidades-list'] }) }, { title: 'Nova Oportunidade', width: 900, height: 650 })}>
+        <Button size="sm" onClick={() => openWindow(OportunidadeForm, { windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['oportunidades-list'] }) }, { title: 'Nova Oportunidade', width: 900, height: 650 })}>
           <Plus className="w-4 h-4 mr-1" /> Nova
         </Button>
       </div>
@@ -95,10 +95,10 @@ export default function OportunidadesListagem({ oportunidades: propOps = [], win
                   <TableCell>{op.responsavel}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" data-permission="CRM.Oportunidade.editar" onClick={() => openWindow(OportunidadeForm, { oportunidade: op, windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['oportunidades-list'] }) }, { title: `Editar: ${op.titulo}`, width: 900, height: 650 })}>
+                      <Button variant="ghost" size="icon" onClick={() => openWindow(OportunidadeForm, { oportunidade: op, windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['oportunidades-list'] }) }, { title: `Editar: ${op.titulo}`, width: 900, height: 650 })}>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" data-permission="CRM.Oportunidade.excluir" className="text-red-600" onClick={() => setItemParaExcluir(op)}>
+                      <Button variant="ghost" size="icon" className="text-red-600" onClick={() => setItemParaExcluir(op)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>

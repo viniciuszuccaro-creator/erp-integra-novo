@@ -7,7 +7,7 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     let user = null;
-    try { user = await base44.auth.me(); } catch (_) {}
+    try { user = await base44.auth.me(); } catch (_) { console.error('[propagateGroupConfigs] catch:', _); }
     if (user && user.role !== 'admin') {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
@@ -184,7 +184,7 @@ Deno.serve(async (req) => {
       // Bulk create (lotes de 100 para evitar timeout)
       for (let i = 0; i < toCreate.length; i += 100) {
         const chunk = toCreate.slice(i, i + 100);
-        try { await base44.asServiceRole.entities[entityName].bulkCreate(chunk); created += chunk.length; } catch (_) {}
+        try { await base44.asServiceRole.entities[entityName].bulkCreate(chunk); created += chunk.length; } catch (_) { console.error('[propagateGroupConfigs] catch:', _); }
       }
       // Bulk update (up to 500 per call) — deduplica por ID para evitar "Duplicate entity IDs"
       const updateById = new Map();
@@ -200,7 +200,7 @@ Deno.serve(async (req) => {
       const bulkUpdatePayload = [...updateById.values()];
       for (let i = 0; i < bulkUpdatePayload.length; i += 500) {
         const chunk = bulkUpdatePayload.slice(i, i + 500);
-        try { await base44.asServiceRole.entities[entityName].bulkUpdate(chunk); updated += chunk.length; } catch (_) {}
+        try { await base44.asServiceRole.entities[entityName].bulkUpdate(chunk); updated += chunk.length; } catch (_) { console.error('[propagateGroupConfigs] catch:', _); }
       }
       return { entity: entityName, created, updated, skipped, total_source: baseRegs.length, direction: 'grupo_to_empresas' };
     };
@@ -249,7 +249,7 @@ Deno.serve(async (req) => {
       // Bulk create missing records (lotes de 100)
       for (let i = 0; i < toCreate.length; i += 100) {
         const chunk = toCreate.slice(i, i + 100);
-        try { await base44.asServiceRole.entities[entityName].bulkCreate(chunk); created += chunk.length; } catch (_) {}
+        try { await base44.asServiceRole.entities[entityName].bulkCreate(chunk); created += chunk.length; } catch (_) { console.error('[propagateGroupConfigs] catch:', _); }
       }
       // Bulk update (up to 500 per call) — deduplica por ID
       const updateById2 = new Map();
@@ -263,7 +263,7 @@ Deno.serve(async (req) => {
       const bulkUpdatePayload2 = [...updateById2.values()];
       for (let i = 0; i < bulkUpdatePayload2.length; i += 500) {
         const chunk = bulkUpdatePayload2.slice(i, i + 500);
-        try { await base44.asServiceRole.entities[entityName].bulkUpdate(chunk); updated += chunk.length; } catch (_) {}
+        try { await base44.asServiceRole.entities[entityName].bulkUpdate(chunk); updated += chunk.length; } catch (_) { console.error('[propagateGroupConfigs] catch:', _); }
       }
       return { entity: entityName, created, updated, skipped, total_source: baseRegs.length, direction: 'empresa_to_grupo' };
     };
@@ -303,7 +303,7 @@ Deno.serve(async (req) => {
         dados_novos: { group_id: groupId, empresa_id: empresaId || null, direction, strategy, total_entidades: entidades.length, results },
         data_hora: new Date().toISOString()
       });
-    } catch {}
+    } catch (e) { console.error('[propagateGroupConfigs] catch:', e); }
 
     return Response.json({ ok: true, group_id: groupId, empresa_id: empresaId || null, direction, strategy, results });
   } catch (error) {

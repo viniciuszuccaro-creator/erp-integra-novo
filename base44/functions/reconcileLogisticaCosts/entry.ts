@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
         const rowsG = await base44.asServiceRole.entities.ConfiguracaoSistema.filter({ chave: 'log_finance_cfg_global' }, undefined, 1);
         cfg = rowsG?.[0]?.valor_json || null;
       }
-    } catch (_) {}
+    } catch (_) { console.error('[reconcileLogisticaCosts] catch:', _); }
 
     const centro_custo_id = cfg?.centro_custo_id || null;
     const plano_contas_id = cfg?.plano_contas_id || null;
@@ -195,7 +195,7 @@ Deno.serve(async (req) => {
                   await base44.asServiceRole.entities.ContaPagar.update(c.id, { alerta_taxa_divergente: true, observacoes: `(LOG) Desvio ${desvio.toFixed(1)}%` });
                 }
               }
-            } catch (_) {}
+            } catch (_) { console.error('[reconcileLogisticaCosts] catch:', _); }
             // Audit log
             try {
               await base44.asServiceRole.entities.AuditLog.create({
@@ -207,10 +207,10 @@ Deno.serve(async (req) => {
                 empresa_id: ent.empresa_id || null,
                 group_id: ent.group_id || null,
               });
-            } catch (_) {}
+            } catch (_) { console.error('[reconcileLogisticaCosts] catch:', _); }
           }
         }
-      } catch (_) {}
+      } catch (_) { console.error('[reconcileLogisticaCosts] catch:', _); }
     }
 
     return Response.json({ ok: true, processed, createdCP, updatedCP, createdCR, updatedCR, alerts, periodo: { startISO, endISO }, empresa_id: empresaId });

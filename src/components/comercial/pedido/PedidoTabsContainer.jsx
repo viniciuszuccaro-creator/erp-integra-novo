@@ -66,8 +66,8 @@ export default function PedidoTabsContainer({
             const res = await base44.functions.invoke('iaFinanceAnomalyScan', { pedido_id: pedido.id });
             if (res?.data?.anomaly === true) { ok = false; motivos.push('Anomalia financeira (IA)'); }
           }
-        } catch {}
-      } catch {}
+        } catch (e) { console.error('[pedido] catch:', e); }
+      } catch (e) { console.error('[pedido] catch:', e); }
       if (!cancel) setConformidade({ ok, motivos });
     };
     run();
@@ -84,7 +84,7 @@ export default function PedidoTabsContainer({
 
   const liberarEdicaoVendedor = async () => {
     setFormData(prev => ({ ...prev, __liberado_vendedor: true }));
-    try { await base44.entities.AuditLog.create({ acao: 'Aprovação', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido?.id, descricao: 'Vendedor liberou edição (conformidade + à vista)', data_hora: new Date().toISOString() }); } catch {}
+    try { await base44.entities.AuditLog.create({ acao: 'Aprovação', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido?.id, descricao: 'Vendedor liberou edição (conformidade + à vista)', data_hora: new Date().toISOString() }); } catch (e) { console.error('[pedido] catch:', e); }
     toast.success('Edição liberada (vendedor)');
   };
 
@@ -97,7 +97,7 @@ export default function PedidoTabsContainer({
   const solicitarLiberacao = async () => {
     try {
       await base44.functions.invoke('solicitacoesAprovacao', { tipo: 'pedido_edicao_em_transito', entidade: 'Pedido', entidade_id: pedido?.id });
-      try { await base44.entities.AuditLog.create({ acao: 'Aprovação', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido?.id, descricao: 'Solicitada liberação de edição (status bloqueado)', data_hora: new Date().toISOString() }); } catch {}
+      try { await base44.entities.AuditLog.create({ acao: 'Aprovação', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido?.id, descricao: 'Solicitada liberação de edição (status bloqueado)', data_hora: new Date().toISOString() }); } catch (e) { console.error('[pedido] catch:', e); }
       toast.success('Solicitação enviada ao gerente');
     } catch (e) {
       toast.error('Falha ao solicitar liberação');
@@ -106,7 +106,7 @@ export default function PedidoTabsContainer({
 
   const liberarEdicaoLocal = async () => {
     setFormData(prev => ({ ...prev, __liberado_gerencia: true }));
-    try { await base44.entities.AuditLog.create({ acao: 'Aprovação', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido?.id, descricao: 'Gerente liberou edição local', data_hora: new Date().toISOString() }); } catch {}
+    try { await base44.entities.AuditLog.create({ acao: 'Aprovação', modulo: 'Comercial', entidade: 'Pedido', registro_id: pedido?.id, descricao: 'Gerente liberou edição local', data_hora: new Date().toISOString() }); } catch (e) { console.error('[pedido] catch:', e); }
   };
 
    return (

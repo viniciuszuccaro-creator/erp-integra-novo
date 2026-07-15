@@ -92,7 +92,6 @@ export default function FormasPagamentoTabela({
                 </TableCell>
                 <TableCell>
                   <button
-                    data-permission="Cadastros.FormaPagamento.editar"
                     onClick={() => toggleAtivaMutation.mutate({ id: forma.id, ativa: !forma.ativa })}
                     disabled={!contextoValido || !podeEditar || toggleAtivaMutation.isPending}
                     className="flex items-center gap-1"
@@ -115,7 +114,6 @@ export default function FormasPagamentoTabela({
                     <Button
                       variant="ghost"
                       size="icon"
-                      data-permission="Cadastros.FormaPagamento.editar"
                       onClick={() => handleEditar(forma)}
                       disabled={!contextoValido || !podeEditar}
                       title="Editar"
@@ -125,7 +123,6 @@ export default function FormasPagamentoTabela({
                     <Button
                       variant="ghost"
                       size="icon"
-                      data-permission="Cadastros.FormaPagamento.excluir"
                       onClick={async () => {
                         const ok = await confirm({ title: "Excluir Forma de Pagamento", description: `Excluir "${forma.descricao}"?`, variant: "danger", confirmText: "Excluir" });
                         if (ok) deleteMutation.mutate(forma.id);

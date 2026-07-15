@@ -82,7 +82,7 @@ export default function useAutoRecovery(
               dados_novos: { strategy, delayMs },
               data_hora: new Date().toISOString(),
             });
-          } catch (_) {}
+          } catch (_) { console.error('[lib] catch:', _); }
         }
       } catch (error) {
         // Falhou, agenda próxima tentativa

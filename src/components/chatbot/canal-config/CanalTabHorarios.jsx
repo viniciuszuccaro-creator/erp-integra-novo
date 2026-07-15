@@ -33,7 +33,7 @@ export default function CanalTabHorarios({ config, onSave, isSaving }) {
           </div>
         ))}
         <div className="flex justify-end pt-4">
-          <Button data-permission="Chatbot.ConfiguracaoCanal.salvar" onClick={handleSave} disabled={isSaving} className="bg-blue-600">
+          <Button onClick={handleSave} disabled={isSaving} className="bg-blue-600">
             {isSaving ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}Salvar Horários
           </Button>
         </div>

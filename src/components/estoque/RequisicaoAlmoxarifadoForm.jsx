@@ -185,7 +185,7 @@ export default function RequisicaoAlmoxarifadoForm({ requisicao, onSubmit, windo
       </Card>
 
       <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
-        <Button type="submit" data-permission="Estoque.Requisicao.salvar" className="bg-orange-600 hover:bg-orange-700">
+        <Button type="submit" className="bg-orange-600 hover:bg-orange-700">
           <Save className="w-4 h-4 mr-2" />
           Registrar Requisição
         </Button>

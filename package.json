@@ -9,14 +9,14 @@
     "lint": "eslint .",
     "typecheck": "tsc -p ./jsconfig.json",
     "preview": "vite preview",
-    "test": "npm run test:validate",
+    "test": "node tests/run-all.mjs",
+    "test:unit": "node tests/unit/unit.test.mjs",
+    "test:integration": "node tests/integration/integration.test.mjs",
+    "test:e2e": "node tests/e2e/e2e-flows.test.mjs",
     "test:validate": "node tests/validate-erp.mjs",
-    "test:unit": "node tests/validate-erp.mjs",
-    "test:integration": "node tests/validate-erp.mjs",
-    "test:e2e": "echo 'E2E: Use o Testing Agent (ícone tubo de ensaio) — descreva o fluxo: \"Criar pedido como vendedor, aprovar como gerente, faturar\"'",
-    "test:rbac": "echo 'RBAC: Use o Testing Agent — \"Verificar que usuário sem permissão não vê botão de baixa manual no Financeiro\"'",
-    "test:multiempresa": "echo 'Multiempresa: Use o Testing Agent — \"Criar pedido na Empresa A, verificar que não aparece na Empresa B\"'",
-    "test:backend": "echo 'Backend: Use test_backend_function no chat para testar funções individualmente'"
+    "test:rbac": "node tests/unit/unit.test.mjs",
+    "test:multiempresa": "node tests/integration/integration.test.mjs",
+    "test:backend": "node tests/integration/integration.test.mjs"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.39",

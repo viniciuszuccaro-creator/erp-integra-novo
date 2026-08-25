@@ -1,23 +1,22 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, ShoppingCart, TrendingUp, FileText, Scale, Percent, Clock, CheckCircle2, Factory, Truck, Package, Layers, Boxes, XCircle, GitBranch } from 'lucide-react';
+import { Users, ShoppingCart, TrendingUp, FileText, CheckCircle2, Clock, Percent, Factory } from 'lucide-react';
 import { safeNumber } from '@/components/comercial/utils/comercialSafeData';
 
 /**
- * V21.4 KPIs Comercial — Ampliado com faturamento parcial, peso, margem, etapas, produção e entrega
+ * KPIs Comercial — apenas essenciais operacionais.
+ * V21.4: detalhes (peso, etapas, margem por tipo, fluxo de entrega) ficam dentro das abas/windows.
  */
 export default function KPIsComercial({
   totalClientes, clientesAtivos, totalPedidos, totalVendas, ticketMedio,
-  valorFaturado, valorPendenteFaturamento, pesoTotalVendido,
+  valorFaturado, valorPendenteFaturamento,
   pedidosFaturados, pedidosFaturamentoParcial, pedidosCancelados,
   margemBruta, margemPercentual, onDrillDown,
-  // V21.4: Novos KPIs
-  pesoFaturado, pesoPendenteFaturamento, margemFaturada,
+  // Mantidos na assinatura para compatibilidade do caller (Comercial.jsx), mas não renderizados aqui
+  pesoTotalVendido, pesoFaturado, pesoPendenteFaturamento, margemFaturada,
   totalEtapasEntrega, etapasFaturadas, etapasPendentes,
-  pedidosComProducao, pedidosSomenteRevenda,
-  percentualFaturado, ticketFaturado,
+  pedidosComProducao, pedidosSomenteRevenda, percentualFaturado, ticketFaturado,
   pedidosEmProducao, pedidosProntoFaturar, pedidosEmExpedicao, pedidosEmTransito, pedidosEntregues,
-  // V21.4: Quantidades e performance
   quantidadesPorTipo, quantidadeTotalItens, margemPorTipo,
   taxaEntregaSucesso, taxaCancelamento, funilStatus,
 }) {
@@ -25,18 +24,11 @@ export default function KPIsComercial({
   const ticket = safeNumber(ticketMedio);
   const fat = safeNumber(valorFaturado);
   const pend = safeNumber(valorPendenteFaturamento);
-  const peso = safeNumber(pesoTotalVendido);
-  const pesoFat = safeNumber(pesoFaturado);
-  const pesoPend = safeNumber(pesoPendenteFaturamento);
   const margem = safeNumber(margemBruta);
   const margemPct = safeNumber(margemPercentual);
-  const margemFat = safeNumber(margemFaturada);
   const pctFat = safeNumber(percentualFaturado);
-  const ticketFat = safeNumber(ticketFaturado);
 
   const fmtMoeda = (v) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-  const fmtPeso = (v) => v >= 1000 ? `${(v / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 2 })} ton` : `${v.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} kg`;
-  const fmtPct = (v) => `${v.toFixed(1)}%`;
 
   const CardBase = ({ icon: Icon, iconColor, title, value, sub, onClick, dataKey }) => (
     <Card className="border-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow" onClick={() => onClick?.(dataKey)}>
@@ -52,55 +44,15 @@ export default function KPIsComercial({
   );
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 min-h-[90px]">
-      {/* ── Vendas ── */}
+    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2 min-h-[90px]">
       <CardBase icon={Users} iconColor="text-blue-600" title="Clientes" value={totalClientes} sub={`${clientesAtivos} ativos`} onClick={onDrillDown} dataKey="clientes" />
       <CardBase icon={ShoppingCart} iconColor="text-purple-600" title="Pedidos" value={totalPedidos} sub={`${pedidosCancelados} cancelados`} onClick={onDrillDown} dataKey="pedidos" />
       <CardBase icon={TrendingUp} iconColor="text-green-600" title="Total Vendas" value={fmtMoeda(vendas)} onClick={onDrillDown} dataKey="vendas" />
       <CardBase icon={FileText} iconColor="text-orange-600" title="Ticket Médio" value={fmtMoeda(ticket)} onClick={onDrillDown} dataKey="ticket" />
-
-      {/* ── Faturamento ── */}
       <CardBase icon={CheckCircle2} iconColor="text-emerald-600" title="Faturado" value={fmtMoeda(fat)} sub={`${pctFat.toFixed(0)}% do total`} onClick={onDrillDown} dataKey="faturado" />
       <CardBase icon={Clock} iconColor="text-amber-600" title="Pend. Faturar" value={fmtMoeda(pend)} sub={pedidosFaturamentoParcial > 0 ? `${pedidosFaturamentoParcial} parciais` : undefined} onClick={onDrillDown} dataKey="pendente" />
-      <CardBase icon={FileText} iconColor="text-emerald-700" title="Ticket Faturado" value={fmtMoeda(ticketFat)} sub={`${pedidosFaturados} pedidos`} onClick={onDrillDown} dataKey="faturado" />
-
-      {/* ── Peso ── */}
-      <CardBase icon={Scale} iconColor="text-cyan-600" title="Peso Vendido" value={fmtPeso(peso)} sub={`${fmtPeso(pesoFat)} faturado`} onClick={onDrillDown} dataKey="peso" />
-      <CardBase icon={Scale} iconColor="text-cyan-700" title="Peso Pendente" value={fmtPeso(pesoPend)} onClick={onDrillDown} dataKey="peso" />
-
-      {/* ── Margem ── */}
-      <CardBase icon={Percent} iconColor="text-indigo-600" title="Margem Bruta" value={fmtMoeda(margem)} sub={fmtPct(margemPct)} onClick={onDrillDown} dataKey="margem" />
-      <CardBase icon={Percent} iconColor="text-indigo-700" title="Margem Faturada" value={fmtMoeda(margemFat)} onClick={onDrillDown} dataKey="margem" />
-
-      {/* ── Etapas de Entrega/Faturamento ── */}
-      <CardBase icon={Layers} iconColor="text-violet-600" title="Etapas Entrega" value={totalEtapasEntrega || 0} sub={`${etapasFaturadas || 0} faturadas`} onClick={onDrillDown} dataKey="pedidos" />
-      <CardBase icon={Layers} iconColor="text-violet-700" title="Etapas Pendentes" value={etapasPendentes || 0} onClick={onDrillDown} dataKey="pendente" />
-
-      {/* ── Produção ── */}
-      <CardBase icon={Factory} iconColor="text-rose-600" title="Com Produção" value={pedidosComProducao || 0} sub="armado/corte-dobra" onClick={onDrillDown} dataKey="pedidos" />
-      <CardBase icon={Package} iconColor="text-rose-700" title="Somente Revenda" value={pedidosSomenteRevenda || 0} onClick={onDrillDown} dataKey="pedidos" />
-
-      {/* ── Fluxo de Entrega ── */}
-      <CardBase icon={Factory} iconColor="text-blue-700" title="Em Produção" value={pedidosEmProducao || 0} onClick={onDrillDown} dataKey="pedidos" />
-      <CardBase icon={CheckCircle2} iconColor="text-amber-700" title="Pronto Faturar" value={pedidosProntoFaturar || 0} onClick={onDrillDown} dataKey="faturado" />
-      <CardBase icon={Truck} iconColor="text-orange-700" title="Em Expedição" value={pedidosEmExpedicao || 0} onClick={onDrillDown} dataKey="pedidos" />
-      <CardBase icon={Truck} iconColor="text-blue-800" title="Em Trânsito" value={pedidosEmTransito || 0} onClick={onDrillDown} dataKey="pedidos" />
-      <CardBase icon={CheckCircle2} iconColor="text-green-700" title="Entregues" value={pedidosEntregues || 0} onClick={onDrillDown} dataKey="pedidos" />
-
-      {/* ── Performance de Entrega ── */}
-      <CardBase icon={CheckCircle2} iconColor="text-green-800" title="Taxa Entrega" value={fmtPct(safeNumber(taxaEntregaSucesso))} sub={`${pedidosEntregues || 0} entregues`} onClick={onDrillDown} dataKey="pedidos" />
-      <CardBase icon={XCircle} iconColor="text-red-600" title="Taxa Cancel." value={fmtPct(safeNumber(taxaCancelamento))} onClick={onDrillDown} dataKey="pedidos" />
-
-      {/* ── Quantidades por Tipo ── */}
-      <CardBase icon={Boxes} iconColor="text-teal-600" title="Qtd. Itens" value={safeNumber(quantidadeTotalItens).toLocaleString('pt-BR')} sub="total itens" onClick={onDrillDown} dataKey="pedidos" />
-      <CardBase icon={Boxes} iconColor="text-teal-700" title="Revenda (kg/un)" value={safeNumber(quantidadesPorTipo?.itens_revenda?.quantidade).toLocaleString('pt-BR')} sub={fmtMoeda(safeNumber(quantidadesPorTipo?.itens_revenda?.valor))} onClick={onDrillDown} dataKey="pedidos" />
-      <CardBase icon={Boxes} iconColor="text-teal-800" title="Armado (kg/un)" value={safeNumber(quantidadesPorTipo?.itens_armado_padrao?.quantidade).toLocaleString('pt-BR')} sub={fmtMoeda(safeNumber(quantidadesPorTipo?.itens_armado_padrao?.valor))} onClick={onDrillDown} dataKey="pedidos" />
-      <CardBase icon={Boxes} iconColor="text-teal-900" title="Corte/Dobra" value={safeNumber(quantidadesPorTipo?.itens_corte_dobra?.quantidade).toLocaleString('pt-BR')} sub={fmtMoeda(safeNumber(quantidadesPorTipo?.itens_corte_dobra?.valor))} onClick={onDrillDown} dataKey="pedidos" />
-
-      {/* ── Margem por Tipo ── */}
-      <CardBase icon={GitBranch} iconColor="text-pink-600" title="Margem Revenda" value={fmtMoeda(safeNumber(margemPorTipo?.itens_revenda?.margem))} sub={fmtPct(safeNumber(margemPorTipo?.itens_revenda?.margemPercent))} onClick={onDrillDown} dataKey="margem" />
-      <CardBase icon={GitBranch} iconColor="text-pink-700" title="Margem Armado" value={fmtMoeda(safeNumber(margemPorTipo?.itens_armado_padrao?.margem))} sub={fmtPct(safeNumber(margemPorTipo?.itens_armado_padrao?.margemPercent))} onClick={onDrillDown} dataKey="margem" />
-      <CardBase icon={GitBranch} iconColor="text-pink-800" title="Margem Corte/Dobra" value={fmtMoeda(safeNumber(margemPorTipo?.itens_corte_dobra?.margem))} sub={fmtPct(safeNumber(margemPorTipo?.itens_corte_dobra?.margemPercent))} onClick={onDrillDown} dataKey="margem" />
+      <CardBase icon={Percent} iconColor="text-indigo-600" title="Margem Bruta" value={fmtMoeda(margem)} sub={`${margemPct.toFixed(1)}%`} onClick={onDrillDown} dataKey="margem" />
+      <CardBase icon={Factory} iconColor="text-rose-600" title="Em Produção" value={pedidosEmProducao || 0} sub={`${pedidosComProducao || 0} c/ produção`} onClick={onDrillDown} dataKey="producao" />
     </div>
   );
 }

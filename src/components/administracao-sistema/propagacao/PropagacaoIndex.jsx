@@ -181,14 +181,14 @@ export default function PropagacaoIndex() {
   return (
     <div className="w-full h-full space-y-4 pb-8">
 
-      {/* ── Banner: automação ativa ── */}
+      {/* ── Banner: automação por eventos ativa ── */}
       <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-xl p-3">
         <div className="flex-shrink-0 w-2 h-2 rounded-full bg-green-500 mt-1.5 animate-pulse"></div>
         <div className="flex-1">
-          <p className="text-sm font-semibold text-green-800">✅ Propagação automática ativa</p>
+          <p className="text-sm font-semibold text-green-800">✅ Propagação 100% automática por eventos</p>
           <p className="text-xs text-green-700 mt-0.5">
-            A sincronização Grupo ↔ Empresas ocorre automaticamente via eventos do sistema (syncBidirectional + sanitizeOnWrite).
-            Use os botões abaixo apenas para <strong>reprocessamento manual</strong> em caso de inconsistência ou recuperação.
+            Toda criação/edição de registro dispara <strong>automaticamente</strong> a sincronização Grupo ↔ Empresas via automações de evento (<code className="text-[10px]">syncBidirectional</code>).
+            Os botões abaixo são exclusivamente para <strong>monitoramento e reprocessamento manual</strong> de recuperação — não são a via primária de propagação.
           </p>
         </div>
       </div>

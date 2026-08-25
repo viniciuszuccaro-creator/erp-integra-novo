@@ -22,6 +22,9 @@ export default function PropagacaoStatusCard({ entity, st, globalLoading, onSync
           {entity.icon} {entity.label}
         </span>
         <div className="flex items-center gap-1 shrink-0">
+          <Badge className="text-[8px] px-1 py-0.5 bg-green-50 text-green-700 border-green-200" title="Propagação automática por evento ativa">
+            ⚡ Auto
+          </Badge>
           <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 text-slate-500 border-slate-200">
             {entity.grupo}
           </Badge>
@@ -31,7 +34,7 @@ export default function PropagacaoStatusCard({ entity, st, globalLoading, onSync
         </div>
       </div>
 
-      <p className="text-xs text-slate-500 truncate">{st?.message || "Aguardando"}</p>
+      <p className="text-xs text-slate-500 truncate">{st?.message || "Sincronização automática ativa (por evento)"}</p>
 
       {st?.lastSync && (
         <p className="text-xs text-slate-400 flex items-center gap-1">
@@ -45,13 +48,15 @@ export default function PropagacaoStatusCard({ entity, st, globalLoading, onSync
         </Badge>
       )}
 
+      {/* Reprocessamento manual (recuperação) — a propagação primária é por evento automático */}
       <div className="flex gap-1 pt-1 flex-wrap">
+        <p className="text-[9px] text-slate-400 w-full mb-0.5">Reprocessar manual (recuperação):</p>
         <Button
           size="sm" variant="outline"
           disabled={globalLoading || isRunning}
           onClick={() => onSync(entity.name, "down")}
           className="flex-1 text-xs h-7 gap-1 min-w-[36px]"
-          title="Grupo → Empresa"
+          title="Reprocessar: Grupo → Empresa"
         >
           <ArrowDown className="w-3 h-3" />
           <span className="hidden sm:inline">↓</span>
@@ -61,7 +66,7 @@ export default function PropagacaoStatusCard({ entity, st, globalLoading, onSync
           disabled={globalLoading || isRunning}
           onClick={() => onSync(entity.name, "up")}
           className="flex-1 text-xs h-7 gap-1 min-w-[36px]"
-          title="Empresa → Grupo"
+          title="Reprocessar: Empresa → Grupo"
         >
           <ArrowUp className="w-3 h-3" />
           <span className="hidden sm:inline">↑</span>
@@ -71,7 +76,7 @@ export default function PropagacaoStatusCard({ entity, st, globalLoading, onSync
           disabled={globalLoading || isRunning}
           onClick={() => onSync(entity.name, "both")}
           className="flex-1 text-xs h-7 min-w-[36px]"
-          title="Bidirecional"
+          title="Reprocessar bidirecional"
         >
           {isRunning ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
         </Button>

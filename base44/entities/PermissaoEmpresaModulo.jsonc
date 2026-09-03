@@ -8,15 +8,15 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico da permiss\u00e3o"
+      "description": "Código sequencial único da permissão"
     },
     "usuario_id": {
       "type": "string",
-      "description": "ID do usu\u00e1rio"
+      "description": "ID do usuário"
     },
     "usuario_nome": {
       "type": "string",
-      "description": "Nome do usu\u00e1rio"
+      "description": "Nome do usuário"
     },
     "empresa_id": {
       "type": "string",
@@ -31,32 +31,32 @@
       "enum": [
         "Dashboard",
         "Comercial e Vendas",
-        "Financeiro e Cont\u00e1bil",
+        "Financeiro e Contábil",
         "Estoque e Almoxarifado",
         "Compras e Suprimentos",
-        "Expedi\u00e7\u00e3o e Log\u00edstica",
-        "Produ\u00e7\u00e3o e Manufatura",
+        "Expedição e Logística",
+        "Produção e Manufatura",
         "Recursos Humanos",
-        "Fiscal e Tribut\u00e1rio",
+        "Fiscal e Tributário",
         "Cadastros Gerais",
         "CRM - Relacionamento",
-        "Agenda e Calend\u00e1rio",
-        "Relat\u00f3rios e An\u00e1lises",
+        "Agenda e Calendário",
+        "Relatórios e Análises",
         "Contratos",
-        "Gest\u00e3o de Empresas",
+        "Gestão de Empresas",
         "Controle de Acesso",
-        "Integra\u00e7\u00f5es",
-        "Configura\u00e7\u00f5es"
+        "Integrações",
+        "Configurações"
       ],
-      "description": "M\u00f3dulo do sistema"
+      "description": "Módulo do sistema"
     },
     "submodulo": {
       "type": "string",
-      "description": "Subm\u00f3dulo espec\u00edfico (ex: Clientes, Pedidos, Notas Fiscais)"
+      "description": "Submódulo específico (ex: Clientes, Pedidos, Notas Fiscais)"
     },
     "aba": {
       "type": "string",
-      "description": "Aba espec\u00edfica dentro do subm\u00f3dulo"
+      "description": "Aba específica dentro do submódulo"
     },
     "nivel_acesso": {
       "type": "string",
@@ -69,26 +69,26 @@
         "Aprovar"
       ],
       "default": "Nenhum",
-      "description": "N\u00edvel de acesso concedido"
+      "description": "Nível de acesso concedido"
     },
     "data_concessao": {
       "type": "string",
       "format": "date-time",
-      "description": "Data de concess\u00e3o da permiss\u00e3o"
+      "description": "Data de concessão da permissão"
     },
     "data_alteracao": {
       "type": "string",
       "format": "date-time",
-      "description": "\u00daltima altera\u00e7\u00e3o"
+      "description": "Última alteração"
     },
     "alterado_por": {
       "type": "string",
-      "description": "Usu\u00e1rio que fez a \u00faltima altera\u00e7\u00e3o"
+      "description": "Usuário que fez a última alteração"
     },
     "ativo": {
       "type": "boolean",
       "default": true,
-      "description": "Se a permiss\u00e3o est\u00e1 ativa"
+      "description": "Se a permissão está ativa"
     },
     "observacoes": {
       "type": "string"
@@ -101,20 +101,41 @@
     "nivel_acesso"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

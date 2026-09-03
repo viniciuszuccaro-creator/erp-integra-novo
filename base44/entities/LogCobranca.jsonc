@@ -26,7 +26,7 @@
         "enviar_email",
         "enviar_whatsapp"
       ],
-      "description": "Tipo de opera\u00e7\u00e3o realizada"
+      "description": "Tipo de operação realizada"
     },
     "provedor": {
       "type": "string",
@@ -35,7 +35,7 @@
     "data_hora": {
       "type": "string",
       "format": "date-time",
-      "description": "Data/hora da opera\u00e7\u00e3o"
+      "description": "Data/hora da operação"
     },
     "payload_enviado": {
       "type": "object",
@@ -56,11 +56,11 @@
         "timeout",
         "pendente"
       ],
-      "description": "Status da opera\u00e7\u00e3o"
+      "description": "Status da operação"
     },
     "codigo_status": {
       "type": "string",
-      "description": "C\u00f3digo de status HTTP"
+      "description": "Código de status HTTP"
     },
     "mensagem": {
       "type": "string",
@@ -72,15 +72,15 @@
     },
     "id_cobranca_externa": {
       "type": "string",
-      "description": "ID da cobran\u00e7a no provedor"
+      "description": "ID da cobrança no provedor"
     },
     "linha_digitavel": {
       "type": "string",
-      "description": "Linha digit\u00e1vel do boleto (se gerado)"
+      "description": "Linha digitável do boleto (se gerado)"
     },
     "pix_copia_cola": {
       "type": "string",
-      "description": "C\u00f3digo PIX copia e cola (se gerado)"
+      "description": "Código PIX copia e cola (se gerado)"
     },
     "pix_qrcode_base64": {
       "type": "string",
@@ -92,7 +92,7 @@
     },
     "usuario_id": {
       "type": "string",
-      "description": "ID do usu\u00e1rio que executou"
+      "description": "ID do usuário que executou"
     },
     "usuario_nome": {
       "type": "string"
@@ -113,19 +113,40 @@
   ],
   "rls": {
     "read": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

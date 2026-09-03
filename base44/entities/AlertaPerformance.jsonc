@@ -12,21 +12,21 @@
     },
     "numero_alerta": {
       "type": "string",
-      "description": "N\u00famero sequencial do alerta"
+      "description": "Número sequencial do alerta"
     },
     "data_hora": {
       "type": "string",
       "format": "date-time",
-      "description": "Data/hora da detec\u00e7\u00e3o"
+      "description": "Data/hora da detecção"
     },
     "tipo_alerta": {
       "type": "string",
       "enum": [
         "Query Lenta",
         "API Lenta",
-        "Erro Cr\u00edtico",
+        "Erro Crítico",
         "CPU Alta",
-        "Mem\u00f3ria Alta",
+        "Memória Alta",
         "Downtime",
         "Timeout",
         "Threshold Excedido",
@@ -47,7 +47,7 @@
     },
     "modulo": {
       "type": "string",
-      "description": "M\u00f3dulo afetado"
+      "description": "Módulo afetado"
     },
     "funcionalidade": {
       "type": "string",
@@ -64,11 +64,11 @@
         "throughput",
         "latencia"
       ],
-      "description": "Tipo de m\u00e9trica que disparou"
+      "description": "Tipo de métrica que disparou"
     },
     "valor_medido": {
       "type": "number",
-      "description": "Valor medido da m\u00e9trica"
+      "description": "Valor medido da métrica"
     },
     "threshold_configurado": {
       "type": "number",
@@ -80,21 +80,21 @@
     },
     "descricao": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o do alerta"
+      "description": "Descrição do alerta"
     },
     "impacto_estimado": {
       "type": "string",
       "enum": [
         "Baixo",
-        "M\u00e9dio",
+        "Médio",
         "Alto",
-        "Cr\u00edtico"
+        "Crítico"
       ],
-      "description": "Impacto estimado no neg\u00f3cio"
+      "description": "Impacto estimado no negócio"
     },
     "usuarios_afetados": {
       "type": "number",
-      "description": "N\u00famero de usu\u00e1rios afetados"
+      "description": "Número de usuários afetados"
     },
     "ocorrencias_relacionadas": {
       "type": "array",
@@ -106,7 +106,7 @@
     "quantidade_ocorrencias": {
       "type": "number",
       "default": 1,
-      "description": "N\u00famero de vezes que ocorreu"
+      "description": "Número de vezes que ocorreu"
     },
     "primeira_ocorrencia": {
       "type": "string",
@@ -116,29 +116,29 @@
     "ultima_ocorrencia": {
       "type": "string",
       "format": "date-time",
-      "description": "\u00daltima vez que foi detectado"
+      "description": "Última vez que foi detectado"
     },
     "frequencia": {
       "type": "string",
       "enum": [
-        "\u00danica",
+        "Única",
         "Recorrente",
         "Constante"
       ],
-      "description": "Frequ\u00eancia do problema"
+      "description": "Frequência do problema"
     },
     "tendencia": {
       "type": "string",
       "enum": [
         "Melhorando",
-        "Est\u00e1vel",
+        "Estável",
         "Piorando"
       ],
-      "description": "Tend\u00eancia do problema"
+      "description": "Tendência do problema"
     },
     "acao_recomendada": {
       "type": "string",
-      "description": "A\u00e7\u00e3o recomendada para resolver"
+      "description": "Ação recomendada para resolver"
     },
     "diagnostico_ia": {
       "type": "object",
@@ -163,14 +163,14 @@
           }
         }
       },
-      "description": "Diagn\u00f3stico automatizado por IA"
+      "description": "Diagnóstico automatizado por IA"
     },
     "status": {
       "type": "string",
       "enum": [
         "Novo",
         "Investigando",
-        "Em Corre\u00e7\u00e3o",
+        "Em Correção",
         "Resolvido",
         "Ignorado",
         "Falso Positivo"
@@ -180,16 +180,16 @@
     },
     "responsavel_id": {
       "type": "string",
-      "description": "ID do respons\u00e1vel pela investiga\u00e7\u00e3o"
+      "description": "ID do responsável pela investigação"
     },
     "responsavel_nome": {
       "type": "string",
-      "description": "Nome do respons\u00e1vel"
+      "description": "Nome do responsável"
     },
     "data_atribuicao": {
       "type": "string",
       "format": "date-time",
-      "description": "Quando foi atribu\u00eddo"
+      "description": "Quando foi atribuído"
     },
     "resolucao": {
       "type": "object",
@@ -218,12 +218,12 @@
           "type": "string"
         }
       },
-      "description": "Dados da resolu\u00e7\u00e3o"
+      "description": "Dados da resolução"
     },
     "notificacao_enviada": {
       "type": "boolean",
       "default": false,
-      "description": "Se notifica\u00e7\u00e3o foi enviada"
+      "description": "Se notificação foi enviada"
     },
     "notificacao_destinatarios": {
       "type": "array",
@@ -248,7 +248,7 @@
     },
     "observacoes": {
       "type": "string",
-      "description": "Observa\u00e7\u00f5es sobre o alerta"
+      "description": "Observações sobre o alerta"
     }
   },
   "required": [
@@ -259,24 +259,40 @@
   ],
   "rls": {
     "read": {
-      "user_condition": {
-        "role": "admin"
-      }
-    },
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

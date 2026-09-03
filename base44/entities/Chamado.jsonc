@@ -8,7 +8,7 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa respons\u00e1vel pelo atendimento"
+      "description": "ID da empresa responsável pelo atendimento"
     },
     "cliente_id": {
       "type": "string",
@@ -33,34 +33,34 @@
     },
     "titulo": {
       "type": "string",
-      "description": "T\u00edtulo do chamado"
+      "description": "Título do chamado"
     },
     "descricao": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o detalhada do chamado"
+      "description": "Descrição detalhada do chamado"
     },
     "categoria": {
       "type": "string",
       "enum": [
-        "Suporte T\u00e9cnico",
+        "Suporte Técnico",
         "Financeiro",
         "Comercial",
         "Entrega",
         "Produto",
         "Outro"
       ],
-      "default": "Suporte T\u00e9cnico",
+      "default": "Suporte Técnico",
       "description": "Categoria do chamado"
     },
     "prioridade": {
       "type": "string",
       "enum": [
         "Baixa",
-        "M\u00e9dia",
+        "Média",
         "Alta",
         "Urgente"
       ],
-      "default": "M\u00e9dia",
+      "default": "Média",
       "description": "Prioridade do chamado"
     },
     "prioridade_ia": {
@@ -92,11 +92,11 @@
     },
     "responsavel_id": {
       "type": "string",
-      "description": "ID do colaborador respons\u00e1vel"
+      "description": "ID do colaborador responsável"
     },
     "responsavel_nome": {
       "type": "string",
-      "description": "Nome do respons\u00e1vel"
+      "description": "Nome do responsável"
     },
     "data_abertura": {
       "type": "string",
@@ -106,15 +106,15 @@
     "data_resolucao": {
       "type": "string",
       "format": "date",
-      "description": "Data de resolu\u00e7\u00e3o do chamado"
+      "description": "Data de resolução do chamado"
     },
     "tempo_primeira_resposta_min": {
       "type": "number",
-      "description": "Tempo at\u00e9 primeira resposta (SLA)"
+      "description": "Tempo até primeira resposta (SLA)"
     },
     "tempo_resolucao_horas": {
       "type": "number",
-      "description": "Tempo total de resolu\u00e7\u00e3o"
+      "description": "Tempo total de resolução"
     },
     "pedido_relacionado_id": {
       "type": "string",
@@ -149,7 +149,7 @@
           }
         }
       },
-      "description": "Hist\u00f3rico de mensagens do chamado"
+      "description": "Histórico de mensagens do chamado"
     },
     "anexos": {
       "type": "array",
@@ -170,7 +170,7 @@
           "type": "string"
         }
       },
-      "description": "Avalia\u00e7\u00e3o do atendimento"
+      "description": "Avaliação do atendimento"
     }
   },
   "required": [
@@ -178,5 +178,43 @@
     "titulo",
     "descricao",
     "categoria"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

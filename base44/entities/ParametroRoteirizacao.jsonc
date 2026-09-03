@@ -12,7 +12,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico do par\u00e2metro"
+      "description": "Código sequencial único do parâmetro"
     },
     "usa_google_maps": {
       "type": "boolean",
@@ -26,13 +26,13 @@
     "prioridade_roteirizacao": {
       "type": "string",
       "enum": [
-        "Menor Dist\u00e2ncia",
+        "Menor Distância",
         "Menor Tempo",
         "Respeitar Janelas",
         "Balanceado"
       ],
       "default": "Balanceado",
-      "description": "Prioridade na cria\u00e7\u00e3o de rotas"
+      "description": "Prioridade na criação de rotas"
     },
     "considera_janela_entrega": {
       "type": "boolean",
@@ -59,20 +59,20 @@
     "max_entregas_por_rota": {
       "type": "number",
       "default": 20,
-      "description": "M\u00e1ximo de entregas por rota"
+      "description": "Máximo de entregas por rota"
     },
     "max_peso_por_veiculo_kg": {
       "type": "number",
-      "description": "M\u00e1ximo de peso por ve\u00edculo"
+      "description": "Máximo de peso por veículo"
     },
     "max_volume_por_veiculo_m3": {
       "type": "number",
-      "description": "M\u00e1ximo de volume por ve\u00edculo"
+      "description": "Máximo de volume por veículo"
     },
     "tempo_medio_descarga_minutos": {
       "type": "number",
       "default": 15,
-      "description": "Tempo m\u00e9dio para descarga"
+      "description": "Tempo médio para descarga"
     },
     "velocidade_media_urbana_kmh": {
       "type": "number",
@@ -97,5 +97,43 @@
   },
   "required": [
     "empresa_id"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

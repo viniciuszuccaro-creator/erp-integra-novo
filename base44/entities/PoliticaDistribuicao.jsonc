@@ -8,15 +8,15 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
+      "description": "ID da empresa que cadastrou (cadastro único compartilhado no grupo)"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico da pol\u00edtica"
+      "description": "Código sequencial único da política"
     },
     "nome": {
       "type": "string",
-      "description": "Nome da pol\u00edtica \u2014 \u00fanico por grupo (ex: Distribui\u00e7\u00e3o Financeiro Padr\u00e3o)"
+      "description": "Nome da política — único por grupo (ex: Distribuição Financeiro Padrão)"
     },
     "tipo_documento": {
       "type": "string",
@@ -32,7 +32,7 @@
         "producao",
         "geral"
       ],
-      "description": "Tipo de documento que esta pol\u00edtica se aplica"
+      "description": "Tipo de documento que esta política se aplica"
     },
     "criterio": {
       "type": "string",
@@ -43,12 +43,12 @@
         "manual"
       ],
       "default": "percentual",
-      "description": "Crit\u00e9rio de distribui\u00e7\u00e3o"
+      "description": "Critério de distribuição"
     },
     "definicoes": {
       "type": "object",
       "additionalProperties": true,
-      "description": "JSON com defini\u00e7\u00f5es por empresa"
+      "description": "JSON com definições por empresa"
     },
     "empresas_participantes": {
       "type": "array",
@@ -63,11 +63,11 @@
           },
           "percentual": {
             "type": "number",
-            "description": "% se crit\u00e9rio for percentual"
+            "description": "% se critério for percentual"
           },
           "valor_fixo": {
             "type": "number",
-            "description": "Valor fixo se crit\u00e9rio for fixo"
+            "description": "Valor fixo se critério for fixo"
           },
           "ativo": {
             "type": "boolean",
@@ -75,7 +75,7 @@
           }
         }
       },
-      "description": "Lista de empresas participantes da distribui\u00e7\u00e3o"
+      "description": "Lista de empresas participantes da distribuição"
     },
     "ativa": {
       "type": "boolean",
@@ -84,12 +84,12 @@
     "padrao_para_tipo": {
       "type": "boolean",
       "default": false,
-      "description": "Se \u00e9 a pol\u00edtica padr\u00e3o para este tipo de documento"
+      "description": "Se é a política padrão para este tipo de documento"
     },
     "permite_ajuste_manual": {
       "type": "boolean",
       "default": true,
-      "description": "Se permite ajuste manual dos valores na hora da distribui\u00e7\u00e3o"
+      "description": "Se permite ajuste manual dos valores na hora da distribuição"
     },
     "historico_uso": {
       "type": "array",
@@ -114,7 +114,7 @@
           }
         }
       },
-      "description": "Hist\u00f3rico de documentos que usaram esta pol\u00edtica"
+      "description": "Histórico de documentos que usaram esta política"
     },
     "observacoes": {
       "type": "string"
@@ -125,5 +125,43 @@
     "nome",
     "tipo_documento",
     "criterio"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

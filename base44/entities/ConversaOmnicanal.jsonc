@@ -29,7 +29,7 @@
     },
     "canal_id_externo": {
       "type": "string",
-      "description": "ID do usu\u00e1rio no canal externo"
+      "description": "ID do usuário no canal externo"
     },
     "cliente_id": {
       "type": "string",
@@ -46,24 +46,24 @@
     },
     "cliente_cpf_cnpj": {
       "type": "string",
-      "description": "V21.6: CPF/CNPJ para identifica\u00e7\u00e3o autom\u00e1tica"
+      "description": "V21.6: CPF/CNPJ para identificação automática"
     },
     "sessao_id": {
       "type": "string",
-      "description": "ID \u00fanico da sess\u00e3o"
+      "description": "ID único da sessão"
     },
     "status": {
       "type": "string",
       "enum": [
         "Em Progresso",
         "Aguardando",
-        "N\u00e3o Atribu\u00edda",
+        "Não Atribuída",
         "Resolvida",
         "Arquivada",
         "Spam",
         "Pausada"
       ],
-      "default": "N\u00e3o Atribu\u00edda"
+      "default": "Não Atribuída"
     },
     "prioridade": {
       "type": "string",
@@ -72,7 +72,7 @@
         "Normal",
         "Alta",
         "Urgente",
-        "Cr\u00edtica"
+        "Crítica"
       ],
       "default": "Normal"
     },
@@ -80,9 +80,9 @@
       "type": "string",
       "enum": [
         "Bot",
-        "H\u00edbrido",
+        "Híbrido",
         "Humano",
-        "IA Avan\u00e7ada"
+        "IA Avançada"
       ],
       "default": "Bot"
     },
@@ -94,7 +94,7 @@
     },
     "equipe_id": {
       "type": "string",
-      "description": "V21.6: ID da equipe respons\u00e1vel"
+      "description": "V21.6: ID da equipe responsável"
     },
     "departamento": {
       "type": "string",
@@ -102,8 +102,8 @@
         "Comercial",
         "Financeiro",
         "Suporte",
-        "Log\u00edstica",
-        "T\u00e9cnico",
+        "Logística",
+        "Técnico",
         "Geral"
       ],
       "description": "V21.6: Departamento de destino"
@@ -223,7 +223,7 @@
           }
         }
       },
-      "description": "V21.6: Hist\u00f3rico de intents detectados"
+      "description": "V21.6: Histórico de intents detectados"
     },
     "assuntos_detectados": {
       "type": "array",
@@ -236,7 +236,7 @@
       "items": {
         "type": "string"
       },
-      "description": "V21.6: Palavras-chave extra\u00eddas pela IA"
+      "description": "V21.6: Palavras-chave extraídas pela IA"
     },
     "acoes_automaticas_executadas": {
       "type": "array",
@@ -270,7 +270,7 @@
     },
     "conta_receber_gerada_id": {
       "type": "string",
-      "description": "V21.6: Boleto/cobran\u00e7a gerada via chat"
+      "description": "V21.6: Boleto/cobrança gerada via chat"
     },
     "entrega_consultada_id": {
       "type": "string",
@@ -328,7 +328,7 @@
           "type": "string",
           "enum": [
             "Baixo",
-            "M\u00e9dio",
+            "Médio",
             "Alto"
           ]
         },
@@ -340,7 +340,7 @@
           "format": "date-time"
         }
       },
-      "description": "V21.6: An\u00e1lise avan\u00e7ada da conversa pela IA"
+      "description": "V21.6: Análise avançada da conversa pela IA"
     },
     "resolvido": {
       "type": "boolean",
@@ -407,7 +407,7 @@
           "type": "number"
         }
       },
-      "description": "V21.6: M\u00e9tricas detalhadas do atendimento"
+      "description": "V21.6: Métricas detalhadas do atendimento"
     },
     "contexto_cliente": {
       "type": "object",
@@ -439,5 +439,43 @@
     "canal",
     "sessao_id",
     "data_inicio"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

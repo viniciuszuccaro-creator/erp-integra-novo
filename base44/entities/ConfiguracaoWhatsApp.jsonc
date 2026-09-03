@@ -12,7 +12,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico da configura\u00e7\u00e3o"
+      "description": "Código sequencial único da configuração"
     },
     "provedor": {
       "type": "string",
@@ -32,19 +32,19 @@
     },
     "api_key": {
       "type": "string",
-      "description": "Token de autentica\u00e7\u00e3o"
+      "description": "Token de autenticação"
     },
     "instance_id": {
       "type": "string",
-      "description": "ID da inst\u00e2ncia WhatsApp"
+      "description": "ID da instância WhatsApp"
     },
     "numero_whatsapp": {
       "type": "string",
-      "description": "N\u00famero WhatsApp da empresa"
+      "description": "Número WhatsApp da empresa"
     },
     "qrcode_conexao": {
       "type": "string",
-      "description": "QR Code para conex\u00e3o"
+      "description": "QR Code para conexão"
     },
     "status_conexao": {
       "type": "string",
@@ -112,5 +112,43 @@
   "required": [
     "empresa_id",
     "provedor"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

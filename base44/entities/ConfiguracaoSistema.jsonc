@@ -12,19 +12,19 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico"
+      "description": "Código sequencial único"
     },
     "tenant_id": {
       "type": "string",
-      "description": "Vol 20.1: ID do tenant SaaS (isolamento de clientes em comercializa\u00e7\u00e3o)"
+      "description": "Vol 20.1: ID do tenant SaaS (isolamento de clientes em comercialização)"
     },
     "chave": {
       "type": "string",
-      "description": "Chave \u00fanica da configura\u00e7\u00e3o (ex: notif_pedido_aprovado, fiscal_cfop_interno)"
+      "description": "Chave única da configuração (ex: notif_pedido_aprovado, fiscal_cfop_interno)"
     },
     "categoria": {
       "type": "string",
-      "description": "Categoria da configura\u00e7\u00e3o (Notificacoes, Fiscal, Integracoes, SaaS, WhiteLabel, etc.)"
+      "description": "Categoria da configuração (Notificacoes, Fiscal, Integracoes, SaaS, WhiteLabel, etc.)"
     },
     "ativa": {
       "type": "boolean",
@@ -33,16 +33,16 @@
     },
     "valor": {
       "type": "string",
-      "description": "Valor texto da configura\u00e7\u00e3o"
+      "description": "Valor texto da configuração"
     },
     "numero": {
       "type": "number",
-      "description": "Valor num\u00e9rico da configura\u00e7\u00e3o"
+      "description": "Valor numérico da configuração"
     },
     "valor_json": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Valor estruturado em JSON (pol\u00edticas, al\u00e7adas, etc.)"
+      "description": "Valor estruturado em JSON (políticas, alçadas, etc.)"
     },
     "dados": {
       "type": "object",
@@ -119,7 +119,7 @@
           "type": "string"
         }
       },
-      "description": "Vol 20.2: Configura\u00e7\u00e3o de white label por tenant"
+      "description": "Vol 20.2: Configuração de white label por tenant"
     },
     "periodo_trial": {
       "type": "object",
@@ -141,7 +141,7 @@
           "default": 0
         }
       },
-      "description": "Vol 20.1: Per\u00edodo de teste (trial)"
+      "description": "Vol 20.1: Período de teste (trial)"
     },
     "status_tenant": {
       "type": "string",
@@ -153,7 +153,7 @@
         "Bloqueado"
       ],
       "default": "Ativo",
-      "description": "Vol 20.1: Status do tenant (suspens\u00e3o controlada sem perda de dados)"
+      "description": "Vol 20.1: Status do tenant (suspensão controlada sem perda de dados)"
     },
     "feature_flags": {
       "type": "object",
@@ -163,22 +163,22 @@
     "integracao_nfe": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Configura\u00e7\u00e3o da integra\u00e7\u00e3o NF-e"
+      "description": "Configuração da integração NF-e"
     },
     "integracao_boletos": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Configura\u00e7\u00e3o de boletos/PIX"
+      "description": "Configuração de boletos/PIX"
     },
     "integracao_whatsapp": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Configura\u00e7\u00e3o do WhatsApp"
+      "description": "Configuração do WhatsApp"
     },
     "integracao_maps": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Configura\u00e7\u00e3o Google Maps"
+      "description": "Configuração Google Maps"
     },
     "observacoes": {
       "type": "string"
@@ -188,20 +188,41 @@
     "chave"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

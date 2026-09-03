@@ -12,7 +12,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico da configura\u00e7\u00e3o"
+      "description": "Código sequencial único da configuração"
     },
     "canal": {
       "type": "string",
@@ -29,7 +29,7 @@
         "SMS",
         "VoIP"
       ],
-      "description": "Canal de comunica\u00e7\u00e3o"
+      "description": "Canal de comunicação"
     },
     "ativo": {
       "type": "boolean",
@@ -41,8 +41,8 @@
         "Apenas Bot",
         "Bot com Transbordo",
         "Apenas Humano",
-        "H\u00edbrido",
-        "IA Avan\u00e7ada"
+        "Híbrido",
+        "IA Avançada"
       ],
       "default": "Bot com Transbordo"
     },
@@ -171,7 +171,7 @@
           }
         }
       },
-      "description": "V21.6: Hor\u00e1rio de atendimento por dia"
+      "description": "V21.6: Horário de atendimento por dia"
     },
     "feriados_bloqueados": {
       "type": "array",
@@ -514,5 +514,43 @@
   "required": [
     "canal",
     "empresa_id"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

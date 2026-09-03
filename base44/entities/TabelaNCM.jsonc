@@ -8,40 +8,40 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
+      "description": "ID da empresa que cadastrou (cadastro único compartilhado no grupo)"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico do registro NCM"
+      "description": "Código sequencial único do registro NCM"
     },
     "ncm": {
       "type": "string",
-      "description": "C\u00f3digo NCM \u2014 \u00fanico por grupo (8 d\u00edgitos)"
+      "description": "Código NCM — único por grupo (8 dígitos)"
     },
     "descricao": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o do NCM \u2014 \u00fanica por grupo"
+      "description": "Descrição do NCM — única por grupo"
     },
     "capitulo": {
       "type": "string",
-      "description": "Cap\u00edtulo (2 primeiros d\u00edgitos)"
+      "description": "Capítulo (2 primeiros dígitos)"
     },
     "posicao": {
       "type": "string",
-      "description": "Posi\u00e7\u00e3o (4 primeiros d\u00edgitos)"
+      "description": "Posição (4 primeiros dígitos)"
     },
     "unidade_tributavel": {
       "type": "string",
-      "description": "Unidade tribut\u00e1vel"
+      "description": "Unidade tributável"
     },
     "ipi_aliquota": {
       "type": "number",
-      "description": "Al\u00edquota de IPI (%)",
+      "description": "Alíquota de IPI (%)",
       "default": 0
     },
     "icms_st_aliquota": {
       "type": "number",
-      "description": "Al\u00edquota de ICMS-ST (%)"
+      "description": "Alíquota de ICMS-ST (%)"
     },
     "icms_st_mva": {
       "type": "number",
@@ -49,24 +49,24 @@
     },
     "pis_aliquota": {
       "type": "number",
-      "description": "Al\u00edquota de PIS (%)"
+      "description": "Alíquota de PIS (%)"
     },
     "cofins_aliquota": {
       "type": "number",
-      "description": "Al\u00edquota de COFINS (%)"
+      "description": "Alíquota de COFINS (%)"
     },
     "cest": {
       "type": "string",
-      "description": "C\u00f3digo CEST (se aplic\u00e1vel)"
+      "description": "Código CEST (se aplicável)"
     },
     "ex_tipi": {
       "type": "string",
-      "description": "C\u00f3digo EX TIPI (exce\u00e7\u00e3o)"
+      "description": "Código EX TIPI (exceção)"
     },
     "categoria": {
       "type": "string",
       "enum": [
-        "Mat\u00e9ria Prima",
+        "Matéria Prima",
         "Produto Acabado",
         "Insumo",
         "Equipamento",
@@ -79,28 +79,28 @@
       "type": "string",
       "enum": [
         "00 - Mercadoria para Revenda",
-        "01 - Mat\u00e9ria-Prima",
+        "01 - Matéria-Prima",
         "02 - Embalagem",
         "03 - Produto em Processo",
         "04 - Produto Acabado",
         "05 - Subproduto",
-        "06 - Produto Intermedi\u00e1rio",
+        "06 - Produto Intermediário",
         "07 - Material de Uso e Consumo",
         "08 - Ativo Imobilizado",
-        "09 - Servi\u00e7os",
+        "09 - Serviços",
         "10 - Outros"
       ],
       "description": "Tipo de item (SPED)"
     },
     "gtin_ean": {
       "type": "string",
-      "description": "C\u00f3digo GTIN/EAN (se aplic\u00e1vel)"
+      "description": "Código GTIN/EAN (se aplicável)"
     },
     "origem_mercadoria": {
       "type": "string",
       "enum": [
         "0 - Nacional",
-        "1 - Estrangeira Importa\u00e7\u00e3o Direta",
+        "1 - Estrangeira Importação Direta",
         "2 - Estrangeira Mercado Interno"
       ],
       "default": "0 - Nacional",
@@ -109,15 +109,53 @@
     "ativo": {
       "type": "boolean",
       "default": true,
-      "description": "Se o NCM est\u00e1 ativo"
+      "description": "Se o NCM está ativo"
     },
     "observacoes": {
       "type": "string",
-      "description": "Observa\u00e7\u00f5es sobre tributa\u00e7\u00e3o"
+      "description": "Observações sobre tributação"
     }
   },
   "required": [
     "ncm",
     "descricao"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

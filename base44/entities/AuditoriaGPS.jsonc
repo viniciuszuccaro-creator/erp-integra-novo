@@ -28,21 +28,21 @@
     },
     "veiculo_id": {
       "type": "string",
-      "description": "ID do ve\u00edculo"
+      "description": "ID do veículo"
     },
     "placa": {
       "type": "string",
-      "description": "Placa do ve\u00edculo"
+      "description": "Placa do veículo"
     },
     "tipo_evento": {
       "type": "string",
       "enum": [
-        "Sa\u00edda",
-        "Posi\u00e7\u00e3o Atualizada",
+        "Saída",
+        "Posição Atualizada",
         "Parada",
         "Retorno",
         "Entrega Iniciada",
-        "Entrega Conclu\u00edda",
+        "Entrega Concluída",
         "Desvio de Rota",
         "Velocidade Excessiva",
         "Bateria Baixa",
@@ -65,7 +65,7 @@
     },
     "precisao_metros": {
       "type": "number",
-      "description": "Precis\u00e3o do GPS em metros"
+      "description": "Precisão do GPS em metros"
     },
     "velocidade_kmh": {
       "type": "number",
@@ -73,16 +73,16 @@
     },
     "endereco_aproximado": {
       "type": "string",
-      "description": "Endere\u00e7o aproximado"
+      "description": "Endereço aproximado"
     },
     "dentro_cerca_eletronica": {
       "type": "boolean",
       "default": false,
-      "description": "Se est\u00e1 dentro da cerca eletr\u00f4nica (geofence)"
+      "description": "Se está dentro da cerca eletrônica (geofence)"
     },
     "distancia_destino_km": {
       "type": "number",
-      "description": "Dist\u00e2ncia at\u00e9 o destino"
+      "description": "Distância até o destino"
     },
     "eta_minutos": {
       "type": "number",
@@ -121,11 +121,11 @@
     },
     "bateria_nivel": {
       "type": "number",
-      "description": "N\u00edvel de bateria (%)"
+      "description": "Nível de bateria (%)"
     },
     "app_versao": {
       "type": "string",
-      "description": "Vers\u00e3o do app m\u00f3vel"
+      "description": "Versão do app móvel"
     }
   },
   "required": [
@@ -135,24 +135,40 @@
   ],
   "rls": {
     "read": {
-      "user_condition": {
-        "role": "admin"
-      }
-    },
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

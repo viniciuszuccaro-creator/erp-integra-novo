@@ -16,11 +16,11 @@
     },
     "numero_pedido": {
       "type": "string",
-      "description": "N\u00famero do pedido (snapshot)"
+      "description": "Número do pedido (snapshot)"
     },
     "nome_etapa": {
       "type": "string",
-      "description": "Nome da etapa (Ex: Etapa 1 - Funda\u00e7\u00e3o, Etapa 2 - Estrutura)"
+      "description": "Nome da etapa (Ex: Etapa 1 - Fundação, Etapa 2 - Estrutura)"
     },
     "etapa_obra_id": {
       "type": "string",
@@ -28,7 +28,7 @@
     },
     "descricao_etapa": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o detalhada da etapa"
+      "description": "Descrição detalhada da etapa"
     },
     "itens_etapa": {
       "type": "array",
@@ -62,7 +62,7 @@
           }
         }
       },
-      "description": "Lista de itens inclu\u00eddos nesta etapa"
+      "description": "Lista de itens incluídos nesta etapa"
     },
     "quantidade_total_itens": {
       "type": "number",
@@ -82,20 +82,20 @@
     "data_prevista_entrega": {
       "type": "string",
       "format": "date",
-      "description": "Previs\u00e3o de entrega desta etapa"
+      "description": "Previsão de entrega desta etapa"
     },
     "sequencia": {
       "type": "number",
       "default": 1,
-      "description": "Ordem de execu\u00e7\u00e3o/entrega"
+      "description": "Ordem de execução/entrega"
     },
     "status_etapa": {
       "type": "string",
       "enum": [
         "Pendente",
-        "Em Produ\u00e7\u00e3o",
+        "Em Produção",
         "Pronta",
-        "Em Expedi\u00e7\u00e3o",
+        "Em Expedição",
         "Faturada",
         "Entregue",
         "Cancelada"
@@ -106,7 +106,7 @@
     "faturada": {
       "type": "boolean",
       "default": false,
-      "description": "Se j\u00e1 foi faturada"
+      "description": "Se já foi faturada"
     },
     "nfe_id": {
       "type": "string",
@@ -114,7 +114,7 @@
     },
     "numero_nfe": {
       "type": "string",
-      "description": "N\u00famero da NF-e"
+      "description": "Número da NF-e"
     },
     "chave_nfe": {
       "type": "string",
@@ -147,12 +147,12 @@
     "data_conclusao_producao": {
       "type": "string",
       "format": "date",
-      "description": "Data de conclus\u00e3o da produ\u00e7\u00e3o"
+      "description": "Data de conclusão da produção"
     },
     "data_expedicao": {
       "type": "string",
       "format": "date",
-      "description": "Data de sa\u00edda para entrega"
+      "description": "Data de saída para entrega"
     },
     "data_entrega_real": {
       "type": "string",
@@ -162,11 +162,11 @@
     "percentual_conclusao": {
       "type": "number",
       "default": 0,
-      "description": "% de conclus\u00e3o desta etapa (produ\u00e7\u00e3o + entrega)"
+      "description": "% de conclusão desta etapa (produção + entrega)"
     },
     "observacoes": {
       "type": "string",
-      "description": "Observa\u00e7\u00f5es da etapa"
+      "description": "Observações da etapa"
     },
     "visivel_portal": {
       "type": "boolean",
@@ -177,5 +177,43 @@
   "required": [
     "pedido_id",
     "nome_etapa"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

@@ -12,7 +12,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo num\u00e9rico sequencial \u00fanico"
+      "description": "Código numérico sequencial único"
     },
     "nome_evento": {
       "type": "string",
@@ -25,8 +25,8 @@
         "Comercial",
         "Financeiro",
         "Estoque",
-        "Log\u00edstica",
-        "Produ\u00e7\u00e3o",
+        "Logística",
+        "Produção",
         "Fiscal",
         "RH",
         "CRM"
@@ -38,7 +38,7 @@
     },
     "template_mensagem": {
       "type": "string",
-      "description": "Template da mensagem de notifica\u00e7\u00e3o"
+      "description": "Template da mensagem de notificação"
     },
     "canais_notificacao": {
       "type": "array",
@@ -52,7 +52,7 @@
           "Sistema"
         ]
       },
-      "description": "Canais onde a notifica\u00e7\u00e3o ser\u00e1 enviada"
+      "description": "Canais onde a notificação será enviada"
     },
     "prioridade": {
       "type": "string",
@@ -69,11 +69,11 @@
       "items": {
         "type": "string"
       },
-      "description": "IDs de usu\u00e1rios que sempre receber\u00e3o"
+      "description": "IDs de usuários que sempre receberão"
     },
     "condicoes_disparo": {
       "type": "object",
-      "description": "Condi\u00e7\u00f5es para disparar a notifica\u00e7\u00e3o"
+      "description": "Condições para disparar a notificação"
     },
     "ativo": {
       "type": "boolean",
@@ -88,20 +88,41 @@
     "tipo_evento"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

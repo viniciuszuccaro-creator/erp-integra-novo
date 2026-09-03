@@ -12,12 +12,12 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico"
+      "description": "Código sequencial único"
     },
     "jwt_ativo": {
       "type": "boolean",
       "default": true,
-      "description": "Se usa JWT para autentica\u00e7\u00e3o"
+      "description": "Se usa JWT para autenticação"
     },
     "jwt_algoritmo": {
       "type": "string",
@@ -47,32 +47,32 @@
     "jwt_rotacao_refresh": {
       "type": "boolean",
       "default": true,
-      "description": "Se faz rota\u00e7\u00e3o de refresh tokens"
+      "description": "Se faz rotação de refresh tokens"
     },
     "jwt_familia_tokens": {
       "type": "boolean",
       "default": true,
-      "description": "Se agrupa tokens em fam\u00edlias (detecta roubo)"
+      "description": "Se agrupa tokens em famílias (detecta roubo)"
     },
     "jwt_revogar_familia_em_suspeita": {
       "type": "boolean",
       "default": true,
-      "description": "Revoga toda fam\u00edlia se detectar uso suspeito"
+      "description": "Revoga toda família se detectar uso suspeito"
     },
     "sessao_unica": {
       "type": "boolean",
       "default": false,
-      "description": "Se permite apenas 1 sess\u00e3o por usu\u00e1rio"
+      "description": "Se permite apenas 1 sessão por usuário"
     },
     "sessoes_simultaneas_max": {
       "type": "number",
       "default": 3,
-      "description": "N\u00famero m\u00e1ximo de sess\u00f5es simult\u00e2neas"
+      "description": "Número máximo de sessões simultâneas"
     },
     "encerrar_sessoes_antigas_auto": {
       "type": "boolean",
       "default": true,
-      "description": "Se encerra sess\u00f5es antigas ao atingir o limite"
+      "description": "Se encerra sessões antigas ao atingir o limite"
     },
     "timeout_inatividade_minutos": {
       "type": "number",
@@ -82,12 +82,12 @@
     "timeout_absoluto_horas": {
       "type": "number",
       "default": 24,
-      "description": "Timeout absoluto da sess\u00e3o (horas)"
+      "description": "Timeout absoluto da sessão (horas)"
     },
     "exigir_mfa": {
       "type": "boolean",
       "default": false,
-      "description": "Se exige autentica\u00e7\u00e3o de dois fatores"
+      "description": "Se exige autenticação de dois fatores"
     },
     "mfa_metodos_disponiveis": {
       "type": "array",
@@ -104,12 +104,12 @@
         "Email",
         "WhatsApp"
       ],
-      "description": "M\u00e9todos de MFA dispon\u00edveis"
+      "description": "Métodos de MFA disponíveis"
     },
     "mfa_validade_codigo_minutos": {
       "type": "number",
       "default": 5,
-      "description": "Validade do c\u00f3digo MFA em minutos"
+      "description": "Validade do código MFA em minutos"
     },
     "mfa_exigir_novo_ip": {
       "type": "boolean",
@@ -124,17 +124,17 @@
     "mfa_exigir_horario_incomum": {
       "type": "boolean",
       "default": false,
-      "description": "Exigir MFA em hor\u00e1rio incomum"
+      "description": "Exigir MFA em horário incomum"
     },
     "tentativas_login_max": {
       "type": "number",
       "default": 5,
-      "description": "Tentativas m\u00e1ximas antes de bloquear"
+      "description": "Tentativas máximas antes de bloquear"
     },
     "bloqueio_tempo_minutos": {
       "type": "number",
       "default": 30,
-      "description": "Tempo de bloqueio ap\u00f3s exceder tentativas"
+      "description": "Tempo de bloqueio após exceder tentativas"
     },
     "bloqueio_ip_suspeito": {
       "type": "boolean",
@@ -158,18 +158,18 @@
     "detectar_anomalias_ia": {
       "type": "boolean",
       "default": false,
-      "description": "Se usa IA para detectar comportamento an\u00f4malo"
+      "description": "Se usa IA para detectar comportamento anômalo"
     },
     "ia_nivel_sensibilidade": {
       "type": "string",
       "enum": [
         "Baixa",
-        "M\u00e9dia",
+        "Média",
         "Alta",
-        "M\u00e1xima"
+        "Máxima"
       ],
-      "default": "M\u00e9dia",
-      "description": "Sensibilidade da detec\u00e7\u00e3o de anomalias"
+      "default": "Média",
+      "description": "Sensibilidade da detecção de anomalias"
     },
     "registrar_dispositivos": {
       "type": "boolean",
@@ -179,17 +179,17 @@
     "notificar_novo_dispositivo": {
       "type": "boolean",
       "default": true,
-      "description": "Notificar usu\u00e1rio em novo dispositivo"
+      "description": "Notificar usuário em novo dispositivo"
     },
     "notificar_novo_ip": {
       "type": "boolean",
       "default": true,
-      "description": "Notificar usu\u00e1rio em novo IP"
+      "description": "Notificar usuário em novo IP"
     },
     "notificar_tentativas_falhas": {
       "type": "boolean",
       "default": true,
-      "description": "Notificar ap\u00f3s X tentativas falhas"
+      "description": "Notificar após X tentativas falhas"
     },
     "politica_senha": {
       "type": "object",
@@ -227,7 +227,7 @@
           "default": false
         }
       },
-      "description": "Pol\u00edtica de senhas"
+      "description": "Política de senhas"
     },
     "rate_limiting": {
       "type": "object",
@@ -258,7 +258,7 @@
     "auditoria_completa": {
       "type": "boolean",
       "default": true,
-      "description": "Se registra todas as a\u00e7\u00f5es em auditoria"
+      "description": "Se registra todas as ações em auditoria"
     },
     "registrar_ips_acessos": {
       "type": "boolean",
@@ -298,16 +298,16 @@
           "default": 0
         }
       },
-      "description": "Estat\u00edsticas de seguran\u00e7a"
+      "description": "Estatísticas de segurança"
     },
     "ultima_tentativa_invasao": {
       "type": "string",
       "format": "date-time",
-      "description": "Data da \u00faltima tentativa suspeita"
+      "description": "Data da última tentativa suspeita"
     },
     "configurado_por": {
       "type": "string",
-      "description": "Usu\u00e1rio que configurou"
+      "description": "Usuário que configurou"
     },
     "configurado_por_id": {
       "type": "string"
@@ -315,11 +315,11 @@
     "data_configuracao": {
       "type": "string",
       "format": "date-time",
-      "description": "Data da configura\u00e7\u00e3o"
+      "description": "Data da configuração"
     },
     "observacoes": {
       "type": "string",
-      "description": "Observa\u00e7\u00f5es sobre a configura\u00e7\u00e3o"
+      "description": "Observações sobre a configuração"
     },
     "ativo": {
       "type": "boolean",
@@ -334,24 +334,40 @@
   ],
   "rls": {
     "read": {
-      "user_condition": {
-        "role": "admin"
-      }
-    },
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

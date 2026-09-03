@@ -12,7 +12,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo num\u00e9rico sequencial \u00fanico"
+      "description": "Código numérico sequencial único"
     },
     "provedor": {
       "type": "string",
@@ -44,26 +44,26 @@
     "ambiente": {
       "type": "string",
       "enum": [
-        "Produ\u00e7\u00e3o",
-        "Homologa\u00e7\u00e3o"
+        "Produção",
+        "Homologação"
       ],
-      "default": "Homologa\u00e7\u00e3o",
-      "description": "Ambiente de emiss\u00e3o"
+      "default": "Homologação",
+      "description": "Ambiente de emissão"
     },
     "serie_nfe": {
       "type": "string",
       "default": "1",
-      "description": "S\u00e9rie da NF-e"
+      "description": "Série da NF-e"
     },
     "proximo_numero": {
       "type": "number",
       "default": 1,
-      "description": "Pr\u00f3ximo n\u00famero de NF-e"
+      "description": "Próximo número de NF-e"
     },
     "emitir_automatico": {
       "type": "boolean",
       "default": false,
-      "description": "Se emite automaticamente ap\u00f3s faturamento"
+      "description": "Se emite automaticamente após faturamento"
     },
     "enviar_email_automatico": {
       "type": "boolean",
@@ -91,20 +91,41 @@
     "provedor"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

@@ -16,33 +16,33 @@
     },
     "modulo": {
       "type": "string",
-      "description": "M\u00f3dulo relacionado"
+      "description": "Módulo relacionado"
     },
     "titulo": {
       "type": "string",
-      "description": "T\u00edtulo da melhoria"
+      "description": "Título da melhoria"
     },
     "descricao": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o objetiva da melhoria"
+      "description": "Descrição objetiva da melhoria"
     },
     "prioridade": {
       "type": "string",
       "enum": [
         "Baixa",
-        "M\u00e9dia",
+        "Média",
         "Alta",
-        "Cr\u00edtica"
+        "Crítica"
       ],
-      "default": "M\u00e9dia"
+      "default": "Média"
     },
     "status": {
       "type": "string",
       "enum": [
         "Planejado",
-        "Em Execu\u00e7\u00e3o",
+        "Em Execução",
         "Validando",
-        "Conclu\u00eddo"
+        "Concluído"
       ],
       "default": "Planejado"
     },
@@ -59,10 +59,10 @@
         "Performance",
         "UX",
         "IA",
-        "Integra\u00e7\u00e3o",
-        "Governan\u00e7a"
+        "Integração",
+        "Governança"
       ],
-      "default": "Governan\u00e7a"
+      "default": "Governança"
     },
     "impacto": {
       "type": "string",
@@ -76,5 +76,43 @@
     "fase",
     "modulo",
     "titulo"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

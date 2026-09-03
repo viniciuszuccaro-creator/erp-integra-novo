@@ -8,26 +8,26 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa propriet\u00e1ria"
+      "description": "ID da empresa proprietária"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico do artigo"
+      "description": "Código sequencial único do artigo"
     },
     "titulo": {
       "type": "string",
-      "description": "T\u00edtulo do artigo \u2014 \u00fanico por grupo"
+      "description": "Título do artigo — único por grupo"
     },
     "slug": {
       "type": "string",
-      "description": "URL amig\u00e1vel"
+      "description": "URL amigável"
     },
     "resumo": {
       "type": "string"
     },
     "conteudo_markdown": {
       "type": "string",
-      "description": "Conte\u00fado em Markdown"
+      "description": "Conteúdo em Markdown"
     },
     "categorias": {
       "type": "array",
@@ -162,5 +162,43 @@
   "required": [
     "titulo",
     "conteudo_markdown"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

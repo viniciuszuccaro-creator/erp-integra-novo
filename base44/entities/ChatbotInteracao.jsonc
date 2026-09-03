@@ -12,7 +12,7 @@
     },
     "sessao_id": {
       "type": "string",
-      "description": "ID \u00fanico da sess\u00e3o de chat"
+      "description": "ID único da sessão de chat"
     },
     "canal": {
       "type": "string",
@@ -38,16 +38,16 @@
     "contato_pendente_cadastro": {
       "type": "boolean",
       "default": false,
-      "description": "Vol 15.1: Se o contato ainda n\u00e3o foi cadastrado no CRM"
+      "description": "Vol 15.1: Se o contato ainda não foi cadastrado no CRM"
     },
     "autenticado": {
       "type": "boolean",
       "default": false,
-      "description": "Se o cliente est\u00e1 autenticado"
+      "description": "Se o cliente está autenticado"
     },
     "mensagem_usuario": {
       "type": "string",
-      "description": "Mensagem enviada pelo usu\u00e1rio"
+      "description": "Mensagem enviada pelo usuário"
     },
     "intent_detectado": {
       "type": "string",
@@ -55,7 +55,7 @@
     },
     "confianca_intent": {
       "type": "number",
-      "description": "% de confian\u00e7a na detec\u00e7\u00e3o (0-100)"
+      "description": "% de confiança na detecção (0-100)"
     },
     "requer_autenticacao": {
       "type": "boolean",
@@ -86,7 +86,7 @@
         "criar_lead"
       ],
       "default": "nenhuma",
-      "description": "Vol 15.2/15.3: A\u00e7\u00e3o autom\u00e1tica executada pelo bot"
+      "description": "Vol 15.2/15.3: Ação automática executada pelo bot"
     },
     "oportunidade_gerada_id": {
       "type": "string",
@@ -98,7 +98,7 @@
     },
     "chamado_gerado_id": {
       "type": "string",
-      "description": "Vol 15.3: ID do chamado gerado (Ocorr\u00eancia cria chamado)"
+      "description": "Vol 15.3: ID do chamado gerado (Ocorrência cria chamado)"
     },
     "sentimento_detectado": {
       "type": "string",
@@ -132,7 +132,7 @@
         "limite_tentativas",
         "manual"
       ],
-      "description": "Vol 15.2: Motivo da transfer\u00eancia para humano"
+      "description": "Vol 15.2: Motivo da transferência para humano"
     },
     "vendedor_notificado_id": {
       "type": "string",
@@ -153,7 +153,7 @@
     },
     "atendente_id": {
       "type": "string",
-      "description": "Vol 15.1: ID do atendente humano respons\u00e1vel"
+      "description": "Vol 15.1: ID do atendente humano responsável"
     },
     "sla_minutos": {
       "type": "number",
@@ -173,5 +173,43 @@
     "sessao_id",
     "canal",
     "mensagem_usuario"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

@@ -41,11 +41,11 @@
     },
     "valor_bruto": {
       "type": "number",
-      "description": "Valor bruto da transa\u00e7\u00e3o"
+      "description": "Valor bruto da transação"
     },
     "valor_liquido": {
       "type": "number",
-      "description": "Valor l\u00edquido ap\u00f3s taxas"
+      "description": "Valor líquido após taxas"
     },
     "taxas_gateway": {
       "type": "number",
@@ -55,32 +55,32 @@
     "forma_pagamento": {
       "type": "string",
       "enum": [
-        "Cart\u00e3o Cr\u00e9dito",
-        "Cart\u00e3o D\u00e9bito",
+        "Cartão Crédito",
+        "Cartão Débito",
         "PIX",
         "Boleto",
         "Carteira Digital",
-        "Transfer\u00eancia"
+        "Transferência"
       ],
       "description": "Forma de pagamento utilizada"
     },
     "bandeira_cartao": {
       "type": "string",
-      "description": "Bandeira do cart\u00e3o (se aplic\u00e1vel)"
+      "description": "Bandeira do cartão (se aplicável)"
     },
     "parcelas": {
       "type": "number",
       "default": 1,
-      "description": "N\u00famero de parcelas"
+      "description": "Número de parcelas"
     },
     "data_transacao": {
       "type": "string",
       "format": "date-time",
-      "description": "Data e hora da transa\u00e7\u00e3o"
+      "description": "Data e hora da transação"
     },
     "id_transacao_gateway": {
       "type": "string",
-      "description": "ID da transa\u00e7\u00e3o no gateway"
+      "description": "ID da transação no gateway"
     },
     "gateway_utilizado": {
       "type": "string",
@@ -97,7 +97,7 @@
         "Recusado"
       ],
       "default": "Pendente",
-      "description": "Status da transa\u00e7\u00e3o no gateway"
+      "description": "Status da transação no gateway"
     },
     "status_conferencia": {
       "type": "string",
@@ -105,41 +105,41 @@
         "Pendente",
         "Conciliado",
         "Divergente",
-        "Em An\u00e1lise"
+        "Em Análise"
       ],
       "default": "Pendente",
-      "description": "Status da confer\u00eancia interna"
+      "description": "Status da conferência interna"
     },
     "data_credito_prevista": {
       "type": "string",
       "format": "date",
-      "description": "Data prevista de cr\u00e9dito na conta"
+      "description": "Data prevista de crédito na conta"
     },
     "data_credito_efetiva": {
       "type": "string",
       "format": "date",
-      "description": "Data efetiva do cr\u00e9dito (ap\u00f3s concilia\u00e7\u00e3o)"
+      "description": "Data efetiva do crédito (após conciliação)"
     },
     "conta_receber_id": {
       "type": "string",
-      "description": "ID do t\u00edtulo a receber vinculado"
+      "description": "ID do título a receber vinculado"
     },
     "caixa_ordem_liquidacao_id": {
       "type": "string",
-      "description": "ID da ordem de liquida\u00e7\u00e3o gerada"
+      "description": "ID da ordem de liquidação gerada"
     },
     "link_pagamento": {
       "type": "string",
-      "description": "Link de pagamento gerado (se aplic\u00e1vel)"
+      "description": "Link de pagamento gerado (se aplicável)"
     },
     "link_expiracao": {
       "type": "string",
       "format": "date-time",
-      "description": "Data de expira\u00e7\u00e3o do link"
+      "description": "Data de expiração do link"
     },
     "ip_cliente": {
       "type": "string",
-      "description": "IP do cliente na transa\u00e7\u00e3o"
+      "description": "IP do cliente na transação"
     },
     "dados_adicionais_gateway": {
       "type": "object",
@@ -155,5 +155,43 @@
     "valor_bruto",
     "forma_pagamento",
     "status_transacao"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

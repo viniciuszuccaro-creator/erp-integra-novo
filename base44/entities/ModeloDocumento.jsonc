@@ -12,7 +12,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo num\u00e9rico sequencial \u00fanico"
+      "description": "Código numérico sequencial único"
     },
     "nome_modelo": {
       "type": "string",
@@ -26,7 +26,7 @@
         "Etiqueta Produto",
         "Canhoto",
         "Termo de Entrega",
-        "Or\u00e7amento",
+        "Orçamento",
         "Proposta Comercial"
       ],
       "description": "Tipo de documento"
@@ -36,7 +36,7 @@
     },
     "template_html": {
       "type": "string",
-      "description": "Template HTML com vari\u00e1veis {{variavel}}"
+      "description": "Template HTML com variáveis {{variavel}}"
     },
     "template_css": {
       "type": "string",
@@ -58,7 +58,7 @@
           }
         }
       },
-      "description": "Lista de vari\u00e1veis que podem ser usadas"
+      "description": "Lista de variáveis que podem ser usadas"
     },
     "orientacao_pagina": {
       "type": "string",
@@ -84,16 +84,16 @@
     },
     "cabecalho_html": {
       "type": "string",
-      "description": "HTML do cabe\u00e7alho"
+      "description": "HTML do cabeçalho"
     },
     "rodape_html": {
       "type": "string",
-      "description": "HTML do rodap\u00e9"
+      "description": "HTML do rodapé"
     },
     "padrao_sistema": {
       "type": "boolean",
       "default": false,
-      "description": "Se \u00e9 modelo padr\u00e3o do sistema (n\u00e3o pode ser exclu\u00eddo)"
+      "description": "Se é modelo padrão do sistema (não pode ser excluído)"
     },
     "ativo": {
       "type": "boolean",
@@ -106,5 +106,43 @@
   "required": [
     "nome_modelo",
     "tipo_documento"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

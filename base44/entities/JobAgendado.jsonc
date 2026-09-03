@@ -12,7 +12,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo num\u00e9rico sequencial \u00fanico"
+      "description": "Código numérico sequencial único"
     },
     "nome_job": {
       "type": "string",
@@ -41,28 +41,28 @@
     "frequencia": {
       "type": "string",
       "enum": [
-        "Hor\u00e1ria",
-        "Di\u00e1ria",
+        "Horária",
+        "Diária",
         "Semanal",
         "Mensal",
         "Personalizada"
       ],
-      "default": "Di\u00e1ria"
+      "default": "Diária"
     },
     "horario_execucao": {
       "type": "string",
-      "description": "Hor\u00e1rio de execu\u00e7\u00e3o (HH:MM)"
+      "description": "Horário de execução (HH:MM)"
     },
     "dias_semana": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Dias da semana (Segunda, Ter\u00e7a, etc)"
+      "description": "Dias da semana (Segunda, Terça, etc)"
     },
     "parametros_execucao": {
       "type": "object",
-      "description": "Par\u00e2metros customizados para execu\u00e7\u00e3o"
+      "description": "Parâmetros customizados para execução"
     },
     "ultima_execucao": {
       "type": "string",
@@ -98,20 +98,41 @@
     "frequencia"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

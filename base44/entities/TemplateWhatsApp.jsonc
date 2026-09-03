@@ -8,15 +8,15 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa propriet\u00e1ria"
+      "description": "ID da empresa proprietária"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico do template"
+      "description": "Código sequencial único do template"
     },
     "nome": {
       "type": "string",
-      "description": "Nome do template \u2014 \u00fanico por grupo"
+      "description": "Nome do template — único por grupo"
     },
     "categoria": {
       "type": "string",
@@ -123,5 +123,43 @@
   "required": [
     "nome",
     "corpo"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

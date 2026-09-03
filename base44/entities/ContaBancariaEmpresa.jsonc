@@ -8,11 +8,11 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa propriet\u00e1ria"
+      "description": "ID da empresa proprietária"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico da conta banc\u00e1ria"
+      "description": "Código sequencial único da conta bancária"
     },
     "banco_id": {
       "type": "string",
@@ -20,27 +20,27 @@
     },
     "agencia": {
       "type": "string",
-      "description": "N\u00famero da ag\u00eancia"
+      "description": "Número da agência"
     },
     "agencia_digito": {
       "type": "string",
-      "description": "D\u00edgito verificador da ag\u00eancia"
+      "description": "Dígito verificador da agência"
     },
     "numero_conta": {
       "type": "string",
-      "description": "N\u00famero da conta"
+      "description": "Número da conta"
     },
     "conta_digito": {
       "type": "string",
-      "description": "D\u00edgito verificador da conta"
+      "description": "Dígito verificador da conta"
     },
     "tipo_conta": {
       "type": "string",
       "enum": [
         "Corrente",
-        "Poupan\u00e7a",
-        "Aplica\u00e7\u00e3o",
-        "Sal\u00e1rio"
+        "Poupança",
+        "Aplicação",
+        "Salário"
       ],
       "default": "Corrente"
     },
@@ -64,7 +64,7 @@
         "Folha",
         "Tributos",
         "Investimento",
-        "Cobran\u00e7a"
+        "Cobrança"
       ],
       "default": "Operacional",
       "description": "Finalidade da conta"
@@ -88,21 +88,21 @@
         "CNPJ",
         "E-mail",
         "Telefone",
-        "Aleat\u00f3ria"
+        "Aleatória"
       ],
       "description": "Tipo de chave PIX"
     },
     "convenio_cobranca": {
       "type": "string",
-      "description": "N\u00famero do conv\u00eanio para cobran\u00e7a"
+      "description": "Número do convênio para cobrança"
     },
     "carteira_cobranca": {
       "type": "string",
-      "description": "Carteira para emiss\u00e3o de boletos"
+      "description": "Carteira para emissão de boletos"
     },
     "codigo_beneficiario": {
       "type": "string",
-      "description": "C\u00f3digo do benefici\u00e1rio"
+      "description": "Código do beneficiário"
     },
     "integracao_conciliacao": {
       "type": "object",
@@ -137,7 +137,7 @@
     "saldo_disponivel": {
       "type": "number",
       "default": 0,
-      "description": "Saldo dispon\u00edvel"
+      "description": "Saldo disponível"
     },
     "limite_cheque_especial": {
       "type": "number",
@@ -146,7 +146,7 @@
     "conta_padrao": {
       "type": "boolean",
       "default": false,
-      "description": "Se \u00e9 a conta padr\u00e3o da empresa"
+      "description": "Se é a conta padrão da empresa"
     },
     "ativo": {
       "type": "boolean",
@@ -161,5 +161,43 @@
     "banco_id",
     "agencia",
     "numero_conta"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

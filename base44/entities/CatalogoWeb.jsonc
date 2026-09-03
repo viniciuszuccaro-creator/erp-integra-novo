@@ -12,16 +12,16 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo num\u00e9rico sequencial \u00fanico"
+      "description": "Código numérico sequencial único"
     },
     "produto_id": {
       "type": "string",
-      "description": "ID do produto no cat\u00e1logo"
+      "description": "ID do produto no catálogo"
     },
     "exibir_no_ecommerce": {
       "type": "boolean",
       "default": false,
-      "description": "Se exibe no e-commerce pr\u00f3prio"
+      "description": "Se exibe no e-commerce próprio"
     },
     "exibir_no_marketplace": {
       "type": "boolean",
@@ -36,7 +36,7 @@
     "exibir_no_catalogo_pdf": {
       "type": "boolean",
       "default": false,
-      "description": "Se aparece no cat\u00e1logo PDF"
+      "description": "Se aparece no catálogo PDF"
     },
     "exibir_no_app": {
       "type": "boolean",
@@ -45,15 +45,15 @@
     },
     "preco_exibido": {
       "type": "number",
-      "description": "Pre\u00e7o a ser exibido"
+      "description": "Preço a ser exibido"
     },
     "tabela_preco_vinculada_id": {
       "type": "string",
-      "description": "ID da tabela de pre\u00e7o vinculada"
+      "description": "ID da tabela de preço vinculada"
     },
     "categoria_navegacao": {
       "type": "string",
-      "description": "Categoria para navega\u00e7\u00e3o no site/e-commerce"
+      "description": "Categoria para navegação no site/e-commerce"
     },
     "subcategoria_navegacao": {
       "type": "string"
@@ -74,15 +74,15 @@
     },
     "slug_url": {
       "type": "string",
-      "description": "URL amig\u00e1vel"
+      "description": "URL amigável"
     },
     "titulo_seo": {
       "type": "string",
-      "description": "T\u00edtulo para SEO"
+      "description": "Título para SEO"
     },
     "meta_description": {
       "type": "string",
-      "description": "Meta descri\u00e7\u00e3o para SEO"
+      "description": "Meta descrição para SEO"
     },
     "imagens_principais": {
       "type": "array",
@@ -96,7 +96,7 @@
       "items": {
         "type": "string"
       },
-      "description": "URLs de v\u00eddeos do produto"
+      "description": "URLs de vídeos do produto"
     },
     "manual_pdf_url": {
       "type": "string",
@@ -109,22 +109,22 @@
     "destaque": {
       "type": "boolean",
       "default": false,
-      "description": "Se \u00e9 produto em destaque"
+      "description": "Se é produto em destaque"
     },
     "ordem_exibicao": {
       "type": "number",
       "default": 0,
-      "description": "Ordem de exibi\u00e7\u00e3o"
+      "description": "Ordem de exibição"
     },
     "data_publicacao": {
       "type": "string",
       "format": "date-time",
-      "description": "Data de publica\u00e7\u00e3o"
+      "description": "Data de publicação"
     },
     "data_expiracao": {
       "type": "string",
       "format": "date-time",
-      "description": "Data de expira\u00e7\u00e3o (opcional)"
+      "description": "Data de expiração (opcional)"
     },
     "ativo": {
       "type": "boolean",
@@ -136,5 +136,43 @@
   },
   "required": [
     "produto_id"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

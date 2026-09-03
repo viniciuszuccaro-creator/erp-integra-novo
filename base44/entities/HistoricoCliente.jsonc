@@ -33,7 +33,7 @@
         "Manual",
         "Sistema"
       ],
-      "description": "M\u00f3dulo que gerou o evento"
+      "description": "Módulo que gerou o evento"
     },
     "referencia_id": {
       "type": "string",
@@ -56,7 +56,7 @@
     },
     "referencia_numero": {
       "type": "string",
-      "description": "N\u00famero do documento (pedido, NF, OP)"
+      "description": "Número do documento (pedido, NF, OP)"
     },
     "tipo_evento": {
       "type": "string",
@@ -81,19 +81,19 @@
     },
     "titulo_evento": {
       "type": "string",
-      "description": "T\u00edtulo curto do evento"
+      "description": "Título curto do evento"
     },
     "descricao_detalhada": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o completa do que aconteceu"
+      "description": "Descrição completa do que aconteceu"
     },
     "usuario_responsavel": {
       "type": "string",
-      "description": "Nome do usu\u00e1rio que gerou o evento"
+      "description": "Nome do usuário que gerou o evento"
     },
     "usuario_responsavel_id": {
       "type": "string",
-      "description": "ID do usu\u00e1rio"
+      "description": "ID do usuário"
     },
     "data_evento": {
       "type": "string",
@@ -157,7 +157,7 @@
     "visivel_cliente": {
       "type": "boolean",
       "default": false,
-      "description": "Se \u00e9 vis\u00edvel no portal do cliente"
+      "description": "Se é visível no portal do cliente"
     },
     "latitude": {
       "type": "number",
@@ -169,18 +169,18 @@
     },
     "status_relacionado": {
       "type": "string",
-      "description": "Status do pedido/entrega/t\u00edtulo no momento do evento"
+      "description": "Status do pedido/entrega/título no momento do evento"
     },
     "valor_relacionado": {
       "type": "number",
-      "description": "Valor financeiro relacionado (se aplic\u00e1vel)"
+      "description": "Valor financeiro relacionado (se aplicável)"
     },
     "tags": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Tags para categoriza\u00e7\u00e3o (urgente, importante, problema, etc.)"
+      "description": "Tags para categorização (urgente, importante, problema, etc.)"
     },
     "prioridade": {
       "type": "string",
@@ -195,30 +195,30 @@
     "dados_adicionais": {
       "type": "object",
       "additionalProperties": true,
-      "description": "JSON com dados extras espec\u00edficos do m\u00f3dulo"
+      "description": "JSON com dados extras específicos do módulo"
     },
     "acao_necessaria": {
       "type": "boolean",
       "default": false,
-      "description": "Se requer a\u00e7\u00e3o do usu\u00e1rio"
+      "description": "Se requer ação do usuário"
     },
     "acao_descricao": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o da a\u00e7\u00e3o necess\u00e1ria"
+      "description": "Descrição da ação necessária"
     },
     "resolvido": {
       "type": "boolean",
       "default": true,
-      "description": "Se o evento foi resolvido/conclu\u00eddo"
+      "description": "Se o evento foi resolvido/concluído"
     },
     "resolvido_por": {
       "type": "string",
-      "description": "Quem resolveu a pend\u00eancia"
+      "description": "Quem resolveu a pendência"
     },
     "resolvido_em": {
       "type": "string",
       "format": "date-time",
-      "description": "Data de resolu\u00e7\u00e3o"
+      "description": "Data de resolução"
     }
   },
   "required": [
@@ -227,5 +227,43 @@
     "tipo_evento",
     "titulo_evento",
     "data_evento"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

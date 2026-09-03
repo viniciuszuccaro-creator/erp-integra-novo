@@ -8,27 +8,27 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa (null se configura\u00e7\u00e3o do grupo)"
+      "description": "ID da empresa (null se configuração do grupo)"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico da configura\u00e7\u00e3o"
+      "description": "Código sequencial único da configuração"
     },
     "ativo": {
       "type": "boolean",
       "default": true,
-      "description": "Se o backup autom\u00e1tico est\u00e1 ativo"
+      "description": "Se o backup automático está ativo"
     },
     "frequencia": {
       "type": "string",
       "enum": [
-        "Di\u00e1rio",
+        "Diário",
         "Semanal",
         "Quinzenal",
         "Mensal"
       ],
-      "default": "Di\u00e1rio",
-      "description": "Se backup \u00e9 di\u00e1rio, semanal, quinzenal ou mensal"
+      "default": "Diário",
+      "description": "Se backup é diário, semanal, quinzenal ou mensal"
     },
     "horario_execucao": {
       "type": "string",
@@ -39,11 +39,11 @@
       "enum": [
         "Domingo",
         "Segunda",
-        "Ter\u00e7a",
+        "Terça",
         "Quarta",
         "Quinta",
         "Sexta",
-        "S\u00e1bado"
+        "Sábado"
       ]
     },
     "dia_mes": {
@@ -340,20 +340,41 @@
     "provider_storage"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

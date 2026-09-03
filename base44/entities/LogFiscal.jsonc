@@ -16,7 +16,7 @@
     },
     "numero_nfe": {
       "type": "string",
-      "description": "N\u00famero da NF-e"
+      "description": "Número da NF-e"
     },
     "chave_acesso": {
       "type": "string",
@@ -40,7 +40,7 @@
         "download_xml",
         "download_pdf"
       ],
-      "description": "A\u00e7\u00e3o realizada"
+      "description": "Ação realizada"
     },
     "provedor": {
       "type": "string",
@@ -49,8 +49,8 @@
     "ambiente": {
       "type": "string",
       "enum": [
-        "Produ\u00e7\u00e3o",
-        "Homologa\u00e7\u00e3o"
+        "Produção",
+        "Homologação"
       ]
     },
     "payload_enviado": {
@@ -71,11 +71,11 @@
         "timeout",
         "pendente"
       ],
-      "description": "Status da opera\u00e7\u00e3o"
+      "description": "Status da operação"
     },
     "codigo_status": {
       "type": "string",
-      "description": "C\u00f3digo de status retornado"
+      "description": "Código de status retornado"
     },
     "mensagem": {
       "type": "string",
@@ -109,18 +109,18 @@
           "format": "date-time"
         }
       },
-      "description": "Aprendizado cont\u00ednuo da IA com erros da SEFAZ (V16.1)"
+      "description": "Aprendizado contínuo da IA com erros da SEFAZ (V16.1)"
     },
     "usuario_id": {
       "type": "string",
-      "description": "ID do usu\u00e1rio que executou"
+      "description": "ID do usuário que executou"
     },
     "usuario_nome": {
       "type": "string"
     },
     "ip_address": {
       "type": "string",
-      "description": "IP do usu\u00e1rio"
+      "description": "IP do usuário"
     },
     "observacoes": {
       "type": "string"
@@ -135,24 +135,40 @@
   ],
   "rls": {
     "read": {
-      "user_condition": {
-        "role": "admin"
-      }
-    },
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

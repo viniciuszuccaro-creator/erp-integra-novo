@@ -14,12 +14,12 @@
       "type": "string",
       "enum": [
         "Hub Cadastros",
-        "Integra\u00e7\u00f5es API",
+        "Integrações API",
         "Fluxo Golden Thread",
-        "Sincroniza\u00e7\u00e3o Marketplace",
+        "Sincronização Marketplace",
         "Job Agendado"
       ],
-      "description": "Tipo de sincroniza\u00e7\u00e3o testada"
+      "description": "Tipo de sincronização testada"
     },
     "data_teste": {
       "type": "string",
@@ -32,14 +32,14 @@
         "OK",
         "Aviso",
         "Erro",
-        "Cr\u00edtico"
+        "Crítico"
       ],
       "default": "OK",
-      "description": "Status geral da sincroniza\u00e7\u00e3o"
+      "description": "Status geral da sincronização"
     },
     "total_verificacoes": {
       "type": "number",
-      "description": "Total de verifica\u00e7\u00f5es realizadas"
+      "description": "Total de verificações realizadas"
     },
     "verificacoes_ok": {
       "type": "number",
@@ -87,7 +87,7 @@
           }
         }
       },
-      "description": "Detalhamento de cada verifica\u00e7\u00e3o"
+      "description": "Detalhamento de cada verificação"
     },
     "botoes_testados": {
       "type": "array",
@@ -111,21 +111,21 @@
           }
         }
       },
-      "description": "Lista de bot\u00f5es testados"
+      "description": "Lista de botões testados"
     },
     "entidades_conectadas": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Entidades que est\u00e3o corretamente conectadas"
+      "description": "Entidades que estão corretamente conectadas"
     },
     "entidades_desconectadas": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Entidades sem conex\u00e3o"
+      "description": "Entidades sem conexão"
     },
     "ias_ativas": {
       "type": "array",
@@ -155,7 +155,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Recomenda\u00e7\u00f5es de melhoria"
+      "description": "Recomendações de melhoria"
     },
     "executado_por": {
       "type": "string"
@@ -183,20 +183,41 @@
     "total_verificacoes"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

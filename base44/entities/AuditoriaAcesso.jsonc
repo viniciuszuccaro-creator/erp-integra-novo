@@ -8,15 +8,15 @@
     },
     "usuario_id": {
       "type": "string",
-      "description": "ID do usu\u00e1rio"
+      "description": "ID do usuário"
     },
     "usuario_nome": {
       "type": "string",
-      "description": "Nome do usu\u00e1rio"
+      "description": "Nome do usuário"
     },
     "usuario_email": {
       "type": "string",
-      "description": "Email do usu\u00e1rio"
+      "description": "Email do usuário"
     },
     "tipo_acao": {
       "type": "string",
@@ -29,9 +29,9 @@
         "Tentativa Falha",
         "MFA Enviado",
         "MFA Validado",
-        "Sess\u00e3o Expirada"
+        "Sessão Expirada"
       ],
-      "description": "Tipo de a\u00e7\u00e3o de acesso"
+      "description": "Tipo de ação de acesso"
     },
     "empresa_id": {
       "type": "string",
@@ -56,11 +56,11 @@
     },
     "ip_address": {
       "type": "string",
-      "description": "Endere\u00e7o IP"
+      "description": "Endereço IP"
     },
     "ip_localizacao": {
       "type": "string",
-      "description": "Localiza\u00e7\u00e3o geogr\u00e1fica do IP (cidade/estado/pa\u00eds)"
+      "description": "Localização geográfica do IP (cidade/estado/país)"
     },
     "user_agent": {
       "type": "string",
@@ -86,39 +86,39 @@
     },
     "latitude": {
       "type": "number",
-      "description": "Latitude (se permitido pelo usu\u00e1rio)"
+      "description": "Latitude (se permitido pelo usuário)"
     },
     "longitude": {
       "type": "number",
-      "description": "Longitude (se permitido pelo usu\u00e1rio)"
+      "description": "Longitude (se permitido pelo usuário)"
     },
     "sucesso": {
       "type": "boolean",
       "default": true,
-      "description": "Se a a\u00e7\u00e3o foi bem-sucedida"
+      "description": "Se a ação foi bem-sucedida"
     },
     "motivo_falha": {
       "type": "string",
-      "description": "Motivo da falha (senha incorreta, sem permiss\u00e3o, etc.)"
+      "description": "Motivo da falha (senha incorreta, sem permissão, etc.)"
     },
     "tentativas_falhas_consecutivas": {
       "type": "number",
       "default": 0,
-      "description": "N\u00famero de tentativas falhas consecutivas"
+      "description": "Número de tentativas falhas consecutivas"
     },
     "bloqueado_temporariamente": {
       "type": "boolean",
       "default": false,
-      "description": "Se o usu\u00e1rio foi bloqueado por tentativas excessivas"
+      "description": "Se o usuário foi bloqueado por tentativas excessivas"
     },
     "duracao_sessao_segundos": {
       "type": "number",
-      "description": "Dura\u00e7\u00e3o da sess\u00e3o em segundos (para logout)"
+      "description": "Duração da sessão em segundos (para logout)"
     },
     "mfa_utilizado": {
       "type": "boolean",
       "default": false,
-      "description": "Se utilizou autentica\u00e7\u00e3o de dois fatores"
+      "description": "Se utilizou autenticação de dois fatores"
     },
     "mfa_metodo": {
       "type": "string",
@@ -128,11 +128,11 @@
         "SMS",
         "Authenticator"
       ],
-      "description": "M\u00e9todo de MFA utilizado"
+      "description": "Método de MFA utilizado"
     },
     "url_destino": {
       "type": "string",
-      "description": "URL acessada ap\u00f3s login/troca"
+      "description": "URL acessada após login/troca"
     },
     "contexto_anterior": {
       "type": "object",
@@ -163,24 +163,40 @@
   ],
   "rls": {
     "read": {
-      "user_condition": {
-        "role": "admin"
-      }
-    },
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

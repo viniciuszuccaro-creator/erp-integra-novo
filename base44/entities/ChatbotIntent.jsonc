@@ -12,15 +12,15 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo num\u00e9rico sequencial \u00fanico"
+      "description": "Código numérico sequencial único"
     },
     "nome_intent": {
       "type": "string",
-      "description": "Nome da inten\u00e7\u00e3o (ex: 2_via_boleto, status_pedido)"
+      "description": "Nome da intenção (ex: 2_via_boleto, status_pedido)"
     },
     "descricao": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o da inten\u00e7\u00e3o"
+      "description": "Descrição da intenção"
     },
     "frases_treinamento": {
       "type": "array",
@@ -34,18 +34,18 @@
       "items": {
         "type": "string"
       },
-      "description": "Palavras\u2011chave equivalentes (de ChatbotIntents)"
+      "description": "Palavras‑chave equivalentes (de ChatbotIntents)"
     },
     "tipo_intent": {
       "type": "string",
       "enum": [
         "consulta",
-        "transa\u00e7\u00e3o",
+        "transação",
         "suporte",
         "comercial",
         "outro"
       ],
-      "description": "Classifica\u00e7\u00e3o do intent"
+      "description": "Classificação do intent"
     },
     "acao_automatica": {
       "type": "string",
@@ -58,7 +58,7 @@
         "nenhuma",
         "custom"
       ],
-      "description": "A\u00e7\u00e3o padr\u00e3o quando o intent \u00e9 acionado"
+      "description": "Ação padrão quando o intent é acionado"
     },
     "entidade_vinculada": {
       "type": "string",
@@ -75,7 +75,7 @@
     "exige_autenticacao": {
       "type": "boolean",
       "default": false,
-      "description": "Se exige autentica\u00e7\u00e3o do usu\u00e1rio"
+      "description": "Se exige autenticação do usuário"
     },
     "canais_permitidos": {
       "type": "array",
@@ -89,11 +89,11 @@
           "Chatbot Widget"
         ]
       },
-      "description": "Canais onde esta intent \u00e9 permitida"
+      "description": "Canais onde esta intent é permitida"
     },
     "resposta_template": {
       "type": "string",
-      "description": "Template/Resposta padr\u00e3o"
+      "description": "Template/Resposta padrão"
     },
     "acoes_automaticas": {
       "type": "array",
@@ -109,7 +109,7 @@
           }
         }
       },
-      "description": "A\u00e7\u00f5es autom\u00e1ticas ao processar esta intent"
+      "description": "Ações automáticas ao processar esta intent"
     },
     "fluxo_fallback": {
       "type": "string",
@@ -120,17 +120,17 @@
         "Finalizar"
       ],
       "default": "Chamar Humano",
-      "description": "Fluxo quando n\u00e3o consegue processar"
+      "description": "Fluxo quando não consegue processar"
     },
     "prioridade": {
       "type": "number",
       "default": 100,
-      "description": "Prioridade de matching (maior = mais priorit\u00e1rio)"
+      "description": "Prioridade de matching (maior = mais prioritário)"
     },
     "taxa_confianca_minima": {
       "type": "number",
       "default": 0.7,
-      "description": "Taxa m\u00ednima de confian\u00e7a para processar (0-1)"
+      "description": "Taxa mínima de confiança para processar (0-1)"
     },
     "total_acionamentos": {
       "type": "number",
@@ -155,20 +155,41 @@
     "descricao"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

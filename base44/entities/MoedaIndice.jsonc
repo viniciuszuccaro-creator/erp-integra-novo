@@ -8,36 +8,36 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
+      "description": "ID da empresa que cadastrou (cadastro único compartilhado no grupo)"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico (BRL, USD, EUR, SELIC, IPCA, CDI)"
+      "description": "Código sequencial único (BRL, USD, EUR, SELIC, IPCA, CDI)"
     },
     "nome": {
       "type": "string",
-      "description": "Nome completo \u2014 \u00fanico por grupo"
+      "description": "Nome completo — único por grupo"
     },
     "tipo": {
       "type": "string",
       "enum": [
         "Moeda",
-        "\u00cdndice Econ\u00f4mico"
+        "Índice Econômico"
       ],
       "description": "Tipo"
     },
     "simbolo": {
       "type": "string",
-      "description": "S\u00edmbolo (R$, $, \u20ac, %)"
+      "description": "Símbolo (R$, $, €, %)"
     },
     "valor_atual": {
       "type": "number",
-      "description": "Valor/cota\u00e7\u00e3o atual"
+      "description": "Valor/cotação atual"
     },
     "data_atualizacao": {
       "type": "string",
       "format": "date-time",
-      "description": "Data da \u00faltima atualiza\u00e7\u00e3o"
+      "description": "Data da última atualização"
     },
     "fonte_dados": {
       "type": "string",
@@ -46,17 +46,17 @@
     "atualiza_automaticamente": {
       "type": "boolean",
       "default": false,
-      "description": "Se atualiza via IA/API autom\u00e1tica"
+      "description": "Se atualiza via IA/API automática"
     },
     "frequencia_atualizacao": {
       "type": "string",
       "enum": [
         "Tempo Real",
-        "Di\u00e1rio",
+        "Diário",
         "Semanal",
         "Mensal"
       ],
-      "description": "Frequ\u00eancia de atualiza\u00e7\u00e3o"
+      "description": "Frequência de atualização"
     },
     "historico_valores": {
       "type": "array",
@@ -72,7 +72,7 @@
           }
         }
       },
-      "description": "Hist\u00f3rico de cota\u00e7\u00f5es"
+      "description": "Histórico de cotações"
     },
     "ativo": {
       "type": "boolean",
@@ -83,5 +83,43 @@
     "codigo",
     "nome",
     "tipo"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

@@ -19,22 +19,22 @@
     "periodo_aquisitivo_inicio": {
       "type": "string",
       "format": "date",
-      "description": "In\u00edcio do per\u00edodo aquisitivo"
+      "description": "Início do período aquisitivo"
     },
     "periodo_aquisitivo_fim": {
       "type": "string",
       "format": "date",
-      "description": "Fim do per\u00edodo aquisitivo"
+      "description": "Fim do período aquisitivo"
     },
     "data_inicio": {
       "type": "string",
       "format": "date",
-      "description": "Data de in\u00edcio das f\u00e9rias"
+      "description": "Data de início das férias"
     },
     "data_fim": {
       "type": "string",
       "format": "date",
-      "description": "Data de fim das f\u00e9rias"
+      "description": "Data de fim das férias"
     },
     "data_retorno": {
       "type": "string",
@@ -49,25 +49,25 @@
       "type": "string",
       "enum": [
         "Integral",
-        "Fracionada 1\u00aa Parcela",
-        "Fracionada 2\u00aa Parcela",
-        "Fracionada 3\u00aa Parcela"
+        "Fracionada 1ª Parcela",
+        "Fracionada 2ª Parcela",
+        "Fracionada 3ª Parcela"
       ],
       "default": "Integral"
     },
     "venda_ferias": {
       "type": "number",
-      "description": "Quantidade de dias vendidos (m\u00e1x 10)",
+      "description": "Quantidade de dias vendidos (máx 10)",
       "minimum": 0,
       "maximum": 10
     },
     "abono_pecuniario": {
       "type": "boolean",
-      "description": "Venda de 1/3 das f\u00e9rias"
+      "description": "Venda de 1/3 das férias"
     },
     "adiantamento_13": {
       "type": "boolean",
-      "description": "Solicitar adiantamento 13\u00ba sal\u00e1rio"
+      "description": "Solicitar adiantamento 13º salário"
     },
     "solicitante": {
       "type": "string"
@@ -93,7 +93,7 @@
         "Aprovado",
         "Recusado",
         "Em Gozo",
-        "Conclu\u00eddo",
+        "Concluído",
         "Cancelado"
       ],
       "default": "Solicitado"
@@ -107,5 +107,43 @@
     "data_inicio",
     "data_fim",
     "dias_solicitados"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

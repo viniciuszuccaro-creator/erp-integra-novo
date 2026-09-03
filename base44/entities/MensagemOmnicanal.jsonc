@@ -16,7 +16,7 @@
     },
     "sessao_id": {
       "type": "string",
-      "description": "ID da sess\u00e3o"
+      "description": "ID da sessão"
     },
     "canal": {
       "type": "string",
@@ -53,11 +53,11 @@
     },
     "mensagem": {
       "type": "string",
-      "description": "Conte\u00fado da mensagem"
+      "description": "Conteúdo da mensagem"
     },
     "mensagem_formatada": {
       "type": "string",
-      "description": "V21.6: Mensagem com markdown/formata\u00e7\u00e3o"
+      "description": "V21.6: Mensagem com markdown/formatação"
     },
     "tipo_conteudo": {
       "type": "string",
@@ -97,7 +97,7 @@
     "template_variaveis": {
       "type": "object",
       "additionalProperties": true,
-      "description": "V21.6: Vari\u00e1veis do template"
+      "description": "V21.6: Variáveis do template"
     },
     "botoes": {
       "type": "array",
@@ -124,7 +124,7 @@
           }
         }
       },
-      "description": "V21.6: Bot\u00f5es interativos"
+      "description": "V21.6: Botões interativos"
     },
     "lista_opcoes": {
       "type": "array",
@@ -142,7 +142,7 @@
           }
         }
       },
-      "description": "V21.6: Lista de op\u00e7\u00f5es selecion\u00e1veis"
+      "description": "V21.6: Lista de opções selecionáveis"
     },
     "data_envio": {
       "type": "string",
@@ -166,7 +166,7 @@
     "tentativas_envio": {
       "type": "number",
       "default": 1,
-      "description": "V21.6: N\u00famero de tentativas de envio"
+      "description": "V21.6: Número de tentativas de envio"
     },
     "intent_detectado": {
       "type": "string"
@@ -179,7 +179,7 @@
     "entidades_extraidas": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Entidades NER extra\u00eddas"
+      "description": "Entidades NER extraídas"
     },
     "sentimento": {
       "type": "string",
@@ -221,7 +221,7 @@
           "additionalProperties": true
         }
       },
-      "description": "V21.6: A\u00e7\u00e3o executada a partir desta mensagem"
+      "description": "V21.6: Ação executada a partir desta mensagem"
     },
     "id_mensagem_externa": {
       "type": "string",
@@ -234,7 +234,7 @@
     "interno": {
       "type": "boolean",
       "default": false,
-      "description": "Mensagem interna (n\u00e3o vis\u00edvel para cliente)"
+      "description": "Mensagem interna (não visível para cliente)"
     },
     "citacao_mensagem_id": {
       "type": "string",
@@ -242,7 +242,7 @@
     },
     "reacao": {
       "type": "string",
-      "description": "V21.6: Emoji de rea\u00e7\u00e3o"
+      "description": "V21.6: Emoji de reação"
     },
     "editada": {
       "type": "boolean",
@@ -260,7 +260,7 @@
     },
     "transcricao_audio": {
       "type": "string",
-      "description": "V21.6: Transcri\u00e7\u00e3o de \u00e1udio pela IA"
+      "description": "V21.6: Transcrição de áudio pela IA"
     },
     "traducao": {
       "type": "object",
@@ -272,7 +272,7 @@
           "type": "string"
         }
       },
-      "description": "V21.6: Tradu\u00e7\u00e3o autom\u00e1tica"
+      "description": "V21.6: Tradução automática"
     }
   },
   "required": [
@@ -282,5 +282,43 @@
     "tipo_remetente",
     "mensagem",
     "data_envio"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

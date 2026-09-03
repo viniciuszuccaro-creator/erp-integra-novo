@@ -8,11 +8,11 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo \u00fanico da empresa"
+      "description": "Código único da empresa"
     },
     "razao_social": {
       "type": "string",
-      "description": "Raz\u00e3o social da empresa"
+      "description": "Razão social da empresa"
     },
     "nome_fantasia": {
       "type": "string",
@@ -24,11 +24,11 @@
     },
     "inscricao_estadual": {
       "type": "string",
-      "description": "Inscri\u00e7\u00e3o estadual"
+      "description": "Inscrição estadual"
     },
     "inscricao_municipal": {
       "type": "string",
-      "description": "Inscri\u00e7\u00e3o municipal"
+      "description": "Inscrição municipal"
     },
     "regime_tributario": {
       "type": "string",
@@ -39,7 +39,7 @@
         "MEI"
       ],
       "default": "Simples Nacional",
-      "description": "Regime tribut\u00e1rio da empresa"
+      "description": "Regime tributário da empresa"
     },
     "regime_apuracao_impostos": {
       "type": "string",
@@ -49,7 +49,7 @@
         "Anual"
       ],
       "default": "Mensal",
-      "description": "Regime de apura\u00e7\u00e3o de impostos"
+      "description": "Regime de apuração de impostos"
     },
     "certificado_digital": {
       "type": "object",
@@ -76,11 +76,11 @@
     "tipo_ambiente_fiscal": {
       "type": "string",
       "enum": [
-        "Produ\u00e7\u00e3o",
-        "Homologa\u00e7\u00e3o"
+        "Produção",
+        "Homologação"
       ],
-      "default": "Homologa\u00e7\u00e3o",
-      "description": "Ambiente fiscal (produ\u00e7\u00e3o ou homologa\u00e7\u00e3o)"
+      "default": "Homologação",
+      "description": "Ambiente fiscal (produção ou homologação)"
     },
     "endereco_fiscal_principal": {
       "type": "object",
@@ -114,7 +114,7 @@
           "type": "string"
         }
       },
-      "description": "Endere\u00e7o fiscal principal"
+      "description": "Endereço fiscal principal"
     },
     "dados_contador": {
       "type": "object",
@@ -140,7 +140,7 @@
           "type": "string"
         }
       },
-      "description": "Dados do contador respons\u00e1vel"
+      "description": "Dados do contador responsável"
     },
     "parametros_fiscais_proprios": {
       "type": "object",
@@ -148,17 +148,17 @@
         "is_contribuinte_icms": {
           "type": "boolean",
           "default": true,
-          "description": "Se \u00e9 contribuinte de ICMS"
+          "description": "Se é contribuinte de ICMS"
         },
         "is_simples_nacional": {
           "type": "boolean",
           "default": false,
-          "description": "Se est\u00e1 no Simples Nacional"
+          "description": "Se está no Simples Nacional"
         },
         "tem_substituicao_tributaria": {
           "type": "boolean",
           "default": false,
-          "description": "Se opera com substitui\u00e7\u00e3o tribut\u00e1ria"
+          "description": "Se opera com substituição tributária"
         },
         "estados_st": {
           "type": "array",
@@ -170,14 +170,14 @@
         "percentual_credito_simples": {
           "type": "number",
           "default": 0,
-          "description": "% de cr\u00e9dito de ICMS no Simples"
+          "description": "% de crédito de ICMS no Simples"
         },
         "aliquota_interna_icms": {
           "type": "number",
-          "description": "Al\u00edquota interna de ICMS do estado"
+          "description": "Alíquota interna de ICMS do estado"
         }
       },
-      "description": "Par\u00e2metros fiscais espec\u00edficos da empresa"
+      "description": "Parâmetros fiscais específicos da empresa"
     },
     "parametros_financeiros_proprios": {
       "type": "object",
@@ -188,20 +188,20 @@
         },
         "conta_bancaria_principal_id": {
           "type": "string",
-          "description": "ID da conta banc\u00e1ria principal"
+          "description": "ID da conta bancária principal"
         },
         "forma_recebimento_padrao_id": {
           "type": "string",
-          "description": "ID da forma de recebimento padr\u00e3o"
+          "description": "ID da forma de recebimento padrão"
         },
         "tipo_cobranca_principal": {
           "type": "string",
           "enum": [
             "Boleto",
             "PIX",
-            "Cart\u00e3o",
+            "Cartão",
             "Dinheiro",
-            "Dep\u00f3sito"
+            "Depósito"
           ],
           "default": "Boleto"
         },
@@ -210,7 +210,7 @@
           "default": 30
         }
       },
-      "description": "Par\u00e2metros financeiros espec\u00edficos da empresa"
+      "description": "Parâmetros financeiros específicos da empresa"
     },
     "locais_estoque_vinculados": {
       "type": "array",
@@ -237,11 +237,11 @@
     },
     "cor_primaria": {
       "type": "string",
-      "description": "Cor prim\u00e1ria da empresa (hex)"
+      "description": "Cor primária da empresa (hex)"
     },
     "cor_secundaria": {
       "type": "string",
-      "description": "Cor secund\u00e1ria da empresa (hex)"
+      "description": "Cor secundária da empresa (hex)"
     },
     "status": {
       "type": "string",
@@ -260,5 +260,43 @@
     "razao_social",
     "cnpj",
     "regime_tributario"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

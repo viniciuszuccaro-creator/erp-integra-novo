@@ -18,7 +18,7 @@
         "Chatbot WhatsApp",
         "API Externa"
       ],
-      "description": "Origem do or\u00e7amento"
+      "description": "Origem do orçamento"
     },
     "cliente_nome": {
       "type": "string",
@@ -38,11 +38,11 @@
     },
     "cliente_erp_id": {
       "type": "string",
-      "description": "ID do cliente no ERP (se j\u00e1 cadastrado)"
+      "description": "ID do cliente no ERP (se já cadastrado)"
     },
     "descricao_pedido": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o textual do que o cliente quer"
+      "description": "Descrição textual do que o cliente quer"
     },
     "arquivo_projeto_url": {
       "type": "string",
@@ -55,7 +55,7 @@
     "processado_ia": {
       "type": "boolean",
       "default": false,
-      "description": "Se a IA j\u00e1 processou"
+      "description": "Se a IA já processou"
     },
     "data_processamento_ia": {
       "type": "string",
@@ -65,11 +65,11 @@
     "resultado_ia": {
       "type": "object",
       "additionalProperties": true,
-      "description": "JSON completo da an\u00e1lise da IA"
+      "description": "JSON completo da análise da IA"
     },
     "confianca_ia": {
       "type": "number",
-      "description": "% de confian\u00e7a da IA (0-100)"
+      "description": "% de confiança da IA (0-100)"
     },
     "produtos_identificados": {
       "type": "array",
@@ -108,7 +108,7 @@
       "enum": [
         "Recebido",
         "Processando IA",
-        "Or\u00e7amento Gerado",
+        "Orçamento Gerado",
         "Enviado ao Cliente",
         "Aprovado",
         "Convertido em Pedido",
@@ -116,11 +116,11 @@
         "Cancelado"
       ],
       "default": "Recebido",
-      "description": "Status do or\u00e7amento"
+      "description": "Status do orçamento"
     },
     "orcamento_pdf_url": {
       "type": "string",
-      "description": "URL do PDF do or\u00e7amento gerado"
+      "description": "URL do PDF do orçamento gerado"
     },
     "data_envio_cliente": {
       "type": "string",
@@ -135,11 +135,11 @@
     "data_validade": {
       "type": "string",
       "format": "date",
-      "description": "Validade do or\u00e7amento"
+      "description": "Validade do orçamento"
     },
     "pedido_erp_id": {
       "type": "string",
-      "description": "ID do pedido criado no ERP (ap\u00f3s convers\u00e3o)"
+      "description": "ID do pedido criado no ERP (após conversão)"
     },
     "responsavel_atendimento": {
       "type": "string",
@@ -155,7 +155,7 @@
     },
     "notificacao_id": {
       "type": "string",
-      "description": "ID da notifica\u00e7\u00e3o enviada (V16.1)"
+      "description": "ID da notificação enviada (V16.1)"
     },
     "mensagens_chat": {
       "type": "array",
@@ -182,7 +182,7 @@
           }
         }
       },
-      "description": "Hist\u00f3rico de conversas"
+      "description": "Histórico de conversas"
     },
     "observacoes": {
       "type": "string"
@@ -191,5 +191,43 @@
   "required": [
     "cliente_nome",
     "cliente_email"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

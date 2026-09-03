@@ -12,11 +12,11 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico do modelo"
+      "description": "Código sequencial único do modelo"
     },
     "nome_modelo": {
       "type": "string",
-      "description": "Nome do modelo \u2014 \u00fanico por grupo"
+      "description": "Nome do modelo — único por grupo"
     },
     "tipo_documento": {
       "type": "string",
@@ -25,7 +25,7 @@
         "Etiqueta Volume",
         "Checklist Carga",
         "Canhoto",
-        "Ordem Separa\u00e7\u00e3o",
+        "Ordem Separação",
         "Outro"
       ],
       "description": "Tipo de documento"
@@ -42,7 +42,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Campos obrigat\u00f3rios no documento"
+      "description": "Campos obrigatórios no documento"
     },
     "campos_opcionais": {
       "type": "array",
@@ -70,7 +70,7 @@
         "PDF",
         "HTML",
         "Imagem",
-        "T\u00e9rmico"
+        "Térmico"
       ],
       "default": "PDF"
     },
@@ -79,8 +79,8 @@
       "enum": [
         "A4",
         "A5",
-        "T\u00e9rmico 80mm",
-        "T\u00e9rmico 58mm",
+        "Térmico 80mm",
+        "Térmico 58mm",
         "Personalizado"
       ],
       "default": "A4"
@@ -96,7 +96,7 @@
     "padrao_empresa": {
       "type": "boolean",
       "default": false,
-      "description": "Se \u00e9 o modelo padr\u00e3o da empresa"
+      "description": "Se é o modelo padrão da empresa"
     },
     "ativo": {
       "type": "boolean",
@@ -109,5 +109,43 @@
   "required": [
     "nome_modelo",
     "tipo_documento"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

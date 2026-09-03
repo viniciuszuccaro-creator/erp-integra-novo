@@ -8,7 +8,7 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
+      "description": "ID da empresa que cadastrou (cadastro único compartilhado no grupo)"
     },
     "empresa_alocada_id": {
       "type": "string",
@@ -16,15 +16,15 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico do colaborador"
+      "description": "Código sequencial único do colaborador"
     },
     "nome_completo": {
       "type": "string",
-      "description": "Nome completo do colaborador \u2014 \u00fanico por grupo"
+      "description": "Nome completo do colaborador — único por grupo"
     },
     "cpf": {
       "type": "string",
-      "description": "CPF \u00fanico do colaborador"
+      "description": "CPF único do colaborador"
     },
     "rg": {
       "type": "string"
@@ -66,9 +66,9 @@
         "RH",
         "Operacional",
         "TI",
-        "Log\u00edstica",
+        "Logística",
         "Compras",
-        "Produ\u00e7\u00e3o"
+        "Produção"
       ]
     },
     "departamento_id": {
@@ -85,15 +85,15 @@
       "enum": [
         "CLT",
         "PJ",
-        "Est\u00e1gio",
-        "Tempor\u00e1rio"
+        "Estágio",
+        "Temporário"
       ]
     },
     "status": {
       "type": "string",
       "enum": [
         "Ativo",
-        "F\u00e9rias",
+        "Férias",
         "Afastado",
         "Desligado",
         "Inativo"
@@ -103,7 +103,7 @@
     "ativo": {
       "type": "boolean",
       "default": true,
-      "description": "Vol 3.4: Exclus\u00e3o l\u00f3gica \u2014 false quando inativado"
+      "description": "Vol 3.4: Exclusão lógica — false quando inativado"
     },
     "endereco": {
       "type": "string"
@@ -124,8 +124,8 @@
           "type": "string",
           "enum": [
             "Corrente",
-            "Poupan\u00e7a",
-            "Sal\u00e1rio"
+            "Poupança",
+            "Salário"
           ]
         },
         "pix_chave": {
@@ -172,10 +172,10 @@
               "Capacete",
               "Luvas",
               "Botas",
-              "\u00d3culos de Prote\u00e7\u00e3o",
+              "Óculos de Proteção",
               "Protetor Auricular",
-              "M\u00e1scara Respirat\u00f3ria",
-              "Cinto de Seguran\u00e7a",
+              "Máscara Respiratória",
+              "Cinto de Segurança",
               "Colete Refletivo",
               "Avental",
               "Outros"
@@ -183,7 +183,7 @@
           },
           "ca": {
             "type": "string",
-            "description": "N\u00famero do Certificado de Aprova\u00e7\u00e3o (CA)"
+            "description": "Número do Certificado de Aprovação (CA)"
           },
           "data_entrega": {
             "type": "string",
@@ -203,21 +203,21 @@
               "Entregue",
               "Devolvido",
               "Vencido",
-              "Substitu\u00eddo"
+              "Substituído"
             ],
             "default": "Entregue"
           },
           "assinatura_ciencia": {
             "type": "boolean",
             "default": false,
-            "description": "Colaborador assinou ci\u00eancia do recebimento"
+            "description": "Colaborador assinou ciência do recebimento"
           },
           "observacao": {
             "type": "string"
           }
         }
       },
-      "description": "Vol 12.1: Controle de EPIs com CA, validade e ci\u00eancia do colaborador"
+      "description": "Vol 12.1: Controle de EPIs com CA, validade e ciência do colaborador"
     },
     "competencias": {
       "type": "array",
@@ -249,7 +249,7 @@
               "Carteira de Trabalho",
               "Contrato",
               "Exame Admissional",
-              "Exame Peri\u00f3dico",
+              "Exame Periódico",
               "CNH",
               "Certificado",
               "Outros"
@@ -329,10 +329,10 @@
             "type": "string",
             "enum": [
               "Vale Transporte",
-              "Vale Refei\u00e7\u00e3o",
-              "Vale Alimenta\u00e7\u00e3o",
-              "Plano de Sa\u00fade",
-              "Plano Odontol\u00f3gico",
+              "Vale Refeição",
+              "Vale Alimentação",
+              "Plano de Saúde",
+              "Plano Odontológico",
               "Seguro de Vida",
               "Outros"
             ]
@@ -404,5 +404,43 @@
     "data_admissao",
     "cargo",
     "departamento"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

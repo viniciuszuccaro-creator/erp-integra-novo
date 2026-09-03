@@ -8,11 +8,11 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "Empresa dona da configura\u00e7\u00e3o"
+      "description": "Empresa dona da configuração"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico da configura\u00e7\u00e3o"
+      "description": "Código sequencial único da configuração"
     },
     "provedor": {
       "type": "string",
@@ -75,12 +75,12 @@
     "dias_vencimento_padrao": {
       "type": "number",
       "default": 3,
-      "description": "Dias ap\u00f3s emiss\u00e3o para vencimento"
+      "description": "Dias após emissão para vencimento"
     },
     "multa_apos_vencimento": {
       "type": "number",
       "default": 2,
-      "description": "% de multa ap\u00f3s vencimento"
+      "description": "% de multa após vencimento"
     },
     "juros_por_dia": {
       "type": "number",
@@ -94,7 +94,7 @@
     },
     "instrucoes_boleto": {
       "type": "string",
-      "description": "Instru\u00e7\u00f5es que aparecem no boleto"
+      "description": "Instruções que aparecem no boleto"
     },
     "enviar_email_automatico": {
       "type": "boolean",
@@ -102,11 +102,11 @@
     },
     "webhook_url": {
       "type": "string",
-      "description": "URL para receber notifica\u00e7\u00f5es de pagamento"
+      "description": "URL para receber notificações de pagamento"
     },
     "webhook_token": {
       "type": "string",
-      "description": "Token de seguran\u00e7a do webhook"
+      "description": "Token de segurança do webhook"
     },
     "pix_chave": {
       "type": "string",
@@ -131,12 +131,12 @@
     "split_config": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Configura\u00e7\u00e3o de split entre empresas"
+      "description": "Configuração de split entre empresas"
     },
     "ultima_sincronizacao": {
       "type": "string",
       "format": "date-time",
-      "description": "\u00daltima vez que sincronizou com a API"
+      "description": "Última vez que sincronizou com a API"
     },
     "status_conexao": {
       "type": "string",
@@ -159,5 +159,43 @@
   "required": [
     "empresa_id",
     "provedor"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

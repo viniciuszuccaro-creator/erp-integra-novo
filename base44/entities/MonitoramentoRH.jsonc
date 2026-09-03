@@ -51,7 +51,7 @@
           "type": "string",
           "enum": [
             "Crescente",
-            "Est\u00e1vel",
+            "Estável",
             "Decrescente"
           ]
         },
@@ -59,9 +59,9 @@
           "type": "string",
           "enum": [
             "Baixo",
-            "M\u00e9dio",
+            "Médio",
             "Alto",
-            "Cr\u00edtico"
+            "Crítico"
           ]
         },
         "indicadores_desmotivacao": {
@@ -116,8 +116,8 @@
               "Queda de Produtividade",
               "Risco de Turnover",
               "Acesso Indevido",
-              "Padr\u00e3o Anormal",
-              "Meta N\u00e3o Atingida"
+              "Padrão Anormal",
+              "Meta Não Atingida"
             ]
           },
           "descricao": {
@@ -127,7 +127,7 @@
             "type": "string",
             "enum": [
               "Baixa",
-              "M\u00e9dia",
+              "Média",
               "Alta"
             ]
           },
@@ -144,5 +144,43 @@
   "required": [
     "colaborador_id",
     "periodo_referencia"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

@@ -8,7 +8,7 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa (se espec\u00edfico da empresa)"
+      "description": "ID da empresa (se específico da empresa)"
     },
     "origem_escopo": {
       "type": "string",
@@ -21,7 +21,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico do centro de resultado"
+      "description": "Código sequencial único do centro de resultado"
     },
     "nome": {
       "type": "string",
@@ -34,7 +34,7 @@
       "type": "string",
       "enum": [
         "Produto",
-        "Servi\u00e7o",
+        "Serviço",
         "Departamento",
         "Projeto",
         "Cliente",
@@ -49,7 +49,7 @@
     },
     "responsavel_id": {
       "type": "string",
-      "description": "ID do usu\u00e1rio respons\u00e1vel"
+      "description": "ID do usuário responsável"
     },
     "meta_receita_mensal": {
       "type": "number",
@@ -69,5 +69,43 @@
   },
   "required": [
     "nome"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

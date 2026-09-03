@@ -8,15 +8,15 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa (se configura\u00e7\u00e3o espec\u00edfica)"
+      "description": "ID da empresa (se configuração específica)"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico da configura\u00e7\u00e3o de IA"
+      "description": "Código sequencial único da configuração de IA"
     },
     "chave": {
       "type": "string",
-      "description": "Chave \u00fanica da configura\u00e7\u00e3o"
+      "description": "Chave única da configuração"
     },
     "modulo": {
       "type": "string",
@@ -29,7 +29,7 @@
         "Estoque",
         "Geral"
       ],
-      "description": "M\u00f3dulo que usa esta IA"
+      "description": "Módulo que usa esta IA"
     },
     "funcionalidade": {
       "type": "string",
@@ -37,29 +37,29 @@
     },
     "objetivo": {
       "type": "string",
-      "description": "Vol 19.1: Objetivo claro da IA \u2014 o que ela faz e por qu\u00ea"
+      "description": "Vol 19.1: Objetivo claro da IA — o que ela faz e por quê"
     },
     "dados_usados": {
       "type": "string",
-      "description": "Vol 19.1: Descri\u00e7\u00e3o dos dados consumidos pela IA"
+      "description": "Vol 19.1: Descrição dos dados consumidos pela IA"
     },
     "limites": {
       "type": "string",
-      "description": "Vol 19.1: O que a IA N\u00c3O pode fazer (limites expl\u00edcitos)"
+      "description": "Vol 19.1: O que a IA NÃO pode fazer (limites explícitos)"
     },
     "periodicidade": {
       "type": "string",
       "enum": [
         "Tempo Real",
         "Por Evento",
-        "Hor\u00e1ria",
-        "Di\u00e1ria",
+        "Horária",
+        "Diária",
         "Semanal",
         "Mensal",
         "Sob Demanda"
       ],
       "default": "Sob Demanda",
-      "description": "Vol 19.1: Periodicidade de execu\u00e7\u00e3o"
+      "description": "Vol 19.1: Periodicidade de execução"
     },
     "acao_permitida": {
       "type": "string",
@@ -69,50 +69,50 @@
         "Resumir",
         "Prever",
         "Detectar Anomalia",
-        "Automatizar (com aprova\u00e7\u00e3o)",
-        "Automatizar (sem aprova\u00e7\u00e3o)"
+        "Automatizar (com aprovação)",
+        "Automatizar (sem aprovação)"
       ],
       "default": "Sugerir",
-      "description": "Vol 19.1: N\u00edvel m\u00e1ximo de a\u00e7\u00e3o permitida \u00e0 IA"
+      "description": "Vol 19.1: Nível máximo de ação permitida à IA"
     },
     "risco_nivel": {
       "type": "string",
       "enum": [
         "Baixo",
-        "M\u00e9dio",
+        "Médio",
         "Alto",
-        "Cr\u00edtico"
+        "Crítico"
       ],
-      "default": "M\u00e9dio",
-      "description": "Vol 19.1: N\u00edvel de risco associado a esta IA"
+      "default": "Médio",
+      "description": "Vol 19.1: Nível de risco associado a esta IA"
     },
     "explicacao_habilitada": {
       "type": "boolean",
       "default": true,
-      "description": "Vol 19.1: Se a IA deve fornecer explica\u00e7\u00e3o para suas sugest\u00f5es"
+      "description": "Vol 19.1: Se a IA deve fornecer explicação para suas sugestões"
     },
     "aprovacao_humana_obrigatoria": {
       "type": "boolean",
       "default": true,
-      "description": "Vol 19.1: Se decis\u00f5es cr\u00edticas exigem aprova\u00e7\u00e3o humana antes de executar"
+      "description": "Vol 19.1: Se decisões críticas exigem aprovação humana antes de executar"
     },
     "responsavel": {
       "type": "string",
-      "description": "Vol 19.1: Nome do respons\u00e1vel por esta IA"
+      "description": "Vol 19.1: Nome do responsável por esta IA"
     },
     "responsavel_id": {
       "type": "string",
-      "description": "Vol 19.1: ID do usu\u00e1rio respons\u00e1vel"
+      "description": "Vol 19.1: ID do usuário responsável"
     },
     "ativo": {
       "type": "boolean",
       "default": false,
-      "description": "Se a IA est\u00e1 ativa"
+      "description": "Se a IA está ativa"
     },
     "modo_treinamento": {
       "type": "boolean",
       "default": false,
-      "description": "Se est\u00e1 em modo de treinamento"
+      "description": "Se está em modo de treinamento"
     },
     "modelo_base": {
       "type": "string",
@@ -140,12 +140,12 @@
     "limite_tokens": {
       "type": "number",
       "default": 8192,
-      "description": "Limite de tokens por requisi\u00e7\u00e3o"
+      "description": "Limite de tokens por requisição"
     },
     "confianca_minima": {
       "type": "number",
       "default": 75,
-      "description": "% m\u00ednimo de confian\u00e7a para aceitar resultado"
+      "description": "% mínimo de confiança para aceitar resultado"
     },
     "temperatura": {
       "type": "number",
@@ -155,36 +155,36 @@
     "timeout_segundos": {
       "type": "number",
       "default": 60,
-      "description": "Timeout da requisi\u00e7\u00e3o"
+      "description": "Timeout da requisição"
     },
     "empresas_habilitadas": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Vol 19.1: Opt-in por empresa \u2014 IDs das empresas autorizadas"
+      "description": "Vol 19.1: Opt-in por empresa — IDs das empresas autorizadas"
     },
     "usuarios_autorizados": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "IDs dos usu\u00e1rios autorizados"
+      "description": "IDs dos usuários autorizados"
     },
     "configuracoes_especificas": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Configura\u00e7\u00f5es espec\u00edficas por funcionalidade"
+      "description": "Configurações específicas por funcionalidade"
     },
     "total_execucoes": {
       "type": "number",
       "default": 0,
-      "description": "Total de execu\u00e7\u00f5es"
+      "description": "Total de execuções"
     },
     "total_sucesso": {
       "type": "number",
       "default": 0,
-      "description": "Total de execu\u00e7\u00f5es bem-sucedidas"
+      "description": "Total de execuções bem-sucedidas"
     },
     "total_erro": {
       "type": "number",
@@ -203,7 +203,7 @@
     "ultima_execucao": {
       "type": "string",
       "format": "date-time",
-      "description": "Data/hora da \u00faltima execu\u00e7\u00e3o"
+      "description": "Data/hora da última execução"
     },
     "observacoes": {
       "type": "string"
@@ -215,20 +215,41 @@
     "funcionalidade"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

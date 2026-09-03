@@ -12,7 +12,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico da roteiriza\u00e7\u00e3o"
+      "description": "Código sequencial único da roteirização"
     },
     "data_rota": {
       "type": "string",
@@ -79,7 +79,7 @@
           }
         }
       },
-      "description": "Entregas inclu\u00eddas nesta rota"
+      "description": "Entregas incluídas nesta rota"
     },
     "otimizacao_ia": {
       "type": "object",
@@ -117,7 +117,7 @@
           }
         }
       },
-      "description": "Dados da otimiza\u00e7\u00e3o por IA"
+      "description": "Dados da otimização por IA"
     },
     "transito_historico": {
       "type": "object",
@@ -152,8 +152,8 @@
       "type": "string",
       "enum": [
         "Planejada",
-        "Em Execu\u00e7\u00e3o",
-        "Conclu\u00edda",
+        "Em Execução",
+        "Concluída",
         "Cancelada"
       ],
       "default": "Planejada"
@@ -189,5 +189,43 @@
     "data_rota",
     "motorista_id",
     "veiculo_id"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

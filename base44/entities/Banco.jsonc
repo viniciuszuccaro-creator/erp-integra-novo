@@ -8,15 +8,15 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
+      "description": "ID da empresa que cadastrou (cadastro único compartilhado no grupo)"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico do registro"
+      "description": "Código sequencial único do registro"
     },
     "codigo_banco": {
       "type": "string",
-      "description": "C\u00f3digo oficial do banco (ex: 001, 237, 341) \u2014 \u00fanico por grupo"
+      "description": "Código oficial do banco (ex: 001, 237, 341) — único por grupo"
     },
     "nome_banco": {
       "type": "string"
@@ -84,5 +84,43 @@
   "required": [
     "codigo_banco",
     "nome_banco"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

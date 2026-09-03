@@ -8,11 +8,11 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "Empresa propriet\u00e1ria da configura\u00e7\u00e3o"
+      "description": "Empresa proprietária da configuração"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo num\u00e9rico sequencial \u00fanico"
+      "description": "Código numérico sequencial único"
     },
     "nome": {
       "type": "string",
@@ -42,9 +42,9 @@
         "enum": [
           "PIX",
           "Boleto",
-          "Cart\u00e3o Cr\u00e9dito",
-          "Cart\u00e3o D\u00e9bito",
-          "Transfer\u00eancia",
+          "Cartão Crédito",
+          "Cartão Débito",
+          "Transferência",
           "Link de Pagamento"
         ]
       },
@@ -52,7 +52,7 @@
     },
     "chave_api_publica": {
       "type": "string",
-      "description": "Chave API p\u00fablica do gateway"
+      "description": "Chave API pública do gateway"
     },
     "chave_api_secreta": {
       "type": "string",
@@ -60,7 +60,7 @@
     },
     "webhook_url": {
       "type": "string",
-      "description": "URL de webhook para receber notifica\u00e7\u00f5es"
+      "description": "URL de webhook para receber notificações"
     },
     "webhook_secret": {
       "type": "string",
@@ -69,17 +69,17 @@
     "ambiente": {
       "type": "string",
       "enum": [
-        "Produ\u00e7\u00e3o",
-        "Homologa\u00e7\u00e3o",
+        "Produção",
+        "Homologação",
         "Teste"
       ],
       "default": "Teste",
-      "description": "Ambiente de opera\u00e7\u00e3o"
+      "description": "Ambiente de operação"
     },
     "configuracoes_extras": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Configura\u00e7\u00f5es espec\u00edficas do gateway (JSON flex\u00edvel)"
+      "description": "Configurações específicas do gateway (JSON flexível)"
     },
     "taxas_gateway": {
       "type": "object",
@@ -127,22 +127,22 @@
           "default": 0
         }
       },
-      "description": "Limites de transa\u00e7\u00e3o do gateway"
+      "description": "Limites de transação do gateway"
     },
     "ativo": {
       "type": "boolean",
       "default": true,
-      "description": "Se o gateway est\u00e1 ativo para uso"
+      "description": "Se o gateway está ativo para uso"
     },
     "prioridade": {
       "type": "number",
       "default": 1,
-      "description": "Prioridade de uso (maior = mais priorit\u00e1rio)"
+      "description": "Prioridade de uso (maior = mais prioritário)"
     },
     "ultima_sincronizacao": {
       "type": "string",
       "format": "date-time",
-      "description": "\u00daltima sincroniza\u00e7\u00e3o de status com o gateway"
+      "description": "Última sincronização de status com o gateway"
     },
     "estatisticas": {
       "type": "object",
@@ -164,7 +164,7 @@
           "default": 0
         }
       },
-      "description": "Estat\u00edsticas de uso do gateway"
+      "description": "Estatísticas de uso do gateway"
     },
     "observacoes": {
       "type": "string"
@@ -175,5 +175,43 @@
     "provedor",
     "empresa_id",
     "ambiente"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

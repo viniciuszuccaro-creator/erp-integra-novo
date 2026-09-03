@@ -8,7 +8,7 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa (se espec\u00edfico)"
+      "description": "ID da empresa (se específico)"
     },
     "tenant_id": {
       "type": "string",
@@ -23,21 +23,21 @@
       "type": "string",
       "enum": [
         "CPU",
-        "Mem\u00f3ria",
-        "Lat\u00eancia",
-        "Requisi\u00e7\u00f5es",
+        "Memória",
+        "Latência",
+        "Requisições",
         "Erros",
         "Uptime",
         "Database",
         "Storage",
-        "Integra\u00e7\u00f5es",
+        "Integrações",
         "Jobs"
       ],
-      "description": "Tipo de m\u00e9trica"
+      "description": "Tipo de métrica"
     },
     "modulo": {
       "type": "string",
-      "description": "Vol 23.3: M\u00f3dulo monitorado (Comercial, Financeiro, Estoque, etc.) para erros por m\u00f3dulo"
+      "description": "Vol 23.3: Módulo monitorado (Comercial, Financeiro, Estoque, etc.) para erros por módulo"
     },
     "cpu_uso_percent": {
       "type": "number",
@@ -45,39 +45,39 @@
     },
     "memoria_uso_mb": {
       "type": "number",
-      "description": "Mem\u00f3ria usada em MB"
+      "description": "Memória usada em MB"
     },
     "memoria_disponivel_mb": {
       "type": "number",
-      "description": "Mem\u00f3ria dispon\u00edvel em MB"
+      "description": "Memória disponível em MB"
     },
     "latencia_media_ms": {
       "type": "number",
-      "description": "Lat\u00eancia m\u00e9dia de requisi\u00e7\u00f5es em ms"
+      "description": "Latência média de requisições em ms"
     },
     "latencia_p95_ms": {
       "type": "number",
-      "description": "Lat\u00eancia percentil 95 em ms"
+      "description": "Latência percentil 95 em ms"
     },
     "latencia_p99_ms": {
       "type": "number",
-      "description": "Vol 23.3: Lat\u00eancia percentil 99 em ms (outliers)"
+      "description": "Vol 23.3: Latência percentil 99 em ms (outliers)"
     },
     "requisicoes_por_segundo": {
       "type": "number",
-      "description": "Taxa de requisi\u00e7\u00f5es/segundo"
+      "description": "Taxa de requisições/segundo"
     },
     "requisicoes_total": {
       "type": "number",
-      "description": "Total de requisi\u00e7\u00f5es no per\u00edodo"
+      "description": "Total de requisições no período"
     },
     "requisicoes_sucesso": {
       "type": "number",
-      "description": "Requisi\u00e7\u00f5es bem-sucedidas"
+      "description": "Requisições bem-sucedidas"
     },
     "requisicoes_erro": {
       "type": "number",
-      "description": "Requisi\u00e7\u00f5es com erro"
+      "description": "Requisições com erro"
     },
     "taxa_erro_percent": {
       "type": "number",
@@ -86,7 +86,7 @@
     "erros_por_modulo": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Vol 23.3: Contagem de erros por m\u00f3dulo (ex: {Comercial: 5, Financeiro: 2})"
+      "description": "Vol 23.3: Contagem de erros por módulo (ex: {Comercial: 5, Financeiro: 2})"
     },
     "consultas_lentas": {
       "type": "array",
@@ -123,15 +123,15 @@
     },
     "usuarios_ativos": {
       "type": "number",
-      "description": "Usu\u00e1rios ativos no momento"
+      "description": "Usuários ativos no momento"
     },
     "sessoes_simultaneas": {
       "type": "number",
-      "description": "Sess\u00f5es simult\u00e2neas"
+      "description": "Sessões simultâneas"
     },
     "database_conexoes_ativas": {
       "type": "number",
-      "description": "Conex\u00f5es ativas no banco"
+      "description": "Conexões ativas no banco"
     },
     "database_queries_por_segundo": {
       "type": "number",
@@ -139,7 +139,7 @@
     },
     "database_tempo_medio_query_ms": {
       "type": "number",
-      "description": "Tempo m\u00e9dio de query em ms"
+      "description": "Tempo médio de query em ms"
     },
     "storage_usado_gb": {
       "type": "number",
@@ -147,7 +147,7 @@
     },
     "storage_disponivel_gb": {
       "type": "number",
-      "description": "Storage dispon\u00edvel em GB"
+      "description": "Storage disponível em GB"
     },
     "cache_hit_rate_percent": {
       "type": "number",
@@ -198,7 +198,7 @@
           }
         }
       },
-      "description": "Vol 23.3: APIs externas indispon\u00edveis no momento da coleta"
+      "description": "Vol 23.3: APIs externas indisponíveis no momento da coleta"
     },
     "alertas_gerados": {
       "type": "array",
@@ -228,7 +228,7 @@
           },
           "acao_recomendada": {
             "type": "string",
-            "description": "Vol 23.3: A\u00e7\u00e3o recomendada para resolver o alerta"
+            "description": "Vol 23.3: Ação recomendada para resolver o alerta"
           }
         }
       },
@@ -237,18 +237,18 @@
     "status_geral": {
       "type": "string",
       "enum": [
-        "Saud\u00e1vel",
-        "Aten\u00e7\u00e3o",
-        "Cr\u00edtico",
+        "Saudável",
+        "Atenção",
+        "Crítico",
         "Offline"
       ],
-      "default": "Saud\u00e1vel",
+      "default": "Saudável",
       "description": "Status geral do sistema"
     },
     "intervalo_coleta_segundos": {
       "type": "number",
       "default": 60,
-      "description": "Intervalo de coleta das m\u00e9tricas"
+      "description": "Intervalo de coleta das métricas"
     }
   },
   "required": [
@@ -257,24 +257,40 @@
   ],
   "rls": {
     "read": {
-      "user_condition": {
-        "role": "admin"
-      }
-    },
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

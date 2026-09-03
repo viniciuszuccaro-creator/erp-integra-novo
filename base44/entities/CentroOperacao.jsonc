@@ -8,15 +8,15 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa respons\u00e1vel"
+      "description": "ID da empresa responsável"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico do centro operacional"
+      "description": "Código sequencial único do centro operacional"
     },
     "nome_centro": {
       "type": "string",
-      "description": "Nome do centro \u2014 \u00fanico por grupo (Ex: CD Guarulhos, Obra Cliente X)"
+      "description": "Nome do centro — único por grupo (Ex: CD Guarulhos, Obra Cliente X)"
     },
     "tipo": {
       "type": "string",
@@ -24,8 +24,8 @@
         "CD",
         "Obra",
         "Loja",
-        "Dep\u00f3sito",
-        "F\u00e1brica"
+        "Depósito",
+        "Fábrica"
       ],
       "description": "Tipo de centro operacional"
     },
@@ -58,7 +58,7 @@
           "default": "Brasil"
         }
       },
-      "description": "Endere\u00e7o completo do centro"
+      "description": "Endereço completo do centro"
     },
     "geolocalizacao": {
       "type": "object",
@@ -73,15 +73,15 @@
           "type": "string"
         }
       },
-      "description": "Geolocaliza\u00e7\u00e3o autom\u00e1tica (V16.1)"
+      "description": "Geolocalização automática (V16.1)"
     },
     "responsavel_id": {
       "type": "string",
-      "description": "ID do colaborador respons\u00e1vel"
+      "description": "ID do colaborador responsável"
     },
     "responsavel_nome": {
       "type": "string",
-      "description": "Nome do respons\u00e1vel"
+      "description": "Nome do responsável"
     },
     "permite_estoque": {
       "type": "boolean",
@@ -90,19 +90,19 @@
     },
     "capacidade_m3": {
       "type": "number",
-      "description": "Capacidade volum\u00e9trica em m\u00b3"
+      "description": "Capacidade volumétrica em m³"
     },
     "area_m2": {
       "type": "number",
-      "description": "\u00c1rea total em m\u00b2"
+      "description": "Área total em m²"
     },
     "custo_mensal_aluguel": {
       "type": "number",
-      "description": "Custo mensal de aluguel/opera\u00e7\u00e3o"
+      "description": "Custo mensal de aluguel/operação"
     },
     "custo_por_m2": {
       "type": "number",
-      "description": "Custo por m\u00b2 calculado por IA"
+      "description": "Custo por m² calculado por IA"
     },
     "horario_funcionamento": {
       "type": "object",
@@ -124,12 +124,12 @@
           "default": false
         }
       },
-      "description": "Hor\u00e1rio de funcionamento"
+      "description": "Horário de funcionamento"
     },
     "ativo": {
       "type": "boolean",
       "default": true,
-      "description": "Se o centro est\u00e1 ativo"
+      "description": "Se o centro está ativo"
     },
     "data_abertura": {
       "type": "string",
@@ -139,16 +139,54 @@
     "data_encerramento": {
       "type": "string",
       "format": "date",
-      "description": "Data de encerramento (se aplic\u00e1vel)"
+      "description": "Data de encerramento (se aplicável)"
     },
     "observacoes": {
       "type": "string",
-      "description": "Observa\u00e7\u00f5es sobre o centro"
+      "description": "Observações sobre o centro"
     }
   },
   "required": [
     "nome_centro",
     "tipo",
     "empresa_id"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

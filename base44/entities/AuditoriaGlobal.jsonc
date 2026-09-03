@@ -8,28 +8,28 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa onde ocorreu a a\u00e7\u00e3o"
+      "description": "ID da empresa onde ocorreu a ação"
     },
     "usuario_id": {
       "type": "string",
-      "description": "ID do usu\u00e1rio que executou"
+      "description": "ID do usuário que executou"
     },
     "usuario_nome": {
       "type": "string",
-      "description": "Nome do usu\u00e1rio"
+      "description": "Nome do usuário"
     },
     "usuario_email": {
       "type": "string",
-      "description": "Email do usu\u00e1rio"
+      "description": "Email do usuário"
     },
     "usuario_perfil": {
       "type": "string",
-      "description": "Perfil de acesso do usu\u00e1rio"
+      "description": "Perfil de acesso do usuário"
     },
     "data_hora": {
       "type": "string",
       "format": "date-time",
-      "description": "Data/hora da a\u00e7\u00e3o"
+      "description": "Data/hora da ação"
     },
     "acao": {
       "type": "string",
@@ -48,16 +48,16 @@
         "Troca Contexto",
         "API Call",
         "IA Execution",
-        "Integra\u00e7\u00e3o",
+        "Integração",
         "Backup",
         "Restore",
         "Config Change"
       ],
-      "description": "Tipo de a\u00e7\u00e3o executada"
+      "description": "Tipo de ação executada"
     },
     "modulo": {
       "type": "string",
-      "description": "M\u00f3dulo do sistema"
+      "description": "Módulo do sistema"
     },
     "entidade_afetada": {
       "type": "string",
@@ -69,7 +69,7 @@
     },
     "registro_chave": {
       "type": "string",
-      "description": "Chave/n\u00famero do registro (PEDXYZ, NF123)"
+      "description": "Chave/número do registro (PEDXYZ, NF123)"
     },
     "campos_alterados": {
       "type": "array",
@@ -92,20 +92,20 @@
     "dados_antes": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Snapshot dos dados antes da altera\u00e7\u00e3o"
+      "description": "Snapshot dos dados antes da alteração"
     },
     "dados_depois": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Snapshot dos dados ap\u00f3s a altera\u00e7\u00e3o"
+      "description": "Snapshot dos dados após a alteração"
     },
     "ip_address": {
       "type": "string",
-      "description": "Endere\u00e7o IP de origem"
+      "description": "Endereço IP de origem"
     },
     "ip_localizacao": {
       "type": "string",
-      "description": "Geolocaliza\u00e7\u00e3o do IP"
+      "description": "Geolocalização do IP"
     },
     "user_agent": {
       "type": "string",
@@ -135,12 +135,12 @@
           "type": "string"
         }
       },
-      "description": "Contexto da sess\u00e3o"
+      "description": "Contexto da sessão"
     },
     "sucesso": {
       "type": "boolean",
       "default": true,
-      "description": "Se a a\u00e7\u00e3o foi bem-sucedida"
+      "description": "Se a ação foi bem-sucedida"
     },
     "mensagem_erro": {
       "type": "string",
@@ -148,41 +148,41 @@
     },
     "duracao_ms": {
       "type": "number",
-      "description": "Dura\u00e7\u00e3o da opera\u00e7\u00e3o em ms"
+      "description": "Duração da operação em ms"
     },
     "nivel_risco": {
       "type": "string",
       "enum": [
         "Baixo",
-        "M\u00e9dio",
+        "Médio",
         "Alto",
-        "Cr\u00edtico"
+        "Crítico"
       ],
       "default": "Baixo",
-      "description": "N\u00edvel de risco da a\u00e7\u00e3o (calculado por IA)"
+      "description": "Nível de risco da ação (calculado por IA)"
     },
     "alerta_ia_gerado": {
       "type": "boolean",
       "default": false,
-      "description": "Se a IA detectou comportamento an\u00f4malo"
+      "description": "Se a IA detectou comportamento anômalo"
     },
     "tipo_alerta": {
       "type": "string",
       "enum": [
         "Nenhum",
         "Login Suspeito",
-        "Hor\u00e1rio Incomum",
+        "Horário Incomum",
         "IP Novo",
-        "A\u00e7\u00e3o Repetitiva",
+        "Ação Repetitiva",
         "Volume Alto",
-        "Acesso Negado M\u00faltiplo"
+        "Acesso Negado Múltiplo"
       ],
       "description": "Tipo de alerta gerado"
     },
     "requer_investigacao": {
       "type": "boolean",
       "default": false,
-      "description": "Se requer investiga\u00e7\u00e3o manual"
+      "description": "Se requer investigação manual"
     },
     "investigado": {
       "type": "boolean",
@@ -199,7 +199,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Tags para categoriza\u00e7\u00e3o"
+      "description": "Tags para categorização"
     }
   },
   "required": [
@@ -210,24 +210,40 @@
   ],
   "rls": {
     "read": {
-      "user_condition": {
-        "role": "admin"
-      }
-    },
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

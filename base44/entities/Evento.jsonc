@@ -12,7 +12,7 @@
     },
     "titulo": {
       "type": "string",
-      "description": "T\u00edtulo do evento"
+      "description": "Título do evento"
     },
     "descricao": {
       "type": "string"
@@ -20,20 +20,20 @@
     "tipo": {
       "type": "string",
       "enum": [
-        "Reuni\u00e3o",
-        "Liga\u00e7\u00e3o",
+        "Reunião",
+        "Ligação",
         "Visita",
         "Tarefa",
         "Follow-up",
         "Evento",
         "Lembrete"
       ],
-      "default": "Reuni\u00e3o"
+      "default": "Reunião"
     },
     "data_inicio": {
       "type": "string",
       "format": "date-time",
-      "description": "Data e hora de in\u00edcio"
+      "description": "Data e hora de início"
     },
     "data_fim": {
       "type": "string",
@@ -84,7 +84,7 @@
         "Agendado",
         "Confirmado",
         "Em Andamento",
-        "Conclu\u00eddo",
+        "Concluído",
         "Cancelado",
         "Adiado"
       ],
@@ -116,7 +116,7 @@
     "frequencia_recorrencia": {
       "type": "string",
       "enum": [
-        "Di\u00e1ria",
+        "Diária",
         "Semanal",
         "Quinzenal",
         "Mensal",
@@ -125,14 +125,14 @@
     },
     "link_reuniao": {
       "type": "string",
-      "description": "Link para reuni\u00e3o online"
+      "description": "Link para reunião online"
     },
     "observacoes": {
       "type": "string"
     },
     "cor": {
       "type": "string",
-      "description": "Cor do evento no calend\u00e1rio",
+      "description": "Cor do evento no calendário",
       "default": "#3b82f6"
     }
   },
@@ -140,5 +140,43 @@
     "titulo",
     "data_inicio",
     "data_fim"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

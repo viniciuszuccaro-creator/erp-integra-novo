@@ -8,19 +8,19 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa respons\u00e1vel pelo contrato"
+      "description": "ID da empresa responsável pelo contrato"
     },
     "numero_contrato": {
       "type": "string",
-      "description": "N\u00famero \u00fanico do contrato"
+      "description": "Número único do contrato"
     },
     "tipo": {
       "type": "string",
       "enum": [
         "Cliente",
         "Fornecedor",
-        "Presta\u00e7\u00e3o de Servi\u00e7o",
-        "Loca\u00e7\u00e3o",
+        "Prestação de Serviço",
+        "Locação",
         "Parceria",
         "Outro"
       ],
@@ -41,7 +41,7 @@
     },
     "descricao": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o detalhada"
+      "description": "Descrição detalhada"
     },
     "modelo_documento_id": {
       "type": "string",
@@ -50,7 +50,7 @@
     "versao_atual": {
       "type": "number",
       "default": 1,
-      "description": "Vol 13.1: N\u00famero da vers\u00e3o atual do contrato"
+      "description": "Vol 13.1: Número da versão atual do contrato"
     },
     "versoes": {
       "type": "array",
@@ -73,12 +73,12 @@
           "conteudo_anterior": {
             "type": "object",
             "additionalProperties": true,
-            "description": "Snapshot antes da altera\u00e7\u00e3o"
+            "description": "Snapshot antes da alteração"
           },
           "conteudo_novo": {
             "type": "object",
             "additionalProperties": true,
-            "description": "Snapshot ap\u00f3s a altera\u00e7\u00e3o"
+            "description": "Snapshot após a alteração"
           },
           "motivo_alteracao": {
             "type": "string"
@@ -88,7 +88,7 @@
           }
         }
       },
-      "description": "Vol 13.1: Hist\u00f3rico de vers\u00f5es com antes/depois para auditoria"
+      "description": "Vol 13.1: Histórico de versões com antes/depois para auditoria"
     },
     "clausulas_sensiveis": {
       "type": "array",
@@ -106,11 +106,11 @@
             "items": {
               "type": "string"
             },
-            "description": "Perfis que podem visualizar/editar esta cl\u00e1usula"
+            "description": "Perfis que podem visualizar/editar esta cláusula"
           }
         }
       },
-      "description": "Vol 13.2: Permiss\u00f5es por cl\u00e1usula sens\u00edvel"
+      "description": "Vol 13.2: Permissões por cláusula sensível"
     },
     "valor_mensal": {
       "type": "number",
@@ -123,12 +123,12 @@
     "data_inicio": {
       "type": "string",
       "format": "date",
-      "description": "Data de in\u00edcio"
+      "description": "Data de início"
     },
     "data_fim": {
       "type": "string",
       "format": "date",
-      "description": "Data de t\u00e9rmino"
+      "description": "Data de término"
     },
     "data_assinatura": {
       "type": "string",
@@ -137,17 +137,17 @@
     },
     "vigencia_meses": {
       "type": "number",
-      "description": "Vig\u00eancia em meses"
+      "description": "Vigência em meses"
     },
     "renovacao_automatica": {
       "type": "boolean",
       "default": false,
-      "description": "Renova\u00e7\u00e3o autom\u00e1tica ao vencer"
+      "description": "Renovação automática ao vencer"
     },
     "prazo_aviso_renovacao": {
       "type": "number",
       "default": 30,
-      "description": "Dias de anteced\u00eancia para aviso de renova\u00e7\u00e3o"
+      "description": "Dias de antecedência para aviso de renovação"
     },
     "indice_reajuste": {
       "type": "string",
@@ -159,7 +159,7 @@
         "Fixo",
         "Outro"
       ],
-      "description": "\u00cdndice de reajuste"
+      "description": "Índice de reajuste"
     },
     "percentual_reajuste": {
       "type": "number",
@@ -168,14 +168,14 @@
     "data_proximo_reajuste": {
       "type": "string",
       "format": "date",
-      "description": "Data do pr\u00f3ximo reajuste"
+      "description": "Data do próximo reajuste"
     },
     "forma_pagamento": {
       "type": "string",
       "enum": [
         "Boleto",
-        "Transfer\u00eancia",
-        "Cart\u00e3o",
+        "Transferência",
+        "Cartão",
         "PIX",
         "Cheque"
       ],
@@ -187,7 +187,7 @@
     },
     "responsavel_empresa": {
       "type": "string",
-      "description": "Respons\u00e1vel pela empresa"
+      "description": "Responsável pela empresa"
     },
     "testemunhas": {
       "type": "array",
@@ -198,11 +198,11 @@
     },
     "clausulas_especiais": {
       "type": "string",
-      "description": "Cl\u00e1usulas especiais"
+      "description": "Cláusulas especiais"
     },
     "multa_rescisao": {
       "type": "number",
-      "description": "Multa por rescis\u00e3o antecipada (%)"
+      "description": "Multa por rescisão antecipada (%)"
     },
     "arquivo_contrato": {
       "type": "string",
@@ -231,7 +231,7 @@
     },
     "assinatura_digital": {
       "type": "object",
-      "description": "Dados da assinatura eletr\u00f4nica",
+      "description": "Dados da assinatura eletrônica",
       "properties": {
         "nome_completo": {
           "type": "string"
@@ -277,12 +277,12 @@
     "ultima_cobranca_gerada": {
       "type": "string",
       "format": "date",
-      "description": "Data da \u00faltima cobran\u00e7a gerada"
+      "description": "Data da última cobrança gerada"
     },
     "proxima_cobranca": {
       "type": "string",
       "format": "date",
-      "description": "Data da pr\u00f3xima cobran\u00e7a"
+      "description": "Data da próxima cobrança"
     },
     "contas_geradas_ids": {
       "type": "array",
@@ -320,7 +320,7 @@
           }
         }
       },
-      "description": "Hist\u00f3rico de renova\u00e7\u00f5es e reajustes"
+      "description": "Histórico de renovações e reajustes"
     },
     "historico_aditivos": {
       "type": "array",
@@ -345,7 +345,7 @@
           }
         }
       },
-      "description": "Hist\u00f3rico de aditivos contratuais"
+      "description": "Histórico de aditivos contratuais"
     },
     "alertas_enviados": {
       "type": "array",
@@ -357,8 +357,8 @@
             "enum": [
               "Vencimento",
               "Reajuste",
-              "Renova\u00e7\u00e3o",
-              "Inadimpl\u00eancia"
+              "Renovação",
+              "Inadimplência"
             ]
           },
           "data_envio": {
@@ -373,17 +373,17 @@
           }
         }
       },
-      "description": "Hist\u00f3rico de alertas enviados"
+      "description": "Histórico de alertas enviados"
     },
     "proximo_alerta_vencimento": {
       "type": "string",
       "format": "date",
-      "description": "Data do pr\u00f3ximo alerta de vencimento"
+      "description": "Data do próximo alerta de vencimento"
     },
     "proximo_alerta_reajuste": {
       "type": "string",
       "format": "date",
-      "description": "Data do pr\u00f3ximo alerta de reajuste"
+      "description": "Data do próximo alerta de reajuste"
     }
   },
   "required": [
@@ -392,5 +392,43 @@
     "parte_contratante",
     "objeto",
     "data_inicio"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

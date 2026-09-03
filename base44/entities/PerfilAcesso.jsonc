@@ -8,15 +8,15 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
+      "description": "ID da empresa que cadastrou (cadastro único compartilhado no grupo)"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico do perfil de acesso"
+      "description": "Código sequencial único do perfil de acesso"
     },
     "nome_perfil": {
       "type": "string",
-      "description": "Nome do perfil \u2014 \u00fanico por grupo"
+      "description": "Nome do perfil — único por grupo"
     },
     "descricao": {
       "type": "string"
@@ -43,7 +43,7 @@
           }
         }
       },
-      "description": "Estrutura flex\u00edvel: m\u00f3dulo \u2192 se\u00e7\u00e3o \u2192 [a\u00e7\u00f5es]."
+      "description": "Estrutura flexível: módulo → seção → [ações]."
     },
     "permissoes_sensiveis": {
       "type": "array",
@@ -66,9 +66,9 @@
             "type": "string",
             "enum": [
               "Baixa",
-              "M\u00e9dia",
+              "Média",
               "Alta",
-              "Cr\u00edtica"
+              "Crítica"
             ]
           },
           "data_deteccao": {
@@ -102,20 +102,41 @@
     "permissoes"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

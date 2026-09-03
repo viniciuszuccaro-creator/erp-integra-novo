@@ -12,7 +12,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo num\u00e9rico sequencial \u00fanico"
+      "description": "Código numérico sequencial único"
     },
     "nome_canal": {
       "type": "string",
@@ -32,7 +32,7 @@
     },
     "whatsapp_numero": {
       "type": "string",
-      "description": "N\u00famero do WhatsApp Business"
+      "description": "Número do WhatsApp Business"
     },
     "whatsapp_token": {
       "type": "string",
@@ -40,7 +40,7 @@
     },
     "widget_codigo": {
       "type": "string",
-      "description": "C\u00f3digo de incorpora\u00e7\u00e3o do widget"
+      "description": "Código de incorporação do widget"
     },
     "configuracoes_canal": {
       "type": "object",
@@ -90,7 +90,7 @@
       "items": {
         "type": "string"
       },
-      "description": "IDs dos usu\u00e1rios que podem atender este canal"
+      "description": "IDs dos usuários que podem atender este canal"
     },
     "total_conversas": {
       "type": "number",
@@ -122,20 +122,41 @@
     "tipo_canal"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

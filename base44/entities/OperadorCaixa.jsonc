@@ -12,15 +12,15 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico do operador"
+      "description": "Código sequencial único do operador"
     },
     "usuario_id": {
       "type": "string",
-      "description": "ID do usu\u00e1rio do sistema"
+      "description": "ID do usuário do sistema"
     },
     "usuario_nome": {
       "type": "string",
-      "description": "Nome do usu\u00e1rio"
+      "description": "Nome do usuário"
     },
     "colaborador_id": {
       "type": "string",
@@ -28,11 +28,11 @@
     },
     "codigo_operador": {
       "type": "string",
-      "description": "C\u00f3digo do operador (legado)"
+      "description": "Código do operador (legado)"
     },
     "nome_caixa": {
       "type": "string",
-      "description": "Nome/identifica\u00e7\u00e3o do caixa (ex: Caixa 1, Caixa Principal)"
+      "description": "Nome/identificação do caixa (ex: Caixa 1, Caixa Principal)"
     },
     "turno_id": {
       "type": "string",
@@ -72,12 +72,12 @@
     "total_entradas": {
       "type": "number",
       "default": 0,
-      "description": "Total de entradas no per\u00edodo"
+      "description": "Total de entradas no período"
     },
     "total_saidas": {
       "type": "number",
       "default": 0,
-      "description": "Total de sa\u00eddas no per\u00edodo"
+      "description": "Total de saídas no período"
     },
     "quantidade_vendas": {
       "type": "number",
@@ -87,7 +87,7 @@
     "ticket_medio": {
       "type": "number",
       "default": 0,
-      "description": "Ticket m\u00e9dio das vendas"
+      "description": "Ticket médio das vendas"
     },
     "permissoes_especiais": {
       "type": "array",
@@ -98,13 +98,13 @@
           "Desconto Acima Limite",
           "Abrir Gaveta",
           "Sangria",
-          "Refor\u00e7o",
-          "Alterar Pre\u00e7o",
+          "Reforço",
+          "Alterar Preço",
           "Venda sem Estoque",
           "Fechamento Caixa"
         ]
       },
-      "description": "Permiss\u00f5es especiais do operadores"
+      "description": "Permissões especiais do operadores"
     },
     "pode_emitir_nfe": {
       "type": "boolean",
@@ -124,7 +124,7 @@
     "limite_desconto_percentual": {
       "type": "number",
       "default": 5,
-      "description": "Limite de desconto sem aprova\u00e7\u00e3o (%)"
+      "description": "Limite de desconto sem aprovação (%)"
     },
     "limite_valor_venda": {
       "type": "number",
@@ -136,11 +136,49 @@
     "ativo": {
       "type": "boolean",
       "default": true,
-      "description": "Se o operador est\u00e1 ativo"
+      "description": "Se o operador está ativo"
     }
   },
   "required": [
     "usuario_nome",
     "empresa_id"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

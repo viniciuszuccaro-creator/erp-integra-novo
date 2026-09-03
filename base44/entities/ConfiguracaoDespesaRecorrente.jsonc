@@ -4,15 +4,15 @@
   "properties": {
     "group_id": {
       "type": "string",
-      "description": "ID do grupo (se aplic\u00e1vel)"
+      "description": "ID do grupo (se aplicável)"
     },
     "empresa_id": {
       "type": "string",
-      "description": "Empresa que ter\u00e1 a despesa"
+      "description": "Empresa que terá a despesa"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico da configura\u00e7\u00e3o"
+      "description": "Código sequencial único da configuração"
     },
     "origem": {
       "type": "string",
@@ -32,7 +32,7 @@
     },
     "descricao": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o da despesa recorrente"
+      "description": "Descrição da despesa recorrente"
     },
     "categoria": {
       "type": "string",
@@ -82,17 +82,17 @@
     },
     "dia_vencimento": {
       "type": "number",
-      "description": "Dia do m\u00eas para vencimento (1-31)"
+      "description": "Dia do mês para vencimento (1-31)"
     },
     "dia_semana_vencimento": {
       "type": "string",
       "enum": [
         "Segunda",
-        "Ter\u00e7a",
+        "Terça",
         "Quarta",
         "Quinta",
         "Sexta",
-        "S\u00e1bado",
+        "Sábado",
         "Domingo"
       ]
     },
@@ -205,7 +205,7 @@
     "ativa": {
       "type": "boolean",
       "default": true,
-      "description": "Se a configura\u00e7\u00e3o est\u00e1 ativa"
+      "description": "Se a configuração está ativa"
     },
     "status": {
       "type": "string",
@@ -226,5 +226,43 @@
     "valor_base",
     "periodicidade",
     "empresa_id"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

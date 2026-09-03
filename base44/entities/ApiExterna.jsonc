@@ -16,11 +16,11 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo num\u00e9rico sequencial \u00fanico"
+      "description": "Código numérico sequencial único"
     },
     "nome_integracao": {
       "type": "string",
-      "description": "Nome da integra\u00e7\u00e3o"
+      "description": "Nome da integração"
     },
     "tipo_api": {
       "type": "string",
@@ -49,21 +49,21 @@
     },
     "headers_autenticacao": {
       "type": "object",
-      "description": "Headers de autentica\u00e7\u00e3o"
+      "description": "Headers de autenticação"
     },
     "ambiente": {
       "type": "string",
       "enum": [
-        "Produ\u00e7\u00e3o",
-        "Homologa\u00e7\u00e3o",
+        "Produção",
+        "Homologação",
         "Sandbox"
       ],
-      "default": "Homologa\u00e7\u00e3o",
-      "description": "Vol 18.1: Ambiente da integra\u00e7\u00e3o"
+      "default": "Homologação",
+      "description": "Vol 18.1: Ambiente da integração"
     },
     "escopo": {
       "type": "string",
-      "description": "Vol 18.1: Escopo/prop\u00f3sito da integra\u00e7\u00e3o (ex: emiss\u00e3o NF-e, consulta CEP, pagamento)"
+      "description": "Vol 18.1: Escopo/propósito da integração (ex: emissão NF-e, consulta CEP, pagamento)"
     },
     "modulo_vinculado": {
       "type": "string",
@@ -73,31 +73,31 @@
         "Fiscal",
         "Estoque",
         "Compras",
-        "Expedi\u00e7\u00e3o",
-        "Produ\u00e7\u00e3o",
+        "Expedição",
+        "Produção",
         "RH",
         "CRM",
         "Sistema"
       ],
-      "description": "Vol 18.1: M\u00f3dulo que consome esta API"
+      "description": "Vol 18.1: Módulo que consome esta API"
     },
     "responsavel_id": {
       "type": "string",
-      "description": "Vol 18.1: ID do usu\u00e1rio respons\u00e1vel pela integra\u00e7\u00e3o"
+      "description": "Vol 18.1: ID do usuário responsável pela integração"
     },
     "responsavel_nome": {
       "type": "string",
-      "description": "Vol 18.1: Nome do respons\u00e1vel"
+      "description": "Vol 18.1: Nome do responsável"
     },
     "limite_requisicoes_por_minuto": {
       "type": "number",
       "default": 60,
-      "description": "Vol 18.1: Limite de requisi\u00e7\u00f5es por minuto (rate limit)"
+      "description": "Vol 18.1: Limite de requisições por minuto (rate limit)"
     },
     "timeout_segundos": {
       "type": "number",
       "default": 30,
-      "description": "Vol 18.1: Timeout da requisi\u00e7\u00e3o"
+      "description": "Vol 18.1: Timeout da requisição"
     },
     "politica_retry": {
       "type": "object",
@@ -115,7 +115,7 @@
           "default": true
         }
       },
-      "description": "Vol 18.1: Pol\u00edtica de retry"
+      "description": "Vol 18.1: Política de retry"
     },
     "circuit_breaker": {
       "type": "object",
@@ -142,7 +142,7 @@
           "format": "date-time"
         }
       },
-      "description": "Vol 18.3: Circuit breaker para prote\u00e7\u00e3o"
+      "description": "Vol 18.3: Circuit breaker para proteção"
     },
     "fila_morta": {
       "type": "array",
@@ -168,7 +168,7 @@
           }
         }
       },
-      "description": "Vol 18.3: Fila morta (dead letter queue) para requisi\u00e7\u00f5es que falharam ap\u00f3s todas as tentativas"
+      "description": "Vol 18.3: Fila morta (dead letter queue) para requisições que falharam após todas as tentativas"
     },
     "ultima_requisicao": {
       "type": "string",
@@ -177,7 +177,7 @@
     "ultima_sincronizacao": {
       "type": "string",
       "format": "date-time",
-      "description": "Vol 18.3: \u00daltima sincroniza\u00e7\u00e3o bem-sucedida"
+      "description": "Vol 18.3: Última sincronização bem-sucedida"
     },
     "total_requisicoes": {
       "type": "number",
@@ -190,12 +190,12 @@
     "total_reprocessados": {
       "type": "number",
       "default": 0,
-      "description": "Vol 18.3: Total de requisi\u00e7\u00f5es reprocessadas da fila morta"
+      "description": "Vol 18.3: Total de requisições reprocessadas da fila morta"
     },
     "latencia_media_ms": {
       "type": "number",
       "default": 0,
-      "description": "Vol 18.3: Lat\u00eancia m\u00e9dia das requisi\u00e7\u00f5es"
+      "description": "Vol 18.3: Latência média das requisições"
     },
     "ativo": {
       "type": "boolean",
@@ -210,20 +210,41 @@
     "tipo_api"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

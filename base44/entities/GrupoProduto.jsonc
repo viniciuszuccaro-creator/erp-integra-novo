@@ -8,34 +8,34 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
+      "description": "ID da empresa que cadastrou (cadastro único compartilhado no grupo)"
     },
     "nome_grupo": {
       "type": "string",
-      "description": "Nome do grupo \u2014 \u00fanico por grupo (Ex: Ferragens, Bitolas, Materiais El\u00e9tricos)"
+      "description": "Nome do grupo — único por grupo (Ex: Ferragens, Bitolas, Materiais Elétricos)"
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico do grupo"
+      "description": "Código sequencial único do grupo"
     },
     "natureza": {
       "type": "string",
       "enum": [
         "Revenda",
-        "Produ\u00e7\u00e3o",
+        "Produção",
         "Consumo",
-        "Servi\u00e7o"
+        "Serviço"
       ],
       "default": "Revenda",
       "description": "Natureza dos produtos deste grupo"
     },
     "ncm_padrao": {
       "type": "string",
-      "description": "NCM padr\u00e3o para produtos deste grupo (V16.1)"
+      "description": "NCM padrão para produtos deste grupo (V16.1)"
     },
     "conta_contabil_padrao_id": {
       "type": "string",
-      "description": "Conta cont\u00e1bil padr\u00e3o (V16.1)"
+      "description": "Conta contábil padrão (V16.1)"
     },
     "margem_sugerida": {
       "type": "number",
@@ -43,7 +43,7 @@
     },
     "icone": {
       "type": "string",
-      "description": "Nome do \u00edcone (lucide-react)"
+      "description": "Nome do ícone (lucide-react)"
     },
     "cor": {
       "type": "string",
@@ -52,7 +52,7 @@
     "ativo": {
       "type": "boolean",
       "default": true,
-      "description": "Se o grupo est\u00e1 ativo"
+      "description": "Se o grupo está ativo"
     },
     "observacoes": {
       "type": "string"
@@ -61,5 +61,43 @@
   "required": [
     "nome_grupo",
     "natureza"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

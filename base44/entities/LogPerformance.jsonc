@@ -13,7 +13,7 @@
     "timestamp": {
       "type": "string",
       "format": "date-time",
-      "description": "Data/hora da medi\u00e7\u00e3o"
+      "description": "Data/hora da medição"
     },
     "tipo_operacao": {
       "type": "string",
@@ -27,7 +27,7 @@
         "calculation",
         "other"
       ],
-      "description": "Tipo de opera\u00e7\u00e3o medida"
+      "description": "Tipo de operação medida"
     },
     "modulo": {
       "type": "string",
@@ -46,23 +46,23 @@
         "Sistema",
         "Outro"
       ],
-      "description": "M\u00f3dulo do sistema"
+      "description": "Módulo do sistema"
     },
     "funcionalidade": {
       "type": "string",
-      "description": "Funcionalidade espec\u00edfica (ex: listar_pedidos, criar_nfe)"
+      "description": "Funcionalidade específica (ex: listar_pedidos, criar_nfe)"
     },
     "duracao_ms": {
       "type": "number",
-      "description": "Dura\u00e7\u00e3o em milissegundos"
+      "description": "Duração em milissegundos"
     },
     "duracao_segundos": {
       "type": "number",
-      "description": "Dura\u00e7\u00e3o em segundos (para facilitar queries)"
+      "description": "Duração em segundos (para facilitar queries)"
     },
     "query_sql": {
       "type": "string",
-      "description": "Query SQL executada (se aplic\u00e1vel)"
+      "description": "Query SQL executada (se aplicável)"
     },
     "query_tipo": {
       "type": "string",
@@ -101,27 +101,27 @@
         "DELETE",
         "PATCH"
       ],
-      "description": "M\u00e9todo HTTP"
+      "description": "Método HTTP"
     },
     "status_code": {
       "type": "number",
-      "description": "C\u00f3digo de status HTTP"
+      "description": "Código de status HTTP"
     },
     "usuario_id": {
       "type": "string",
-      "description": "ID do usu\u00e1rio que executou"
+      "description": "ID do usuário que executou"
     },
     "usuario_nome": {
       "type": "string",
-      "description": "Nome do usu\u00e1rio"
+      "description": "Nome do usuário"
     },
     "sessao_id": {
       "type": "string",
-      "description": "ID da sess\u00e3o"
+      "description": "ID da sessão"
     },
     "ip_address": {
       "type": "string",
-      "description": "IP do usu\u00e1rio"
+      "description": "IP do usuário"
     },
     "user_agent": {
       "type": "string",
@@ -129,7 +129,7 @@
     },
     "memoria_usada_mb": {
       "type": "number",
-      "description": "Mem\u00f3ria usada na opera\u00e7\u00e3o"
+      "description": "Memória usada na operação"
     },
     "cpu_percent": {
       "type": "number",
@@ -190,16 +190,16 @@
     },
     "correlacao_id": {
       "type": "string",
-      "description": "ID para correlacionar opera\u00e7\u00f5es relacionadas"
+      "description": "ID para correlacionar operações relacionadas"
     },
     "parent_operacao_id": {
       "type": "string",
-      "description": "ID da opera\u00e7\u00e3o pai (para tracing distribu\u00eddo)"
+      "description": "ID da operação pai (para tracing distribuído)"
     },
     "parametros": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Par\u00e2metros da opera\u00e7\u00e3o (filtros, IDs, etc)"
+      "description": "Parâmetros da operação (filtros, IDs, etc)"
     },
     "metricas_adicionais": {
       "type": "object",
@@ -220,7 +220,7 @@
           "type": "number"
         }
       },
-      "description": "M\u00e9tricas detalhadas"
+      "description": "Métricas detalhadas"
     },
     "alerta_gerado": {
       "type": "boolean",
@@ -243,14 +243,14 @@
     },
     "versao_sistema": {
       "type": "string",
-      "description": "Vers\u00e3o do sistema"
+      "description": "Versão do sistema"
     },
     "tags": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Tags para categoriza\u00e7\u00e3o"
+      "description": "Tags para categorização"
     }
   },
   "required": [
@@ -261,24 +261,40 @@
   ],
   "rls": {
     "read": {
-      "user_condition": {
-        "role": "admin"
-      }
-    },
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

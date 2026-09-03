@@ -18,7 +18,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo \u00fanico do cargo"
+      "description": "Código único do cargo"
     },
     "nome_cargo": {
       "type": "string"
@@ -29,7 +29,7 @@
     "nivel_hierarquico": {
       "type": "string",
       "enum": [
-        "Estagi\u00e1rio",
+        "Estagiário",
         "Auxiliar",
         "Assistente",
         "Analista",
@@ -63,5 +63,43 @@
   },
   "required": [
     "nome_cargo"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

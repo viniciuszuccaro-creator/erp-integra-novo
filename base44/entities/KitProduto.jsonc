@@ -8,7 +8,7 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
+      "description": "ID da empresa que cadastrou (cadastro único compartilhado no grupo)"
     },
     "empresa_dona_id": {
       "type": "string",
@@ -16,25 +16,25 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico do kit"
+      "description": "Código sequencial único do kit"
     },
     "codigo_kit": {
       "type": "string",
-      "description": "C\u00f3digo do kit (legado)"
+      "description": "Código do kit (legado)"
     },
     "nome_kit": {
       "type": "string",
-      "description": "Nome do kit \u2014 \u00fanico por grupo"
+      "description": "Nome do kit — único por grupo"
     },
     "descricao": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o do kit"
+      "description": "Descrição do kit"
     },
     "tipo_kit": {
       "type": "string",
       "enum": [
         "Comercial",
-        "Produ\u00e7\u00e3o",
+        "Produção",
         "Promocional",
         "Personalizado"
       ],
@@ -59,11 +59,11 @@
           }
         }
       },
-      "description": "Produtos que comp\u00f5em o kit"
+      "description": "Produtos que compõem o kit"
     },
     "preco_kit": {
       "type": "number",
-      "description": "Pre\u00e7o do kit (pode ser diferente da soma dos itens)"
+      "description": "Preço do kit (pode ser diferente da soma dos itens)"
     },
     "desconto_kit_percentual": {
       "type": "number",
@@ -89,5 +89,43 @@
   "required": [
     "nome_kit",
     "itens_kit"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

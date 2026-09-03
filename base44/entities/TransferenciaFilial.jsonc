@@ -8,11 +8,11 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa origem da transfer\u00eancia"
+      "description": "ID da empresa origem da transferência"
     },
     "numero_transferencia": {
       "type": "string",
-      "description": "N\u00famero \u00fanico da transfer\u00eancia"
+      "description": "Número único da transferência"
     },
     "empresa_origem_id": {
       "type": "string",
@@ -31,7 +31,7 @@
     "data_solicitacao": {
       "type": "string",
       "format": "date",
-      "description": "Data da solicita\u00e7\u00e3o"
+      "description": "Data da solicitação"
     },
     "data_envio": {
       "type": "string",
@@ -48,7 +48,7 @@
       "enum": [
         "Planejada",
         "Aprovada",
-        "Em Tr\u00e2nsito",
+        "Em Trânsito",
         "Recebida",
         "Cancelada"
       ],
@@ -93,21 +93,21 @@
     },
     "valor_total": {
       "type": "number",
-      "description": "Valor total da transfer\u00eancia"
+      "description": "Valor total da transferência"
     },
     "motivo": {
       "type": "string",
-      "description": "Motivo da transfer\u00eancia"
+      "description": "Motivo da transferência"
     },
     "tipo_transporte": {
       "type": "string",
       "enum": [
-        "Pr\u00f3prio",
+        "Próprio",
         "Transportadora",
         "Courier",
         "Outro"
       ],
-      "default": "Pr\u00f3prio"
+      "default": "Próprio"
     },
     "transportadora": {
       "type": "string"
@@ -123,7 +123,7 @@
     },
     "solicitante": {
       "type": "string",
-      "description": "Usu\u00e1rio que solicitou"
+      "description": "Usuário que solicitou"
     },
     "solicitante_id": {
       "type": "string"
@@ -147,11 +147,11 @@
     },
     "movimentacao_origem_id": {
       "type": "string",
-      "description": "ID da movimenta\u00e7\u00e3o de sa\u00edda no estoque origem"
+      "description": "ID da movimentação de saída no estoque origem"
     },
     "movimentacao_destino_id": {
       "type": "string",
-      "description": "ID da movimenta\u00e7\u00e3o de entrada no estoque destino"
+      "description": "ID da movimentação de entrada no estoque destino"
     },
     "documento_fiscal": {
       "type": "object",
@@ -170,7 +170,7 @@
           "type": "string"
         }
       },
-      "description": "Dados da nota fiscal (se aplic\u00e1vel)"
+      "description": "Dados da nota fiscal (se aplicável)"
     },
     "comprovantes": {
       "type": "array",
@@ -223,7 +223,7 @@
           }
         }
       },
-      "description": "Hist\u00f3rico de mudan\u00e7as de status"
+      "description": "Histórico de mudanças de status"
     },
     "notificacoes_enviadas": {
       "type": "array",
@@ -254,7 +254,7 @@
           }
         }
       },
-      "description": "Notifica\u00e7\u00f5es enviadas"
+      "description": "Notificações enviadas"
     }
   },
   "required": [
@@ -262,5 +262,43 @@
     "empresa_origem_id",
     "empresa_destino_id",
     "data_solicitacao"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

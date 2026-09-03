@@ -28,11 +28,11 @@
     },
     "item_producao_id": {
       "type": "string",
-      "description": "ID do item de produ\u00e7\u00e3o (se produzido)"
+      "description": "ID do item de produção (se produzido)"
     },
     "op_id": {
       "type": "string",
-      "description": "ID da Ordem de Produ\u00e7\u00e3o"
+      "description": "ID da Ordem de Produção"
     },
     "tipo_item": {
       "type": "string",
@@ -44,15 +44,15 @@
     },
     "descricao_produto": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o do produto/item"
+      "description": "Descrição do produto/item"
     },
     "codigo_sku": {
       "type": "string",
-      "description": "C\u00f3digo SKU"
+      "description": "Código SKU"
     },
     "elemento": {
       "type": "string",
-      "description": "Elemento estrutural (V1, C2, etc) se for produ\u00e7\u00e3o"
+      "description": "Elemento estrutural (V1, C2, etc) se for produção"
     },
     "quantidade": {
       "type": "number",
@@ -72,7 +72,7 @@
     },
     "volume_m3": {
       "type": "number",
-      "description": "Volume em m\u00b3"
+      "description": "Volume em m³"
     },
     "fracionado_30kg": {
       "type": "boolean",
@@ -116,24 +116,24 @@
     },
     "lote": {
       "type": "string",
-      "description": "N\u00famero do lote (se controlar)"
+      "description": "Número do lote (se controlar)"
     },
     "data_validade": {
       "type": "string",
       "format": "date",
-      "description": "Data de validade (se aplic\u00e1vel)"
+      "description": "Data de validade (se aplicável)"
     },
     "nfe_numero": {
       "type": "string",
-      "description": "N\u00famero da NF-e que acompanha"
+      "description": "Número da NF-e que acompanha"
     },
     "romaneio_numero": {
       "type": "string",
-      "description": "N\u00famero do romaneio"
+      "description": "Número do romaneio"
     },
     "localizacao_estoque": {
       "type": "string",
-      "description": "Localiza\u00e7\u00e3o no estoque antes da separa\u00e7\u00e3o"
+      "description": "Localização no estoque antes da separação"
     },
     "separado": {
       "type": "boolean",
@@ -147,12 +147,50 @@
     },
     "observacao": {
       "type": "string",
-      "description": "Observa\u00e7\u00f5es sobre o item"
+      "description": "Observações sobre o item"
     }
   },
   "required": [
     "entrega_id",
     "descricao_produto",
     "quantidade"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

@@ -8,15 +8,15 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa respons\u00e1vel pela entrega"
+      "description": "ID da empresa responsável pela entrega"
     },
     "regiao_entrega_id": {
       "type": "string",
-      "description": "ID da regi\u00e3o de entrega"
+      "description": "ID da região de entrega"
     },
     "regiao_entrega_nome": {
       "type": "string",
-      "description": "Nome da regi\u00e3o (snapshot)"
+      "description": "Nome da região (snapshot)"
     },
     "pedido_id": {
       "type": "string",
@@ -27,7 +27,7 @@
     },
     "op_id": {
       "type": "string",
-      "description": "ID da ordem de produ\u00e7\u00e3o (se vier da produ\u00e7\u00e3o)"
+      "description": "ID da ordem de produção (se vier da produção)"
     },
     "nfe_id": {
       "type": "string",
@@ -84,7 +84,7 @@
           "type": "string"
         }
       },
-      "description": "Snapshot do endere\u00e7o usado na entrega"
+      "description": "Snapshot do endereço usado na entrega"
     },
     "contato_entrega": {
       "type": "object",
@@ -113,12 +113,12 @@
     "data_separacao": {
       "type": "string",
       "format": "date-time",
-      "description": "Data/hora da separa\u00e7\u00e3o"
+      "description": "Data/hora da separação"
     },
     "data_saida": {
       "type": "string",
       "format": "date-time",
-      "description": "Data/hora da sa\u00edda para entrega"
+      "description": "Data/hora da saída para entrega"
     },
     "data_previsao": {
       "type": "string",
@@ -131,11 +131,11 @@
     },
     "janela_entrega_inicio": {
       "type": "string",
-      "description": "Hor\u00e1rio in\u00edcio (HH:MM)"
+      "description": "Horário início (HH:MM)"
     },
     "janela_entrega_fim": {
       "type": "string",
-      "description": "Hor\u00e1rio fim (HH:MM)"
+      "description": "Horário fim (HH:MM)"
     },
     "transportadora": {
       "type": "string"
@@ -173,23 +173,23 @@
     },
     "codigo_rastreamento": {
       "type": "string",
-      "description": "C\u00f3digo de rastreio da transportadora"
+      "description": "Código de rastreio da transportadora"
     },
     "link_rastreamento": {
       "type": "string",
-      "description": "Link de rastreamento (campo preparado para integra\u00e7\u00e3o)"
+      "description": "Link de rastreamento (campo preparado para integração)"
     },
     "qr_code": {
       "type": "string",
-      "description": "QR Code \u00fanico para rastreamento interno"
+      "description": "QR Code único para rastreamento interno"
     },
     "rota_id": {
       "type": "string",
-      "description": "ID da rota (se fizer parte de roteiriza\u00e7\u00e3o)"
+      "description": "ID da rota (se fizer parte de roteirização)"
     },
     "romaneio_id": {
       "type": "string",
-      "description": "ID do romaneio que cont\u00e9m esta entrega"
+      "description": "ID do romaneio que contém esta entrega"
     },
     "prioridade": {
       "type": "string",
@@ -210,7 +210,7 @@
     },
     "volume_total_m3": {
       "type": "number",
-      "description": "Volume total estimado em m\u00b3 (para restri\u00e7\u00f5es de capacidade)"
+      "description": "Volume total estimado em m³ (para restrições de capacidade)"
     },
     "valor_frete": {
       "type": "number"
@@ -222,17 +222,17 @@
     "status": {
       "type": "string",
       "enum": [
-        "Aguardando Separa\u00e7\u00e3o",
-        "Em Separa\u00e7\u00e3o",
+        "Aguardando Separação",
+        "Em Separação",
         "Pronto para Expedir",
         "Saiu para Entrega",
-        "Em Tr\u00e2nsito",
+        "Em Trânsito",
         "Entregue",
         "Entrega Frustrada",
         "Devolvido",
         "Cancelado"
       ],
-      "default": "Aguardando Separa\u00e7\u00e3o"
+      "default": "Aguardando Separação"
     },
     "comprovante_entrega": {
       "type": "object",
@@ -276,12 +276,12 @@
           "type": "string",
           "enum": [
             "Cliente Ausente",
-            "Endere\u00e7o Incorreto",
+            "Endereço Incorreto",
             "Recusa de Recebimento",
-            "\u00c1rea de Risco",
-            "Hor\u00e1rio Inadequado",
-            "Ve\u00edculo Quebrado",
-            "Condi\u00e7\u00f5es Clim\u00e1ticas",
+            "Área de Risco",
+            "Horário Inadequado",
+            "Veículo Quebrado",
+            "Condições Climáticas",
             "Outros"
           ]
         },
@@ -308,9 +308,9 @@
           "tipo": {
             "type": "string",
             "enum": [
-              "Separa\u00e7\u00e3o",
-              "Sa\u00edda",
-              "Em Tr\u00e2nsito",
+              "Separação",
+              "Saída",
+              "Em Trânsito",
               "Chegada",
               "Entregue",
               "Frustrada"
@@ -346,7 +346,7 @@
           }
         }
       },
-      "description": "Hist\u00f3rico de notifica\u00e7\u00f5es enviadas"
+      "description": "Histórico de notificações enviadas"
     },
     "historico_status": {
       "type": "array",
@@ -379,7 +379,7 @@
           }
         }
       },
-      "description": "Timeline de mudan\u00e7as de status"
+      "description": "Timeline de mudanças de status"
     },
     "ocorrencias": {
       "type": "array",
@@ -392,8 +392,8 @@
               "Atraso",
               "Avaria",
               "Extravio",
-              "Devolu\u00e7\u00e3o Parcial",
-              "Problema Ve\u00edculo",
+              "Devolução Parcial",
+              "Problema Veículo",
               "Outros"
             ]
           },
@@ -415,7 +415,7 @@
           }
         }
       },
-      "description": "Ocorr\u00eancias durante o transporte"
+      "description": "Ocorrências durante o transporte"
     },
     "avaliacao_entrega": {
       "type": "object",
@@ -446,17 +446,17 @@
     },
     "link_publico_rastreamento": {
       "type": "string",
-      "description": "Link p\u00fablico para rastreamento sem login (V16.1)"
+      "description": "Link público para rastreamento sem login (V16.1)"
     },
     "rastreamento_habilitado": {
       "type": "boolean",
       "default": true,
-      "description": "Se o rastreamento est\u00e1 habilitado (V16.1)"
+      "description": "Se o rastreamento está habilitado (V16.1)"
     },
     "rastreamento_ultima_atualizacao": {
       "type": "string",
       "format": "date-time",
-      "description": "\u00daltima atualiza\u00e7\u00e3o de GPS (V16.1)"
+      "description": "Última atualização de GPS (V16.1)"
     },
     "logistica_reversa": {
       "type": "object",
@@ -490,17 +490,17 @@
         },
         "movimentacao_estoque_id": {
           "type": "string",
-          "description": "ID da entrada de devolu\u00e7\u00e3o"
+          "description": "ID da entrada de devolução"
         },
         "notificacao_financeiro_id": {
           "type": "string",
-          "description": "ID da notifica\u00e7\u00e3o para bloquear cobran\u00e7a"
+          "description": "ID da notificação para bloquear cobrança"
         },
         "observacoes_devolucao": {
           "type": "string"
         }
       },
-      "description": "Dados de log\u00edstica reversa (V16.1)"
+      "description": "Dados de logística reversa (V16.1)"
     },
     "observacoes": {
       "type": "string"
@@ -508,7 +508,7 @@
     "salvar_endereco_no_cliente": {
       "type": "boolean",
       "default": false,
-      "description": "Se deve salvar endere\u00e7o no cadastro do cliente"
+      "description": "Se deve salvar endereço no cadastro do cliente"
     },
     "salvar_contato_no_cliente": {
       "type": "boolean",
@@ -526,5 +526,43 @@
     "cliente_nome",
     "endereco_entrega_completo",
     "empresa_id"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

@@ -8,23 +8,23 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa respons\u00e1vel"
+      "description": "ID da empresa responsável"
     },
     "op_id": {
       "type": "string",
-      "description": "ID da Ordem de Produ\u00e7\u00e3o"
+      "description": "ID da Ordem de Produção"
     },
     "numero_op": {
       "type": "string",
-      "description": "N\u00famero da OP inspecionada"
+      "description": "Número da OP inspecionada"
     },
     "item_op_id": {
       "type": "string",
-      "description": "ID do item espec\u00edfico da OP (se houver)"
+      "description": "ID do item específico da OP (se houver)"
     },
     "item_elemento": {
       "type": "string",
-      "description": "C\u00f3digo do elemento (V1, C2, B1...)"
+      "description": "Código do elemento (V1, C2, B1...)"
     },
     "pedido_id": {
       "type": "string",
@@ -41,12 +41,12 @@
     },
     "numero_inspecao": {
       "type": "string",
-      "description": "N\u00famero sequencial da inspe\u00e7\u00e3o"
+      "description": "Número sequencial da inspeção"
     },
     "data_inspecao": {
       "type": "string",
       "format": "date-time",
-      "description": "Data/hora da inspe\u00e7\u00e3o"
+      "description": "Data/hora da inspeção"
     },
     "responsavel_id": {
       "type": "string",
@@ -62,7 +62,7 @@
         "Corte",
         "Dobra",
         "Montagem",
-        "Arma\u00e7\u00e3o",
+        "Armação",
         "Acabamento",
         "Final"
       ],
@@ -78,7 +78,7 @@
         "estaca",
         "outro"
       ],
-      "description": "Tipo de produ\u00e7\u00e3o inspecionada"
+      "description": "Tipo de produção inspecionada"
     },
     "resultado": {
       "type": "string",
@@ -89,15 +89,15 @@
         "Aprovado com Ressalva"
       ],
       "default": "Aprovado",
-      "description": "Resultado final da inspe\u00e7\u00e3o"
+      "description": "Resultado final da inspeção"
     },
     "motivo_reprovacao": {
       "type": "string",
-      "description": "Motivo da reprova\u00e7\u00e3o (obrigat\u00f3rio se reprovado)"
+      "description": "Motivo da reprovação (obrigatório se reprovado)"
     },
     "observacao_geral": {
       "type": "string",
-      "description": "Observa\u00e7\u00f5es gerais da inspe\u00e7\u00e3o"
+      "description": "Observações gerais da inspeção"
     },
     "foto_inspecao_url": {
       "type": "string",
@@ -120,7 +120,7 @@
           }
         }
       },
-      "description": "Fotos adicionais da inspe\u00e7\u00e3o"
+      "description": "Fotos adicionais da inspeção"
     },
     "assinatura_responsavel_url": {
       "type": "string",
@@ -128,14 +128,14 @@
     },
     "tempo_inspecao_min": {
       "type": "number",
-      "description": "Tempo gasto na inspe\u00e7\u00e3o (minutos)"
+      "description": "Tempo gasto na inspeção (minutos)"
     },
     "status": {
       "type": "string",
       "enum": [
         "Aberto",
-        "Em Inspe\u00e7\u00e3o",
-        "Conclu\u00eddo",
+        "Em Inspeção",
+        "Concluído",
         "Cancelado"
       ],
       "default": "Aberto"
@@ -189,7 +189,7 @@
           "default": false
         }
       },
-      "description": "Checklist espec\u00edfico para corte e dobra"
+      "description": "Checklist específico para corte e dobra"
     },
     "checklist_armado": {
       "type": "object",
@@ -242,7 +242,7 @@
           "default": false
         }
       },
-      "description": "Checklist espec\u00edfico para arma\u00e7\u00e3o"
+      "description": "Checklist específico para armação"
     },
     "checklist_bloco": {
       "type": "object",
@@ -287,7 +287,7 @@
           "default": false
         }
       },
-      "description": "Checklist espec\u00edfico para blocos"
+      "description": "Checklist específico para blocos"
     },
     "medicoes_realizadas": {
       "type": "array",
@@ -317,7 +317,7 @@
           }
         }
       },
-      "description": "Medi\u00e7\u00f5es detalhadas realizadas"
+      "description": "Medições detalhadas realizadas"
     },
     "ia_verificacao": {
       "type": "object",
@@ -353,7 +353,7 @@
           "type": "string"
         }
       },
-      "description": "Resultado da verifica\u00e7\u00e3o por IA (preparado)"
+      "description": "Resultado da verificação por IA (preparado)"
     },
     "nao_conformidades": {
       "type": "array",
@@ -364,10 +364,10 @@
             "type": "string",
             "enum": [
               "Bitola Errada",
-              "Medida Fora do Padr\u00e3o",
+              "Medida Fora do Padrão",
               "Dobra Incorreta",
               "Falta Estribo",
-              "Espa\u00e7amento Errado",
+              "Espaçamento Errado",
               "Peso Divergente",
               "Defeito Visual",
               "Outro"
@@ -377,11 +377,11 @@
             "type": "string",
             "enum": [
               "Baixa",
-              "M\u00e9dia",
+              "Média",
               "Alta",
-              "Cr\u00edtica"
+              "Crítica"
             ],
-            "default": "M\u00e9dia"
+            "default": "Média"
           },
           "descricao": {
             "type": "string"
@@ -406,7 +406,7 @@
           }
         }
       },
-      "description": "Lista de n\u00e3o conformidades detectadas"
+      "description": "Lista de não conformidades detectadas"
     },
     "aprovado_por": {
       "type": "string",
@@ -432,11 +432,11 @@
     "reinspecao": {
       "type": "boolean",
       "default": false,
-      "description": "Se \u00e9 uma reinspe\u00e7\u00e3o de item reprovado"
+      "description": "Se é uma reinspeção de item reprovado"
     },
     "inspecao_anterior_id": {
       "type": "string",
-      "description": "ID da inspe\u00e7\u00e3o anterior (se for reinspe\u00e7\u00e3o)"
+      "description": "ID da inspeção anterior (se for reinspeção)"
     },
     "historico_reinspecoes": {
       "type": "array",
@@ -458,12 +458,12 @@
           }
         }
       },
-      "description": "Hist\u00f3rico de reinspe\u00e7\u00f5es"
+      "description": "Histórico de reinspeções"
     },
     "liberar_para_expedicao": {
       "type": "boolean",
       "default": false,
-      "description": "Se deve liberar automaticamente para expedi\u00e7\u00e3o"
+      "description": "Se deve liberar automaticamente para expedição"
     },
     "expedicao_liberada": {
       "type": "boolean",
@@ -483,7 +483,7 @@
             "enum": [
               "Foto",
               "PDF",
-              "Relat\u00f3rio",
+              "Relatório",
               "Certificado",
               "Outro"
             ]
@@ -500,7 +500,7 @@
           }
         }
       },
-      "description": "Anexos da inspe\u00e7\u00e3o"
+      "description": "Anexos da inspeção"
     }
   },
   "required": [
@@ -509,5 +509,43 @@
     "numero_inspecao",
     "data_inspecao",
     "resultado"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

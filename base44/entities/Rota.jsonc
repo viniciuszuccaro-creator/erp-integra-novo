@@ -12,11 +12,11 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo sequencial \u00fanico da rota"
+      "description": "Código sequencial único da rota"
     },
     "nome_rota": {
       "type": "string",
-      "description": "Nome da rota \u2014 \u00fanico por grupo"
+      "description": "Nome da rota — único por grupo"
     },
     "descricao": {
       "type": "string"
@@ -67,7 +67,7 @@
           "janela_entrega_preferencial": {
             "type": "string",
             "enum": [
-              "Manh\u00e3",
+              "Manhã",
               "Tarde",
               "Noite",
               "Indiferente"
@@ -82,7 +82,7 @@
               "Munck",
               "Outro"
             ],
-            "description": "Tipo de descarga necess\u00e1ria (V16.1)"
+            "description": "Tipo de descarga necessária (V16.1)"
           },
           "tempo_estimado_parada_minutos": {
             "type": "number",
@@ -127,12 +127,12 @@
         "criterio": {
           "type": "string",
           "enum": [
-            "Menor Dist\u00e2ncia",
+            "Menor Distância",
             "Menor Tempo",
             "Janelas de Entrega",
-            "Ecol\u00f3gica"
+            "Ecológica"
           ],
-          "default": "Menor Dist\u00e2ncia"
+          "default": "Menor Distância"
         },
         "economia_km": {
           "type": "number",
@@ -148,14 +148,14 @@
         },
         "reducao_co2_kg": {
           "type": "number",
-          "description": "Redu\u00e7\u00e3o de CO2 (V16.1)"
+          "description": "Redução de CO2 (V16.1)"
         }
       },
-      "description": "Resultado da otimiza\u00e7\u00e3o por IA (V16.1)"
+      "description": "Resultado da otimização por IA (V16.1)"
     },
     "distancia_total_km": {
       "type": "number",
-      "description": "Dist\u00e2ncia total calculada"
+      "description": "Distância total calculada"
     },
     "tempo_total_previsto_minutos": {
       "type": "number",
@@ -167,7 +167,7 @@
     },
     "origem_endereco": {
       "type": "string",
-      "description": "Endere\u00e7o de sa\u00edda (empresa/dep\u00f3sito)"
+      "description": "Endereço de saída (empresa/depósito)"
     },
     "origem_latitude": {
       "type": "number"
@@ -197,7 +197,7 @@
         "Interno",
         "IA"
       ],
-      "description": "Algoritmo de otimiza\u00e7\u00e3o usado"
+      "description": "Algoritmo de otimização usado"
     },
     "status": {
       "type": "string",
@@ -205,7 +205,7 @@
         "Planejada",
         "Aprovada",
         "Em Andamento",
-        "Conclu\u00edda",
+        "Concluída",
         "Cancelada"
       ],
       "default": "Planejada"
@@ -213,7 +213,7 @@
     "progresso_percentual": {
       "type": "number",
       "default": 0,
-      "description": "% de entregas conclu\u00eddas"
+      "description": "% de entregas concluídas"
     },
     "entregas_concluidas": {
       "type": "number",
@@ -243,5 +243,43 @@
     "nome_rota",
     "empresa_id",
     "data_rota"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

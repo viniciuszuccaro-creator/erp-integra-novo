@@ -24,11 +24,11 @@
     },
     "veiculo_id": {
       "type": "string",
-      "description": "ID do ve\u00edculo"
+      "description": "ID do veículo"
     },
     "placa": {
       "type": "string",
-      "description": "Placa do ve\u00edculo"
+      "description": "Placa do veículo"
     },
     "motorista_id": {
       "type": "string",
@@ -41,7 +41,7 @@
     "data_hora": {
       "type": "string",
       "format": "date-time",
-      "description": "Data/hora da captura da posi\u00e7\u00e3o"
+      "description": "Data/hora da captura da posição"
     },
     "latitude": {
       "type": "number",
@@ -53,7 +53,7 @@
     },
     "precisao_metros": {
       "type": "number",
-      "description": "Precis\u00e3o do GPS em metros"
+      "description": "Precisão do GPS em metros"
     },
     "velocidade_kmh": {
       "type": "number",
@@ -61,7 +61,7 @@
     },
     "direcao_graus": {
       "type": "number",
-      "description": "Dire\u00e7\u00e3o em graus (0-360)"
+      "description": "Direção em graus (0-360)"
     },
     "altitude_metros": {
       "type": "number",
@@ -69,7 +69,7 @@
     },
     "endereco_aproximado": {
       "type": "string",
-      "description": "Endere\u00e7o aproximado (reverse geocoding)"
+      "description": "Endereço aproximado (reverse geocoding)"
     },
     "cidade": {
       "type": "string",
@@ -81,11 +81,11 @@
     },
     "distancia_proxima_entrega_km": {
       "type": "number",
-      "description": "Dist\u00e2ncia at\u00e9 a pr\u00f3xima entrega em km"
+      "description": "Distância até a próxima entrega em km"
     },
     "tempo_estimado_proxima_entrega_min": {
       "type": "number",
-      "description": "Tempo estimado at\u00e9 pr\u00f3xima entrega em minutos"
+      "description": "Tempo estimado até próxima entrega em minutos"
     },
     "status_movimento": {
       "type": "string",
@@ -95,11 +95,11 @@
         "Em Entrega",
         "Retornando"
       ],
-      "description": "Status do movimento do ve\u00edculo"
+      "description": "Status do movimento do veículo"
     },
     "bateria_nivel": {
       "type": "number",
-      "description": "N\u00edvel de bateria do dispositivo (%)"
+      "description": "Nível de bateria do dispositivo (%)"
     },
     "conectividade": {
       "type": "string",
@@ -109,15 +109,15 @@
         "3G",
         "Offline"
       ],
-      "description": "Tipo de conex\u00e3o"
+      "description": "Tipo de conexão"
     },
     "dispositivo_id": {
       "type": "string",
-      "description": "ID do dispositivo m\u00f3vel"
+      "description": "ID do dispositivo móvel"
     },
     "app_versao": {
       "type": "string",
-      "description": "Vers\u00e3o do app m\u00f3vel"
+      "description": "Versão do app móvel"
     },
     "sincronizado": {
       "type": "boolean",
@@ -130,5 +130,43 @@
     "data_hora",
     "latitude",
     "longitude"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

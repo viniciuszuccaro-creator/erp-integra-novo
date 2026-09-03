@@ -10,7 +10,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "C\u00f3digo \u00fanico do ve\u00edculo"
+      "description": "Código único do veículo"
     },
     "placa": {
       "type": "string"
@@ -18,7 +18,7 @@
     "tipo_veiculo": {
       "type": "string",
       "enum": [
-        "Caminh\u00e3o",
+        "Caminhão",
         "Caminhonete",
         "Van",
         "Carro",
@@ -26,7 +26,7 @@
         "Carreta",
         "Outro"
       ],
-      "default": "Caminh\u00e3o"
+      "default": "Caminhão"
     },
     "modelo": {
       "type": "string"
@@ -49,12 +49,12 @@
     "proprietario": {
       "type": "string",
       "enum": [
-        "Pr\u00f3prio",
+        "Próprio",
         "Agregado",
         "Terceirizado",
         "Alugado"
       ],
-      "default": "Pr\u00f3prio"
+      "default": "Próprio"
     },
     "motorista_padrao_id": {
       "type": "string"
@@ -95,7 +95,7 @@
             "type": "string",
             "enum": [
               "OK",
-              "Aten\u00e7\u00e3o",
+              "Atenção",
               "Vencido"
             ]
           }
@@ -133,7 +133,7 @@
       "type": "string",
       "enum": [
         "Ativo",
-        "Manuten\u00e7\u00e3o",
+        "Manutenção",
         "Inativo",
         "Vendido"
       ],
@@ -147,5 +147,43 @@
     "placa",
     "tipo_veiculo",
     "empresa_id"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

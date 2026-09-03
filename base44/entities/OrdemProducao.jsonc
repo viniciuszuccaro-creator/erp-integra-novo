@@ -8,7 +8,7 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa respons\u00e1vel pela produ\u00e7\u00e3o"
+      "description": "ID da empresa responsável pela produção"
     },
     "empresa_atendimento_id": {
       "type": "string",
@@ -16,7 +16,7 @@
     },
     "numero_op": {
       "type": "string",
-      "description": "N\u00famero sequencial da OP"
+      "description": "Número sequencial da OP"
     },
     "pedido_id": {
       "type": "string",
@@ -45,12 +45,12 @@
     "tipo_producao": {
       "type": "string",
       "enum": [
-        "Armado Padr\u00e3o",
+        "Armado Padrão",
         "Corte e Dobra",
-        "Produ\u00e7\u00e3o Sob Medida",
+        "Produção Sob Medida",
         "Misto"
       ],
-      "description": "Tipo de produ\u00e7\u00e3o"
+      "description": "Tipo de produção"
     },
     "itens_vinculados": {
       "type": "array",
@@ -157,7 +157,7 @@
           }
         }
       },
-      "description": "Detalhamento de engenharia de cada pe\u00e7a"
+      "description": "Detalhamento de engenharia de cada peça"
     },
     "peso_total_kg": {
       "type": "number",
@@ -195,7 +195,7 @@
           }
         }
       },
-      "description": "Mat\u00e9ria-prima prevista e consumida"
+      "description": "Matéria-prima prevista e consumida"
     },
     "custo_previsto": {
       "type": "number",
@@ -239,13 +239,13 @@
       "type": "string",
       "enum": [
         "Planejada",
-        "Aguardando Mat\u00e9ria-Prima",
+        "Aguardando Matéria-Prima",
         "Em Corte",
         "Em Dobra",
         "Em Montagem",
-        "Inspe\u00e7\u00e3o",
-        "Pronto para Expedi\u00e7\u00e3o",
-        "Conclu\u00edda",
+        "Inspeção",
+        "Pronto para Expedição",
+        "Concluída",
         "Cancelada"
       ],
       "default": "Planejada"
@@ -263,9 +263,9 @@
       "type": "string",
       "enum": [
         "Baixo",
-        "M\u00e9dio",
+        "Médio",
         "Alto",
-        "Cr\u00edtico"
+        "Crítico"
       ],
       "description": "Calculado por IA"
     },
@@ -333,7 +333,7 @@
           }
         }
       },
-      "description": "Refugo detectado durante produ\u00e7\u00e3o"
+      "description": "Refugo detectado durante produção"
     },
     "apontamentos_producao": {
       "type": "array",
@@ -370,7 +370,7 @@
           }
         }
       },
-      "description": "Apontamentos de produ\u00e7\u00e3o dos operadores"
+      "description": "Apontamentos de produção dos operadores"
     },
     "responsavel_planejamento": {
       "type": "string"
@@ -416,5 +416,43 @@
     "numero_op",
     "tipo_producao",
     "empresa_id"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

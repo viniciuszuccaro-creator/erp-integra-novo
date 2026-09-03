@@ -31,7 +31,7 @@
     },
     "valor_bruto": {
       "type": "number",
-      "description": "Valor total da transa\u00e7\u00e3o"
+      "description": "Valor total da transação"
     },
     "bandeira": {
       "type": "string",
@@ -43,7 +43,7 @@
         "Hipercard",
         "Outros"
       ],
-      "description": "Bandeira do cart\u00e3o"
+      "description": "Bandeira do cartão"
     },
     "adquirente": {
       "type": "string",
@@ -61,7 +61,7 @@
     },
     "nsu": {
       "type": "string",
-      "description": "N\u00famero Sequencial \u00danico da transa\u00e7\u00e3o"
+      "description": "Número Sequencial Único da transação"
     },
     "codigo_autorizacao": {
       "type": "string"
@@ -80,7 +80,7 @@
     },
     "valor_liquido": {
       "type": "number",
-      "description": "Valor que ser\u00e1 recebido ap\u00f3s taxas"
+      "description": "Valor que será recebido após taxas"
     },
     "previsao_recebimento": {
       "type": "string",
@@ -94,7 +94,7 @@
     "status_compensacao": {
       "type": "string",
       "enum": [
-        "Em Tr\u00e2nsito",
+        "Em Trânsito",
         "A Compensar",
         "Compensado",
         "Cancelado",
@@ -102,23 +102,23 @@
         "Chargeback Solicitado",
         "Chargeback Confirmado"
       ],
-      "default": "Em Tr\u00e2nsito"
+      "default": "Em Trânsito"
     },
     "chargeback": {
       "type": "boolean",
       "default": false,
-      "description": "Vol 10.3: Se houve chargeback (contesta\u00e7\u00e3o pelo cliente)"
+      "description": "Vol 10.3: Se houve chargeback (contestação pelo cliente)"
     },
     "data_chargeback": {
       "type": "string",
       "format": "date-time",
-      "description": "Vol 10.3: Data/hora da solicita\u00e7\u00e3o de chargeback"
+      "description": "Vol 10.3: Data/hora da solicitação de chargeback"
     },
     "motivo_chargeback": {
       "type": "string",
       "enum": [
         "Fraude",
-        "Produto n\u00e3o recebido",
+        "Produto não recebido",
         "Produto divergente",
         "Duplicidade",
         "Cancelamento pelo cliente",
@@ -145,20 +145,20 @@
     "taxa_antecipacao": {
       "type": "number",
       "default": 0,
-      "description": "Vol 10.3: Taxa cobrada pela antecipa\u00e7\u00e3o"
+      "description": "Vol 10.3: Taxa cobrada pela antecipação"
     },
     "conciliacao_bancaria_id": {
       "type": "string",
-      "description": "ID da concilia\u00e7\u00e3o banc\u00e1ria quando compensado"
+      "description": "ID da conciliação bancária quando compensado"
     },
     "extrato_bancario_id": {
       "type": "string",
-      "description": "ID do extrato banc\u00e1rio correspondente"
+      "description": "ID do extrato bancário correspondente"
     },
     "divergencia_valor": {
       "type": "number",
       "default": 0,
-      "description": "Diferen\u00e7a entre previsto e recebido"
+      "description": "Diferença entre previsto e recebido"
     },
     "motivo_divergencia": {
       "type": "string"
@@ -166,10 +166,10 @@
     "tipo_operacao": {
       "type": "string",
       "enum": [
-        "Cr\u00e9dito",
-        "D\u00e9bito"
+        "Crédito",
+        "Débito"
       ],
-      "default": "Cr\u00e9dito"
+      "default": "Crédito"
     },
     "observacoes": {
       "type": "string"
@@ -180,5 +180,43 @@
     "valor_bruto",
     "bandeira",
     "adquirente"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

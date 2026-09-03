@@ -16,20 +16,20 @@
     },
     "conta_bancaria_id": {
       "type": "string",
-      "description": "ID da conta banc\u00e1ria"
+      "description": "ID da conta bancária"
     },
     "data_movimento": {
       "type": "string",
       "format": "date",
-      "description": "Data do movimento banc\u00e1rio"
+      "description": "Data do movimento bancário"
     },
     "descricao": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o do lan\u00e7amento"
+      "description": "Descrição do lançamento"
     },
     "documento": {
       "type": "string",
-      "description": "N\u00famero do documento"
+      "description": "Número do documento"
     },
     "valor": {
       "type": "number",
@@ -49,12 +49,12 @@
     },
     "saldo_posterior": {
       "type": "number",
-      "description": "Saldo ap\u00f3s o movimento"
+      "description": "Saldo após o movimento"
     },
     "conciliado": {
       "type": "boolean",
       "default": false,
-      "description": "Se j\u00e1 foi conciliado"
+      "description": "Se já foi conciliado"
     },
     "movimento_vinculado_id": {
       "type": "string",
@@ -67,7 +67,7 @@
     },
     "conciliacao_id": {
       "type": "string",
-      "description": "ID do registro de concilia\u00e7\u00e3o"
+      "description": "ID do registro de conciliação"
     },
     "sugestao_ia_id": {
       "type": "string",
@@ -76,7 +76,7 @@
     "score_match_ia": {
       "type": "number",
       "default": 0,
-      "description": "Score de confian\u00e7a do match sugerido (0-100)"
+      "description": "Score de confiança do match sugerido (0-100)"
     },
     "origem_importacao": {
       "type": "string",
@@ -92,11 +92,11 @@
     },
     "hash_idempotencia": {
       "type": "string",
-      "description": "Vol 18.1: Hash para garantir idempot\u00eancia em importa\u00e7\u00f5es automatizadas"
+      "description": "Vol 18.1: Hash para garantir idempotência em importações automatizadas"
     },
     "arquivo_origem": {
       "type": "string",
-      "description": "Nome do arquivo de importa\u00e7\u00e3o"
+      "description": "Nome do arquivo de importação"
     },
     "observacoes": {
       "type": "string"
@@ -107,5 +107,43 @@
     "data_movimento",
     "valor",
     "tipo"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

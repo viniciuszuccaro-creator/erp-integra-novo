@@ -17,36 +17,36 @@
         "Consolidado"
       ],
       "default": "Individual",
-      "description": "Se \u00e9 de uma empresa ou do grupo todo"
+      "description": "Se é de uma empresa ou do grupo todo"
     },
     "periodo": {
       "type": "string",
-      "description": "Per\u00edodo (YYYY-MM)"
+      "description": "Período (YYYY-MM)"
     },
     "data_inicio": {
       "type": "string",
       "format": "date",
-      "description": "Data de in\u00edcio do per\u00edodo"
+      "description": "Data de início do período"
     },
     "data_fim": {
       "type": "string",
       "format": "date",
-      "description": "Data de fim do per\u00edodo"
+      "description": "Data de fim do período"
     },
     "receita_bruta": {
       "type": "number",
       "default": 0,
-      "description": "Receita bruta do per\u00edodo"
+      "description": "Receita bruta do período"
     },
     "deducoes_impostos": {
       "type": "number",
       "default": 0,
-      "description": "Dedu\u00e7\u00f5es e impostos sobre vendas"
+      "description": "Deduções e impostos sobre vendas"
     },
     "receita_liquida": {
       "type": "number",
       "default": 0,
-      "description": "Receita l\u00edquida (bruta - dedu\u00e7\u00f5es)"
+      "description": "Receita líquida (bruta - deduções)"
     },
     "cpv": {
       "type": "number",
@@ -56,7 +56,7 @@
     "lucro_bruto": {
       "type": "number",
       "default": 0,
-      "description": "Lucro bruto (receita l\u00edquida - CPV)"
+      "description": "Lucro bruto (receita líquida - CPV)"
     },
     "despesas_administrativas": {
       "type": "number",
@@ -109,19 +109,19 @@
     "lucro_liquido": {
       "type": "number",
       "default": 0,
-      "description": "Lucro l\u00edquido final"
+      "description": "Lucro líquido final"
     },
     "margem_bruta_percentual": {
       "type": "number",
-      "description": "(Lucro bruto / Receita l\u00edquida) * 100"
+      "description": "(Lucro bruto / Receita líquida) * 100"
     },
     "margem_operacional_percentual": {
       "type": "number",
-      "description": "(Lucro operacional / Receita l\u00edquida) * 100"
+      "description": "(Lucro operacional / Receita líquida) * 100"
     },
     "margem_liquida_percentual": {
       "type": "number",
-      "description": "(Lucro l\u00edquido / Receita l\u00edquida) * 100"
+      "description": "(Lucro líquido / Receita líquida) * 100"
     },
     "detalhamento": {
       "type": "object",
@@ -133,7 +133,7 @@
       "items": {
         "type": "string"
       },
-      "description": "IDs das empresas inclu\u00eddas na consolida\u00e7\u00e3o"
+      "description": "IDs das empresas incluídas na consolidação"
     },
     "gerado_automaticamente": {
       "type": "boolean",
@@ -143,7 +143,7 @@
     "data_geracao": {
       "type": "string",
       "format": "date-time",
-      "description": "Data/hora de gera\u00e7\u00e3o"
+      "description": "Data/hora de geração"
     },
     "usuario_geracao": {
       "type": "string"
@@ -156,5 +156,43 @@
     "periodo",
     "data_inicio",
     "data_fim"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

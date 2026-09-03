@@ -13,15 +13,15 @@
     "data_lancamento": {
       "type": "string",
       "format": "date",
-      "description": "Data do lan\u00e7amento cont\u00e1bil"
+      "description": "Data do lançamento contábil"
     },
     "historico": {
       "type": "string",
-      "description": "Hist\u00f3rico do lan\u00e7amento"
+      "description": "Histórico do lançamento"
     },
     "documento": {
       "type": "string",
-      "description": "N\u00famero do documento (NF, Pedido, etc.)"
+      "description": "Número do documento (NF, Pedido, etc.)"
     },
     "tipo_documento": {
       "type": "string",
@@ -30,9 +30,9 @@
         "Pedido",
         "Conta a Pagar",
         "Conta a Receber",
-        "Movimenta\u00e7\u00e3o Estoque",
-        "Ordem de Produ\u00e7\u00e3o",
-        "Transfer\u00eancia",
+        "Movimentação Estoque",
+        "Ordem de Produção",
+        "Transferência",
         "Manual",
         "Outro"
       ],
@@ -40,7 +40,7 @@
     },
     "documento_origem_id": {
       "type": "string",
-      "description": "ID do documento que gerou o lan\u00e7amento"
+      "description": "ID do documento que gerou o lançamento"
     },
     "conta_debito_id": {
       "type": "string",
@@ -48,11 +48,11 @@
     },
     "conta_debito_codigo": {
       "type": "string",
-      "description": "C\u00f3digo da conta debitada"
+      "description": "Código da conta debitada"
     },
     "conta_debito_descricao": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o da conta debitada"
+      "description": "Descrição da conta debitada"
     },
     "conta_credito_id": {
       "type": "string",
@@ -60,15 +60,15 @@
     },
     "conta_credito_codigo": {
       "type": "string",
-      "description": "C\u00f3digo da conta creditada"
+      "description": "Código da conta creditada"
     },
     "conta_credito_descricao": {
       "type": "string",
-      "description": "Descri\u00e7\u00e3o da conta creditada"
+      "description": "Descrição da conta creditada"
     },
     "valor": {
       "type": "number",
-      "description": "Valor do lan\u00e7amento"
+      "description": "Valor do lançamento"
     },
     "centro_custo_id": {
       "type": "string",
@@ -83,13 +83,13 @@
         "Financeiro",
         "Fiscal",
         "Estoque",
-        "Produ\u00e7\u00e3o",
+        "Produção",
         "Folha de Pagamento",
         "Manual",
-        "Importa\u00e7\u00e3o",
+        "Importação",
         "Ajuste"
       ],
-      "description": "Origem do lan\u00e7amento"
+      "description": "Origem do lançamento"
     },
     "automatico": {
       "type": "boolean",
@@ -108,27 +108,27 @@
     },
     "lote": {
       "type": "string",
-      "description": "N\u00famero do lote de lan\u00e7amentos"
+      "description": "Número do lote de lançamentos"
     },
     "data_estorno": {
       "type": "string",
       "format": "date-time",
-      "description": "Data do estorno (se aplic\u00e1vel)"
+      "description": "Data do estorno (se aplicável)"
     },
     "lancamento_estorno_id": {
       "type": "string",
-      "description": "ID do lan\u00e7amento de estorno"
+      "description": "ID do lançamento de estorno"
     },
     "usuario_responsavel": {
       "type": "string",
-      "description": "Usu\u00e1rio que criou o lan\u00e7amento"
+      "description": "Usuário que criou o lançamento"
     },
     "usuario_responsavel_id": {
       "type": "string"
     },
     "periodo_competencia": {
       "type": "string",
-      "description": "Per\u00edodo de compet\u00eancia (YYYY-MM)"
+      "description": "Período de competência (YYYY-MM)"
     },
     "observacoes": {
       "type": "string"
@@ -140,5 +140,43 @@
     "conta_credito_id",
     "valor",
     "empresa_id"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

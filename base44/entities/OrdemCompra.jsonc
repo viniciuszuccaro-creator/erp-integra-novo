@@ -21,7 +21,7 @@
     },
     "solicitacao_compra_id": {
       "type": "string",
-      "description": "ID da solicita\u00e7\u00e3o que originou esta OC"
+      "description": "ID da solicitação que originou esta OC"
     },
     "data_solicitacao": {
       "type": "string",
@@ -30,7 +30,7 @@
     "data_aprovacao": {
       "type": "string",
       "format": "date",
-      "description": "Data de aprova\u00e7\u00e3o da OC"
+      "description": "Data de aprovação da OC"
     },
     "data_envio_fornecedor": {
       "type": "string",
@@ -48,7 +48,7 @@
     },
     "lead_time_real": {
       "type": "number",
-      "description": "Lead time real em dias (envio \u2192 recebimento)"
+      "description": "Lead time real em dias (envio → recebimento)"
     },
     "valor_total": {
       "type": "number"
@@ -102,15 +102,15 @@
     },
     "condicao_pagamento": {
       "type": "string",
-      "description": "Condi\u00e7\u00e3o de pagamento acordada"
+      "description": "Condição de pagamento acordada"
     },
     "forma_pagamento": {
       "type": "string",
       "enum": [
-        "\u00c0 Vista",
+        "À Vista",
         "Boleto",
-        "Transfer\u00eancia",
-        "Cart\u00e3o",
+        "Transferência",
+        "Cartão",
         "30 dias",
         "60 dias"
       ]
@@ -133,7 +133,7 @@
     },
     "nota_fiscal_entrada": {
       "type": "string",
-      "description": "N\u00famero da NF de entrada"
+      "description": "Número da NF de entrada"
     },
     "observacoes": {
       "type": "string"
@@ -161,7 +161,7 @@
           }
         }
       },
-      "description": "Hist\u00f3rico de mudan\u00e7as de status"
+      "description": "Histórico de mudanças de status"
     },
     "avaliacao_fornecedor": {
       "type": "object",
@@ -198,12 +198,50 @@
           "type": "string"
         }
       },
-      "description": "Avalia\u00e7\u00e3o do fornecedor ap\u00f3s recebimento"
+      "description": "Avaliação do fornecedor após recebimento"
     }
   },
   "required": [
     "fornecedor_nome",
     "data_solicitacao",
     "valor_total"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

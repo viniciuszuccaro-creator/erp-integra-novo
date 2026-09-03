@@ -4,11 +4,11 @@
   "properties": {
     "group_id": {
       "type": "string",
-      "description": "ID do grupo (se lan\u00e7ado no grupo)"
+      "description": "ID do grupo (se lançado no grupo)"
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa (se lan\u00e7ado na empresa)"
+      "description": "ID da empresa (se lançado na empresa)"
     },
     "origem": {
       "type": "string",
@@ -17,7 +17,7 @@
         "empresa"
       ],
       "default": "empresa",
-      "description": "Se foi lan\u00e7ado no grupo ou na empresa"
+      "description": "Se foi lançado no grupo ou na empresa"
     },
     "origem_tipo": {
       "type": "string",
@@ -32,7 +32,7 @@
         "outro"
       ],
       "default": "manual",
-      "description": "Tipo de origem do lan\u00e7amento"
+      "description": "Tipo de origem do lançamento"
     },
     "canal_origem": {
       "type": "string",
@@ -40,18 +40,18 @@
         "ERP",
         "API",
         "Marketplace",
-        "Importa\u00e7\u00e3o",
-        "Autom\u00e1tico",
+        "Importação",
+        "Automático",
         "WhatsApp",
         "Portal",
         "Outro"
       ],
       "default": "ERP",
-      "description": "Canal de origem do lan\u00e7amento"
+      "description": "Canal de origem do lançamento"
     },
     "config_recorrente_id": {
       "type": "string",
-      "description": "ID da configura\u00e7\u00e3o recorrente que gerou este lan\u00e7amento"
+      "description": "ID da configuração recorrente que gerou este lançamento"
     },
     "documento_grupo_id": {
       "type": "string",
@@ -60,7 +60,7 @@
     "e_replicado": {
       "type": "boolean",
       "default": false,
-      "description": "Se \u00e9 uma c\u00f3pia de um t\u00edtulo do grupo"
+      "description": "Se é uma cópia de um título do grupo"
     },
     "rateado_para_empresas": {
       "type": "boolean",
@@ -69,7 +69,7 @@
     },
     "rateio_id": {
       "type": "string",
-      "description": "ID do rateio que gerou este t\u00edtulo"
+      "description": "ID do rateio que gerou este título"
     },
     "descricao": {
       "type": "string"
@@ -102,18 +102,18 @@
       "type": "string",
       "enum": [
         "Fornecedores",
-        "Sal\u00e1rios",
+        "Salários",
         "Impostos",
         "Aluguel",
         "Energia",
-        "\u00c1gua",
+        "Água",
         "Telefone",
         "Internet",
         "Marketing",
-        "Comiss\u00f5es",
+        "Comissões",
         "Contabilidade",
-        "Assessoria Jur\u00eddica",
-        "Manuten\u00e7\u00e3o",
+        "Assessoria Jurídica",
+        "Manutenção",
         "Transporte",
         "Outros"
       ]
@@ -127,7 +127,7 @@
     },
     "percentual_rateio": {
       "type": "number",
-      "description": "% deste t\u00edtulo em rela\u00e7\u00e3o ao grupo"
+      "description": "% deste título em relação ao grupo"
     },
     "data_emissao": {
       "type": "string",
@@ -156,18 +156,18 @@
       "type": "string",
       "enum": [
         "Pendente",
-        "Aguardando Aprova\u00e7\u00e3o",
+        "Aguardando Aprovação",
         "Aprovado",
         "Pago",
         "Rejeitado",
         "Cancelado"
       ],
       "default": "Pendente",
-      "description": "Status no fluxo de aprova\u00e7\u00e3o"
+      "description": "Status no fluxo de aprovação"
     },
     "aprovado_por": {
       "type": "string",
-      "description": "Usu\u00e1rio que aprovou"
+      "description": "Usuário que aprovou"
     },
     "aprovado_por_id": {
       "type": "string"
@@ -175,7 +175,7 @@
     "data_aprovacao": {
       "type": "string",
       "format": "date-time",
-      "description": "Data de aprova\u00e7\u00e3o"
+      "description": "Data de aprovação"
     },
     "rejeitado_por": {
       "type": "string"
@@ -187,9 +187,9 @@
       "type": "string",
       "enum": [
         "Dinheiro",
-        "Transfer\u00eancia",
+        "Transferência",
         "Boleto",
-        "Cart\u00e3o",
+        "Cartão",
         "PIX",
         "Cheque",
         "TED",
@@ -213,11 +213,11 @@
             "Hipercard",
             "Outro"
           ],
-          "description": "V22.0 ETAPA 4: Bandeira do cart\u00e3o utilizado"
+          "description": "V22.0 ETAPA 4: Bandeira do cartão utilizado"
         },
         "numero_autorizacao": {
           "type": "string",
-          "description": "V22.0 ETAPA 4: N\u00famero de autoriza\u00e7\u00e3o da transa\u00e7\u00e3o"
+          "description": "V22.0 ETAPA 4: Número de autorização da transação"
         },
         "taxa_operadora": {
           "type": "number",
@@ -230,17 +230,17 @@
         },
         "valor_liquido": {
           "type": "number",
-          "description": "V22.0 ETAPA 4: Valor ap\u00f3s descontar taxas"
+          "description": "V22.0 ETAPA 4: Valor após descontar taxas"
         },
         "data_recebido_caixa": {
           "type": "string",
           "format": "date",
-          "description": "V22.0 ETAPA 4: EST\u00c1GIO 1 - Quando foi recebido/pago no caixa"
+          "description": "V22.0 ETAPA 4: ESTÁGIO 1 - Quando foi recebido/pago no caixa"
         },
         "data_compensado_banco": {
           "type": "string",
           "format": "date",
-          "description": "V22.0 ETAPA 4: EST\u00c1GIO 2 - Quando compensou no banco"
+          "description": "V22.0 ETAPA 4: ESTÁGIO 2 - Quando compensou no banco"
         },
         "status_compensacao": {
           "type": "string",
@@ -250,11 +250,11 @@
             "Conciliado"
           ],
           "default": "Aguardando",
-          "description": "V22.0 ETAPA 4: Status da compensa\u00e7\u00e3o banc\u00e1ria"
+          "description": "V22.0 ETAPA 4: Status da compensação bancária"
         },
         "observacoes": {
           "type": "string",
-          "description": "V22.0 ETAPA 4: Observa\u00e7\u00f5es sobre a liquida\u00e7\u00e3o"
+          "description": "V22.0 ETAPA 4: Observações sobre a liquidação"
         }
       },
       "description": "V22.0 ETAPA 4: Detalhes completos do pagamento"
@@ -294,7 +294,7 @@
     },
     "empresa_que_pagou_id": {
       "type": "string",
-      "description": "ID da empresa que fez o pagamento (se pago_por=empresa mas t\u00edtulo \u00e9 do grupo)"
+      "description": "ID da empresa que fez o pagamento (se pago_por=empresa mas título é do grupo)"
     },
     "comprovante_pagamento_url": {
       "type": "string",
@@ -325,12 +325,12 @@
     "alerta_taxa_divergente": {
       "type": "boolean",
       "default": false,
-      "description": "Se a IA detectou diverg\u00eancia na taxa"
+      "description": "Se a IA detectou divergência na taxa"
     },
     "duplicidade_detectada": {
       "type": "boolean",
       "default": false,
-      "description": "Se a IA detectou poss\u00edvel duplicidade"
+      "description": "Se a IA detectou possível duplicidade"
     },
     "contas_similares_ids": {
       "type": "array",
@@ -372,7 +372,7 @@
           }
         }
       },
-      "description": "Distribui\u00e7\u00e3o realizada para empresas (se origem=grupo)"
+      "description": "Distribuição realizada para empresas (se origem=grupo)"
     },
     "auditoria_pagamento": {
       "type": "array",
@@ -408,7 +408,7 @@
           }
         }
       },
-      "description": "P3: Auditoria completa de a\u00e7\u00f5es sens\u00edveis em RBAC"
+      "description": "P3: Auditoria completa de ações sensíveis em RBAC"
     }
   },
   "required": [
@@ -417,5 +417,43 @@
     "data_vencimento",
     "centro_custo_id",
     "plano_contas_id"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

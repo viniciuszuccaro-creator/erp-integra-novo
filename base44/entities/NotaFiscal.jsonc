@@ -11,12 +11,12 @@
     "tipo": {
       "type": "string",
       "enum": [
-        "NF-e (Sa\u00edda)",
+        "NF-e (Saída)",
         "NF-e (Entrada)",
         "NFC-e",
         "NFS-e"
       ],
-      "default": "NF-e (Sa\u00edda)"
+      "default": "NF-e (Saída)"
     },
     "modelo": {
       "type": "string",
@@ -147,7 +147,7 @@
     },
     "chave_acesso": {
       "type": "string",
-      "description": "Chave de 44 d\u00edgitos"
+      "description": "Chave de 44 dígitos"
     },
     "protocolo_autorizacao": {
       "type": "string"
@@ -179,7 +179,7 @@
     },
     "xml_carta_correcao": {
       "type": "string",
-      "description": "URL do XML da carta de corre\u00e7\u00e3o"
+      "description": "URL do XML da carta de correção"
     },
     "cfop": {
       "type": "string",
@@ -191,17 +191,17 @@
         "Normal",
         "Complementar",
         "Ajuste",
-        "Devolu\u00e7\u00e3o"
+        "Devolução"
       ],
       "default": "Normal"
     },
     "ambiente": {
       "type": "string",
       "enum": [
-        "Produ\u00e7\u00e3o",
-        "Homologa\u00e7\u00e3o"
+        "Produção",
+        "Homologação"
       ],
-      "default": "Homologa\u00e7\u00e3o"
+      "default": "Homologação"
     },
     "observacoes": {
       "type": "string"
@@ -230,7 +230,7 @@
     },
     "codigo_status_sefaz": {
       "type": "string",
-      "description": "C\u00f3digo de status da SEFAZ"
+      "description": "Código de status da SEFAZ"
     },
     "motivo_rejeicao": {
       "type": "string"
@@ -254,9 +254,9 @@
               "tipo": {
                 "type": "string",
                 "enum": [
-                  "Regime Incompat\u00edvel",
+                  "Regime Incompatível",
                   "CFOP Incorreto",
-                  "NCM Inv\u00e1lido",
+                  "NCM Inválido",
                   "Destaque ICMS",
                   "Outro"
                 ]
@@ -286,16 +286,16 @@
           "type": "string"
         }
       },
-      "description": "Valida\u00e7\u00e3o pr\u00e9-emiss\u00e3o da IA Fiscal (V16.1)"
+      "description": "Validação pré-emissão da IA Fiscal (V16.1)"
     },
     "emitir_dentro_estado": {
       "type": "boolean",
       "default": false,
-      "description": "Emitir como opera\u00e7\u00e3o interna para evitar DIFAL"
+      "description": "Emitir como operação interna para evitar DIFAL"
     },
     "justificativa_interna": {
       "type": "string",
-      "description": "Justificativa para emiss\u00e3o interna"
+      "description": "Justificativa para emissão interna"
     },
     "cancelamento": {
       "type": "object",
@@ -468,7 +468,7 @@
             "CIF",
             "FOB",
             "Sem Frete",
-            "Pr\u00f3prio"
+            "Próprio"
           ]
         },
         "placa_veiculo": {
@@ -531,7 +531,7 @@
           }
         }
       },
-      "description": "Hist\u00f3rico de eventos da nota"
+      "description": "Histórico de eventos da nota"
     },
     "api_resposta": {
       "type": "object",
@@ -554,5 +554,43 @@
     "cliente_fornecedor",
     "data_emissao",
     "valor_total"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

@@ -12,7 +12,7 @@
     },
     "extrato_bancario_id": {
       "type": "string",
-      "description": "ID do extrato banc\u00e1rio"
+      "description": "ID do extrato bancário"
     },
     "movimento_caixa_id": {
       "type": "string",
@@ -21,11 +21,11 @@
     "data_conciliacao": {
       "type": "string",
       "format": "date-time",
-      "description": "Data/hora da concilia\u00e7\u00e3o"
+      "description": "Data/hora da conciliação"
     },
     "valor_extrato": {
       "type": "number",
-      "description": "Valor no extrato banc\u00e1rio"
+      "description": "Valor no extrato bancário"
     },
     "valor_movimento": {
       "type": "number",
@@ -34,23 +34,23 @@
     "valor_diferenca": {
       "type": "number",
       "default": 0,
-      "description": "Diferen\u00e7a entre extrato e movimento"
+      "description": "Diferença entre extrato e movimento"
     },
     "tem_divergencia": {
       "type": "boolean",
       "default": false,
-      "description": "Se h\u00e1 diverg\u00eancia de valor"
+      "description": "Se há divergência de valor"
     },
     "tipo_divergencia": {
       "type": "string",
       "enum": [
         "Valor Diferente",
         "Data Diferente",
-        "Tarifa Banc\u00e1ria",
+        "Tarifa Bancária",
         "Taxa Gateway",
         "Outro"
       ],
-      "description": "Tipo de diverg\u00eancia encontrada"
+      "description": "Tipo de divergência encontrada"
     },
     "status": {
       "type": "string",
@@ -71,11 +71,11 @@
     "score_confianca_ia": {
       "type": "number",
       "default": 0,
-      "description": "Score de confian\u00e7a da IA (0-100)"
+      "description": "Score de confiança da IA (0-100)"
     },
     "responsavel_conciliacao": {
       "type": "string",
-      "description": "Usu\u00e1rio que realizou a concilia\u00e7\u00e3o"
+      "description": "Usuário que realizou a conciliação"
     },
     "responsavel_id": {
       "type": "string"
@@ -83,7 +83,7 @@
     "desfeito": {
       "type": "boolean",
       "default": false,
-      "description": "Vol 10.4: Se a concilia\u00e7\u00e3o foi desfeita"
+      "description": "Vol 10.4: Se a conciliação foi desfeita"
     },
     "data_desfazer": {
       "type": "string",
@@ -92,15 +92,15 @@
     },
     "justificativa_desfazer": {
       "type": "string",
-      "description": "Vol 10.4: Justificativa obrigat\u00f3ria para desfazer concilia\u00e7\u00e3o"
+      "description": "Vol 10.4: Justificativa obrigatória para desfazer conciliação"
     },
     "responsavel_desfazer": {
       "type": "string",
-      "description": "Vol 10.4: Usu\u00e1rio que desfez a concilia\u00e7\u00e3o"
+      "description": "Vol 10.4: Usuário que desfez a conciliação"
     },
     "responsavel_desfazer_id": {
       "type": "string",
-      "description": "Vol 10.4: ID do usu\u00e1rio que desfez"
+      "description": "Vol 10.4: ID do usuário que desfez"
     },
     "observacoes": {
       "type": "string"
@@ -109,5 +109,43 @@
   "required": [
     "empresa_id",
     "data_conciliacao"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

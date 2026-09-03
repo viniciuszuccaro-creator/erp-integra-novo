@@ -1,5 +1,0 @@
-{
-  "status": "strict_guard_completed",
-  "date": "2026-05-11",
-  "fix": "Defined shouldNeutralize and neutralContent so recreated documentation JSX files are rewritten as valid modules before lint/build."
-}

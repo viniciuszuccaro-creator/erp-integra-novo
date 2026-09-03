@@ -1,7 +1,0 @@
-{
-  "status": "ok",
-  "fixed": "Removed documentation mirror files that were incorrectly parsed as JSX by lint.",
-  "business_logic_changed": false,
-  "regra_mae_changed": false,
-  "note": "Only duplicated documentation artifacts were removed; real app modules/components were not changed."
-}

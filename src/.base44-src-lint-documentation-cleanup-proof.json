@@ -1,8 +1,0 @@
-{
-  "status": "resolved",
-  "problem": "Documentation and JSON mirrors under src/components were being parsed as JSX by ESLint.",
-  "solution": "Removed only duplicated documentation mirror artifacts from src/components and components.",
-  "business_logic_changed": false,
-  "regra_mae_changed": false,
-  "safe_for_build": true
-}

@@ -1,9 +1,0 @@
-{
-  "status": "lint_documentation_artifacts_cleaned",
-  "cleaned_at": "2026-05-11T00:00:00Z",
-  "removedPatterns": ["components/**/*.md.jsx", "components/**/*.json.jsx", "components/**/README*.jsx", "components/**/CERTIFIC*.jsx", "components/**/CHECKLIST*.jsx", "components/**/ETAPA*.jsx", "components/**/FASE*.jsx", "components/**/DEBUG*.jsx", "components/**/DIAGNOSTICO*.jsx", "components/**/CORRECAO*.jsx"],
-  "eslintProtectionEnabled": true,
-  "viteProtectionEnabled": true,
-  "prebuildProtectionEnabled": true,
-  "safeForLint": true
-}

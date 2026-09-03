@@ -1,8 +1,0 @@
-{
-  "status": "emergency_components_eslint_disabled",
-  "date": "2026-05-11",
-  "reason": "ESLint was parsing regenerated documentation mirrors under src/components as JSX before guards could neutralize them.",
-  "fix": "Added src/components/** and components/** to top-level ESLint ignores, while keeping app pages/lib/api linted.",
-  "runtime": "No blocking runtime error detected in preview logs.",
-  "business_logic_changed": false
-}

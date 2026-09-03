@@ -1,7 +1,0 @@
-{
-  "status": "definitive_neutralization_approach_applied",
-  "date": "2026-05-11",
-  "approach": "Documentation mirror artifacts with code extensions are automatically overwritten as valid empty JSX/JS modules before lint/build.",
-  "result": "Recreated .md.jsx/.json.jsx/.config.jsx/.jsxe files no longer break parsing.",
-  "preserves_rule": "Never delete functional modules; only neutralize documentation mirrors."
-}

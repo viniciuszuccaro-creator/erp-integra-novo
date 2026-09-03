@@ -1,8 +1,0 @@
-{
-  "status": "final_lint_mirror_guard_applied",
-  "date": "2026-05-11",
-  "fix": "Strict documentation mirror guard now runs before lint, inside stable environment check, and after stable environment check.",
-  "covers": [".md.jsx", ".json.jsx", ".config.jsx", "documentation-named .jsx mirrors"],
-  "regra_mae_changed": false,
-  "business_logic_changed": false
-}

@@ -1,7 +1,0 @@
-{
-  "status": "eslint_emergency_ignore_installed",
-  "date": "2026-05-11",
-  "fix": "Added a top-level ESLint flat-config ignore block for all regenerated documentation mirror artifacts before parsing.",
-  "scope": "src/components and components documentation/code mirrors",
-  "business_logic_changed": false
-}

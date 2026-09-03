@@ -1,6 +1,0 @@
-{
-  "status": "documentation_jsx_neutralization_enabled",
-  "date": "2026-05-11",
-  "fix": "Instead of only deleting recreated documentation JSX mirrors, the guard now rewrites them as valid empty JS modules before lint/build.",
-  "result": "Recreated .md.jsx/.json.jsx documentation files no longer cause parse errors."
-}

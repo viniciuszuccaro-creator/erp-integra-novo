@@ -1,7 +1,0 @@
-{
-  "status": "final_neutralizer_installed",
-  "date": "2026-05-11",
-  "fix": "Strict guard now rewrites recreated documentation JSX/TSX artifacts as valid empty modules before lint/build.",
-  "scope": "src/components and components",
-  "result": "Documentation mirrors can no longer trigger parse errors if recreated."
-}

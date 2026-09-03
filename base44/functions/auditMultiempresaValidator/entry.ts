@@ -26,6 +26,9 @@ Deno.serve(async (req) => {
       'Interacao', 'Campanha', 'Evento', 'Transportadora', 'Cliente', 'Fornecedor'
     ];
 
+    // Cadastros Gerais compartilhados no grupo (Regra-Mãe #9): empresa_id opcional — escopo-grupo é válido
+    const CADASTROS_GERAIS_GRUPO = new Set(['FormaPagamento', 'Colaborador']);
+
     const resultados = {};
     for (const entidade of entidades) {
       try {
@@ -35,11 +38,19 @@ Deno.serve(async (req) => {
         const semEmpresa = recordsArr.filter(r => !r.empresa_id);
         const validos = recordsArr.filter(r => r.empresa_id && r.group_id === group_id);
 
+        const ehCadastroGeralGrupo = CADASTROS_GERAIS_GRUPO.has(entidade);
+        // Em cadastros gerais, registro sem empresa_id = escopo-grupo legítimo; problema real é falta de group_id
+        const escopoGrupo = ehCadastroGeralGrupo ? semEmpresa.filter(r => r.group_id === group_id).length : 0;
+        const problemas = ehCadastroGeralGrupo
+          ? semEmpresa.filter(r => r.group_id !== group_id).length
+          : semEmpresa.length;
+
         resultados[entidade] = {
           total: recordsArr.length,
-          validos: validos.length,
+          validos: validos.length + escopoGrupo,
+          escopo_grupo: escopoGrupo,
           sem_empresa_id: semEmpresa.length,
-          problemas_detectados: semEmpresa.length > 0
+          problemas_detectados: problemas > 0
         };
       } catch (e) {
         resultados[entidade] = { erro: e.message };

@@ -288,8 +288,7 @@
           "default": 0
         },
         "relatorios_gerados": {
-          "type": "number",
-          "default": 0
+          "type": "number"
         },
         "tempo_medio_pagina_segundos": {
           "type": "number"
@@ -307,5 +306,27 @@
     "token_sessao",
     "data_hora_inicio",
     "ip_address"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

@@ -199,7 +199,7 @@
     "parametros": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Par\u00e2metros da opera\u00e7\u00e3o (filtros, IDs, etc.)"
+      "description": "Par\u00e2metros da opera\u00e7\u00e3o (filtros, IDs, etc)"
     },
     "metricas_adicionais": {
       "type": "object",
@@ -258,5 +258,27 @@
     "tipo_operacao",
     "modulo",
     "duracao_ms"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

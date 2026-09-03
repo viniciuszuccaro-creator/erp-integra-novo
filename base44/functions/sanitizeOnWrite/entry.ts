@@ -237,77 +237,10 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Criptografia de campos sensíveis (AES-GCM com BACKUP_ENCRYPTION_KEY)
-    async function getCryptoKey() {
-      const secret = Deno.env.get('BACKUP_ENCRYPTION_KEY');
-      if (!secret) return null;
-      const enc = new TextEncoder();
-      const raw = await crypto.subtle.digest('SHA-256', enc.encode(secret));
-      return await crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt']);
-    }
-    const b64 = (buf) => {
-      const bytes = new Uint8Array(buf);
-      let bin = '';
-      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-      return btoa(bin);
-    };
-    async function encryptValue(plain, key) {
-      const enc = new TextEncoder();
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(String(plain)));
-      return { enc: 'gcm/v1', iv: b64(iv), data: b64(cipher) };
-    }
-    async function encryptSensitive(obj, entity) {
-      const key = await getCryptoKey();
-      if (!key) return obj;
-      const SENSITIVE_EXACT = new Set(['numero_autorizacao','pix_chave','conta','agencia','cartao','linha_digitavel','codigo_barras','pix_qrcode','pix_copia_cola','cpf','cnpj','rg','inscricao_estadual','inscricao_municipal','cliente_cpf_cnpj','favorecido_cpf_cnpj']);
-      const isPIIKey = (k) => {
-        const s = String(k || '').toLowerCase();
-        return SENSITIVE_EXACT.has(s) || s.includes('email') || s.includes('telefone') || s.includes('whatsapp');
-      };
-      const walk = async (val, parentKey = '') => {
-        if (Array.isArray(val)) {
-          const out = [];
-          for (const item of val) out.push(await walk(item, parentKey));
-          return out;
-        }
-        if (val && typeof val === 'object') {
-          const out = {};
-          for (const [k, v] of Object.entries(val)) {
-            if ((typeof v === 'string' || typeof v === 'number') && isPIIKey(k)) {
-              out[k] = await encryptValue(v, key);
-            } else {
-              out[k] = await walk(v, k);
-            }
-          }
-          return out;
-        }
-        return val;
-      };
-      // Escopos conhecidos: detalhes_pagamento, dados_bancarios, contatos/emails/telefones e campos de cobrança (ContaReceber)
-      let out = { ...obj };
-      if (out?.detalhes_pagamento) {
-        out = { ...out, detalhes_pagamento: await walk(out.detalhes_pagamento) };
-      }
-      if (Array.isArray(out?.dados_bancarios)) {
-        out = { ...out, dados_bancarios: await walk(out.dados_bancarios) };
-      }
-      // PII comuns por entidade
-      if (entity === 'Cliente' || entity === 'Fornecedor' || entity === 'Transportadora' || entity === 'Colaborador') {
-        out = await walk(out);
-      }
-      if (entity === 'ContaReceber') {
-        const topKeys = ['linha_digitavel','codigo_barras','pix_qrcode','pix_copia_cola'];
-        for (const k of topKeys) {
-          if (typeof out[k] === 'string' || typeof out[k] === 'number') {
-            out[k] = await encryptValue(out[k], key);
-          }
-        }
-      }
-      return out;
-    }
-
-    const secured = await encryptSensitive(enriched, event.entity_name);
+    // PII: criptografia dedicada via piiEncryptor (formato string enc:gcm, reversível, compatível com schema).
+    // A criptografia inline anterior gravava objetos {enc,iv,data} em campos string do schema,
+    // fazendo toda gravação de Cliente/Fornecedor/Transportadora/Colaborador com CNPJ/CPF falhar (500).
+    const secured = enriched;
 
     // Construir patch somente com campos alterados (ignorar built-ins)
     const BUILT_INS = new Set(['id', 'created_date', 'updated_date', 'created_by']);

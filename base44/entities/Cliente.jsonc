@@ -8,11 +8,11 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa proprietária"
+      "description": "ID da empresa propriet\u00e1ria"
     },
     "empresa_dona_id": {
       "type": "string",
-      "description": "Empresa que cadastrou/é dona do cliente"
+      "description": "Empresa que cadastrou/\u00e9 dona do cliente"
     },
     "empresas_compartilhadas_ids": {
       "type": "array",
@@ -23,13 +23,13 @@
     },
     "codigo": {
       "type": "string",
-      "description": "Código único do cliente"
+      "description": "C\u00f3digo \u00fanico do cliente"
     },
     "tipo": {
       "type": "string",
       "enum": [
-        "Pessoa Física",
-        "Pessoa Jurídica"
+        "Pessoa F\u00edsica",
+        "Pessoa Jur\u00eddica"
       ],
       "description": "Tipo de cliente"
     },
@@ -50,18 +50,18 @@
         "Inapta",
         "Suspensa",
         "Baixada",
-        "Não Verificado"
+        "N\u00e3o Verificado"
       ],
-      "default": "Não Verificado",
+      "default": "N\u00e3o Verificado",
       "description": "Status na Receita Federal consultado por IA"
     },
     "motivo_inatividade": {
       "type": "string",
-      "description": "Motivo de inativação/bloqueio"
+      "description": "Motivo de inativa\u00e7\u00e3o/bloqueio"
     },
     "nome": {
       "type": "string",
-      "description": "Nome do cliente ou Razão Social"
+      "description": "Nome do cliente ou Raz\u00e3o Social"
     },
     "razao_social": {
       "type": "string"
@@ -75,7 +75,7 @@
     },
     "cnpj": {
       "type": "string",
-      "description": "CNPJ único do cliente"
+      "description": "CNPJ \u00fanico do cliente"
     },
     "rg": {
       "type": "string",
@@ -102,7 +102,7 @@
         "MEI",
         "Micro",
         "Pequena",
-        "Média",
+        "M\u00e9dia",
         "Grande"
       ],
       "description": "Porte da empresa (sugerido por IA)"
@@ -113,11 +113,11 @@
     },
     "regiao_atendimento_id": {
       "type": "string",
-      "description": "ID da região de atendimento do cliente"
+      "description": "ID da regi\u00e3o de atendimento do cliente"
     },
     "regiao_atendimento_nome": {
       "type": "string",
-      "description": "Nome da região (snapshot)"
+      "description": "Nome da regi\u00e3o (snapshot)"
     },
     "origem_cadastro": {
       "type": "string",
@@ -138,18 +138,18 @@
       "type": "string",
       "enum": [
         "Pendente",
-        "Em Análise",
+        "Em An\u00e1lise",
         "Aprovado",
         "Reprovado"
       ],
       "default": "Pendente",
-      "description": "Status de validação KYC/KYB"
+      "description": "Status de valida\u00e7\u00e3o KYC/KYB"
     },
     "risco_cadastro_ia": {
       "type": "string",
       "enum": [
         "Baixo",
-        "Médio",
+        "M\u00e9dio",
         "Alto"
       ],
       "default": "Baixo",
@@ -158,7 +158,7 @@
     "data_validacao_kyc": {
       "type": "string",
       "format": "date-time",
-      "description": "Data da validação KYC"
+      "description": "Data da valida\u00e7\u00e3o KYC"
     },
     "endereco_principal": {
       "type": "object",
@@ -231,7 +231,7 @@
           }
         }
       },
-      "description": "Múltiplos contatos do cliente"
+      "description": "M\u00faltiplos contatos do cliente"
     },
     "contatos_b2b_ids": {
       "type": "array",
@@ -255,7 +255,7 @@
               "WhatsApp",
               "E-mail",
               "Telefone",
-              "Reunião",
+              "Reuni\u00e3o",
               "Visita"
             ]
           },
@@ -273,7 +273,7 @@
           }
         }
       },
-      "description": "Histórico de comunicações"
+      "description": "Hist\u00f3rico de comunica\u00e7\u00f5es"
     },
     "condicao_comercial": {
       "type": "object",
@@ -296,7 +296,7 @@
         "condicao_pagamento": {
           "type": "string",
           "enum": [
-            "À Vista",
+            "\u00c0 Vista",
             "7 dias",
             "15 dias",
             "30 dias",
@@ -304,7 +304,7 @@
             "60 dias",
             "Parcelado"
           ],
-          "default": "À Vista"
+          "default": "\u00c0 Vista"
         },
         "prazo_pagamento_dias": {
           "type": "number"
@@ -358,7 +358,7 @@
             "type": "string",
             "enum": [
               "Entrega",
-              "Cobrança",
+              "Cobran\u00e7a",
               "Matriz",
               "Obra",
               "Outro"
@@ -404,7 +404,7 @@
           "janela_entrega_preferencial": {
             "type": "string",
             "enum": [
-              "Manhã",
+              "Manh\u00e3",
               "Tarde",
               "Noite",
               "Indiferente"
@@ -436,7 +436,7 @@
           }
         }
       },
-      "description": "Múltiplos endereços de entrega"
+      "description": "M\u00faltiplos endere\u00e7os de entrega"
     },
     "configuracao_fiscal": {
       "type": "object",
@@ -472,7 +472,7 @@
           "enum": [
             "1 - Contribuinte",
             "2 - Isento",
-            "9 - Não Contribuinte"
+            "9 - N\u00e3o Contribuinte"
           ],
           "default": "1 - Contribuinte"
         },
@@ -505,10 +505,10 @@
             "type": "string",
             "enum": [
               "Contrato Social",
-              "Certidão Negativa",
-              "Inscrição Estadual",
-              "Comprovante Endereço",
-              "Referência Comercial",
+              "Certid\u00e3o Negativa",
+              "Inscri\u00e7\u00e3o Estadual",
+              "Comprovante Endere\u00e7o",
+              "Refer\u00eancia Comercial",
               "Proposta Comercial",
               "RG",
               "CPF",
@@ -541,11 +541,11 @@
     },
     "vendedor_responsavel": {
       "type": "string",
-      "description": "V21.5: Nome do vendedor (preenchido automático)"
+      "description": "V21.5: Nome do vendedor (preenchido autom\u00e1tico)"
     },
     "vendedor_responsavel_id": {
       "type": "string",
-      "description": "V21.5: ID do vendedor (preenchido automático com usuário logado)"
+      "description": "V21.5: ID do vendedor (preenchido autom\u00e1tico com usu\u00e1rio logado)"
     },
     "indicador_nome": {
       "type": "string",
@@ -571,7 +571,7 @@
     "percentual_comissao_indicador": {
       "type": "number",
       "default": 0,
-      "description": "V21.5: % de comissão do indicador (snapshot)"
+      "description": "V21.5: % de comiss\u00e3o do indicador (snapshot)"
     },
     "representante_id": {
       "type": "string",
@@ -586,7 +586,7 @@
         "Novo"
       ],
       "default": "Novo",
-      "description": "Classificação automática por volume de compras"
+      "description": "Classifica\u00e7\u00e3o autom\u00e1tica por volume de compras"
     },
     "valor_compras_12meses": {
       "type": "number",
@@ -611,15 +611,15 @@
     "dias_sem_comprar": {
       "type": "number",
       "default": 0,
-      "description": "Dias desde última compra (calculado por IA)"
+      "description": "Dias desde \u00faltima compra (calculado por IA)"
     },
     "risco_churn": {
       "type": "string",
       "enum": [
         "Baixo",
-        "Médio",
+        "M\u00e9dio",
         "Alto",
-        "Crítico"
+        "Cr\u00edtico"
       ],
       "default": "Baixo",
       "description": "Risco de perda calculado por IA"
@@ -649,17 +649,17 @@
     "score_pagamento": {
       "type": "number",
       "default": 100,
-      "description": "Score de 0-100 baseado em histórico de pagamento"
+      "description": "Score de 0-100 baseado em hist\u00f3rico de pagamento"
     },
     "score_confianca_ia": {
       "type": "number",
       "default": 50,
-      "description": "Score de confiança gerado pela IA (0-100)"
+      "description": "Score de confian\u00e7a gerado pela IA (0-100)"
     },
     "score_saude_cliente": {
       "type": "number",
       "default": 100,
-      "description": "Score de saúde do relacionamento (0-100)"
+      "description": "Score de sa\u00fade do relacionamento (0-100)"
     },
     "dias_atraso_medio": {
       "type": "number",
@@ -687,7 +687,7 @@
           "type": "string"
         }
       },
-      "description": "Próxima ação do CRM"
+      "description": "Pr\u00f3xima a\u00e7\u00e3o do CRM"
     },
     "canal_preferencial": {
       "type": "string",
@@ -698,7 +698,7 @@
         "Telefone",
         "Presencial"
       ],
-      "description": "Canal de comunicação preferencial calculado por IA"
+      "description": "Canal de comunica\u00e7\u00e3o preferencial calculado por IA"
     },
     "uso_portal": {
       "type": "object",
@@ -729,7 +729,7 @@
           ]
         }
       },
-      "description": "Métricas de uso do portal"
+      "description": "M\u00e9tricas de uso do portal"
     },
     "uso_canais": {
       "type": "object",
@@ -754,7 +754,7 @@
           "type": "string"
         }
       },
-      "description": "IA de Preferência de Canal"
+      "description": "IA de Prefer\u00eancia de Canal"
     },
     "pode_ver_portal": {
       "type": "boolean",
@@ -769,7 +769,7 @@
     "pode_aprovar_orcamento_portal": {
       "type": "boolean",
       "default": false,
-      "description": "Se pode aprovar orçamentos pelo portal"
+      "description": "Se pode aprovar or\u00e7amentos pelo portal"
     },
     "pode_atualizar_cadastro_portal": {
       "type": "boolean",
@@ -778,7 +778,7 @@
     },
     "portal_usuario_id": {
       "type": "string",
-      "description": "ID do usuário no portal (se cadastrado)"
+      "description": "ID do usu\u00e1rio no portal (se cadastrado)"
     },
     "lgpd_autorizacoes": {
       "type": "object",
@@ -807,7 +807,7 @@
           "type": "string"
         }
       },
-      "description": "Autorizações LGPD"
+      "description": "Autoriza\u00e7\u00f5es LGPD"
     },
     "observacoes": {
       "type": "string"
@@ -816,5 +816,43 @@
   "required": [
     "nome",
     "tipo"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }

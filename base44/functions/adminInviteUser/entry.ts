@@ -17,6 +17,24 @@ Deno.serve(async (req) => {
 
     await base44.users.inviteUser(email, role);
 
+    // RLS Multiempresa: carimbar group_id do admin no convidado (âncora do RLS de tenant)
+    // Se o registro do usuário ainda não existir (signup pendente), o carimbo falha silenciosamente
+    // e a configuração de grupo é feita no onboarding da Gestão de Acessos.
+    const groupId = body?.group_id || user?.group_id;
+    if (groupId) {
+      try {
+        const sr = base44.asServiceRole;
+        const found = await sr.entities.User.filter({ email }, undefined, 1);
+        if (found?.[0]?.id) {
+          const patch = { group_id: groupId };
+          if (Array.isArray(body?.empresas_vinculadas) && body.empresas_vinculadas.length) {
+            patch.empresas_vinculadas = body.empresas_vinculadas;
+          }
+          await sr.entities.User.update(found[0].id, patch);
+        }
+      } catch (e) { console.error('[adminInviteUser] group stamp:', e); }
+    }
+
     // Auditoria
     try {
       await base44.entities.AuditLog.create({

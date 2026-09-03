@@ -371,7 +371,7 @@
         }
       ]
     },
-    "update": {
+    "create": {
       "$or": [
         {
           "data.group_id": "{{user.data.group_id}}"
@@ -383,17 +383,15 @@
         }
       ]
     },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
     "delete": {
-      "$or": [
-        {
-          "data.group_id": "{{user.data.group_id}}"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     }
   }
 }

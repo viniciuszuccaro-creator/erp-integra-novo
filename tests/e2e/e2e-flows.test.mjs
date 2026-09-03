@@ -161,7 +161,7 @@ const FLOWS = [
   {
     name: 'F8: Cadastros — Importação Inteligente (código externo → interno)',
     prerequisites: [
-      { type: 'file', path: 'src/components/cadastros/ImportarProdutosLote.jsx' },
+      { type: 'file', path: 'src/components/estoque/ImportadorProdutosPlanilha.jsx' },
       { type: 'file', path: 'src/components/estoque/ImportadorProdutosPlanilha.jsx' },
       { type: 'file', path: 'base44/functions/parseSpreadsheet/entry.ts' },
     ],

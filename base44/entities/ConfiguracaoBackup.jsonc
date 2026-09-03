@@ -27,7 +27,8 @@
         "Quinzenal",
         "Mensal"
       ],
-      "default": "Di\u00e1rio"
+      "default": "Di\u00e1rio",
+      "description": "Se backup \u00e9 di\u00e1rio, semanal, quinzenal ou mensal"
     },
     "horario_execucao": {
       "type": "string",
@@ -337,5 +338,22 @@
     "frequencia",
     "horario_execucao",
     "provider_storage"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

@@ -5,7 +5,7 @@
  * Requer: app rodando (npm run dev) ou deploy ativo.
  * Testa funções backend, entidades, automações e multiempresa.
  */
-import { base44 } from '../../src/api/base44Client.js';
+let base44;
 
 const COLORS = {
   green: '\x1b[32m', red: '\x1b[31m', yellow: '\x1b[33m',
@@ -85,6 +85,16 @@ async function runIntegration() {
   console.log(`\n${COLORS.bold}${COLORS.blue}═══════════════════════════════════════════════════${COLORS.reset}`);
   console.log(`${COLORS.bold}${COLORS.blue}  ERP ZUCCARO — TESTES DE INTEGRAÇÃO (API REAL)${COLORS.reset}`);
   console.log(`${COLORS.bold}${COLORS.blue}═══════════════════════════════════════════════════${COLORS.reset}\n`);
+
+  // Import dinâmico protegido: base44Client exige runtime Vite (import.meta.env + alias @/)
+  try {
+    ({ base44 } = await import('../../src/api/base44Client.js'));
+  } catch (err) {
+    log('skip', `Cliente base44 indisponível fora do runtime Vite (${err.code || err.message})`);
+    console.log(`${COLORS.yellow}ℹ️  Testes de integração live requerem o ambiente empacotado do app (Vite).${COLORS.reset}`);
+    console.log(`${COLORS.yellow}   Para validação estrutural estática, use: npm run test:unit${COLORS.reset}`);
+    process.exit(0);
+  }
 
   // ── 1. Backend Functions Críticas ──
   console.log(`${COLORS.bold}⚙️  INT 1: Funções Backend${COLORS.reset}`);

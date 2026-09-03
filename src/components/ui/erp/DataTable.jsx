@@ -2,13 +2,18 @@ import React, { useMemo, useRef, useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
-import { ChevronDown, ArrowUp, ArrowDown, ArrowUpDown, MoreVertical, SlidersHorizontal } from "lucide-react";
+import { ArrowUp, ArrowDown, ArrowUpDown, MoreVertical } from "lucide-react";
 import usePermissions from "@/components/lib/usePermissions";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { uiAuditWrap } from "@/components/lib/uiAudit";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getPads, normalizeSelectedSet } from "./dataTable/dataTableHelpers";
+import DataTableToolbar from "./dataTable/DataTableToolbar";
+import DataTableBulkBar from "./dataTable/DataTableBulkBar";
+import DataTablePagination from "./dataTable/DataTablePagination";
+import DataTableFooterTotals from "./dataTable/DataTableFooterTotals";
 
 export default function ERPDataTable({
   columns = [], // [{ key, label, isNumeric, render?: (row) => ReactNode }]
@@ -76,10 +81,7 @@ export default function ERPDataTable({
     })
   , [columns, hiddenColumns]);
 
-  // Densidade: controla paddings e alturas (confortável por padrão)
-  const padX = density === 'compact' ? 'px-2' : density === 'spacious' ? 'px-4' : 'px-3';
-  const padYHead = density === 'compact' ? 'py-1' : density === 'spacious' ? 'py-2.5' : 'py-1.5';
-  const padYCell = density === 'compact' ? 'py-1.5' : density === 'spacious' ? 'py-3' : 'py-2';
+  const { padX, padYHead, padYCell } = getPads(density);
 
   const wrapAudit = (label, fn, meta = { kind: 'datatable' }) => (typeof fn === 'function' ? uiAuditWrap(label, fn, meta) : undefined);
 
@@ -92,14 +94,12 @@ export default function ERPDataTable({
     onGlobalSearchChange: wrapAudit('ERPDataTable.onGlobalSearchChange', onGlobalSearchChange),
     onToggleSelectAll: wrapAudit('ERPDataTable.onToggleSelectAll', onToggleSelectAll),
     onToggleItem: wrapAudit('ERPDataTable.onToggleItem', onToggleItem),
-  }), [onSortChange, onPageChange, onPageSizeChange, onColumnFiltersChange, onHiddenColumnsChange, onGlobalSearchChange, onToggleSelectAll, onToggleItem]);
+    onBulkDeleteSelected: wrapAudit('ERPDataTable.onBulkDeleteSelected', onBulkDeleteSelected),
+    onBulkExportSelected: wrapAudit('ERPDataTable.onBulkExportSelected', onBulkExportSelected),
+  }), [onSortChange, onPageChange, onPageSizeChange, onColumnFiltersChange, onHiddenColumnsChange, onGlobalSearchChange, onToggleSelectAll, onToggleItem, onBulkDeleteSelected, onBulkExportSelected]);
 
   // Aceita Set ou Array para seleção
-  const selectedSet = useMemo(() => {
-    if (selectedIds instanceof Set) return selectedIds;
-    if (Array.isArray(selectedIds)) return new Set(selectedIds);
-    return new Set();
-  }, [selectedIds]);
+  const selectedSet = useMemo(() => normalizeSelectedSet(selectedIds), [selectedIds]);
 
   // Debounce interno para filtros de coluna (reduz chamadas ao backend)
   const [localFilters, setLocalFilters] = useState(columnFilters || {});
@@ -111,7 +111,7 @@ export default function ERPDataTable({
     return () => clearTimeout(h);
   }, [localFilters]);
 
-   const handleResize = (key, e) => {
+  const handleResize = (key, e) => {
     e.preventDefault();
     const startX = e.clientX;
     const th = headerRefs.current[key];
@@ -186,60 +186,21 @@ export default function ERPDataTable({
 
   return (
     <div className="w-full h-full flex flex-col overflow-hidden bg-white/50 backdrop-blur-md rounded-sm">
-      <div className="flex items-center justify-between pb-2 gap-2 rounded-sm border bg-white/80 backdrop-blur-sm shadow-sm px-2 py-1 sticky top-0 z-10">
-        <DropdownMenu>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="h-8 w-8 rounded-sm" aria-label="Configurar colunas">
-                  <SlidersHorizontal className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-            </TooltipTrigger>
-            <TooltipContent>Configurar colunas</TooltipContent>
-          </Tooltip>
-          <DropdownMenuContent>
-            {columns.map((c) => (
-              <DropdownMenuCheckboxItem
-                key={c.key}
-                checked={!hiddenColumns.has(c.key)}
-                onCheckedChange={(checked) => {
-                  const next = new Set(hiddenColumns);
-                  if (!checked) next.add(c.key); else next.delete(c.key);
-                  audited.onHiddenColumnsChange && audited.onHiddenColumnsChange(next);
-                }}
-              >
-                {c.label}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        {enableGlobalSearch && (
-          <input
-            value={globalSearchValue}
-            onChange={(e) => audited.onGlobalSearchChange && audited.onGlobalSearchChange(e.target.value)}
-            className="h-8 w-full sm:w-64 border rounded-sm px-2 text-sm"
-            placeholder="Busca global..."
-          />
-        )}
-      </div>
+      <DataTableToolbar
+        columns={columns}
+        hiddenColumns={hiddenColumns}
+        onHiddenColumnsChange={audited.onHiddenColumnsChange}
+        enableGlobalSearch={enableGlobalSearch}
+        globalSearchValue={globalSearchValue}
+        onGlobalSearchChange={audited.onGlobalSearchChange}
+      />
 
       {showBulkBar && selectedSet.size > 0 && (
-        <div className="sticky top-0 z-10 mb-2 rounded-lg border bg-yellow-50 text-yellow-900 px-3 py-2 flex items-center justify-between">
-          <div className="text-sm font-medium">{selectedSet.size} selecionado(s)</div>
-          <div className="flex items-center gap-2">
-            {audited.onBulkExportSelected && (
-              <Button variant="outline" size="sm" onClick={() => audited.onBulkExportSelected && audited.onBulkExportSelected(Array.from(selectedSet))}>
-                Exportar selecionados
-              </Button>
-            )}
-            {audited.onBulkDeleteSelected && (
-              <Button variant="destructive" size="sm" onClick={() => audited.onBulkDeleteSelected && audited.onBulkDeleteSelected(Array.from(selectedSet))}>
-                Excluir selecionados
-              </Button>
-            )}
-          </div>
-        </div>
+        <DataTableBulkBar
+          selectedSet={selectedSet}
+          onBulkExportSelected={audited.onBulkExportSelected}
+          onBulkDeleteSelected={audited.onBulkDeleteSelected}
+        />
       )}
 
       <div className="flex-1 overflow-auto border rounded-sm w-full h-full bg-white/80 backdrop-blur-sm shadow-sm" style={{scrollBehavior:'smooth'}}>
@@ -390,51 +351,18 @@ export default function ERPDataTable({
         </div>
       </div>
 
-      {footerTotals && Object.keys(totals).length > 0 && (
-        <div className="mt-2 text-sm text-slate-600 flex flex-wrap gap-4">
-          {Object.entries(totals).map(([k, v]) => (
-            <div key={k}><span className="font-medium">Total {columns.find(c => c.key === k)?.label}:</span> {v.toLocaleString('pt-BR')}</div>
-          ))}
-        </div>
+      {footerTotals && (
+        <DataTableFooterTotals totals={totals} columns={columns} />
       )}
 
-      {/* Paginação backend padronizada (renderiza apenas se controlada externamente) */}
-      {onPageChange && (totalItems || 0) > 0 && (
-        <div className="mt-3 flex items-center justify-between gap-2 text-sm">
-          <div className="text-slate-600">
-            Página {page} de {totalPages}{totalItems ? ` • ${totalItems} registros` : ''}
-          </div>
-          <div className="flex items-center gap-2">
-            <select
-              className="h-8 border rounded-sm px-2"
-              value={pageSize}
-              onChange={(e) => audited.onPageSizeChange && audited.onPageSizeChange(Number(e.target.value))}
-            >
-              {[10, 20, 50, 100].map((n) => (
-                <option key={n} value={n}>{n}/página</option>
-              ))}
-            </select>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => audited.onPageChange && audited.onPageChange(Math.max(1, page - 1))}
-                disabled={page <= 1}
-              >
-                Anterior
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => audited.onPageChange && audited.onPageChange(Math.min(totalPages, page + 1))}
-                disabled={page >= totalPages}
-              >
-                Próxima
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DataTablePagination
+        page={page}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        pageSize={pageSize}
+        onPageChange={audited.onPageChange}
+        onPageSizeChange={audited.onPageSizeChange}
+      />
     </div>
   );
 }

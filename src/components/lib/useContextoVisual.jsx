@@ -1,8 +1,12 @@
+// Regra-Mãe 3: Refatorado em módulos focados sob ./contexto/ — comportamento e API pública preservados
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useUser } from "./UserContext";
 import useContextoGrupoEmpresa from "./useContextoGrupoEmpresa";
+import { createDistribuicaoHelpers } from "./contexto/contextoDistribuicao";
+import { createCrudHelpers } from "./contexto/contextoCrud";
+import { createFilterInContext } from "./contexto/filterInContextFactory";
 
 export function useContextoVisual() {
   const { user, isLoading: loadingUser } = useUser();
@@ -51,23 +55,23 @@ export function useContextoVisual() {
   const estaNoGrupo = contexto === 'grupo';
 
   useEffect(() => {
-            try {
-              localStorage.setItem('contexto_atual', contexto);
-            } catch (e) {
-              console.warn('Erro ao salvar contexto:', e);
-            }
-          }, [contexto]);
+    try {
+      localStorage.setItem('contexto_atual', contexto);
+    } catch (e) {
+      console.warn('Erro ao salvar contexto:', e);
+    }
+  }, [contexto]);
 
-          // Persistir o grupo atual para headers multi-tenant
-          useEffect(() => {
-            try {
-              if (grupoAtual?.id) {
-                localStorage.setItem('group_atual_id', grupoAtual.id);
-              }
-            } catch (e) {
-              console.warn('Erro ao salvar grupo:', e);
-            }
-          }, [grupoAtual?.id]);
+  // Persistir o grupo atual para headers multi-tenant
+  useEffect(() => {
+    try {
+      if (grupoAtual?.id) {
+        localStorage.setItem('group_atual_id', grupoAtual.id);
+      }
+    } catch (e) {
+      console.warn('Erro ao salvar grupo:', e);
+    }
+  }, [grupoAtual?.id]);
 
   const adaptarMenuPorContexto = (menuItems) => {
     if (!user) return menuItems;
@@ -88,6 +92,42 @@ export function useContextoVisual() {
   const obterSugestoesNavegacao = () => {
     return [];
   };
+
+  const alternarContexto = () => {
+    setContexto(prevContexto => prevContexto === 'empresa' ? 'grupo' : 'empresa');
+  };
+
+  const selecionarEmpresa = (empresaId) => {
+    setEmpresaAtualId(empresaId);
+    try {
+      localStorage.setItem('empresa_atual_id', empresaId);
+    } catch (e) {
+      console.warn('Erro ao salvar empresa:', e);
+    }
+  };
+
+  // Helpers: multiempresa stamping and server-side filter
+  const getFiltroContexto = (campo = 'empresa_id', incluirGrupo = false) => {
+    const filtro = {};
+    if (incluirGrupo && grupoAtual?.id) filtro.group_id = grupoAtual.id;
+    if (contexto === 'grupo') {
+      if (filtroEmpresa !== 'todas') filtro[campo] = filtroEmpresa;
+    } else if (empresaAtual?.id) {
+      filtro[campo] = empresaAtual.id;
+    }
+    return filtro;
+  };
+
+  const carimbarContexto = (dados, campo = 'empresa_id') => {
+    return {
+      ...dados,
+      ...(grupoAtual?.id && !dados?.group_id ? { group_id: grupoAtual.id } : {}),
+      ...((contexto !== 'grupo') && empresaAtual?.id && !dados?.[campo] ? { [campo]: empresaAtual.id } : {}),
+    };
+  };
+
+  // Consulta server-side ordenada (módulo ./contexto/filterInContextFactory)
+  const { filterInContext } = createFilterInContext({ getFiltroContexto, empresasDoGrupo });
 
   // Compatibilidade: se receber array -> filtra local; se receber string -> delega para filterInContext (consulta server com ordenação)
   const filtrarPorContexto = (arg, campo = 'empresa_id', maybeOrder, maybeLimit) => {
@@ -125,426 +165,11 @@ export function useContextoVisual() {
     return dados;
   };
 
-  const obterLabelOrigem = (item) => {
-    if (!item) return '-';
-    if (item.origem === 'grupo') return 'Grupo';
-    if (item.empresa_id) {
-      const empresa = empresasDoGrupo.find(e => e.id === item.empresa_id);
-      return empresa?.nome_fantasia || empresa?.razao_social || item.empresa_id;
-    }
-    return '-';
-  };
+  // Helpers de origem/distribuição (módulo ./contexto/contextoDistribuicao)
+  const { adicionarColunasContexto } = createDistribuicaoHelpers(empresasDoGrupo);
 
-  const obterLabelEmpresa = (item) => {
-    if (!item) return '-';
-    if (item.origem === 'grupo' && item.rateado_para_empresas) return 'Grupo (distribuído)';
-    if (item.origem === 'grupo' && !item.rateado_para_empresas) return 'Grupo (apenas grupo)';
-    if (item.empresa_id) {
-      const empresa = empresasDoGrupo.find(e => e.id === item.empresa_id);
-      return empresa?.nome_fantasia || empresa?.razao_social || '-';
-    }
-    return '-';
-  };
-
-  const obterCorOrigem = (item) => {
-    if (!item) return 'bg-slate-100 text-slate-700';
-    if (item.origem === 'grupo') return 'bg-blue-100 text-blue-700';
-    return 'bg-purple-100 text-purple-700';
-  };
-
-  const temDistribuicao = (item) => {
-    return item?.rateado_para_empresas === true && 
-           item?.distribuicao_realizada && 
-           item.distribuicao_realizada.length > 0;
-  };
-
-  const obterStatusDistribuicao = (item) => {
-    if (!temDistribuicao(item)) return null;
-    const distribuicao = item.distribuicao_realizada;
-    const todosPagos = distribuicao.every(d => d.status === 'Pago' || d.status === 'Recebido');
-    const algunsPagos = distribuicao.some(d => d.status === 'Pago' || d.status === 'Recebido');
-    if (todosPagos) return 'Total';
-    if (algunsPagos) return 'Parcial';
-    return 'Pendente';
-  };
-
-  const obterPercentualPago = (item) => {
-    if (!temDistribuicao(item)) return 0;
-    const distribuicao = item.distribuicao_realizada;
-    const totalPago = distribuicao.reduce((sum, d) => {
-      if (d.status === 'Pago' || d.status === 'Recebido') return sum + d.valor;
-      return sum;
-    }, 0);
-    const total = distribuicao.reduce((sum, d) => sum + d.valor, 0);
-    return total > 0 ? (totalPago / total) * 100 : 0;
-  };
-
-  const adicionarColunasContexto = (dados) => {
-    if (!dados) return [];
-    return dados.map(item => ({
-      ...item,
-      _origem_label: obterLabelOrigem(item),
-      _empresa_label: obterLabelEmpresa(item),
-      _origem_cor: obterCorOrigem(item),
-      _tem_distribuicao: temDistribuicao(item),
-      _status_distribuicao: obterStatusDistribuicao(item),
-      _percentual_pago: obterPercentualPago(item)
-    }));
-  };
-
-  const alternarContexto = () => {
-    setContexto(prevContexto => prevContexto === 'empresa' ? 'grupo' : 'empresa');
-  };
-
-  const selecionarEmpresa = (empresaId) => {
-    setEmpresaAtualId(empresaId);
-    try {
-      localStorage.setItem('empresa_atual_id', empresaId);
-    } catch (e) {
-      console.warn('Erro ao salvar empresa:', e);
-    }
-  };
-
-  // Helpers: multiempresa stamping and server-side filter
-  const getFiltroContexto = (campo = 'empresa_id', incluirGrupo = false) => {
-    const filtro = {};
-    if (incluirGrupo && grupoAtual?.id) filtro.group_id = grupoAtual.id;
-    if (contexto === 'grupo') {
-      if (filtroEmpresa !== 'todas') filtro[campo] = filtroEmpresa;
-    } else if (empresaAtual?.id) {
-      filtro[campo] = empresaAtual.id;
-    }
-    return filtro;
-  };
-
-  const carimbarContexto = (dados, campo = 'empresa_id') => {
-    return {
-      ...dados,
-      ...(grupoAtual?.id && !dados?.group_id ? { group_id: grupoAtual.id } : {}),
-      ...((contexto !== 'grupo') && empresaAtual?.id && !dados?.[campo] ? { [campo]: empresaAtual.id } : {}),
-    };
-  };
-
-  // Create helpers that always stamp context
-  const MODULE_BY_ENTITY = {
-    Cliente: 'CRM', Oportunidade: 'CRM', Interacao: 'CRM', Campanha: 'CRM', Pedido: 'Comercial', OrcamentoCliente: 'Comercial',
-    Comissao: 'Comercial', NotaFiscal: 'Fiscal', Entrega: 'Expedição', Romaneio: 'Expedição', Rota: 'Expedição',
-    Fornecedor: 'Compras', SolicitacaoCompra: 'Compras', OrdemCompra: 'Compras', Produto: 'Estoque',
-    MovimentacaoEstoque: 'Estoque', TransferenciaFilial: 'Estoque', Inventario: 'Estoque',
-    ContaPagar: 'Financeiro', ContaReceber: 'Financeiro', CaixaMovimento: 'Financeiro', ConciliacaoBancaria: 'Financeiro',
-    LancamentoContabil: 'Financeiro', CentroCusto: 'Financeiro', PlanoDeContas: 'Financeiro', PlanoContas: 'Financeiro',
-    Contrato: 'Contratos', Evento: 'Agenda', Chamado: 'Hub Atendimento',
-    OrdemProducao: 'Produção', ApontamentoProducao: 'Produção',
-    Colaborador: 'RH', Ferias: 'RH', Ponto: 'RH', User: 'Sistema'
-  };
-  const sanitizeOnWrite = (obj) => {
-    if (!obj || typeof obj !== 'object') return obj;
-    const clean = (v) => typeof v === 'string'
-      ? v.replace(/<\s*script[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi,'').replace(/javascript:\s*/gi,'')
-      : v;
-    const out = Array.isArray(obj) ? obj.map((x) => sanitizeOnWrite(x)) : Object.fromEntries(Object.entries(obj).map(([k,v]) => [k, (v && typeof v === 'object') ? sanitizeOnWrite(v) : clean(v)]));
-    return out;
-  };
-
-  const createInContext = async (entityName, dados, campo = 'empresa_id') => {
-    const stamped = carimbarContexto(sanitizeOnWrite(dados), campo);
-    if (!stamped.group_id && !stamped[campo]) {
-      throw new Error('Contexto multiempresa obrigatório: defina grupo ou empresa');
-    }
-    const created = await base44.entities[entityName].create(stamped);
-    try {
-      await base44.entities.AuditLog.create({
-        usuario: (await base44.auth.me())?.email || 'Usuário',
-        acao: 'Criação', modulo: MODULE_BY_ENTITY[entityName] || 'Sistema', tipo_auditoria: 'entidade', entidade: entityName,
-        descricao: `Criado registro em ${entityName}`,
-        empresa_id: stamped[campo] || null, group_id: stamped.group_id || null,
-        dados_anteriores: null, dados_novos: created,
-        data_hora: new Date().toISOString()
-      });
-    } catch (e) { console.error('[useContextoVisual] Falha ao auditar criação:', e?.message || e); }
-    return created;
-  };
-  const bulkCreateInContext = async (entityName, lista, campo = 'empresa_id') => {
-    const stampedList = lista.map(item => {
-      const s = carimbarContexto(sanitizeOnWrite(item), campo);
-      if (!s.group_id && !s[campo]) {
-        throw new Error('Contexto multiempresa obrigatório em item da lista');
-      }
-      return s;
-    });
-    const res = await base44.entities[entityName].bulkCreate(stampedList);
-    try {
-      await base44.entities.AuditLog.create({
-        usuario: (await base44.auth.me())?.email || 'Usuário',
-        acao: 'Criação', modulo: MODULE_BY_ENTITY[entityName] || 'Sistema', tipo_auditoria: 'entidade', entidade: entityName,
-        descricao: `Criação em lote (${res?.length || stampedList.length})`,
-        empresa_id: stampedList[0]?.[campo] || null, group_id: stampedList[0]?.group_id || null,
-        dados_anteriores: null, dados_novos: { count: res?.length || stampedList.length },
-        data_hora: new Date().toISOString()
-      });
-    } catch (e) { console.error('[useContextoVisual] Falha ao auditar criação em lote:', e?.message || e); }
-    return res;
-  };
-  const updateInContext = async (entityName, id, dados, campo = 'empresa_id') => {
-    const stamped = carimbarContexto(sanitizeOnWrite(dados), campo);
-    if (!stamped.group_id && !stamped[campo]) {
-      throw new Error('Contexto multiempresa obrigatório: defina grupo ou empresa');
-    }
-    const before = await base44.entities[entityName].get(id).catch(() => null);
-    const updated = await base44.entities[entityName].update(id, stamped);
-    try {
-      await base44.entities.AuditLog.create({
-        usuario: (await base44.auth.me())?.email || 'Usuário',
-        acao: 'Edição', modulo: MODULE_BY_ENTITY[entityName] || 'Sistema', tipo_auditoria: 'entidade', entidade: entityName,
-        descricao: `Atualizado registro ${id} em ${entityName}`,
-        empresa_id: stamped[campo] || before?.[campo] || null, group_id: stamped.group_id || before?.group_id || null,
-        dados_anteriores: before, dados_novos: updated,
-        data_hora: new Date().toISOString()
-      });
-    } catch (e) { console.error('[useContextoVisual] Falha ao auditar edição:', e?.message || e); }
-    return updated;
-  };
-  // Vol 3.4: Exclusão lógica obrigatória para dados corporativos — converte delete em inativação
-  const NO_PHYSICAL_DELETE_ENTITIES = new Set([
-    'Cliente', 'Fornecedor', 'Transportadora', 'Representante', 'ContatoB2B',
-    'Produto', 'Servico', 'KitProduto', 'GrupoProduto', 'Marca', 'SetorAtividade',
-    'UnidadeMedida', 'TabelaNCM', 'CondicaoComercial', 'SegmentoCliente',
-    'RegiaoAtendimento', 'Cargo', 'Departamento', 'Turno', 'MoedaIndice',
-    'TipoDespesa', 'TipoFrete', 'Banco', 'LocalEstoque', 'RotaPadrao',
-    'Veiculo', 'Motorista', 'CentroResultado', 'CentroOperacao',
-    'CentroCusto', 'PlanoDeContas', 'FormaPagamento', 'TabelaPreco',
-    'TabelaPrecoItem', 'GrupoEmpresarial', 'Empresa',
-    'NotaFiscal', 'TabelaFiscal', 'TabelaDIFAL',
-    'ContaReceber', 'ContaPagar', 'CaixaMovimento', 'LancamentoContabil',
-    'ConciliacaoBancaria', 'RateioFinanceiro', 'ExtratoBancario',
-    'MovimentoCartao', 'CaixaOrdemLiquidacao', 'DRE', 'SPEDFiscal',
-    'Colaborador', 'Ferias', 'Ponto',
-    'Pedido', 'OrdemCompra', 'SolicitacaoCompra', 'OrdemProducao',
-    'ApontamentoProducao', 'Entrega', 'Romaneio', 'MovimentacaoEstoque',
-    'Inventario', 'Contrato', 'Evento', 'Comissao',
-    // Vol 3.6/3.7: Logs de segurança e auditoria nunca podem ser excluídos fisicamente
-    'AuditLog', 'AuditoriaGlobal', 'AuditoriaAcesso', 'AuditoriaGPS', 'AuditoriaIA',
-    'LogFiscal', 'LogCobranca', 'LogPerformance', 'LogsIA', 'AlertaPerformance',
-    'SessaoUsuario', 'TokenRefresh', 'ConfiguracaoSeguranca',
-  ]);
-
-  const deleteInContext = async (entityName, id) => {
-    const before = await base44.entities[entityName].get(id).catch(() => null);
-
-    // Vol 3.4: Dados corporativos usam exclusão lógica (inativação), não física
-    if (NO_PHYSICAL_DELETE_ENTITIES.has(entityName)) {
-      const inactivated = await base44.entities[entityName].update(id, {
-        ativo: false,
-        status: 'Inativo',
-        _inactivated_at: new Date().toISOString(),
-      });
-      try {
-        await base44.entities.AuditLog.create({
-          usuario: (await base44.auth.me())?.email || 'Usuário',
-          acao: 'Inativação', modulo: MODULE_BY_ENTITY[entityName] || 'Sistema', tipo_auditoria: 'entidade', entidade: entityName,
-          descricao: `Inativação (exclusão lógica Vol 3.4) do registro ${id} em ${entityName}`,
-          empresa_id: before?.empresa_id || null, group_id: before?.group_id || null,
-          dados_anteriores: before, dados_novos: inactivated,
-          data_hora: new Date().toISOString()
-        });
-      } catch (e) { console.error('[useContextoVisual] Falha ao auditar inativação (exclusão lógica):', e?.message || e); }
-      return inactivated;
-    }
-
-    // Entidades temporárias/não-corporativas: exclusão física permitida com auditoria
-    const res = await base44.entities[entityName].delete(id);
-    try {
-      await base44.entities.AuditLog.create({
-        usuario: (await base44.auth.me())?.email || 'Usuário',
-        acao: 'Exclusão', modulo: MODULE_BY_ENTITY[entityName] || 'Sistema', tipo_auditoria: 'entidade', entidade: entityName,
-        descricao: `Excluído registro ${id} em ${entityName}`,
-        empresa_id: before?.empresa_id || null, group_id: before?.group_id || null,
-        dados_anteriores: before, dados_novos: null,
-        data_hora: new Date().toISOString()
-      });
-    } catch (e) { console.error('[useContextoVisual] Falha ao auditar exclusão física:', e?.message || e); }
-    return res;
-  };
-  const DEFAULT_SORTS = {
-            Produto: { field: 'descricao', direction: 'asc' },
-            Cliente: { field: 'nome', direction: 'asc' },
-            Fornecedor: { field: 'nome', direction: 'asc' },
-            Pedido: { field: 'data_pedido', direction: 'desc' },
-            ContaPagar: { field: 'data_vencimento', direction: 'asc' },
-            ContaReceber: { field: 'data_vencimento', direction: 'asc' },
-            OrdemCompra: { field: 'data_solicitacao', direction: 'desc' },
-            CentroCusto: { field: 'codigo', direction: 'asc' },
-            PlanoDeContas: { field: 'codigo', direction: 'asc' },
-            PlanoContas: { field: 'codigo', direction: 'asc' },
-            User: { field: 'full_name', direction: 'asc' },
-            CondicaoComercial: { field: 'nome_condicao', direction: 'asc' },
-            Departamento: { field: 'nome_departamento', direction: 'asc' },
-            Turno: { field: 'nome_turno', direction: 'asc' },
-            Marca: { field: 'nome_marca', direction: 'asc' },
-            GrupoProduto: { field: 'nome_grupo', direction: 'asc' },
-            SetorAtividade: { field: 'nome', direction: 'asc' },
-            RotaPadrao: { field: 'nome_rota', direction: 'asc' },
-            TabelaNCM: { field: 'ncm', direction: 'asc' },
-            KitProduto: { field: 'nome_kit', direction: 'asc' },
-            TipoDespesa: { field: 'nome', direction: 'asc' },
-            MoedaIndice: { field: 'nome', direction: 'asc' },
-            CentroResultado: { field: 'nome', direction: 'asc' },
-            CentroOperacao: { field: 'nome', direction: 'asc' },
-            LocalEstoque: { field: 'nome', direction: 'asc' },
-            TipoFrete: { field: 'nome', direction: 'asc' },
-            Motorista: { field: 'nome_completo', direction: 'asc' },
-            Servico: { field: 'descricao', direction: 'asc' },
-            FormaPagamento: { field: 'descricao', direction: 'asc' },
-            ContatoB2B: { field: 'nome_completo', direction: 'asc' },
-            CatalogoWeb: { field: 'produto_id', direction: 'asc' },
-            OperadorCaixa: { field: 'usuario_nome', direction: 'asc' },
-            TabelaFiscal: { field: 'nome_regra', direction: 'asc' },
-            GrupoEmpresarial: { field: 'nome_do_grupo', direction: 'asc' },
-            TabelaPreco: { field: 'nome', direction: 'asc' },
-            ConfiguracaoDespesaRecorrente: { field: 'nome', direction: 'asc' },
-            ConfiguracaoNFe: { field: 'provedor', direction: 'asc' },
-            EventoNotificacao: { field: 'nome_evento', direction: 'asc' },
-            ApiExterna: { field: 'nome_api', direction: 'asc' },
-            ChatbotCanal: { field: 'nome_canal', direction: 'asc' },
-            ChatbotIntent: { field: 'nome_intent', direction: 'asc' },
-            JobAgendado: { field: 'nome_job', direction: 'asc' },
-            Webhook: { field: 'nome_webhook', direction: 'asc' },
-            GatewayPagamento: { field: 'nome_gateway', direction: 'asc' },
-            ModeloDocumento: { field: 'nome_modelo', direction: 'asc' },
-          };
-
-          const normalizeSortField = (entityName, field) => {
-            if (!field) return field;
-            const f = String(field).toLowerCase();
-            if (entityName === 'Produto') {
-              if (f === 'cod' || f === 'código' || f === 'codigo') return 'codigo';
-              if (f === 'tipo' || f === 'tipoitem' || f === 'tipo_item') return 'tipo_item';
-              if (f === 'descrição' || f === 'descricao') return 'descricao';
-            }
-            if (entityName === 'CondicaoComercial' && (f === 'nome' || f === 'name')) return 'nome_condicao';
-            if (entityName === 'Departamento' && (f === 'nome' || f === 'name')) return 'nome_departamento';
-            if (entityName === 'Turno' && (f === 'nome' || f === 'name')) return 'nome_turno';
-            if (entityName === 'Marca' && (f === 'nome' || f === 'name')) return 'nome_marca';
-            if (entityName === 'GrupoProduto' && (f === 'nome' || f === 'name')) return 'nome_grupo';
-            if (entityName === 'SetorAtividade' && (f === 'name')) return 'nome';
-            if (entityName === 'CatalogoWeb' && (f === 'nome' || f === 'name')) return 'produto_id';
-            if (entityName === 'OperadorCaixa' && (f === 'nome' || f === 'name')) return 'usuario_nome';
-            if (entityName === 'TabelaFiscal' && (f === 'nome' || f === 'name')) return 'nome_regra';
-            if (entityName === 'GrupoEmpresarial' && (f === 'nome' || f === 'name')) return 'nome_do_grupo';
-            return field;
-          };
-          const getLastSort = (entityName) => {
-            try {
-              const v = JSON.parse(localStorage.getItem(`sort_${entityName}`) || 'null');
-              if (v?.sortField) v.sortField = normalizeSortField(entityName, v.sortField);
-              return v;
-            } catch { return null; }
-          };
-          const setLastSort = (entityName, sort) => {
-            try {
-              const s = { ...sort, sortField: normalizeSortField(entityName, sort?.sortField) };
-              localStorage.setItem(`sort_${entityName}`, JSON.stringify(s));
-            } catch (e) { console.error('[lib] catch:', e); }
-          };
-
-          const filterInContext = async (entityName, criterios = {}, order = undefined, limit = undefined, campo = 'empresa_id') => {
-                   const ENTITY_CONTEXT_FIELD = { Fornecedor: 'empresa_dona_id', Transportadora: 'empresa_dona_id', Colaborador: 'empresa_alocada_id', NotaFiscal: 'empresa_faturamento_id', TransferenciaFilial: 'empresa_origem_id' };
-                   const SHARED_SET = new Set(['Cliente','Fornecedor','Transportadora']);
-                   const ctxCampo = ENTITY_CONTEXT_FIELD[entityName] || campo || 'empresa_id';
-
-                   const scope = getFiltroContexto(ctxCampo, true) || {};
-                   const groupId = scope.group_id;
-                   const empresaId = scope[ctxCampo];
-
-                   // Detecta suporte a contexto via schema
-                   let hasGroupField = true;
-                   let hasCtxField = true;
-                   try {
-                     const sch = (base44.entities?.[entityName]?.schema ? await base44.entities[entityName].schema() : null);
-                     const props = sch?.properties || {};
-                     hasGroupField = Object.prototype.hasOwnProperty.call(props, 'group_id');
-                     hasCtxField = Object.prototype.hasOwnProperty.call(props, ctxCampo);
-                   } catch (e) { console.error('[lib] catch:', e); }
-                   const noContext = !hasGroupField && !hasCtxField;
-
-                   if (!groupId && !empresaId && !noContext) return [];
-
-                   const rest = { ...criterios };
-
-                   // Contexto de GRUPO (sem empresa específica): filtro simples por group_id (indexado e rápido)
-                   // O backend expandGroupFilter retorna { group_id } diretamente, sem $or/$in complexo
-                   if (groupId && !empresaId) {
-                     const filtro = noContext ? { ...rest } : { ...rest, group_id: groupId };
-                     if (entityName === 'PerfilAcesso') {
-                       // Inclui legacy (group_id: null) para perfis criados antes do multi-tenant
-                       filtro.$or = [{ group_id: groupId }, { grupo_id: groupId }, { group_id: null, empresa_id: null }];
-                       delete filtro.group_id;
-                     }
-                     // TransferenciaFilial precisa de empresa_origem/destino (backend não expande)
-                     if (entityName === 'TransferenciaFilial' && Array.isArray(empresasDoGrupo) && empresasDoGrupo.length) {
-                       const empresasIds = empresasDoGrupo.map(e => e.id).filter(Boolean);
-                       filtro.$or = [{ group_id: groupId }, { empresa_origem_id: { $in: empresasIds } }, { empresa_destino_id: { $in: empresasIds } }];
-                       delete filtro.group_id;
-                     }
-                     // seguir para sort + invoke abaixo
-                     return (async () => {
-                       let sortField2, sortDirection2;
-                       if (typeof order === 'string' && order.length) {
-                         sortDirection2 = order.startsWith('-') ? 'desc' : 'asc';
-                         sortField2 = normalizeSortField(entityName, order.replace(/^-/, ''));
-                         setLastSort(entityName, { sortField: sortField2, sortDirection: sortDirection2 });
-                       } else {
-                         const last = getLastSort(entityName);
-                         sortField2 = normalizeSortField(entityName, last?.sortField || DEFAULT_SORTS[entityName]?.field || 'updated_date');
-                         sortDirection2 = last?.sortDirection || DEFAULT_SORTS[entityName]?.direction || 'desc';
-                       }
-                       const res = await base44.functions.invoke('entityListSorted', {
-                         entityName, filter: filtro, sortField: sortField2, sortDirection: sortDirection2, limit: limit || 100,
-                       });
-                       return Array.isArray(res?.data) ? res.data : [];
-                     })();
-                   }
-
-                   // Contexto de EMPRESA: $or mínimo com empresaId + shared (para entidades compartilhadas)
-                   const orConds = [];
-                   if (empresaId) {
-                     if (entityName === 'Cliente') {
-                       orConds.push(
-                         { empresa_id: empresaId },
-                         { empresa_dona_id: empresaId },
-                         { empresas_compartilhadas_ids: { $in: [empresaId] } }
-                       );
-                     } else {
-                       orConds.push({ [ctxCampo]: empresaId });
-                       if (SHARED_SET.has(entityName)) {
-                         orConds.push({ empresas_compartilhadas_ids: { $in: [empresaId] } });
-                       }
-                     }
-                   }
-
-                   const filtro = noContext ? { ...rest } : { ...rest, ...(orConds.length ? { $or: orConds } : {}) };
-
-                   // Derivar sort
-                   let sortField, sortDirection;
-                   if (typeof order === 'string' && order.length) {
-                     sortDirection = order.startsWith('-') ? 'desc' : 'asc';
-                     sortField = normalizeSortField(entityName, order.replace(/^-/, ''));
-                     setLastSort(entityName, { sortField, sortDirection });
-                   } else {
-                     const last = getLastSort(entityName);
-                     sortField = normalizeSortField(entityName, last?.sortField || DEFAULT_SORTS[entityName]?.field || 'updated_date');
-                     sortDirection = last?.sortDirection || DEFAULT_SORTS[entityName]?.direction || 'desc';
-                   }
-
-                   const res = await base44.functions.invoke('entityListSorted', {
-                     entityName,
-                     filter: filtro,
-                     sortField,
-                     sortDirection,
-                     limit: limit || 100,
-                   });
-                   return Array.isArray(res?.data) ? res.data : [];
-                 };
+  // CRUD com auditoria e exclusão lógica (módulo ./contexto/contextoCrud)
+  const { createInContext, bulkCreateInContext, updateInContext, deleteInContext } = createCrudHelpers(carimbarContexto);
 
   return {
     contexto,

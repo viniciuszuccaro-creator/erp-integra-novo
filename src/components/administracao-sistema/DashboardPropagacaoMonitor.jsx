@@ -3,25 +3,21 @@
  * Monitor em tempo real da propagação Grupo↔Empresas
  * Regra-Mãe: pequeno, focado, w-full h-full responsivo
  */
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
-import { TrendingUp, AlertCircle, CheckCircle2, Loader2, RefreshCw } from 'lucide-react';
+import { TrendingUp, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 export default function DashboardPropagacaoMonitor() {
   const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
-  const [forceRefresh, setForceRefresh] = useState(0);
-  const [executando, setExecutando] = useState(false);
 
   // Fetch histórico de propagações com contexto multiempresa
-  const { data: propagacoes = [], refetch } = useQuery({
-    queryKey: ['propagacoes', forceRefresh, contextoKey],
+  const { data: propagacoes = [] } = useQuery({
+    queryKey: ['propagacoes', contextoKey],
     queryFn: () => filterInContext('AuditLog', 
       { 
         entidade: 'PropagacaoAutomatica',
@@ -32,36 +28,6 @@ export default function DashboardPropagacaoMonitor() {
     ),
     staleTime: 30000,
   });
-
-  // Forçar sincronização imediata
-  const handleForceSyncAll = async () => {
-    setExecutando(true);
-    try {
-      const result = await base44.functions.invoke('propagateGroupConfigs', {
-        forceAll: true,
-        timestamp: new Date().toISOString()
-      });
-      
-      // Registrar na auditoria
-      await base44.entities.AuditLog.create({
-        usuario: (await base44.auth.me()).full_name,
-        acao: 'Execução Manual',
-        modulo: 'Propagação',
-        tipo_auditoria: 'sincronizacao',
-        entidade: 'PropagacaoAutomatica',
-        descricao: 'Sincronização forçada de todas entidades',
-        dados_novos: { resultado: result },
-        data_hora: new Date().toISOString(),
-      });
-      
-      setForceRefresh(prev => prev + 1);
-      await refetch();
-    } catch (err) {
-      console.error('Erro ao forçar sincronização:', err);
-    } finally {
-      setExecutando(false);
-    }
-  };
 
   // Contar sucesso vs erro
   const stats = {
@@ -121,31 +87,16 @@ export default function DashboardPropagacaoMonitor() {
         </Card>
       </div>
 
-      {/* Botão de Sincronização Manual */}
-      <Card className="bg-blue-50 border-blue-200">
+      {/* Propagação automática por eventos */}
+      <Card className="bg-green-50 border-green-200">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Sincronização Manual</CardTitle>
+          <CardTitle className="text-base text-green-800">✅ Propagação Automática por Eventos</CardTitle>
         </CardHeader>
         <CardContent>
-          <Button
-            onClick={handleForceSyncAll}
-            disabled={executando}
-            className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
-          >
-            {executando ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Sincronizando...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="w-4 h-4" />
-                Forçar Sincronização de Todas Entidades
-              </>
-            )}
-          </Button>
-          <p className="text-xs text-slate-500 mt-3">
-            Execute quando mudanças críticas forem feitas no Grupo e precisarem ser propagadas imediatamente para todas as empresas.
+          <p className="text-xs text-green-700">
+            Toda criação/edição de registro base dispara automaticamente a sincronização Grupo ↔ Empresas
+            (automações de evento → <code>syncBidirectional</code>). Acionamento manual desnecessário —
+            este painel é apenas de monitoramento.
           </p>
         </CardContent>
       </Card>

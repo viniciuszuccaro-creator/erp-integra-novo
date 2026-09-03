@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
-import { CheckCircle2, AlertCircle, XCircle, Wifi, ArrowDownUp, RefreshCw } from "lucide-react";
+import { CheckCircle2, AlertCircle, XCircle, Wifi, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
 /**
  * AdminStatusBar — barra de saúde compacta com propagação integrada.
@@ -16,7 +15,6 @@ export default function AdminStatusBar() {
   const gId = grupoAtual?.id || (() => {
     try { return localStorage.getItem('group_atual_id'); } catch { return null; }
   })();
-  const [propagando, setPropagando] = useState(false);
 
   const { data: configs = [], isFetching, refetch } = useQuery({
     queryKey: ["admin-status-bar", eId ?? "sem", gId ?? "sem"],
@@ -70,22 +68,6 @@ export default function AdminStatusBar() {
   const healthColor = healthPct >= 80 ? "text-green-600" : healthPct >= 50 ? "text-amber-600" : "text-red-600";
   const healthBg = healthPct >= 80 ? "bg-green-50 border-green-200" : healthPct >= 50 ? "bg-amber-50 border-amber-200" : "bg-red-50 border-red-200";
 
-  const handlePropagacaoRapida = async () => {
-    if (!gId && !eId) { toast.error("Selecione grupo ou empresa."); return; }
-    setPropagando(true);
-    try {
-      const res = await base44.functions.invoke("propagateGroupConfigs", {
-        group_id: gId || null, empresa_id: eId || null, direction: "grupo_to_empresas", strategy: "merge"
-      });
-      const total = (res?.data?.results || []).reduce((s, r) => s + (r.created || 0) + (r.updated || 0), 0);
-      toast.success(`✅ Propagação rápida: ${total} registros sincronizados.`);
-    } catch (err) {
-      toast.error("Erro na propagação: " + String(err?.message || err));
-    } finally {
-      setPropagando(false);
-    }
-  };
-
   return (
     <div className={`w-full border rounded-xl px-4 py-3 mb-2 ${healthBg}`}>
       <div className="flex flex-wrap items-center gap-3">
@@ -119,23 +101,6 @@ export default function AdminStatusBar() {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          {/* Propagação rápida */}
-          {(eId || gId) && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 text-xs gap-1.5 border-blue-200 text-blue-700 hover:bg-blue-50"
-              onClick={handlePropagacaoRapida}
-              disabled={propagando}
-              title="Propagar configurações do Grupo para todas as Empresas agora"
-            >
-              {propagando
-                ? <RefreshCw className="w-3 h-3 animate-spin" />
-                : <ArrowDownUp className="w-3 h-3" />
-              }
-              {propagando ? "Propagando…" : "Propagação Rápida"}
-            </Button>
-          )}
           <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => refetch()}>
             <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? "animate-spin" : ""}`} />
           </Button>

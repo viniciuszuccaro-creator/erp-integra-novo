@@ -7,12 +7,10 @@ import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import {
-  Play, Shield, ArrowDownUp, Database, Loader2, Settings
+  Play, Shield, Database, Loader2, Settings
 } from "lucide-react";
-import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function AdminQuickActions({ onTabChange }) {
-  const { grupoAtual } = useContextoVisual();
   const [loading, setLoading] = useState(null);
 
   const run = async (key, fn) => {
@@ -41,17 +39,6 @@ export default function AdminQuickActions({ onTabChange }) {
       fn: async () => {
         await base44.functions.invoke("initializeRBACProfiles", {});
         toast.success("Perfis RBAC inicializados!");
-      },
-    },
-    {
-      key: "propagacao",
-      label: "Sincronizar Grupo",
-      icon: ArrowDownUp,
-      color: "bg-teal-600 hover:bg-teal-700",
-      fn: async () => {
-        if (!grupoAtual?.id) throw new Error("Selecione um grupo.");
-        await base44.functions.invoke("propagateGroupConfigs", { group_id: grupoAtual.id });
-        toast.success("Propagação iniciada!");
       },
     },
     {

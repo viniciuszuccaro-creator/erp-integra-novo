@@ -30,7 +30,7 @@ export function converterParaCSV(dados, colunas) {
         try {
           valor = new Date(valor).toLocaleDateString('pt-BR');
         } catch (e) {
-          valor = valor;
+          // data inválida: mantém o valor original
         }
       }
 

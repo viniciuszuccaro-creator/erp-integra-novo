@@ -28,7 +28,7 @@ export function useContextoGrupoEmpresa() {
     carregarContextoInicial();
   }, []);
 
-  const { trocarParaGrupo, trocarParaEmpresa } = criarTrocasContexto({
+  const { trocarParaGrupo, trocarParaEmpresa } = useTrocasContexto({
     user,
     setUser,
     setContexto,

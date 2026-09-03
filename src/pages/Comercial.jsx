@@ -1,17 +1,11 @@
-import React, { Suspense, useEffect, startTransition } from "react";
+import React, { startTransition } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQueryClient } from "@tanstack/react-query";
-import { Users, ShoppingCart, FileText, TrendingUp, ShieldCheck, Truck, Package, AlertCircle } from "lucide-react";
-import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { toast } from "sonner";
 import usePermissions from "@/components/lib/usePermissions";
-import useRLSQuery from "@/components/lib/useRLSQuery";
 import { useWindow } from "@/components/lib/useWindow";
 import { useUser } from "@/components/lib/UserContext";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
 import ProtectedSection from "@/components/security/ProtectedSection";
-import { toast } from "sonner";
-import PedidoFormCompleto from "../components/comercial/PedidoFormCompleto";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import ValidarPedidosExternos from "@/components/comercial/ValidarPedidosExternos";
 import HeaderComercialCompacto from "@/components/comercial/comercial-launchpad/HeaderComercialCompacto";
@@ -19,201 +13,27 @@ import ModuleLayout from "@/components/layout/ModuleLayout";
 import ModuleKPIs from "@/components/layout/ModuleKPIs";
 import ModuleContent from "@/components/layout/ModuleContent";
 import ModuleTabs from "@/components/layout/ModuleTabs";
-import KPIsComercial from "@/components/comercial/comercial-launchpad/KPIsComercial";
 import ModulosGridComercial from "@/components/comercial/comercial-launchpad/ModulosGridComercial";
-import useComercialDerivedData from "@/components/comercial/hooks/useComercialDerivedData";
-import useCountEntitiesOptimized from "@/components/lib/useCountEntitiesOptimized";
-import {
-  COMERCIAL_COMPANY_LIMIT,
-  COMERCIAL_EXTERNAL_LIMIT,
-  COMERCIAL_LIST_LIMIT,
-  COMERCIAL_SHORT_LIMIT,
-} from "@/components/comercial/config/comercialQueryConfig";
-
-const ClientesTab = React.lazy(() => import("../components/comercial/ClientesTab"));
-const PedidosTab = React.lazy(() => import("../components/comercial/PedidosTab"));
-const ComissoesTab = React.lazy(() => import("../components/comercial/ComissoesTab"));
-const NotasFiscaisTab = React.lazy(() => import("../components/comercial/NotasFiscaisTab"));
-const TabelasPrecoTab = React.lazy(() => import("../components/comercial/TabelasPrecoTab"));
-const CentralAprovacoesManager = React.lazy(() => import("../components/comercial/CentralAprovacoesManager"));
-const PedidosEntregaTab = React.lazy(() => import("../components/comercial/PedidosEntregaTab"));
-const PedidosRetiradaTab = React.lazy(() => import("../components/comercial/PedidosRetiradaTab"));
-const MonitoramentoCanaisRealtime = React.lazy(() => import("@/components/comercial/MonitoramentoCanaisRealtime"));
+import useComercialPageData from "@/components/comercial/page/useComercialPageData";
+import useComercialPedidoWindows from "@/components/comercial/page/useComercialPedidoWindows";
+import { buildComercialModules } from "@/components/comercial/page/comercialModulesConfig";
+import ComercialKPIsStrip from "@/components/comercial/page/ComercialKPIsStrip";
 
 export default function Comercial() {
   const { hasPermission, isLoading: loadingPermissions } = usePermissions();
   const canViewComercial = (section = null) => hasPermission('Comercial', section, 'visualizar');
   const canSeeComercial = canViewComercial();
-  const { openWindow, closeWindow } = useWindow();
-  const { createInContext, updateInContext, empresaAtual, grupoAtual, estaNoGrupo } = useContextoVisual();
-  // groupId já declarado acima via contextoValido
+  const { openWindow } = useWindow();
   const { user } = useUser();
-  const queryClient = useQueryClient();
-
-  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
-  // P2: contexto válido inclui grupo explícito (não só empresa)
-  const contextoValido = !!(empresaAtual?.id || groupId);
-  const bloqueadoSemEmpresa = !contextoValido;
-
-  const { data: clientes = [] } = useRLSQuery(
-    'Cliente', {}, '-created_date', COMERCIAL_LIST_LIMIT,
-    { staleTime: 30000, enabled: contextoValido && canSeeComercial }
-  );
-
-  const { data: pedidos = [], refetch: refetchPedidos } = useRLSQuery(
-    'Pedido', {}, '-created_date', COMERCIAL_LIST_LIMIT,
-    { staleTime: 30000, enabled: contextoValido && canSeeComercial }
-  );
-
-  useEffect(() => {
-    if (!(empresaAtual?.id || estaNoGrupo)) return;
-    if (!base44.entities?.Pedido?.subscribe) return;
-    const un = base44.entities.Pedido.subscribe(() => {
-      try { queryClient.invalidateQueries({ queryKey: ['Pedido'] }); } catch (_) {}
-    });
-    return () => { try { un?.(); } catch (_) {} };
-  }, [empresaAtual?.id, grupoAtual?.id, estaNoGrupo, queryClient]);
-
-  // Realtime adicional: Comissões e NF-e
-  useEffect(() => {
-    if (!(empresaAtual?.id || estaNoGrupo)) return;
-    const unsubs = [];
-    if (base44.entities?.Comissao?.subscribe) {
-      unsubs.push(base44.entities.Comissao.subscribe(() => {
-        try { queryClient.invalidateQueries({ queryKey: ['comissoes'] }); } catch (_) {}
-      }));
-    }
-    if (base44.entities?.NotaFiscal?.subscribe) {
-      unsubs.push(base44.entities.NotaFiscal.subscribe(() => {
-        try { queryClient.invalidateQueries({ queryKey: ['notasFiscais'] }); } catch (_) {}
-      }));
-    }
-    return () => { unsubs.forEach(u => { try { u && u(); } catch (_) {} }); };
-  }, [empresaAtual?.id, grupoAtual?.id, estaNoGrupo]);
-
-  const { data: comissoes = [] } = useRLSQuery(
-    'Comissao', {}, '-created_date', COMERCIAL_SHORT_LIMIT,
-    { staleTime: 30000, enabled: contextoValido && canSeeComercial }
-  );
-
-  const { data: notasFiscais = [] } = useRLSQuery(
-    'NotaFiscal', {}, '-created_date', COMERCIAL_SHORT_LIMIT,
-    { staleTime: 30000, enabled: contextoValido && canSeeComercial }
-  );
-
-  const { data: tabelasPreco = [] } = useRLSQuery(
-    'TabelaPreco', {}, '-updated_date', COMERCIAL_SHORT_LIMIT,
-    { staleTime: 30000, enabled: contextoValido && canSeeComercial }
-  );
-
-  const { data: empresas = [] } = useRLSQuery(
-    'Empresa', {}, '-created_date', COMERCIAL_COMPANY_LIMIT,
-    { staleTime: 30000, enabled: Boolean(canSeeComercial && contextoValido) }
-  );
-
-  const { data: pedidosExternos = [] } = useRLSQuery(
-    'PedidoExterno', {}, '-created_date', COMERCIAL_EXTERNAL_LIMIT,
-    { staleTime: 30000, enabled: contextoValido && canSeeComercial }
-  );
 
   const {
-    pedidosExternosPendentes,
-    totalVendas,
-    ticketMedio,
-    clientesAtivos,
-    pedidosPendentesAprovacao,
-    pedidosEntrega,
-    pedidosRetirada,
-    valorFaturado,
-    valorPendenteFaturamento,
-    pesoTotalVendido,
-    pesoFaturado,
-    pesoPendenteFaturamento,
-    pedidosFaturados,
-    pedidosFaturamentoParcial,
-    pedidosCancelados,
-    margemBruta,
-    margemPercentual,
-    margemFaturada,
-    totalEtapasEntrega,
-    etapasFaturadas,
-    etapasPendentes,
-    pedidosComProducao,
-    pedidosSomenteRevenda,
-    percentualFaturado,
-    ticketFaturado,
-    pedidosEmProducao,
-    pedidosProntoFaturar,
-    pedidosEmExpedicao,
-    pedidosEmTransito,
-    pedidosEntregues,
-    quantidadesPorTipo,
-    quantidadeTotalItens,
-    margemPorTipo,
-    taxaEntregaSucesso,
-    taxaCancelamento,
-    funilStatus,
-  } = useComercialDerivedData({ pedidos, clientes, pedidosExternos });
+    empresaAtual, grupoAtual, bloqueadoSemEmpresa,
+    clientes, pedidos, refetchPedidos,
+    comissoes, notasFiscais, tabelasPreco, empresas,
+    derived, totalPedidosServer, totalClientesServer,
+  } = useComercialPageData({ canSeeComercial });
 
-  // Vol 3.3: Contagens server-side precisas (não limitadas pelo batch carregado)
-  const { counts: serverCounts } = useCountEntitiesOptimized(['Pedido', 'Cliente']);
-  const totalPedidosServer = serverCounts?.Pedido ?? pedidos.length;
-  const totalClientesServer = serverCounts?.Cliente ?? clientes.length;
-
-  const handleCreateNewPedido = () => {
-    let pedidoCriado = false;
-    openWindow(
-      PedidoFormCompleto,
-      {
-        clientes,
-        windowMode: true,
-        pedido: { status: 'Rascunho' },
-        onSubmit: async (formData) => {
-          if (pedidoCriado) return;
-          pedidoCriado = true;
-          try {
-            const created = await createInContext('Pedido', {
-              ...formData,
-              vendedor: formData.vendedor || user?.full_name,
-              vendedor_id: formData.vendedor_id || user?.id
-            });
-            toast.success("Pedido criado!");
-            await refetchPedidos();
-          } catch (error) {
-            pedidoCriado = false;
-            toast.error("Erro: " + error.message);
-          }
-        }
-      },
-      { title: ' Novo Pedido', width: 1400, height: 800 }
-    );
-  };
-
-  const handleEditPedido = (pedido) => {
-    let atualizacaoEmAndamento = false;
-    let windowIdRef = openWindow(
-      PedidoFormCompleto,
-      {
-        pedido,
-        clientes,
-        windowMode: true,
-        onSubmit: async (formData) => {
-          if (atualizacaoEmAndamento) return;
-          atualizacaoEmAndamento = true;
-          try {
-            await updateInContext('Pedido', formData.id, formData);
-            toast.success("Pedido atualizado!");
-            await refetchPedidos();
-            if (windowIdRef) closeWindow(windowIdRef);
-          } catch (error) {
-            atualizacaoEmAndamento = false;
-            toast.error("Erro: " + error.message);
-          }
-        }
-      },
-      { title: `Editar: ${pedido.numero_pedido}`, width: 1400, height: 800 }
-    );
-  };
+  const { handleCreateNewPedido, handleEditPedido } = useComercialPedidoWindows({ clientes, refetchPedidos });
 
   if (loadingPermissions) {
     return <div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
@@ -232,140 +52,47 @@ export default function Comercial() {
     );
   }
 
-  const modules = [
-    {
-      title: 'Clientes',
-      sectionKey: 'Clientes',
-      description: 'Cadastro e gestão',
-      icon: Users,
-      color: 'blue',
-      component: ClientesTab,
-      windowTitle: ' Clientes',
-      width: 1500,
-      height: 850,
-      props: { clientes }
-    },
-    {
-      title: 'Pedidos',
-      sectionKey: 'Pedidos',
-      description: 'Orçamentos e vendas',
-      icon: ShoppingCart,
-      color: 'purple',
-      component: PedidosTab,
-      windowTitle: ' Pedidos',
-      width: 1500,
-      height: 850,
-      props: { pedidos, clientes, empresas, onCreatePedido: handleCreateNewPedido, onEditPedido: handleEditPedido }
-    },
-    {
-      title: 'Logística Entrega',
-      description: 'CIF e FOB',
-      icon: Truck,
-      color: 'blue',
-      component: PedidosEntregaTab,
-      windowTitle: ' Logística de Entrega',
-      width: 1400,
-      height: 800,
-      badge: pedidosEntrega > 0 ? `${pedidosEntrega}` : null
-    },
-    {
-      title: 'Pedidos Retirada',
-      sectionKey: 'Pedidos Retirada',
-      description: 'Cliente retira',
-      icon: Package,
-      color: 'green',
-      component: PedidosRetiradaTab,
-      windowTitle: ' Pedidos p/ Retirada',
-      width: 1400,
-      height: 800,
-      badge: pedidosRetirada > 0 ? `${pedidosRetirada}` : null
-    },
-    {
-      title: 'Comissões',
-      description: 'Vendedores e indicadores',
-      icon: TrendingUp,
-      color: 'green',
-      component: ComissoesTab,
-      windowTitle: 'Comissões',
-      width: 1400,
-      height: 800,
-      props: { comissoes, pedidos, empresas }
-    },
-    {
-      title: 'Notas Fiscais',
-      sectionKey: 'Notas Fiscais',
-      description: 'NF-e emitidas',
-      icon: FileText,
-      color: 'indigo',
-      component: NotasFiscaisTab,
-      windowTitle: ' Notas Fiscais',
-      width: 1500,
-      height: 850,
-      props: { notasFiscais, pedidos, clientes }
-    },
-    {
-      title: 'Aprovações',
-      description: 'Descontos hierárquicos',
-      icon: ShieldCheck,
-      color: 'orange',
-      component: CentralAprovacoesManager,
-      windowTitle: 'Aviso: Central de Aprovações',
-      width: 1400,
-      height: 800,
-      badge: pedidosPendentesAprovacao > 0 ? `${pedidosPendentesAprovacao} pendentes` : null
-    },
-    {
-      title: 'Tabelas de Preço',
-      description: 'Gestão de preços',
-      icon: TrendingUp,
-      color: 'indigo',
-      component: TabelasPrecoTab,
-      windowTitle: ' Tabelas de Preço',
-      width: 1400,
-      height: 800,
-      props: { tabelasPreco }
-    },
-    {
-      title: 'Canais Realtime',
-      sectionKey: 'Canais Realtime',
-      description: 'Monitoramento de origem',
-      icon: TrendingUp,
-      color: 'cyan',
-      component: MonitoramentoCanaisRealtime,
-      windowTitle: ' Canais em Tempo Real',
-      width: 1300,
-      height: 750,
-      props: { autoRefresh: true }
-    }
-  ];
+  const modules = buildComercialModules({
+    clientes,
+    pedidos,
+    empresas,
+    comissoes,
+    notasFiscais,
+    tabelasPreco,
+    pedidosEntrega: derived.pedidosEntrega,
+    pedidosRetirada: derived.pedidosRetirada,
+    pedidosPendentesAprovacao: derived.pedidosPendentesAprovacao,
+    onCreatePedido: handleCreateNewPedido,
+    onEditPedido: handleEditPedido,
+  });
 
   const allowedModules = modules
     .map((m) => ({ ...m, permissionKey: `Comercial.${m.sectionKey || m.title}.visualizar` }))
     .filter(m => canViewComercial(m.sectionKey || m.title));
 
-   // Vol 5.1: Drill-down de KPIs — clicar no card abre o módulo de origem
-   const handleKPIDrillDown = (dataKey) => {
-     const moduleMap = {
-       clientes: modules.find(m => m.title === 'Clientes'),
-       pedidos: modules.find(m => m.title === 'Pedidos'),
-       vendas: modules.find(m => m.title === 'Pedidos'),
-       ticket: modules.find(m => m.title === 'Pedidos'),
-       faturado: modules.find(m => m.title === 'Notas Fiscais'),
-       pendente: modules.find(m => m.title === 'Pedidos'),
-       peso: modules.find(m => m.title === 'Pedidos'),
-       margem: modules.find(m => m.title === 'Pedidos'),
-       // V21.4: Novos drill-downs
-       etapas: modules.find(m => m.title === 'Pedidos'),
-       producao: modules.find(m => m.title === 'Pedidos'),
-       expedicao: modules.find(m => m.title === 'Logística Entrega'),
-     };
-     const targetModule = moduleMap[dataKey];
-     if (targetModule) {
-       handleModuleClick(targetModule);
-     }
-   };
+  // Vol 5.1: Drill-down de KPIs — clicar no card abre o módulo de origem
+  const handleKPIDrillDown = (dataKey) => {
+    const moduleMap = {
+      clientes: modules.find(m => m.title === 'Clientes'),
+      pedidos: modules.find(m => m.title === 'Pedidos'),
+      vendas: modules.find(m => m.title === 'Pedidos'),
+      ticket: modules.find(m => m.title === 'Pedidos'),
+      faturado: modules.find(m => m.title === 'Notas Fiscais'),
+      pendente: modules.find(m => m.title === 'Pedidos'),
+      peso: modules.find(m => m.title === 'Pedidos'),
+      margem: modules.find(m => m.title === 'Pedidos'),
+      // V21.4: Novos drill-downs
+      etapas: modules.find(m => m.title === 'Pedidos'),
+      producao: modules.find(m => m.title === 'Pedidos'),
+      expedicao: modules.find(m => m.title === 'Logística Entrega'),
+    };
+    const targetModule = moduleMap[dataKey];
+    if (targetModule) {
+      handleModuleClick(targetModule);
+    }
+  };
 
-   const handleModuleClick = (module) => {
+  const handleModuleClick = (module) => {
     if (!canViewComercial(module.sectionKey || module.title)) {
       toast.error('Sem permissao para visualizar esta area do Comercial.');
       return;
@@ -415,49 +142,12 @@ export default function Comercial() {
               </div>}
             >
               <ModuleKPIs>
-                <KPIsComercial
-                   totalClientes={totalClientesServer}
-                   clientesAtivos={clientesAtivos}
-                   totalPedidos={totalPedidosServer}
-                   totalVendas={totalVendas}
-                   ticketMedio={ticketMedio}
-                   valorFaturado={valorFaturado}
-                   valorPendenteFaturamento={valorPendenteFaturamento}
-                   pesoTotalVendido={pesoTotalVendido}
-                   pesoFaturado={pesoFaturado}
-                   pesoPendenteFaturamento={pesoPendenteFaturamento}
-                   pedidosFaturados={pedidosFaturados}
-                   pedidosFaturamentoParcial={pedidosFaturamentoParcial}
-                   pedidosCancelados={pedidosCancelados}
-                   margemBruta={margemBruta}
-                   margemPercentual={margemPercentual}
-                   margemFaturada={margemFaturada}
-                   totalEtapasEntrega={totalEtapasEntrega}
-                   etapasFaturadas={etapasFaturadas}
-                   etapasPendentes={etapasPendentes}
-                   pedidosComProducao={pedidosComProducao}
-                   pedidosSomenteRevenda={pedidosSomenteRevenda}
-                   percentualFaturado={percentualFaturado}
-                   ticketFaturado={ticketFaturado}
-                   pedidosEmProducao={pedidosEmProducao}
-                   pedidosProntoFaturar={pedidosProntoFaturar}
-                   pedidosEmExpedicao={pedidosEmExpedicao}
-                   pedidosEmTransito={pedidosEmTransito}
-                   pedidosEntregues={pedidosEntregues}
-                   quantidadesPorTipo={quantidadesPorTipo}
-                   quantidadeTotalItens={quantidadeTotalItens}
-                   margemPorTipo={margemPorTipo}
-                   taxaEntregaSucesso={taxaEntregaSucesso}
-                   taxaCancelamento={taxaCancelamento}
-                   funilStatus={funilStatus}
-                   onDrillDown={handleKPIDrillDown}
-                   />
-                {pedidosExternosPendentes > 0 && (
-                  <Badge className="bg-orange-100 text-orange-700 px-3 py-2 text-sm font-medium">
-                    <AlertCircle className="w-3 h-3 mr-2" />
-                    {pedidosExternosPendentes} pedido(s) externo(s) a validar
-                  </Badge>
-                )}
+                <ComercialKPIsStrip
+                  derived={derived}
+                  totalPedidosServer={totalPedidosServer}
+                  totalClientesServer={totalClientesServer}
+                  onDrillDown={handleKPIDrillDown}
+                />
               </ModuleKPIs>
               <ModuleContent>
                 <ModuleTabs

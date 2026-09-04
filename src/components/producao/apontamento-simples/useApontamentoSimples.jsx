@@ -123,7 +123,7 @@ export default function useApontamentoSimples(opId, op, onApontamentoSalvo) {
         perda_kg_real: (op.perda_kg_real || 0) + formApontamento.peso_refugado_kg,
         itens_concluidos: itensConcluidos,
         percentual_conclusao: percentual,
-        status: percentual === 100 ? "Em Conferência" : formApontamento.setor,
+        status: percentual === 100 ? "Inspeção" : formApontamento.setor,
         data_inicio_real: op.data_inicio_real || new Date().toISOString(),
         custos_reais: custosReais,
         tempo_real_horas: (op.tempo_real_horas || 0) + formApontamento.tempo_minutos / 60,
@@ -154,15 +154,18 @@ export default function useApontamentoSimples(opId, op, onApontamentoSalvo) {
         const config = await base44.entities.ConfiguracaoProducao.filter({ empresa_id: op.empresa_id });
         if (config.length > 0 && config[0]?.modo_integracao_estoque === "reserva_baixa") {
           const baixas = [];
-          for (const material of op.materiais_necessarios || []) {
+          // Fase 8: lê o campo do schema (materia_prima_prevista), legado como fallback
+          for (const material of op.materia_prima_prevista || op.materiais_necessarios || []) {
+            const quantidadeKg = Number(material.quantidade_prevista ?? material.quantidade_kg ?? 0);
+            if (quantidadeKg <= 0) continue;
             const movBaixa = await base44.entities.MovimentacaoEstoque.create({
               ...ctx,
               tipo_movimento: "saida",
               origem_movimento: "producao",
               origem_documento_id: op.id,
               produto_id: material.produto_id,
-              produto_descricao: material.descricao,
-              quantidade: material.quantidade_kg,
+              produto_descricao: material.produto_descricao || material.descricao,
+              quantidade: quantidadeKg,
               unidade_medida: material.unidade,
               documento: op.numero_op,
               motivo: "Consumo em produção",
@@ -188,8 +191,8 @@ export default function useApontamentoSimples(opId, op, onApontamentoSalvo) {
             const produto = await base44.entities.Produto.filter({ id: material.produto_id });
             if (produto[0]) {
               await base44.entities.Produto.update(material.produto_id, {
-                estoque_atual: (produto[0].estoque_atual || 0) - material.quantidade_kg,
-                estoque_reservado: (produto[0].estoque_reservado || 0) - material.quantidade_kg,
+                estoque_atual: (produto[0].estoque_atual || 0) - quantidadeKg,
+                estoque_reservado: (produto[0].estoque_reservado || 0) - quantidadeKg,
               });
             }
           }

@@ -40,8 +40,8 @@ export default function ApontamentoSimplesForm({ form, setForm, itensDisponiveis
                 <SelectContent>
                   <SelectItem value="Em Corte">Corte</SelectItem>
                   <SelectItem value="Em Dobra">Dobra</SelectItem>
-                  <SelectItem value="Em Armação">Armação</SelectItem>
-                  <SelectItem value="Em Conferência">Conferência</SelectItem>
+                  <SelectItem value="Em Montagem">Armação</SelectItem>
+                  <SelectItem value="Inspeção">Conferência</SelectItem>
                 </SelectContent>
               </Select>
             </div>

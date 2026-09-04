@@ -64,8 +64,8 @@ function computeIssues(receber, pagar, cfg) {
 // Inlined notificationService
 async function notify(base44, notif, options = {}) {
   const { whatsapp = false } = options;
-  const { titulo, mensagem, tipo = 'alerta', categoria = 'Sistema', prioridade = 'Normal', empresa_id = null, dados = null } = notif || {};
-  try { if (base44?.asServiceRole?.entities?.Notificacao?.create) { await base44.asServiceRole.entities.Notificacao.create({ titulo, mensagem, tipo, categoria, prioridade, empresa_id, dados }); } } catch (notifErr) { console.error('Notificação falhou (iaFinanceAnomalyScan):', notifErr); }
+  const { titulo, mensagem, tipo = 'alerta', categoria = 'Sistema', prioridade = 'Normal', empresa_id = null, group_id = null, dados = null } = notif || {};
+  try { if (base44?.asServiceRole?.entities?.Notificacao?.create) { await base44.asServiceRole.entities.Notificacao.create({ titulo, mensagem, tipo, categoria, prioridade, empresa_id, group_id, dados }); } } catch (notifErr) { console.error('Notificação falhou (iaFinanceAnomalyScan):', notifErr); }
   if (whatsapp && empresa_id) {
     try {
       const cfgs = await base44.asServiceRole.entities?.ConfiguracaoWhatsApp?.filter?.({ empresa_id }, '-updated_date', 1);

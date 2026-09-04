@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     const statusChanged = data?.status && data?.status !== old_data?.status;
     if (!statusChanged) return Response.json({ ok: true, skipped: true });
 
-    const results = { contas_pagar_criadas: [], movimentos_estoque: [] };
+    const results = { contas_pagar_criadas: [], movimentos_estoque: [], ops_concluidas: [] };
 
     // 1) Confirmação de entrega -> opcional ContaPagar do frete
     if (data.status === 'Entregue') {
@@ -101,7 +101,36 @@ Deno.serve(async (req) => {
         await audit(base44, user, { acao: 'Erro', modulo: 'Estoque', entidade: 'MovimentacaoEstoque', descricao: `Falha baixa por entrega: ${e.message}` });
       }
 
-      await audit(base44, user, { acao: 'Edição', modulo: 'Expedição', entidade: 'Entrega', registro_id: data.id, descricao: 'Entrega confirmada (gatilho financeiro/estoque)' });
+      // Fase 8 (Produção → Expedição): conclui OPs do pedido que estavam prontas para expedição
+      if (data?.pedido_id) {
+        try {
+          const ops = await base44.asServiceRole.entities.OrdemProducao.filter({ pedido_id: data.pedido_id, status: 'Pronto para Expedição' });
+          for (const op of (ops || [])) {
+            await base44.asServiceRole.entities.OrdemProducao.update(op.id, {
+              status: 'Concluída',
+              data_conclusao_real: new Date().toISOString(),
+              historico_mudancas_status: [
+                ...(op?.historico_mudancas_status || []),
+                {
+                  data_hora: new Date().toISOString(),
+                  status_anterior: op.status,
+                  status_novo: 'Concluída',
+                  usuario: user?.full_name || user?.email || 'Sistema',
+                  motivo: `Entrega confirmada (${data.numero_pedido || data.id})`
+                }
+              ]
+            });
+            results.ops_concluidas.push(op.id);
+          }
+          if ((ops || []).length) {
+            await audit(base44, user, { acao: 'Edição', modulo: 'Produção', entidade: 'OrdemProducao', registro_id: data.pedido_id, descricao: `Entrega confirmada — ${(ops || []).length} OP(s) do pedido concluída(s)`, empresa_id: data?.empresa_id || null });
+          }
+        } catch (e) {
+          await audit(base44, user, { acao: 'Erro', modulo: 'Produção', entidade: 'OrdemProducao', descricao: `Falha ao concluir OPs do pedido: ${e.message}` });
+        }
+      }
+
+      await audit(base44, user, { acao: 'Edição', modulo: 'Expedição', entidade: 'Entrega', registro_id: data.id, descricao: 'Entrega confirmada (gatilho financeiro/estoque/produção)' });
     }
 
     // 2) Logística reversa -> entrada em estoque

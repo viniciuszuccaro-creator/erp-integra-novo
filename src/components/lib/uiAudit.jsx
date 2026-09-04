@@ -42,8 +42,8 @@ export function logUIAction({ component, action, status, meta }) {
       base44.entities?.AuditLog?.create?.({
         usuario: u?.full_name || u?.email || 'Usuário',
         usuario_id: u?.id,
-        empresa_id: ctx?.empresa_id || null,
-        group_id: ctx?.group_id || null,
+        empresa_id: ctx?.empresa_id || u?.data?.empresa_id || null,
+        group_id: ctx?.group_id || u?.data?.group_id || u?.group_id || null,
         acao: "Interação",
         modulo: "Sistema",
         entidade: "UI",
@@ -68,8 +68,8 @@ export function logUIIssue({ component, issue, severity = "warn", meta }) {
       base44.entities?.AuditLog?.create?.({
         usuario: u?.full_name || u?.email || 'Usuário',
         usuario_id: u?.id,
-        empresa_id: ctx?.empresa_id || null,
-        group_id: ctx?.group_id || null,
+        empresa_id: ctx?.empresa_id || u?.data?.empresa_id || null,
+        group_id: ctx?.group_id || u?.data?.group_id || u?.group_id || null,
         acao: "Auditoria",
         modulo: "Sistema",
         entidade: "UI",

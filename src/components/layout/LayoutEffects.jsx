@@ -80,7 +80,7 @@ export default function LayoutEffects({
                 await base44.functions.invoke("auditError", {
                   module: moduleName || "Sistema", message: `Query error: ${m}`,
                   stack: error?.stack || null, page: currentPageName,
-                  empresa_id: empresaAtual?.id || null, group_id: grupoAtual?.id || null,
+                  empresa_id: empresaAtual?.id || null, group_id: grupoAtual?.id || user?.data?.group_id || user?.group_id || null,
                 });
               }
             } catch (e) { console.error('[layout] catch:', e); } })();
@@ -104,7 +104,7 @@ export default function LayoutEffects({
           usuario: user?.full_name || user?.email || "Usuário",
           usuario_id: user?.id,
           empresa_id: empresaAtual?.id || null,
-          group_id: grupoAtual?.id || null,
+          group_id: grupoAtual?.id || user?.data?.group_id || user?.group_id || null,
           acao: "Visualização", modulo: moduleName || "Sistema",
           tipo_auditoria: "ui", entidade: "Navegação",
           descricao: `Rota: ${location.pathname}`,
@@ -133,7 +133,7 @@ export default function LayoutEffects({
           usuario: user?.full_name || user?.email || "Usuário",
           usuario_id: user?.id,
           empresa_id: empresaAtual?.id || null,
-          group_id: grupoAtual?.id || null,
+          group_id: grupoAtual?.id || user?.data?.group_id || user?.group_id || null,
           acao: "Bloqueio", modulo: moduleName, tipo_auditoria: "seguranca",
           entidade: "Página",
           descricao: `Acesso negado ao módulo ${moduleName} (${currentPageName})`,
@@ -178,7 +178,7 @@ export default function LayoutEffects({
             usuario: user?.full_name || user?.email || "Usuário",
             usuario_id: user?.id,
             empresa_id: empresaAtual?.id || evt?.data?.empresa_id || null,
-            group_id: grupoAtual?.id || evt?.data?.group_id || null,
+            group_id: grupoAtual?.id || evt?.data?.group_id || user?.data?.group_id || user?.group_id || null,
             acao: evt.type === "create" ? "Criação" : evt.type === "update" ? "Edição" : "Exclusão",
             modulo: entityToModule[name], tipo_auditoria: "entidade",
             entidade: name, registro_id: evt.id,
@@ -308,7 +308,7 @@ export default function LayoutEffects({
                         acao: "Visualização", modulo: moduleName || "Sistema", tipo_auditoria: "sistema", entidade: "PWA",
                         descricao: "Nova versão PWA disponível", data_hora: new Date().toISOString(),
                         usuario: user?.full_name || "Usuário", usuario_id: user?.id || null,
-                        empresa_id: empresaAtual?.id || null, group_id: grupoAtual?.id || null,
+                        empresa_id: empresaAtual?.id || null, group_id: grupoAtual?.id || user?.data?.group_id || user?.group_id || null,
                       });
                     }
                   } catch (e) { console.error('[layout] catch:', e); } })();
@@ -324,7 +324,7 @@ export default function LayoutEffects({
                       acao: "Visualização", modulo: moduleName || "Sistema", tipo_auditoria: "sistema", entidade: "PWA",
                       descricao: "Service Worker atualizado e ativo", data_hora: new Date().toISOString(),
                       usuario: user?.full_name || "Usuário", usuario_id: user?.id || null,
-                      empresa_id: empresaAtual?.id || null, group_id: grupoAtual?.id || null,
+                      empresa_id: empresaAtual?.id || null, group_id: grupoAtual?.id || user?.data?.group_id || user?.group_id || null,
                     });
                   }
                 } catch (e) { console.error('[layout] catch:', e); } })();

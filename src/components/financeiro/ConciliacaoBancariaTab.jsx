@@ -100,7 +100,7 @@ Retorne sugestões de conciliação baseadas em valor, data, histórico e simila
         data_conciliacao: new Date().toISOString(),
         lancamentos_extrato: lancamentosExtrato,
         sugestoes_conciliacao_ia: result.sugestoes || [],
-        status: "Em Processamento"
+        status: "pendente"
       });
     },
     onSuccess: () => {
@@ -201,7 +201,7 @@ Retorne sugestões de conciliação baseadas em valor, data, histórico e simila
               <div>
                 <p className="text-sm text-slate-600">Totalmente Conciliadas</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {conciliacoes.filter(c => c.status === "Conciliada Totalmente").length}
+                  {conciliacoes.filter(c => c.status === "conciliado").length}
                 </p>
               </div>
               <CheckCircle className="w-8 h-8 text-green-500" />
@@ -215,7 +215,7 @@ Retorne sugestões de conciliação baseadas em valor, data, histórico e simila
               <div>
                 <p className="text-sm text-slate-600">Com Divergências</p>
                 <p className="text-2xl font-bold text-red-600">
-                  {conciliacoes.filter(c => c.status === "Com Divergências").length}
+                  {conciliacoes.filter(c => c.status === "divergente").length}
                 </p>
               </div>
               <AlertTriangle className="w-8 h-8 text-red-500" />
@@ -275,8 +275,8 @@ Retorne sugestões de conciliação baseadas em valor, data, histórico e simila
                       <td className="p-3">
                         <Badge 
                           className={
-                            conc.status === "Conciliada Totalmente" ? "bg-green-100 text-green-800" :
-                            conc.status === "Com Divergências" ? "bg-red-100 text-red-800" :
+                            conc.status === "conciliado" ? "bg-green-100 text-green-800" :
+                            conc.status === "divergente" ? "bg-red-100 text-red-800" :
                             "bg-yellow-100 text-yellow-800"
                           }
                         >

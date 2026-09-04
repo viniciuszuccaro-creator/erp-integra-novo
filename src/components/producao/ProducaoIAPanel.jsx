@@ -9,12 +9,12 @@ export default function ProducaoIAPanel({ ordensProducao = [] }) {
   const [insights, setInsights] = useState(null);
 
   const stats = useMemo(() => {
-    const emProd = ordensProducao.filter(op => ["Em Corte","Em Dobra","Em Armação"].includes(op.status)).length;
+    const emProd = ordensProducao.filter(op => ["Em Corte","Em Dobra","Em Montagem"].includes(op.status)).length;
     const atrasadas = ordensProducao.filter(op => {
-      if (!op.data_previsao_entrega) return false;
-      return new Date(op.data_previsao_entrega) < new Date() && op.status !== "Finalizada" && op.status !== "Cancelada";
+      if (!op.data_previsao_conclusao) return false;
+      return new Date(op.data_previsao_conclusao) < new Date() && op.status !== "Concluída" && op.status !== "Cancelada";
     }).length;
-    const finalizadas = ordensProducao.filter(op => op.status === "Finalizada").length;
+    const finalizadas = ordensProducao.filter(op => op.status === "Concluída").length;
     const canceladas = ordensProducao.filter(op => op.status === "Cancelada").length;
     const eficiencia = ordensProducao.length > 0 ? Math.round((finalizadas / ordensProducao.length) * 100) : 0;
     return { emProd, atrasadas, finalizadas, canceladas, eficiencia, total: ordensProducao.length };

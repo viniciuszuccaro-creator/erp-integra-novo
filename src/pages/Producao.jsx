@@ -42,11 +42,12 @@ export default function Producao() {
     { staleTime: 30000, retry: 2, enabled: contextoValido }
   );
 
-  const opsLiberadas = ordensProducao.filter(op => op.status === "Liberada").length;
+  // Fase 8: statuses oficiais do schema OrdemProducao
+  const opsLiberadas = ordensProducao.filter(op => op.status === "Planejada").length;
   const opsEmProducao = ordensProducao.filter(op =>
-    ["Em Corte", "Em Dobra", "Em Armação"].includes(op.status)
+    ["Em Corte", "Em Dobra", "Em Montagem"].includes(op.status)
   ).length;
-  const opsFinalizadas = ordensProducao.filter(op => op.status === "Finalizada").length;
+  const opsFinalizadas = ordensProducao.filter(op => op.status === "Concluída").length;
 
   if (loadingPermissions) {
     return (

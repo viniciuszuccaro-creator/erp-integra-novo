@@ -28,13 +28,14 @@ export default function RelatoriosProducao({ ops }) {
   const [periodoFim, setPeriodoFim] = useState("");
 
   const opsFiltradas = ops.filter(op => {
-    if (periodoInicio && op.data_emissao < periodoInicio) return false;
-    if (periodoFim && op.data_emissao > periodoFim) return false;
+    const dataRef = (op.data_criacao || op.data_emissao || "");
+    if (periodoInicio && dataRef < periodoInicio) return false;
+    if (periodoFim && dataRef > periodoFim) return false;
     return true;
   });
 
   const totalOPs = opsFiltradas.length;
-  const opsFinalizadas = opsFiltradas.filter(op => op.status === "Finalizada").length;
+  const opsFinalizadas = opsFiltradas.filter(op => op.status === "Concluída").length;
   const taxaConclusao = totalOPs > 0 ? ((opsFinalizadas / totalOPs) * 100).toFixed(1) : 0;
 
   const pesoTotal = opsFiltradas.reduce((sum, op) => sum + (op.peso_teorico_total_kg || 0), 0);

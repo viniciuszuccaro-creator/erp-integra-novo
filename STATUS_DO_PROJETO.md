@@ -807,3 +807,14 @@ Checklist inicial:
 - `git diff --check` executado sem erros.
 - Build validado com sucesso via `npm run build`; permanecem apenas warnings tecnicos preexistentes de CSS, browserslist/baseline, imports dinamicos/estaticos e chunks grandes.
 - Proximo passo sugerido: continuar Fase 8 nas integracoes de Producao com Expedicao/Estoque, revisando passagem de status, separacao/conferencia, documentos e auditoria antes/depois.
+
+### Consolidacao Regra-Mae 9 - Cadastro Unico Compartilhado (2026-09-04)
+
+- Concluida a migracao dos Cadastros Gerais do modelo de replicacao por empresa para o modelo de cadastro unico compartilhado por grupo (Regra-Mae 9).
+- Entidades com compartilhamento explicito (`empresas_compartilhadas_ids`) 100% consolidadas: Produto (871), Cliente (1), Fornecedor (4), Transportadora (2), Representante (2) e Regiao de Atendimento (5).
+- Todas as demais entidades de cadastro (31 no total) verificadas com zero replicas restantes e zero nomes duplicados por grupo.
+- `syncBidirectional` atualizado para o modo `cadastro_unico_compartilhado`: novos cadastros sao compartilhados via `empresas_compartilhadas_ids` (idempotente), sem gerar duplicatas por empresa.
+- `filterInContext` (frontend) e `entityListSorted` (backend) ja cobrem as 6 entidades compartilhadas: no contexto de empresa a consulta usa `$or` com `empresas_compartilhadas_ids $in`, garantindo visibilidade do catalogo unico.
+- Backfill de compartilhamento aplicado nas entidades de pessoas (Cliente, Fornecedor, Transportadora), com registro em `AuditLog`.
+- Verificacao final registrada em `AuditLog`: 0 replicas e 0 duplicidades nas 6 entidades compartilhadas.
+- Proximo passo: reativar as automacoes de propagacao automatica apos a restauracao dos creditos de integracao (2026-09-07) e monitorar a consistencia dos cadastros compartilhados.

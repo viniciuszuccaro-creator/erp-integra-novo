@@ -279,6 +279,15 @@ Deno.serve(async (req) => {
     const isReadOnly = READ_ONLY_ACTIONS.includes(desired);
     const targetEntity = body?.entity_name;
 
+    // Admin bypass via cache de permissões — evita que cooldown/rate-limit negue admin em escritas
+    try {
+      const __earlyTok = req.headers.get('authorization') || '';
+      const __earlyCache = __PERM_CACHE.get(__earlyTok.slice(-32));
+      if (__earlyCache && Date.now() - __earlyCache.ts < __PERM_TTL && __earlyCache.user?.role === 'admin') {
+        return Response.json({ allowed: true });
+      }
+    } catch (e) { console.error('[entityGuard] catch:', e); }
+
     // Cooldown por rate-limit
     if (Date.now() < __BACKEND_PAUSED_UNTIL) {
       // Fail-open apenas para leitura; fail-closed para escrita durante cooldown
@@ -505,6 +514,12 @@ Deno.serve(async (req) => {
       __BACKEND_PAUSED_UNTIL = Date.now() + 120000;
       globalThis.__egBackendPausedUntil = __BACKEND_PAUSED_UNTIL;
     }
+    // Admin em cache não é penalizado por falha transitória do backend
+    try {
+      const __tok = req.headers.get('authorization') || '';
+      const __cached = __PERM_CACHE.get(__tok.slice(-32));
+      if (__cached?.user?.role === 'admin') return Response.json({ allowed: true });
+    } catch (_) {}
     // Fail-closed para escrita em exceções; fail-open apenas para leitura
     const fallbackAction = normalize(body?.action || 'visualizar');
     const isRead = READ_ONLY_ACTIONS.includes(fallbackAction);

@@ -66,7 +66,7 @@ export default function ProtectedSection({
           __guardCache.set(key, { allowed: backendAllowed, ts: Date.now() });
           setAllowedFinal(backendAllowed && allowed);
         })
-        .catch(() => { setAllowedFinal(optimisticDefault); });
+        .catch(() => { setAllowedFinal(allowed); });
       return;
     }
 
@@ -84,7 +84,8 @@ export default function ProtectedSection({
       __guardCache.set(key, { allowed: backendAllowed, ts: Date.now() });
       setAllowedFinal(backendAllowed && allowed);
     }).catch(() => {
-      setAllowedFinal(optimisticDefault);
+      // Falha transitória do guard (429/5xx): degrada para decisão local em vez de negar falsamente
+      setAllowedFinal(allowed);
     }).finally(() => {
       __guardInflight.delete(key);
     });

@@ -818,3 +818,17 @@ Checklist inicial:
 - Backfill de compartilhamento aplicado nas entidades de pessoas (Cliente, Fornecedor, Transportadora), com registro em `AuditLog`.
 - Verificacao final registrada em `AuditLog`: 0 replicas e 0 duplicidades nas 6 entidades compartilhadas.
 - Proximo passo: reativar as automacoes de propagacao automatica apos a restauracao dos creditos de integracao (2026-09-07) e monitorar a consistencia dos cadastros compartilhados.
+
+### Higiene de auditoria multiempresa - fim dos registros orfaos (2026-09-04)
+
+- Concluida a limpeza de registros de auditoria sem contexto de grupo no `AuditLog`.
+- Corrigidos os emissores de logs `Bloqueio` que gravavam sem `group_id`, todos no componente existente, sem criar arquivo novo:
+  - `LayoutEffects.jsx`: log de bloqueio de modulo agora usa fallback do contexto do usuario e do contexto persistido em localStorage (`group_atual_id`/`empresa_atual_id`).
+  - `ProtectedSection.jsx`: log de acesso negado agora inclui `group_id` com fallback do usuario/grupo ativo.
+  - `ProtectedAction.jsx`: mesmo reforco aplicado ao log de acao protegida negada.
+  - `GuardRails.jsx`: log de bloqueio de pagina agora usa `empresaAtivaId`/`grupoAtivoId` com fallback do usuario.
+- `uiAudit.jsx` (sessao anterior) ja possuia fallback de grupo/empresa pelo contexto persistido, mantido.
+- Todos os registros orfaos encontrados foram carimbados com o `group_id` real do grupo CPA (total consolidado na data, incluindo 19+16 lotes finais).
+- Varredura final em entidades de sistema (`Notificacao`, `MonitoramentoSistema`, logs, auditorias, sessoes) e entidades operacionais (`Pedido`, `Cliente`, `Produto`, `Fornecedor`, `Transportadora`, contas, `Entrega`, `NotaFiscal`, estoque, compras, producao): zero registros sem `group_id`.
+- Observacao: enquanto a versao publicada nao for atualizada, a copia publicada (pacote antigo) pode continuar gerando logs sem grupo; republicar o app resolve.
+- Proximo passo: republicar o app para a versao publicada assumir as correcoes; apos 2026-09-07, reativar automacoes e o Deploy Heartbeat do Command Center pausados por falta de creditos de integracao.

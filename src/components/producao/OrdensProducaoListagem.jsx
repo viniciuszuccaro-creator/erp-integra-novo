@@ -14,12 +14,14 @@ import { useWindow } from "@/components/lib/useWindow";
 import FormularioOrdemProducao from "./FormularioOrdemProducao";
 
 const STATUS_COLORS = {
-  "Rascunho": "bg-slate-100 text-slate-600",
-  "Liberada": "bg-blue-100 text-blue-700",
+  "Planejada": "bg-slate-100 text-slate-600",
+  "Aguardando Matéria-Prima": "bg-yellow-100 text-yellow-700",
   "Em Corte": "bg-orange-100 text-orange-700",
   "Em Dobra": "bg-yellow-100 text-yellow-700",
-  "Em Armação": "bg-purple-100 text-purple-700",
-  "Finalizada": "bg-green-100 text-green-700",
+  "Em Montagem": "bg-purple-100 text-purple-700",
+  "Inspeção": "bg-indigo-100 text-indigo-700",
+  "Pronto para Expedição": "bg-blue-100 text-blue-700",
+  "Concluída": "bg-green-100 text-green-700",
   "Cancelada": "bg-red-100 text-red-700",
 };
 
@@ -43,7 +45,7 @@ export default function OrdensProducaoListagem({ windowMode }) {
   });
 
   const filtered = ops.filter(op => {
-    const matchSearch = [op.numero_op, op.cliente_nome, op.descricao, op.status].join(" ").toLowerCase().includes(search.toLowerCase());
+    const matchSearch = [op.numero_op, op.cliente_nome, op.tipo_producao, op.status].join(" ").toLowerCase().includes(search.toLowerCase());
     const matchStatus = filtroStatus === "todos" || op.status === filtroStatus;
     return matchSearch && matchStatus;
   });
@@ -79,10 +81,10 @@ export default function OrdensProducaoListagem({ windowMode }) {
             <TableHeader>
               <TableRow>
                 <TableHead>Nº OP</TableHead>
-                <TableHead>Descrição</TableHead>
+                <TableHead>Tipo</TableHead>
                 <TableHead>Cliente</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Qtd</TableHead>
+                <TableHead>Peso (KG)</TableHead>
                 <TableHead>Previsão</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
@@ -93,12 +95,12 @@ export default function OrdensProducaoListagem({ windowMode }) {
               ) : filtered.map(op => (
                 <TableRow key={op.id}>
                   <TableCell className="font-mono font-semibold">{op.numero_op || op.id?.slice(0, 8)}</TableCell>
-                  <TableCell className="max-w-xs truncate">{op.descricao || op.objeto}</TableCell>
+                  <TableCell className="max-w-xs truncate">{op.tipo_producao || '-'}</TableCell>
                   <TableCell>{op.cliente_nome}</TableCell>
                   <TableCell><Badge className={STATUS_COLORS[op.status] || "bg-slate-100 text-slate-600"}>{op.status}</Badge></TableCell>
-                  <TableCell>{op.quantidade_total || '-'}</TableCell>
+                  <TableCell className="font-mono text-xs">{op.peso_total_kg ? op.peso_total_kg.toLocaleString('pt-BR') : '-'}</TableCell>
                   <TableCell className="text-xs text-slate-500">
-                    {op.data_previsao ? new Date(op.data_previsao).toLocaleDateString('pt-BR') : '-'}
+                    {op.data_previsao_conclusao ? new Date(op.data_previsao_conclusao).toLocaleDateString('pt-BR') : '-'}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">

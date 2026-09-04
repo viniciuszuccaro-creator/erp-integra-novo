@@ -419,7 +419,7 @@ Deno.serve(async (req) => {
     if (issues.length > 0) {
       // Usa empresa do primeiro título como contexto padrão
       const alvoEmpresaId = (filtros?.empresa_id) || (receber[0]?.empresa_id) || (pagar[0]?.empresa_id) || null;
-      const alvoGrupoId = (filtros?.group_id) || (receber[0]?.group_id) || (pagar[0]?.group_id) || null;
+      const alvoGroupId = (filtros?.group_id) || (receber[0]?.group_id) || (pagar[0]?.group_id) || null;
 
       await base44.asServiceRole.entities.AuditLog.create({
         usuario: 'Sistema',
@@ -429,7 +429,7 @@ Deno.serve(async (req) => {
         descricao: `Anomalias detectadas: ${issues.length}`,
         dados_novos: { issues: issues.slice(0, 50), sugestoes: (sugestoes || []).slice(0, 50) },
         empresa_id: alvoEmpresaId || null,
-        group_id: alvoGrupoId || null,
+        group_id: alvoGroupId || null,
         data_hora: new Date().toISOString(),
       });
 
@@ -442,7 +442,7 @@ Deno.serve(async (req) => {
         categoria: 'Financeiro',
         prioridade: 'Alta',
         empresa_id: alvoEmpresaId,
-        group_id: alvoGrupoId,
+        group_id: alvoGroupId,
         dados: { resumoSeveridade, exemplos: issues.slice(0, 5), sugestoes: (sugestoes || []).slice(0, 5) }
       }, { whatsapp: true });
 

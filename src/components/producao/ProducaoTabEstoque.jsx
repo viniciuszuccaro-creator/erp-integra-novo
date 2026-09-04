@@ -45,16 +45,16 @@ export default function ProducaoTabEstoque({ formData, setFormData, isDisabled, 
           ))}
           <Separator />
           {[
-            { id: "exigir-bitola", key: "exigir_bitola_cadastrada", color: "orange", label: "Exigir bitola cadastrada no estoque", desc: "Não permite criar OP com bitola que não existe no cadastro de produtos." },
-            { id: "bloquear-sem-estoque", key: "bloquear_op_sem_estoque", color: "red", label: "Bloquear liberação de OP sem estoque disponível", desc: 'OP fica com status "Aguardando Matéria-Prima" se não tiver material.' },
-            { id: "baixa-maior", key: "permitir_baixa_maior_teorico", color: "purple", label: "Permitir baixa de estoque maior que o teórico", desc: "Permite consumo real maior que o planejado (útil para retrabalhos)." },
-          ].map(({ id, key, color, label, desc }) => (
-            <div key={id} className={`flex items-center gap-3 p-4 bg-${color}-50 rounded border border-${color}-200`}>
+            { id: "exigir-bitola", key: "exigir_bitola_cadastrada", box: "bg-orange-50 border-orange-200", check: "text-orange-600 focus:ring-orange-500", title: "text-orange-900", descClass: "text-orange-700", label: "Exigir bitola cadastrada no estoque", desc: "Não permite criar OP com bitola que não existe no cadastro de produtos." },
+            { id: "bloquear-sem-estoque", key: "bloquear_op_sem_estoque", box: "bg-red-50 border-red-200", check: "text-red-600 focus:ring-red-500", title: "text-red-900", descClass: "text-red-700", label: "Bloquear liberação de OP sem estoque disponível", desc: 'OP fica com status "Aguardando Matéria-Prima" se não tiver material.' },
+            { id: "baixa-maior", key: "permitir_baixa_maior_teorico", box: "bg-purple-50 border-purple-200", check: "text-purple-600 focus:ring-purple-500", title: "text-purple-900", descClass: "text-purple-700", label: "Permitir baixa de estoque maior que o teórico", desc: "Permite consumo real maior que o planejado (útil para retrabalhos)." },
+          ].map(({ id, key, box, check, title, descClass, label, desc }) => (
+            <div key={id} className={`flex items-center gap-3 p-4 ${box} rounded border`}>
               <input type="checkbox" id={id} checked={formData[key]} onChange={(e) => setFormData({ ...formData, [key]: e.target.checked })}
-                disabled={isDisabled} className={`w-4 h-4 text-${color}-600 bg-gray-100 border-gray-300 rounded focus:ring-${color}-500`} />
+                disabled={isDisabled} className={`w-4 h-4 ${check} bg-gray-100 border-gray-300 rounded`} />
               <div>
-                <label htmlFor={id} className={`font-semibold text-${color}-900 cursor-pointer`}>{label}</label>
-                <p className={`text-sm text-${color}-700`}>{desc}</p>
+                <label htmlFor={id} className={`font-semibold ${title} cursor-pointer`}>{label}</label>
+                <p className={`text-sm ${descClass}`}>{desc}</p>
               </div>
             </div>
           ))}

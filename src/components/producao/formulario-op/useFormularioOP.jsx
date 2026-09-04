@@ -21,6 +21,24 @@ export default function useFormularioOP(op, onClose) {
   const [seletorProdutoAberto, setSeletorProdutoAberto] = useState(false);
   const [produtosInsuficientes, setProdutosInsuficientes] = useState([]);
 
+  // Fase 8: ao editar uma OP existente, hidrata a aba de MP com o campo do schema
+  // (materia_prima_prevista → itens) assim que os produtos são carregados
+  React.useEffect(() => {
+    if (!op?.id || formData.itens?.length || !produtosProducao.length) return;
+    const itensHidratados = (op.materia_prima_prevista || []).map(mp => {
+      const produto = produtosProducao.find(p => p.id === mp.produto_id);
+      return {
+        produto_id: mp.produto_id,
+        descricao: mp.produto_descricao || produto?.descricao || '',
+        codigo: produto?.codigo || '',
+        quantidade: mp.quantidade_prevista ?? 0,
+        unidade: mp.unidade || produto?.unidade_principal || 'KG',
+        estoque_disponivel: produto?.estoque_disponivel ?? produto?.estoque_atual ?? 0
+      };
+    });
+    if (itensHidratados.length) setFormData(prev => ({ ...prev, itens: itensHidratados }));
+  }, [produtosProducao.length]);
+
   const { data: pedidos = [] } = useRLSQuery('Pedido', {}, '-created_date', 999, { enabled: !!contexto });
   const { data: empresas = [] } = useRLSQuery('Empresa', {}, 'nome_fantasia', 999, { enabled: !!contexto });
   const { data: produtosProducaoRaw = [] } = useRLSQuery('Produto', {}, 'descricao', 999, { enabled: !!contexto });
@@ -124,7 +142,8 @@ Retorne: sequenciamento, otimização de corte, tempo previsto, riscos e gargalo
       produto_id: i.produto_id,
       produto_descricao: i.descricao,
       quantidade_prevista: Number(i.quantidade || 0),
-      quantidade_consumida: 0,
+      // Preserva o consumo já registrado pela conclusão da OP (baixa de estoque)
+      quantidade_consumida: (formData.materia_prima_prevista || []).find(mp => mp.produto_id === i.produto_id)?.quantidade_consumida || 0,
       unidade: i.unidade
     }));
     // Preserva MP já gravada que não veio pelo formulário (edição de OP existente)

@@ -117,7 +117,20 @@ Retorne: sequenciamento, otimização de corte, tempo previsto, riscos e gargalo
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validarEstoque()) { toast.error("❌ Estoque insuficiente de matéria-prima!"); return; }
-    saveMutation.mutate(formData);
+    // Fase 8: persiste a MP no campo do schema (materia_prima_prevista) —
+    // campo consumido pela baixa de estoque na conclusão da OP
+    const { itens, ...resto } = formData;
+    const mpDoForm = (itens || []).map(i => ({
+      produto_id: i.produto_id,
+      produto_descricao: i.descricao,
+      quantidade_prevista: Number(i.quantidade || 0),
+      quantidade_consumida: 0,
+      unidade: i.unidade
+    }));
+    // Preserva MP já gravada que não veio pelo formulário (edição de OP existente)
+    const mpExistente = (formData.materia_prima_prevista || [])
+      .filter(mp => !mpDoForm.some(m => m.produto_id === mp.produto_id));
+    saveMutation.mutate({ ...resto, materia_prima_prevista: [...mpExistente, ...mpDoForm] });
   };
 
   return {

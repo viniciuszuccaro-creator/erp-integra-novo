@@ -132,8 +132,8 @@ export default function LayoutEffects({
         base44.entities.AuditLog.create({
           usuario: user?.full_name || user?.email || "Usuário",
           usuario_id: user?.id,
-          empresa_id: empresaAtual?.id || null,
-          group_id: grupoAtual?.id || user?.data?.group_id || user?.group_id || null,
+          empresa_id: empresaAtual?.id || (typeof localStorage !== "undefined" ? localStorage.getItem("empresa_atual_id") : null),
+          group_id: grupoAtual?.id || user?.data?.group_id || user?.group_id || (typeof localStorage !== "undefined" ? localStorage.getItem("group_atual_id") : null),
           acao: "Bloqueio", modulo: moduleName, tipo_auditoria: "seguranca",
           entidade: "Página",
           descricao: `Acesso negado ao módulo ${moduleName} (${currentPageName})`,

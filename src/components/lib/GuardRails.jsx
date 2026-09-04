@@ -47,7 +47,8 @@ export default function GuardRails({ children, currentPageName }) {
         base44.entities.AuditLog.create({
           usuario: user?.full_name || user?.email || 'Usuário',
           usuario_id: user?.id,
-          empresa_id: empresaAtual?.id || null,
+          empresa_id: empresaAtivaId || null,
+          group_id: grupoAtivoId || user?.data?.group_id || user?.group_id || null,
           empresa_nome: empresaAtual?.nome_fantasia || empresaAtual?.razao_social || null,
           acao: 'Bloqueio',
           modulo: mod,

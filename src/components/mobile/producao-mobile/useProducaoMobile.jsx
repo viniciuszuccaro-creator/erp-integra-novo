@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import usePermissions from "@/components/lib/usePermissions";
+import { concluirOPCompleto } from "@/components/lib/useFluxoPedido";
 
 const APONTAMENTO_INIT = {
   setor: "Em Corte",
@@ -37,7 +38,7 @@ export default function useProducaoMobile() {
           { empresa_id: user?.empresa_atual_id },
           ...(user?.group_id ? [{ group_id: user?.group_id }] : [])
         ],
-        status: { $in: ['Liberada', 'Em Corte', 'Em Dobra', 'Em Armação', 'Aguardando Matéria-Prima'] }
+        status: { $in: ['Planejada', 'Aguardando Matéria-Prima', 'Em Corte', 'Em Dobra', 'Em Montagem', 'Inspeção'] }
       };
       return await base44.entities.OrdemProducao.filter(filtro, '-created_date', 200);
     },
@@ -84,7 +85,7 @@ export default function useProducaoMobile() {
         peso_real_total_kg: (opSelecionada.peso_real_total_kg || 0) + dados.peso_produzido_kg,
         itens_concluidos: itensConcluidos,
         percentual_conclusao: percentual,
-        status: percentual === 100 ? "Em Conferência" : dados.setor,
+        status: percentual === 100 ? "Inspeção" : dados.setor,
         data_inicio_real: opSelecionada.data_inicio_real || new Date().toISOString()
       });
 
@@ -119,6 +120,10 @@ export default function useProducaoMobile() {
     mutationFn: async (opId) => {
       const op = ops.find(o => o.id === opId);
 
+      // Fase 8: reutiliza a conclusão central da OP — baixa MP do estoque,
+      // status "Pronto para Expedição" e pedido liberado para faturar
+      const resultadoOP = await concluirOPCompleto(op, op.empresa_id);
+
       const novaEntrega = await base44.entities.Entrega.create({
         group_id: op.group_id,
         empresa_id: op.empresa_id,
@@ -141,7 +146,6 @@ export default function useProducaoMobile() {
       });
 
       await base44.entities.OrdemProducao.update(opId, {
-        status: "Expedida",
         entrega_id: novaEntrega.id
       });
 

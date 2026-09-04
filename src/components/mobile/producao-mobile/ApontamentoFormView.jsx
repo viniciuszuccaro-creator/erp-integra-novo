@@ -53,8 +53,8 @@ export default function ApontamentoFormView({
                   <SelectContent>
                     <SelectItem value="Em Corte" className="text-lg py-3">🔪 Corte</SelectItem>
                     <SelectItem value="Em Dobra" className="text-lg py-3">🔧 Dobra</SelectItem>
-                    <SelectItem value="Em Armação" className="text-lg py-3">🏗️ Armação</SelectItem>
-                    <SelectItem value="Em Conferência" className="text-lg py-3">✅ Conferência</SelectItem>
+                    <SelectItem value="Em Montagem" className="text-lg py-3">🏗️ Armação</SelectItem>
+                    <SelectItem value="Inspeção" className="text-lg py-3">✅ Conferência</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

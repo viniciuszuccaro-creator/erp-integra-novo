@@ -62,9 +62,9 @@ export default function DashboardProdutosProducao({ onAbrirConversao }) {
   // Top 5 produtos mais usados
   const usoProdutos = {};
   ordensProducao.forEach(op => {
-    op.itens?.forEach(item => {
+    op.materia_prima_prevista?.forEach(item => {
       if (item.produto_id) {
-        usoProdutos[item.produto_id] = (usoProdutos[item.produto_id] || 0) + (item.quantidade || 0);
+        usoProdutos[item.produto_id] = (usoProdutos[item.produto_id] || 0) + (item.quantidade_prevista || item.quantidade || 0);
       }
     });
   });

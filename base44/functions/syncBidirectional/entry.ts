@@ -50,7 +50,23 @@ const UP_ENTITIES = new Set([
   'Contrato', 'Evento', 'SolicitacaoCompra', 'TransferenciaFilial',
   'Inventario', 'SeparacaoConferencia', 'ConciliacaoBancaria', 'MovimentoCartao',
   'DRE', 'RateioFinanceiro', 'ExtratoBancario', 'CaixaOrdemLiquidacao',
-]);
+  ]);
+
+  // Regra-Mãe 9 — CADASTROS ÚNICOS: propagação por COMPARTILHAMENTO (empresas_compartilhadas_ids),
+  // nunca por duplicação de registros por empresa.
+  const CATALOG_UNIQUE = new Set([
+  'ConfiguracaoSistema', 'PerfilAcesso', 'FormaPagamento', 'PlanoDeContas', 'CentroCusto',
+  'TabelaPreco', 'TabelaPrecoItem', 'CondicaoComercial', 'TipoDespesa', 'Banco',
+  'Produto', 'GrupoProduto', 'Marca', 'SetorAtividade', 'UnidadeMedida',
+  'LocalEstoque', 'KitProduto', 'Cliente', 'Fornecedor', 'Transportadora', 'Representante',
+  'Colaborador', 'ContatoB2B', 'SegmentoCliente', 'RegiaoAtendimento',
+  'Departamento', 'Cargo', 'Turno', 'Veiculo', 'Motorista', 'TipoFrete', 'RotaPadrao',
+  ]);
+
+  // Subset com o campo empresas_compartilhadas_ids no schema (compartilhamento explícito)
+  const CATALOG_SHARED = new Set([
+  'Cliente', 'Fornecedor', 'Transportadora', 'Representante', 'Produto', 'RegiaoAtendimento',
+  ]);
 
 function stripBlocked(data) {
   const out = { ...data };
@@ -149,6 +165,45 @@ Deno.serve(async (req) => {
 
     const api = base44.asServiceRole;
     const results = [];
+
+    // ===== CADASTRO ÚNICO (Regra-Mãe 9): compartilha em vez de duplicar =====
+    // Cadastros gerais nunca geram réplicas por empresa — a visibilidade das empresas
+    // do grupo é garantida por empresas_compartilhadas_ids no próprio registro canônico.
+    if (CATALOG_UNIQUE.has(entityName)) {
+      const shared = [];
+      if (eventType !== 'delete' && group_id && CATALOG_SHARED.has(entityName)) {
+        const empresas = await fetchWithFallback(api, 'Empresa', { group_id }, 100);
+        const empresaIds = empresas.map(e => e.id).filter(Boolean);
+        const recordId = entityId || null;
+        if (recordId && empresaIds.length) {
+          const atuais = Array.isArray(eventData?.empresas_compartilhadas_ids)
+            ? eventData.empresas_compartilhadas_ids.filter(Boolean)
+            : [];
+          const merged = Array.from(new Set([...atuais, ...empresaIds]));
+          // Idempotência: se nada mudou, não escreve (evita loop de automação)
+          if (merged.length !== atuais.length) {
+            try {
+              const patch = { id: recordId, group_id, empresas_compartilhadas_ids: merged };
+              if (entityName === 'Produto') patch.compartilhado_grupo = true;
+              await safeWrite(api, entityName, 'update', patch);
+              shared.push({ record_id: recordId, status: 'compartilhado', empresas: merged.length });
+            } catch (e) {
+              shared.push({ record_id: recordId, status: 'error', error: e.message });
+            }
+          }
+        }
+      }
+      _inflight.delete(raceKey);
+      return Response.json({
+        ok: true,
+        entity: entityName,
+        event: eventType,
+        mode: 'cadastro_unico_compartilhado',
+        total_processados: shared.length,
+        results: shared,
+        duration_ms: Date.now() - t0,
+      });
+    }
 
     const isBoth = direction === 'both';
     const isDown = (isBoth || direction === 'down' || direction === 'auto') && !!group_id && DOWN_ENTITIES.has(entityName);

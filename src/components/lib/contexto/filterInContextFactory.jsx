@@ -5,7 +5,7 @@ import { DEFAULT_SORTS, normalizeSortField, getLastSort, setLastSort } from "./c
 export function createFilterInContext({ getFiltroContexto, empresasDoGrupo }) {
   const filterInContext = async (entityName, criterios = {}, order = undefined, limit = undefined, campo = 'empresa_id') => {
     const ENTITY_CONTEXT_FIELD = { Fornecedor: 'empresa_dona_id', Transportadora: 'empresa_dona_id', Colaborador: 'empresa_alocada_id', NotaFiscal: 'empresa_faturamento_id', TransferenciaFilial: 'empresa_origem_id' };
-    const SHARED_SET = new Set(['Cliente', 'Fornecedor', 'Transportadora']);
+    const SHARED_SET = new Set(['Cliente', 'Fornecedor', 'Transportadora', 'Produto', 'Representante', 'RegiaoAtendimento']);
     const ctxCampo = ENTITY_CONTEXT_FIELD[entityName] || campo || 'empresa_id';
 
     const scope = getFiltroContexto(ctxCampo, true) || {};

@@ -10,6 +10,8 @@ import { useWindow } from "@/components/lib/useWindow";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
 import FormularioOrdemProducao from "./FormularioOrdemProducao";
+import { concluirOPCompleto } from "@/components/lib/useFluxoPedido";
+import usePermissions from "@/components/lib/usePermissions";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 
 const colunas = [
@@ -26,6 +28,7 @@ export default function KanbanProducaoInteligente({ windowMode = false }) {
   const queryClient = useQueryClient();
   const { openWindow } = useWindow();
   const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const { hasPermission } = usePermissions();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [filtroEmpresa, setFiltroEmpresa] = useState("todas");
 
@@ -61,12 +64,38 @@ export default function KanbanProducaoInteligente({ windowMode = false }) {
     },
   });
 
-  const handleDragEnd = (result) => {
+  const handleDragEnd = async (result) => {
     if (!result.destination) return;
-    
+
+    // RBAC (Regra-Mãe 5b): mover OP no Kanban exige permissão de edição em Produção
+    if (!hasPermission('Producao', null, 'editar')) {
+      toast.error("Sem permissão para alterar ordens de produção");
+      return;
+    }
+
     const { draggableId, destination } = result;
     const novoStatus = destination.droppableId;
-    
+
+    // Fase 8: ao mover para "Pronto para Expedição", baixa matéria-prima do estoque
+    // e libera o pedido vinculado para faturamento (integração Produção → Estoque/Expedição)
+    if (novoStatus === "Pronto para Expedição") {
+      const op = ops.find(o => o.id === draggableId);
+      if (op && op.status !== "Pronto para Expedição") {
+        try {
+          const resultado = await concluirOPCompleto(op, op.empresa_id || empresaAtual?.id);
+          if (resultado.erros?.length) {
+            toast.warning(`OP liberada para expedição com ${resultado.erros.length} aviso(s): ${resultado.erros[0]}`);
+          } else {
+            toast.success(`OP ${op.numero_op || ''} pronta para expedição — ${resultado.baixasMaterial.length} baixa(s) de estoque`);
+          }
+        } catch (e) {
+          toast.error(`Falha ao liberar OP: ${e?.message || e}`);
+        }
+        queryClient.invalidateQueries({ queryKey: ["ordens-producao"] });
+        return;
+      }
+    }
+
     updateStatusMutation.mutate({ id: draggableId, status: novoStatus });
   };
 

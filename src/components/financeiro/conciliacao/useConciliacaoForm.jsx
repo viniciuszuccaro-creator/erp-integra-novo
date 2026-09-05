@@ -40,6 +40,7 @@ export default function useConciliacaoForm() {
   const conciliar = useMutation({
     mutationFn: async ({ lancamentoBanco, movimento }) => {
       if (!podeEditar) throw new Error("Sem permissão para conciliar");
+      if (!contextoValido) throw new Error("Contexto de grupo/empresa obrigatório para conciliar (Regra-Mãe 5a)");
 
       if (movimento.tipo === "pagamento_omnichannel") {
         await updateInContext('PagamentoOmnichannel', movimento.id, {
@@ -48,6 +49,18 @@ export default function useConciliacaoForm() {
         });
       }
 
+      // Regra-Mãe 5d: auditoria completa da conciliação manual (antes/depois, grupo/empresa, usuário)
+      await base44.entities.AuditLog.create({
+        group_id: grupoAtual?.id, grupo_id: grupoAtual?.id, empresa_id: empresaAtual?.id,
+        usuario: user?.full_name || 'Sistema', usuario_id: user?.id,
+        acao: "Conciliação", modulo: "Financeiro", tipo_auditoria: "operacional",
+        entidade: movimento?.tipo === "pagamento_omnichannel" ? "PagamentoOmnichannel" : "ExtratoBancario",
+        registro_id: movimento?.id,
+        descricao: "Conciliação bancária manual realizada",
+        data_hora: new Date().toISOString(), sucesso: true,
+        dados_anteriores: { status_conferencia: movimento?.status_conferencia },
+        dados_novos: { status_conferencia: "Conciliado", data_credito_efetiva: lancamentoBanco?.data }
+      });
       return true;
     },
     onSuccess: () => {
@@ -65,20 +78,24 @@ export default function useConciliacaoForm() {
   const resolverDivergencia = useMutation({
     mutationFn: async (concId) => {
       if (!podeEditar) throw new Error("Sem permissão para resolver divergências");
+      if (!contextoValido) throw new Error("Contexto de grupo/empresa obrigatório (Regra-Mãe 5a)");
+      const anterior = await base44.entities.ConciliacaoBancaria.get(concId).catch(() => null);
       await base44.entities.ConciliacaoBancaria.update(concId, { status: 'resolvido', tem_divergencia: false });
       await base44.entities.AuditLog.create({
-        group_id: grupoAtual?.id,
+        group_id: grupoAtual?.id, grupo_id: grupoAtual?.id,
         empresa_id: empresaAtual?.id,
         usuario: user?.full_name || 'Sistema',
         usuario_id: user?.id,
         acao: "Edição",
         modulo: "Financeiro",
-        tipo_auditoria: "entidade",
+        tipo_auditoria: "operacional",
         entidade: "ConciliacaoBancaria",
         registro_id: concId,
         descricao: "Divergência de conciliação resolvida",
         data_hora: new Date().toISOString(),
-        sucesso: true
+        sucesso: true,
+        dados_anteriores: anterior ? { status: anterior.status, tem_divergencia: anterior.tem_divergencia } : undefined,
+        dados_novos: { status: 'resolvido', tem_divergencia: false }
       });
     },
     onSuccess: () => {

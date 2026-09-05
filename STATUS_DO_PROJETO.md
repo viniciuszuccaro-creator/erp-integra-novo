@@ -1008,5 +1008,10 @@ Estado consolidado:
 - Usuários sem permissão continuam bloqueados na UI; agora também na persistência (fail-closed). Admin mantém bypass pelo resolvedor de permissões existente.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido; API dos hooks e diálogos inalterada.
 
+### PDV (Caixa) e Conciliação Bancária — mesmo padrão aplicado (2026-09-05)
+- `CaixaPDVCompleto.jsx`: abertura, fechamento, venda PDV e liquidação de títulos no caixa agora geram `AuditLog` operacional completo (grupo/empresa, usuário, dados da operação); trava explícita de grupo na venda e liquidação (Regra-Mãe 5a); todos os mutations ganharam `onError` com aviso na tela (antes falhas silenciosas).
+- `useConciliacaoForm.jsx` (conciliação manual): conciliação agora exige contexto grupo/empresa válido e grava auditoria com antes/depois (`status_conferencia`); resolução de divergência busca o registro antes da alteração e grava estado anterior + `grupo_id`.
+- Fluxo PDV preservado: venda balcão continua gerando Pedido Faturado + CaixaMovimento (formato reconhecido pelo orderFlowAuditor v2.1), sem NF/CR indevidos.
+
 ### Próximo passo sugerido
-- Repetir o padrão na baixa/fechamento do PDV (CaixaPDV) e na conciliaação bancária manual, se ainda não cobertos.
+- Varrer os demais fluxos financeiros sensíveis remanescentes: remessa/retorno bancário (`useRemessaRetorno`), geração de cobrança/links de pagamento (`GerarCobrancaModal`, `GerarLinkPagamentoModal`) e rateio multiempresa, reforçando auditoria antes/depois e validação dupla onde faltar.

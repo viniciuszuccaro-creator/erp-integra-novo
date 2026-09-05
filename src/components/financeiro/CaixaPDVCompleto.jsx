@@ -50,6 +50,17 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
   const podeLiquidarTitulos = canEdit('Financeiro', 'Contas a Receber') || canEdit('Financeiro', 'Contas a Pagar') || hasPermission('Financeiro', null, 'baixar');
   const controlesDesabilitados = !contextoValido || !podeOperarCaixa;
 
+  // Regra-Mãe 5d: auditoria completa das ações sensíveis do caixa (abertura, venda, liquidação, fechamento)
+  const auditCaixaPDV = async (acao, descricao, dadosNovos = {}) => {
+    try { await base44.entities.AuditLog.create({
+      acao, modulo: 'Financeiro', entidade: 'CaixaMovimento',
+      descricao, data_hora: new Date().toISOString(),
+      group_id: groupId, grupo_id: groupId, empresa_id: empresaAtual?.id,
+      usuario: user?.full_name, usuario_id: user?.id,
+      tipo_auditoria: 'operacional', sucesso: true, dados_novos: dadosNovos
+    }); } catch (e) { console.error('[CaixaPDV] Falha ao auditar:', e?.message || e); }
+  };
+
   const { formasPagamento, obterFormasPorContexto, obterConfiguracao } = useFormasPagamento({ empresa_id: empresaAtual?.id });
   const formasPDV = obterFormasPorContexto('pdv');
 
@@ -92,12 +103,17 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
       if (controlesDesabilitados) throw new Error("Sem contexto ou permissão.");
       await createInContext('CaixaMovimento', { ...(empresaAtual?.id ? { empresa_id: empresaAtual.id } : {}), ...(groupId ? { group_id: groupId } : {}), data_movimento: new Date().toISOString(), tipo_movimento: 'Abertura', origem: 'Abertura Caixa', forma_pagamento: 'Dinheiro', valor: saldo, descricao: 'Abertura de Caixa', usuario_operador_nome: user?.full_name, caixa_aberto: true });
     },
-    onSuccess: () => { setCaixaAberto(true); queryClient.invalidateQueries({ queryKey: ['movimentos-caixa'] }); toast.success("Caixa aberto!"); }
+    onSuccess: (_d, saldo) => {
+      auditCaixaPDV('Criação', 'Abertura de caixa PDV', { saldo_inicial: saldo, tipo_movimento: 'Abertura' });
+      setCaixaAberto(true); queryClient.invalidateQueries({ queryKey: ['movimentos-caixa'] }); toast.success("Caixa aberto!");
+    },
+    onError: (err) => toast.error("Erro ao abrir caixa: " + err.message)
   });
 
   const finalizarVenda = useMutation({
     mutationFn: async () => {
       if (controlesDesabilitados) throw new Error("Sem contexto ou permissão.");
+      if (!groupId) throw new Error("Contexto de grupo/empresa obrigatório (Regra-Mãe 5a).");
       const pedido = await createInContext('Pedido', { ...(empresaAtual?.id ? { empresa_id: empresaAtual.id } : {}), ...(groupId ? { group_id: groupId } : {}), numero_pedido: `PDV-${Date.now()}`, forma_pagamento: formasPagamentoVenda.map(f => f.forma_descricao).join(', '), tipo: 'Pedido', tipo_frete: tipoEntrega === "Retirada" ? "Retirada" : "CIF", origem_pedido: 'PDV Presencial', data_pedido: hoje, cliente_nome: clienteSelecionado?.nome || 'Cliente Avulso', cliente_id: clienteSelecionado?.id, vendedor: user?.full_name, itens_revenda: carrinho.map(item => ({ produto_id: item.id, produto_descricao: item.descricao, quantidade: item.quantidade, valor_unitario: item.preco_venda, valor_total: item.preco_venda * item.quantidade })), valor_produtos: subtotal, desconto_geral_pedido_valor: valorDesconto, valor_total: totalVenda, status: 'Faturado' });
       if (tipoEntrega === "Entrega" && clienteSelecionado) {
         const ec = clienteSelecionado.endereco_principal || {};
@@ -113,15 +129,18 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
       return { pedido };
     },
     onSuccess: ({ pedido }) => {
+      auditCaixaPDV('Criação', `Venda PDV ${pedido.numero_pedido} finalizada`, { pedido_id: pedido.id, numero_pedido: pedido.numero_pedido, valor_total: pedido.valor_total, cliente: pedido.cliente_nome, formas_pagamento: pedido.forma_pagamento });
       setCarrinho([]); setFormasPagamentoVenda([{ forma_id: null, forma_descricao: "Selecione", valor: 0, parcelas: 1 }]); setClienteSelecionado(null); setDesconto(0); setAcrescimo(0); setEmitirNFe(false); setEmitirBoleto(false); setTipoEntrega("Retirada"); setEnderecoEntrega("");
       queryClient.invalidateQueries();
       toast.success(`Venda ${pedido.numero_pedido} finalizada!${troco > 0 ? ` TROCO: R$ ${troco.toFixed(2)}` : ''}`);
-    }
+    },
+    onError: (err) => toast.error("Erro ao finalizar venda: " + err.message)
   });
 
   const liquidarTitulo = useMutation({
     mutationFn: async ({ titulo, tipo, forma }) => {
       if (!contextoValido || !podeLiquidarTitulos) throw new Error("Sem contexto ou permissão.");
+      if (!groupId) throw new Error("Contexto de grupo/empresa obrigatório (Regra-Mãe 5a).");
       if (tipo === 'receber') {
         await updateInContext('ContaReceber', titulo.id, { status: 'Recebido', data_recebimento: hoje, valor_recebido: titulo.valor, forma_recebimento: forma });
         await createInContext('CaixaMovimento', { ...(empresaAtual?.id ? { empresa_id: empresaAtual.id } : {}), ...(groupId ? { group_id: groupId } : {}), data_movimento: new Date().toISOString(), tipo_movimento: 'Entrada', origem: 'Liquidação Receber', forma_pagamento: forma, valor: titulo.valor, descricao: `Recebimento: ${titulo.cliente}`, conta_receber_id: titulo.id, usuario_operador_nome: user?.full_name, caixa_aberto: true });
@@ -129,8 +148,13 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
         await updateInContext('ContaPagar', titulo.id, { status: 'Pago', data_pagamento: hoje, valor_pago: titulo.valor, forma_pagamento: forma });
         await createInContext('CaixaMovimento', { ...(empresaAtual?.id ? { empresa_id: empresaAtual.id } : {}), ...(groupId ? { group_id: groupId } : {}), data_movimento: new Date().toISOString(), tipo_movimento: 'Saída', origem: 'Liquidação Pagar', forma_pagamento: forma, valor: titulo.valor, descricao: `Pagamento: ${titulo.fornecedor}`, conta_pagar_id: titulo.id, usuario_operador_nome: user?.full_name, caixa_aberto: true });
       }
+      return { titulo, tipo, forma };
     },
-    onSuccess: () => { queryClient.invalidateQueries(); toast.success("Liquidado!"); }
+    onSuccess: ({ titulo, tipo, forma }) => {
+      auditCaixaPDV('Baixa', `Liquidação de título (${tipo === 'receber' ? 'Conta a Receber' : 'Conta a Pagar'}) no caixa PDV`, { titulo_id: titulo.id, tipo, valor: titulo.valor, forma, entidade_baixada: tipo === 'receber' ? 'ContaReceber' : 'ContaPagar' });
+      queryClient.invalidateQueries(); toast.success("Liquidado!");
+    },
+    onError: (err) => toast.error("Erro ao liquidar título: " + err.message)
   });
 
   const fecharCaixa = useMutation({
@@ -138,7 +162,11 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
       if (controlesDesabilitados) throw new Error("Sem contexto ou permissão.");
       await createInContext('CaixaMovimento', { ...(empresaAtual?.id ? { empresa_id: empresaAtual.id } : {}), ...(groupId ? { group_id: groupId } : {}), data_movimento: new Date().toISOString(), tipo_movimento: 'Fechamento', origem: 'Fechamento Caixa', forma_pagamento: 'Dinheiro', valor: saldoAtual, descricao: `Fechamento - Saldo: R$ ${saldoAtual.toFixed(2)}`, usuario_operador_nome: user?.full_name, caixa_aberto: false });
     },
-    onSuccess: () => { setCaixaAberto(false); queryClient.invalidateQueries(); toast.success("Caixa fechado!"); }
+    onSuccess: () => {
+      auditCaixaPDV('Fechamento', 'Fechamento de caixa PDV', { saldo_final: saldoAtual, entradas_dinheiro: totalEntradasDinheiro, saidas_dinheiro: totalSaidasDinheiro });
+      setCaixaAberto(false); queryClient.invalidateQueries(); toast.success("Caixa fechado!");
+    },
+    onError: (err) => toast.error("Erro ao fechar caixa: " + err.message)
   });
 
   if (!caixaAberto) {

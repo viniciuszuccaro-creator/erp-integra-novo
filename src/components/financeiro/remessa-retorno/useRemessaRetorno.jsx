@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
+import { useUser } from "@/components/lib/UserContext";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import useContextoVisual from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
@@ -11,12 +13,24 @@ import { toast } from "sonner";
  */
 export default function useRemessaRetorno() {
   const queryClient = useQueryClient();
+  const { user } = useUser();
   const { empresaAtual, grupoAtual, filterInContext, createInContext, updateInContext } = useContextoVisual();
   const { canCreate, canEdit, hasPermission } = usePermissions();
 
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
   const contextKey = empresaAtual?.id || groupId || "sem-contexto";
   const contextoValido = contextKey !== "sem-contexto";
+
+  // Regra-Mãe 5d: auditoria completa das operações de remessa/retorno bancário
+  const auditRemessa = async (acao, descricao, dadosNovos = {}) => {
+    try { await base44.entities.AuditLog.create({
+      acao, modulo: 'Financeiro', entidade: 'ArquivoRemessaRetorno',
+      descricao, data_hora: new Date().toISOString(),
+      group_id: groupId, grupo_id: groupId, empresa_id: empresaAtual?.id,
+      usuario: user?.full_name || 'Sistema', usuario_id: user?.id,
+      tipo_auditoria: 'operacional', sucesso: true, dados_novos: dadosNovos
+    }); } catch (e) { console.error('[RemessaRetorno] Falha ao auditar:', e?.message || e); }
+  };
 
   const podeGerarRemessa = canCreate("Financeiro", "Remessa Retorno") || canCreate("Financeiro", "Remessa") || hasPermission("Financeiro", null, "gerenciar");
   const podeProcessarRetorno = canEdit("Financeiro", "Remessa Retorno") || canEdit("Financeiro", "Contas a Receber") || hasPermission("Financeiro", null, "baixar");
@@ -50,6 +64,7 @@ export default function useRemessaRetorno() {
   const gerarRemessaMutation = useMutation({
     mutationFn: async ({ bancoId, titulosIds }) => {
       if (!contextoValido || !podeGerarRemessa) throw new Error("Sem contexto ou permissão para gerar remessa.");
+      if (!groupId) throw new Error("Contexto de grupo/empresa obrigatório (Regra-Mãe 5a).");
       const banco = bancos.find(b => b.id === bancoId);
       const titulos = contasReceber.filter(c => titulosIds.includes(c.id));
       if (!titulos.length) throw new Error("Selecione ao menos um título.");
@@ -97,6 +112,7 @@ export default function useRemessaRetorno() {
       return arquivo;
     },
     onSuccess: (arquivo) => {
+      auditRemessa('Emissão', `Remessa CNAB gerada (${arquivo.quantidade_titulos} títulos)`, { arquivo_id: arquivo.id, arquivo_nome: arquivo.arquivo_nome, banco: arquivo.banco_nome, valor_total: arquivo.valor_total, titulos_ids: arquivo.titulos_incluidos?.map(t => t.titulo_id) });
       queryClient.invalidateQueries({ queryKey: ['contasReceber'] });
       queryClient.invalidateQueries({ queryKey: ['arquivos-remessa-retorno'] });
       toast.success(`✅ Remessa gerada! ${arquivo.quantidade_titulos} títulos`);
@@ -115,6 +131,7 @@ export default function useRemessaRetorno() {
   const processarRetornoMutation = useMutation({
     mutationFn: async (file) => {
       if (!contextoValido || !podeProcessarRetorno) throw new Error("Sem contexto ou permissão para processar retorno.");
+      if (!groupId) throw new Error("Contexto de grupo/empresa obrigatório (Regra-Mãe 5a).");
       const conteudo = await file.text();
       const linhas = conteudo.split('\n').filter(l => l.trim());
       const ocorrencias = linhas.map(linha => {
@@ -151,9 +168,11 @@ export default function useRemessaRetorno() {
       });
 
       let titulosBaixados = 0;
+      const titulosAntes = [];
       for (const ocorrencia of ocorrencias) {
         const titulo = contasReceber.find(c => c.nosso_numero === ocorrencia.nossoNumero);
         if (titulo && ocorrencia.codigoOcorrencia === '06') {
+          titulosAntes.push({ titulo_id: titulo.id, cliente: titulo.cliente, status_anterior: titulo.status, valor: titulo.valor, valor_recebido: ocorrencia.valorPago || titulo.valor });
           await updateInContext('ContaReceber', titulo.id, {
             status: 'Recebido',
             data_recebimento: ocorrencia.dataPagamento || new Date().toISOString(),
@@ -165,9 +184,10 @@ export default function useRemessaRetorno() {
           titulosBaixados++;
         }
       }
-      return { arquivo, titulosBaixados };
+      return { arquivo, titulosBaixados, titulosAntes };
     },
-    onSuccess: ({ titulosBaixados }) => {
+    onSuccess: ({ arquivo, titulosBaixados, titulosAntes }) => {
+      auditRemessa('Baixa', `Retorno CNAB processado (${titulosBaixados} título(s) baixado(s))`, { arquivo_id: arquivo.id, arquivo_nome: arquivo.arquivo_nome, titulos_baixados: titulosAntes });
       queryClient.invalidateQueries({ queryKey: ['contasReceber'] });
       queryClient.invalidateQueries({ queryKey: ['arquivos-remessa-retorno'] });
       toast.success(`✅ Retorno processado! ${titulosBaixados} título(s) baixado(s)`);

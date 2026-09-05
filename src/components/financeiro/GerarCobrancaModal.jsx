@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
+import { useUser } from "@/components/lib/UserContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -32,11 +34,25 @@ export default function GerarCobrancaModal({ isOpen, onClose, contaReceber }) {
     updateInContext
   } = useContextoVisual();
   const { canCreate, canEdit, hasPermission } = usePermissions();
+  const { user } = useUser();
 
   const groupId = contaReceber?.group_id || grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
   const empresaId = contaReceber?.empresa_id || empresaAtual?.id || null;
   const contextKey = empresaId || groupId || "sem-contexto";
   const contextoValido = contextKey !== "sem-contexto";
+
+  // Regra-Mãe 5d: auditoria completa da geração de cobrança (antes/depois, grupo/empresa, usuário)
+  const auditCobranca = async (acao, descricao, dadosNovos = {}) => {
+    try { await base44.entities.AuditLog.create({
+      acao, modulo: 'Financeiro', entidade: 'ContaReceber', registro_id: contaReceber?.id,
+      descricao, data_hora: new Date().toISOString(),
+      group_id: groupId, grupo_id: groupId, empresa_id: empresaId,
+      usuario: user?.full_name || 'Sistema', usuario_id: user?.id,
+      tipo_auditoria: 'operacional', sucesso: true,
+      dados_anteriores: { forma_cobranca: contaReceber?.forma_cobranca, status_cobranca: contaReceber?.status_cobranca },
+      dados_novos: dadosNovos
+    }); } catch (e) { console.error('[Cobranca] Falha ao auditar:', e?.message || e); }
+  };
   const podeGerarCobranca =
     canCreate("Financeiro", "Cobrança") ||
     canCreate("Financeiro", "Cobranca") ||
@@ -109,6 +125,7 @@ export default function GerarCobrancaModal({ isOpen, onClose, contaReceber }) {
       return retornoMock;
     },
     onSuccess: (data) => {
+      auditCobranca('Emissão', 'Boleto gerado (simulado)', { forma_cobranca: 'Boleto', status_cobranca: 'gerada_simulada', id_cobranca_externa: data.id, linha_digitavel: data.identificationField });
       queryClient.invalidateQueries({ queryKey: ['contasReceber'] });
       setCobrancaGerada({ tipo: 'boleto', dados: data });
       toast.success("✅ Boleto gerado!");
@@ -169,6 +186,7 @@ export default function GerarCobrancaModal({ isOpen, onClose, contaReceber }) {
       return retornoMock;
     },
     onSuccess: (data) => {
+      auditCobranca('Emissão', 'PIX gerado (simulado)', { forma_cobranca: 'PIX', status_cobranca: 'gerada_simulada', id_cobranca_externa: data.id });
       queryClient.invalidateQueries({ queryKey: ['contasReceber'] });
       setCobrancaGerada({ tipo: 'pix', dados: data });
       toast.success("✅ PIX gerado!");

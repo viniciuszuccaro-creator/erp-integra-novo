@@ -1013,5 +1013,11 @@ Estado consolidado:
 - `useConciliacaoForm.jsx` (conciliação manual): conciliação agora exige contexto grupo/empresa válido e grava auditoria com antes/depois (`status_conferencia`); resolução de divergência busca o registro antes da alteração e grava estado anterior + `grupo_id`.
 - Fluxo PDV preservado: venda balcão continua gerando Pedido Faturado + CaixaMovimento (formato reconhecido pelo orderFlowAuditor v2.1), sem NF/CR indevidos.
 
+### Remessa/Retorno CNAB, Cobrança e Link de Pagamento — mesmo padrão aplicado (2026-09-05)
+- `useRemessaRetorno.jsx`: geração de remessa e processamento de retorno CNAB agora geram `AuditLog` operacional completo (grupo/empresa, usuário, dados da operação); baixa por retorno captura o estado anterior de cada título (`status_anterior`, valor); trava explícita de grupo nas duas operações (Regra-Mãe 5a).
+- `GerarCobrancaModal.jsx`: geração de boleto e PIX agora grava auditoria com antes/depois (`forma_cobranca`/`status_cobranca`), grupo/empresa e usuário, complementando o `LogCobranca` existente.
+- `GerarLinkPagamentoModal.jsx`: geração de link passou a exigir contexto grupo/empresa e permissão na persistência (validação dupla — antes não havia nenhuma checagem), grava auditoria antes/depois e o botão recebeu bloqueio visual + marcadores RBAC/auditoria.
+- Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido; validações e mocks existentes preservados.
+
 ### Próximo passo sugerido
-- Varrer os demais fluxos financeiros sensíveis remanescentes: remessa/retorno bancário (`useRemessaRetorno`), geração de cobrança/links de pagamento (`GerarCobrancaModal`, `GerarLinkPagamentoModal`) e rateio multiempresa, reforçando auditoria antes/depois e validação dupla onde faltar.
+- Aplicar o mesmo padrão no rateio multiempresa (`RateioMultiempresa` / rateioDistribuicao) e nas demais persistências sensíveis do Financeiro (aprovações, DRE/SPED), reforçando auditoria antes/depois e validação dupla onde faltar.

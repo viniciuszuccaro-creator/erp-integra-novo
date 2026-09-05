@@ -8,13 +8,32 @@ import { Copy, Link2, CheckCircle2, Loader2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
+import useContextoVisual from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
+import { useUser } from "@/components/lib/UserContext";
 
 export default function GerarLinkPagamentoModal({ isOpen, onClose, contaReceber }) {
   const queryClient = useQueryClient();
   const [linkGerado, setLinkGerado] = useState(null);
+  const { user } = useUser();
+  const { grupoAtual, empresaAtual } = useContextoVisual();
+  const { canCreate, canEdit, hasPermission } = usePermissions();
+
+  const groupId = contaReceber?.group_id || grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+  const empresaId = contaReceber?.empresa_id || empresaAtual?.id || null;
+  const contextoValido = !!(groupId && empresaId);
+  const podeGerarLink =
+    canCreate('Financeiro', 'Cobrança') ||
+    canCreate('Financeiro', 'Cobranca') ||
+    canEdit('Financeiro', 'Contas a Receber') ||
+    hasPermission('Financeiro', null, 'gerenciar');
 
   const gerarLinkMutation = useMutation({
     mutationFn: async () => {
+      // Regra-Mãe 5a/5b: contexto multiempresa e permissão obrigatórios na persistência
+      if (!contextoValido) throw new Error('Contexto de grupo/empresa obrigatório para gerar link (Regra-Mãe 5a).');
+      if (!podeGerarLink) throw new Error('Seu perfil não permite gerar links de pagamento.');
+
       // Simular chamada ao gateway
       const linkSimulado = `https://pag.erp-integra.com.br/pay/${contaReceber.id}`;
       
@@ -42,6 +61,18 @@ export default function GerarLinkPagamentoModal({ isOpen, onClose, contaReceber 
         status_cobranca: 'gerada_simulada',
         forma_cobranca: 'Link Pagamento'
       });
+
+      // Regra-Mãe 5d: auditoria completa (antes/depois, grupo/empresa, usuário)
+      try { await base44.entities.AuditLog.create({
+        acao: 'Emissão', modulo: 'Financeiro', entidade: 'ContaReceber', registro_id: contaReceber.id,
+        descricao: 'Link de pagamento gerado (simulado)',
+        data_hora: new Date().toISOString(),
+        group_id: groupId, grupo_id: groupId, empresa_id: empresaId,
+        usuario: user?.full_name || 'Sistema', usuario_id: user?.id,
+        tipo_auditoria: 'operacional', sucesso: true,
+        dados_anteriores: { forma_cobranca: contaReceber.forma_cobranca, status_cobranca: contaReceber.status_cobranca, url_fatura: contaReceber.url_fatura },
+        dados_novos: { forma_cobranca: 'Link Pagamento', status_cobranca: 'gerada_simulada', url_fatura: linkSimulado }
+      }); } catch (e) { console.error('[LinkPagamento] Falha ao auditar:', e?.message || e); }
 
       return linkSimulado;
     },
@@ -82,7 +113,11 @@ export default function GerarLinkPagamentoModal({ isOpen, onClose, contaReceber 
           {!linkGerado ? (
             <Button
               onClick={() => gerarLinkMutation.mutate()}
-              disabled={gerarLinkMutation.isPending}
+              disabled={gerarLinkMutation.isPending || !contextoValido || !podeGerarLink}
+              data-permission="Financeiro.Cobrança.criar"
+              data-action="gerar_link_pagamento"
+              data-sensitive="true"
+              data-context-required="true"
               className="w-full bg-blue-600 hover:bg-blue-700"
               size="lg"
             >

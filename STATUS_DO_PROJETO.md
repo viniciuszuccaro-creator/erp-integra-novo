@@ -1024,5 +1024,11 @@ Estado consolidado:
 - `rateioDistribuicao.jsx` (helpers de distribuição do grupo): CORRIGIDO defeito de multiempresa — títulos gerados por `ratearDocumento` gravavam `group_id: null` (registros órfãos); agora herdam o `group_id` do documento original. Rateio e as duas sincronizações de baixa (grupo→empresas e empresa→grupo) passaram a gerar `AuditLog` com antes/depois.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### Ordens de Liquidação e Cartões a Compensar — Regra-Mãe aplicada (2026-09-05)
+- `OrdensLiquidacaoPendentes.jsx`: liquidação e cancelamento de ordens agora geram `AuditLog` completo (antes/depois, grupo, empresa, usuário, títulos vinculados); corrigido texto corrompido ("permissÃ£o"); adicionados toasts de erro e marcadores RBAC nos botões (liquidar/cancelar/confirmar). Contexto e permissão já eram validados e foram mantidos.
+- `CartoesACompensar.jsx`: conciliação de cartão — antes sem RBAC, sem contexto e gravando direto na entidade — agora exige contexto grupo/empresa + permissão, persiste via `updateInContext` (contexto multiempresa) e gera `AuditLog` com antes/depois; botão de conciliar bloqueado e marcado.
+- `CaixaCentralLiquidacao.jsx` auditado: é apenas launchpad (leituras via `filterInContext`, sem persistências) — sem alterações necessárias.
+- Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
+
 ### Próximo passo sugerido
-- Varrer as persistências sensíveis restantes do Financeiro (aprovações em `CaixaCentralLiquidacao`/`OrdensLiquidacaoPendentes`, exportações DRE/SPED, `CartoesACompensar`) e depois republicar o app para consolidar todas as correções na versão publicada.
+- Varrer as persistências sensíveis restantes do Financeiro (exportações DRE/SPED, `ExtratoBancarioResumo`, `MovimentosDiarios`) e depois republicar o app para consolidar todas as correções na versão publicada (créditos de integração do workspace renovam em 07/09 — jobs agendados e IA retomam aí).

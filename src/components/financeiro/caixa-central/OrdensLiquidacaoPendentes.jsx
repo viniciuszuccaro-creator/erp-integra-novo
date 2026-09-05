@@ -39,7 +39,7 @@ export default function OrdensLiquidacaoPendentes() {
   const liquidarOrdemMutation = useMutation({
     mutationFn: async ({ ordemId, dados }) => {
       const ordem = ordensLiquidacao.find(o => o.id === ordemId);
-      if (!contextoValido || !podeLiquidar) throw new Error("Sem contexto ou permissÃ£o para liquidar.");
+      if (!contextoValido || !podeLiquidar) throw new Error("Sem contexto ou permissão para liquidar.");
       
       if (ordem.titulos_vinculados && ordem.titulos_vinculados.length > 0) {
         for (const titulo of ordem.titulos_vinculados) {
@@ -70,6 +70,18 @@ export default function OrdensLiquidacaoPendentes() {
           observacoes: dados.observacoes
         }
       });
+
+      // Regra-Mãe 5d: auditoria completa da liquidação (antes/depois, grupo, empresa, usuário)
+      try { await base44.entities.AuditLog.create({
+        acao: 'Liquidação', modulo: 'Financeiro', entidade: 'CaixaOrdemLiquidacao', registro_id: ordemId,
+        descricao: `Ordem de liquidação liquidada (${ordem.titulos_vinculados?.length || 0} título(s))`,
+        data_hora: new Date().toISOString(),
+        group_id: groupId, grupo_id: groupId, empresa_id: ordem.empresa_id || empresaAtual?.id || null,
+        usuario: dados.usuario_nome || 'Sistema', usuario_id: dados.usuario_id,
+        tipo_auditoria: 'operacional', sucesso: true,
+        dados_anteriores: { status: ordem.status, valor_total: ordem.valor_total, forma_pagamento_pretendida: ordem.forma_pagamento_pretendida },
+        dados_novos: { status: 'Liquidado', forma_pagamento: dados.forma_pagamento, observacoes: dados.observacoes, titulos: ordem.titulos_vinculados }
+      }); } catch (e) { console.error('[Caixa] Falha ao auditar liquidação:', e?.message || e); }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['caixa-ordens-liquidacao'] });
@@ -81,21 +93,35 @@ export default function OrdensLiquidacaoPendentes() {
       setOrdemSelecionada(null);
       setFormaPagamentoLiquidacao("");
       setObservacoesLiquidacao("");
-    }
+    },
+    onError: (error) => toast({ title: "❌ Erro na liquidação", description: error.message, variant: "destructive" })
   });
 
   const cancelarOrdemMutation = useMutation({
     mutationFn: async (ordemId) => {
-      if (!contextoValido || !podeLiquidar) throw new Error("Sem contexto ou permissÃ£o para cancelar.");
+      if (!contextoValido || !podeLiquidar) throw new Error("Sem contexto ou permissão para cancelar.");
+      const ordem = ordensLiquidacao.find(o => o.id === ordemId);
       await updateInContext('CaixaOrdemLiquidacao', ordemId, {
         status: "Cancelado",
         data_cancelamento: new Date().toISOString()
       });
+
+      // Regra-Mãe 5d: auditoria do cancelamento com estado anterior
+      try { await base44.entities.AuditLog.create({
+        acao: 'Cancelamento', modulo: 'Financeiro', entidade: 'CaixaOrdemLiquidacao', registro_id: ordemId,
+        descricao: 'Ordem de liquidação cancelada',
+        data_hora: new Date().toISOString(),
+        group_id: groupId, grupo_id: groupId, empresa_id: ordem?.empresa_id || empresaAtual?.id || null,
+        usuario: 'Sistema', tipo_auditoria: 'operacional', sucesso: true,
+        dados_anteriores: ordem ? { status: ordem.status, valor_total: ordem.valor_total, origem: ordem.origem } : null,
+        dados_novos: { status: 'Cancelado', data_cancelamento: new Date().toISOString() }
+      }); } catch (e) { console.error('[Caixa] Falha ao auditar cancelamento:', e?.message || e); }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['caixa-ordens-liquidacao'] });
       toast({ title: "✅ Ordem cancelada" });
-    }
+    },
+    onError: (error) => toast({ title: "❌ Erro ao cancelar ordem", description: error.message, variant: "destructive" })
   });
 
   const ordensPendentes = ordensLiquidacao.filter(o => o.status === "Pendente");
@@ -129,7 +155,8 @@ export default function OrdensLiquidacaoPendentes() {
       dados: {
         forma_pagamento: formaPagamentoLiquidacao,
         observacoes: observacoesLiquidacao,
-        usuario_id: user?.id
+        usuario_id: user?.id,
+        usuario_nome: user?.full_name
       }
     });
   };
@@ -182,7 +209,7 @@ export default function OrdensLiquidacaoPendentes() {
                     <TableCell><Badge className="bg-blue-100 text-blue-700">{ordem.forma_pagamento_pretendida}</Badge></TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button size="sm" disabled={!contextoValido || !podeLiquidar || liquidarOrdemMutation.isPending} onClick={() => handleLiquidar(ordem)} className="bg-emerald-600 hover:bg-emerald-700">
+                        <Button size="sm" disabled={!contextoValido || !podeLiquidar || liquidarOrdemMutation.isPending} onClick={() => handleLiquidar(ordem)} data-permission="Financeiro.Caixa.liquidar" data-action="liquidar_ordem" data-sensitive="true" data-context-required="true" className="bg-emerald-600 hover:bg-emerald-700">
                           <CheckCircle2 className="w-4 h-4 mr-1" />
                           Liquidar
                         </Button>
@@ -191,6 +218,7 @@ export default function OrdensLiquidacaoPendentes() {
                           variant="outline" 
                           onClick={() => cancelarOrdemMutation.mutate(ordem.id)} 
                           className="border-red-300 text-red-600"
+                          data-permission="Financeiro.Caixa.cancelar" data-action="cancelar_ordem" data-sensitive="true" data-context-required="true"
                           disabled={!contextoValido || !podeLiquidar || cancelarOrdemMutation.isPending}
                         >
                           <XCircle className="w-4 h-4" />
@@ -294,6 +322,7 @@ export default function OrdensLiquidacaoPendentes() {
                   className="bg-emerald-600 hover:bg-emerald-700"
                   onClick={confirmarLiquidacao}
                   disabled={!contextoValido || !podeLiquidar || liquidarOrdemMutation.isPending}
+                  data-permission="Financeiro.Caixa.liquidar" data-action="confirmar_liquidacao" data-sensitive="true" data-context-required="true"
                 >
                   <CheckCircle2 className="w-4 h-4 mr-2" />
                   {liquidarOrdemMutation.isPending ? "Liquidando..." : "Confirmar Liquidação"}

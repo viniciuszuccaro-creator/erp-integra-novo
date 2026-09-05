@@ -7,12 +7,19 @@ import { Badge } from "@/components/ui/badge";
 import { CreditCard, CheckCircle, AlertCircle, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
+import { useUser } from "@/components/lib/UserContext";
 
 export default function CartoesACompensar() {
   const queryClient = useQueryClient();
   const [filtroStatus, setFiltroStatus] = useState("todos");
-  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const { filterInContext, updateInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const { user } = useUser();
+  const { canEdit, hasPermission } = usePermissions();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
+  const contextoValido = !!(grupoAtual?.id || empresaAtual?.id);
+  const podeConciliar = canEdit('Financeiro', 'Cartões') || canEdit('Financeiro', 'Caixa') || hasPermission('Financeiro', null, 'conciliar');
 
   const { data: cartoes = [], isLoading } = useQuery({
     queryKey: ["movimento-cartao", contextoKey],
@@ -22,15 +29,32 @@ export default function CartoesACompensar() {
 
   const conciliarMutation = useMutation({
     mutationFn: async ({ id }) => {
-      return base44.entities.MovimentoCartao.update(id, {
+      // Regra-Mãe 5a/5b: contexto multiempresa e permissão obrigatórios na persistência
+      if (!contextoValido || !podeConciliar) throw new Error("Sem contexto de grupo/empresa ou permissão para conciliar cartão (Regra-Mãe 5a/5b).");
+      const antes = cartoes.find(c => c.id === id) || null;
+      const mudancas = {
         status_compensacao: "Compensado",
         data_recebimento_efetivo: new Date().toISOString().split('T')[0]
-      });
+      };
+      await updateInContext('MovimentoCartao', id, mudancas);
+
+      // Regra-Mãe 5d: auditoria com antes/depois, grupo, empresa e usuário
+      try { await base44.entities.AuditLog.create({
+        acao: 'Conciliação', modulo: 'Financeiro', entidade: 'MovimentoCartao', registro_id: id,
+        descricao: 'Cartão compensado manualmente',
+        data_hora: new Date().toISOString(),
+        group_id: groupId, grupo_id: groupId, empresa_id: antes?.empresa_id || empresaAtual?.id || null,
+        usuario: user?.full_name || 'Sistema', usuario_id: user?.id,
+        tipo_auditoria: 'operacional', sucesso: true,
+        dados_anteriores: antes ? { status_compensacao: antes.status_compensacao, valor_liquido: antes.valor_liquido, nsu: antes.nsu, bandeira: antes.bandeira } : null,
+        dados_novos: mudancas
+      }); } catch (e) { console.error('[Cartões] Falha ao auditar conciliação:', e?.message || e); }
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["movimento-cartao"]);
       toast.success("Cartão compensado com sucesso!");
     },
+    onError: (error) => toast.error(error.message || "Erro ao conciliar cartão"),
   });
 
   const cartoesFiltrados = filtroStatus === "todos" 
@@ -175,7 +199,8 @@ export default function CartoesACompensar() {
                           <Button
                             size="sm"
                             onClick={() => conciliarMutation.mutate({ id: cartao.id })}
-                            disabled={conciliarMutation.isPending}
+                            disabled={conciliarMutation.isPending || !contextoValido || !podeConciliar}
+                            data-permission="Financeiro.Cartões.conciliar" data-action="conciliar_cartao" data-sensitive="true" data-context-required="true"
                           >
                             <CheckCircle className="w-3 h-3 mr-1" />
                             Conciliar

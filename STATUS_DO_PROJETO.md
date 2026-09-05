@@ -1034,6 +1034,9 @@ Estado consolidado:
 - `RelatorioDRE.jsx`: as 3 exportações CSV do DRE agora exigem permissão de exportar (Relatórios/Financeiro) e geram `AuditLog` com grupo, empresa, usuário, período e nº de registros; botões bloqueados e marcados RBAC.
 - `ExportacaoSPED.jsx`: geração de SPED agora valida contexto grupo/empresa + permissão na persistência, grava o usuário real (antes fixo "Usuário Atual") e gera `AuditLog` completo (tipo, período, notas, totais fiscais); botão bloqueado e marcado.
 - `ExtratoBancarioResumo.jsx` e `MovimentosDiarios.jsx` auditados: somente leitura (consultas via `filterInContext` com contexto) — sem persistências, sem alterações.
+- `LiquidarReceberPagar.jsx` revisado: já tinha contexto+RBAC+auditoria; corrigido texto corrompido e adicionados marcadores RBAC aos 4 botões de envio ao Caixa.
+- `BaixaTituloDialog.jsx` e `BaixaContaPagarDialog.jsx` verificados: já marcados com RBAC e validação nos hooks pais — sem alterações.
+- Varredura das persistências sensíveis do Financeiro/Fiscal: **CONCLUÍDA**.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
 ### Próximo passo sugerido

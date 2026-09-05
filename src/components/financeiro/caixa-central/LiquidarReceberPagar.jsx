@@ -56,7 +56,7 @@ export default function LiquidarReceberPagar() {
 
   const enviarParaCaixaMutation = useMutation({
     mutationFn: async ({ titulos, tipo }) => {
-      if (!contextoValido || !podeEnviarCaixa) throw new Error("Sem contexto ou permissÃ£o para enviar ao caixa.");
+      if (!contextoValido || !podeEnviarCaixa) throw new Error("Sem contexto ou permissão para enviar ao caixa.");
       const ordens = await Promise.all(titulos.map(async (titulo) => {
         const ordemData = {
           tipo_operacao: tipo === 'receber' ? 'Recebimento' : 'Pagamento',
@@ -128,6 +128,7 @@ export default function LiquidarReceberPagar() {
                   })}
                   disabled={!contextoValido || !podeEnviarCaixa || enviarParaCaixaMutation.isPending}
                   className="bg-green-600 hover:bg-green-700"
+                  data-permission="Financeiro.CaixaCentral.enviar-caixa" data-action="enviar_titulos_caixa" data-sensitive="true" data-context-required="true"
                 >
                   <Send className="w-4 h-4 mr-2" />
                   Enviar {titulosSelecionadosReceber.length} para Caixa
@@ -185,6 +186,7 @@ export default function LiquidarReceberPagar() {
                           variant="outline"
                           onClick={() => enviarParaCaixaMutation.mutate({ titulos: [conta], tipo: 'receber' })}
                           disabled={!contextoValido || !podeEnviarCaixa || enviarParaCaixaMutation.isPending}
+                          data-permission="Financeiro.CaixaCentral.enviar-caixa" data-action="enviar_titulo_caixa" data-sensitive="true" data-context-required="true"
                         >
                           <ArrowRight className="w-4 h-4 mr-1" />
                           Enviar
@@ -220,6 +222,7 @@ export default function LiquidarReceberPagar() {
                   })}
                   disabled={!contextoValido || !podeEnviarCaixa || enviarParaCaixaMutation.isPending}
                   className="bg-red-600 hover:bg-red-700"
+                  data-permission="Financeiro.CaixaCentral.enviar-caixa" data-action="enviar_titulos_caixa" data-sensitive="true" data-context-required="true"
                 >
                   <Send className="w-4 h-4 mr-2" />
                   Enviar {titulosSelecionadosPagar.length} para Caixa
@@ -277,6 +280,7 @@ export default function LiquidarReceberPagar() {
                           variant="outline"
                           onClick={() => enviarParaCaixaMutation.mutate({ titulos: [conta], tipo: 'pagar' })}
                           disabled={!contextoValido || !podeEnviarCaixa || enviarParaCaixaMutation.isPending}
+                          data-permission="Financeiro.CaixaCentral.enviar-caixa" data-action="enviar_titulo_caixa" data-sensitive="true" data-context-required="true"
                         >
                           <ArrowRight className="w-4 h-4 mr-1" />
                           Enviar

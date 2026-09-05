@@ -59,6 +59,13 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
 
   const enviarParaCaixaMutation = useMutation({
     mutationFn: async (titulos) => {
+      // Regra-Mãe 5: validação dupla (RBAC + contexto multiempresa) na persistência
+      if (!hasPermission('Financeiro', 'ContaPagar', 'enviar_caixa') && !hasPermission('Financeiro', 'ContaPagar', 'editar')) {
+        throw new Error('Sem permissão para enviar títulos ao Caixa');
+      }
+      if (!titulos?.length || !titulos.some(t => t.group_id)) {
+        throw new Error('Contexto de grupo/empresa obrigatório para envio ao Caixa (Regra-Mãe 5a)');
+      }
       const ordens = await Promise.all(titulos.map(async (titulo) => {
         return await base44.entities.CaixaOrdemLiquidacao.create({
           empresa_id: titulo.empresa_id,
@@ -80,17 +87,25 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
       }));
       return ordens;
     },
-    onSuccess: async (ordens) => {
+    onSuccess: async (ordens, titulos) => {
       queryClient.invalidateQueries({ queryKey: ['caixa-ordens-liquidacao'] });
       toast({ title: `✅ ${ordens.length} título(s) enviado(s) para o Caixa!` });
-      try { await base44.entities.AuditLog.create({ acao: 'Criação', modulo: 'Financeiro', entidade: 'CaixaOrdemLiquidacao', descricao: `${ordens.length} título(s) do Pagar enviados para o Caixa`, data_hora: new Date().toISOString() }); } catch(e) { console.error('[ContasPagar] Falha ao auditar envio para Caixa:', e?.message || e); }
+      try { await base44.entities.AuditLog.create({ acao: 'Criação', modulo: 'Financeiro', entidade: 'CaixaOrdemLiquidacao', descricao: `${ordens.length} título(s) do Pagar enviados para o Caixa`, data_hora: new Date().toISOString(), group_id: titulos?.[0]?.group_id, grupo_id: titulos?.[0]?.group_id, empresa_id: titulos?.[0]?.empresa_id, usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id, tipo_auditoria: 'operacional', sucesso: true, dados_novos: { ordens: ordens.length, titulos_ids: titulos?.map(t => t.id) } }); } catch(e) { console.error('[ContasPagar] Falha ao auditar envio para Caixa:', e?.message || e); }
       setContasSelecionadas([]);
-    }
+    },
+    onError: (err) => toast({ title: 'Erro ao enviar para o Caixa', description: err?.message, variant: 'destructive' })
   });
 
   const baixarTituloMutation = useMutation({
     mutationFn: async ({ id, dados }) => {
+      // Regra-Mãe 5: validação dupla (RBAC + contexto multiempresa) na persistência
+      if (!hasPermission('Financeiro', 'ContaPagar', 'baixar') && !hasPermission('Financeiro', 'ContaPagar', 'liquidar')) {
+        throw new Error('Sem permissão para baixar título');
+      }
       const conta = contasList.find(c => c.id === id);
+      if (!conta?.group_id || !conta?.empresa_id) {
+        throw new Error('Título sem contexto de grupo/empresa — baixa bloqueada (Regra-Mãe 5a)');
+      }
       const valorTotal = (conta?.valor || 0) + (dados.juros || 0) + (dados.multa || 0) - (dados.desconto || 0);
       
       await createRLS('CaixaMovimento', {
@@ -123,13 +138,25 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
         observacoes: dados.observacoes
       });
     },
-    onSuccess: () => {
+    onSuccess: async (_data, vars) => {
+      const conta = contasList.find(c => c.id === vars?.id) || {};
+      try { await base44.entities.AuditLog.create({
+        acao: 'Baixa', modulo: 'Financeiro', entidade: 'ContaPagar', registro_id: vars?.id,
+        descricao: 'Pagamento de título registrado (baixa + movimento de caixa)',
+        data_hora: new Date().toISOString(),
+        group_id: conta.group_id, grupo_id: conta.group_id, empresa_id: conta.empresa_id,
+        usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
+        tipo_auditoria: 'operacional', sucesso: true,
+        dados_anteriores: { status: conta.status, valor: conta.valor, data_pagamento: conta.data_pagamento, valor_pago: conta.valor_pago },
+        dados_novos: { status: 'Pago', data_pagamento: vars?.dados?.data_pagamento, forma_pagamento: vars?.dados?.forma_pagamento, juros: vars?.dados?.juros, multa: vars?.dados?.multa, desconto: vars?.dados?.desconto, valor_pago: (conta.valor || 0) + (vars?.dados?.juros || 0) + (vars?.dados?.multa || 0) - (vars?.dados?.desconto || 0) }
+      }); } catch(e) { console.error('[ContasPagar] Falha ao auditar baixa:', e?.message || e); }
       queryClient.invalidateQueries({ queryKey: ['ContaPagar'] });
       queryClient.invalidateQueries({ queryKey: ['caixa-movimentos'] });
       setDialogBaixaOpen(false);
       setContaAtual(null);
       toast({ title: "✅ Título pago!" });
-    }
+    },
+    onError: (err) => toast({ title: 'Erro ao pagar título', description: err?.message, variant: 'destructive' })
   });
 
   const baixarMultiplaMutation = useMutation({
@@ -141,11 +168,21 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
         }
       }));
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      const contasCtx = contasSelecionadas.map(cid => contasList.find(c => c.id === cid)).filter(Boolean);
+      try { await base44.entities.AuditLog.create({
+        acao: 'Baixa', modulo: 'Financeiro', entidade: 'ContaPagar',
+        descricao: `Baixa múltipla (${contasSelecionadas.length} título(s))`, data_hora: new Date().toISOString(),
+        group_id: contasCtx[0]?.group_id, grupo_id: contasCtx[0]?.group_id, empresa_id: contasCtx[0]?.empresa_id,
+        usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
+        tipo_auditoria: 'operacional', sucesso: true,
+        dados_novos: { titulos_ids: [...contasSelecionadas], ...dadosBaixa }
+      }); } catch(e) { console.error('[ContasPagar] Falha ao auditar baixa múltipla:', e?.message || e); }
       setContasSelecionadas([]);
       setDialogBaixaOpen(false);
       toast({ title: `✅ ${contasSelecionadas.length} título(s) pago(s)!` });
-    }
+    },
+    onError: (err) => toast({ title: 'Erro na baixa múltipla', description: err?.message, variant: 'destructive' })
   });
 
   const aprovarPagamentoMutation = useMutation({
@@ -158,10 +195,12 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
       });
     },
     onSuccess: async (_data, id) => {
+      const conta = contasList.find(c => c.id === id) || {};
       queryClient.invalidateQueries({ queryKey: ['ContaPagar'] });
       toast({ title: "✅ Pagamento aprovado!" });
-      try { await base44.entities.AuditLog.create({ acao: 'Edição', modulo: 'Financeiro', entidade: 'ContaPagar', registro_id: id, descricao: 'Aprovação de pagamento', data_hora: new Date().toISOString() }); } catch(e) { console.error('[ContasPagar] Falha ao auditar aprovação de pagamento:', e?.message || e); }
-    }
+      try { await base44.entities.AuditLog.create({ acao: 'Aprovação', modulo: 'Financeiro', entidade: 'ContaPagar', registro_id: id, descricao: 'Aprovação de pagamento', data_hora: new Date().toISOString(), group_id: conta.group_id, grupo_id: conta.group_id, empresa_id: conta.empresa_id, usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id, tipo_auditoria: 'operacional', sucesso: true, dados_anteriores: { status_pagamento: conta.status_pagamento }, dados_novos: { status_pagamento: 'Aprovado', aprovado_por: authUser?.full_name || authUser?.email } }); } catch(e) { console.error('[ContasPagar] Falha ao auditar aprovação de pagamento:', e?.message || e); }
+    },
+    onError: (err) => toast({ title: 'Erro ao aprovar pagamento', description: err?.message, variant: 'destructive' })
   });
 
   const contasFiltradas = contasList
@@ -272,7 +311,7 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
           a.download = `contas_pagar_${new Date().toISOString().slice(0,10)}.csv`;
           a.click();
           URL.revokeObjectURL(url);
-          try { base44.entities.AuditLog.create({ acao: 'Exportação', modulo: 'Financeiro', entidade: 'ContaPagar', descricao: `Exportados ${itens.length} títulos`, data_hora: new Date().toISOString() }); } catch(e) { console.error('[ContasPagar] Falha ao auditar exportação:', e?.message || e); }
+          try { base44.entities.AuditLog.create({ acao: 'Exportação', modulo: 'Financeiro', entidade: 'ContaPagar', descricao: `Exportados ${itens.length} títulos`, data_hora: new Date().toISOString(), group_id: grupoAtual?.id, grupo_id: grupoAtual?.id, empresa_id: empresaAtual?.id, usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id, tipo_auditoria: 'operacional', sucesso: true, dados_novos: { quantidade: itens.length } }); } catch(e) { console.error('[ContasPagar] Falha ao auditar exportação:', e?.message || e); }
         }}
         onBaixarMultipla={handleBaixarMultipla}
         onNovaConta={() => { if (!hasPermission('Financeiro','ContaPagar','criar')) { toast({ title: '⛔ Sem permissão para criar', variant: 'destructive' }); return; } openWindow(ContaPagarForm, {

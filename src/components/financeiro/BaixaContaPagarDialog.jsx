@@ -29,7 +29,7 @@ export default function BaixaContaPagarDialog({
             {contaAtual ? 'Registrar Pagamento' : `Pagar Múltiplos Títulos (${contasSelecionadas.length})`}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form onSubmit={onSubmit} className="space-y-4" data-permission="Financeiro.ContaPagar.baixar" data-action="financeiro.conta_pagar.baixar" data-sensitive="true">
           {!contaAtual && (
             <Alert className="bg-blue-50 border-blue-200">
               <AlertDescription>
@@ -52,6 +52,8 @@ export default function BaixaContaPagarDialog({
                 value={dadosBaixa.data_pagamento}
                 onChange={(e) => setDadosBaixa({ ...dadosBaixa, data_pagamento: e.target.value })}
                 required
+                data-permission="Financeiro.ContaPagar.baixar"
+                data-action="financeiro.conta_pagar.data_pagamento"
               />
             </div>
           </div>
@@ -101,7 +103,7 @@ export default function BaixaContaPagarDialog({
 
           <div className="flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-            <Button type="submit" disabled={isPending} className="bg-green-600">
+            <Button type="submit" disabled={isPending} className="bg-green-600" data-permission="Financeiro.ContaPagar.baixar" data-action="financeiro.conta_pagar.baixar" data-sensitive="true">
               {isPending ? 'Registrando...' : 'Confirmar'}
             </Button>
           </div>

@@ -979,3 +979,34 @@ Estado consolidado:
 - Fase 4 (Omnicanal/Portal/Mobile): 10/10 — HubAtendimento 5 canais, Portal + Chat integrados, apps Motorista/Produção mobile, SLA/fila ativos.
 - Fase 5 (Integrações/Marketplaces): 10/10 — marketplaceSync, PedidoExterno com multiempresa, rate limiting 100 req/min, circuit breaker, retry com backoff.
 - Conclusão: nenhuma fase regrediu; sistema integralmente íntegro na véspera da renovação de créditos (07/09).
+
+## 2026-09-05 — Módulo Financeiro: reforço da baixa de títulos e envio ao Caixa (Regra-Mãe)
+
+### Diagnóstico das lacunas (nos componentes existentes, sem criar nada novo)
+- Baixa de Conta a Receber (individual e múltipla) gerava `AuditLog` SEM `group_id`/`empresa_id`, SEM usuário e SEM estado antes/depois — o mesmo padrão de log órfão já eliminado no restante do sistema.
+- Baixa de Conta a Pagar gerava movimento de caixa, mas NENHUM log de auditoria da baixa; aprovação de pagamento e exportação CSV auditavam sem grupo/empresa/usuário; envio ao Caixa auditava sem contexto.
+- A permissão de baixa era checada apenas ao ABRIR o diálogo; a persistência (mutation) não revalidava (Regra-Mãe 5b exige validação dupla).
+- Nenhuma validação de contexto grupo/empresa na persistência das baixas (Regra-Mãe 5a).
+- Baixa individual do Receber gravava `valor_recebido` sem somar juros/multa/desconto (inconsistência com o total exibido no diálogo).
+- Envio de títulos ao Caixa (Receber e Pagar) e baixa múltipla não tratavam erros (falhas silenciosas).
+- Diálogos de baixa sem marcadores RBAC/auditoria visual.
+
+### Correções aplicadas (apenas em arquivos existentes)
+- `useContasReceber.jsx`:
+  - `baixarTituloMutation`: revalidação de permissão e de contexto grupo/empresa na persistência (fail-closed); `valor_recebido` sempre = valor + juros + multa - desconto; auditoria enriquecida com `group_id`/`grupo_id`/`empresa_id`, usuário, `dados_anteriores` e `dados_novos`; `onError` com toast.
+  - `baixarMultiplaMutation`: mesma auditoria enriquecida (contexto, IDs baixados, dados da baixa) + `onError`.
+  - `enviarParaCaixaMutation`: revalidação de RBAC/contexto na persistência; auditoria operacional com grupo/empresa/usuário/IDs + `onError`.
+- `ContasPagarTab.jsx`:
+  - `baixarTituloMutation`: revalidação de permissão e contexto na persistência; auditoria completa da baixa (antes/depois, grupo/empresa, usuário) + `onError`.
+  - `baixarMultiplaMutation` e `enviarParaCaixaMutation`: auditoria completa + revalidação RBAC/contexto + `onError`.
+  - `aprovarPagamentoMutation`: auditoria enriquecida (Aprovação, antes/depois de `status_pagamento`, grupo/empresa, usuário) + `onError`.
+  - Auditoria de exportação CSV agora carrega grupo/empresa/usuário.
+- `BaixaTituloDialog.jsx` e `BaixaContaPagarDialog.jsx`: marcadores `data-permission`/`data-action`/`data-sensitive` no formulário, campo de data e botão Confirmar.
+- `LiquidarReceberPagar.jsx` (caixa central): auditoria operacional do envio ao Caixa com grupo/empresa/usuário/títulos vinculados no contexto ativo + `onError` com toast.
+
+### Segurança preservada
+- Usuários sem permissão continuam bloqueados na UI; agora também na persistência (fail-closed). Admin mantém bypass pelo resolvedor de permissões existente.
+- Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido; API dos hooks e diálogos inalterada.
+
+### Próximo passo sugerido
+- Repetir o padrão na baixa/fechamento do PDV (CaixaPDV) e na conciliaação bancária manual, se ainda não cobertos.

@@ -840,4 +840,5 @@ Checklist inicial:
 - `ProtectedSection.jsx` corrigido para degradar para a decisão local (`hasPermission`) em falha transitória do guard (429/5xx), alinhando-se ao comportamento que o `ProtectedAction` já tinha; usuario sem perfil continua fail-closed localmente.
 - Teste direto do `entityGuard` com `Comercial.Pedidos.criar`: retorno `allowed: true` (200), confirmando que o admin volta a criar pedidos.
 - Segurança preservada: não-admins seguem fail-closed para escrita em exceções; validação dupla (frontend + backend) mantida; nenhum modulo ou arquivo novo criado.
+- Correcao adicional (mesma data): o LayoutEffects registrava "Acesso negado ao modulo" falso durante o boot, antes do usuario/perfil de acesso estar carregado (logs com usuario "Usuario"). O efeito de auditoria de bloqueio agora aguarda usuario e permissoes carregados antes de avaliar, eliminando bloqueios/registros falsos para admin sem enfraquecer o RBAC.
 - Proximo passo: republicar o app para a versao publicada assumir a correcao; apos 2026-09-07, reativar automacoes pausadas por falta de creditos de integracao.

@@ -24,7 +24,7 @@ export default function LayoutEffects({
 }) {
   const queryClient = useQueryClient();
   const location = useLocation();
-  const { hasPermission } = usePermissions();
+  const { hasPermission, isLoading: isLoadingPerms } = usePermissions();
   const auditThrottleRef = useRef({ click: 0, change: 0 });
   const AUDIT_BUSINESS_ONLY = true;
 
@@ -124,6 +124,8 @@ export default function LayoutEffects({
 
   useEffect(() => {
     if (!moduleName) return;
+    // Evita bloqueio falso: não avalia permissão antes do usuário/perfil estar carregado
+    if (!user || isLoadingPerms) return;
     const key = `audit_block_${moduleName}_${empresaAtual?.id || 'none'}`;
     try {
       const allowed = hasPermission(moduleName, null, "ver");
@@ -141,7 +143,7 @@ export default function LayoutEffects({
         });
       }
     } catch (e) { console.error('[layout] catch:', e); }
-  }, [moduleName, currentPageName, user?.id, empresaAtual?.id, grupoAtual?.id]);
+  }, [moduleName, currentPageName, user?.id, user, isLoadingPerms, empresaAtual?.id, grupoAtual?.id]);
 
   // 7. Entity subscriptions para auditoria + stamping
   useEffect(() => {

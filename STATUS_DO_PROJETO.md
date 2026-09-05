@@ -953,3 +953,21 @@ Estado consolidado:
 
 ### Próximo passo
 - Republicar o app (botão Publicar) para a versão publicada assumir o auditor v2.1; após 07/09, a rotina diária 06:30 fica limpa de falsos positivos.
+
+## 2026-09-05 — Varredura final de saúde: validadores internos 100% limpos
+
+### `auditMultiempresaValidator` (18 entidades do grupo real)
+- Pedidos (39/39), Contas a Receber (6/6), Produtos (100/100), Colaboradores (4/4), Formas de Pagamento (8/8), Ordens de Produção (3/3): TODOS válidos, zero registros sem empresa, zero fora de escopo, `problemas_detectados: false` em todas as entidades.
+
+### `validateERPStructure`
+- Propagação bidirecional íntegra (syncBidirectional com anti-loop e_replicado + SyncMap), catálogo de entidades down/up coerente com o modo cadastro único compartilhado (Regra-Mãe 9).
+
+### `securityPoliciesValidator`
+- 11 perfis RBAC validados, ZERO conflitos SoD em todos (Administrador, RH, Analista, Gerente, Financeiro, Consulta, Gerencial, Gerente Financeiro, Analista Financeiro, Operacional, Gestor Comercial), severidade máxima Baixa.
+
+### Estado consolidado do ERP (véspera da renovação de créditos 07/09)
+- Fluxo de pedidos: 0 inconsistências (auditor v2.1).
+- Multiempresa/propagação: 0 problemas.
+- RBAC/SoD: 0 conflitos.
+- Jobs agendadas: todas com defeito de código resolvido; as pendentes aguardam apenas créditos do workspace (limitação de billing até 2026-09-07, não do ERP).
+- Pendência única do usuário: republicar o app (botão Publicar).

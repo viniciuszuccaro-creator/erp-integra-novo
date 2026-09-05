@@ -913,24 +913,26 @@ Estado consolidado:
 - Todas com defeito de código resolvido; as que ainda falham, falham apenas por esgotamento de créditos de integração do workspace (bloqueio até 2026-09-07 — limitação de billing, não do ERP): jobs de IA (Churn, Anomalias Financeiras), Security Alerts e envios (WhatsApp/e-mail).
 - Pendente do usuário: republicar o app (botão Publicar) para a versão publicada assumir todas as correções.
 
-## 2026-09-05 — Varredura headless das jobs agendadas + correção do otimizador de preços
+## 2026-09-05 — Varredura headless das jobs + correções do optimizerOrchestrator e higiene de pedido PDV
 
-### Varredura de todas as demais jobs agendadas (invocação sem usuário)
-- Testadas as funções das jobs ativas no modo como o agendador as chama (sem usuário, payload mínimo): `groupConsolidation`, `orderFlowAuditor`, `reconcileLogisticaCosts`, `permissionOptimizer`, `fleetMaintenance`, `backfillGroupEmpresa` — TODAS 200 OK headless, sem o defeito de 401/403.
-- `securityAlerts` e `autoBackup` retornaram 500 exclusivamente por esgotamento de créditos de integração do workspace (bloqueio até 07/09) — sem defeito de código.
+### Varredura de todas as demais jobs agendadas (invocação sem usuário, como o agendador chama)
+- 200 OK headless: groupConsolidation, orderFlowAuditor, reconcileLogisticaCosts, permissionOptimizer, optimizerOrchestrator, fleetMaintenance, backfillGroupEmpresa (dry-run), marketplaceSync, propagateGroupConfigs, paymentStatusManager, deployAudit.
+- 500 APENAS por crédito do workspace (não defeito de código): securityAlerts (usa SendEmail) e autoBackup (usa upload/signed URL). Retomam sozinhas após 2026-09-07.
+- Conclusão: nenhuma outra job carrega o defeito 401/403 de contexto sem usuário.
 
-### Correção do `optimizerOrchestrator` (job diária 02:00 — Optimization Orchestrator)
-- Defeito: a orquestração chamava o `productPriceOptimizer` via `asServiceRole.functions.invoke` (invocação aninhada incorreta) — as 2 empresas falhavam instantaneamente (`failed: 2`), e a otimização noturna nunca executava de fato.
-- Corrigido no arquivo existente: invocação entre funções pelo padrão do SDK (`base44.functions.invoke`) com tratamento tolerante do formato de resposta.
-- Reforço Regra-Mãe 5a/5d: contexto de grupo explícito (payload ou grupo real do cadastro) e `group_id` agora gravado no AuditLog da orquestração.
-- Validado: 200 com `failed: 0`, 2 empresas orquestradas (teste com lote pequeno); o `productPriceOptimizer` direto já executava 200 (lote de 424 produtos, 93 atualizados, tolerante a créditos).
+### Correção do optimizerOrchestrator (defeito real — chamadas aninhadas falhavam)
+- Causa: orquestrador usava `asServiceRole.functions.invoke` (não suportado) para chamar o productPriceOptimizer por empresa — as 2 empresas falhavam silenciosamente (`failed: 2`) desde sempre, retornando `ok: true` (job verde sem executar nada).
+- Corrigido para a invocação entre funções padrão `base44.functions.invoke`, com resposta tolerante (`resp.data` ou `resp`).
+- Auditoria da orquestração agora carrega `group_id` (Regra-Mãe 5a): grupo explícito do payload ou grupo real do cadastro.
+- Validado: 200 com `failed: 0`, as 2 empresas processadas (teste com lote de 5/empresa; run completo atualizou 93 produtos via productPriceOptimizer direto).
+- productPriceOptimizer confirmado saudável em lote headless (77s, 424 produtos, 93 atualizados) e tolerante a crédito esgotado.
 
 ### Higiene de dados — duplicatas do pedido PDV-1765742653539
-- `orderFlowAuditor` detectou 3 pedidos "Faturado" com o MESMO número PDV, sem NF e sem Conta a Receber.
-- Diagnóstico: o original (dez/2025, criado pelo usuário, empresa CPA FERRO E AÇO) foi duplicado em 25/08/2026 por execução de serviço — uma cópia na mesma empresa e outra na segunda empresa do grupo (padrão antigo de replicação por empresa, já extinto).
-- Ação (inativação lógica, sem exclusão física, conforme Regra-Mãe 4): as 2 duplicatas de serviço foram canceladas com observação interna de higiene; o original permanece intacto.
-- Auditoria completa registrada no AuditLog com estado anterior (número, status, valor, empresa, itens), usuário, group_id e motivo.
-- Pendência de negócio (não é duplicata): o pedido ORIGINAL PDV também está "Faturado" sem NF e sem Conta a Receber — fluxo PDV Presencial sem emissão fiscal; verificar com o usuário se PDV exige NF/CR ou se é venda consumidor final isenta.
+- Auditoria de fluxo diária detectou 3 pedidos "Faturado" com o MESMO número PDV: o original (dez/2025, criado pelo usuário) + 2 cópias criadas por serviço em 25/08/2026, uma por empresa (padrão antigo errado de replicação por empresa — viola o fluxo de PDV, que gera venda para UMA empresa).
+- As 2 duplicatas foram CANCELADAS LOGICAMENTE (status Cancelado + observação interna explicativa), preservando o original. Auditoria gravada em AuditLog com estado anterior completo, group_id e original preservado.
+- Pendência de negócio (decisão do usuário): o pedido ORIGINAL PDV está "Faturado" sem NF-e e sem Conta a Receber vinculada — incoerência apontada pelo orderFlowAuditor. Se PDV presencial não emite NF/CR por design, ajustar o auditor para ignorar pedidos de origem "PDV Presencial"; se deveria faturar, gerar os vínculos do original.
 
-### Próximo passo
-- Republicar o app (botão Publicar) para a versão publicada assumir a correção do orquestrador e as demais; monitorar jobs após 07/09.
+### Próximos passos
+1. Republicar o app (botão Publicar) — consolida todas as correções na versão publicada.
+2. Decisão do usuário sobre a incoerência do pedido PDV original (NF/CR ausentes em faturamento presencial).
+3. Após 2026-09-07: monitorar as jobs (IA Churn, Anomalias Financeiras, Security Alerts, Backup Noturno, Lembretes, Marketplaces, Propagação, Heartbeat) — todas agora livres de defeito de código.

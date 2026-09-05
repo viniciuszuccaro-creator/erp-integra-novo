@@ -16,7 +16,7 @@ export default function BaixaTituloDialog({
         <DialogHeader>
           <DialogTitle>{contaAtual ? 'Baixar Conta a Receber' : `Baixar Múltiplos Títulos (${contasSelecionadas.length})`}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form onSubmit={onSubmit} className="space-y-4" data-permission="Financeiro.ContaReceber.baixar" data-action="financeiro.conta_receber.baixar" data-sensitive="true">
           {!contaAtual && (
             <Alert className="bg-blue-50 border-blue-200">
               <AlertDescription>
@@ -30,7 +30,7 @@ export default function BaixaTituloDialog({
             )}
             <div className={contaAtual ? '' : 'col-span-2'}>
               <Label>Data Recebimento *</Label>
-              <Input type="date" value={dadosBaixa.data_recebimento} onChange={(e) => setDadosBaixa({ ...dadosBaixa, data_recebimento: e.target.value })} required />
+              <Input type="date" value={dadosBaixa.data_recebimento} onChange={(e) => setDadosBaixa({ ...dadosBaixa, data_recebimento: e.target.value })} required data-permission="Financeiro.ContaReceber.baixar" data-action="financeiro.conta_receber.data_recebimento" />
             </div>
           </div>
           <div>
@@ -61,7 +61,7 @@ export default function BaixaTituloDialog({
           )}
           <div className="flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-            <Button type="submit" disabled={isPending} className="bg-green-600">
+            <Button type="submit" disabled={isPending} className="bg-green-600" data-permission="Financeiro.ContaReceber.baixar" data-action="financeiro.conta_receber.baixar" data-sensitive="true">
               {isPending ? 'Baixando...' : 'Confirmar'}
             </Button>
           </div>

@@ -11,6 +11,7 @@ import { base44 } from '@/api/base44Client';
 import useContextoVisual from '@/components/lib/useContextoVisual';
 import usePermissions from '@/components/lib/usePermissions';
 import { useToast } from '@/components/ui/use-toast';
+import { useUser } from '@/components/lib/UserContext';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -24,6 +25,7 @@ import {
 export default function LiquidarReceberPagar() {
   const { filterInContext, empresaAtual, grupoAtual, createInContext } = useContextoVisual();
   const { canCreate, hasPermission } = usePermissions();
+  const { user: authUser } = useUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [abaAtiva, setAbaAtiva] = useState("receber");
@@ -77,12 +79,23 @@ export default function LiquidarReceberPagar() {
       }));
       return ordens;
     },
-    onSuccess: (ordens) => {
+    onSuccess: async (ordens, { titulos, tipo }) => {
+      await base44.entities.AuditLog.create({
+        acao: 'Criação', modulo: 'Financeiro', entidade: 'CaixaOrdemLiquidacao',
+        descricao: `${ordens.length} título(s) enviado(s) ao Caixa (${tipo === 'receber' ? 'Contas a Receber' : 'Contas a Pagar'})`,
+        data_hora: new Date().toISOString(),
+        group_id: groupId, grupo_id: groupId,
+        empresa_id: empresaAtual?.id || titulos?.[0]?.empresa_id,
+        usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
+        tipo_auditoria: 'operacional', sucesso: true,
+        dados_novos: { ordens: ordens.length, titulos_ids: titulos?.map(t => t.id) }
+      });
       queryClient.invalidateQueries({ queryKey: ['caixa-ordens-liquidacao'] });
       toast({ title: `✅ ${ordens.length} título(s) enviado(s) para Caixa!` });
       setTitulosSelecionadosReceber([]);
       setTitulosSelecionadosPagar([]);
-    }
+    },
+    onError: (err) => toast({ title: 'Erro ao enviar para o Caixa', description: err?.message, variant: 'destructive' })
   });
 
   return (

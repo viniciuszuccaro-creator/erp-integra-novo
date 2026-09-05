@@ -35,6 +35,13 @@ export default function useContasReceber({ contasList, queryClient: extQueryClie
 
   const enviarParaCaixaMutation = useMutation({
     mutationFn: async (titulos) => {
+      // Regra-Mãe 5: validação dupla (RBAC + contexto multiempresa) na persistência, não só na UI
+      if (!hasPermission('Financeiro', 'Caixa', 'criar') && !hasPermission('Financeiro', null, 'baixar')) {
+        throw new Error('Sem permissão para enviar títulos ao Caixa');
+      }
+      if (!titulos?.length || !titulos.some(t => t.group_id)) {
+        throw new Error('Contexto de grupo/empresa obrigatório para envio ao Caixa (Regra-Mãe 5a)');
+      }
       const ordens = await Promise.all(titulos.map(async (titulo) => {
         return await createInContext('CaixaOrdemLiquidacao', {
           group_id: titulo.group_id, empresa_id: titulo.empresa_id,
@@ -46,41 +53,71 @@ export default function useContasReceber({ contasList, queryClient: extQueryClie
       }));
       return ordens;
     },
-    onSuccess: async (ordens) => {
+    onSuccess: async (ordens, titulos) => {
+      await base44.entities.AuditLog.create({
+        acao: 'Criação', modulo: 'Financeiro', entidade: 'CaixaOrdemLiquidacao',
+        descricao: `${ordens.length} título(s) enviado(s) ao Caixa (Contas a Receber)`,
+        data_hora: new Date().toISOString(),
+        group_id: titulos?.[0]?.group_id, grupo_id: titulos?.[0]?.group_id, empresa_id: titulos?.[0]?.empresa_id,
+        usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
+        tipo_auditoria: 'operacional', sucesso: true,
+        dados_novos: { ordens: ordens.length, titulos_ids: titulos?.map(t => t.id) }
+      });
       queryClient.invalidateQueries({ queryKey: ['caixa-ordens-liquidacao'] });
       toast({ title: `✅ ${ordens.length} título(s) enviado(s) para o Caixa!` });
       setContasSelecionadas([]);
-    }
+    },
+    onError: (err) => toast({ title: 'Erro ao enviar para o Caixa', description: err?.message, variant: 'destructive' })
   });
 
   const baixarTituloMutation = useMutation({
     mutationFn: async ({ id, dados }) => {
+      // Regra-Mãe 5: validação dupla (RBAC + contexto multiempresa) na persistência, não só na UI
+      if (!hasPermission('Financeiro', 'ContaReceber', 'baixar') && !hasPermission('Financeiro', 'ContaReceber', 'liquidar')) {
+        throw new Error('Sem permissão para baixar título');
+      }
+      const conta = contasList.find(c => c.id === id) || {};
+      if (!conta.group_id || !conta.empresa_id) {
+        throw new Error('Título sem contexto de grupo/empresa — baixa bloqueada (Regra-Mãe 5a)');
+      }
+      // Consistência: valor recebido sempre reflete valor + juros + multa - desconto (igual ao total exibido no diálogo)
+      const valorRecebido = (conta.valor || 0) + (dados.juros || 0) + (dados.multa || 0) - (dados.desconto || 0);
       const titulo = await updateRLS('ContaReceber', id, {
-        status: "Recebido", data_recebimento: dados.data_recebimento, valor_recebido: dados.valor_recebido,
+        status: "Recebido", data_recebimento: dados.data_recebimento, valor_recebido: valorRecebido,
         forma_recebimento: dados.forma_recebimento, juros: dados.juros, multa: dados.multa, desconto: dados.desconto, observacoes: dados.observacoes
       });
-      const conta = contasList.find(c => c.id === id);
-      if (conta?.cliente_id) {
+      if (conta.cliente_id) {
         await createRLS('HistoricoCliente', {
           group_id: conta.group_id, empresa_id: conta.empresa_id, cliente_id: conta.cliente_id, cliente_nome: conta.cliente,
           modulo_origem: "Financeiro", referencia_id: id, referencia_tipo: "ContaReceber", tipo_evento: "Recebimento",
-          titulo_evento: `Recebimento de R$ ${dados.valor_recebido.toFixed(2)}`,
+          titulo_evento: `Recebimento de R$ ${valorRecebido.toFixed(2)}`,
           descricao_detalhada: `Título ${conta.descricao} recebido via ${dados.forma_recebimento}`,
           usuario_responsavel: authUser?.full_name || authUser?.email, usuario_responsavel_id: authUser?.id,
-          data_evento: new Date().toISOString(), valor_relacionado: dados.valor_recebido, resolvido: true
+          data_evento: new Date().toISOString(), valor_relacionado: valorRecebido, resolvido: true
         });
       }
       return titulo;
     },
     onSuccess: async (_data, vars) => {
+      const conta = contasList.find(c => c.id === vars?.id) || {};
       await base44.entities.AuditLog.create({
-        acao: 'Edição', modulo: 'Financeiro', entidade: 'ContaReceber', registro_id: vars?.id,
-        descricao: 'Baixa de título registrada', data_hora: new Date().toISOString()
+        acao: 'Baixa', modulo: 'Financeiro', entidade: 'ContaReceber', registro_id: vars?.id,
+        descricao: 'Baixa de título registrada', data_hora: new Date().toISOString(),
+        group_id: conta.group_id, grupo_id: conta.group_id, empresa_id: conta.empresa_id,
+        usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
+        tipo_auditoria: 'operacional', sucesso: true,
+        dados_anteriores: { status: conta.status, valor: conta.valor, data_recebimento: conta.data_recebimento, valor_recebido: conta.valor_recebido },
+        dados_novos: {
+          status: 'Recebido', data_recebimento: vars?.dados?.data_recebimento, forma_recebimento: vars?.dados?.forma_recebimento,
+          juros: vars?.dados?.juros, multa: vars?.dados?.multa, desconto: vars?.dados?.desconto,
+          valor_recebido: (conta.valor || 0) + (vars?.dados?.juros || 0) + (vars?.dados?.multa || 0) - (vars?.dados?.desconto || 0)
+        }
       });
       queryClient.invalidateQueries({ queryKey: ['ContaReceber'] });
       setDialogBaixaOpen(false); setContaAtual(null);
       toast({ title: "✅ Título baixado com sucesso!" });
-    }
+    },
+    onError: (err) => toast({ title: 'Erro ao baixar título', description: err?.message, variant: 'destructive' })
   });
 
   const baixarMultiplaMutation = useMutation({
@@ -94,10 +131,19 @@ export default function useContasReceber({ contasList, queryClient: extQueryClie
       }));
     },
     onSuccess: async () => {
-      await base44.entities.AuditLog.create({ acao: 'Edição', modulo: 'Financeiro', entidade: 'ContaReceber', descricao: `Baixa múltipla (${contasSelecionadas.length})`, data_hora: new Date().toISOString() });
+      const contasCtx = contasSelecionadas.map(cid => contasList.find(c => c.id === cid)).filter(Boolean);
+      await base44.entities.AuditLog.create({
+        acao: 'Baixa', modulo: 'Financeiro', entidade: 'ContaReceber',
+        descricao: `Baixa múltipla (${contasSelecionadas.length} título(s))`, data_hora: new Date().toISOString(),
+        group_id: contasCtx[0]?.group_id, grupo_id: contasCtx[0]?.group_id, empresa_id: contasCtx[0]?.empresa_id,
+        usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
+        tipo_auditoria: 'operacional', sucesso: true,
+        dados_novos: { titulos_ids: [...contasSelecionadas], ...dadosBaixa }
+      });
       setContasSelecionadas([]); setDialogBaixaOpen(false);
       toast({ title: `✅ ${contasSelecionadas.length} título(s) baixado(s)!` });
-    }
+    },
+    onError: (err) => toast({ title: 'Erro na baixa múltipla', description: err?.message, variant: 'destructive' })
   });
 
   const enviarWhatsAppMutation = useMutation({

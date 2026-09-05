@@ -971,3 +971,11 @@ Estado consolidado:
 - RBAC/SoD: 0 conflitos.
 - Jobs agendadas: todas com defeito de código resolvido; as pendentes aguardam apenas créditos do workspace (limitação de billing até 2026-09-07, não do ERP).
 - Pendência única do usuário: republicar o app (botão Publicar).
+
+### Checks de integridade das 5 fases (fase1Check a fase5Check) — todos 100/100
+- Fase 1 (Segurança/RBAC): 10/10 — entityGuard RLS, SoD 10 regras, PII AES-GCM em 3 entidades, security alerts 11 checks ativos, scanner 30min.
+- Fase 2 (Multiempresa): 10/10 — GRUPO CPA com 2 empresas, syncBidirectional v4.1 (DOWN 38 / UP 18 entidades), herança de 20 configs, 11 perfis RBAC com group_id.
+- Fase 3 (Fluxo de negócio/Eventos): 10/10 — moduleEventBus, orderFlowAuditor, 8 handlers de webhook interno, invalidation bus com 9 entidades em tempo real.
+- Fase 4 (Omnicanal/Portal/Mobile): 10/10 — HubAtendimento 5 canais, Portal + Chat integrados, apps Motorista/Produção mobile, SLA/fila ativos.
+- Fase 5 (Integrações/Marketplaces): 10/10 — marketplaceSync, PedidoExterno com multiempresa, rate limiting 100 req/min, circuit breaker, retry com backoff.
+- Conclusão: nenhuma fase regrediu; sistema integralmente íntegro na véspera da renovação de créditos (07/09).

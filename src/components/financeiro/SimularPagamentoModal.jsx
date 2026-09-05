@@ -13,6 +13,7 @@ import { useUser } from "@/components/lib/UserContext";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
+import usePermissions from "@/components/lib/usePermissions";
 
 /**
  * ETAPA 4 - Simulador de Pagamento
@@ -20,6 +21,7 @@ import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
  */
 export default function SimularPagamentoModal({ isOpen, onClose, contaReceber }) {
   const { user } = useUser();
+  const { hasPermission } = usePermissions();
   const { formasPagamento, isLoading: loadingFormas } = useFormasPagamento();
   const queryClient = useQueryClient();
   const [processando, setProcessando] = useState(false);
@@ -33,6 +35,14 @@ export default function SimularPagamentoModal({ isOpen, onClose, contaReceber })
   const simularPagamentoMutation = useMutation({
     mutationFn: async () => {
       setProcessando(true);
+
+      // Regra-Mãe 5a/5b: validação dupla (RBAC + contexto multiempresa) na persistência, não só na UI
+      if (!hasPermission('Financeiro', 'ContaReceber', 'baixar') && !hasPermission('Financeiro', 'ContaReceber', 'liquidar')) {
+        throw new Error('Sem permissão para simular pagamento/baixar título');
+      }
+      if (!contaReceber?.group_id || !contaReceber?.empresa_id) {
+        throw new Error('Título sem contexto de grupo/empresa — operação bloqueada (Regra-Mãe 5a)');
+      }
 
       // 1. Criar Pagamento Omnichannel
       const pagamento = await base44.entities.PagamentoOmnichannel.create({
@@ -127,6 +137,21 @@ export default function SimularPagamentoModal({ isOpen, onClose, contaReceber })
         valor_operacao: dadosSimulacao.valor_pago,
         usuario_nome: user?.full_name || "Sistema"
       });
+
+      // 6. Regra-Mãe 5d: auditoria completa (antes/depois) da simulação
+      try { await base44.entities.AuditLog.create({
+        acao: 'Baixa', modulo: 'Financeiro', entidade: 'ContaReceber', registro_id: contaReceber.id,
+        descricao: 'Pagamento simulado via webhook (fluxo completo: PagamentoOmnichannel → Baixa CR → Ordem Caixa)',
+        data_hora: new Date().toISOString(),
+        group_id: contaReceber.group_id, grupo_id: contaReceber.group_id, empresa_id: contaReceber.empresa_id,
+        usuario: user?.full_name || 'Sistema', usuario_id: user?.id,
+        tipo_auditoria: 'operacional', sucesso: true,
+        dados_anteriores: { status: contaReceber.status, valor: contaReceber.valor, valor_recebido: contaReceber.valor_recebido, status_cobranca: contaReceber.status_cobranca },
+        dados_novos: {
+          status: 'Recebido', forma_pagamento: dadosSimulacao.forma_pagamento, valor_pago: dadosSimulacao.valor_pago,
+          data_pagamento: dadosSimulacao.data_pagamento, simulado: true, pagamento_omnichannel_id: pagamento.id
+        }
+      }); } catch(e) { console.error('[SimularPagamento] Falha ao auditar:', e?.message || e); }
 
       return pagamento;
     },
@@ -270,6 +295,7 @@ export default function SimularPagamentoModal({ isOpen, onClose, contaReceber })
                   onClick={() => simularPagamentoMutation.mutate()}
                   className="flex-1 bg-green-600 hover:bg-green-700"
                   disabled={processando}
+                  data-permission="Financeiro.ContaReceber.baixar" data-action="simular_pagamento" data-sensitive="true" data-context-required="true"
                 >
                   <Zap className="w-4 h-4 mr-2" />
                   {processando ? "Processando..." : "Simular Pagamento"}

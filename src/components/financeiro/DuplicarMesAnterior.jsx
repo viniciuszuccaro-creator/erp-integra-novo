@@ -12,6 +12,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Copy, Calendar, CheckCircle2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
+import { useUser } from "@/components/lib/UserContext";
 
 /**
  * DUPLICAR MÊS ANTERIOR V21.8
@@ -23,6 +25,9 @@ export default function DuplicarMesAnterior({ empresaId }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const { canCreate } = usePermissions();
+  const { user: authUser } = useUser();
+  const podeDuplicar = canCreate('Financeiro', 'ContaPagar');
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const [dialogOpen, setDialogOpen] = useState(false);
   const [empresaSelecionada, setEmpresaSelecionada] = useState(empresaId || '');
@@ -77,7 +82,14 @@ export default function DuplicarMesAnterior({ empresaId }) {
 
   const duplicarMutation = useMutation({
     mutationFn: async () => {
+      // Regra-Mãe 5a/5b: permissão e contexto multiempresa obrigatórios na persistência
+      if (!podeDuplicar) throw new Error('Sem permissão para duplicar contas a pagar');
+      if (!contexto || !grupoAtual?.id) throw new Error('Contexto de grupo/empresa obrigatório para duplicar despesas (Regra-Mãe 5a)');
+
       const contasDuplicar = contasMesAnterior.filter(c => contasSelecionadas.includes(c.id));
+      if (contasDuplicar.some(c => !c.group_id || !c.empresa_id)) {
+        throw new Error('Existem despesas sem contexto de grupo/empresa — duplicação bloqueada (Regra-Mãe 5a)');
+      }
       const [anoDestino, mesDestino_] = mesDestino.split('-');
 
       const novasContas = contasDuplicar.map(conta => {
@@ -98,21 +110,38 @@ export default function DuplicarMesAnterior({ empresaId }) {
         };
       });
 
-      await base44.entities.ContaPagar.bulkCreate(novasContas);
-      return novasContas;
+      const criadas = await base44.entities.ContaPagar.bulkCreate(novasContas);
+
+      // Regra-Mãe 5d: auditoria da duplicação em lote
+      try { await base44.entities.AuditLog.create({
+        acao: 'Criação', modulo: 'Financeiro', entidade: 'ContaPagar',
+        descricao: `Duplicação de ${novasContas.length} despesa(s) de ${mesReferencia} para ${mesDestino}`,
+        data_hora: new Date().toISOString(),
+        group_id: grupoAtual?.id, grupo_id: grupoAtual?.id, empresa_id: empresaSelecionada || empresaAtual?.id || novasContas?.[0]?.empresa_id,
+        usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
+        tipo_auditoria: 'operacional', sucesso: true,
+        dados_novos: {
+          mes_origem: mesReferencia, mes_destino: mesDestino, quantidade: novasContas.length,
+          origem_ids: contasDuplicar.map(c => c.id), valor_total: novasContas.reduce((s, c) => s + (c.valor || 0), 0)
+        }
+      }); } catch(e) { console.error('[DuplicarMesAnterior] Falha ao auditar:', e?.message || e); }
+
+      return criadas;
     },
     onSuccess: (novasContas) => {
       queryClient.invalidateQueries({ queryKey: ['contasPagar'] });
+      queryClient.invalidateQueries({ queryKey: ['contas-pagar-mes-anterior'] });
       toast({ title: `✅ ${novasContas.length} despesa(s) duplicada(s) para ${mesDestino}!` });
       setDialogOpen(false);
       setContasSelecionadas([]);
-    }
+    },
+    onError: (err) => toast({ title: 'Erro ao duplicar despesas', description: err?.message, variant: 'destructive' })
   });
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
+        <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50" disabled={!podeDuplicar} data-permission="Financeiro.ContaPagar.criar" data-action="duplicar_mes_anterior" data-sensitive="true" data-context-required="true">
           <Copy className="w-4 h-4 mr-2" />
           Duplicar Mês Anterior
         </Button>
@@ -237,8 +266,9 @@ export default function DuplicarMesAnterior({ empresaId }) {
           </Button>
           <Button
             onClick={() => duplicarMutation.mutate()}
-            disabled={contasSelecionadas.length === 0 || duplicarMutation.isPending}
+            disabled={contasSelecionadas.length === 0 || duplicarMutation.isPending || !podeDuplicar}
             className="bg-purple-600 hover:bg-purple-700"
+            data-permission="Financeiro.ContaPagar.criar" data-action="duplicar_mes_anterior" data-sensitive="true" data-context-required="true"
           >
             <CheckCircle2 className="w-4 h-4 mr-2" />
             Duplicar {contasSelecionadas.length} Despesa(s)

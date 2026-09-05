@@ -1036,6 +1036,9 @@ Estado consolidado:
 - `ExtratoBancarioResumo.jsx` e `MovimentosDiarios.jsx` auditados: somente leitura (consultas via `filterInContext` com contexto) — sem persistências, sem alterações.
 - `LiquidarReceberPagar.jsx` revisado: já tinha contexto+RBAC+auditoria; corrigido texto corrompido e adicionados marcadores RBAC aos 4 botões de envio ao Caixa.
 - `BaixaTituloDialog.jsx` e `BaixaContaPagarDialog.jsx` verificados: já marcados com RBAC e validação nos hooks pais — sem alterações.
+- `DuplicarMesAnterior.jsx` endurecido: criação em lote de contas a pagar agora exige permissão de criar, valida contexto de grupo/empresa (bloqueia despesas órfãs), registra AuditLog com origem/destino/valores e trata erro com toast; botões bloqueados e marcados RBAC.
+- `SimularPagamentoModal.jsx` endurecido: simulação de webhook (fluxo completo de baixa) agora tem validação dupla RBAC+contexto na persistência e AuditLog com antes/depois; botão marcado.
+- `useContasReceber.jsx` e `ContasPagarTab.jsx` verificados: baixas, envios ao Caixa, aprovação e exportação já com validação dupla + AuditLog — sem alterações.
 - Varredura das persistências sensíveis do Financeiro/Fiscal: **CONCLUÍDA**.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 

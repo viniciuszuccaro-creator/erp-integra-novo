@@ -862,7 +862,7 @@ Estado consolidado:
 
 ### Plano pos-07/09 (checklist de reativacao)
 1. Republicar o app (botao Publicar) para aplicar correcoes RBAC na versao publicada.
-2. Reativar (toggle) apenas: Deploy Heartbeat 15m (deployAudit) — Command Center volta a receber health/latencia/erros.
+2. FEITO (2026-09-05): Deploy Heartbeat 15m (deployAudit, id 69a803...) reativado via toggle. Com a correcao do heartbeat agendado (`{heartbeat: true}`), voltara a executar com sucesso assim que os creditos forem renovados (automacoes agendadas estao bloqueadas ate 07/09).
 3. Verificar execucao de sucesso das jobs de IA diarias ativas (Churn 11:15, Anomalias Financeiras 11:00) e de Lembretes Financeiros 12:00 — falhas atuais sao exclusivamente por creditos.
 4. RESOLVIDO (2026-09-05): as falhas do `marketplaceSync` (job agendada invocava sem o parametro `marketplace` → 400) e do `Deploy Heartbeat` (job agendada invocava funcao webhook-only sem o header x-deploy-token → 401) eram defeitos de integracao, NAO de creditos. Corrigido melhorando as funcoes existentes: marketplaceSync agora executa todos os marketplaces quando chamado sem parametro especifico (e o check de admin inerte `!user?.role === 'admin'` foi corrigido para `user?.role !== 'admin'`); deployAudit agora aceita heartbeat agendado (`{heartbeat: true}`) gravando registro fixo de health no AuditLog, mantendo a via CI com token intacta. Ambos testados: 200. Apos republicar, o Deploy Heartbeat pode ser reativado imediatamente (nao depende de creditos); `Propagacao Noturna Grupo→Empresas` (1 falha) acompanhar as jobs normais.
 5. NAO reativar automacoes arquivadas (duplicadas/de funcoes inexistentes).

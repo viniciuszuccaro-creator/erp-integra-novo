@@ -832,3 +832,12 @@ Checklist inicial:
 - Varredura final em entidades de sistema (`Notificacao`, `MonitoramentoSistema`, logs, auditorias, sessoes) e entidades operacionais (`Pedido`, `Cliente`, `Produto`, `Fornecedor`, `Transportadora`, contas, `Entrega`, `NotaFiscal`, estoque, compras, producao): zero registros sem `group_id`.
 - Observacao: enquanto a versao publicada nao for atualizada, a copia publicada (pacote antigo) pode continuar gerando logs sem grupo; republicar o app resolve.
 - Proximo passo: republicar o app para a versao publicada assumir as correcoes; apos 2026-09-07, reativar automacoes e o Deploy Heartbeat do Command Center pausados por falta de creditos de integracao.
+
+### Correcao RBAC - admin bloqueado em Comercial.Pedidos.criar (2026-09-05)
+
+- Causa raiz identificada: falhas transitórias do guard de permissões (`entityGuard`) negavam escritas mesmo para admin. Tres caminhos falhavam fechados sem checar o papel do usuario: cooldown de rate-limit (retornava `allowed: false` para escrita ANTES do check de admin), resposta 429 e exceções 5xx; o `ProtectedSection` tratava qualquer falha do guard como negação definitiva e registrava falso "Acesso negado" no AuditLog.
+- `entityGuard` corrigido nos dois pontos, sem criar arquivo novo: bypass de admin via cache de permissões antes do cooldown, e bypass de admin via cache no handler de exceção — admin em cache nunca é penalizado por falha transitória.
+- `ProtectedSection.jsx` corrigido para degradar para a decisão local (`hasPermission`) em falha transitória do guard (429/5xx), alinhando-se ao comportamento que o `ProtectedAction` já tinha; usuario sem perfil continua fail-closed localmente.
+- Teste direto do `entityGuard` com `Comercial.Pedidos.criar`: retorno `allowed: true` (200), confirmando que o admin volta a criar pedidos.
+- Segurança preservada: não-admins seguem fail-closed para escrita em exceções; validação dupla (frontend + backend) mantida; nenhum modulo ou arquivo novo criado.
+- Proximo passo: republicar o app para a versao publicada assumir a correcao; apos 2026-09-07, reativar automacoes pausadas por falta de creditos de integracao.

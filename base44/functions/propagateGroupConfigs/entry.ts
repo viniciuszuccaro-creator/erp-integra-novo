@@ -72,6 +72,7 @@ Deno.serve(async (req) => {
       'LocalEstoque', 'KitProduto', 'Cliente', 'Fornecedor', 'Transportadora', 'Representante',
       'Colaborador', 'ContatoB2B', 'SegmentoCliente', 'RegiaoAtendimento',
       'Departamento', 'Cargo', 'Turno', 'Veiculo', 'Motorista', 'TipoFrete', 'RotaPadrao',
+      'TabelaNCM', // schema: ncm/descricao "único por grupo" — cadastro compartilhado, nunca duplicar
     ]);
     // Subset com o campo empresas_compartilhadas_ids no schema (compartilhamento explícito)
     const CATALOG_SHARED = new Set([
@@ -129,6 +130,9 @@ Deno.serve(async (req) => {
         SegmentoCliente: ['nome_segmento'],
         RegiaoAtendimento: ['nome_regiao', 'codigo_regiao'],
         ModeloDocumento: ['nome', 'tipo'],
+        TabelaFiscal: ['nome_regra', 'cfop'],
+        ConfiguracaoNFe: ['ambiente', 'serie_nfe'],
+        TabelaNCM: ['ncm'],
         ConfiguracaoSistema: ['chave'],
         IAConfig: ['chave'],
         EventoNotificacao: ['nome_evento'],
@@ -205,7 +209,8 @@ Deno.serve(async (req) => {
             : { ...r, group_id: undefined, empresa_id: emp.id });
           const keyField = keys.find(k => r?.[k]);
           const keyVal = keyField ? String(r[keyField]) : null;
-          const existing = keyVal ? existingByEmpresa.get(`${emp.id}:${keyVal}`) : null;
+          if (!keyVal) { skipped++; continue; } // sem campo-chave: nunca copiar (evita duplicação a cada execução)
+          const existing = existingByEmpresa.get(`${emp.id}:${keyVal}`);
           if (existing) {
             if (strategy === 'override') {
               toUpdate.push({ id: existing.id, payload });
@@ -276,7 +281,8 @@ Deno.serve(async (req) => {
           : { ...r, empresa_id: undefined, group_id: groupId });
         const keyField = keys.find(k => r?.[k]);
         const keyVal = keyField ? String(r[keyField]) : null;
-        const existing = keyVal ? groupKeyMap.get(keyVal) : null;
+        if (!keyVal) { skipped++; continue; } // sem campo-chave: nunca copiar (evita duplicação a cada execução)
+        const existing = groupKeyMap.get(keyVal);
         if (existing) {
           if (strategy === 'override') {
             toUpdate.push({ id: existing.id, payload });

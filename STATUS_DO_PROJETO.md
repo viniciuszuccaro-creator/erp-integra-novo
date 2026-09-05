@@ -890,3 +890,25 @@ Estado consolidado:
 
 ### Próximo passo
 - Republicar o app para a versao publicada assumir a correcao; a job noturna retoma execucao normal apos 2026-09-07 (creditos de integracao).
+
+## 2026-09-05 — Hardening das jobs agendadas (contexto sem usuário autenticado)
+
+### Causa raiz comum identificada
+- Invocações agendadas (EventBridge) chegam SEM usuário autenticado. Funções que exigiam `auth.me()`/token antes de rotear falhavam 401/403/500 e marcavam a job como failed — o mesmo padrão já corrigido no deployAudit, agora eliminado nos demais.
+
+### Correções nas funções existentes (sem arquivo novo)
+- `paymentStatusManager`: job "Lembretes Financeiros D+0/D±3" retornava 401 (exigia usuário ANTES de rotear). Agora: parse de body tolerante, sem usuário + sem action → default `lembretes_cobranca` (varredura multiempresa); ações interativas continuam exigindo usuário (RBAC preservado); admin pode disparar a varredura manualmente. Testado: 200 `{ok: true, enviados: 0}`.
+- `marketplaceSync`: job "Sincronização de Marketplaces (2h)" retornaria 403/500 agendada (exigia admin). Agora: sem usuário é permitido apenas com contexto multiempresa explícito no payload; sem contexto retorna 200 com `skipped` (Regra-Mãe 5a — nada opera fora de grupo/empresa); não-admin interativo continua bloqueado.
+
+### function_args fixados nas jobs (contexto explícito obrigatório)
+- Deploy Heartbeat 15m → `{heartbeat: true}` (rota de heartbeat agendada, sem exigir token CI).
+- Sincronização de Marketplaces (2h) → `{group_id: 69170f28...}` (contexto do grupo real).
+- Propagação Noturna Grupo→Empresas → `{group_id, direction: grupo_to_empresas}`.
+- Lembretes Financeiros D+0/D±3 → `{action: lembretes_cobranca, group_id}`.
+
+### Validação de dados pós-higiene
+- Scan final de 33 entidades de catálogo: ZERO cópias órfãs por empresa (sem group_id) restantes.
+
+### Estado consolidado das jobs agendadas ativas
+- Todas com defeito de código resolvido; as que ainda falham, falham apenas por esgotamento de créditos de integração do workspace (bloqueio até 2026-09-07 — limitação de billing, não do ERP): jobs de IA (Churn, Anomalias Financeiras), Security Alerts e envios (WhatsApp/e-mail).
+- Pendente do usuário: republicar o app (botão Publicar) para a versão publicada assumir todas as correções.

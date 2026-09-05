@@ -147,12 +147,18 @@ async function conciliarExtrato(base44, ctx, conc){
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const ctx = await getUserAndPerfil(base44);
-    const user = ctx.user;
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-
-    const body = await req.json();
-    if (!user && !body?.action) body.action = 'lembretes_cobranca';
+    // Execucao agendada/evento nao possui usuario autenticado — nao pode falhar com 401 antes de rotear
+    let user = null;
+    try { user = await base44.auth.me(); } catch (_) { user = null; }
+    const ctx = { user, perfil: null };
+    let body = {};
+    try { body = await req.json(); } catch (_) { body = {}; }
+    // Job agendada (sem usuario e sem action): varredura de lembretes de cobranca
+    if (!user && !body?.action && !body?.event?.entity_name) body.action = 'lembretes_cobranca';
+    // Acoes interativas continuam exigindo usuario autenticado (RBAC/auditoria preservados)
+    if (!user && body?.action !== 'lembretes_cobranca' && !body?.event?.entity_name) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const { entity, id, ids, action, justificativa, pagamento: pagamentoIn, conciliacao } = body || {};
     const internalToken = body?.internal_token || req.headers.get('x-internal-token') || null;
     const trustedInternal = !!(internalToken && Deno.env.get('DEPLOY_AUDIT_TOKEN') && internalToken === Deno.env.get('DEPLOY_AUDIT_TOKEN'));
@@ -183,8 +189,8 @@ Deno.serve(async (req) => {
       return Response.json({ ok: true, reminder: true, diffDays });
     }
 
-    // Execução agendada/service: varredura de CR e envio de lembretes (requer internal_token)
-    if (action === 'lembretes_cobranca' && (trustedInternal || !user)) {
+    // Execução agendada/service: varredura de CR e envio de lembretes (internal_token, agendada sem usuário, ou admin manual)
+    if (action === 'lembretes_cobranca' && (trustedInternal || !user || user?.role === 'admin')) {
       const empresaIdIn = body.empresa_id || null;
       const groupIdIn = body.group_id || null;
       let empresas = [];

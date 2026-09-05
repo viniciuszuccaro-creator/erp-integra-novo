@@ -7,10 +7,16 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (user?.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
+    // Execução agendada não possui usuário autenticado — não pode falhar 403 antes de rotear
+    let user = null;
+    try { user = await base44.auth.me(); } catch (_) { user = null; }
+    if (user && user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
 
     const { marketplace, action = 'sync_pedidos', empresa_id, group_id } = await req.json().catch(() => ({}));
+    // Agendado sem contexto multiempresa explícito: nada a sincronizar (Regra-Mãe 5a)
+    if (!user && !group_id && !empresa_id) {
+      return Response.json({ ok: true, skipped: 'execucao_agendada_sem_contexto_multiempresa' });
+    }
     // Invocacao agendada sem marketplace especifico → executa todos os marketplaces suportados
     const VALID = ['mercado_livre', 'amazon', 'shopee'];
     const marketplaces = marketplace ? [marketplace] : VALID;

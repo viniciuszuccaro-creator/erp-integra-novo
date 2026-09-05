@@ -63,6 +63,21 @@ Deno.serve(async (req) => {
     entidades = Array.isArray(entidades) && entidades.length ? entidades : DEFAULT_ENTIDADES;
     strategy = strategy || 'merge'; // 'skip' | 'merge' | 'override'
 
+    // Regra-Mãe 9 — CADASTROS ÚNICOS: propagação por COMPARTILHAMENTO (empresas_compartilhadas_ids),
+    // nunca por duplicação de registros por empresa (alinhado ao syncBidirectional CATALOG_UNIQUE).
+    const CATALOG_UNIQUE = new Set([
+      'ConfiguracaoSistema', 'PerfilAcesso', 'FormaPagamento', 'PlanoDeContas', 'CentroCusto',
+      'TabelaPreco', 'TabelaPrecoItem', 'CondicaoComercial', 'TipoDespesa', 'Banco',
+      'Produto', 'GrupoProduto', 'Marca', 'SetorAtividade', 'UnidadeMedida',
+      'LocalEstoque', 'KitProduto', 'Cliente', 'Fornecedor', 'Transportadora', 'Representante',
+      'Colaborador', 'ContatoB2B', 'SegmentoCliente', 'RegiaoAtendimento',
+      'Departamento', 'Cargo', 'Turno', 'Veiculo', 'Motorista', 'TipoFrete', 'RotaPadrao',
+    ]);
+    // Subset com o campo empresas_compartilhadas_ids no schema (compartilhamento explícito)
+    const CATALOG_SHARED = new Set([
+      'Cliente', 'Fornecedor', 'Transportadora', 'Representante', 'Produto', 'RegiaoAtendimento',
+    ]);
+
     if (!groupId && empresaId) {
       const emp = await base44.asServiceRole.entities.Empresa.filter({ id: empresaId }, undefined, 1).then(r => r?.[0]).catch(() => null);
       groupId = emp?.group_id || null;
@@ -141,6 +156,30 @@ Deno.serve(async (req) => {
         baseRegs = await base44.asServiceRole.entities[entityName].filter({ group_id: null, empresa_id: null }, undefined, 5000).catch(() => []);
       }
       if (!baseRegs.length) return { entity: entityName, created: 0, updated: 0, skipped: 0, total_source: 0, direction: 'grupo_to_empresas' };
+
+      // Regra-Mãe 9 — CADASTROS ÚNICOS: nunca duplicar cadastro por empresa.
+      // Compartilha via empresas_compartilhadas_ids no registro canônico do grupo (idempotente).
+      if (CATALOG_UNIQUE.has(entityName)) {
+        let sharedUpdated = 0;
+        if (CATALOG_SHARED.has(entityName) && targetEmpresas.length) {
+          const empresaIds = targetEmpresas.map(e => e.id).filter(Boolean);
+          const toShare = [];
+          for (const r of baseRegs) {
+            const atuais = Array.isArray(r.empresas_compartilhadas_ids) ? r.empresas_compartilhadas_ids.filter(Boolean) : [];
+            const merged = Array.from(new Set([...atuais, ...empresaIds]));
+            if (merged.length !== atuais.length) {
+              const patch = { empresas_compartilhadas_ids: merged };
+              if (entityName === 'Produto') patch.compartilhado_grupo = true;
+              toShare.push({ id: r.id, patch });
+            }
+          }
+          for (const { id, patch } of toShare) {
+            try { await base44.asServiceRole.entities[entityName].update(id, patch); sharedUpdated++; } catch (e) { console.error('[propagateGroupConfigs] share:', e); }
+          }
+        }
+        return { entity: entityName, mode: 'cadastro_unico_compartilhado', created: 0, updated: sharedUpdated, skipped: baseRegs.length, total_source: baseRegs.length, direction: 'grupo_to_empresas' };
+      }
+
       const keys = keyFieldsByEntity(entityName);
       let created = 0, updated = 0, skipped = 0;
 
@@ -207,6 +246,11 @@ Deno.serve(async (req) => {
 
     const copyEmpresaToGroup = async (entityName, empresaOrigemId) => {
       if (!base44.asServiceRole.entities?.[entityName]) return { entity: entityName, skipped: 'not-found' };
+      // Regra-Mãe 9 — CADASTROS ÚNICOS: o registro canônico vive no grupo; cópias por empresa
+      // são legacy e NUNCA propagam UP por duplicação (evita duplicar o cadastro no grupo).
+      if (CATALOG_UNIQUE.has(entityName)) {
+        return { entity: entityName, mode: 'cadastro_unico_compartilhado', created: 0, updated: 0, skipped: 'catalog-unico', total_source: 0, direction: 'empresa_to_grupo' };
+      }
       const baseRegs = await base44.asServiceRole.entities[entityName].filter({ empresa_id: empresaOrigemId }, undefined, 5000).catch(() => []);
       if (!baseRegs.length) return { entity: entityName, created: 0, updated: 0, skipped: 0, total_source: 0, direction: 'empresa_to_grupo' };
       const keys = keyFieldsByEntity(entityName);

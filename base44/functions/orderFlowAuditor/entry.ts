@@ -4,7 +4,7 @@ let LAST_AUDITOR_RUN_AT = 0;
 const AUDITOR_COOLDOWN_MS = 30 * 60 * 1000;
 
 /**
- * orderFlowAuditor v2.0 — Orquestrador de Fluxo de Módulos
+ * orderFlowAuditor v2.1 — Orquestrador de Fluxo de Módulos
  * Fase 3: verifica coerência Pedido ↔ Estoque ↔ Financeiro ↔ Expedição ↔ NF-e
  * Publica eventos no moduleEventBus para cada inconsistência detectada.
  * Multiempresa: filtra por group_id + empresa_id quando fornecidos.
@@ -27,12 +27,13 @@ Deno.serve(async (req) => {
     if (empresa_id) scope.empresa_id = empresa_id;
 
     // Buscar pedidos + dados relacionados em paralelo
-    const [pedidosRes, entregasAllRes, nfsAllRes, contasRes, movsRes] = await Promise.allSettled([
+    const [pedidosRes, entregasAllRes, nfsAllRes, contasRes, movsRes, caixaRes] = await Promise.allSettled([
       base44.asServiceRole.entities.Pedido.filter(scope, '-updated_date', 50),
       base44.asServiceRole.entities.Entrega.filter(scope, '-updated_date', 100),
       base44.asServiceRole.entities.NotaFiscal.filter(scope, '-updated_date', 100),
       base44.asServiceRole.entities.ContaReceber.filter(scope, '-updated_date', 100),
       base44.asServiceRole.entities.MovimentacaoEstoque.filter(scope, '-updated_date', 100),
+      base44.asServiceRole.entities.CaixaMovimento.filter(scope, '-updated_date', 100),
     ]);
 
     const pedidos     = pedidosRes.status === 'fulfilled'  ? (pedidosRes.value  || []) : [];
@@ -40,6 +41,7 @@ Deno.serve(async (req) => {
     const nfsAll      = nfsAllRes.status === 'fulfilled'    ? (nfsAllRes.value    || []) : [];
     const contasAll   = contasRes.status === 'fulfilled'    ? (contasRes.value    || []) : [];
     const movsAll     = movsRes.status === 'fulfilled'      ? (movsRes.value      || []) : [];
+    const caixaAll    = caixaRes.status === 'fulfilled'     ? (caixaRes.value     || []) : [];
 
     const issues = [];
     const flowStats = { pedidosFaturados: 0, comEntrega: 0, comNF: 0, comCR: 0, comMov: 0 };
@@ -59,6 +61,15 @@ Deno.serve(async (req) => {
       const hasCR      = contas.length > 0;
       const hasMov     = movs.length > 0;
 
+      // Fluxo PDV presencial: venda balcão liquidada no caixa (CaixaMovimento) —
+      // não gera NF-e nem ContaReceber por design. Só é considerada coerente
+      // se houver movimentação de caixa vinculada; sem caixa, segue sinalizando.
+      const isPDV = p?.origem_pedido === 'PDV Presencial' || (p?.numero_pedido || '').startsWith('PDV-');
+      const caixaMovs = isPDV ? caixaAll.filter(m =>
+        m?.pedido_id === pid || ((m?.descricao || '').includes(p?.numero_pedido || '__none__'))
+      ) : [];
+      const hasCaixaPDV = caixaMovs.length > 0;
+
       const isFaturado = ['Faturado','Pronto para Faturar','Em Expedição','Em Trânsito','Entregue'].includes(status);
       if (isFaturado) {
         flowStats.pedidosFaturados++;
@@ -69,7 +80,7 @@ Deno.serve(async (req) => {
       }
 
       const incoerencias = [];
-      if ((status === 'Faturado' || status === 'Pronto para Faturar') && !hasNF) {
+      if ((status === 'Faturado' || status === 'Pronto para Faturar') && !hasNF && !hasCaixaPDV) {
         incoerencias.push('Pedido sem Nota Fiscal associada');
       }
       if (['Em Expedição','Em Trânsito','Entregue'].includes(status) && !hasEntrega) {
@@ -78,8 +89,11 @@ Deno.serve(async (req) => {
       if (status === 'Entregue' && hasEntrega && !entregas.some(e => !!e?.data_entrega)) {
         incoerencias.push('Entrega sem data_entrega registrada');
       }
-      if (isFaturado && !hasCR) {
+      if (isFaturado && !hasCR && !hasCaixaPDV) {
         incoerencias.push('Pedido faturado sem ContaReceber vinculada');
+      }
+      if (isPDV && isFaturado && !hasCaixaPDV && !hasNF && !hasCR) {
+        incoerencias.push('Pedido PDV faturado sem recebimento no caixa nem vínculos fiscais/financeiros');
       }
 
       if (incoerencias.length > 0) {
@@ -109,7 +123,7 @@ Deno.serve(async (req) => {
       issues: issues.length,
       flowStats,
       details: issues.slice(0, 20),
-      version: '2.0',
+      version: '2.1',
     });
   } catch (error) {
     return Response.json({ error: String(error?.message || error) }, { status: 500 });

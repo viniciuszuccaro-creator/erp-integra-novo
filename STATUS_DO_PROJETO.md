@@ -934,5 +934,22 @@ Estado consolidado:
 
 ### Próximos passos
 1. Republicar o app (botão Publicar) — consolida todas as correções na versão publicada.
-2. Decisão do usuário sobre a incoerência do pedido PDV original (NF/CR ausentes em faturamento presencial).
-3. Após 2026-09-07: monitorar as jobs (IA Churn, Anomalias Financeiras, Security Alerts, Backup Noturno, Lembretes, Marketplaces, Propagação, Heartbeat) — todas agora livres de defeito de código.
+2. Após 2026-09-07: monitorar as jobs (IA Churn, Anomalias Financeiras, Security Alerts, Backup Noturno, Lembretes, Marketplaces, Propagação, Heartbeat) — todas agora livres de defeito de código.
+
+## 2026-09-05 — RESOLVIDO: pedido PDV original era falso positivo — auditor v2.1 reconhece venda balcão liquidada no caixa
+
+### Diagnóstico definitivo (com dados reais)
+- O pedido PDV-1765742653539 original (Faturado, R$ 323,90) POSSUI 3 movimentos de caixa vinculados somando exatamente R$ 323,90 (100,00 + 100,00 + 123,90, "Venda PDV-...") — dinheiro integralmente recebido no caixa em 14/12/2025.
+- Conclusão: o fluxo PDV Presencial está financeiramente consistente — venda balcão paga no caixa NÃO gera ContaReceber (correto) nem NF-e (fluxo presencial sem emissão). O sinal do auditor era falso positivo, não incoerência real.
+
+### Melhoria no `orderFlowAuditor` existente (v2.0 → v2.1, sem arquivo novo)
+- Auditor agora carrega os `CaixaMovimento` do escopo e reconhece o fluxo PDV (origem "PDV Presencial" ou número iniciado em "PDV-").
+- Pedido faturado PDV COM movimentação de caixa vinculada deixa de exigir NF-e e ContaReceber (venda liquidada no balcão).
+- Fiscalização preservada e reforçada: pedido PDV faturado SEM caixa, sem NF e sem CR gera novo sinal específico ("Pedido PDV faturado sem recebimento no caixa nem vínculos fiscais/financeiros"); todos os demais fluxos continuam exigindo NF/CR como antes.
+- Multiempresa preservada: busca de caixa usa o mesmo escopo group_id/empresa_id do resto da auditoria; logs de Auditoria continuam carimbados com grupo/empresa.
+
+### Validação
+- Teste com o grupo real: 39 pedidos auditados, 0 inconsistências, flowStats coerente (1 faturado PDV com recebimento em caixa). v2.1.
+
+### Próximo passo
+- Republicar o app (botão Publicar) para a versão publicada assumir o auditor v2.1; após 07/09, a rotina diária 06:30 fica limpa de falsos positivos.

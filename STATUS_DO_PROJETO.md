@@ -866,3 +866,27 @@ Estado consolidado:
 3. Verificar execucao de sucesso das jobs de IA diarias ativas (Churn 11:15, Anomalias Financeiras 11:00) e de Lembretes Financeiros 12:00 — falhas atuais sao exclusivamente por creditos.
 4. RESOLVIDO (2026-09-05): as falhas do `marketplaceSync` (job agendada invocava sem o parametro `marketplace` → 400) e do `Deploy Heartbeat` (job agendada invocava funcao webhook-only sem o header x-deploy-token → 401) eram defeitos de integracao, NAO de creditos. Corrigido melhorando as funcoes existentes: marketplaceSync agora executa todos os marketplaces quando chamado sem parametro especifico (e o check de admin inerte `!user?.role === 'admin'` foi corrigido para `user?.role !== 'admin'`); deployAudit agora aceita heartbeat agendado (`{heartbeat: true}`) gravando registro fixo de health no AuditLog, mantendo a via CI com token intacta. Ambos testados: 200. Apos republicar, o Deploy Heartbeat pode ser reativado imediatamente (nao depende de creditos); `Propagacao Noturna Grupo→Empresas` (1 falha) acompanhar as jobs normais.
 5. NAO reativar automacoes arquivadas (duplicadas/de funcoes inexistentes).
+
+## 2026-09-05 — Correcao do propagateGroupConfigs (Propagacao Noturna Grupo→Empresas)
+
+### Diagnostico
+- A falha unica da job `Propagação Noturna Grupo→Empresas` NAO era defeito de codigo: a funcao executa com sucesso (200, ~9-52s). Automacoes agendadas estao bloqueadas por esgotamento de creditos de integracao ate 2026-09-07 (limitacao do workspace, nao do ERP).
+- Teste ponta-a-ponta porem revelou defeito grave de duplicacao: a propagação descendente CRIAVA copias de cadastros por empresa (e sem `group_id` — registros orfaos), contradizendo a Regra-Mae 9 (cadastro unico compartilhado) e o modo `cadastro_unico_compartilhado` ja implementado no `syncBidirectional`.
+
+### Correcoes no `propagateGroupConfigs/entry.ts` (melhoria no existente, sem arquivo novo)
+- Adicionado o mesmo conjunto `CATALOG_UNIQUE`/`CATALOG_SHARED` do `syncBidirectional`: entidades de cadastro (Produto, Cliente, Fornecedor, FormaPagamento, PlanoDeContas, Banco, etc. — 33 entidades) NUNCA mais sao duplicadas por empresa na direção Grupo→Empresas; para as 6 entidades com `empresas_compartilhadas_ids` o compartilhamento e aplicado de forma idempotente no registro canonico do grupo.
+- Direção Empresa→Grupo tambem protegida: cadastros unicos nunca propagam UP por duplicacao (o canônico vive no grupo).
+- Corrigido runaway de duplicacao para configuracoes por empresa sem campo-chave no dedupe: adicionadas chaves `TabelaFiscal: [nome_regra, cfop]`, `ConfiguracaoNFe: [ambiente, serie_nfe]` e `TabelaNCM: [ncm]` — antes, cada execução noturna criava copias novas de TabelaFiscal e ConfiguracaoNFe (duplicacao ilimitada).
+- Adicionada trava de segurança: registro sem nenhum campo-chave nunca e copiado (skip contabilizado), eliminando o risco de runaway para qualquer entidade futura.
+- `TabelaNCM` incluida no catalogo unico (schema: ncm/descricao "unico por grupo") — copias por empresa removidas.
+
+### Higiene de dados (auditada em AuditLog, entidade HigieneDados, group_id real)
+- Removidas 1543 duplicatas orfas (sem group_id) de 17 entidades de cadastro criadas involuntariamente durante a primeira execucao de teste (incluindo 1248 Produto, 91 GrupoProduto).
+- Dedupe de copias acumuladas por falta de chave: TabelaFiscal (10 removidas), ConfiguracaoNFe (2), TabelaNCM (30 copias por empresa removidas — cadastro unico).
+
+### Validacao (3 execucoes de teste)
+- Execucao pos-correcao: 200 em ~9s; cadastros em `cadastro_unico_compartilhado` (created 0), TabelaFiscal atualizando copias existentes (created 0, updated 10), zero novas duplicatas.
+- Estado final: banco restaurado ao estado anterior aos testes + configuracoes por empresa legitimas (TabelaFiscal, ConfiguracaoNFe, Parametros, Templates) com exatamente 1 copia por empresa.
+
+### Próximo passo
+- Republicar o app para a versao publicada assumir a correcao; a job noturna retoma execucao normal apos 2026-09-07 (creditos de integracao).

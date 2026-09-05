@@ -8,7 +8,10 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine
 } from "recharts";
 import { Download, TrendingUp, TrendingDown, DollarSign, Percent } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import useContextoVisual from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
+import { useUser } from "@/components/lib/UserContext";
 import FiltrosPeriodoEmpresa from "@/components/relatorios/FiltrosPeriodoEmpresa";
 import { exportarCSV } from "@/components/relatorios/exportUtils";
 
@@ -17,7 +20,11 @@ export default function RelatorioDRE() {
     data_inicio: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0],
     data_fim: new Date().toISOString().split('T')[0],
   });
-  const { filterInContext, empresaAtual } = useContextoVisual();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const { user } = useUser();
+  const { canExport } = usePermissions();
+  const groupId = grupoAtual?.id || empresaAtual?.group_id || null;
+  const podeExportar = canExport('Relatórios', 'DRE') || canExport('Financeiro');
 
   const { data: pedidos = [] } = useQuery({
     queryKey: ['dre-pedidos', empresaAtual?.id],
@@ -79,6 +86,21 @@ export default function RelatorioDRE() {
   const fmt = v => `R$ ${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
   const fmtPct = v => `${Number(v).toFixed(1)}%`;
 
+  // Regra-Mãe 5b/5d: exportação sensível exige permissão e gera auditoria
+  const handleExportCSV = async (dados, nomeArquivo) => {
+    if (!podeExportar || !groupId) return;
+    exportarCSV(dados, nomeArquivo);
+    try { await base44.entities.AuditLog.create({
+      acao: 'Exportação', modulo: 'Relatórios', entidade: 'RelatorioDRE',
+      descricao: `Exportação CSV do relatório DRE (${nomeArquivo})`,
+      data_hora: new Date().toISOString(),
+      group_id: groupId, grupo_id: groupId, empresa_id: empresaAtual?.id || null,
+      usuario: user?.full_name || 'Sistema', usuario_id: user?.id,
+      tipo_auditoria: 'operacional', sucesso: true,
+      dados_novos: { arquivo: nomeArquivo, periodo: `${filtros.data_inicio} a ${filtros.data_fim}`, registros: dados.length }
+    }); } catch (e) { console.error('[DRE] Falha ao auditar exportação:', e?.message || e); }
+  };
+
   const linhasDRE = [
     { label: '(+) Receita Bruta', valor: receitaBruta, destaque: false },
     { label: '(-) CMV / CPV', valor: -cmv, destaque: false },
@@ -96,7 +118,7 @@ export default function RelatorioDRE() {
         <CardHeader className="pb-2">
           <div className="flex justify-between items-center">
             <CardTitle className="text-base">DRE Resumida — {filtros.data_inicio} a {filtros.data_fim}</CardTitle>
-            <Button size="sm" variant="outline" onClick={() => exportarCSV(linhasDRE.map(l=>({descricao:l.label, valor:l.valor, margem:l.margem})), 'dre_resumida')}>
+            <Button size="sm" variant="outline" disabled={!podeExportar} data-permission="Relatórios.DRE.exportar" data-action="exportar_csv" data-sensitive="true" data-context-required="true" onClick={() => handleExportCSV(linhasDRE.map(l=>({descricao:l.label, valor:l.valor, margem:l.margem})), 'dre_resumida')}>
               <Download className="w-3 h-3 mr-1" /> CSV
             </Button>
           </div>
@@ -149,7 +171,7 @@ export default function RelatorioDRE() {
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <CardTitle className="text-base">DRE Mensal (Receita × CMV × EBITDA)</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => exportarCSV(dreMensal, 'dre_mensal')}>
+              <Button size="sm" variant="outline" disabled={!podeExportar} data-permission="Relatórios.DRE.exportar" data-action="exportar_csv" data-sensitive="true" data-context-required="true" onClick={() => handleExportCSV(dreMensal, 'dre_mensal')}>
                 <Download className="w-3 h-3 mr-1" /> CSV
               </Button>
             </div>
@@ -176,7 +198,7 @@ export default function RelatorioDRE() {
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
               <CardTitle className="text-base">Despesas por Categoria</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => exportarCSV(despesasPorCategoria, 'despesas_categoria')}>
+              <Button size="sm" variant="outline" disabled={!podeExportar} data-permission="Relatórios.DRE.exportar" data-action="exportar_csv" data-sensitive="true" data-context-required="true" onClick={() => handleExportCSV(despesasPorCategoria, 'despesas_categoria')}>
                 <Download className="w-3 h-3 mr-1" /> CSV
               </Button>
             </div>

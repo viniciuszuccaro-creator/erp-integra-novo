@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
+import { useUser } from "@/components/lib/UserContext";
 import { FileText, Download, CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
 
 /**
@@ -18,6 +20,10 @@ export default function ExportacaoSPED({ empresaId }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { grupoAtual } = useContextoVisual();
+  const { user } = useUser();
+  const { canCreate, hasPermission } = usePermissions();
+  const contextoValido = !!(empresaId && grupoAtual?.id);
+  const podeGerar = canCreate('Fiscal', 'SPED') || canCreate('Fiscal', 'Exportação') || hasPermission('Fiscal', null, 'exportar');
 
   const [tipoSped, setTipoSped] = useState("Fiscal (EFD ICMS/IPI)");
   const [periodoInicial, setPeriodoInicial] = useState(
@@ -30,6 +36,10 @@ export default function ExportacaoSPED({ empresaId }) {
 
   const gerarSPEDMutation = useMutation({
     mutationFn: async ({ tipoSped, periodoInicial, periodoFinal }) => {
+      // Regra-Mãe 5a/5b: contexto multiempresa e permissão obrigatórios na persistência
+      if (!contextoValido) throw new Error("Contexto de grupo/empresa obrigatório para gerar SPED (Regra-Mãe 5a).");
+      if (!podeGerar) throw new Error("Seu perfil não permite gerar arquivos SPED.");
+
       // SIMULAÇÃO - Substituir por geração real do arquivo SPED
       await new Promise(resolve => setTimeout(resolve, 3000));
 
@@ -98,8 +108,23 @@ export default function ExportacaoSPED({ empresaId }) {
             tipo: "info"
           }
         ],
-        usuario_geracao: "Usuário Atual"
+        usuario_geracao: user?.full_name || "Sistema"
       });
+
+      // Regra-Mãe 5d: auditoria completa da geração do SPED
+      try { await base44.entities.AuditLog.create({
+        acao: 'Emissão', modulo: 'Fiscal', entidade: 'SPEDFiscal', registro_id: novoSPED.id,
+        descricao: `Arquivo SPED gerado (${tipoSped})`,
+        data_hora: new Date().toISOString(),
+        group_id: grupoAtual?.id, grupo_id: grupoAtual?.id, empresa_id: empresaId,
+        usuario: user?.full_name || 'Sistema', usuario_id: user?.id,
+        tipo_auditoria: 'operacional', sucesso: true,
+        dados_novos: {
+          tipo_sped: tipoSped, periodo_inicial: periodoInicial, periodo_final: periodoFinal,
+          quantidade_notas: notasPeriodo.length, valor_total_operacoes: valorTotal,
+          icms_apurado: icmsTotal, pis_apurado: pisTotal, cofins_apurado: cofinsTotal
+        }
+      }); } catch (e) { console.error('[SPED] Falha ao auditar geração:', e?.message || e); }
 
       return novoSPED;
     },
@@ -176,7 +201,8 @@ export default function ExportacaoSPED({ empresaId }) {
 
           <Button
             onClick={handleGerar}
-            disabled={gerando}
+            disabled={gerando || !contextoValido || !podeGerar}
+            data-permission="Fiscal.SPED.criar" data-action="gerar_sped" data-sensitive="true" data-context-required="true"
             className="w-full bg-purple-600 hover:bg-purple-700 h-12"
           >
             {gerando ? (

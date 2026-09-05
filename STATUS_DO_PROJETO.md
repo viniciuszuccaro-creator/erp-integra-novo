@@ -1030,5 +1030,11 @@ Estado consolidado:
 - `CaixaCentralLiquidacao.jsx` auditado: é apenas launchpad (leituras via `filterInContext`, sem persistências) — sem alterações necessárias.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### Exportações DRE e SPED — Regra-Mãe aplicada (2026-09-05)
+- `RelatorioDRE.jsx`: as 3 exportações CSV do DRE agora exigem permissão de exportar (Relatórios/Financeiro) e geram `AuditLog` com grupo, empresa, usuário, período e nº de registros; botões bloqueados e marcados RBAC.
+- `ExportacaoSPED.jsx`: geração de SPED agora valida contexto grupo/empresa + permissão na persistência, grava o usuário real (antes fixo "Usuário Atual") e gera `AuditLog` completo (tipo, período, notas, totais fiscais); botão bloqueado e marcado.
+- `ExtratoBancarioResumo.jsx` e `MovimentosDiarios.jsx` auditados: somente leitura (consultas via `filterInContext` com contexto) — sem persistências, sem alterações.
+- Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
+
 ### Próximo passo sugerido
-- Varrer as persistências sensíveis restantes do Financeiro (exportações DRE/SPED, `ExtratoBancarioResumo`, `MovimentosDiarios`) e depois republicar o app para consolidar todas as correções na versão publicada (créditos de integração do workspace renovam em 07/09 — jobs agendados e IA retomam aí).
+- Republicar o app para consolidar na versão publicada todo o endurecimento Financeiro/Fiscal/Rateio desta semana (créditos de integração do workspace renovam em 07/09 — jobs agendados, IA e notificações retomam automaticamente aí).

@@ -58,17 +58,17 @@ export function criarHelpersDistribuicao({ getGrupoId, getEmpresasDoGrupo }) {
 
   const ratearDocumento = async (entidade, documentoId, distribuicao) => {
     const titulosGerados = [];
+    const docs = await base44.entities[entidade].filter({ id: documentoId });
+    const docOriginal = docs[0];
+    const groupIdDoc = docOriginal?.group_id || getGrupoId?.() || null;
 
     for (const dist of distribuicao) {
-      const docs = await base44.entities[entidade].filter({ id: documentoId });
-      const docOriginal = docs[0];
-
       const novaTitulo = {
         ...docOriginal,
         id: undefined,
         created_date: undefined,
         updated_date: undefined,
-        group_id: null,
+        group_id: groupIdDoc,
         empresa_id: dist.empresa_id,
         origem: 'empresa',
         documento_grupo_id: documentoId,
@@ -92,6 +92,17 @@ export function criarHelpersDistribuicao({ getGrupoId, getEmpresasDoGrupo }) {
       distribuicao_realizada: titulosGerados
     });
 
+    // Regra-Mãe 5d: auditoria do rateio de documento do grupo
+    try { await base44.entities.AuditLog.create({
+      acao: 'Criação', modulo: 'Financeiro', entidade, registro_id: documentoId,
+      descricao: `Documento do grupo rateado para ${titulosGerados.length} empresa(s)`,
+      data_hora: new Date().toISOString(),
+      group_id: groupIdDoc, grupo_id: groupIdDoc,
+      usuario: 'Sistema', tipo_auditoria: 'operacional', sucesso: true,
+      dados_anteriores: { valor: docOriginal?.valor, rateado_para_empresas: false },
+      dados_novos: { titulos_gerados: titulosGerados }
+    }); } catch (e) { console.error('[Rateio] Falha ao auditar:', e?.message || e); }
+
     return titulosGerados;
   };
 
@@ -114,6 +125,17 @@ export function criarHelpersDistribuicao({ getGrupoId, getEmpresasDoGrupo }) {
         data_pagamento: percentualPago >= 1 ? new Date().toISOString().split('T')[0] : null
       });
     }
+
+    // Regra-Mãe 5d: auditoria da sincronização de baixa do grupo para empresas
+    try { await base44.entities.AuditLog.create({
+      acao: 'Baixa', modulo: 'Financeiro', entidade, registro_id: documentoGrupoId,
+      descricao: `Baixa do grupo sincronizada para ${docGrupo.distribuicao_realizada.length} título(s) de empresa(s)`,
+      data_hora: new Date().toISOString(),
+      group_id: docGrupo.group_id || null, grupo_id: docGrupo.group_id || null,
+      usuario: 'Sistema', tipo_auditoria: 'operacional', sucesso: true,
+      dados_anteriores: { status_grupo: docGrupo.status, valor: docGrupo.valor },
+      dados_novos: { valor_pago: valorPago, percentual_pago: percentualPago }
+    }); } catch (e) { console.error('[Rateio] Falha ao auditar:', e?.message || e); }
   };
 
   const sincronizarBaixaParaGrupo = async (entidade, documentoEmpresaId) => {
@@ -143,6 +165,17 @@ export function criarHelpersDistribuicao({ getGrupoId, getEmpresasDoGrupo }) {
       valor_pago: totalPago,
       status: todosPagos ? 'Pago' : 'Pendente'
     });
+
+    // Regra-Mãe 5d: auditoria da sincronização de baixa da empresa para o grupo
+    try { await base44.entities.AuditLog.create({
+      acao: 'Baixa', modulo: 'Financeiro', entidade, registro_id: docGrupo.id,
+      descricao: 'Baixa consolidada da empresa para o documento do grupo',
+      data_hora: new Date().toISOString(),
+      group_id: docGrupo.group_id || null, grupo_id: docGrupo.group_id || null,
+      usuario: 'Sistema', tipo_auditoria: 'operacional', sucesso: true,
+      dados_anteriores: { status: docGrupo.status, valor_pago: docGrupo.valor_pago },
+      dados_novos: { valor_pago: totalPago, status: todosPagos ? 'Pago' : 'Pendente', todos_pagos: todosPagos }
+    }); } catch (e) { console.error('[Rateio] Falha ao auditar:', e?.message || e); }
   };
 
   return {

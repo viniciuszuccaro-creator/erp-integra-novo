@@ -1019,5 +1019,10 @@ Estado consolidado:
 - `GerarLinkPagamentoModal.jsx`: geração de link passou a exigir contexto grupo/empresa e permissão na persistência (validação dupla — antes não havia nenhuma checagem), grava auditoria antes/depois e o botão recebeu bloqueio visual + marcadores RBAC/auditoria.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido; validações e mocks existentes preservados.
 
+### Rateio Multiempresa — mesmo padrão aplicado + correção de registros órfãos (2026-09-05)
+- `RateioMultiempresa.jsx`: criação de rateio agora exige contexto grupo/empresas e permissão na persistência (validação dupla — antes não havia checagem), grava `responsavel` com o usuário real e gera `AuditLog` operacional completo (grupo, usuário, títulos gerados, distribuição); botão de criar recebeu bloqueio visual + marcadores RBAC/auditoria.
+- `rateioDistribuicao.jsx` (helpers de distribuição do grupo): CORRIGIDO defeito de multiempresa — títulos gerados por `ratearDocumento` gravavam `group_id: null` (registros órfãos); agora herdam o `group_id` do documento original. Rateio e as duas sincronizações de baixa (grupo→empresas e empresa→grupo) passaram a gerar `AuditLog` com antes/depois.
+- Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
+
 ### Próximo passo sugerido
-- Aplicar o mesmo padrão no rateio multiempresa (`RateioMultiempresa` / rateioDistribuicao) e nas demais persistências sensíveis do Financeiro (aprovações, DRE/SPED), reforçando auditoria antes/depois e validação dupla onde faltar.
+- Varrer as persistências sensíveis restantes do Financeiro (aprovações em `CaixaCentralLiquidacao`/`OrdensLiquidacaoPendentes`, exportações DRE/SPED, `CartoesACompensar`) e depois republicar o app para consolidar todas as correções na versão publicada.

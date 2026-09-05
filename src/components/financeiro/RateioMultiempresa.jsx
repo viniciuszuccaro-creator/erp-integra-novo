@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { Split, Shuffle } from 'lucide-react';
+import usePermissions from '@/components/lib/usePermissions';
+import { useUser } from '@/components/lib/UserContext';
 import RateioFormFields from './rateio-multiempresa/RateioFormFields';
 import RateioDistribuicaoCard from './rateio-multiempresa/RateioDistribuicaoCard';
 
@@ -24,14 +26,22 @@ export default function RateioMultiempresa({ empresas, grupoId, windowMode = fal
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [formRateio, setFormRateio] = useState(initialForm(empresas));
+  const { user } = useUser();
+  const { canCreate, hasPermission } = usePermissions();
+  const contextoValido = !!(grupoId && empresas?.length);
+  const podeRatear = canCreate('Financeiro', 'Rateio') || canCreate('Financeiro', 'Rateio Multiempresa') || hasPermission('Financeiro', null, 'gerenciar');
 
   const criarRateioMutation = useMutation({
     mutationFn: async (dados) => {
+      // Regra-Mãe 5a/5b: contexto multiempresa e permissão obrigatórios na persistência
+      if (!contextoValido) throw new Error('Contexto de grupo/empresas obrigatório para ratear (Regra-Mãe 5a).');
+      if (!podeRatear) throw new Error('Seu perfil não permite criar rateios financeiros.');
+
       const rateio = await base44.entities.RateioFinanceiro.create({
         group_id: grupoId, tipo_documento: dados.tipo_documento, descricao: dados.descricao,
         valor_total: dados.valor_total, criterio_rateio: dados.criterio_rateio,
         data_rateio: new Date().toISOString().split('T')[0], distribuicao: dados.distribuicao,
-        categoria: dados.categoria, responsavel: 'Sistema', status_consolidacao: 'pendente',
+        categoria: dados.categoria, responsavel: user?.full_name || 'Sistema', status_consolidacao: 'pendente',
       });
 
       const titulosCriados = [];
@@ -58,6 +68,22 @@ export default function RateioMultiempresa({ empresas, grupoId, windowMode = fal
           titulo_id: t.id, valor: t.valor, percentual: t.percentual_rateio, status: t.status,
         })),
       });
+
+      // Regra-Mãe 5d: auditoria completa do rateio (grupo, usuário, títulos gerados)
+      try { await base44.entities.AuditLog.create({
+        acao: 'Criação', modulo: 'Financeiro', entidade: 'RateioFinanceiro', registro_id: rateio.id,
+        descricao: `Rateio multiempresa criado (${titulosCriados.length} título(s) distribuído(s))`,
+        data_hora: new Date().toISOString(),
+        group_id: grupoId, grupo_id: grupoId,
+        usuario: user?.full_name || 'Sistema', usuario_id: user?.id,
+        tipo_auditoria: 'operacional', sucesso: true,
+        dados_novos: {
+          tipo_documento: dados.tipo_documento, valor_total: dados.valor_total, criterio_rateio: dados.criterio_rateio,
+          categoria: dados.categoria, titulos_ids: titulosCriados.map(t => t.id),
+          distribuicao: dados.distribuicao,
+        },
+      }); } catch (e) { console.error('[Rateio] Falha ao auditar:', e?.message || e); }
+
       return { rateio, titulos: titulosCriados };
     },
     onSuccess: (resultado) => {
@@ -145,7 +171,7 @@ export default function RateioMultiempresa({ empresas, grupoId, windowMode = fal
 
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button type="button" variant="outline" onClick={() => setFormRateio(initialForm(empresas))}>Limpar</Button>
-            <Button type="submit" disabled={criarRateioMutation.isPending} className="bg-purple-600 hover:bg-purple-700">
+            <Button type="submit" disabled={criarRateioMutation.isPending || !contextoValido || !podeRatear} data-permission="Financeiro.Rateio.criar" data-action="criar_rateio" data-sensitive="true" data-context-required="true" className="bg-purple-600 hover:bg-purple-700">
               {criarRateioMutation.isPending ? (
                 <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />Criando...</>
               ) : (

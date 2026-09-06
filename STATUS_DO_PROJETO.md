@@ -1053,6 +1053,18 @@ Estado consolidado:
 - `usePontoEletronico.jsx`: registro de ponto revalida RBAC e contexto de grupo na persistência (fail-closed) e gera `AuditLog` com contexto e dados do registro; foto facial redimensionada antes de salvar (evita campo oversized que quebra operações do registro); toast de erro adicionado. Validação por IA mantém bypass automático enquanto créditos do workspace estiverem esgotados.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### Lib/Hooks — Fluxos do Pedido e Integrações — Regra-Mãe aplicada (2026-09-06, lote 6)
+- `contextoCrud.jsx`: adicionado `withFlowContext`/`sanitizeFlow` — carimbo de contexto multiempresa (fail-closed) + sanitização para fluxos fora do React, sem duplicar a auditoria de `createInContext` (fluxos já auditam via `auditHelper`).
+- `fluxoPedido/aprovarPedido.jsx`: 8 mutações cruas (Cliente, MovimentacaoEstoque, Produto, OrdemProducao, Pedido, ContaReceber, HistoricoCliente) — todas com carimbo de contexto + sanitização; ajuste de limite de crédito agora também auditado (antes/depois).
+- `fluxoPedido/cancelarPedido.jsx`: 5 mutações cruas (liberação de reserva, Produto, ContaReceber, Pedido) — protegidas.
+- `fluxoPedido/concluirOP.jsx`: 4 mutações cruas (consumo de material, Produto, OrdemProducao, Pedido) — protegidas.
+- `fluxoPedido/faturarPedido.jsx`: 4 mutações cruas (MovimentacaoEstoque, Produto, Entrega, Pedido) — protegidas (faturamento parcial Vol 5.2 preservado).
+- `fluxoPedido/fechamentoAutomatico.jsx`: 4 mutações cruas (ContaReceber, Pedido x2, Entrega) — protegidas.
+- `integracaoBoletos.jsx`: 4 mutações cruas (Cliente, LogCobranca create/update) — protegidas com contexto do título/conta.
+- `useToggleConfig.jsx`: escrita direta de ConfiguracaoSistema agora sanitizada (RBAC já existia via canEditConfigByPermission; contexto já explícito via scope).
+- Varredura pós-lote: nenhuma mutação crua restante em src/components/lib e src/hooks (apenas AuditLog.create).
+- Próximos lotes: sistema (13), mobile (9), produção (9).
+
 ### Financeiro — Módulo completo — Regra-Mãe aplicada (2026-09-06, lote 5)
 - `ConciliacaoAutomaticaIA.jsx`: aplicar conciliações usava `ExtratoBancario.update`/`CaixaMovimento.update`/`ConciliacaoBancaria.create` crus — migrados para persistência protegida, RBAC `editar` Financeiro, contexto de grupo obrigatório e auditoria do lote (antes sem qualquer log).
 - `DuplicarMesAnterior.jsx`: `ContaPagar.bulkCreate` cru — migrado para `bulkCreateInContext` (carimbo de contexto).

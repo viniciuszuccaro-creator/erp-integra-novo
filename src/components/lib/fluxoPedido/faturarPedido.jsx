@@ -1,5 +1,6 @@
 import { base44 } from "@/api/base44Client";
 import { getUsuarioAtual, auditar } from './auditHelper';
+import { withFlowContext, sanitizeFlow } from '@/components/lib/contexto/contextoCrud';
 
 /**
  * Baixa estoque de item (liberação de reserva no faturamento)
@@ -24,7 +25,7 @@ async function baixarEstoqueItem(item, pedido, empresaId, quantidadeFaturar) {
   }
 
   const user = await getUsuarioAtual();
-  const movimentacao = await base44.entities.MovimentacaoEstoque.create({
+  const movimentacao = await base44.entities.MovimentacaoEstoque.create(sanitizeFlow(withFlowContext({
     empresa_id: empresaId,
     group_id: pedido.group_id,
     tipo_movimento: "liberacao_reserva",
@@ -44,12 +45,12 @@ async function baixarEstoqueItem(item, pedido, empresaId, quantidadeFaturar) {
     motivo: `Baixa por faturamento ${quantidadeFaturar != null ? 'parcial' : 'total'} - NF-e`,
     responsavel: (user?.full_name || user?.email || "Sistema"),
     responsavel_id: user?.id
-  });
+  }, { group_id: pedido.group_id, empresa_id: empresaId })));
 
-  await base44.entities.Produto.update(item.produto_id, {
+  await base44.entities.Produto.update(item.produto_id, withFlowContext({
     estoque_atual: novoEstoque,
     estoque_reservado: novoReservado
-  });
+  }, produto));
 
   await auditar("Estoque", "MovimentacaoEstoque", "create", movimentacao.id,
     `Baixa por faturamento ${quantidadeFaturar != null ? 'parcial' : 'total'} - Pedido ${pedido.numero_pedido}`,
@@ -204,7 +205,7 @@ export async function faturarPedidoCompleto(pedido, nfe, empresaId, itensParaFat
     const totalmenteFaturado = valorPendenteTotal < 0.01;
 
     // Cria entrega
-    const entrega = await base44.entities.Entrega.create({
+    const entrega = await base44.entities.Entrega.create(sanitizeFlow(withFlowContext({
       empresa_id: empresaId,
       group_id: pedido.group_id,
       pedido_id: pedido.id,
@@ -231,7 +232,7 @@ export async function faturarPedidoCompleto(pedido, nfe, empresaId, itensParaFat
         usuario: (user?.full_name || user?.email || "Sistema"),
         observacao: `Entrega criada no faturamento ${totalmenteFaturado ? 'total' : 'parcial'}`
       }]
-    });
+    }, { group_id: pedido.group_id, empresa_id: empresaId })));
 
     await auditar("Logística", "Entrega", "create", entrega.id,
       `Entrega criada do Pedido ${pedido.numero_pedido} (${totalmenteFaturado ? 'total' : 'parcial'})`,
@@ -255,7 +256,7 @@ export async function faturarPedidoCompleto(pedido, nfe, empresaId, itensParaFat
       itens_corte_dobra: pedido.itens_corte_dobra,
     };
 
-    await base44.entities.Pedido.update(pedido.id, updateData);
+    await base44.entities.Pedido.update(pedido.id, withFlowContext(updateData, pedido));
 
     // Vol 5.2: Auditoria com antes/depois
     await auditar("Comercial", "Pedido", "update", pedido.id,

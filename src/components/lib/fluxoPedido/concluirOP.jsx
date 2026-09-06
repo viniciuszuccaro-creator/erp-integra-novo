@@ -1,5 +1,6 @@
 import { base44 } from "@/api/base44Client";
 import { getUsuarioAtual, auditar } from './auditHelper';
+import { withFlowContext, sanitizeFlow } from '@/components/lib/contexto/contextoCrud';
 
 /**
  * Fase 8: Baixa material consumido na produção
@@ -20,7 +21,7 @@ async function baixarMaterialProducao(material, op, empresaId) {
   const novoEstoque = (produto.estoque_atual || 0) - quantidade;
   const user = await getUsuarioAtual();
 
-  const movConsumo = await base44.entities.MovimentacaoEstoque.create({
+  const movConsumo = await base44.entities.MovimentacaoEstoque.create(sanitizeFlow(withFlowContext({
     empresa_id: empresaId,
     group_id: op.group_id,
     tipo_movimento: "saida",
@@ -37,10 +38,10 @@ async function baixarMaterialProducao(material, op, empresaId) {
     motivo: `Consumo na produção - OP ${op.numero_op}`,
     responsavel: (user?.full_name || user?.email || "Sistema"),
     responsavel_id: user?.id
-  });
+  }, { group_id: op.group_id, empresa_id: empresaId })));
 
   await auditar("Estoque", "MovimentacaoEstoque", "create", movConsumo.id, `Consumo na produção - OP ${op.numero_op}`, empresaId, null, movConsumo);
-  await base44.entities.Produto.update(produto.id, { estoque_atual: Math.max(0, novoEstoque) });
+  await base44.entities.Produto.update(produto.id, withFlowContext({ estoque_atual: Math.max(0, novoEstoque) }, produto));
 
   return movConsumo;
 }
@@ -82,7 +83,7 @@ export async function concluirOPCompleto(op, empresaId) {
 
     const pesoProduzido = Number(op.progresso_fisico_kg || op.peso_total_kg || 0);
 
-    await base44.entities.OrdemProducao.update(op.id, {
+    await base44.entities.OrdemProducao.update(op.id, sanitizeFlow(withFlowContext({
       status: "Pronto para Expedição",
       data_conclusao_real: new Date().toISOString(),
       progresso_fisico_percentual: 100,
@@ -98,7 +99,7 @@ export async function concluirOPCompleto(op, empresaId) {
           motivo: "OP concluída - materiais baixados do estoque e liberados para expedição"
         }
       ]
-    });
+    }, op)));
 
     await auditar("Produção", "OrdemProducao", "update", op.id,
       `OP ${op.numero_op} pronta para expedição — ${resultados.baixasMaterial.length} baixa(s) de estoque`,
@@ -108,7 +109,7 @@ export async function concluirOPCompleto(op, empresaId) {
     );
 
     if (op.pedido_id) {
-      await base44.entities.Pedido.update(op.pedido_id, { status: "Pronto para Faturar" });
+      await base44.entities.Pedido.update(op.pedido_id, withFlowContext({ status: "Pronto para Faturar" }, { group_id: op.group_id, empresa_id: op.empresa_id || empresaId }));
       await auditar("Comercial", "Pedido", "update", op.pedido_id,
         `Pedido ${op.numero_pedido || ''} pronto para faturar (via OP ${op.numero_op})`,
         empresaId, { status: op.status }, { status: "Pronto para Faturar" });

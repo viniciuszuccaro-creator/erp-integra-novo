@@ -1,5 +1,6 @@
 import { base44 } from "@/api/base44Client";
 import { getUsuarioAtual, auditar } from './auditHelper';
+import { withFlowContext, sanitizeFlow } from '@/components/lib/contexto/contextoCrud';
 
 /**
  * Valida limite de crédito do cliente
@@ -53,12 +54,16 @@ export async function atualizarLimiteCreditoCliente(clienteId, valor, operacao =
   const limiteAtual = cliente.condicao_comercial?.limite_credito_utilizado || 0;
   const novoLimite = operacao === 'adicionar' ? limiteAtual + valor : limiteAtual - valor;
 
-  await base44.entities.Cliente.update(clienteId, {
+  await base44.entities.Cliente.update(clienteId, withFlowContext({
     condicao_comercial: {
       ...(cliente.condicao_comercial || {}),
       limite_credito_utilizado: Math.max(0, novoLimite)
     }
-  });
+  }, cliente));
+  // Regra-Mãe 5d: auditoria do ajuste de limite de crédito (antes/depois)
+  await auditar("CRM", "Cliente", "update", clienteId,
+    `Limite de crédito utilizado atualizado: R$ ${Math.max(0, novoLimite).toFixed(2)}`,
+    cliente.empresa_id, { limite_credito_utilizado: limiteAtual }, { limite_credito_utilizado: Math.max(0, novoLimite) });
 }
 
 /**
@@ -81,7 +86,7 @@ export async function baixarEstoqueItemAprovacao(item, pedido, empresaId) {
   const novoEstoque = estoqueAtual - item.quantidade;
   const user = await getUsuarioAtual();
 
-  const movimentacao = await base44.entities.MovimentacaoEstoque.create({
+  const movimentacao = await base44.entities.MovimentacaoEstoque.create(sanitizeFlow(withFlowContext({
     empresa_id: empresaId,
     group_id: pedido.group_id,
     tipo_movimento: "saida",
@@ -106,9 +111,9 @@ export async function baixarEstoqueItemAprovacao(item, pedido, empresaId) {
     valor_unitario: item.preco_unitario || item.valor_unitario,
     valor_total: item.valor_total || (item.quantidade * (item.preco_unitario || 0)),
     aprovado: true
-  });
+  }, { group_id: pedido.group_id, empresa_id: empresaId })));
 
-  await base44.entities.Produto.update(item.produto_id, { estoque_atual: novoEstoque });
+  await base44.entities.Produto.update(item.produto_id, withFlowContext({ estoque_atual: novoEstoque }, produto));
   await auditar("Estoque", "MovimentacaoEstoque", "create", movimentacao.id, `Baixa por faturamento - Pedido ${pedido.numero_pedido}`, empresaId, null, movimentacao);
   return movimentacao;
 }
@@ -143,7 +148,7 @@ async function gerarOPAutomatica(pedido, empresaId) {
   }
 
   const user = await getUsuarioAtual();
-  const op = await base44.entities.OrdemProducao.create({
+  const op = await base44.entities.OrdemProducao.create(sanitizeFlow(withFlowContext({
     empresa_id: empresaId,
     group_id: pedido.group_id,
     numero_op: numeroOP,
@@ -173,13 +178,13 @@ async function gerarOPAutomatica(pedido, empresaId) {
       usuario: (user?.full_name || user?.email || "Sistema"),
       observacao: "OP gerada automaticamente na aprovação do pedido"
     }]
-  });
+  }, { group_id: pedido.group_id, empresa_id: empresaId })));
 
   await auditar("Produção", "OrdemProducao", "create", op.id, `OP ${numeroOP} gerada do Pedido ${pedido.numero_pedido}`, empresaId, null, op);
-  await base44.entities.Pedido.update(pedido.id, {
+  await base44.entities.Pedido.update(pedido.id, withFlowContext({
     ordem_producao_ids: [...(pedido.ordem_producao_ids || []), op.id],
     status: "Em Produção"
-  });
+  }, pedido));
 
   return op;
 }
@@ -188,7 +193,7 @@ async function gerarOPAutomatica(pedido, empresaId) {
  * Gera conta a receber a partir de parcela
  */
 async function gerarContaReceber(pedido, parcela, empresaId) {
-  const conta = await base44.entities.ContaReceber.create({
+  const conta = await base44.entities.ContaReceber.create(sanitizeFlow(withFlowContext({
     empresa_id: empresaId,
     group_id: pedido.group_id,
     origem_tipo: "pedido",
@@ -203,7 +208,7 @@ async function gerarContaReceber(pedido, parcela, empresaId) {
     forma_recebimento: pedido.forma_pagamento,
     numero_parcela: parcela.numero_parcela.toString(),
     observacoes: `Gerado automaticamente do pedido ${pedido.numero_pedido}`
-  });
+  }, { group_id: pedido.group_id, empresa_id: empresaId })));
   await auditar("Financeiro", "ContaReceber", "create", conta.id, `CR gerada do Pedido ${pedido.numero_pedido} - Parcela ${parcela.numero_parcela}`, empresaId, null, conta);
   return conta;
 }
@@ -258,14 +263,14 @@ export async function aprovarPedidoCompleto(pedido, empresaId) {
       await atualizarLimiteCreditoCliente(pedido.cliente_id, pedido.valor_total, 'adicionar');
     }
 
-    await base44.entities.Pedido.update(pedido.id, {
+    await base44.entities.Pedido.update(pedido.id, withFlowContext({
       status: "Aprovado",
       data_aprovacao: new Date().toISOString()
-    });
+    }, pedido));
     await auditar("Comercial", "Pedido", "update", pedido.id, `Pedido ${pedido.numero_pedido} aprovado`, empresaId, null, { status: "Aprovado" });
 
     const userHC = await getUsuarioAtual();
-    await base44.entities.HistoricoCliente.create({
+    await base44.entities.HistoricoCliente.create(sanitizeFlow(withFlowContext({
       empresa_id: empresaId,
       group_id: pedido.group_id,
       cliente_id: pedido.cliente_id,
@@ -280,7 +285,7 @@ export async function aprovarPedidoCompleto(pedido, empresaId) {
       usuario_responsavel: (userHC?.full_name || userHC?.email || "Sistema"),
       data_evento: new Date().toISOString(),
       valor_relacionado: pedido.valor_total
-    });
+    }, { group_id: pedido.group_id, empresa_id: empresaId })));
   } catch (error) {
     resultados.erros.push(`Erro geral: ${error.message}`);
   }

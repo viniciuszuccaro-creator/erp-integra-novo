@@ -47,6 +47,20 @@ export const sanitizeOnWrite = (obj) => {
   return out;
 };
 
+// Regra-Mãe 5a/5c: Carimbo de contexto + sanitização para fluxos fora do React (fluxoPedido, integração de cobrança)
+// Auditoria permanece com auditHelper.auditar, específica de cada fluxo — evita duplicar o log do createInContext.
+export function withFlowContext(dados, { group_id, empresa_id } = {}, campo = 'empresa_id') {
+  if (!group_id && !empresa_id) {
+    throw new Error('Contexto multiempresa obrigatório (Regra-Mãe 5a): fluxo sem grupo/empresa definidos');
+  }
+  return {
+    ...(dados || {}),
+    ...(group_id && !dados?.group_id ? { group_id } : {}),
+    ...(empresa_id && !dados?.[campo] ? { [campo]: empresa_id } : {}),
+  };
+}
+export const sanitizeFlow = sanitizeOnWrite;
+
 // Regra-Mãe 5a/5d: CRUD sempre com contexto multiempresa e auditoria completa
 export function createCrudHelpers(carimbarContexto) {
   const createInContext = async (entityName, dados, campo = 'empresa_id') => {

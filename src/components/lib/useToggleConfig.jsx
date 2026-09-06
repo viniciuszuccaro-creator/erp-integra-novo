@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import usePermissions from '@/components/lib/usePermissions';
+import { sanitizeFlow } from '@/components/lib/contexto/contextoCrud';
 
 const CONFIG_PERMISSION_RULES = [
   { match: (chave, categoria) => String(categoria || '').toLowerCase().includes('seguranca') || String(chave || '').startsWith('seg_'), permissions: [['Sistema', 'Seguranca', 'editar'], ['Sistema', 'Segurança', 'editar']] },
@@ -162,13 +163,13 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
     const existentes = await base44.entities.ConfiguracaoSistema.filter(filter, '-updated_date', 20);
     const list = Array.isArray(existentes) ? existentes : [];
     const latest = findMatchingRecord(list, chave);
-    const payload = {
+    const payload = sanitizeFlow({
       chave,
       categoria: categoria || 'Sistema',
       ativa,
       ...scope,
       updated_date: new Date().toISOString(),
-    };
+    });
 
     if (latest?.id) {
       return await base44.entities.ConfiguracaoSistema.update(latest.id, payload);

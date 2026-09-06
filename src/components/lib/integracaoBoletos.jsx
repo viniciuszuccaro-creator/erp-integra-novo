@@ -4,6 +4,7 @@
  */
 
 import { base44 } from '@/api/base44Client';
+import { withFlowContext, sanitizeFlow } from '@/components/lib/contexto/contextoCrud';
 
 /**
  * Verifica configuração do gateway
@@ -180,9 +181,9 @@ async function criarClienteAsaas(conta, config) {
   const resultado = await response.json();
   
   // Salvar ID do cliente no sistema
-  await base44.entities.Cliente.update(cliente.id, {
+  await base44.entities.Cliente.update(cliente.id, withFlowContext({
     cliente_asaas_id: resultado.id
-  });
+  }, cliente));
   
   return resultado.id;
 }
@@ -256,7 +257,7 @@ export async function gerarCobranca(contaReceber, tipo = 'BOLETO') {
   }
 
   // 3. Log da tentativa
-  const logId = await base44.entities.LogCobranca.create({
+  const logId = await base44.entities.LogCobranca.create(sanitizeFlow(withFlowContext({
     empresa_id: contaReceber.empresa_id,
     group_id: contaReceber.group_id,
     conta_receber_id: contaReceber.id,
@@ -265,7 +266,7 @@ export async function gerarCobranca(contaReceber, tipo = 'BOLETO') {
     data_hora: new Date().toISOString(),
     payload_enviado: { conta: contaReceber, tipo },
     status_operacao: 'pendente'
-  });
+  }, contaReceber)));
 
   // 4. Gerar conforme provedor
   try {
@@ -282,14 +283,14 @@ export async function gerarCobranca(contaReceber, tipo = 'BOLETO') {
     }
 
     // 5. Atualizar log de sucesso
-    await base44.entities.LogCobranca.update(logId.id, {
+    await base44.entities.LogCobranca.update(logId.id, withFlowContext({
       retorno_recebido: resultado,
       status_operacao: 'sucesso',
       id_cobranca_externa: resultado.id,
       linha_digitavel: resultado.linha_digitavel,
       pix_copia_cola: resultado.pix_copia_cola,
       url_boleto: resultado.url_boleto
-    });
+    }, contaReceber));
 
     return {
       ...resultado,
@@ -298,10 +299,10 @@ export async function gerarCobranca(contaReceber, tipo = 'BOLETO') {
     
   } catch (error) {
     // 6. Atualizar log de erro
-    await base44.entities.LogCobranca.update(logId.id, {
+    await base44.entities.LogCobranca.update(logId.id, withFlowContext({
       status_operacao: 'erro',
       mensagem: error.message
-    });
+    }, contaReceber));
 
     throw error;
   }

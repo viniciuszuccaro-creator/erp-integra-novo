@@ -1,5 +1,6 @@
 import { base44 } from "@/api/base44Client";
 import { getUsuarioAtual, auditar } from './auditHelper';
+import { withFlowContext, sanitizeFlow } from '@/components/lib/contexto/contextoCrud';
 import { baixarEstoqueItemAprovacao } from './aprovarPedido';
 
 /**
@@ -68,7 +69,7 @@ export async function executarFechamentoCompleto(pedido, empresaId, callbacks = 
         const intervalo = pedido.intervalo_parcelas || 30;
         dataVencimento.setDate(dataVencimento.getDate() + (i * intervalo));
 
-        const conta = await base44.entities.ContaReceber.create({
+        const conta = await base44.entities.ContaReceber.create(sanitizeFlow(withFlowContext({
           empresa_id: empresaId,
           group_id: pedido.group_id,
           origem_tipo: 'pedido',
@@ -84,7 +85,7 @@ export async function executarFechamentoCompleto(pedido, empresaId, callbacks = 
           numero_documento: pedido.numero_pedido,
           numero_parcela: `${i}/${numeroParcelas}`,
           visivel_no_portal: true
-        });
+        }, { group_id: pedido.group_id, empresa_id: empresaId })));
 
         await auditar("Financeiro", "ContaReceber", "create", conta.id, `CR gerada do Pedido ${pedido.numero_pedido} - Parcela ${i}/${numeroParcelas}`, empresaId, null, conta);
         resultados.financeiro.contas.push(conta);
@@ -105,13 +106,13 @@ export async function executarFechamentoCompleto(pedido, empresaId, callbacks = 
       const tipoFrete = pedido.tipo_frete || 'CIF';
 
       if (tipoFrete === 'Retirada') {
-        await base44.entities.Pedido.update(pedido.id, {
+        await base44.entities.Pedido.update(pedido.id, withFlowContext({
           observacoes_internas: (pedido.observacoes_internas || '') + '\n[AUTOMAÇÃO] Cliente irá retirar na loja.'
-        });
+        }, pedido));
         onLog(`✅ Pedido marcado para RETIRADA`, 'success');
       } else {
         const user = await getUsuarioAtual();
-        const entrega = await base44.entities.Entrega.create({
+        const entrega = await base44.entities.Entrega.create(sanitizeFlow(withFlowContext({
           empresa_id: empresaId,
           group_id: pedido.group_id,
           pedido_id: pedido.id,
@@ -133,7 +134,7 @@ export async function executarFechamentoCompleto(pedido, empresaId, callbacks = 
           prioridade: pedido.prioridade || 'Normal',
           usuario_responsavel: (user?.full_name || user?.email || 'Sistema'),
           usuario_responsavel_id: user?.id
-        });
+        }, { group_id: pedido.group_id, empresa_id: empresaId })));
 
         await auditar("Expedição", "Entrega", "create", entrega.id, `Entrega criada do Pedido ${pedido.numero_pedido}`, empresaId, null, entrega);
         resultados.logistica.entrega = entrega;
@@ -151,11 +152,11 @@ export async function executarFechamentoCompleto(pedido, empresaId, callbacks = 
     // ETAPA 4: Atualizar Status
     onLog('📝 Atualizando status do pedido...', 'info');
     try {
-      await base44.entities.Pedido.update(pedido.id, {
+      await base44.entities.Pedido.update(pedido.id, withFlowContext({
         status: 'Pronto para Faturar',
         observacoes_internas: (pedido.observacoes_internas || '') +
           `\n[AUTOMAÇÃO ${new Date().toLocaleString('pt-BR')}] Fluxo automático concluído com sucesso.`
-      });
+      }, pedido));
       await auditar("Comercial", "Pedido", "update", pedido.id, `Pedido ${pedido.numero_pedido} pronto para faturar (fechamento automático)`, empresaId, null, { status: 'Pronto para Faturar' });
 
       resultados.status.sucesso = true;

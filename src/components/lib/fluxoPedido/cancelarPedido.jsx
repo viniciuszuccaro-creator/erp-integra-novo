@@ -1,5 +1,6 @@
 import { base44 } from "@/api/base44Client";
 import { getUsuarioAtual, auditar } from './auditHelper';
+import { withFlowContext, sanitizeFlow } from '@/components/lib/contexto/contextoCrud';
 import { atualizarLimiteCreditoCliente } from './aprovarPedido';
 
 /**
@@ -15,7 +16,7 @@ async function liberarReservaEstoque(movimentacaoReserva, empresaId) {
   if (!produto) return;
 
   const user = await getUsuarioAtual();
-  const mov = await base44.entities.MovimentacaoEstoque.create({
+  const mov = await base44.entities.MovimentacaoEstoque.create(sanitizeFlow(withFlowContext({
     empresa_id: empresaId,
     group_id: movimentacaoReserva.group_id,
     tipo_movimento: "liberacao_reserva",
@@ -35,12 +36,12 @@ async function liberarReservaEstoque(movimentacaoReserva, empresaId) {
     motivo: "Liberação de reserva - pedido cancelado",
     responsavel: (user?.full_name || user?.email || "Sistema"),
     responsavel_id: user?.id
-  });
+  }, { group_id: movimentacaoReserva.group_id, empresa_id: empresaId })));
 
   await auditar("Estoque", "MovimentacaoEstoque", "create", mov.id, "Liberação de reserva - pedido cancelado", empresaId, null, mov);
-  await base44.entities.Produto.update(produto.id, {
+  await base44.entities.Produto.update(produto.id, withFlowContext({
     estoque_reservado: Math.max(0, (produto.estoque_reservado || 0) - movimentacaoReserva.quantidade)
-  });
+  }, produto));
 }
 
 /**
@@ -70,7 +71,7 @@ export async function cancelarPedidoCompleto(pedido, empresaId) {
     });
 
     for (const conta of contas) {
-      await base44.entities.ContaReceber.update(conta.id, { status: "Cancelado" });
+      await base44.entities.ContaReceber.update(conta.id, withFlowContext({ status: "Cancelado" }, conta));
       await auditar("Financeiro", "ContaReceber", "update", conta.id, `Conta a receber cancelada (Pedido ${pedido.numero_pedido})`, empresaId, { status: conta.status }, { status: "Cancelado" });
       resultados.contasCanceladas.push(conta);
     }
@@ -79,7 +80,7 @@ export async function cancelarPedidoCompleto(pedido, empresaId) {
       await atualizarLimiteCreditoCliente(pedido.cliente_id, pedido.valor_total, 'remover');
     }
 
-    await base44.entities.Pedido.update(pedido.id, { status: "Cancelado" });
+    await base44.entities.Pedido.update(pedido.id, withFlowContext({ status: "Cancelado" }, pedido));
     await auditar("Comercial", "Pedido", "update", pedido.id, `Pedido ${pedido.numero_pedido} cancelado`, empresaId, null, { status: "Cancelado" });
   } catch (error) {
     resultados.erros.push(`Erro ao cancelar: ${error.message}`);

@@ -1048,5 +1048,10 @@ Estado consolidado:
 - `useContratoActions.jsx` (Contratos): geração de cobrança automática exige permissão e bloqueia contratos sem contexto de grupo (título herda `group_id` do grupo ativo — corrigida possível origem de registro órfão); renovação com validação dupla e `AuditLog` antes/depois (valor e vigência); exclusão com validação dupla e registro do estado completo do contrato antes da inativação lógica.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### RH (Férias e Ponto Eletrônico) — Regra-Mãe aplicada (2026-09-06)
+- `FeriasTab.jsx`: corrigida falha grave de RBAC — aprovação/rejeição de férias estava liberada para qualquer usuário com permissão de `visualizar`; agora exige ação `aprovar` (fail-closed na UI e na persistência). Edição exige `editar` (antes liberada com `criar`); criação revalida `criar` + contexto de grupo. AuditLog de criar/atualizar com `group_id`/`empresa_id`, `registro_id` e estado antes/depois (aprovação logada como "Aprovação"); mutations com toast de erro (falhas antes silenciosas).
+- `usePontoEletronico.jsx`: registro de ponto revalida RBAC e contexto de grupo na persistência (fail-closed) e gera `AuditLog` com contexto e dados do registro; foto facial redimensionada antes de salvar (evita campo oversized que quebra operações do registro); toast de erro adicionado. Validação por IA mantém bypass automático enquanto créditos do workspace estiverem esgotados.
+- Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
+
 ### Próximo passo sugerido
-- Republicar o app para consolidar na versão publicada todo o endurecimento Financeiro/Fiscal/Rateio/Compras/Estoque/Contratos desta semana (créditos de integração do workspace renovam em 07/09 — jobs agendados, IA e notificações retomam automaticamente aí).
+- Republicar o app para consolidar na versão publicada todo o endurecimento Financeiro/Fiscal/Rateio/Compras/Estoque/Contratos/RH desta semana (créditos de integração do workspace renovam em 07/09 — jobs agendados, IA e notificações retomam automaticamente aí).

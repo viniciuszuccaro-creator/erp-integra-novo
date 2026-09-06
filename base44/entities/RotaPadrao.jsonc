@@ -10,7 +10,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "Código único da rota"
+      "description": "C\u00f3digo \u00fanico da rota"
     },
     "nome_rota": {
       "type": "string"
@@ -41,11 +41,11 @@
         "type": "string",
         "enum": [
           "Segunda",
-          "Terça",
+          "Ter\u00e7a",
           "Quarta",
           "Quinta",
           "Sexta",
-          "Sábado",
+          "S\u00e1bado",
           "Domingo"
         ]
       }
@@ -104,6 +104,18 @@
     "empresa_id"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

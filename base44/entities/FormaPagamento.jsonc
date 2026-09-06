@@ -8,11 +8,11 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa (se específico por empresa)"
+      "description": "ID da empresa (se espec\u00edfico por empresa)"
     },
     "codigo": {
       "type": "string",
-      "description": "Código único da forma de pagamento"
+      "description": "C\u00f3digo \u00fanico da forma de pagamento"
     },
     "descricao": {
       "type": "string",
@@ -24,11 +24,11 @@
         "Dinheiro",
         "PIX",
         "Boleto",
-        "Cartão Crédito",
-        "Cartão Débito",
-        "Transferência",
+        "Cart\u00e3o Cr\u00e9dito",
+        "Cart\u00e3o D\u00e9bito",
+        "Transfer\u00eancia",
         "Cheque",
-        "Crédito em Conta",
+        "Cr\u00e9dito em Conta",
         "Fidelidade/Cashback",
         "Outro"
       ],
@@ -37,7 +37,7 @@
     "ativa": {
       "type": "boolean",
       "default": true,
-      "description": "Se está ativa para uso"
+      "description": "Se est\u00e1 ativa para uso"
     },
     "aceita_desconto": {
       "type": "boolean",
@@ -47,36 +47,36 @@
     "percentual_desconto_padrao": {
       "type": "number",
       "default": 0,
-      "description": "% de desconto padrão"
+      "description": "% de desconto padr\u00e3o"
     },
     "aplicar_acrescimo": {
       "type": "boolean",
       "default": false,
-      "description": "Se aplica acréscimo/taxa"
+      "description": "Se aplica acr\u00e9scimo/taxa"
     },
     "percentual_acrescimo_padrao": {
       "type": "number",
       "default": 0,
-      "description": "% de acréscimo (ex: taxa cartão)"
+      "description": "% de acr\u00e9scimo (ex: taxa cart\u00e3o)"
     },
     "prazo_compensacao_dias": {
       "type": "number",
       "default": 0,
-      "description": "Dias para compensação/recebimento"
+      "description": "Dias para compensa\u00e7\u00e3o/recebimento"
     },
     "gerar_cobranca_online": {
       "type": "boolean",
       "default": false,
-      "description": "Se gera cobrança via gateway"
+      "description": "Se gera cobran\u00e7a via gateway"
     },
     "integracao_obrigatoria": {
       "type": "boolean",
       "default": false,
-      "description": "Se requer integração ativa para usar"
+      "description": "Se requer integra\u00e7\u00e3o ativa para usar"
     },
     "banco_vinculado_id": {
       "type": "string",
-      "description": "ID do banco vinculado para cobrança online (PIX/Boleto bancário)"
+      "description": "ID do banco vinculado para cobran\u00e7a online (PIX/Boleto banc\u00e1rio)"
     },
     "gateway_pagamento_id": {
       "type": "string",
@@ -89,7 +89,7 @@
     "usa_gateway": {
       "type": "boolean",
       "default": false,
-      "description": "Se usa gateway de pagamento ao invés de banco direto"
+      "description": "Se usa gateway de pagamento ao inv\u00e9s de banco direto"
     },
     "permite_parcelamento": {
       "type": "boolean",
@@ -99,17 +99,17 @@
     "maximo_parcelas": {
       "type": "number",
       "default": 1,
-      "description": "Número máximo de parcelas"
+      "description": "N\u00famero m\u00e1ximo de parcelas"
     },
     "intervalo_parcelas_dias": {
       "type": "number",
       "default": 30,
-      "description": "Dias entre parcelas (genérico)"
+      "description": "Dias entre parcelas (gen\u00e9rico)"
     },
     "taxa_por_parcela": {
       "type": "number",
       "default": 0,
-      "description": "Taxa % por parcela (genérica)"
+      "description": "Taxa % por parcela (gen\u00e9rica)"
     },
     "configuracao_parcelas_cartao": {
       "type": "array",
@@ -118,23 +118,23 @@
         "properties": {
           "numero_parcela": {
             "type": "number",
-            "description": "Número da parcela (1, 2, 3...)"
+            "description": "N\u00famero da parcela (1, 2, 3...)"
           },
           "dias_vencimento": {
             "type": "number",
-            "description": "Dias corridos até vencimento desta parcela"
+            "description": "Dias corridos at\u00e9 vencimento desta parcela"
           },
           "taxa_percentual": {
             "type": "number",
-            "description": "Taxa % específica desta parcela"
+            "description": "Taxa % espec\u00edfica desta parcela"
           }
         }
       },
-      "description": "Configuração individual de cada parcela para Cartão de Crédito"
+      "description": "Configura\u00e7\u00e3o individual de cada parcela para Cart\u00e3o de Cr\u00e9dito"
     },
     "icone": {
       "type": "string",
-      "description": "Nome do ícone (lucide-react)"
+      "description": "Nome do \u00edcone (lucide-react)"
     },
     "cor": {
       "type": "string",
@@ -143,7 +143,7 @@
     "ordem_exibicao": {
       "type": "number",
       "default": 0,
-      "description": "Ordem de exibição na lista"
+      "description": "Ordem de exibi\u00e7\u00e3o na lista"
     },
     "disponivel_ecommerce": {
       "type": "boolean",
@@ -164,6 +164,18 @@
     "tipo"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

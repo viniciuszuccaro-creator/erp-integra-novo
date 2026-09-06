@@ -10,7 +10,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "Código único do veículo"
+      "description": "C\u00f3digo \u00fanico do ve\u00edculo"
     },
     "placa": {
       "type": "string"
@@ -18,7 +18,7 @@
     "tipo_veiculo": {
       "type": "string",
       "enum": [
-        "Caminhão",
+        "Caminh\u00e3o",
         "Caminhonete",
         "Van",
         "Carro",
@@ -26,7 +26,7 @@
         "Carreta",
         "Outro"
       ],
-      "default": "Caminhão"
+      "default": "Caminh\u00e3o"
     },
     "modelo": {
       "type": "string"
@@ -49,12 +49,12 @@
     "proprietario": {
       "type": "string",
       "enum": [
-        "Próprio",
+        "Pr\u00f3prio",
         "Agregado",
         "Terceirizado",
         "Alugado"
       ],
-      "default": "Próprio"
+      "default": "Pr\u00f3prio"
     },
     "motorista_padrao_id": {
       "type": "string"
@@ -95,7 +95,7 @@
             "type": "string",
             "enum": [
               "OK",
-              "Atenção",
+              "Aten\u00e7\u00e3o",
               "Vencido"
             ]
           }
@@ -133,7 +133,7 @@
       "type": "string",
       "enum": [
         "Ativo",
-        "Manutenção",
+        "Manuten\u00e7\u00e3o",
         "Inativo",
         "Vendido"
       ],
@@ -149,6 +149,18 @@
     "empresa_id"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

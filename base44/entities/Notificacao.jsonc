@@ -12,11 +12,11 @@
     },
     "codigo": {
       "type": "string",
-      "description": "Código sequencial único"
+      "description": "C\u00f3digo sequencial \u00fanico"
     },
     "titulo": {
       "type": "string",
-      "description": "Título da notificação"
+      "description": "T\u00edtulo da notifica\u00e7\u00e3o"
     },
     "mensagem": {
       "type": "string",
@@ -32,7 +32,7 @@
         "urgente"
       ],
       "default": "info",
-      "description": "Tipo de notificação"
+      "description": "Tipo de notifica\u00e7\u00e3o"
     },
     "categoria": {
       "type": "string",
@@ -46,7 +46,7 @@
         "Geral"
       ],
       "default": "Geral",
-      "description": "Categoria da notificação"
+      "description": "Categoria da notifica\u00e7\u00e3o"
     },
     "prioridade": {
       "type": "string",
@@ -57,15 +57,15 @@
         "Urgente"
       ],
       "default": "Normal",
-      "description": "Nível de prioridade"
+      "description": "N\u00edvel de prioridade"
     },
     "destinatario_id": {
       "type": "string",
-      "description": "ID do usuário destinatário"
+      "description": "ID do usu\u00e1rio destinat\u00e1rio"
     },
     "destinatario_email": {
       "type": "string",
-      "description": "E-mail do destinatário"
+      "description": "E-mail do destinat\u00e1rio"
     },
     "remetente": {
       "type": "string",
@@ -73,7 +73,7 @@
     },
     "link_acao": {
       "type": "string",
-      "description": "URL para ação relacionada"
+      "description": "URL para a\u00e7\u00e3o relacionada"
     },
     "entidade_relacionada": {
       "type": "string",
@@ -86,7 +86,7 @@
     "lida": {
       "type": "boolean",
       "default": false,
-      "description": "Se a notificação foi lida"
+      "description": "Se a notifica\u00e7\u00e3o foi lida"
     },
     "data_leitura": {
       "type": "string",
@@ -101,12 +101,12 @@
     "acao_tomada": {
       "type": "boolean",
       "default": false,
-      "description": "Se alguma ação foi tomada"
+      "description": "Se alguma a\u00e7\u00e3o foi tomada"
     },
     "expira_em": {
       "type": "string",
       "format": "date-time",
-      "description": "Data/hora de expiração"
+      "description": "Data/hora de expira\u00e7\u00e3o"
     },
     "dados_adicionais": {
       "type": "object",
@@ -125,6 +125,18 @@
     "tipo"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

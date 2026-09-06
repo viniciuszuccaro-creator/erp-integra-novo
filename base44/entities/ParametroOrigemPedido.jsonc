@@ -12,11 +12,11 @@
     },
     "codigo": {
       "type": "string",
-      "description": "Código sequencial único"
+      "description": "C\u00f3digo sequencial \u00fanico"
     },
     "nome": {
       "type": "string",
-      "description": "Nome do canal (ex: ERP Manual, Site Automático, Chatbot)"
+      "description": "Nome do canal (ex: ERP Manual, Site Autom\u00e1tico, Chatbot)"
     },
     "canal": {
       "type": "string",
@@ -37,11 +37,11 @@
       "type": "string",
       "enum": [
         "Manual",
-        "Automático",
+        "Autom\u00e1tico",
         "Misto"
       ],
       "default": "Manual",
-      "description": "Se a criação é manual, automática ou ambas"
+      "description": "Se a cria\u00e7\u00e3o \u00e9 manual, autom\u00e1tica ou ambas"
     },
     "origem_pedido_manual": {
       "type": "string",
@@ -78,24 +78,24 @@
     "bloquear_edicao_automatico": {
       "type": "boolean",
       "default": true,
-      "description": "Se deve bloquear edição da origem quando automático"
+      "description": "Se deve bloquear edi\u00e7\u00e3o da origem quando autom\u00e1tico"
     },
     "url_webhook": {
       "type": "string",
-      "description": "URL do webhook para receber pedidos automáticos (se aplicável)"
+      "description": "URL do webhook para receber pedidos autom\u00e1ticos (se aplic\u00e1vel)"
     },
     "api_token": {
       "type": "string",
-      "description": "Token de autenticação da API (se aplicável)"
+      "description": "Token de autentica\u00e7\u00e3o da API (se aplic\u00e1vel)"
     },
     "ativo": {
       "type": "boolean",
       "default": true,
-      "description": "Se este canal está ativo"
+      "description": "Se este canal est\u00e1 ativo"
     },
     "descricao": {
       "type": "string",
-      "description": "Descrição do canal e como funciona"
+      "description": "Descri\u00e7\u00e3o do canal e como funciona"
     },
     "cor_badge": {
       "type": "string",
@@ -119,6 +119,18 @@
     "tipo_criacao"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

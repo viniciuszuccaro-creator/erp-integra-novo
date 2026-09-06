@@ -51,7 +51,7 @@
           "type": "string",
           "enum": [
             "Crescente",
-            "Estável",
+            "Est\u00e1vel",
             "Decrescente"
           ]
         },
@@ -59,9 +59,9 @@
           "type": "string",
           "enum": [
             "Baixo",
-            "Médio",
+            "M\u00e9dio",
             "Alto",
-            "Crítico"
+            "Cr\u00edtico"
           ]
         },
         "indicadores_desmotivacao": {
@@ -116,8 +116,8 @@
               "Queda de Produtividade",
               "Risco de Turnover",
               "Acesso Indevido",
-              "Padrão Anormal",
-              "Meta Não Atingida"
+              "Padr\u00e3o Anormal",
+              "Meta N\u00e3o Atingida"
             ]
           },
           "descricao": {
@@ -127,7 +127,7 @@
             "type": "string",
             "enum": [
               "Baixa",
-              "Média",
+              "M\u00e9dia",
               "Alta"
             ]
           },
@@ -146,6 +146,18 @@
     "periodo_referencia"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

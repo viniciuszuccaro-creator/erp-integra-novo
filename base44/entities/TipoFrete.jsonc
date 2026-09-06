@@ -8,15 +8,15 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa que cadastrou (cadastro único compartilhado no grupo)"
+      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
     },
     "codigo": {
       "type": "string",
-      "description": "Código sequencial único do tipo de frete"
+      "description": "C\u00f3digo sequencial \u00fanico do tipo de frete"
     },
     "nome": {
       "type": "string",
-      "description": "Nome do tipo de frete — único por grupo"
+      "description": "Nome do tipo de frete \u2014 \u00fanico por grupo"
     },
     "descricao": {
       "type": "string"
@@ -37,7 +37,7 @@
       "type": "string",
       "enum": [
         "Remetente",
-        "Destinatário",
+        "Destinat\u00e1rio",
         "Terceiro"
       ],
       "default": "Remetente"
@@ -48,7 +48,7 @@
         "Fixo",
         "Por Peso",
         "Por Volume",
-        "Por Distância",
+        "Por Dist\u00e2ncia",
         "Tabela",
         "Negociado"
       ],
@@ -57,7 +57,7 @@
     "valor_fixo": {
       "type": "number",
       "default": 0,
-      "description": "Valor fixo do frete (se aplicável)"
+      "description": "Valor fixo do frete (se aplic\u00e1vel)"
     },
     "valor_por_kg": {
       "type": "number",
@@ -70,15 +70,15 @@
     "valor_minimo": {
       "type": "number",
       "default": 0,
-      "description": "Valor mínimo de frete"
+      "description": "Valor m\u00ednimo de frete"
     },
     "icone": {
       "type": "string",
-      "description": "Ícone representativo"
+      "description": "\u00cdcone representativo"
     },
     "cor": {
       "type": "string",
-      "description": "Cor de identificação (hex)"
+      "description": "Cor de identifica\u00e7\u00e3o (hex)"
     },
     "ativo": {
       "type": "boolean",
@@ -93,6 +93,18 @@
     "tipo"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

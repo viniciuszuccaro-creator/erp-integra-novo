@@ -12,7 +12,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "Código sequencial único"
+      "description": "C\u00f3digo sequencial \u00fanico"
     },
     "banco_id": {
       "type": "string",
@@ -20,13 +20,13 @@
     },
     "conta_bancaria_id": {
       "type": "string",
-      "description": "ID da conta bancária"
+      "description": "ID da conta banc\u00e1ria"
     },
     "tipo_lancamento": {
       "type": "string",
       "enum": [
-        "Crédito",
-        "Débito",
+        "Cr\u00e9dito",
+        "D\u00e9bito",
         "Ambos"
       ],
       "default": "Ambos"
@@ -62,33 +62,33 @@
         "Por Valor",
         "Por Data",
         "Por Documento",
-        "Combinação Inteligente"
+        "Combina\u00e7\u00e3o Inteligente"
       ],
-      "default": "Combinação Inteligente"
+      "default": "Combina\u00e7\u00e3o Inteligente"
     },
     "tolerancia_diferenca_valor": {
       "type": "number",
       "default": 0.01,
-      "description": "Tolerância de diferença em valor (R$)"
+      "description": "Toler\u00e2ncia de diferen\u00e7a em valor (R$)"
     },
     "tolerancia_diferenca_dias": {
       "type": "number",
       "default": 2,
-      "description": "Tolerância de diferença em dias"
+      "description": "Toler\u00e2ncia de diferen\u00e7a em dias"
     },
     "conta_contabil_nao_identificado": {
       "type": "string",
-      "description": "Conta contábil para lançamentos não identificados"
+      "description": "Conta cont\u00e1bil para lan\u00e7amentos n\u00e3o identificados"
     },
     "usar_ia_aprendizado": {
       "type": "boolean",
       "default": true,
-      "description": "Se usa IA para aprender com conciliações anteriores"
+      "description": "Se usa IA para aprender com concilia\u00e7\u00f5es anteriores"
     },
     "conciliacao_automatica_ativa": {
       "type": "boolean",
       "default": false,
-      "description": "Se faz conciliação automática"
+      "description": "Se faz concilia\u00e7\u00e3o autom\u00e1tica"
     },
     "ativo": {
       "type": "boolean",
@@ -103,6 +103,18 @@
     "banco_id"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

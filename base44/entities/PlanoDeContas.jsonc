@@ -18,11 +18,11 @@
     },
     "codigo": {
       "type": "string",
-      "description": "Código sequencial único do registro"
+      "description": "C\u00f3digo sequencial \u00fanico do registro"
     },
     "codigo_conta": {
       "type": "string",
-      "description": "Código da conta contábil (ex: 1.1.1.01)"
+      "description": "C\u00f3digo da conta cont\u00e1bil (ex: 1.1.1.01)"
     },
     "nome_conta": {
       "type": "string"
@@ -37,7 +37,7 @@
         "Despesa",
         "Ativo",
         "Passivo",
-        "Patrimônio Líquido"
+        "Patrim\u00f4nio L\u00edquido"
       ]
     },
     "natureza": {
@@ -90,6 +90,18 @@
     "tipo_conta"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

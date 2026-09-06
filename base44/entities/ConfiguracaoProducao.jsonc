@@ -8,32 +8,32 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa (configuração por empresa)"
+      "description": "ID da empresa (configura\u00e7\u00e3o por empresa)"
     },
     "codigo": {
       "type": "string",
-      "description": "Código sequencial único"
+      "description": "C\u00f3digo sequencial \u00fanico"
     },
     "chave": {
       "type": "string",
-      "description": "Identificador único da configuração"
+      "description": "Identificador \u00fanico da configura\u00e7\u00e3o"
     },
     "tipo": {
       "type": "string",
       "enum": [
-        "Configuração Geral",
-        "Perda Aço",
+        "Configura\u00e7\u00e3o Geral",
+        "Perda A\u00e7o",
         "Perda Arame",
-        "Preço por KG",
-        "Tempo Produção",
+        "Pre\u00e7o por KG",
+        "Tempo Produ\u00e7\u00e3o",
         "Outro"
       ],
-      "description": "Tipo de configuração"
+      "description": "Tipo de configura\u00e7\u00e3o"
     },
     "perda_aco_percentual": {
       "type": "number",
       "default": 5,
-      "description": "Percentual de perda de aço (%)"
+      "description": "Percentual de perda de a\u00e7o (%)"
     },
     "perda_arame_percentual": {
       "type": "number",
@@ -42,23 +42,23 @@
     },
     "preco_aco_kg": {
       "type": "number",
-      "description": "Preço do aço por KG"
+      "description": "Pre\u00e7o do a\u00e7o por KG"
     },
     "preco_arame_kg": {
       "type": "number",
-      "description": "Preço do arame por KG"
+      "description": "Pre\u00e7o do arame por KG"
     },
     "tempo_corte_por_barra": {
       "type": "number",
-      "description": "Tempo médio de corte por barra (minutos)"
+      "description": "Tempo m\u00e9dio de corte por barra (minutos)"
     },
     "tempo_dobra_por_barra": {
       "type": "number",
-      "description": "Tempo médio de dobra por barra (minutos)"
+      "description": "Tempo m\u00e9dio de dobra por barra (minutos)"
     },
     "tempo_armacao_por_peca": {
       "type": "number",
-      "description": "Tempo médio de armação por peça (minutos)"
+      "description": "Tempo m\u00e9dio de arma\u00e7\u00e3o por pe\u00e7a (minutos)"
     },
     "bloqueado_edicao": {
       "type": "boolean",
@@ -67,7 +67,7 @@
     },
     "bloqueado_por": {
       "type": "string",
-      "description": "Usuário que bloqueou"
+      "description": "Usu\u00e1rio que bloqueou"
     },
     "bloqueado_em": {
       "type": "string",
@@ -97,7 +97,7 @@
         "manual"
       ],
       "default": "reserva",
-      "description": "Modo de integração com estoque"
+      "description": "Modo de integra\u00e7\u00e3o com estoque"
     },
     "permitir_baixa_maior_teorico": {
       "type": "boolean",
@@ -106,11 +106,11 @@
     },
     "produto_arame_recozido_id": {
       "type": "string",
-      "description": "ID do produto padrão de arame recozido"
+      "description": "ID do produto padr\u00e3o de arame recozido"
     },
     "produto_sucata_id": {
       "type": "string",
-      "description": "ID do produto padrão de sucata/retalho"
+      "description": "ID do produto padr\u00e3o de sucata/retalho"
     },
     "exigir_bitola_cadastrada": {
       "type": "boolean",
@@ -120,7 +120,7 @@
     "bloquear_op_sem_estoque": {
       "type": "boolean",
       "default": false,
-      "description": "Bloqueia liberação se não tiver material em estoque"
+      "description": "Bloqueia libera\u00e7\u00e3o se n\u00e3o tiver material em estoque"
     },
     "gerar_etiqueta_automatica": {
       "type": "boolean",
@@ -130,7 +130,7 @@
     "prazo_padrao_op_dias": {
       "type": "number",
       "default": 7,
-      "description": "Prazo padrão em dias para conclusão"
+      "description": "Prazo padr\u00e3o em dias para conclus\u00e3o"
     },
     "historico_alteracoes": {
       "type": "array",
@@ -151,7 +151,7 @@
           "valor_novo": {}
         }
       },
-      "description": "Histórico de todas as alterações"
+      "description": "Hist\u00f3rico de todas as altera\u00e7\u00f5es"
     },
     "observacoes": {
       "type": "string"
@@ -168,6 +168,18 @@
     "tipo"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

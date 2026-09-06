@@ -18,7 +18,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "Código único do cargo"
+      "description": "C\u00f3digo \u00fanico do cargo"
     },
     "nome_cargo": {
       "type": "string"
@@ -29,7 +29,7 @@
     "nivel_hierarquico": {
       "type": "string",
       "enum": [
-        "Estagiário",
+        "Estagi\u00e1rio",
         "Auxiliar",
         "Assistente",
         "Analista",
@@ -65,6 +65,18 @@
     "nome_cargo"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

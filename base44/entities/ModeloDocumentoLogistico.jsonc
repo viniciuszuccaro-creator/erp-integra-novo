@@ -12,11 +12,11 @@
     },
     "codigo": {
       "type": "string",
-      "description": "Código sequencial único do modelo"
+      "description": "C\u00f3digo sequencial \u00fanico do modelo"
     },
     "nome_modelo": {
       "type": "string",
-      "description": "Nome do modelo — único por grupo"
+      "description": "Nome do modelo \u2014 \u00fanico por grupo"
     },
     "tipo_documento": {
       "type": "string",
@@ -25,7 +25,7 @@
         "Etiqueta Volume",
         "Checklist Carga",
         "Canhoto",
-        "Ordem Separação",
+        "Ordem Separa\u00e7\u00e3o",
         "Outro"
       ],
       "description": "Tipo de documento"
@@ -42,7 +42,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Campos obrigatórios no documento"
+      "description": "Campos obrigat\u00f3rios no documento"
     },
     "campos_opcionais": {
       "type": "array",
@@ -70,7 +70,7 @@
         "PDF",
         "HTML",
         "Imagem",
-        "Térmico"
+        "T\u00e9rmico"
       ],
       "default": "PDF"
     },
@@ -79,8 +79,8 @@
       "enum": [
         "A4",
         "A5",
-        "Térmico 80mm",
-        "Térmico 58mm",
+        "T\u00e9rmico 80mm",
+        "T\u00e9rmico 58mm",
         "Personalizado"
       ],
       "default": "A4"
@@ -96,7 +96,7 @@
     "padrao_empresa": {
       "type": "boolean",
       "default": false,
-      "description": "Se é o modelo padrão da empresa"
+      "description": "Se \u00e9 o modelo padr\u00e3o da empresa"
     },
     "ativo": {
       "type": "boolean",
@@ -111,6 +111,18 @@
     "tipo_documento"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

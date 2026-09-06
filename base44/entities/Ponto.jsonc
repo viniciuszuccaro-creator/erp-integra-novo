@@ -22,7 +22,7 @@
     },
     "entrada_manha": {
       "type": "string",
-      "description": "Horário formato HH:MM"
+      "description": "Hor\u00e1rio formato HH:MM"
     },
     "saida_almoco": {
       "type": "string"
@@ -70,6 +70,18 @@
     "data"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

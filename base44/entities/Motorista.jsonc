@@ -13,7 +13,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "Código único do motorista"
+      "description": "C\u00f3digo \u00fanico do motorista"
     },
     "nome_completo": {
       "type": "string"
@@ -58,7 +58,7 @@
         "CLT",
         "Agregado",
         "Terceirizado",
-        "Autônomo"
+        "Aut\u00f4nomo"
       ],
       "default": "CLT"
     },
@@ -165,7 +165,7 @@
       "type": "string",
       "enum": [
         "Ativo",
-        "Férias",
+        "F\u00e9rias",
         "Afastado",
         "Inativo"
       ],
@@ -182,6 +182,18 @@
     "cnh_validade"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

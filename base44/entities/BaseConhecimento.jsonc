@@ -8,26 +8,26 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa proprietária"
+      "description": "ID da empresa propriet\u00e1ria"
     },
     "codigo": {
       "type": "string",
-      "description": "Código sequencial único do artigo"
+      "description": "C\u00f3digo sequencial \u00fanico do artigo"
     },
     "titulo": {
       "type": "string",
-      "description": "Título do artigo — único por grupo"
+      "description": "T\u00edtulo do artigo \u2014 \u00fanico por grupo"
     },
     "slug": {
       "type": "string",
-      "description": "URL amigável"
+      "description": "URL amig\u00e1vel"
     },
     "resumo": {
       "type": "string"
     },
     "conteudo_markdown": {
       "type": "string",
-      "description": "Conteúdo em Markdown"
+      "description": "Conte\u00fado em Markdown"
     },
     "categorias": {
       "type": "array",
@@ -164,6 +164,18 @@
     "conteudo_markdown"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

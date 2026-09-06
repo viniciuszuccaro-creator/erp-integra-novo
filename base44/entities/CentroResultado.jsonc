@@ -8,7 +8,7 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa (se específico da empresa)"
+      "description": "ID da empresa (se espec\u00edfico da empresa)"
     },
     "origem_escopo": {
       "type": "string",
@@ -21,7 +21,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "Código sequencial único do centro de resultado"
+      "description": "C\u00f3digo sequencial \u00fanico do centro de resultado"
     },
     "nome": {
       "type": "string",
@@ -34,7 +34,7 @@
       "type": "string",
       "enum": [
         "Produto",
-        "Serviço",
+        "Servi\u00e7o",
         "Departamento",
         "Projeto",
         "Cliente",
@@ -49,7 +49,7 @@
     },
     "responsavel_id": {
       "type": "string",
-      "description": "ID do usuário responsável"
+      "description": "ID do usu\u00e1rio respons\u00e1vel"
     },
     "meta_receita_mensal": {
       "type": "number",
@@ -71,6 +71,18 @@
     "nome"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

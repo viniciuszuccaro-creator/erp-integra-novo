@@ -8,7 +8,7 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa que cadastrou (cadastro único compartilhado no grupo)"
+      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
     },
     "empresa_dona_id": {
       "type": "string",
@@ -23,20 +23,20 @@
     },
     "nome": {
       "type": "string",
-      "description": "Nome do local — único por grupo (Ex: Almoxarifado Central, Depósito A)"
+      "description": "Nome do local \u2014 \u00fanico por grupo (Ex: Almoxarifado Central, Dep\u00f3sito A)"
     },
     "codigo": {
       "type": "string",
-      "description": "Código sequencial único do local"
+      "description": "C\u00f3digo sequencial \u00fanico do local"
     },
     "tipo": {
       "type": "string",
       "enum": [
         "Almoxarifado",
-        "Depósito",
+        "Dep\u00f3sito",
         "Loja",
-        "Produção",
-        "Expedição",
+        "Produ\u00e7\u00e3o",
+        "Expedi\u00e7\u00e3o",
         "Quarentena",
         "Outro"
       ],
@@ -87,11 +87,11 @@
           "type": "number"
         }
       },
-      "description": "Estrutura física para picking"
+      "description": "Estrutura f\u00edsica para picking"
     },
     "capacidade_m3": {
       "type": "number",
-      "description": "Capacidade em m³"
+      "description": "Capacidade em m\u00b3"
     },
     "ocupacao_atual_m3": {
       "type": "number",
@@ -126,6 +126,18 @@
     "tipo"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

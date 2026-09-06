@@ -8,7 +8,7 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa que cadastrou (cadastro único compartilhado no grupo)"
+      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
     },
     "empresa_dona_id": {
       "type": "string",
@@ -16,25 +16,25 @@
     },
     "codigo": {
       "type": "string",
-      "description": "Código sequencial único do kit"
+      "description": "C\u00f3digo sequencial \u00fanico do kit"
     },
     "codigo_kit": {
       "type": "string",
-      "description": "Código do kit (legado)"
+      "description": "C\u00f3digo do kit (legado)"
     },
     "nome_kit": {
       "type": "string",
-      "description": "Nome do kit — único por grupo"
+      "description": "Nome do kit \u2014 \u00fanico por grupo"
     },
     "descricao": {
       "type": "string",
-      "description": "Descrição do kit"
+      "description": "Descri\u00e7\u00e3o do kit"
     },
     "tipo_kit": {
       "type": "string",
       "enum": [
         "Comercial",
-        "Produção",
+        "Produ\u00e7\u00e3o",
         "Promocional",
         "Personalizado"
       ],
@@ -59,11 +59,11 @@
           }
         }
       },
-      "description": "Produtos que compõem o kit"
+      "description": "Produtos que comp\u00f5em o kit"
     },
     "preco_kit": {
       "type": "number",
-      "description": "Preço do kit (pode ser diferente da soma dos itens)"
+      "description": "Pre\u00e7o do kit (pode ser diferente da soma dos itens)"
     },
     "desconto_kit_percentual": {
       "type": "number",
@@ -91,6 +91,18 @@
     "itens_kit"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

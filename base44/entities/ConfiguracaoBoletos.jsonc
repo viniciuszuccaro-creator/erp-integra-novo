@@ -12,7 +12,7 @@
     },
     "codigo": {
       "type": "string",
-      "description": "Código sequencial único da configuração"
+      "description": "C\u00f3digo sequencial \u00fanico da configura\u00e7\u00e3o"
     },
     "provedor": {
       "type": "string",
@@ -41,7 +41,7 @@
     "ambiente": {
       "type": "string",
       "enum": [
-        "Produção",
+        "Produ\u00e7\u00e3o",
         "Sandbox"
       ],
       "default": "Sandbox"
@@ -59,7 +59,7 @@
     "dias_vencimento_padrao": {
       "type": "number",
       "default": 3,
-      "description": "Dias até vencimento (padrão)"
+      "description": "Dias at\u00e9 vencimento (padr\u00e3o)"
     },
     "multa_percentual": {
       "type": "number",
@@ -86,7 +86,7 @@
     },
     "webhook_url": {
       "type": "string",
-      "description": "URL para receber notificações de pagamento"
+      "description": "URL para receber notifica\u00e7\u00f5es de pagamento"
     },
     "ultima_cobranca_gerada": {
       "type": "string",
@@ -109,6 +109,18 @@
     "provedor"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

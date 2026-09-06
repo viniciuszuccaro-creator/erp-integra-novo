@@ -8,7 +8,7 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa onde ocorreu a movimentação"
+      "description": "ID da empresa onde ocorreu a movimenta\u00e7\u00e3o"
     },
     "origem_movimento": {
       "type": "string",
@@ -22,7 +22,7 @@
         "nfe",
         "devolucao"
       ],
-      "description": "Origem da movimentação"
+      "description": "Origem da movimenta\u00e7\u00e3o"
     },
     "origem_documento_id": {
       "type": "string",
@@ -38,7 +38,7 @@
         "liberacao_reserva",
         "ajuste"
       ],
-      "description": "Tipo de movimentação"
+      "description": "Tipo de movimenta\u00e7\u00e3o"
     },
     "produto_id": {
       "type": "string",
@@ -46,11 +46,11 @@
     },
     "produto_descricao": {
       "type": "string",
-      "description": "Descrição do produto"
+      "description": "Descri\u00e7\u00e3o do produto"
     },
     "codigo_produto": {
       "type": "string",
-      "description": "Código do produto"
+      "description": "C\u00f3digo do produto"
     },
     "quantidade": {
       "type": "number",
@@ -62,48 +62,48 @@
     },
     "estoque_anterior": {
       "type": "number",
-      "description": "Saldo antes da movimentação"
+      "description": "Saldo antes da movimenta\u00e7\u00e3o"
     },
     "estoque_atual": {
       "type": "number",
-      "description": "Saldo após a movimentação"
+      "description": "Saldo ap\u00f3s a movimenta\u00e7\u00e3o"
     },
     "reservado_anterior": {
       "type": "number",
       "default": 0,
-      "description": "Reservado antes da movimentação"
+      "description": "Reservado antes da movimenta\u00e7\u00e3o"
     },
     "reservado_atual": {
       "type": "number",
       "default": 0,
-      "description": "Reservado após a movimentação"
+      "description": "Reservado ap\u00f3s a movimenta\u00e7\u00e3o"
     },
     "disponivel_anterior": {
       "type": "number",
       "default": 0,
-      "description": "Disponível antes da movimentação"
+      "description": "Dispon\u00edvel antes da movimenta\u00e7\u00e3o"
     },
     "disponivel_atual": {
       "type": "number",
       "default": 0,
-      "description": "Disponível após a movimentação"
+      "description": "Dispon\u00edvel ap\u00f3s a movimenta\u00e7\u00e3o"
     },
     "data_movimentacao": {
       "type": "string",
       "format": "date-time",
-      "description": "Data e hora da movimentação"
+      "description": "Data e hora da movimenta\u00e7\u00e3o"
     },
     "documento": {
       "type": "string",
-      "description": "Número do documento (NF, OP, etc)"
+      "description": "N\u00famero do documento (NF, OP, etc)"
     },
     "motivo": {
       "type": "string",
-      "description": "Motivo da movimentação"
+      "description": "Motivo da movimenta\u00e7\u00e3o"
     },
     "lote": {
       "type": "string",
-      "description": "Número do lote (se controla lote)"
+      "description": "N\u00famero do lote (se controla lote)"
     },
     "data_validade": {
       "type": "string",
@@ -112,23 +112,23 @@
     },
     "localizacao_origem": {
       "type": "string",
-      "description": "Localização de origem (almoxarifado, corredor, prateleira)"
+      "description": "Localiza\u00e7\u00e3o de origem (almoxarifado, corredor, prateleira)"
     },
     "localizacao_destino": {
       "type": "string",
-      "description": "Localização de destino"
+      "description": "Localiza\u00e7\u00e3o de destino"
     },
     "empresa_origem_id": {
       "type": "string",
-      "description": "Empresa origem (em transferências)"
+      "description": "Empresa origem (em transfer\u00eancias)"
     },
     "empresa_destino_id": {
       "type": "string",
-      "description": "Empresa destino (em transferências)"
+      "description": "Empresa destino (em transfer\u00eancias)"
     },
     "transferencia_id": {
       "type": "string",
-      "description": "ID da transferência entre filiais"
+      "description": "ID da transfer\u00eancia entre filiais"
     },
     "centro_custo_id": {
       "type": "string",
@@ -139,22 +139,22 @@
     },
     "responsavel": {
       "type": "string",
-      "description": "Usuário responsável"
+      "description": "Usu\u00e1rio respons\u00e1vel"
     },
     "responsavel_id": {
       "type": "string"
     },
     "valor_unitario": {
       "type": "number",
-      "description": "Valor unitário do produto"
+      "description": "Valor unit\u00e1rio do produto"
     },
     "valor_total": {
       "type": "number",
-      "description": "Valor total da movimentação"
+      "description": "Valor total da movimenta\u00e7\u00e3o"
     },
     "custo_medio": {
       "type": "number",
-      "description": "Custo médio após a movimentação"
+      "description": "Custo m\u00e9dio ap\u00f3s a movimenta\u00e7\u00e3o"
     },
     "status_integracao": {
       "type": "string",
@@ -164,7 +164,7 @@
         "erro"
       ],
       "default": "sincronizado",
-      "description": "Status de sincronização entre grupo e empresa"
+      "description": "Status de sincroniza\u00e7\u00e3o entre grupo e empresa"
     },
     "observacoes": {
       "type": "string"
@@ -172,7 +172,7 @@
     "aprovado": {
       "type": "boolean",
       "default": true,
-      "description": "Se a movimentação foi aprovada"
+      "description": "Se a movimenta\u00e7\u00e3o foi aprovada"
     },
     "aprovador": {
       "type": "string"
@@ -190,6 +190,18 @@
     "empresa_id"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

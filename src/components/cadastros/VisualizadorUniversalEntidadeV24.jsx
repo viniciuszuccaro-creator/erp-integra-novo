@@ -250,7 +250,7 @@ export default function VisualizadorUniversalEntidadeV24({
     } catch (e) { console.error("Erro ao excluir em massa:", e?.message || e); return; }
     setSelectedIds(new Set()); setDeselectedIds(new Set()); setCrossPageAll(false); setPage(1);
     invalidateAll(queryClient, ENTITY);
-  }, [ENTITY, crossPageAll, totalCount, selectedIds, deselectedIds, readFilter, queryClient, deleteInContext, canDeleteCadastro]);
+  }, [ENTITY, crossPageAll, totalCount, selectedIds, deselectedIds, readFilter, queryClient, deleteInContext, canDeleteCadastro, user, empresaId, groupId]);
 
   const allPageSelected  = items.length > 0 && items.every(i => isItemSelected(i.id));
   const somePageSelected = items.some(i => isItemSelected(i.id));

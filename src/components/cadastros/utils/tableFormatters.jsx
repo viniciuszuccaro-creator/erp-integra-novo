@@ -81,3 +81,24 @@ export function fmtValue(value, col, extraColors = {}) {
   if (typeof value === "object") return Array.isArray(value) ? "[" + value.length + "]" : "–";
   return String(value).substring(0, 130);
 }
+
+/**
+ * fmtValueText — versão texto puro de fmtValue (para exportação CSV/Excel).
+ * Espelha as mesmas regras de exibição da tabela (bool Sim/Não, datas pt-BR,
+ * moeda BRL, números), garantindo que o arquivo exportado corresponda à tela.
+ */
+export function fmtValueText(value, col) {
+  if (value === null || value === undefined || value === "") return "";
+  if (BOOL_FIELDS.has(col.field)) return value ? "Sim" : "Não";
+  if (DATE_FIELDS.has(col.field) || col.type === "date") {
+    try { const d = new Date(value); if (!isNaN(d.getTime())) return d.toLocaleDateString("pt-BR"); } catch (_) { }
+  }
+  if (MONEY_FIELDS.has(col.field) || col.type === "currency") {
+    const n = Number(value);
+    if (!isNaN(n)) return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  }
+  if (col.type === "number") { const n = Number(value); return isNaN(n) ? String(value) : n.toLocaleString("pt-BR"); }
+  if (typeof value === "boolean") return value ? "Sim" : "Não";
+  if (typeof value === "object") return Array.isArray(value) ? `${value.length} itens` : "";
+  return String(value).substring(0, 130);
+}

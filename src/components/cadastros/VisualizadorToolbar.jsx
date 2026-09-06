@@ -3,6 +3,7 @@ import { Search, RefreshCw, Plus, Trash2, X, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { getDisplayValue, fmtValueText } from "@/components/cadastros/utils/tableFormatters";
 
 const PAGE_SIZES = [10, 20, 50, 100];
 
@@ -21,11 +22,9 @@ export default function VisualizadorToolbar({
     if (!items?.length || !COLUMNS?.length) return;
     const header = COLUMNS.map(c => c.label).join(";");
     const rows = items.map(item =>
-      COLUMNS.map(c => {
-        const v = item[c.field];
-        if (v === null || v === undefined) return "";
-        if (typeof v === "object") return Array.isArray(v) ? v.length : "";
-        return String(v).replace(/;/g, ",");
+      COLUMNS.map((c, idx) => {
+        const v = getDisplayValue(item, c, idx === 0);
+        return fmtValueText(v, c).replace(/;/g, ",").replace(/\r?\n/g, " ");
       }).join(";")
     );
     const csv = [header, ...rows].join("\n");

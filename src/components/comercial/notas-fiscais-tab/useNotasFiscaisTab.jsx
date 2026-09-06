@@ -35,6 +35,7 @@ export default function useNotasFiscaisTab() {
       setIsDialogOpen(false); resetForm();
       toast({ title: "✅ Nota Fiscal criada!" });
     },
+    onError: (err) => toast({ title: "Erro ao criar Nota Fiscal", description: err?.message || 'Tente novamente.', variant: "destructive" }),
   });
 
   const updateMutation = useMutation({
@@ -44,6 +45,7 @@ export default function useNotasFiscaisTab() {
       setIsDialogOpen(false); setSelectedNF(null); resetForm();
       toast({ title: "✅ Nota Fiscal atualizada!" });
     },
+    onError: (err) => toast({ title: "Erro ao atualizar Nota Fiscal", description: err?.message || 'Tente novamente.', variant: "destructive" }),
   });
 
   const cancelarNFeMutation = useMutation({
@@ -66,9 +68,12 @@ export default function useNotasFiscaisTab() {
       return resultado;
     },
     onSuccess: () => {
+      // Alinhado ao useRLSQuery: listagem em ['NotaFiscal']; 'notasFiscais' mantido por compat
+      queryClient.invalidateQueries({ queryKey: ['NotaFiscal'] });
       queryClient.invalidateQueries({ queryKey: ['notasFiscais'] });
       toast({ title: "✅ NF-e Cancelada (Simulação)" });
-    }
+    },
+    onError: (err) => toast({ title: "Erro ao cancelar NF-e", description: err?.message || 'Tente novamente.', variant: "destructive" }),
   });
 
   const handleSubmit = (e) => {

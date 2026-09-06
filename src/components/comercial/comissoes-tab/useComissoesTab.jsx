@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import useRLS from "@/components/lib/useRLS";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import { useConfirm } from "@/components/ui/confirm-dialog";
+import { useToast } from "@/components/ui/use-toast";
 
 /**
  * Hook extraído de ComissoesTab.jsx (Regra-Mãe)
@@ -12,6 +13,7 @@ import { useConfirm } from "@/components/ui/confirm-dialog";
 export default function useComissoesTab({ comissoes, pedidos }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todas");
+  const { toast } = useToast();
 
   const queryClient = useQueryClient();
   const { update: updateRLS, create: createRLS } = useRLS();
@@ -25,6 +27,7 @@ export default function useComissoesTab({ comissoes, pedidos }) {
       data_aprovacao: new Date().toISOString().split('T')[0]
     }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['Comissao'] }),
+    onError: (err) => toast({ title: "Erro ao aprovar comissão", description: err?.message || 'Tente novamente.', variant: "destructive" }),
   });
 
   const recusarComissaoMutation = useMutation({
@@ -33,6 +36,7 @@ export default function useComissoesTab({ comissoes, pedidos }) {
       observacoes: `${obs || ''}\n\nRecusada: ${motivo}`
     }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['Comissao'] }),
+    onError: (err) => toast({ title: "Erro ao recusar comissão", description: err?.message || 'Tente novamente.', variant: "destructive" }),
   });
 
   const pagarComissaoMutation = useMutation({
@@ -57,6 +61,7 @@ export default function useComissoesTab({ comissoes, pedidos }) {
       queryClient.invalidateQueries({ queryKey: ['Comissao'] });
       queryClient.invalidateQueries({ queryKey: ['ContaPagar'] });
     },
+    onError: (err) => toast({ title: "Erro ao gerar pagamento", description: err?.message || 'Tente novamente.', variant: "destructive" }),
   });
 
   const handleAprovar = async (comissao) => {

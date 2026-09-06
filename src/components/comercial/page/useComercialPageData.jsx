@@ -52,6 +52,8 @@ export default function useComercialPageData({ canSeeComercial }) {
     }
     if (base44.entities?.NotaFiscal?.subscribe) {
       unsubs.push(base44.entities.NotaFiscal.subscribe(() => {
+        // Listagem em ['NotaFiscal'] (useRLSQuery); 'notasFiscais' mantido por compat
+        try { queryClient.invalidateQueries({ queryKey: ['NotaFiscal'] }); } catch (_) {}
         try { queryClient.invalidateQueries({ queryKey: ['notasFiscais'] }); } catch (_) {}
       }));
     }

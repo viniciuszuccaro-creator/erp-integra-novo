@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
 import usePermissions from "@/components/lib/usePermissions";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
  * ETAPA 4 - Simulador de Pagamento
@@ -22,6 +23,7 @@ import usePermissions from "@/components/lib/usePermissions";
 export default function SimularPagamentoModal({ isOpen, onClose, contaReceber }) {
   const { user } = useUser();
   const { hasPermission } = usePermissions();
+  const { createInContext, updateInContext } = useContextoVisual();
   const { formasPagamento, isLoading: loadingFormas } = useFormasPagamento();
   const queryClient = useQueryClient();
   const [processando, setProcessando] = useState(false);
@@ -45,7 +47,7 @@ export default function SimularPagamentoModal({ isOpen, onClose, contaReceber })
       }
 
       // 1. Criar Pagamento Omnichannel
-      const pagamento = await base44.entities.PagamentoOmnichannel.create({
+      const pagamento = await createInContext('PagamentoOmnichannel', {
         group_id: contaReceber.group_id,
         empresa_id: contaReceber.empresa_id,
         origem_pagamento: "Simulação Manual",
@@ -74,7 +76,7 @@ export default function SimularPagamentoModal({ isOpen, onClose, contaReceber })
       });
 
       // 2. Baixar Conta a Receber
-      await base44.entities.ContaReceber.update(contaReceber.id, {
+      await updateInContext('ContaReceber', contaReceber.id, {
         status: 'Recebido',
         data_recebimento: dadosSimulacao.data_pagamento,
         valor_recebido: dadosSimulacao.valor_pago,
@@ -85,7 +87,7 @@ export default function SimularPagamentoModal({ isOpen, onClose, contaReceber })
       });
 
       // 3. Criar Ordem de Liquidação para Caixa
-      await base44.entities.CaixaOrdemLiquidacao.create({
+      await createInContext('CaixaOrdemLiquidacao', {
         group_id: contaReceber.group_id,
         empresa_id: contaReceber.empresa_id,
         tipo_operacao: 'Recebimento',
@@ -106,7 +108,7 @@ export default function SimularPagamentoModal({ isOpen, onClose, contaReceber })
 
       // 4. Criar Histórico Cliente
       if (contaReceber.cliente_id) {
-        await base44.entities.HistoricoCliente.create({
+        await createInContext('HistoricoCliente', {
           group_id: contaReceber.group_id,
           empresa_id: contaReceber.empresa_id,
           cliente_id: contaReceber.cliente_id,
@@ -125,7 +127,7 @@ export default function SimularPagamentoModal({ isOpen, onClose, contaReceber })
       }
 
       // 5. Log de Cobrança
-      await base44.entities.LogCobranca.create({
+      await createInContext('LogCobranca', {
         group_id: contaReceber.group_id,
         empresa_id: contaReceber.empresa_id,
         conta_receber_id: contaReceber.id,

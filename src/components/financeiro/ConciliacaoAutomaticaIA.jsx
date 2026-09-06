@@ -8,12 +8,17 @@ import { base44 } from '@/api/base44Client';
 import { Sparkles, Zap, CheckCircle2, AlertTriangle, TrendingUp, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import usePermissions from '@/components/lib/usePermissions';
+import { useUser } from '@/components/lib/UserContext';
 
 export default function ConciliacaoAutomaticaIA({ empresaId }) {
   const queryClient = useQueryClient();
   const [processando, setProcessando] = useState(false);
   const [resultados, setResultados] = useState(null);
-  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const { filterInContext, grupoAtual, empresaAtual, contexto, createInContext, updateInContext } = useContextoVisual();
+  const { user } = useUser();
+  const { canEdit } = usePermissions();
+  const podeConciliar = canEdit('Financeiro', 'ConciliacaoBancaria') || canEdit('Financeiro');
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaId || empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: extratos = [] } = useQuery({
@@ -76,19 +81,23 @@ export default function ConciliacaoAutomaticaIA({ empresaId }) {
 
   const aplicarConciliacoes = useMutation({
     mutationFn: async () => {
+      // Regra-Mãe 5a/5b: RBAC + contexto multiempresa obrigatórios na persistência (fail-closed)
+      if (!podeConciliar) throw new Error('Sem permissão para aplicar conciliações.');
+      if (!grupoAtual?.id) throw new Error('Contexto de grupo obrigatório para conciliar (Regra-Mãe 5a).');
+      let aplicadas = 0;
       for (const match of resultados.matches.filter(m => m.exato)) {
-        await base44.entities.ExtratoBancario.update(match.extrato.id, {
+        await updateInContext('ExtratoBancario', match.extrato.id, {
           conciliado: true,
           movimento_vinculado_id: match.movimento.id,
           data_conciliacao: new Date().toISOString()
         });
 
-        await base44.entities.CaixaMovimento.update(match.movimento.id, {
+        await updateInContext('CaixaMovimento', match.movimento.id, {
           conciliado: true,
           extrato_vinculado_id: match.extrato.id
         });
 
-        await base44.entities.ConciliacaoBancaria.create({
+        await createInContext('ConciliacaoBancaria', {
           empresa_id: match.extrato.empresa_id,
           group_id: match.extrato.group_id,
           extrato_bancario_id: match.extrato.id,
@@ -102,7 +111,19 @@ export default function ConciliacaoAutomaticaIA({ empresaId }) {
           conciliado_por_ia: true,
           observacoes: 'Conciliação automática via IA'
         });
+        aplicadas++;
       }
+
+      // Regra-Mãe 5d: auditoria do lote de conciliações automáticas
+      try { await base44.entities.AuditLog.create({
+        acao: 'Conciliação', modulo: 'Financeiro', entidade: 'ConciliacaoBancaria',
+        descricao: `Conciliação automática via IA (${aplicadas} par(es) conciliado(s))`,
+        data_hora: new Date().toISOString(),
+        group_id: grupoAtual?.id, grupo_id: grupoAtual?.id, empresa_id: empresaAtual?.id,
+        usuario: user?.full_name || 'Sistema', usuario_id: user?.id,
+        tipo_auditoria: 'operacional', sucesso: true,
+        dados_novos: { conciliacoes: aplicadas, conciliado_por_ia: true }
+      }); } catch (e) { console.error('[ConciliacaoIA] Falha ao auditar:', e?.message || e); }
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['extratos-pendentes']);
@@ -233,7 +254,7 @@ export default function ConciliacaoAutomaticaIA({ empresaId }) {
             {resultados.conciliados > 0 && (
               <Button
                 onClick={() => aplicarConciliacoes.mutate()}
-                disabled={aplicarConciliacoes.isPending}
+                disabled={aplicarConciliacoes.isPending || !podeConciliar}
                 className="w-full bg-green-600 hover:bg-green-700"
                 size="lg"
               >

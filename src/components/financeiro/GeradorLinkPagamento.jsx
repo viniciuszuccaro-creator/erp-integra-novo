@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/select";
 import { Link2, Copy, Check, QrCode } from "lucide-react";
 import { useUser } from "@/components/lib/UserContext";
+import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 import { toast } from "sonner";
 
 /**
@@ -26,6 +28,9 @@ export default function GeradorLinkPagamento({
   onClose 
 }) {
   const { user } = useUser();
+  const { grupoAtual, empresaAtual, createInContext, updateInContext } = useContextoVisual();
+  const { canCreate, canEdit, hasPermission } = usePermissions();
+  const podeGerar = canCreate('Financeiro', 'Cobranca') || canEdit('Financeiro') || hasPermission('Financeiro', null, 'gerenciar');
   const queryClient = useQueryClient();
   const [linkGerado, setLinkGerado] = useState(null);
   const [copiado, setCopiado] = useState(false);
@@ -38,8 +43,14 @@ export default function GeradorLinkPagamento({
 
   const gerarLink = useMutation({
     mutationFn: async () => {
+      // Regra-Mãe 5a/5b: RBAC + contexto multiempresa obrigatórios na persistência (fail-closed)
+      const groupId = titulo?.group_id || pedido?.group_id || grupoAtual?.id;
+      const empresaId = titulo?.empresa_id || pedido?.empresa_id || empresaAtual?.id;
+      if (!groupId || !empresaId) throw new Error('Contexto de grupo/empresa obrigatório para gerar link (Regra-Mãe 5a).');
+      if (!podeGerar) throw new Error('Seu perfil não permite gerar links de pagamento.');
+
       // Criar registro de pagamento omnichannel
-      const pagamento = await base44.entities.PagamentoOmnichannel.create({
+      const pagamento = await createInContext('PagamentoOmnichannel', {
         group_id: titulo?.group_id || pedido?.group_id,
         empresa_id: titulo?.empresa_id || pedido?.empresa_id,
         origem_pagamento: "Link Pagamento",
@@ -60,20 +71,20 @@ export default function GeradorLinkPagamento({
       // Gerar link fictício (em produção, integraria com gateway real)
       const link = `https://pag.erp-integra.com.br/${config.gateway}/${pagamento.id}`;
       
-      await base44.entities.PagamentoOmnichannel.update(pagamento.id, {
+      await updateInContext('PagamentoOmnichannel', pagamento.id, {
         link_pagamento: link
       });
 
       // Se houver título, vincular
       if (titulo) {
-        await base44.entities.ContaReceber.update(titulo.id, {
+        await updateInContext('ContaReceber', titulo.id, {
           link_pagamento_gerado: link,
           data_link_pagamento: new Date().toISOString()
         });
       }
 
       // Criar ordem de liquidação pendente
-      await base44.entities.CaixaOrdemLiquidacao.create({
+      await createInContext('CaixaOrdemLiquidacao', {
         group_id: pagamento.group_id,
         empresa_id: pagamento.empresa_id,
         tipo_operacao: "Recebimento",
@@ -190,7 +201,7 @@ export default function GeradorLinkPagamento({
             <Button
                 onClick={() => gerarLink.mutate()}
                 className="w-full bg-blue-600 hover:bg-blue-700"
-                disabled={gerarLink.isPending}
+                disabled={gerarLink.isPending || !podeGerar}
               >
               <Link2 className="w-4 h-4 mr-2" />
               Gerar Link

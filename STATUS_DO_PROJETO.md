@@ -1053,6 +1053,19 @@ Estado consolidado:
 - `usePontoEletronico.jsx`: registro de ponto revalida RBAC e contexto de grupo na persistência (fail-closed) e gera `AuditLog` com contexto e dados do registro; foto facial redimensionada antes de salvar (evita campo oversized que quebra operações do registro); toast de erro adicionado. Validação por IA mantém bypass automático enquanto créditos do workspace estiverem esgotados.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### Financeiro — Módulo completo — Regra-Mãe aplicada (2026-09-06, lote 5)
+- `ConciliacaoAutomaticaIA.jsx`: aplicar conciliações usava `ExtratoBancario.update`/`CaixaMovimento.update`/`ConciliacaoBancaria.create` crus — migrados para persistência protegida, RBAC `editar` Financeiro, contexto de grupo obrigatório e auditoria do lote (antes sem qualquer log).
+- `DuplicarMesAnterior.jsx`: `ContaPagar.bulkCreate` cru — migrado para `bulkCreateInContext` (carimbo de contexto).
+- `GeradorLinkPagamento.jsx`: gerar link usava 4 mutações cruas sem RBAC/contexto/auditoria parcial — migrado para `createInContext`/`updateInContext`, RBAC fail-closed, exigência de grupo/empresa e botão desabilitado sem permissão.
+- `GerarLinkPagamentoModal.jsx`: `PagamentoOmnichannel.create`/`ContaReceber.update` crus — migrados para persistência protegida.
+- `RateioMultiempresa.jsx`: `RateioFinanceiro.create/update` e criação dinâmica de títulos cru — migrados para persistência protegida (inclui `ContaPagar`/`ContaReceber` do rateio).
+- `SimularPagamentoModal.jsx`: 5 mutações cruas (PagamentoOmnichannel, ContaReceber, CaixaOrdemLiquidacao, HistoricoCliente, LogCobranca) — todas migradas para persistência protegida.
+- `VendasMulticanal.jsx`: sincronizar pagamento usava `PagamentoOmnichannel.create` cru — migrado, com RBAC `criar` Financeiro e bloqueio de pedido sem contexto.
+- `useConciliacaoForm.jsx`: resolver divergência e importar extrato usavam mutações cruas — migrados para `updateInContext`/`createInContext`, com bloqueio de importação sem contexto.
+- `ContasPagarTab.jsx`: envio ao Caixa usava `CaixaOrdemLiquidacao.create` cru — migrado para `createInContext`.
+- Varredura pós-lote: nenhuma mutação crua restante em src/components/financeiro (apenas `AuditLog.create`, que é o próprio registro de auditoria).
+- Próximos lotes: lib/hooks (30), sistema (13), mobile (9), produção (9).
+
 ### Hub de Atendimento + Pedidos/Boletos via Chat — Regra-Mãe aplicada (2026-09-06, lote 4)
 - `hub-atendimento/useHubAtendimentoData.jsx`: enviar mensagem, assumir e resolver conversa usavam `MensagemOmnicanal.create`/`ConversaOmnicanal.update` crus — migrados para `createInContext`/`updateInContext`, RBAC `editar` HubAtendimento, fail-closed.
 - `chatbot/CriarPedidoChat.jsx`: criar pedido via chat usava `Pedido.create`/`ConversaOmnicanal.update` crus — migrados para persistência protegida, RBAC `criar` Comercial + exigência de contexto grupo/empresa, fail-closed.

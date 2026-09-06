@@ -24,12 +24,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import useContextoVisual from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 
 export default function VendasMulticanal({ windowMode = false }) {
   const [canalFiltro, setCanalFiltro] = useState("todos");
   const [statusFiltro, setStatusFiltro] = useState("todos");
   const [busca, setBusca] = useState("");
-  const { empresaAtual, filtrarPorContexto, filterInContext, estaNoGrupo, grupoAtual } = useContextoVisual();
+  const { empresaAtual, filtrarPorContexto, filterInContext, estaNoGrupo, grupoAtual, createInContext } = useContextoVisual();
+  const { canCreate } = usePermissions();
   const queryClient = useQueryClient();
   const hasContext = Boolean(empresaAtual?.id || estaNoGrupo || grupoAtual?.id);
 
@@ -103,7 +105,10 @@ export default function VendasMulticanal({ windowMode = false }) {
   const sincronizarPagamentoMutation = useMutation({
     mutationFn: async (pedidoId) => {
       const pedido = pedidos.find(p => p.id === pedidoId);
-      await base44.entities.PagamentoOmnichannel.create({
+      // Regra-Mãe 5a/5b: RBAC + contexto multiempresa obrigatórios na persistência (fail-closed)
+      if (!canCreate('Financeiro')) throw new Error('Sem permissão para sincronizar pagamentos.');
+      if (!pedido?.group_id || !pedido?.empresa_id) throw new Error('Pedido sem contexto de grupo/empresa — sincronização bloqueada (Regra-Mãe 5a).');
+      await createInContext('PagamentoOmnichannel', {
         empresa_id: pedido.empresa_id,
         group_id: pedido.group_id,
         origem_canal: pedido.origem_pedido,

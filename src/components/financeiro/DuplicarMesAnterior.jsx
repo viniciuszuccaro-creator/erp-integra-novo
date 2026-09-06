@@ -24,7 +24,7 @@ import { useUser } from "@/components/lib/UserContext";
 export default function DuplicarMesAnterior({ empresaId }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
+  const { filterInContext, empresaAtual, grupoAtual, contexto, bulkCreateInContext } = useContextoVisual();
   const { canCreate } = usePermissions();
   const { user: authUser } = useUser();
   const podeDuplicar = canCreate('Financeiro', 'ContaPagar');
@@ -110,7 +110,7 @@ export default function DuplicarMesAnterior({ empresaId }) {
         };
       });
 
-      const criadas = await base44.entities.ContaPagar.bulkCreate(novasContas);
+      const criadas = await bulkCreateInContext('ContaPagar', novasContas);
 
       // Regra-Mãe 5d: auditoria da duplicação em lote
       try { await base44.entities.AuditLog.create({

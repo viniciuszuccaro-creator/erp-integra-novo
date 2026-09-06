@@ -23,7 +23,7 @@ import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 export default function ContasPagarTab({ contas, windowMode = false }) {
   const { create: createRLS, update: updateRLS } = useRLS();
-  const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
+  const { filterInContext, grupoAtual, empresaAtual, contexto, createInContext } = useContextoVisual();
   const { page, setPage, pageSize, setPageSize } = useBackendPagination('ContaPagar', 20);
   const [sortField, setSortField, sortDirection, setSortDirection] = usePersistedSort('ContaPagar', 'data_vencimento', 'asc');
 
@@ -67,7 +67,7 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
         throw new Error('Contexto de grupo/empresa obrigatório para envio ao Caixa (Regra-Mãe 5a)');
       }
       const ordens = await Promise.all(titulos.map(async (titulo) => {
-        return await base44.entities.CaixaOrdemLiquidacao.create({
+        return await createInContext('CaixaOrdemLiquidacao', {
           empresa_id: titulo.empresa_id,
           group_id: titulo.group_id,
           tipo_operacao: 'Pagamento',

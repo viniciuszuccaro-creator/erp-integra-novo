@@ -14,7 +14,7 @@ import { toast } from "sonner";
 export default function useConciliacaoForm() {
   const { user } = useUser();
   const queryClient = useQueryClient();
-  const { filterInContext, grupoAtual, empresaAtual, contexto, updateInContext } = useContextoVisual();
+  const { filterInContext, grupoAtual, empresaAtual, contexto, createInContext, updateInContext } = useContextoVisual();
   const { canEdit, canCreate } = usePermissions();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
   const contextoValido = !!contexto && contextoKey !== 'sem-grupo-sem-empresa';
@@ -80,7 +80,7 @@ export default function useConciliacaoForm() {
       if (!podeEditar) throw new Error("Sem permissão para resolver divergências");
       if (!contextoValido) throw new Error("Contexto de grupo/empresa obrigatório (Regra-Mãe 5a)");
       const anterior = await base44.entities.ConciliacaoBancaria.get(concId).catch(() => null);
-      await base44.entities.ConciliacaoBancaria.update(concId, { status: 'resolvido', tem_divergencia: false });
+      await updateInContext('ConciliacaoBancaria', concId, { status: 'resolvido', tem_divergencia: false });
       await base44.entities.AuditLog.create({
         group_id: grupoAtual?.id, grupo_id: grupoAtual?.id,
         empresa_id: empresaAtual?.id,
@@ -108,10 +108,11 @@ export default function useConciliacaoForm() {
   const handleImportarExtrato = async (file) => {
     if (!file) return;
     if (!podeImportar) { toast.error("Sem permissão para importar extratos"); return; }
+    if (!contextoValido) { toast.error("Contexto de grupo/empresa obrigatório (Regra-Mãe 5a)"); return; }
     setImportando(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      await base44.entities.ExtratoBancario.create({
+      await createInContext('ExtratoBancario', {
         group_id: grupoAtual?.id,
         empresa_id: empresaSelecionada || empresaAtual?.id,
         descricao: `Importação: ${file.name}`,

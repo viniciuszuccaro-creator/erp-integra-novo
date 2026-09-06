@@ -8,6 +8,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Split, Shuffle } from 'lucide-react';
 import usePermissions from '@/components/lib/usePermissions';
 import { useUser } from '@/components/lib/UserContext';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import RateioFormFields from './rateio-multiempresa/RateioFormFields';
 import RateioDistribuicaoCard from './rateio-multiempresa/RateioDistribuicaoCard';
 
@@ -28,6 +29,7 @@ export default function RateioMultiempresa({ empresas, grupoId, windowMode = fal
   const [formRateio, setFormRateio] = useState(initialForm(empresas));
   const { user } = useUser();
   const { canCreate, hasPermission } = usePermissions();
+  const { createInContext, updateInContext } = useContextoVisual();
   const contextoValido = !!(grupoId && empresas?.length);
   const podeRatear = canCreate('Financeiro', 'Rateio') || canCreate('Financeiro', 'Rateio Multiempresa') || hasPermission('Financeiro', null, 'gerenciar');
 
@@ -37,7 +39,7 @@ export default function RateioMultiempresa({ empresas, grupoId, windowMode = fal
       if (!contextoValido) throw new Error('Contexto de grupo/empresas obrigatório para ratear (Regra-Mãe 5a).');
       if (!podeRatear) throw new Error('Seu perfil não permite criar rateios financeiros.');
 
-      const rateio = await base44.entities.RateioFinanceiro.create({
+      const rateio = await createInContext('RateioFinanceiro', {
         group_id: grupoId, tipo_documento: dados.tipo_documento, descricao: dados.descricao,
         valor_total: dados.valor_total, criterio_rateio: dados.criterio_rateio,
         data_rateio: new Date().toISOString().split('T')[0], distribuicao: dados.distribuicao,
@@ -47,8 +49,8 @@ export default function RateioMultiempresa({ empresas, grupoId, windowMode = fal
       const titulosCriados = [];
       for (const dist of dados.distribuicao) {
         if (dist.valor > 0) {
-          const EntidadeAlvo = dados.tipo_documento === 'ContaPagar' ? base44.entities.ContaPagar : base44.entities.ContaReceber;
-          const titulo = await EntidadeAlvo.create({
+          const entidadeTitulo = dados.tipo_documento === 'ContaPagar' ? 'ContaPagar' : 'ContaReceber';
+          const titulo = await createInContext(entidadeTitulo, {
             group_id: grupoId, empresa_id: dist.empresa_id, origem: 'grupo', e_replicado: true,
             documento_grupo_id: rateio.id, rateio_id: rateio.id,
             descricao: `${dados.descricao} (${dist.empresa_nome})`,
@@ -62,7 +64,7 @@ export default function RateioMultiempresa({ empresas, grupoId, windowMode = fal
         }
       }
 
-      await base44.entities.RateioFinanceiro.update(rateio.id, {
+      await updateInContext('RateioFinanceiro', rateio.id, {
         distribuicao_realizada: titulosCriados.map((t, idx) => ({
           empresa_id: dados.distribuicao[idx].empresa_id, empresa_nome: dados.distribuicao[idx].empresa_nome,
           titulo_id: t.id, valor: t.valor, percentual: t.percentual_rateio, status: t.status,

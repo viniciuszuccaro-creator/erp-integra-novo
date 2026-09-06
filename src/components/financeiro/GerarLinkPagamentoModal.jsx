@@ -16,7 +16,7 @@ export default function GerarLinkPagamentoModal({ isOpen, onClose, contaReceber 
   const queryClient = useQueryClient();
   const [linkGerado, setLinkGerado] = useState(null);
   const { user } = useUser();
-  const { grupoAtual, empresaAtual } = useContextoVisual();
+  const { grupoAtual, empresaAtual, createInContext, updateInContext } = useContextoVisual();
   const { canCreate, canEdit, hasPermission } = usePermissions();
 
   const groupId = contaReceber?.group_id || grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
@@ -38,7 +38,7 @@ export default function GerarLinkPagamentoModal({ isOpen, onClose, contaReceber 
       const linkSimulado = `https://pag.erp-integra.com.br/pay/${contaReceber.id}`;
       
       // Criar PagamentoOmnichannel pendente
-      await base44.entities.PagamentoOmnichannel.create({
+      await createInContext('PagamentoOmnichannel', {
         empresa_id: contaReceber.empresa_id,
         group_id: contaReceber.group_id,
         origem_pagamento: 'Link Pagamento',
@@ -56,7 +56,7 @@ export default function GerarLinkPagamentoModal({ isOpen, onClose, contaReceber 
       });
 
       // Atualizar CR
-      await base44.entities.ContaReceber.update(contaReceber.id, {
+      await updateInContext('ContaReceber', contaReceber.id, {
         url_fatura: linkSimulado,
         status_cobranca: 'gerada_simulada',
         forma_cobranca: 'Link Pagamento'

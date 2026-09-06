@@ -70,6 +70,12 @@ export default function Bloco3Financeiro({ allCounts, isLoading, searchTerm = ""
         <CardContent className="p-4 text-sm text-slate-600">Total consolidado do grupo.</CardContent>
       </Card>
 
+      {searchTerm.trim() && filteredTiles.length === 0 && (
+        <div className="col-span-full rounded-sm border border-dashed border-slate-200 py-4 text-center text-xs text-slate-400">
+          Nenhum cadastro deste bloco corresponde a "{searchTerm.trim()}".
+        </div>
+      )}
+
       {filteredTiles.map(({ k, t, i: Icon, c, f: FormComp }) => (
         <Card
           key={k}

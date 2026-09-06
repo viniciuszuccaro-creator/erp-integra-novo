@@ -89,6 +89,12 @@ export default function Bloco2Produtos({ allCounts, isLoading, searchTerm = "" }
         <CardContent className="p-3 text-xs text-slate-500">Listagem e edição completa com filtros avançados.</CardContent>
       </Card>
 
+      {searchTerm.trim() && filteredTiles.length === 0 && (
+        <div className="col-span-full rounded-sm border border-dashed border-slate-200 py-4 text-center text-xs text-slate-400">
+          Nenhum cadastro deste bloco corresponde a "{searchTerm.trim()}".
+        </div>
+      )}
+
       {filteredTiles.map(({ k, title, Icon, campos, form: FormComp }) => (
         <Card key={k} className="rounded-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-150 cursor-pointer group border"
           onClick={canViewEntity(k) ? openList(k, title, Icon, campos, FormComp) : undefined}

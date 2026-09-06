@@ -108,23 +108,26 @@ export default function VendasMulticanal({ windowMode = false }) {
       // Regra-Mãe 5a/5b: RBAC + contexto multiempresa obrigatórios na persistência (fail-closed)
       if (!canCreate('Financeiro')) throw new Error('Sem permissão para sincronizar pagamentos.');
       if (!pedido?.group_id || !pedido?.empresa_id) throw new Error('Pedido sem contexto de grupo/empresa — sincronização bloqueada (Regra-Mãe 5a).');
+      // Alinhado ao schema de PagamentoOmnichannel (origem_pagamento, id_pedido_vinculado, valor_bruto, status_transacao)
+      const ORIGENS_OMNI = { 'Site': 'Site', 'App': 'App Mobile', 'Marketplace': 'Marketplace', 'Chatbot': 'Chatbot', 'Portal': 'Portal Cliente', 'E-commerce': 'E-commerce', 'WhatsApp': 'Chatbot' };
       await createInContext('PagamentoOmnichannel', {
         empresa_id: pedido.empresa_id,
         group_id: pedido.group_id,
-        origem_canal: pedido.origem_pedido,
-        pedido_id: pedido.id,
-        numero_pedido: pedido.numero_pedido,
+        origem_pagamento: ORIGENS_OMNI[pedido.origem_pedido] || 'E-commerce',
+        id_pedido_vinculado: pedido.id,
         cliente_nome: pedido.cliente_nome,
-        valor_total: pedido.valor_total,
-        forma_pagamento: pedido.forma_pagamento,
+        valor_bruto: pedido.valor_total,
+        forma_pagamento: pedido.forma_pagamento || 'PIX',
+        status_transacao: 'Autorizado',
         status_conferencia: 'Pendente',
-        data_venda: pedido.data_pedido
+        data_transacao: pedido.data_pedido || new Date().toISOString()
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pagamentos-omnichannel'] });
       toast.success("✅ Pagamento sincronizado!");
-    }
+    },
+    onError: (error) => toast.error(error.message || "Erro ao sincronizar pagamento")
   });
 
   const content = (

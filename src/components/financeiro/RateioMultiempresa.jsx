@@ -76,7 +76,7 @@ export default function RateioMultiempresa({ empresas, grupoId, windowMode = fal
         acao: 'Criação', modulo: 'Financeiro', entidade: 'RateioFinanceiro', registro_id: rateio.id,
         descricao: `Rateio multiempresa criado (${titulosCriados.length} título(s) distribuído(s))`,
         data_hora: new Date().toISOString(),
-        group_id: grupoId, grupo_id: grupoId,
+        grupo_id: grupoId,
         usuario: user?.full_name || 'Sistema', usuario_id: user?.id,
         tipo_auditoria: 'operacional', sucesso: true,
         dados_novos: {
@@ -92,6 +92,10 @@ export default function RateioMultiempresa({ empresas, grupoId, windowMode = fal
       queryClient.invalidateQueries({ queryKey: ['rateios'] });
       queryClient.invalidateQueries({ queryKey: ['contasPagar'] });
       queryClient.invalidateQueries({ queryKey: ['contasReceber'] });
+      // Chaves unificadas por entidade (mesmo padrão das abas de Contas a Pagar/Receber)
+      queryClient.invalidateQueries({ queryKey: ['RateioFinanceiro'] });
+      queryClient.invalidateQueries({ queryKey: ['ContaPagar'] });
+      queryClient.invalidateQueries({ queryKey: ['ContaReceber'] });
       toast({ title: '✅ Rateio criado!', description: `${resultado.titulos.length} títulos distribuídos entre as empresas` });
       setFormRateio(initialForm(empresas));
     },
@@ -125,6 +129,14 @@ export default function RateioMultiempresa({ empresas, grupoId, windowMode = fal
     const totalPercentual = formRateio.distribuicao.reduce((sum, d) => sum + (parseFloat(d.percentual) || 0), 0);
     if (Math.abs(totalPercentual - 100) > 0.01) {
       toast({ title: '⚠️ Erro no Rateio', description: `A soma dos percentuais deve ser 100%. Atual: ${totalPercentual.toFixed(2)}%`, variant: 'destructive' });
+      return;
+    }
+    if (!formRateio.valor_total || parseFloat(formRateio.valor_total) <= 0) {
+      toast({ title: '⚠️ Erro no Rateio', description: 'Informe um valor total maior que zero.', variant: 'destructive' });
+      return;
+    }
+    if (!formRateio.data_vencimento) {
+      toast({ title: '⚠️ Erro no Rateio', description: 'Informe a data de vencimento dos títulos.', variant: 'destructive' });
       return;
     }
     criarRateioMutation.mutate(formRateio);

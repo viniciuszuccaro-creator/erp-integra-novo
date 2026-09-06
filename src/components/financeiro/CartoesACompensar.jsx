@@ -24,7 +24,7 @@ export default function CartoesACompensar() {
   const { data: cartoes = [], isLoading } = useQuery({
     queryKey: ["movimento-cartao", contextoKey],
     queryFn: () => filterInContext('MovimentoCartao', {}, '-created_date', 999),
-    enabled: !!contexto,
+    enabled: contextoValido,
   });
 
   const conciliarMutation = useMutation({
@@ -51,7 +51,9 @@ export default function CartoesACompensar() {
       }); } catch (e) { console.error('[Cartões] Falha ao auditar conciliação:', e?.message || e); }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["movimento-cartao"]);
+      // React Query v5: invalidação exige objeto { queryKey }
+      queryClient.invalidateQueries({ queryKey: ["movimento-cartao"] });
+      queryClient.invalidateQueries({ queryKey: ["MovimentoCartao"] });
       toast.success("Cartão compensado com sucesso!");
     },
     onError: (error) => toast.error(error.message || "Erro ao conciliar cartão"),
@@ -161,7 +163,7 @@ export default function CartoesACompensar() {
                   cartoesFiltrados.map((cartao) => (
                     <tr key={cartao.id} className="border-b hover:bg-slate-50">
                       <td className="p-3 text-sm">
-                        {new Date(cartao.data_transacao).toLocaleDateString('pt-BR')}
+                        {cartao.data_transacao ? new Date(cartao.data_transacao).toLocaleDateString('pt-BR') : '-'}
                       </td>
                       <td className="p-3 text-sm">{cartao.cliente_nome}</td>
                       <td className="p-3 text-sm">

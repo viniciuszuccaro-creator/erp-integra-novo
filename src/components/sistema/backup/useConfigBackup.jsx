@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 
 /**
  * Hook extraído de ConfiguracaoBackup.jsx
@@ -50,7 +51,7 @@ export default function useConfigBackup({ empresaId, grupoId }) {
 
   const salvarMutation = useMutation({
     mutationFn: async (data) => {
-      const stamped = { ...data, empresa_id: empresaAtivaId || null, group_id: grupoAtivoId || null };
+      const stamped = sanitizeFlow({ ...data, empresa_id: empresaAtivaId || null, group_id: grupoAtivoId || null });
       const result = config?.id
         ? await base44.entities.ConfiguracaoBackup.update(config.id, stamped)
         : await base44.entities.ConfiguracaoBackup.create(stamped);
@@ -74,13 +75,13 @@ export default function useConfigBackup({ empresaId, grupoId }) {
   const executarBackupManualMutation = useMutation({
     mutationFn: async () => {
       const numeroBackup = `BKP-${Date.now()}`;
-      const backup = await base44.entities.BackupAutomatico.create({
+      const backup = await base44.entities.BackupAutomatico.create(sanitizeFlow({
         group_id: grupoAtivoId, empresa_id: empresaAtivaId, tipo_backup: 'Completo',
         escopo: empresaAtivaId ? 'empresa' : 'grupo', numero_backup: numeroBackup,
         data_hora_inicio: new Date().toISOString(), status: 'Em Progresso', trigger: 'Manual',
         modulos_incluidos: ['Todos'], provider_storage: formData.provider_storage || 'Base44 Cloud',
         criptografado: formData.criptografia_ativa, automatico: false, executado_por: 'Sistema'
-      });
+      }));
       try {
         const me = await base44.auth.me();
         await base44.entities.AuditLog.create({
@@ -92,13 +93,13 @@ export default function useConfigBackup({ empresaId, grupoId }) {
         });
       } catch (e) { console.error('[backup] catch:', e); }
       setTimeout(async () => {
-        await base44.entities.BackupAutomatico.update(backup.id, {
+        await base44.entities.BackupAutomatico.update(backup.id, sanitizeFlow({
           status: 'Concluído', data_hora_fim: new Date().toISOString(), duracao_segundos: 3,
           quantidade_total_registros: 1500, tamanho_backup_mb: 45.2, tamanho_comprimido_mb: 12.8,
           taxa_compressao: 71.7, hash_integridade: 'sha256:' + Math.random().toString(36).substring(2, 15),
           arquivo_path: `/backups/${empresaAtivaId || grupoAtivoId}/${numeroBackup}.json.gz`,
           validacao_integridade: { validado: true, hash_valido: true, arquivo_integro: true, pode_restaurar: true }
-        });
+        }));
         try {
           const me = await base44.auth.me();
           await base44.entities.AuditLog.create({

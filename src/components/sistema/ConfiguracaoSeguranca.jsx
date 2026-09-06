@@ -11,6 +11,7 @@ import { Shield, Key, Clock, Smartphone, Lock, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import usePermissions from '@/components/lib/usePermissions';
+import { sanitizeFlow } from '@/components/lib/contexto/contextoCrud';
 import { DEFAULT_SECURITY_CONFIG, normalizeSecurityConfig } from './seguranca/securityConfigDefaults';
 import SegurancaJWTTab from './seguranca/SegurancaJWTTab';
 import SegurancaSessoesTab from './seguranca/SegurancaSessoesTab';
@@ -82,12 +83,12 @@ export default function ConfiguracaoSeguranca({ empresaId, grupoId }) {
   const salvarMutation = useMutation({
     mutationFn: async (data) => {
       const clean = normalizeSecurityConfig(data);
-      const stamped = {
+      const stamped = sanitizeFlow({
         ...clean,
         empresa_id: empresaAtivaId || null,
         group_id: grupoAtivoId || null,
         origem_configuracao: empresaAtivaId ? 'empresa' : 'grupo',
-      };
+      });
       const result = config?.id
         ? await base44.entities.ConfiguracaoSeguranca.update(config.id, stamped)
         : await base44.entities.ConfiguracaoSeguranca.create(stamped);

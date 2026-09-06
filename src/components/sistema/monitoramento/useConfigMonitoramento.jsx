@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { toast } from "sonner";
 
 const DEFAULT_CONFIG = {
@@ -43,7 +44,7 @@ export default function useConfigMonitoramento({ empresaId, grupoId }) {
 
   const salvarMutation = useMutation({
     mutationFn: async (data) => {
-      const stamped = carimbarContexto({ ...data, empresa_id: empresaAtivaId || null, group_id: grupoAtivoId || null }, "empresa_id");
+      const stamped = sanitizeFlow(carimbarContexto({ ...data, empresa_id: empresaAtivaId || null, group_id: grupoAtivoId || null }, "empresa_id"));
       const result = config?.id
         ? await base44.entities.ConfiguracaoMonitoramento.update(config.id, stamped)
         : await base44.entities.ConfiguracaoMonitoramento.create(stamped);

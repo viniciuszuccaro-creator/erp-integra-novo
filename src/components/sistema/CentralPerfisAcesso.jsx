@@ -11,6 +11,7 @@ import { Shield, Search, Plus } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { useRLSQuery } from "@/components/lib/useRLSQuery";
 import usePermissions from "@/components/lib/usePermissions";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { getAccessScope, isUserInAccessScope, buildAccessAudit } from "@/components/administracao-sistema/gestao-acessos/accessScope";
 import PerfilCard from "@/components/administracao-sistema/gestao-acessos/PerfilCard";
 import PerfilFormModal from "@/components/administracao-sistema/gestao-acessos/PerfilFormModal";
@@ -65,12 +66,13 @@ export default function CentralPerfisAcesso() {
         throw new Error("Selecione um grupo ou empresa antes de salvar o perfil.");
       const perfilId = perfilAberto?.id;
       if (perfilId && !perfilAberto.novo)
-        return base44.entities.PerfilAcesso.update(perfilId, data);
-      return base44.entities.PerfilAcesso.create({
-        ...data,
-        group_id: grupoAtivoId,
-        empresa_id: empresaAtivaId,
-      });
+        return base44.entities.PerfilAcesso.update(
+          perfilId,
+          sanitizeFlow({ ...data, group_id: grupoAtivoId, empresa_id: empresaAtivaId })
+        );
+      return base44.entities.PerfilAcesso.create(
+        sanitizeFlow({ ...data, group_id: grupoAtivoId, empresa_id: empresaAtivaId })
+      );
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["perfis-acesso", scopeKey] });

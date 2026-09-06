@@ -1053,6 +1053,15 @@ Estado consolidado:
 - `usePontoEletronico.jsx`: registro de ponto revalida RBAC e contexto de grupo na persistência (fail-closed) e gera `AuditLog` com contexto e dados do registro; foto facial redimensionada antes de salvar (evita campo oversized que quebra operações do registro); toast de erro adicionado. Validação por IA mantém bypass automático enquanto créditos do workspace estiverem esgotados.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### Sistema — Perfis, Configs, WhatsApp Engine e Backup — Regra-Mãe aplicada (2026-09-06, lote 7)
+- `CentralPerfisAcesso.jsx`: create/update de PerfilAcesso agora sanitizados e com carimbo de grupo/empresa reforçado no update (RBAC + auditoria já existentes preservados).
+- `ConfiguracaoSeguranca.jsx`: payload de segurança sanitizado (contexto explícito + auditoria já existentes).
+- `GestaoUsuariosAvancada.jsx`: payload de update de User sanitizado (RBAC, contexto e auditoria antes/depois já existentes).
+- `WhatsAppBusinessEngine.jsx`: os 4 métodos de envio propagam group_id/empresa_id do documento de origem (pedido/entrega/conta) e o histórico de cliente é criado sanitizado com contexto multiempresa (Regra-Mãe 5a/5c).
+- `backup/useConfigBackup.jsx`: ConfiguracaoBackup e BackupAutomatico (create/update) sanitizados (contexto + auditoria já existentes).
+- `monitoramento/useConfigMonitoramento.jsx`: payload sanitizado sobre carimbarContexto (contexto + auditoria já existentes).
+- Próximos lotes: mobile (9), produção (9).
+
 ### Lib/Hooks — Fluxos do Pedido e Integrações — Regra-Mãe aplicada (2026-09-06, lote 6)
 - `contextoCrud.jsx`: adicionado `withFlowContext`/`sanitizeFlow` — carimbo de contexto multiempresa (fail-closed) + sanitização para fluxos fora do React, sem duplicar a auditoria de `createInContext` (fluxos já auditam via `auditHelper`).
 - `fluxoPedido/aprovarPedido.jsx`: 8 mutações cruas (Cliente, MovimentacaoEstoque, Produto, OrdemProducao, Pedido, ContaReceber, HistoricoCliente) — todas com carimbo de contexto + sanitização; ajuste de limite de crédito agora também auditado (antes/depois).

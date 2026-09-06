@@ -24,6 +24,7 @@ import {
   Eye
 } from "lucide-react";
 import { getAccessScope, normalizeEmpresaIds, buildAccessAudit } from "@/components/administracao-sistema/gestao-acessos/accessScope";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 
 export default function GestaoUsuariosAvancada({ 
   usuario, 
@@ -83,7 +84,7 @@ export default function GestaoUsuariosAvancada({
         ...(groupId ? { group_id: groupId } : {}),
         ...(empresaId ? { empresa_id: empresaId } : {})
       };
-      const result = await base44.entities.User.update(usuario.id, payload);
+      const result = await base44.entities.User.update(usuario.id, sanitizeFlow(payload));
       try {
         await base44.entities.AuditLog.create(buildAccessAudit({
           operador,

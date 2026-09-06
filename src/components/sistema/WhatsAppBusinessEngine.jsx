@@ -1,4 +1,5 @@
 import { base44 } from '@/api/base44Client';
+import { sanitizeFlow } from '@/components/lib/contexto/contextoCrud';
 
 /**
  * WhatsApp Business Engine
@@ -30,7 +31,9 @@ Qualquer dúvida, estamos à disposição! 😊`;
     return await this.enviarMensagem(whatsapp.valor, mensagem, {
       tipo: 'pedido_aprovado',
       pedido_id: pedido.id,
-      cliente_id: cliente.id
+      cliente_id: cliente.id,
+      group_id: pedido.group_id || cliente.group_id || null,
+      empresa_id: pedido.empresa_id || cliente.empresa_id || null
     });
   },
 
@@ -63,7 +66,9 @@ ${linkRastreamento ? `🔗 *Rastreie em tempo real:*\n${linkRastreamento}\n\n` :
       tipo: 'saida_entrega',
       entrega_id: entrega.id,
       cliente_id: cliente.id,
-      link: linkRastreamento
+      link: linkRastreamento,
+      group_id: entrega.group_id || cliente.group_id || null,
+      empresa_id: entrega.empresa_id || cliente.empresa_id || null
     });
   },
 
@@ -114,7 +119,9 @@ ${detalhesCobranca}Contamos com você! 🙏`;
     return await this.enviarMensagem(whatsapp.valor, mensagem, {
       tipo: 'cobranca',
       conta_receber_id: contaReceber.id,
-      cliente_id: cliente.id
+      cliente_id: cliente.id,
+      group_id: contaReceber.group_id || cliente.group_id || null,
+      empresa_id: contaReceber.empresa_id || cliente.empresa_id || null
     });
   },
 
@@ -142,7 +149,9 @@ Se tiver algum problema, entre em contato. 📞`;
     return await this.enviarMensagem(whatsapp.valor, mensagem, {
       tipo: 'entrega_concluida',
       entrega_id: entrega.id,
-      cliente_id: cliente.id
+      cliente_id: cliente.id,
+      group_id: entrega.group_id || cliente.group_id || null,
+      empresa_id: entrega.empresa_id || cliente.empresa_id || null
     });
   },
 
@@ -158,8 +167,11 @@ Se tiver algum problema, entre em contato. 📞`;
 
       // Registrar histórico
       if (metadata.cliente_id) {
-        await base44.entities.HistoricoCliente.create({
+        await base44.entities.HistoricoCliente.create(sanitizeFlow({
           cliente_id: metadata.cliente_id,
+          // Regra-Mãe 5a: contexto multiempresa propagado do documento de origem
+          ...(metadata.group_id ? { group_id: metadata.group_id } : {}),
+          ...(metadata.empresa_id ? { empresa_id: metadata.empresa_id } : {}),
           modulo_origem: 'Sistema',
           referencia_id: metadata.pedido_id || metadata.entrega_id || metadata.conta_receber_id,
           referencia_tipo: metadata.tipo === 'pedido_aprovado' ? 'Pedido' :
@@ -173,7 +185,7 @@ Se tiver algum problema, entre em contato. 📞`;
           whatsapp_mensagem: mensagem,
           whatsapp_status: 'Enviado',
           visivel_cliente: true
-        });
+        }));
       }
 
       return {

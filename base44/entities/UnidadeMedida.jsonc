@@ -8,19 +8,19 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa que cadastrou (cadastro único compartilhado no grupo)"
+      "description": "ID da empresa que cadastrou (cadastro \u00fanico compartilhado no grupo)"
     },
     "codigo": {
       "type": "string",
-      "description": "Código sequencial único da unidade de medida"
+      "description": "C\u00f3digo sequencial \u00fanico da unidade de medida"
     },
     "sigla": {
       "type": "string",
-      "description": "Sigla da unidade (UN, KG, MT, etc.) — único por grupo"
+      "description": "Sigla da unidade (UN, KG, MT, etc.) \u2014 \u00fanico por grupo"
     },
     "nome_completo": {
       "type": "string",
-      "description": "Nome completo da unidade — único por grupo"
+      "description": "Nome completo da unidade \u2014 \u00fanico por grupo"
     },
     "tipo_grandeza": {
       "type": "string",
@@ -28,7 +28,7 @@
         "Massa",
         "Comprimento",
         "Volume",
-        "Área",
+        "\u00c1rea",
         "Unidade",
         "Tempo",
         "Outro"
@@ -75,6 +75,18 @@
     "nome_completo"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

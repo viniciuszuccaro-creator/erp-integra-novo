@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import usePermissions from "@/components/lib/usePermissions";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { concluirOPCompleto } from "@/components/lib/useFluxoPedido";
 
 const APONTAMENTO_INIT = {
@@ -79,7 +80,7 @@ export default function useProducaoMobile() {
         ? Math.round((itensConcluidos / opSelecionada.itens_producao.length) * 100)
         : 0;
 
-      await base44.entities.OrdemProducao.update(opSelecionada.id, {
+      await base44.entities.OrdemProducao.update(opSelecionada.id, sanitizeFlow({
         apontamentos: [...apontamentosAtuais, novoApontamento],
         itens_producao: itensAtualizados,
         peso_real_total_kg: (opSelecionada.peso_real_total_kg || 0) + dados.peso_produzido_kg,
@@ -87,7 +88,7 @@ export default function useProducaoMobile() {
         percentual_conclusao: percentual,
         status: percentual === 100 ? "Inspeção" : dados.setor,
         data_inicio_real: opSelecionada.data_inicio_real || new Date().toISOString()
-      });
+      }));
 
       try {
         await base44.entities.AuditLog.create({
@@ -124,7 +125,7 @@ export default function useProducaoMobile() {
       // status "Pronto para Expedição" e pedido liberado para faturar
       const resultadoOP = await concluirOPCompleto(op, op.empresa_id);
 
-      const novaEntrega = await base44.entities.Entrega.create({
+      const novaEntrega = await base44.entities.Entrega.create(sanitizeFlow({
         group_id: op.group_id,
         empresa_id: op.empresa_id,
         pedido_id: op.pedido_id,
@@ -143,11 +144,11 @@ export default function useProducaoMobile() {
           usuario: user?.full_name || "Sistema",
           observacao: `Finalizado via mobile por ${user?.full_name}`
         }]
-      });
+      }));
 
-      await base44.entities.OrdemProducao.update(opId, {
+      await base44.entities.OrdemProducao.update(opId, sanitizeFlow({
         entrega_id: novaEntrega.id
-      });
+      }));
 
       try {
         await base44.entities.AuditLog.create({

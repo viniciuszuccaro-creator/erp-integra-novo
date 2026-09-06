@@ -1053,6 +1053,11 @@ Estado consolidado:
 - `usePontoEletronico.jsx`: registro de ponto revalida RBAC e contexto de grupo na persistência (fail-closed) e gera `AuditLog` com contexto e dados do registro; foto facial redimensionada antes de salvar (evita campo oversized que quebra operações do registro); toast de erro adicionado. Validação por IA mantém bypass automático enquanto créditos do workspace estiverem esgotados.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### Mobile — Motorista e Produção — Regra-Mãe aplicada (2026-09-06, lote 8)
+- `useEntregasMotorista.jsx`: todas as 6 mutações de Entrega (iniciar, confirmar, ocorrência, reversa, fila offline) e PosicaoVeiculo (GPS) agora sanitizadas; entrega frustrada e logística reversa ganharam auditoria completa (Regra-Mãe 5c/5d) — contexto e RBAC já preservados.
+- `producao-mobile/useProducaoMobile.jsx`: apontamento de OP, criação de Entrega e vínculo entrega_id sanitizados (RBAC + auditoria já existentes).
+- Próximo lote: produção (9).
+
 ### Sistema — Perfis, Configs, WhatsApp Engine e Backup — Regra-Mãe aplicada (2026-09-06, lote 7)
 - `CentralPerfisAcesso.jsx`: create/update de PerfilAcesso agora sanitizados e com carimbo de grupo/empresa reforçado no update (RBAC + auditoria já existentes preservados).
 - `ConfiguracaoSeguranca.jsx`: payload de segurança sanitizado (contexto explícito + auditoria já existentes).

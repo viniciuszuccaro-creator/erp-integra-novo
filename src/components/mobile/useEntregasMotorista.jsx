@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { useUser } from "@/components/lib/UserContext";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { toast } from "sonner";
 
 export default function useEntregasMotorista() {
@@ -44,7 +45,7 @@ export default function useEntregasMotorista() {
         for (const op of pendentes) {
           try {
             if (op.tipo === 'update_entrega') {
-              await base44.entities.Entrega.update(op.entregaId, op.dados);
+              await base44.entities.Entrega.update(op.entregaId, sanitizeFlow(op.dados));
             }
             resolvidos.push(op.id);
           } catch (err) {
@@ -121,11 +122,11 @@ export default function useEntregasMotorista() {
         const novaLocalizacao = { latitude: position.coords.latitude, longitude: position.coords.longitude, precisao: position.coords.accuracy, velocidade: position.coords.speed || 0, timestamp: new Date().toISOString() };
         setLocalizacao(novaLocalizacao);
         if (entregaAtual) {
-          base44.entities.PosicaoVeiculo.create({
+          base44.entities.PosicaoVeiculo.create(sanitizeFlow({
             entrega_id: entregaAtual.id, romaneio_id: entregaAtual.romaneio_id, motorista_id: user.id, motorista_nome: user.full_name, placa: entregaAtual.placa,
             empresa_id: entregaAtual.empresa_id, group_id: entregaAtual.group_id,
             ...novaLocalizacao, bateria_nivel: 0, conectividade: navigator.connection?.effectiveType || "4G",
-          });
+          }));
         }
       },
       (error) => console.error("Erro GPS:", error),
@@ -148,7 +149,7 @@ export default function useEntregasMotorista() {
       return;
     }
     try {
-      await base44.entities.Entrega.update(entrega.id, dados);
+      await base44.entities.Entrega.update(entrega.id, sanitizeFlow(dados));
       try { await base44.entities.AuditLog.create({ usuario: user?.full_name || user?.email || "Motorista", usuario_id: user?.id, empresa_id: entrega.empresa_id || null, group_id: entrega.group_id || null, acao: "Edição", modulo: "Expedição", tipo_auditoria: "ui", entidade: "Entrega", registro_id: entrega.id, descricao: "Entrega iniciada no app do motorista", data_hora: new Date().toISOString() }); } catch (e) { console.error('[mobile] audit catch:', e); }
       refetch();
       toast.success("🚚 Entrega iniciada!");
@@ -203,7 +204,7 @@ export default function useEntregasMotorista() {
     }
 
     try {
-      await base44.entities.Entrega.update(entregaAtual.id, dados);
+      await base44.entities.Entrega.update(entregaAtual.id, sanitizeFlow(dados));
 
       try { await base44.entities.AuditLog.create({ usuario: user?.full_name || user?.email || "Motorista", usuario_id: user?.id, empresa_id: entregaAtual?.empresa_id || null, group_id: entregaAtual?.group_id || null, acao: "Edição", modulo: "Expedição", tipo_auditoria: "ui", entidade: "Entrega", registro_id: entregaAtual?.id, descricao: "Entrega confirmada (foto + assinatura) no app do motorista", data_hora: new Date().toISOString() }); } catch (e) { console.error('[mobile] audit catch:', e); }
 
@@ -219,11 +220,13 @@ export default function useEntregasMotorista() {
   const registrarOcorrencia = async (motivo) => {
     if (!entregaAtual?.id) { toast.error("Nenhuma entrega ativa"); return; }
     try {
-      await base44.entities.Entrega.update(entregaAtual.id, {
+      await base44.entities.Entrega.update(entregaAtual.id, sanitizeFlow({
         status: "Entrega Frustrada",
         entrega_frustrada: { motivo, detalhes: "", tentativa_numero: 1, reagendamento: null, foto_ocorrencia: fotoComprovante },
         historico_status: [...(entregaAtual.historico_status || []), { status: "Entrega Frustrada", data_hora: new Date().toISOString(), usuario: user.full_name, localizacao, observacao: motivo }],
-      });
+      }));
+      // Regra-Mãe 5d: auditoria da ocorrência de entrega frustrada
+      try { await base44.entities.AuditLog.create({ usuario: user?.full_name || user?.email || "Motorista", usuario_id: user?.id, empresa_id: entregaAtual?.empresa_id || null, group_id: entregaAtual?.group_id || null, acao: "Edição", modulo: "Expedição", tipo_auditoria: "ui", entidade: "Entrega", registro_id: entregaAtual?.id, descricao: `Entrega frustrada no app do motorista: ${motivo}`, dados_novos: { status: "Entrega Frustrada", motivo }, data_hora: new Date().toISOString() }); } catch (e) { console.error('[mobile] audit catch:', e); }
       setEntregaAtual(null); refetch();
       toast.error("❌ Ocorrência registrada");
     } catch (err) {
@@ -235,11 +238,13 @@ export default function useEntregasMotorista() {
   const registrarReversa = async () => {
     if (!entregaAtual?.id) { toast.error("Nenhuma entrega ativa"); return; }
     try {
-      await base44.entities.Entrega.update(entregaAtual.id, {
+      await base44.entities.Entrega.update(entregaAtual.id, sanitizeFlow({
         status: "Devolvido",
         logistica_reversa: { ativada: true, motivo: reversaMotivo, quantidade_devolvida: reversaQtd, valor_devolvido: reversaValor },
         historico_status: [...(entregaAtual.historico_status || []), { status: "Devolvido", data_hora: new Date().toISOString(), usuario: user.full_name, observacao: reversaMotivo }],
-      });
+      }));
+      // Regra-Mãe 5d: auditoria da logística reversa
+      try { await base44.entities.AuditLog.create({ usuario: user?.full_name || user?.email || "Motorista", usuario_id: user?.id, empresa_id: entregaAtual?.empresa_id || null, group_id: entregaAtual?.group_id || null, acao: "Edição", modulo: "Expedição", tipo_auditoria: "ui", entidade: "Entrega", registro_id: entregaAtual?.id, descricao: `Logística reversa registrada no app: ${reversaMotivo}`, dados_novos: { status: "Devolvido", motivo: reversaMotivo, quantidade_devolvida: reversaQtd }, data_hora: new Date().toISOString() }); } catch (e) { console.error('[mobile] audit catch:', e); }
       setEntregaAtual(null); refetch();
       toast.success("🔁 Logística reversa registrada");
     } catch (err) {

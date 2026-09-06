@@ -136,7 +136,7 @@ export default function Cadastros() {
               <button
                 key={id}
                 onClick={() => handleCardClick(id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all hover:shadow-sm ${color}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all hover:shadow-sm ${color} ${acordeonAberto.includes(id) ? 'ring-2 ring-slate-400 ring-offset-1' : ''}`}
                 title={`Ir para ${label}`}
               >
                 <Icon className="w-3.5 h-3.5" />

@@ -118,17 +118,24 @@ export default function useCadastrosAllCounts() {
     retry: 1,
   });
 
-  // Real-time: incrementa/decrementa sem refetch completo
+  // Real-time: invalidação com debounce — múltiplos eventos seguidos (ex.: bulkCreate)
+  // disparam um único refetch do lote em vez de um por evento
   useEffect(() => {
+    let timer = null;
     const unsubs = ALL_ENTITIES.map(name => {
       const api = base44.entities?.[name];
       if (!api?.subscribe) return null;
-      return api.subscribe((evt) => {
-        // Invalida cache para forçar refetch preciso em próxima entrada
-        queryClient.invalidateQueries({ queryKey: ["cadastros-all-counts-v7"], type: "all" });
+      return api.subscribe(() => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ["cadastros-all-counts-v7"], type: "all" });
+        }, 400);
       });
     }).filter(Boolean);
-    return () => { unsubs.forEach(u => { if (typeof u === "function") u(); }); };
+    return () => {
+      clearTimeout(timer);
+      unsubs.forEach(u => { if (typeof u === "function") u(); });
+    };
   }, [groupId, empresaId, queryClient]);
 
   const counts = data || SNAPSHOT;

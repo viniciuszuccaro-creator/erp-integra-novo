@@ -109,6 +109,7 @@ export default function CentralIntegracoes() {
         entidade: "ConfiguracaoSistema",
         registro_id: existentes?.[0]?.id || null,
         descricao: `${ativo ? "Ativacao" : "Desativacao"} de integracao`,
+        dados_anteriores: existentes?.[0] || null,
         dados_novos: { chave: key, ativo },
         sucesso: true,
         data_hora: new Date().toISOString(),

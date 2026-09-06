@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import useContextoVisual from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 
 function otimizarRotaNN(pontos, origem) {
   if (!pontos || pontos.length === 0) return [];
@@ -55,7 +55,8 @@ export default function useRoteirizacaoMapa(entregas, motoristas, veiculos) {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual, createInContext, updateInContext } = useContextoVisual();
+  const { canCreate } = usePermissions();
 
   const handleSelecionarEntrega = (entrega) => {
     if (entregasSelecionadas.find((e) => e.id === entrega.id)) {
@@ -135,10 +136,13 @@ export default function useRoteirizacaoMapa(entregas, motoristas, veiculos) {
     }
 
     try {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canCreate('Expedicao')) throw new Error('Sem permissão para gerar romaneios.');
+      if (!empresaAtual?.id && !grupoAtual?.id) throw new Error('Sem contexto de grupo/empresa — operação bloqueada.');
       const motoristaNome =
         motoristas.find((m) => m.id === motoristaSelecionado)?.nome_completo || "Motorista";
 
-      const rota = await base44.entities.Rota.create({
+      const rota = await createInContext('Rota', {
         empresa_id: empresaAtual?.id,
         group_id: grupoAtual?.id || empresaAtual?.group_id,
         nome_rota: `Rota ${new Date().toLocaleDateString("pt-BR")} - ${motoristaNome}`,
@@ -167,7 +171,7 @@ export default function useRoteirizacaoMapa(entregas, motoristas, veiculos) {
         criado_por: "Sistema",
       });
 
-      const romaneio = await base44.entities.Romaneio.create({
+      const romaneio = await createInContext('Romaneio', {
         empresa_id: empresaAtual?.id,
         group_id: grupoAtual?.id || empresaAtual?.group_id,
         numero_romaneio: `ROM-${Date.now()}`,
@@ -184,7 +188,7 @@ export default function useRoteirizacaoMapa(entregas, motoristas, veiculos) {
       });
 
       for (const ponto of rotaOtimizada.pontos) {
-        await base44.entities.Entrega.update(ponto.id, {
+        await updateInContext('Entrega', ponto.id, {
           rota_id: rota.id,
           romaneio_id: romaneio.id,
           status: "Pronto para Expedir",
@@ -207,7 +211,7 @@ export default function useRoteirizacaoMapa(entregas, motoristas, veiculos) {
     } catch (error) {
       toast({
         title: "❌ Erro ao gerar romaneio",
-        description: "Ocorreu um erro ao salvar. Tente novamente.",
+        description: error?.message || "Ocorreu um erro ao salvar. Tente novamente.",
         variant: "destructive",
       });
     }

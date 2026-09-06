@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { base44 } from "@/api/base44Client";
+import useContextoVisual from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,8 @@ export default function AssinaturaEletronicaModal({
   onAssinado
 }) {
   const { toast } = useToast();
+  const { updateInContext } = useContextoVisual();
+  const { canEdit } = usePermissions();
   const [assinando, setAssinando] = useState(false);
   const [assinado, setAssinado] = useState(false);
 
@@ -48,6 +51,12 @@ export default function AssinaturaEletronicaModal({
 
   const assinarDocumento = async () => {
     if (!validar()) return;
+    // Regra-Mãe 5: RBAC fail-closed antes da persistência
+    const moduloDoc = tipo === "contrato" ? 'Contratos' : 'Comercial';
+    if (!canEdit(moduloDoc)) {
+      toast({ title: "❌ Sem permissão", description: "Você não tem permissão para registrar assinaturas neste módulo.", variant: "destructive" });
+      return;
+    }
     try {
       setAssinando(true);
       const assinaturaImagem = obterAssinaturaBase64();
@@ -81,10 +90,11 @@ export default function AssinaturaEletronicaModal({
         };
       }
 
+      // Regra-Mãe 5: persistência protegida (carimbo de contexto + auditoria antes/depois)
       if (tipo === "contrato") {
-        await base44.entities.Contrato.update(documento.id, campoAssinatura);
+        await updateInContext('Contrato', documento.id, campoAssinatura);
       } else if (tipo === "pedido") {
-        await base44.entities.Pedido.update(documento.id, campoAssinatura);
+        await updateInContext('Pedido', documento.id, campoAssinatura);
       }
 
       setAssinado(true);

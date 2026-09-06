@@ -5,10 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { Truck, Building2, Pen } from "lucide-react";
 import { toast } from "sonner";
 import RBACButton from "@/components/lib/RBACButton";
+import useContextoVisual from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 import EnvioMensagemAutomatica from "./EnvioMensagemAutomatica";
 import AssinaturaDigitalEntrega from "./AssinaturaDigitalEntrega";
 
@@ -27,10 +28,14 @@ export default function DetalhesEntregaView({
   const containerClass = windowMode ? "w-full h-full flex flex-col overflow-hidden" : "";
   const queryClient = useQueryClient();
   const [showAssinatura, setShowAssinatura] = React.useState(false);
+  const { updateInContext } = useContextoVisual();
+  const { canEdit } = usePermissions();
 
   const confirmarEntregaAssinaturaMutation = useMutation({
     mutationFn: async (dadosAssinatura) => {
-      return await base44.entities.Entrega.update(entrega.id, {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('Expedicao')) throw new Error('Sem permissão para confirmar entrega.');
+      return await updateInContext('Entrega', entrega.id, {
         status: "Entregue",
         data_entrega: new Date().toISOString(),
         comprovante_entrega: {
@@ -56,7 +61,8 @@ export default function DetalhesEntregaView({
       queryClient.invalidateQueries({ queryKey: ['entregas'] });
       setShowAssinatura(false);
       toast.success("✅ Entrega confirmada com assinatura!");
-    }
+    },
+    onError: (e) => toast.error(e?.message || 'Erro ao confirmar entrega'),
   });
 
   const content = (

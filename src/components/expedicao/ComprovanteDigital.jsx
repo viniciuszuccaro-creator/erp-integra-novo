@@ -9,6 +9,8 @@ import { Camera, Upload, CheckCircle, MapPin } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import useContextoVisual from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -16,6 +18,8 @@ import { base44 } from "@/api/base44Client";
 export default function ComprovanteDigital({ entrega, isOpen, onClose, windowMode = false }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { updateInContext } = useContextoVisual();
+  const { canEdit } = usePermissions();
 
   const [formData, setFormData] = useState({
     nome_recebedor: "",
@@ -29,7 +33,11 @@ export default function ComprovanteDigital({ entrega, isOpen, onClose, windowMod
   const [uploading, setUploading] = useState(false);
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Entrega.update(id, data),
+    mutationFn: async ({ id, data }) => {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('Expedicao')) throw new Error('Sem permissão para confirmar entrega.');
+      return updateInContext('Entrega', id, data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entregas'] });
       toast({ title: "✅ Comprovante registrado com sucesso!" });

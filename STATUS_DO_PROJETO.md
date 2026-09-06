@@ -1053,6 +1053,15 @@ Estado consolidado:
 - `usePontoEletronico.jsx`: registro de ponto revalida RBAC e contexto de grupo na persistência (fail-closed) e gera `AuditLog` com contexto e dados do registro; foto facial redimensionada antes de salvar (evita campo oversized que quebra operações do registro); toast de erro adicionado. Validação por IA mantém bypass automático enquanto créditos do workspace estiverem esgotados.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### Expedição/Chatbot/Timeline/Assinatura Eletrônica — Regra-Mãe aplicada (2026-09-06, lote 2)
+- `chatbot/ConfiguracaoCanais.jsx`: salvar canal usava `ConfiguracaoCanal.create/update` crus — migrado para `createInContext`/`updateInContext` (carimbo de contexto + auditoria), RBAC (criar/editar HubAtendimento) fail-closed, com feedback de erro.
+- `expedicao/ComprovanteDigital.jsx`: confirmação de entrega usava `Entrega.update` cru — migrada para `updateInContext('Entrega')` com RBAC `editar` Expedição, fail-closed.
+- `expedicao/DetalhesEntregaView.jsx`: confirmação por assinatura usava `Entrega.update` cru — migrada para `updateInContext` (auditoria antes/depois), RBAC fail-closed, feedback de erro.
+- `expedicao/EnvioMensagemAutomatica.jsx`: registro de notificação e histórico do cliente usavam `Entrega.update`/`HistoricoCliente.create` crus — migrados para `updateInContext`/`createInContext`, RBAC fail-closed, feedback de erro.
+- `expedicao/roteirizacao-mapa/useRoteirizacaoMapa.jsx`: geração de romaneio usava `Rota.create`/`Romaneio.create`/`Entrega.update` crus — migrados para persistência protegida, RBAC `criar` Expedição + contexto de grupo/empresa obrigatório (fail-closed).
+- `cliente/timeline-cliente/useTimelineCliente.jsx`: `useRegistrarEvento` usava `HistoricoCliente.create` cru — migrado para `createInContext` (carimbo de grupo/empresa + auditoria).
+- `AssinaturaEletronicaModal.jsx`: assinatura de contrato/pedido usava `Contrato.update`/`Pedido.update` crus — migrada para `updateInContext` (auditoria antes/depois), RBAC `editar` (Contratos/Comercial) fail-closed antes da persistência.
+
 ### Comercial (Comissões/Pedidos Externos/Entrega/Retirada) + CRM Interações — Regra-Mãe aplicada (2026-09-06)
 - `CalcularComissoesForm.jsx`: geração de comissões usava `Comissao.create` cru — migrada para `createInContext('Comissao')` (carimbo de grupo/empresa + auditoria), com RBAC `criar` do módulo Comercial e validação de contexto obrigatório, fail-closed.
 - `ValidarPedidosExternos.jsx`: validar/excluir/importar pedido externo usavam gravação/exclusão cruas — migradas para `updateInContext`/`deleteInContext` (auditoria com estado anterior), com RBAC (editar/excluir/criar Comercial), fail-closed e feedback de erro nas três mutações.

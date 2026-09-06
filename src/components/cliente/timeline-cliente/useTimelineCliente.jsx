@@ -45,10 +45,11 @@ export function useTimelineCliente({ clienteId, limitarModulo, limitarReferencia
  * Hook para registrar evento no histórico do cliente
  */
 export function useRegistrarEvento() {
-  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual, createInContext } = useContextoVisual();
   return async (evento) => {
     try {
-      await base44.entities.HistoricoCliente.create({
+      // Regra-Mãe 5: persistência protegida — carimbo de contexto + auditoria
+      await createInContext('HistoricoCliente', {
         ...evento,
         group_id: evento.group_id || grupoAtual?.id || empresaAtual?.group_id || null,
         empresa_id: evento.empresa_id || empresaAtual?.id || null,

@@ -8,6 +8,7 @@ import { MessageCircle, Instagram, Send as Telegram, Mail, Globe, Settings, Smar
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 import RoteamentoInteligente from "./RoteamentoInteligente";
 import NotificacoesCanal from "./NotificacoesCanal";
 import AutomacaoFluxos from "./AutomacaoFluxos";
@@ -23,7 +24,8 @@ import CanalTabSLA from "./canal-config/CanalTabSLA";
  */
 export default function ConfiguracaoCanais() {
   const queryClient = useQueryClient();
-  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual, createInContext, updateInContext } = useContextoVisual();
+  const { canCreate, canEdit } = usePermissions();
   const [canalSelecionado, setCanalSelecionado] = useState("WhatsApp");
   const [abaAtiva, setAbaAtiva] = useState("basico");
 
@@ -48,10 +50,13 @@ export default function ConfiguracaoCanais() {
 
   const salvarConfigMutation = useMutation({
     mutationFn: async (dados) => {
-      if (configAtual) return await base44.entities.ConfiguracaoCanal.update(configAtual.id, dados);
-      return await base44.entities.ConfiguracaoCanal.create({ ...dados, empresa_id: empresaAtual?.id, group_id: empresaAtual?.group_id || grupoAtual?.id, canal: canalSelecionado });
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (configAtual ? !canEdit('HubAtendimento') : !canCreate('HubAtendimento')) throw new Error('Sem permissão para salvar configurações de canais.');
+      if (configAtual) return await updateInContext('ConfiguracaoCanal', configAtual.id, dados);
+      return await createInContext('ConfiguracaoCanal', { ...dados, empresa_id: empresaAtual?.id, group_id: empresaAtual?.group_id || grupoAtual?.id, canal: canalSelecionado });
     },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['config-canais'] }); toast.success("Configuração salva!"); }
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['config-canais'] }); toast.success("Configuração salva!"); },
+    onError: (e) => toast.error(e?.message || 'Erro ao salvar configuração'),
   });
 
   const canaisAtivos = configs.filter(c => c.ativo).length;

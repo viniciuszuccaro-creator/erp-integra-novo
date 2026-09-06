@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import { MessageCircle, Send, CheckCircle, AlertCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { mockEnviarWhatsApp, avisoModoSimulacao } from "@/components/integracoes/MockIntegracoes";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 import RBACButton from "@/components/lib/RBACButton";
 
 /**
@@ -18,7 +18,8 @@ import RBACButton from "@/components/lib/RBACButton";
  * EM MODO SIMULAÇÃO
  */
 export default function EnvioMensagemAutomatica({ entrega, tipo = "saida_entrega" }) {
-  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual, createInContext, updateInContext } = useContextoVisual();
+  const { canEdit } = usePermissions();
   const [enviando, setEnviando] = React.useState(false);
   const [mensagemCustom, setMensagemCustom] = React.useState("");
   const [enviado, setEnviado] = React.useState(false);
@@ -35,6 +36,8 @@ export default function EnvioMensagemAutomatica({ entrega, tipo = "saida_entrega
 
   const enviarMensagemMutation = useMutation({
     mutationFn: async (mensagem) => {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('Expedicao')) throw new Error('Sem permissão para enviar notificações.');
       const telefone = entrega.contato_entrega?.whatsapp || entrega.contato_entrega?.telefone;
 
       if (!telefone) {
@@ -51,7 +54,7 @@ export default function EnvioMensagemAutomatica({ entrega, tipo = "saida_entrega
       // Atualizar entrega com histórico de notificação
       const notificacoesAtuais = entrega.notificacoes_enviadas || [];
       
-      await base44.entities.Entrega.update(entrega.id, {
+      await updateInContext('Entrega', entrega.id, {
         notificacoes_enviadas: [
           ...notificacoesAtuais,
           {
@@ -67,8 +70,8 @@ export default function EnvioMensagemAutomatica({ entrega, tipo = "saida_entrega
         ]
       });
 
-      // Registrar no histórico do cliente
-      await base44.entities.HistoricoCliente.create({
+      // Registrar no histórico do cliente (persistência protegida)
+      await createInContext('HistoricoCliente', {
         empresa_id: entrega.empresa_id || empresaAtual?.id,
         group_id: grupoAtual?.id || empresaAtual?.group_id || entrega.group_id || null,
         cliente_id: entrega.cliente_id,
@@ -98,6 +101,9 @@ export default function EnvioMensagemAutomatica({ entrega, tipo = "saida_entrega
         title: "✅ WhatsApp Enviado (Simulação)",
         description: `Mensagem registrada no histórico`
       });
+    },
+    onError: (e) => {
+      toast({ title: "❌ Erro ao enviar mensagem", description: e?.message || "Tente novamente", variant: "destructive" });
     }
   });
 

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import usePermissions from '@/components/lib/usePermissions';
 
 /**
  * V21.6 - CONFIGURAÇÃO DE NOTIFICAÇÕES
@@ -31,7 +32,8 @@ import { useContextoVisual } from '@/components/lib/useContextoVisual';
 export default function NotificacoesCanal({ canalConfig }) {
   // Compatibilidade - aceita canalConfig ou canalId
   const canalId = canalConfig?.id;
-  const { empresaAtual } = useContextoVisual();
+  const { empresaAtual, updateInContext } = useContextoVisual();
+  const { canEdit } = usePermissions();
   const queryClient = useQueryClient();
 
   const tiposNotificacao = [
@@ -90,8 +92,10 @@ export default function NotificacoesCanal({ canalConfig }) {
   const salvarMutation = useMutation({
     mutationFn: async () => {
       if (!config?.id) return;
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('HubAtendimento')) throw new Error('Sem permissão para salvar notificações.');
       
-      await base44.entities.ConfiguracaoCanal.update(config.id, {
+      await updateInContext('ConfiguracaoCanal', config.id, {
         notificacoes: configLocal
       });
     },

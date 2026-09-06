@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Settings2, Users, TrendingUp, Settings, Brain } from 'lucide-react';
 import { toast } from 'sonner';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import usePermissions from '@/components/lib/usePermissions';
 
 /**
  * V21.6 - ROTEAMENTO INTELIGENTE DE CONVERSAS
@@ -24,7 +25,8 @@ import { useContextoVisual } from '@/components/lib/useContextoVisual';
  */
 export default function RoteamentoInteligente({ canalConfig }) {
   const queryClient = useQueryClient();
-  const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const { empresaAtual, filterInContext, grupoAtual, contexto, updateInContext } = useContextoVisual();
+  const { canEdit } = usePermissions();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const [regras, setRegras] = useState({
@@ -81,8 +83,10 @@ export default function RoteamentoInteligente({ canalConfig }) {
   const salvarRegrasMutation = useMutation({
     mutationFn: async () => {
       if (!canalConfig?.id) return;
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('HubAtendimento')) throw new Error('Sem permissão para salvar regras de roteamento.');
       
-      await base44.entities.ConfiguracaoCanal.update(canalConfig.id, {
+      await updateInContext('ConfiguracaoCanal', canalConfig.id, {
         regras_roteamento: regras
       });
     },
@@ -116,7 +120,9 @@ export default function RoteamentoInteligente({ canalConfig }) {
     }
 
     if (atendenteEscolhido) {
-      await base44.entities.ConversaOmnicanal.update(conversaId, {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('HubAtendimento')) throw new Error('Sem permissão para atribuir conversas.');
+      await updateInContext('ConversaOmnicanal', conversaId, {
         atendente_id: atendenteEscolhido.atendente_id,
         atendente_nome: atendenteEscolhido.nome,
         status: 'Em Progresso'

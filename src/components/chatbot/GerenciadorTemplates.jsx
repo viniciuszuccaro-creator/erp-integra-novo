@@ -20,6 +20,7 @@ import {
 import { toast } from 'sonner';
 import { useConfirm } from '@/components/ui/confirm-dialog';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import usePermissions from '@/components/lib/usePermissions';
 import RBACButton from '@/components/lib/RBACButton';
 import {
   Dialog,
@@ -47,7 +48,8 @@ export default function GerenciadorTemplates() {
   const [busca, setBusca] = useState('');
   const queryClient = useQueryClient();
   const { confirm, ConfirmDialog } = useConfirm();
-  const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const { empresaAtual, filterInContext, grupoAtual, contexto, createInContext, updateInContext } = useContextoVisual();
+  const { canCreate, canEdit } = usePermissions();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const [formData, setFormData] = useState({
@@ -83,6 +85,8 @@ export default function GerenciadorTemplates() {
 
   const salvarTemplateMutation = useMutation({
     mutationFn: async (template) => {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canCreate('HubAtendimento')) throw new Error('Sem permissão para salvar templates.');
       // Encontrar config do primeiro canal ativo ou criar nova
       const configs = await base44.entities.ConfiguracaoCanal.filter({
         empresa_id: empresaAtual?.id,
@@ -91,7 +95,7 @@ export default function GerenciadorTemplates() {
       
       let config = configs[0];
       if (!config) {
-        config = await base44.entities.ConfiguracaoCanal.create({
+        config = await createInContext('ConfiguracaoCanal', {
           canal: 'Portal',
           empresa_id: empresaAtual?.id,
           group_id: grupoAtual?.id || empresaAtual?.group_id,
@@ -110,7 +114,7 @@ export default function GerenciadorTemplates() {
         ? templatesAtuais.map(t => t.template_id === templateEditando.template_id ? novoTemplate : t)
         : [...templatesAtuais, novoTemplate];
 
-      await base44.entities.ConfiguracaoCanal.update(config.id, {
+      await updateInContext('ConfiguracaoCanal', config.id, {
         templates_mensagens: templatesAtualizados
       });
 
@@ -125,12 +129,14 @@ export default function GerenciadorTemplates() {
 
   const excluirTemplateMutation = useMutation({
     mutationFn: async (template) => {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('HubAtendimento')) throw new Error('Sem permissão para excluir templates.');
       const config = await base44.entities.ConfiguracaoCanal.get(template.canal_config_id);
       const templatesAtualizados = config.templates_mensagens.filter(
         t => t.template_id !== template.template_id
       );
       
-      await base44.entities.ConfiguracaoCanal.update(config.id, {
+      await updateInContext('ConfiguracaoCanal', config.id, {
         templates_mensagens: templatesAtualizados
       });
     },

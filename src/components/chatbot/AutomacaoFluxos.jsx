@@ -8,6 +8,8 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Workflow, Clock, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import usePermissions from '@/components/lib/usePermissions';
 
 /**
  * V21.6 - AUTOMAÇÕES E FLUXOS
@@ -16,6 +18,8 @@ import { toast } from 'sonner';
  * ✅ Layout responsivo w-full h-full
  */
 export default function AutomacaoFluxos({ canalConfig }) {
+  const { updateInContext } = useContextoVisual();
+  const { canEdit } = usePermissions();
   const [automacoes, setAutomacoes] = useState([
     {
       nome: 'Boas-vindas Fora Horário',
@@ -50,8 +54,10 @@ export default function AutomacaoFluxos({ canalConfig }) {
   const salvarMutation = useMutation({
     mutationFn: async () => {
       if (!canalConfig?.id) return;
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('HubAtendimento')) throw new Error('Sem permissão para salvar automações.');
       
-      await base44.entities.ConfiguracaoCanal.update(canalConfig.id, {
+      await updateInContext('ConfiguracaoCanal', canalConfig.id, {
         acoes_automaticas: automacoes.map(a => ({
           trigger: a.trigger,
           acao: a.acao,

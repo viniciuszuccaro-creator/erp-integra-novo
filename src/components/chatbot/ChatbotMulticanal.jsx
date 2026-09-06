@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import usePermissions from '@/components/lib/usePermissions';
 
 /**
  * V21.6 - GERENCIADOR MULTICANAL
@@ -33,7 +34,8 @@ import { useContextoVisual } from '@/components/lib/useContextoVisual';
  * ✅ Links para configuração detalhada
  */
 export default function ChatbotMulticanal() {
-  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual, createInContext, updateInContext } = useContextoVisual();
+  const { canEdit } = usePermissions();
   const queryClient = useQueryClient();
 
   const canaisDisponiveis = [
@@ -80,12 +82,14 @@ export default function ChatbotMulticanal() {
 
   const toggleCanalMutation = useMutation({
     mutationFn: async ({ canalId, ativo }) => {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('HubAtendimento')) throw new Error('Sem permissão para configurar canais.');
       const configExistente = configsCanais.find(c => c.canal === canalId);
       
       if (configExistente) {
-        await base44.entities.ConfiguracaoCanal.update(configExistente.id, { ativo });
+        await updateInContext('ConfiguracaoCanal', configExistente.id, { ativo });
       } else {
-        await base44.entities.ConfiguracaoCanal.create({
+        await createInContext('ConfiguracaoCanal', {
           canal: canalId,
           empresa_id: empresaAtual?.id || 'default',
           group_id: grupoAtual?.id || empresaAtual?.group_id,

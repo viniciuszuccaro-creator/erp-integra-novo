@@ -10,6 +10,7 @@ import { BookOpen, Plus, Search, Edit2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import usePermissions from '@/components/lib/usePermissions';
 
 /**
  * V21.5 - BASE DE CONHECIMENTO IA
@@ -20,7 +21,8 @@ export default function BaseConhecimento() {
   const [busca, setBusca] = useState('');
   const [editando, setEditando] = useState(null);
   const queryClient = useQueryClient();
-  const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const { empresaAtual, filterInContext, grupoAtual, contexto, createInContext, updateInContext } = useContextoVisual();
+  const { canEdit } = usePermissions();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const [form, setForm] = useState({
@@ -41,11 +43,13 @@ export default function BaseConhecimento() {
 
   const salvarMutation = useMutation({
     mutationFn: async (dados) => {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('HubAtendimento')) throw new Error('Sem permissão para salvar conhecimento.');
       const configs = await base44.entities.ConfiguracaoCanal.filter({ empresa_id: empresaAtual?.id });
       let config = configs[0];
       
       if (!config) {
-        config = await base44.entities.ConfiguracaoCanal.create({
+        config = await createInContext('ConfiguracaoCanal', {
           canal: 'Portal',
           empresa_id: empresaAtual?.id,
           group_id: grupoAtual?.id || empresaAtual?.group_id,
@@ -65,7 +69,7 @@ export default function BaseConhecimento() {
         ? baseAtual.map(k => k.id === editando.id ? novo : k)
         : [...baseAtual, novo];
 
-      await base44.entities.ConfiguracaoCanal.update(config.id, {
+      await updateInContext('ConfiguracaoCanal', config.id, {
         base_conhecimento: baseAtualizada
       });
     },

@@ -1053,6 +1053,16 @@ Estado consolidado:
 - `usePontoEletronico.jsx`: registro de ponto revalida RBAC e contexto de grupo na persistência (fail-closed) e gera `AuditLog` com contexto e dados do registro; foto facial redimensionada antes de salvar (evita campo oversized que quebra operações do registro); toast de erro adicionado. Validação por IA mantém bypass automático enquanto créditos do workspace estiverem esgotados.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### Chatbot — Cluster de Canais completo — Regra-Mãe aplicada (2026-09-06, lote 3)
+- Varredura global executada (regex em todo `src/`): 163 mutações cruas restantes em ~22 módulos, agrupadas por módulo para lotes (AuditLog.create ignorado — é o próprio mecanismo de auditoria).
+- `chatbot/AutomacaoFluxos.jsx`: salvar automações usava `ConfiguracaoCanal.update` cru — migrado para `updateInContext`, RBAC `editar` HubAtendimento, fail-closed.
+- `chatbot/BaseConhecimento.jsx`: salvar conhecimento usava `ConfiguracaoCanal.create/update` crus — migrados para `createInContext`/`updateInContext`, RBAC fail-closed.
+- `chatbot/NotificacoesCanal.jsx`: salvar notificações usava `ConfiguracaoCanal.update` cru — migrado para `updateInContext`, RBAC fail-closed.
+- `chatbot/ChatbotMulticanal.jsx`: ligar/desligar canal usava `ConfiguracaoCanal.update/create` crus — migrados para persistência protegida, RBAC fail-closed.
+- `chatbot/GerenciadorTemplates.jsx`: salvar/criar/excluir template usavam `ConfiguracaoCanal.create/update` crus — migrados para persistência protegida, RBAC (criar/editar) fail-closed.
+- `chatbot/RoteamentoInteligente.jsx`: salvar regras e atribuir conversa usavam `ConfiguracaoCanal.update`/`ConversaOmnicanal.update` crus — migrados para `updateInContext`, RBAC fail-closed.
+- Próximos lotes (por prioridade de risco): hub-atendimento (4), chatbot restante (conversas/pedidos/boletos), financeiro (21), lib/hooks (30), sistema (13), mobile (9), produção (9).
+
 ### Expedição/Chatbot/Timeline/Assinatura Eletrônica — Regra-Mãe aplicada (2026-09-06, lote 2)
 - `chatbot/ConfiguracaoCanais.jsx`: salvar canal usava `ConfiguracaoCanal.create/update` crus — migrado para `createInContext`/`updateInContext` (carimbo de contexto + auditoria), RBAC (criar/editar HubAtendimento) fail-closed, com feedback de erro.
 - `expedicao/ComprovanteDigital.jsx`: confirmação de entrega usava `Entrega.update` cru — migrada para `updateInContext('Entrega')` com RBAC `editar` Expedição, fail-closed.

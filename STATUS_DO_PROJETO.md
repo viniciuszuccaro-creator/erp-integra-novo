@@ -1053,6 +1053,14 @@ Estado consolidado:
 - `usePontoEletronico.jsx`: registro de ponto revalida RBAC e contexto de grupo na persistência (fail-closed) e gera `AuditLog` com contexto e dados do registro; foto facial redimensionada antes de salvar (evita campo oversized que quebra operações do registro); toast de erro adicionado. Validação por IA mantém bypass automático enquanto créditos do workspace estiverem esgotados.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### Comercial (Comissões/Pedidos Externos/Entrega/Retirada) + CRM Interações — Regra-Mãe aplicada (2026-09-06)
+- `CalcularComissoesForm.jsx`: geração de comissões usava `Comissao.create` cru — migrada para `createInContext('Comissao')` (carimbo de grupo/empresa + auditoria), com RBAC `criar` do módulo Comercial e validação de contexto obrigatório, fail-closed.
+- `ValidarPedidosExternos.jsx`: validar/excluir/importar pedido externo usavam gravação/exclusão cruas — migradas para `updateInContext`/`deleteInContext` (auditoria com estado anterior), com RBAC (editar/excluir/criar Comercial), fail-closed e feedback de erro nas três mutações.
+- `PedidosEntregaDetalhesDialog.jsx`: mudança de status do pedido usava `Pedido.update` cru — migrada para `updateInContext('Pedido')` (auditoria antes/depois) com RBAC `editar` Comercial, fail-closed, e checagem antes da baixa de estoque no confirmar entrega.
+- `usePedidosRetirada.jsx`: registro da entrega usava `Entrega.create` cru — migrado para `createInContext('Entrega')`; RBAC `editar` Comercial e contexto de grupo obrigatório (fail-closed) na retirada e na mudança de status; mutações ganharam feedback de erro.
+- `crm/InteracoesListagem.jsx`: exclusão de interação usava `Interacao.delete` cru — migrada para `deleteInContext('Interacao')` (auditoria do estado anterior), RBAC `excluir` do módulo CRM, fail-closed, com feedback de erro.
+- Mapeamento global de gravações cruas restantes concluído (varredura regex em todo `src/`); próximos lotes: chatbot/ConfiguracaoCanal, expedicao (Comprovante/Detalhes/EnvioMensagem/Roteirizacao), timeline-cliente e AssinaturaEletronicaModal.
+
 ### Agenda + Central de Aprovações (Comercial) — Regra-Mãe aplicada (2026-09-06)
 - `Agenda.jsx`: criar/editar/excluir evento agora valida RBAC (criar/editar/excluir do módulo Agenda) na persistência, fail-closed; mutações ganharam feedback de erro (falhas antes silenciosas). Persistência já usava `createInContext`/`updateInContext`/`deleteInContext` (carimbo de contexto + auditoria + exclusão lógica de Evento preservados).
 - `useCentralAprovacoes.jsx`: aprovar/negar desconto de pedido usava `Pedido.update` cru — sem RBAC, sem auditoria e sem carimbo; migrado para `updateInContext('Pedido')` (auditoria antes/depois automática), com RBAC granular `aprovar` do módulo Comercial (fail-closed), validação de contexto de grupo do pedido e feedback de erro na negação.

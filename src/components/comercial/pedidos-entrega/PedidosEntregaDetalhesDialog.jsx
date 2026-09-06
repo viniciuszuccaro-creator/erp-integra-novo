@@ -1,6 +1,8 @@
 import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import useContextoVisual from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,18 +23,26 @@ export default function PedidosEntregaDetalhesDialog({
   open, onOpenChange, entregaSelecionada, permissoes, entregas
 }) {
   const queryClient = useQueryClient();
+  const { updateInContext } = useContextoVisual();
+  const { canEdit } = usePermissions();
 
   const atualizarStatusMutation = useMutation({
-    mutationFn: ({ pedidoId, novoStatus }) =>
-      base44.entities.Pedido.update(pedidoId, { status: novoStatus }),
+    mutationFn: async ({ pedidoId, novoStatus }) => {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('Comercial')) throw new Error('Sem permissão para alterar o status do pedido.');
+      return updateInContext('Pedido', pedidoId, { status: novoStatus });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
-    }
+    },
+    onError: (e) => toast.error(e?.message || 'Erro ao atualizar status do pedido'),
   });
 
   const handleConfirmarEntrega = async () => {
     const pedido = entregaSelecionada?.pedido;
     if (!pedido) return;
+    // Regra-Mãe 5: fail-closed antes de qualquer movimentação de estoque
+    if (!canEdit('Comercial')) { toast.error('Sem permissão para confirmar entrega.'); return; }
 
     // Baixa de estoque via função backend (multiempresa-safe)
     if (pedido.itens_revenda?.length > 0) {

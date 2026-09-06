@@ -6,10 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calculator, Calendar } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import usePermissions from '@/components/lib/usePermissions';
 
 export default function CalcularComissoesForm({ onSubmit, onCancel, pedidos = [] }) {
   const [periodo, setPeriodo] = useState('mes');
@@ -17,10 +17,14 @@ export default function CalcularComissoesForm({ onSubmit, onCancel, pedidos = []
   const [dataFim, setDataFim] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual, createInContext } = useContextoVisual();
+  const { canCreate } = usePermissions();
 
   const handleCalcularComissoes = async () => {
     try {
+      // Regra-Mãe 5: RBAC + contexto obrigatório na persistência (fail-closed)
+      if (!canCreate('Comercial')) throw new Error('Sem permissão para gerar comissões.');
+      if (!grupoAtual?.id && !empresaAtual?.group_id) throw new Error('Sem contexto de grupo/empresa — operação bloqueada.');
       const hoje = new Date();
       let dataInicioCalculo = new Date();
       let dataFimCalculo = hoje;
@@ -69,7 +73,7 @@ export default function CalcularComissoesForm({ onSubmit, onCancel, pedidos = []
         const percentual = 5;
         const valorComissao = dados.total_vendas * (percentual / 100);
 
-        await base44.entities.Comissao.create({
+        await createInContext('Comissao', {
           vendedor: dados.vendedor,
           vendedor_id: dados.vendedor_id,
           pedido_id: dados.pedidos[0]?.id,

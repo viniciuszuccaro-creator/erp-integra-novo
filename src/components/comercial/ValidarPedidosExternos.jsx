@@ -9,10 +9,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RefreshCw, CheckCircle2, XCircle, Download, Upload, ExternalLink } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import useContextoVisual from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
+import { toast } from "sonner";
 
 export default function ValidarPedidosExternos({ windowMode = true }) {
   const queryClient = useQueryClient();
-  const { createInContext } = useContextoVisual();
+  const { createInContext, updateInContext, deleteInContext } = useContextoVisual();
+  const { canCreate, canEdit, canDelete } = usePermissions();
   const { confirm, ConfirmDialog } = useConfirm();
 
   const { data: externos = [], isFetching, refetch } = useQuery({
@@ -29,24 +32,34 @@ export default function ValidarPedidosExternos({ windowMode = true }) {
 
   const marcarValidado = useMutation({
     mutationFn: async (ext) => {
-      return base44.entities.PedidoExterno.update(ext.id, { status_importacao: "Validado" });
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('Comercial')) throw new Error('Sem permissão para validar pedidos externos.');
+      return updateInContext('PedidoExterno', ext.id, { status_importacao: "Validado" });
     },
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["pedidos-externos"] }),
       ]);
     },
+    onError: (e) => toast.error(e?.message || 'Erro ao validar pedido externo'),
   });
 
   const excluirExterno = useMutation({
-    mutationFn: async (ext) => base44.entities.PedidoExterno.delete(ext.id),
+    mutationFn: async (ext) => {
+      // Regra-Mãe 5: RBAC + auditoria do estado anterior (fail-closed)
+      if (!canDelete('Comercial')) throw new Error('Sem permissão para excluir pedidos externos.');
+      return deleteInContext('PedidoExterno', ext.id);
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["pedidos-externos"] });
     },
+    onError: (e) => toast.error(e?.message || 'Erro ao excluir pedido externo'),
   });
 
   const importarComoPedido = useMutation({
     mutationFn: async (ext) => {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canCreate('Comercial')) throw new Error('Sem permissão para importar pedidos.');
       // Map mínimo para Pedido
       const numero = ext.numero_pedido_externo || `EXT-${(ext.id || "").toString().slice(-6) || Date.now()}`;
       const cliente_nome = ext.cliente_nome || "Cliente Externo";
@@ -77,7 +90,7 @@ export default function ValidarPedidosExternos({ windowMode = true }) {
       };
 
       const created = await createInContext("Pedido", payload, "empresa_id");
-      await base44.entities.PedidoExterno.update(ext.id, { status_importacao: "Importado", pedido_id: created.id });
+      await updateInContext('PedidoExterno', ext.id, { status_importacao: "Importado", pedido_id: created.id });
       return created;
     },
     onSuccess: async () => {
@@ -86,6 +99,7 @@ export default function ValidarPedidosExternos({ windowMode = true }) {
         queryClient.invalidateQueries({ queryKey: ["pedidos"] }),
       ]);
     },
+    onError: (e) => toast.error(e?.message || 'Erro ao importar pedido'),
   });
 
   return (

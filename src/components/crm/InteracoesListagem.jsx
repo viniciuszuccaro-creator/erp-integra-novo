@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Search, MessageSquare, Edit, Trash2, Phone, Mail, Video, Users } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
+import { toast } from "sonner";
 import ConfirmDialog from "@/components/ui/confirm-dialog";
 import InteracaoForm from "./InteracaoForm";
 import { useWindow } from "@/components/lib/useWindow";
@@ -24,7 +25,8 @@ const tipoColor = {
 export default function InteracoesListagem({ interacoes: propInt = [], windowMode }) {
   const [search, setSearch] = useState("");
   const [itemParaExcluir, setItemParaExcluir] = useState(null);
-  const { empresaAtual, filterInContext } = useContextoVisual();
+  const { empresaAtual, filterInContext, deleteInContext } = useContextoVisual();
+  const { canDelete } = usePermissions();
   const { openWindow } = useWindow();
   const qc = useQueryClient();
 
@@ -36,8 +38,13 @@ export default function InteracoesListagem({ interacoes: propInt = [], windowMod
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Interacao.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['interacoes-list'] })
+    mutationFn: async (id) => {
+      // Regra-Mãe 5: RBAC + auditoria do estado anterior (fail-closed)
+      if (!canDelete('CRM')) throw new Error('Sem permissão para excluir interações.');
+      return deleteInContext('Interacao', id);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['interacoes-list'] }),
+    onError: (e) => toast.error(e?.message || 'Erro ao excluir interação'),
   });
 
   const filtered = interacoes.filter(i =>

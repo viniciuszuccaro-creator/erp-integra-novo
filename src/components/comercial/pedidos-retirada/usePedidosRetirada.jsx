@@ -2,10 +2,12 @@ import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 import { toast } from "sonner";
 
 export default function usePedidosRetirada() {
   const { filterInContext, createInContext, updateInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const { canEdit } = usePermissions();
   const [busca, setBusca] = useState("");
   const [statusFiltro, setStatusFiltro] = useState("todos");
   const [detalhesOpen, setDetalhesOpen] = useState(false);
@@ -54,16 +56,24 @@ export default function usePedidosRetirada() {
   const retirados = pedidos.filter((p) => p.status === "Entregue" && p.tipo_frete === "Retirada").length;
 
   const atualizarStatusMutation = useMutation({
-    mutationFn: ({ pedidoId, novoStatus }) => updateInContext("Pedido", pedidoId, { status: novoStatus }),
+    mutationFn: async ({ pedidoId, novoStatus }) => {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('Comercial')) throw new Error('Sem permissão para alterar o status do pedido.');
+      return updateInContext("Pedido", pedidoId, { status: novoStatus });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pedidos-retirada"] });
       toast.success("✅ Status atualizado!");
     },
+    onError: (e) => toast.error(e?.message || 'Erro ao atualizar status'),
   });
 
   const confirmarRetiradaMutation = useMutation({
     mutationFn: async ({ pedido }) => {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('Comercial')) throw new Error('Sem permissão para confirmar retirada.');
       const ctx = { empresa_id: pedido.empresa_id, group_id: pedido.group_id || grupoAtual?.id };
+      if (!ctx.group_id) throw new Error('Pedido sem contexto de grupo — operação bloqueada.');
 
       if (pedido.itens_revenda?.length > 0) {
         for (const item of pedido.itens_revenda) {
@@ -100,7 +110,7 @@ export default function usePedidosRetirada() {
         data_entrega_real: new Date().toISOString(),
       });
 
-      await base44.entities.Entrega.create({
+      await createInContext("Entrega", {
         ...ctx,
         pedido_id: pedido.id,
         numero_pedido: pedido.numero_pedido,
@@ -146,6 +156,7 @@ export default function usePedidosRetirada() {
       setDocRecebedor("");
       setObservacoes("");
     },
+    onError: (e) => toast.error(e?.message || 'Erro ao confirmar retirada'),
   });
 
   const handleConfirmarRetirada = () => {

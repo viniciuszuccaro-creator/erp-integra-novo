@@ -8,21 +8,21 @@
     },
     "empresa_id": {
       "type": "string",
-      "description": "ID da empresa responsável"
+      "description": "ID da empresa respons\u00e1vel"
     },
     "numero_romaneio": {
       "type": "string",
-      "description": "Número sequencial do romaneio"
+      "description": "N\u00famero sequencial do romaneio"
     },
     "data_romaneio": {
       "type": "string",
       "format": "date",
-      "description": "Data de geração"
+      "description": "Data de gera\u00e7\u00e3o"
     },
     "data_saida": {
       "type": "string",
       "format": "date-time",
-      "description": "Data/hora de saída"
+      "description": "Data/hora de sa\u00edda"
     },
     "data_retorno": {
       "type": "string",
@@ -49,7 +49,7 @@
     },
     "veiculo": {
       "type": "string",
-      "description": "Descrição do veículo"
+      "description": "Descri\u00e7\u00e3o do ve\u00edculo"
     },
     "veiculo_id": {
       "type": "string"
@@ -62,12 +62,12 @@
       "enum": [
         "Carro",
         "Van",
-        "Caminhão",
+        "Caminh\u00e3o",
         "Caminhonete",
         "Moto",
         "Outro"
       ],
-      "default": "Caminhão"
+      "default": "Caminh\u00e3o"
     },
     "rota_id": {
       "type": "string",
@@ -78,7 +78,7 @@
       "items": {
         "type": "string"
       },
-      "description": "IDs das entregas incluídas"
+      "description": "IDs das entregas inclu\u00eddas"
     },
     "quantidade_entregas": {
       "type": "number",
@@ -102,11 +102,11 @@
     },
     "capacidade_veiculo_kg": {
       "type": "number",
-      "description": "Capacidade do veículo (do cadastro) (V16.1)"
+      "description": "Capacidade do ve\u00edculo (do cadastro) (V16.1)"
     },
     "percentual_ocupacao": {
       "type": "number",
-      "description": "% de ocupação do veículo (V16.1)"
+      "description": "% de ocupa\u00e7\u00e3o do ve\u00edculo (V16.1)"
     },
     "alerta_sobrepeso": {
       "type": "boolean",
@@ -115,7 +115,7 @@
     },
     "distancia_total_km": {
       "type": "number",
-      "description": "Distância total prevista"
+      "description": "Dist\u00e2ncia total prevista"
     },
     "tempo_previsto_minutos": {
       "type": "number",
@@ -127,11 +127,11 @@
     },
     "km_inicial": {
       "type": "number",
-      "description": "KM inicial do veículo"
+      "description": "KM inicial do ve\u00edculo"
     },
     "km_final": {
       "type": "number",
-      "description": "KM final do veículo"
+      "description": "KM final do ve\u00edculo"
     },
     "km_rodado": {
       "type": "number",
@@ -139,16 +139,16 @@
     },
     "combustivel_estimado_l": {
       "type": "number",
-      "description": "Combustível estimado pela IA (V16.1)"
+      "description": "Combust\u00edvel estimado pela IA (V16.1)"
     },
     "custo_combustivel_estimado": {
       "type": "number",
-      "description": "Custo estimado de combustível (V16.1)"
+      "description": "Custo estimado de combust\u00edvel (V16.1)"
     },
     "rota_ecologica": {
       "type": "boolean",
       "default": false,
-      "description": "Se a IA priorizou rota ecológica (V16.1)"
+      "description": "Se a IA priorizou rota ecol\u00f3gica (V16.1)"
     },
     "status": {
       "type": "string",
@@ -156,7 +156,7 @@
         "Aberto",
         "Aprovado",
         "Em Rota",
-        "Concluído",
+        "Conclu\u00eddo",
         "Cancelado"
       ],
       "default": "Aberto"
@@ -166,7 +166,7 @@
     },
     "instrucoes_motorista": {
       "type": "string",
-      "description": "Instruções especiais para o motorista"
+      "description": "Instru\u00e7\u00f5es especiais para o motorista"
     },
     "assinatura_motorista": {
       "type": "string",
@@ -210,11 +210,11 @@
             "enum": [
               "Atraso",
               "Avaria",
-              "Veículo",
+              "Ve\u00edculo",
               "Cliente",
-              "Trânsito",
+              "Tr\u00e2nsito",
               "Recusa Total",
-              "Devolução Parcial",
+              "Devolu\u00e7\u00e3o Parcial",
               "Outro"
             ]
           },
@@ -230,11 +230,11 @@
           },
           "acao_corretiva": {
             "type": "string",
-            "description": "Ação corretiva sugerida (V16.1)"
+            "description": "A\u00e7\u00e3o corretiva sugerida (V16.1)"
           }
         }
       },
-      "description": "Ocorrências durante a rota"
+      "description": "Ocorr\u00eancias durante a rota"
     },
     "entregas_realizadas": {
       "type": "number",
@@ -266,7 +266,7 @@
     },
     "link_publico_rastreamento": {
       "type": "string",
-      "description": "Link público para rastreamento (V16.1)"
+      "description": "Link p\u00fablico para rastreamento (V16.1)"
     }
   },
   "required": [
@@ -275,6 +275,18 @@
     "data_romaneio"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

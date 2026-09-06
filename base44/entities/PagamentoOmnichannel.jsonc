@@ -41,11 +41,11 @@
     },
     "valor_bruto": {
       "type": "number",
-      "description": "Valor bruto da transação"
+      "description": "Valor bruto da transa\u00e7\u00e3o"
     },
     "valor_liquido": {
       "type": "number",
-      "description": "Valor líquido após taxas"
+      "description": "Valor l\u00edquido ap\u00f3s taxas"
     },
     "taxas_gateway": {
       "type": "number",
@@ -55,32 +55,32 @@
     "forma_pagamento": {
       "type": "string",
       "enum": [
-        "Cartão Crédito",
-        "Cartão Débito",
+        "Cart\u00e3o Cr\u00e9dito",
+        "Cart\u00e3o D\u00e9bito",
         "PIX",
         "Boleto",
         "Carteira Digital",
-        "Transferência"
+        "Transfer\u00eancia"
       ],
       "description": "Forma de pagamento utilizada"
     },
     "bandeira_cartao": {
       "type": "string",
-      "description": "Bandeira do cartão (se aplicável)"
+      "description": "Bandeira do cart\u00e3o (se aplic\u00e1vel)"
     },
     "parcelas": {
       "type": "number",
       "default": 1,
-      "description": "Número de parcelas"
+      "description": "N\u00famero de parcelas"
     },
     "data_transacao": {
       "type": "string",
       "format": "date-time",
-      "description": "Data e hora da transação"
+      "description": "Data e hora da transa\u00e7\u00e3o"
     },
     "id_transacao_gateway": {
       "type": "string",
-      "description": "ID da transação no gateway"
+      "description": "ID da transa\u00e7\u00e3o no gateway"
     },
     "gateway_utilizado": {
       "type": "string",
@@ -97,7 +97,7 @@
         "Recusado"
       ],
       "default": "Pendente",
-      "description": "Status da transação no gateway"
+      "description": "Status da transa\u00e7\u00e3o no gateway"
     },
     "status_conferencia": {
       "type": "string",
@@ -105,41 +105,41 @@
         "Pendente",
         "Conciliado",
         "Divergente",
-        "Em Análise"
+        "Em An\u00e1lise"
       ],
       "default": "Pendente",
-      "description": "Status da conferência interna"
+      "description": "Status da confer\u00eancia interna"
     },
     "data_credito_prevista": {
       "type": "string",
       "format": "date",
-      "description": "Data prevista de crédito na conta"
+      "description": "Data prevista de cr\u00e9dito na conta"
     },
     "data_credito_efetiva": {
       "type": "string",
       "format": "date",
-      "description": "Data efetiva do crédito (após conciliação)"
+      "description": "Data efetiva do cr\u00e9dito (ap\u00f3s concilia\u00e7\u00e3o)"
     },
     "conta_receber_id": {
       "type": "string",
-      "description": "ID do título a receber vinculado"
+      "description": "ID do t\u00edtulo a receber vinculado"
     },
     "caixa_ordem_liquidacao_id": {
       "type": "string",
-      "description": "ID da ordem de liquidação gerada"
+      "description": "ID da ordem de liquida\u00e7\u00e3o gerada"
     },
     "link_pagamento": {
       "type": "string",
-      "description": "Link de pagamento gerado (se aplicável)"
+      "description": "Link de pagamento gerado (se aplic\u00e1vel)"
     },
     "link_expiracao": {
       "type": "string",
       "format": "date-time",
-      "description": "Data de expiração do link"
+      "description": "Data de expira\u00e7\u00e3o do link"
     },
     "ip_cliente": {
       "type": "string",
-      "description": "IP do cliente na transação"
+      "description": "IP do cliente na transa\u00e7\u00e3o"
     },
     "dados_adicionais_gateway": {
       "type": "object",
@@ -157,6 +157,18 @@
     "status_transacao"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

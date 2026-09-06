@@ -42,11 +42,11 @@
       "type": "string",
       "enum": [
         "Baixa",
-        "Média",
+        "M\u00e9dia",
         "Alta",
         "Urgente"
       ],
-      "default": "Média"
+      "default": "M\u00e9dia"
     },
     "data_necessidade": {
       "type": "string",
@@ -56,7 +56,7 @@
       "type": "string",
       "enum": [
         "Pendente",
-        "Em Análise",
+        "Em An\u00e1lise",
         "Aprovada",
         "Rejeitada",
         "Compra Gerada",
@@ -85,6 +85,18 @@
     "quantidade_solicitada"
   ],
   "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.group_id": "{{user.data.group_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {

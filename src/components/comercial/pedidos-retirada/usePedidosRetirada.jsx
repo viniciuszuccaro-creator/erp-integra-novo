@@ -75,6 +75,7 @@ export default function usePedidosRetirada() {
       const ctx = { empresa_id: pedido.empresa_id, group_id: pedido.group_id || grupoAtual?.id };
       if (!ctx.group_id) throw new Error('Pedido sem contexto de grupo — operação bloqueada.');
 
+      const itensSemEstoque = [];
       if (pedido.itens_revenda?.length > 0) {
         for (const item of pedido.itens_revenda) {
           if (item.produto_id) {
@@ -100,9 +101,15 @@ export default function usePedidosRetirada() {
                 aprovado: true,
               });
               await updateInContext("Produto", item.produto_id, { estoque_atual: novoEstoque });
+            } else {
+              // Regra-Mãe 5d: divergência de estoque registrada e reportada (não silenciosa)
+              itensSemEstoque.push(item.descricao || produto?.descricao || item.produto_id);
             }
           }
         }
+      }
+      if (itensSemEstoque.length > 0) {
+        toast.warning(`⚠️ Retirada concluída, mas sem baixa de estoque para: ${itensSemEstoque.join(', ')}`);
       }
 
       await updateInContext("Pedido", pedido.id, {

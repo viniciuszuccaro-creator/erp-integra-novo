@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { base44 } from "@/api/base44Client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +42,6 @@ export default function PedidosEntregaTab({ windowMode = false }) {
   const [ocorrenciaOpen, setOcorrenciaOpen] = useState(false);
   const [romaneioOpen, setRomaneioOpen] = useState(false);
 
-  const queryClient = useQueryClient();
   const { openWindow } = useWindow();
   const permissoes = usePermissoesLogistica();
   const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
@@ -78,6 +76,13 @@ export default function PedidosEntregaTab({ windowMode = false }) {
     return grupos;
   }, [pedidosParaEntrega]);
 
+  // Lookup O(1) de entrega por pedido (evita find O(n) por linha da tabela)
+  const entregaPorPedidoId = useMemo(() => {
+    const map = new Map();
+    entregas.forEach(e => { if (e.pedido_id && !map.has(e.pedido_id)) map.set(e.pedido_id, e); });
+    return map;
+  }, [entregas]);
+
   const pedidosFiltrados = useMemo(() => {
     let resultado = pedidosParaEntrega;
     if (busca) {
@@ -96,7 +101,7 @@ export default function PedidosEntregaTab({ windowMode = false }) {
   }, [pedidosParaEntrega, busca, statusFiltro, regiaoFiltro]);
 
   const handleVerDetalhes = (pedido) => {
-    const entrega = entregas.find(e => e.pedido_id === pedido.id);
+    const entrega = entregaPorPedidoId.get(pedido.id);
     setEntregaSelecionada({ pedido, entrega });
     setDetalhesOpen(true);
   };
@@ -154,7 +159,7 @@ export default function PedidosEntregaTab({ windowMode = false }) {
               <TableBody>
                 {pedidosFiltrados.map(pedido => {
                   const regiao = pedido.endereco_entrega_principal?.cidade || 'Sem Região';
-                  const entrega = entregas.find(e => e.pedido_id === pedido.id);
+                  const entrega = entregaPorPedidoId.get(pedido.id);
                   return (
                     <TableRow key={pedido.id} className="hover:bg-slate-50">
                       <TableCell className="font-semibold">{pedido.numero_pedido}</TableCell>

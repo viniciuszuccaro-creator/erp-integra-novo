@@ -87,16 +87,21 @@ export function useItensRevenda({ formData, setFormData }) {
     const filter = { cliente_id: formData.cliente_id };
     if (formData?.group_id) filter.group_id = formData.group_id;
 
-    const pedidosCliente = await base44.entities.Pedido.filter(filter, '-data_pedido', 1);
+    try {
+      const pedidosCliente = await base44.entities.Pedido.filter(filter, '-data_pedido', 1);
 
-    if (pedidosCliente.length > 0 && pedidosCliente[0].itens_revenda?.length > 0) {
-      setFormData(prev => ({
-        ...prev,
-        itens_revenda: [...(prev?.itens_revenda || []), ...pedidosCliente[0].itens_revenda]
-      }));
-      toast.success(`✅ ${pedidosCliente[0].itens_revenda.length} item(ns) copiado(s)`);
-    } else {
-      toast.error(pedidosCliente.length > 0 ? 'Último pedido não tem itens de revenda' : 'Cliente não tem pedidos anteriores');
+      if (pedidosCliente.length > 0 && pedidosCliente[0].itens_revenda?.length > 0) {
+        setFormData(prev => ({
+          ...prev,
+          itens_revenda: [...(prev?.itens_revenda || []), ...pedidosCliente[0].itens_revenda]
+        }));
+        toast.success(`✅ ${pedidosCliente[0].itens_revenda.length} item(ns) copiado(s)`);
+      } else {
+        toast.error(pedidosCliente.length > 0 ? 'Último pedido não tem itens de revenda' : 'Cliente não tem pedidos anteriores');
+      }
+    } catch (error) {
+      console.error('[itens-revenda] erro ao copiar último pedido:', error);
+      toast.error('Falha ao copiar o último pedido.');
     }
   };
 

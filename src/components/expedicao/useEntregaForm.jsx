@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from "@/api/base44Client";
 import { useUser } from "@/components/lib/UserContext";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 import { useToast } from '@/components/ui/use-toast';
 import { toast as sonnerToast } from "sonner";
 
@@ -17,6 +18,7 @@ export default function useEntregaForm({ formData, setFormData, onCancel, isEdit
   const { toast: toastHook } = useToast();
   const { user: authUser } = useUser();
   const { createInContext, updateInContext } = useContextoVisual();
+  const { canCreate, canEdit } = usePermissions();
 
   const calcularPrevisaoEntrega = async () => {
     if (!formData.endereco_entrega_completo?.cidade) { sonnerToast.error("❌ Preencha o endereço primeiro"); return; }
@@ -35,14 +37,15 @@ export default function useEntregaForm({ formData, setFormData, onCancel, isEdit
 
   const createMutation = useMutation({
     mutationFn: (data) => {
+      // Regra-Mãe 5: validação dupla RBAC + contexto na persistência (fail-closed)
+      if (!canCreate('Expedição')) throw new Error('Sem permissão para criar entregas.');
       const payload = {
         ...data,
         usuario_responsavel: data.usuario_responsavel || (authUser?.full_name || authUser?.email),
         usuario_responsavel_id: data.usuario_responsavel_id || authUser?.id,
-        group_id: data.group_id,
-        empresa_id: data.empresa_id,
       };
-      return base44.entities.Entrega.create(payload);
+      // createInContext carimba group_id/empresa_id do contexto ativo (antes podia gravar entrega órfã)
+      return createInContext('Entrega', payload);
     },
     onSuccess: async (entregaCriada) => {
       queryClient.invalidateQueries({ queryKey: ['entregas'] });
@@ -51,7 +54,7 @@ export default function useEntregaForm({ formData, setFormData, onCancel, isEdit
       sonnerToast.success("✅ Entrega criada com sucesso!");
       try {
         await base44.entities.AuditLog.create({
-          empresa_id: entregaCriada?.empresa_id, usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
+          group_id: entregaCriada?.group_id, empresa_id: entregaCriada?.empresa_id, usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
           acao: 'Criação', modulo: 'Expedição', entidade: 'Entrega', registro_id: entregaCriada?.id,
           descricao: 'Entrega criada via formulário', dados_novos: entregaCriada, data_hora: new Date().toISOString(), sucesso: true
         });
@@ -62,7 +65,11 @@ export default function useEntregaForm({ formData, setFormData, onCancel, isEdit
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => updateInContext('Entrega', id, data),
+    mutationFn: ({ id, data }) => {
+      // Regra-Mãe 5: validação dupla RBAC na persistência (fail-closed)
+      if (!canEdit('Expedição')) throw new Error('Sem permissão para editar entregas.');
+      return updateInContext('Entrega', id, data);
+    },
     onSuccess: async (entregaAtualizada) => {
       queryClient.invalidateQueries({ queryKey: ['entregas'] });
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
@@ -70,7 +77,7 @@ export default function useEntregaForm({ formData, setFormData, onCancel, isEdit
       sonnerToast.success("✅ Entrega atualizada!");
       try {
         await base44.entities.AuditLog.create({
-          empresa_id: entregaAtualizada?.empresa_id, usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
+          group_id: entregaAtualizada?.group_id, empresa_id: entregaAtualizada?.empresa_id, usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
           acao: 'Edição', modulo: 'Expedição', entidade: 'Entrega', registro_id: entregaAtualizada?.id,
           descricao: 'Entrega atualizada via formulário', dados_novos: entregaAtualizada, data_hora: new Date().toISOString(), sucesso: true
         });

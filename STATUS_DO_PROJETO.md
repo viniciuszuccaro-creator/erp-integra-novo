@@ -1053,5 +1053,10 @@ Estado consolidado:
 - `usePontoEletronico.jsx`: registro de ponto revalida RBAC e contexto de grupo na persistência (fail-closed) e gera `AuditLog` com contexto e dados do registro; foto facial redimensionada antes de salvar (evita campo oversized que quebra operações do registro); toast de erro adicionado. Validação por IA mantém bypass automático enquanto créditos do workspace estiverem esgotados.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### Expedição/Logística (Entregas e Ocorrências) — Regra-Mãe aplicada (2026-09-06)
+- `useEntregaForm.jsx`: criação de entrega corrigida — antes gravava direto podendo gerar registro órfão (sem contexto); agora persiste via `createInContext` (carimba grupo/empresa do contexto ativo). Criação e edição revalidam RBAC na persistência (fail-closed); AuditLog de criar/editar ganhou `group_id`. Verificado: `concluirOP.jsx` (Produção → Estoque/Expedição) já estava compliance (auditoria com antes/depois e contexto).
+- `RegistroOcorrenciaLogistica.jsx`: ocorrências logísticas (Avaria, Extravio, Entrega Frustrada etc.) — antes sem nenhuma auditoria — agora revalidam RBAC e contexto na persistência (fail-closed) e geram `AuditLog` completo (tipo, descrição, resolução, foto, impacto no pedido, contagem antes/depois); toast de erro adicionado (falhas antes silenciosas).
+- Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
+
 ### Próximo passo sugerido
-- Republicar o app para consolidar na versão publicada todo o endurecimento Financeiro/Fiscal/Rateio/Compras/Estoque/Contratos/RH desta semana (créditos de integração do workspace renovam em 07/09 — jobs agendados, IA e notificações retomam automaticamente aí).
+- Republicar o app para consolidar na versão publicada todo o endurecimento Financeiro/Fiscal/Rateio/Compras/Estoque/Contratos/RH/Expedição desta semana (créditos de integração do workspace renovam em 07/09 — jobs agendados, IA e notificações retomam automaticamente aí).

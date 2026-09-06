@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertTriangle, Upload, Camera, CheckCircle2, X } from "lucide-react";
 import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 import RBACButton from "@/components/lib/RBACButton";
 
 /**
@@ -24,6 +25,7 @@ export default function RegistroOcorrenciaLogistica({ pedido, entrega, onClose, 
 
   const queryClient = useQueryClient();
   const { carimbarContexto } = useContextoVisual();
+  const { canCreate } = usePermissions();
   const ctxEmpresaId = entrega?.empresa_id || pedido?.empresa_id;
   const ctxGroupId = entrega?.group_id || pedido?.group_id;
 
@@ -50,6 +52,9 @@ export default function RegistroOcorrenciaLogistica({ pedido, entrega, onClose, 
 
   const registrarOcorrenciaMutation = useMutation({
     mutationFn: async () => {
+      // Regra-Mãe 5: validação dupla RBAC + contexto na persistência (fail-closed)
+      if (!canCreate('Expedição')) throw new Error('Sem permissão para registrar ocorrências.');
+      if (!ctxGroupId && !entrega?.group_id && !pedido?.group_id) throw new Error('Sem contexto de grupo/empresa — operação bloqueada.');
       const novaOcorrencia = {
         tipo: tipoOcorrencia,
         descricao: descricao,
@@ -88,12 +93,26 @@ export default function RegistroOcorrenciaLogistica({ pedido, entrega, onClose, 
         });
       }
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      // Regra-Mãe 5d: auditoria completa da ocorrência (tipo, foto, impacto no pedido)
+      try {
+        await base44.entities.AuditLog.create({
+          acao: 'Criação', modulo: 'Expedição', entidade: 'Entrega',
+          registro_id: entrega?.id || null,
+          usuario: user?.full_name || user?.email || 'Sistema', usuario_id: user?.id,
+          group_id: ctxGroupId, empresa_id: ctxEmpresaId,
+          descricao: `Ocorrência "${tipoOcorrencia}" no pedido #${pedido?.numero_pedido}`,
+          dados_anteriores: entrega ? { qtd_ocorrencias: (entrega.ocorrencias || []).length } : undefined,
+          dados_novos: { tipo: tipoOcorrencia, descricao, resolucao: resolucao || 'Em análise', foto_url: fotoUrl, pedido_status_alterado: tipoOcorrencia === 'Entrega Frustrada' },
+          data_hora: new Date().toISOString(), sucesso: true
+        });
+      } catch (_) { console.error('[ocorrencia] falha ao auditar:', _); }
       queryClient.invalidateQueries({ queryKey: ['entregas'] });
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
       toast.success("✅ Ocorrência registrada!");
       if (onClose) onClose();
-    }
+    },
+    onError: (error) => { toast.error(error?.message || 'Erro ao registrar ocorrência'); }
   });
 
   const containerClass = windowMode ? "w-full h-full flex flex-col" : "";

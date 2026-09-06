@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 
 /**
  * Hook extraído de Contratos.jsx (Regra-Mãe regra 3).
@@ -12,6 +13,7 @@ export function useContratoActions({ contratos, empresaAtual, groupId, user }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { createInContext, updateInContext, deleteInContext } = useContextoVisual();
+  const { canCreate, canEdit, canDelete } = usePermissions();
 
   // ---- Alertas automáticos de vencimento e reajuste ----
   const enviarAlerta = async (contrato, tipo, dias) => {
@@ -116,9 +118,12 @@ export function useContratoActions({ contratos, empresaAtual, groupId, user }) {
   // ---- Geração automática de cobranças ----
   const gerarCobrancasMutation = useMutation({
     mutationFn: async (contrato) => {
+      // Regra-Mãe 5: validação dupla RBAC + contexto na persistência (fail-closed)
+      if (!canCreate('Contratos')) throw new Error('Sem permissão para gerar cobranças de contratos.');
       if (!contrato.gerar_cobranca_automatica || contrato.status !== 'Vigente') {
         throw new Error('Cobrança automática não ativa ou contrato não vigente.');
       }
+      if (!contrato.group_id && !groupId) throw new Error('Contrato sem contexto de grupo — operação bloqueada.');
       const hoje = new Date();
       let ultimaCobrancaData = contrato.ultima_cobranca_gerada ? new Date(contrato.ultima_cobranca_gerada) : new Date(contrato.data_inicio);
       if (new Date(contrato.data_inicio) > hoje) return { gerado: false, motivo: 'Contrato ainda não iniciou' };
@@ -142,7 +147,7 @@ export function useContratoActions({ contratos, empresaAtual, groupId, user }) {
         descricao: `Mensalidade ${contrato.objeto} - ${contrato.numero_contrato}`,
         cliente: contrato.parte_contratante,
         empresa_id: contrato.empresa_id || empresaAtual?.id,
-        group_id: contrato.group_id || null,
+        group_id: contrato.group_id || groupId || null,
         valor: contrato.valor_mensal,
         data_emissao: hoje.toISOString().split('T')[0],
         data_vencimento: currentMonthDueDate.toISOString().split('T')[0],
@@ -186,6 +191,9 @@ export function useContratoActions({ contratos, empresaAtual, groupId, user }) {
   // ---- Renovação automática ----
   const renovarContratoMutation = useMutation({
     mutationFn: async (contrato) => {
+      // Regra-Mãe 5: validação dupla RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('Contratos')) throw new Error('Sem permissão para renovar contratos.');
+      if (!contrato.group_id && !groupId) throw new Error('Contrato sem contexto de grupo — operação bloqueada.');
       const hoje = new Date();
       const novaDataInicio = new Date(contrato.data_fim);
       novaDataInicio.setDate(novaDataInicio.getDate() + 1);
@@ -218,14 +226,16 @@ export function useContratoActions({ contratos, empresaAtual, groupId, user }) {
       };
       await updateInContext('Contrato', contrato.id, updatedContrato);
       queryClient.setQueryData(['contratos'], (old) => old?.map(c => c.id === contrato.id ? updatedContrato : c) || []);
-      return { contrato, novoValorMensal, percentualReajusteAplicado };
+      return { contrato: updatedContrato, novoValorMensal, percentualReajusteAplicado, valorAnterior: contrato.valor_mensal, vigenciaAnterior: { data_inicio: contrato.data_inicio, data_fim: contrato.data_fim } };
     },
-    onSuccess: async ({ contrato, novoValorMensal, percentualReajusteAplicado }) => {
+    onSuccess: async ({ contrato, novoValorMensal, percentualReajusteAplicado, valorAnterior, vigenciaAnterior }) => {
       await base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário', usuario_id: user?.id,
         acao: 'Renovação', modulo: 'Contratos', entidade: 'Contrato', registro_id: contrato?.id,
         descricao: `Contrato ${contrato?.numero_contrato || ''} renovado`,
-        empresa_id: empresaAtual?.id || null, group_id: groupId || null,
+        dados_anteriores: { valor_mensal: valorAnterior, ...vigenciaAnterior },
+        dados_novos: { valor_mensal: novoValorMensal, percentual_reajuste: percentualReajusteAplicado, data_inicio: contrato?.data_inicio, data_fim: contrato?.data_fim },
+        empresa_id: contrato?.empresa_id || empresaAtual?.id || null, group_id: contrato?.group_id || groupId || null,
       });
       queryClient.invalidateQueries({ queryKey: ['contratos'] });
       toast({ title: "✅ Contrato Renovado!", description: `${contrato.numero_contrato} renovado ${percentualReajusteAplicado > 0 ? `com reajuste de ${percentualReajusteAplicado}%` : 'sem reajuste'}` });
@@ -237,13 +247,21 @@ export function useContratoActions({ contratos, empresaAtual, groupId, user }) {
 
   // ---- Exclusão ----
   const deleteMutation = useMutation({
-    mutationFn: (id) => deleteInContext('Contrato', id),
-    onSuccess: async (_res, id) => {
+    mutationFn: async (id) => {
+      // Regra-Mãe 5: validação dupla RBAC + contexto na persistência (fail-closed)
+      if (!canDelete('Contratos')) throw new Error('Sem permissão para excluir contratos.');
+      const antes = contratos?.find(c => c.id === id) || null;
+      if (antes && !antes.group_id && !groupId) throw new Error('Contrato sem contexto de grupo — operação bloqueada.');
+      await deleteInContext('Contrato', id);
+      return { id, antes };
+    },
+    onSuccess: async ({ id, antes }) => {
       await base44.entities.AuditLog.create({
         usuario: user?.full_name || user?.email || 'Usuário', usuario_id: user?.id,
         acao: 'Exclusão', modulo: 'Contratos', entidade: 'Contrato', registro_id: id,
-        empresa_id: empresaAtual?.id || null, group_id: groupId || null,
+        empresa_id: antes?.empresa_id || empresaAtual?.id || null, group_id: antes?.group_id || groupId || null,
         descricao: `Contrato excluído`,
+        dados_anteriores: antes ? { numero_contrato: antes.numero_contrato, objeto: antes.objeto, parte_contratante: antes.parte_contratante, valor_mensal: antes.valor_mensal, status: antes.status } : undefined,
       });
       queryClient.invalidateQueries({ queryKey: ['contratos'] });
       toast({ title: "✅ Contrato Excluído", description: "O contrato foi removido" });

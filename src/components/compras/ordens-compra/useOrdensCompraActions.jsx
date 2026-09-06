@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { useUser } from "@/components/lib/UserContext";
+import usePermissions from "@/components/lib/usePermissions";
+import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 
 /**
@@ -9,7 +11,8 @@ import { base44 } from "@/api/base44Client";
  * Todas as mutations de OC: criar, atualizar, aprovar, enviar, receber, avaliar.
  */
 export default function useOrdensCompraActions({ fornecedores, authUser }) {
-  const { createInContext, updateInContext, filterInContext } = useContextoVisual();
+  const { createInContext, updateInContext, filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const { canApprove, canEdit } = usePermissions();
   const [ocSelecionada, setOcSelecionada] = useState(null);
 
   const createMutation = useMutation({ mutationFn: (data) => createInContext('OrdemCompra', data) });
@@ -18,32 +21,45 @@ export default function useOrdensCompraActions({ fornecedores, authUser }) {
 
   const aprovarMutation = useMutation({
     mutationFn: async ({ id, oc }) => {
+      // Regra-Mãe 5: validação dupla RBAC + contexto na persistência (fail-closed)
+      if (!canApprove('Compras')) throw new Error('Sem permissão para aprovar ordens de compra.');
+      if (!oc?.group_id || !oc?.empresa_id) throw new Error('Ordem de compra sem contexto de grupo/empresa — operação bloqueada.');
       const hoje = new Date().toISOString().split('T')[0];
       await updateInContext('OrdemCompra', id, {
         status: 'Aprovada', data_aprovacao: hoje,
         historico: [...(oc.historico || []), { data: new Date().toISOString(), status_anterior: oc.status, status_novo: 'Aprovada', usuario: (authUser?.full_name || authUser?.email || 'Sistema'), observacao: 'Ordem de compra aprovada' }]
       });
+      return { group_id: oc.group_id, empresa_id: oc.empresa_id, status_anterior: oc.status };
     },
-    onSuccess: async () => {
-      try { await base44.entities.AuditLog.create({ acao: 'Aprovação', modulo: 'Compras', entidade: 'OrdemCompra', usuario: authUser?.email, usuario_id: authUser?.id, descricao: 'OC aprovada', data_hora: new Date().toISOString() }); } catch (_) { console.error('[ordens-compra] catch:', _); }
-    }
+    onSuccess: async ({ group_id, empresa_id, status_anterior }) => {
+      try { await base44.entities.AuditLog.create({ acao: 'Aprovação', modulo: 'Compras', entidade: 'OrdemCompra', usuario: authUser?.email, usuario_id: authUser?.id, group_id: group_id || grupoAtual?.id, empresa_id: empresa_id || empresaAtual?.id, descricao: 'OC aprovada', dados_anteriores: { status: status_anterior }, dados_novos: { status: 'Aprovada' }, data_hora: new Date().toISOString() }); } catch (_) { console.error('[ordens-compra] catch:', _); }
+    },
+    onError: (error) => { toast.error(error?.message || 'Erro ao aprovar ordem de compra'); }
   });
 
   const enviarFornecedorMutation = useMutation({
     mutationFn: async ({ id, oc }) => {
+      // Regra-Mãe 5: validação dupla RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('Compras')) throw new Error('Sem permissão para enviar ordens de compra ao fornecedor.');
+      if (!oc?.group_id || !oc?.empresa_id) throw new Error('Ordem de compra sem contexto de grupo/empresa — operação bloqueada.');
       const hoje = new Date().toISOString().split('T')[0];
       await updateInContext('OrdemCompra', id, {
         status: 'Enviada ao Fornecedor', data_envio_fornecedor: hoje,
         historico: [...(oc.historico || []), { data: new Date().toISOString(), status_anterior: oc.status, status_novo: 'Enviada ao Fornecedor', usuario: (authUser?.full_name || authUser?.email || 'Sistema'), observacao: 'Ordem enviada ao fornecedor' }]
       });
+      return { group_id: oc.group_id, empresa_id: oc.empresa_id, status_anterior: oc.status };
     },
-    onSuccess: async () => {
-      try { await base44.entities.AuditLog.create({ acao: 'Edição', modulo: 'Compras', entidade: 'OrdemCompra', usuario: authUser?.email, usuario_id: authUser?.id, descricao: 'OC enviada ao fornecedor', data_hora: new Date().toISOString() }); } catch (_) { console.error('[ordens-compra] catch:', _); }
-    }
+    onSuccess: async ({ group_id, empresa_id, status_anterior }) => {
+      try { await base44.entities.AuditLog.create({ acao: 'Edição', modulo: 'Compras', entidade: 'OrdemCompra', usuario: authUser?.email, usuario_id: authUser?.id, group_id: group_id || grupoAtual?.id, empresa_id: empresa_id || empresaAtual?.id, descricao: 'OC enviada ao fornecedor', dados_anteriores: { status: status_anterior }, dados_novos: { status: 'Enviada ao Fornecedor' }, data_hora: new Date().toISOString() }); } catch (_) { console.error('[ordens-compra] catch:', _); }
+    },
+    onError: (error) => { toast.error(error?.message || 'Erro ao enviar ordem ao fornecedor'); }
   });
 
   const receberMutation = useMutation({
     mutationFn: async ({ id, oc, dados }) => {
+      // Regra-Mãe 5: validação dupla RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('Compras')) throw new Error('Sem permissão para registrar recebimento de ordens de compra.');
+      if (!oc?.group_id || !oc?.empresa_id) throw new Error('Ordem de compra sem contexto de grupo/empresa — operação bloqueada.');
       const dataEnvio = new Date(oc.data_envio_fornecedor);
       const dataRecebimento = new Date(dados.data_entrega_real);
       const leadTimeReal = Math.floor((dataRecebimento - dataEnvio) / (1000 * 60 * 60 * 24));
@@ -76,17 +92,22 @@ export default function useOrdensCompraActions({ fornecedores, authUser }) {
           }
         }
       }
-      return { leadTimeReal, fornecedorNome: oc.fornecedor_nome };
+      return { leadTimeReal, fornecedorNome: oc.fornecedor_nome, group_id: oc.group_id, empresa_id: oc.empresa_id, status_anterior: oc.status, nfe: dados.nota_fiscal_entrada };
     },
-    onSuccess: async ({ leadTimeReal }) => {
-      try { await base44.entities.AuditLog.create({ acao: 'Edição', modulo: 'Compras', entidade: 'OrdemCompra', usuario: authUser?.email, usuario_id: authUser?.id, descricao: 'Recebimento registrado', dados_novos: { lead_time_real: leadTimeReal }, data_hora: new Date().toISOString() }); } catch (_) { console.error('[ordens-compra] catch:', _); }
-    }
+    onSuccess: async ({ leadTimeReal, group_id, empresa_id, status_anterior, nfe }) => {
+      try { await base44.entities.AuditLog.create({ acao: 'Edição', modulo: 'Compras', entidade: 'OrdemCompra', usuario: authUser?.email, usuario_id: authUser?.id, group_id: group_id || grupoAtual?.id, empresa_id: empresa_id || empresaAtual?.id, descricao: 'Recebimento registrado', dados_anteriores: { status: status_anterior }, dados_novos: { status: 'Recebida', lead_time_real: leadTimeReal, nota_fiscal_entrada: nfe }, data_hora: new Date().toISOString() }); } catch (_) { console.error('[ordens-compra] catch:', _); }
+    },
+    onError: (error) => { toast.error(error?.message || 'Erro ao registrar recebimento'); }
   });
 
   const avaliarFornecedorMutation = useMutation({
     mutationFn: async ({ oc, avaliacao }) => {
+      // Regra-Mãe 5: validação dupla RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('Compras')) throw new Error('Sem permissão para avaliar fornecedores.');
+      if (!oc?.group_id || !oc?.empresa_id) throw new Error('Ordem de compra sem contexto de grupo/empresa — operação bloqueada.');
       const notaMedia = (avaliacao.qualidade + avaliacao.prazo + avaliacao.preco + avaliacao.atendimento) / 4;
-      await base44.entities.OrdemCompra.update(oc.id, {
+      // Correção: persiste com contexto multiempresa (antes gravava direto sem contexto)
+      await updateInContext('OrdemCompra', oc.id, {
         avaliacao_fornecedor: { realizada: true, data: new Date().toISOString(), nota: notaMedia, criterios: { qualidade: avaliacao.qualidade, prazo: avaliacao.prazo, preco: avaliacao.preco, atendimento: avaliacao.atendimento }, comentario: avaliacao.comentario }
       });
       const fornecedor = fornecedores.find(f => f.id === oc.fornecedor_id);
@@ -96,8 +117,12 @@ export default function useOrdensCompraActions({ fornecedores, authUser }) {
         const notaMediaFornecedor = somaNotas / novasAvaliacoes.length;
         await updateInContext('Fornecedor', fornecedor.id, { avaliacoes: novasAvaliacoes, nota_media: parseFloat(notaMediaFornecedor.toFixed(2)) });
       }
-      return { notaMedia, fornecedorNome: oc.fornecedor_nome };
-    }
+      return { notaMedia, fornecedorNome: oc.fornecedor_nome, group_id: oc.group_id, empresa_id: oc.empresa_id };
+    },
+    onSuccess: async ({ notaMedia, group_id, empresa_id }) => {
+      try { await base44.entities.AuditLog.create({ acao: 'Edição', modulo: 'Compras', entidade: 'OrdemCompra', usuario: authUser?.email, usuario_id: authUser?.id, group_id: group_id || grupoAtual?.id, empresa_id: empresa_id || empresaAtual?.id, descricao: 'Fornecedor avaliado', dados_novos: { nota_media: notaMedia }, data_hora: new Date().toISOString() }); } catch (_) { console.error('[ordens-compra] catch:', _); }
+    },
+    onError: (error) => { toast.error(error?.message || 'Erro ao avaliar fornecedor'); }
   });
 
   return { createMutation, updateMutation, aprovarMutation, enviarFornecedorMutation, receberMutation, avaliarFornecedorMutation, ocSelecionada, setOcSelecionada };

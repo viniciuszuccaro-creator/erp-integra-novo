@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import usePermissions from "@/components/lib/usePermissions";
 import ProtectedField from "@/components/security/ProtectedField";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { useUser } from "@/components/lib/UserContext";
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -25,7 +26,8 @@ export default function TransferenciaEntreEmpresasForm({
 }) {
   const queryClient = useQueryClient();
   const { canCreate } = usePermissions();
-  const { createInContext } = useContextoVisual();
+  const { createInContext, grupoAtual } = useContextoVisual();
+  const { user } = useUser();
 
   const [formData, setFormData] = useState({
     empresa_origem_id: "",
@@ -40,9 +42,12 @@ export default function TransferenciaEntreEmpresasForm({
 
   const createTransferenciaMutation = useMutation({
     mutationFn: async (data) => {
+      // Regra-Mãe 5: validação dupla RBAC + contexto na persistência (fail-closed)
+      if (!canCreate('Estoque', 'Transferencias')) throw new Error('Sem permissão para realizar transferências entre empresas.');
       const produto = produtos.find(p => p.id === data.produto_id);
       const empresaOrigem = empresasDoGrupo.find(e => e.id === data.empresa_origem_id);
       const empresaDestino = empresasDoGrupo.find(e => e.id === data.empresa_destino_id);
+      if (!empresaOrigem?.group_id || !empresaDestino?.group_id) throw new Error('Empresas de origem/destino sem contexto de grupo — operação bloqueada.');
 
       // Criar registro de transferência
       const transferencia = await createInContext('TransferenciaFilial', {
@@ -87,6 +92,24 @@ export default function TransferenciaEntreEmpresasForm({
         data_movimentacao: new Date().toISOString()
       });
 
+      // Regra-Mãe 5d: auditoria completa da transferência intercompany
+      try {
+        await base44.entities.AuditLog.create({
+          acao: 'Criação', modulo: 'Estoque', entidade: 'TransferenciaFilial', registro_id: transferencia.id,
+          usuario: user?.email || user?.full_name || 'Sistema', usuario_id: user?.id,
+          group_id: empresaOrigem.group_id || grupoAtual?.id,
+          empresa_id: empresaOrigem.id,
+          descricao: 'Transferência entre empresas',
+          dados_novos: {
+            empresa_origem_id: empresaOrigem.id, empresa_destino_id: empresaDestino.id,
+            produto: produto?.descricao, quantidade: data.quantidade,
+            valor_total: (produto.custo_medio || produto.custo_aquisicao || 0) * data.quantidade,
+            gerar_financeiro: !!data.gerar_financeiro, motivo: data.motivo
+          },
+          data_hora: new Date().toISOString()
+        });
+      } catch (_) { console.error('[transferencia] falha ao auditar:', _); }
+
       return transferencia;
     },
     onSuccess: () => {
@@ -96,6 +119,9 @@ export default function TransferenciaEntreEmpresasForm({
       toast.success("✅ Transferência realizada com sucesso!");
       if (onSuccess) onSuccess();
       resetForm();
+    },
+    onError: (error) => {
+      toast.error(error?.message || "Erro ao realizar transferência entre empresas");
     }
   });
 

@@ -1042,5 +1042,11 @@ Estado consolidado:
 - Varredura das persistências sensíveis do Financeiro/Fiscal: **CONCLUÍDA**.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### Compras, Estoque (Transferência Intercompany) e Contratos — Regra-Mãe aplicada (2026-09-06)
+- `useOrdensCompraActions.jsx` (Compras): aprovação, envio ao fornecedor, recebimento e avaliação de OC agora revalidam RBAC e contexto grupo/empresa na persistência (fail-closed — antes nenhuma checagem); todos os AuditLog ganharam `group_id`/`empresa_id` e estado antes/depois; avaliação de fornecedor corrigida para persistir via `updateInContext` (antes gravava direto sem contexto); mutations com toast de erro (antes falhas silenciosas).
+- `TransferenciaEntreEmpresasForm.jsx` (Estoque): transferência entre empresas — antes sem auditoria — agora revalida permissão e contexto de grupo na persistência (fail-closed) e gera `AuditLog` completo (empresas origem/destino, produto, quantidade, valor, financeiro interno); adicionado toast de erro.
+- `useContratoActions.jsx` (Contratos): geração de cobrança automática exige permissão e bloqueia contratos sem contexto de grupo (título herda `group_id` do grupo ativo — corrigida possível origem de registro órfão); renovação com validação dupla e `AuditLog` antes/depois (valor e vigência); exclusão com validação dupla e registro do estado completo do contrato antes da inativação lógica.
+- Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
+
 ### Próximo passo sugerido
-- Republicar o app para consolidar na versão publicada todo o endurecimento Financeiro/Fiscal/Rateio desta semana (créditos de integração do workspace renovam em 07/09 — jobs agendados, IA e notificações retomam automaticamente aí).
+- Republicar o app para consolidar na versão publicada todo o endurecimento Financeiro/Fiscal/Rateio/Compras/Estoque/Contratos desta semana (créditos de integração do workspace renovam em 07/09 — jobs agendados, IA e notificações retomam automaticamente aí).

@@ -45,7 +45,10 @@ const SHARED_ENTITIES = new Set(['Cliente', 'Fornecedor', 'Transportadora']);
 
 // Constrói o filtro $or para uma entidade (igual ao filterInContext da tabela)
 function buildEntityFilter(entityName, groupId, empresaId, empresasDoGrupo) {
-  if (PURE_CATALOG.has(entityName)) return {};
+  // Alinhado ao readFilter do VisualizadorUniversalEntidadeV24:
+  // exclui registros mesclados (duplicatas desativadas) para badge bater com a tabela
+  const excludeMerged = { _merged: { $ne: true } };
+  if (PURE_CATALOG.has(entityName)) return { ...excludeMerged };
 
   const ctxCampo = ENTITY_CONTEXT_FIELD[entityName] || 'empresa_id';
   const orConds = [];
@@ -60,6 +63,8 @@ function buildEntityFilter(entityName, groupId, empresaId, empresasDoGrupo) {
   }
   if (groupId) {
     orConds.push({ group_id: groupId });
+    // Registros órfãos legados (sem empresa_id e sem group_id) — igual ao V24
+    orConds.push({ empresa_id: null, group_id: null });
     if (!empresaId && Array.isArray(empresasDoGrupo) && empresasDoGrupo.length) {
       const ids = empresasDoGrupo.map(e => e.id).filter(Boolean);
       if (ids.length) {
@@ -76,7 +81,7 @@ function buildEntityFilter(entityName, groupId, empresaId, empresasDoGrupo) {
     }
   }
 
-  return orConds.length ? { $or: orConds } : {};
+  return orConds.length ? { $or: orConds, ...excludeMerged } : { ...excludeMerged };
 }
 
 export default function useCadastrosAllCounts() {

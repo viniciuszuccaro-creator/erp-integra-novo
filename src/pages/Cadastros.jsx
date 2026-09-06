@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import useCadastrosAllCounts from "@/components/cadastros/hooks/useCadastrosAllCounts";
 import { Card, CardContent } from "@/components/ui/card";
@@ -55,8 +55,28 @@ export default function Cadastros() {
       setAcordeonAberto(acordeonAberto.filter((id) => id !== blocoId));
     } else {
       setAcordeonAberto([...acordeonAberto, blocoId]);
+      // Rola suavemente até o bloco recém-aberto (atalho da barra de totais)
+      setTimeout(() => {
+        document.querySelector(`[data-value="${blocoId}"]`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 150);
     }
   };
+
+  // Busca universal: abre todos os blocos automaticamente ao digitar e
+  // restaura o estado anterior dos acordeões quando a busca é limpa
+  const BLOCO_IDS = ["bloco1", "bloco2", "bloco3", "bloco4", "bloco5", "bloco6"];
+  const openBeforeSearchRef = useRef(null);
+  useEffect(() => {
+    if (searchTerm.trim()) {
+      if (openBeforeSearchRef.current === null) {
+        openBeforeSearchRef.current = acordeonAberto;
+        setAcordeonAberto(BLOCO_IDS);
+      }
+    } else if (openBeforeSearchRef.current !== null) {
+      setAcordeonAberto(openBeforeSearchRef.current);
+      openBeforeSearchRef.current = null;
+    }
+  }, [searchTerm]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!podeVerCadastros) {
     return (
@@ -122,7 +142,7 @@ export default function Cadastros() {
                 <Icon className="w-3.5 h-3.5" />
                 <span>{label}</span>
                 <span className="font-bold tabular-nums">
-                  {(total ?? 0).toLocaleString('pt-BR')}
+                  {countsLoading ? "…" : (total ?? 0).toLocaleString('pt-BR')}
                 </span>
               </button>
             ))}

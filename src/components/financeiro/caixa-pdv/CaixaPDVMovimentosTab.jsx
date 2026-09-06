@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function CaixaPDVMovimentosTab({ movimentosHoje, somatoriaFormasPagamento, pedidos }) {
+  // O(1): mapa de pedidos para reconciliação com movimentos (antes O(n²) por linha)
+  const pedidosMap = useMemo(() => new Map(pedidos.map(p => [p.id, p])), [pedidos]);
   return (
     <>
       <Card className="mb-4">
@@ -43,7 +45,7 @@ export default function CaixaPDVMovimentosTab({ movimentosHoje, somatoriaFormasP
             </TableHeader>
             <TableBody>
               {movimentosHoje.map(m => {
-                const pedidoVinculado = pedidos.find(p => p.id === m.pedido_id);
+                const pedidoVinculado = pedidosMap.get(m.pedido_id);
                 return (
                   <TableRow key={m.id}>
                     <TableCell>{new Date(m.data_movimento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</TableCell>

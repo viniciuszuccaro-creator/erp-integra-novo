@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -70,10 +70,28 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
   const { data: contasReceber = [] } = useRLSQuery('ContaReceber', {}, 'data_vencimento', 200, { enabled: contextoValido });
   const { data: contasPagar = [] } = useRLSQuery('ContaPagar', {}, 'data_vencimento', 200, { enabled: contextoValido });
   const { data: pedidos = [] } = useRLSQuery('Pedido', {}, '-data_pedido', 200, { enabled: contextoValido });
-  const { data: movimentos = [] } = useRLSQuery('CaixaMovimento', {}, '-data_movimento', 200, { enabled: caixaAberto && contextoValido, refetchInterval: 10000 });
+  const { data: movimentos = [] } = useRLSQuery('CaixaMovimento', {}, '-data_movimento', 200, { enabled: contextoValido, refetchInterval: caixaAberto ? 10000 : false });
 
-  const hoje = new Date().toISOString().split('T')[0];
-  const movimentosHoje = movimentos.filter(m => new Date(m.data_movimento).toISOString().split('T')[0] === hoje && !m.cancelado);
+  // Data local (evita desvio de UTC: movimentos após 21h no fuso Brasil não podem "sumir" do caixa do dia)
+  const agora = new Date();
+  const hoje = agora.toLocaleDateString('sv-SE');
+  const mesmaDataLocal = (d) => {
+    const dt = new Date(d);
+    return dt.getFullYear() === agora.getFullYear() && dt.getMonth() === agora.getMonth() && dt.getDate() === agora.getDate();
+  };
+  const movimentosHoje = movimentos.filter(m => mesmaDataLocal(m.data_movimento) && !m.cancelado);
+
+  // Restaura o estado do caixa ao recarregar a página (abertura/fechamento persistidos nos movimentos)
+  useEffect(() => {
+    if (!movimentos.length) return;
+    const aberturasHoje = movimentos.filter(m => m.tipo_movimento === 'Abertura' && mesmaDataLocal(m.data_movimento));
+    const fechamentosHoje = movimentos.filter(m => m.tipo_movimento === 'Fechamento' && mesmaDataLocal(m.data_movimento));
+    if (aberturasHoje.length > fechamentosHoje.length && !caixaAberto) {
+      setCaixaAberto(true);
+      const ultimaAbertura = aberturasHoje[aberturasHoje.length - 1];
+      if (ultimaAbertura?.valor) setSaldoInicial(ultimaAbertura.valor);
+    }
+  }, [movimentos]);
   const totalEntradasDinheiro = movimentosHoje.filter(m => m.tipo_movimento === 'Entrada' && m.forma_pagamento === 'Dinheiro').reduce((s, m) => s + (m.valor || 0), 0);
   const totalSaidasDinheiro = movimentosHoje.filter(m => m.tipo_movimento === 'Saída' && m.forma_pagamento === 'Dinheiro').reduce((s, m) => s + (m.valor || 0), 0);
   const saldoAtual = saldoInicial + totalEntradasDinheiro - totalSaidasDinheiro;
@@ -101,6 +119,8 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
   const abrirCaixa = useMutation({
     mutationFn: async (saldo) => {
       if (controlesDesabilitados) throw new Error("Sem contexto ou permissão.");
+      if (caixaAberto) throw new Error("Caixa já está aberto.");
+      if (saldo < 0) throw new Error("Saldo inicial não pode ser negativo.");
       await createInContext('CaixaMovimento', { ...(empresaAtual?.id ? { empresa_id: empresaAtual.id } : {}), ...(groupId ? { group_id: groupId } : {}), data_movimento: new Date().toISOString(), tipo_movimento: 'Abertura', origem: 'Abertura Caixa', forma_pagamento: 'Dinheiro', valor: saldo, descricao: 'Abertura de Caixa', usuario_operador_nome: user?.full_name, caixa_aberto: true });
     },
     onSuccess: (_d, saldo) => {
@@ -114,6 +134,8 @@ export default function CaixaPDVCompleto({ empresaAtual: empresaProp, windowMode
     mutationFn: async () => {
       if (controlesDesabilitados) throw new Error("Sem contexto ou permissão.");
       if (!groupId) throw new Error("Contexto de grupo/empresa obrigatório (Regra-Mãe 5a).");
+      if (carrinho.length === 0) throw new Error("Carrinho vazio.");
+      if (totalPago < totalVenda) throw new Error("Pagamento insuficiente para o total da venda.");
       const pedido = await createInContext('Pedido', { ...(empresaAtual?.id ? { empresa_id: empresaAtual.id } : {}), ...(groupId ? { group_id: groupId } : {}), numero_pedido: `PDV-${Date.now()}`, forma_pagamento: formasPagamentoVenda.map(f => f.forma_descricao).join(', '), tipo: 'Pedido', tipo_frete: tipoEntrega === "Retirada" ? "Retirada" : "CIF", origem_pedido: 'PDV Presencial', data_pedido: hoje, cliente_nome: clienteSelecionado?.nome || 'Cliente Avulso', cliente_id: clienteSelecionado?.id, vendedor: user?.full_name, itens_revenda: carrinho.map(item => ({ produto_id: item.id, produto_descricao: item.descricao, quantidade: item.quantidade, valor_unitario: item.preco_venda, valor_total: item.preco_venda * item.quantidade })), valor_produtos: subtotal, desconto_geral_pedido_valor: valorDesconto, valor_total: totalVenda, status: 'Faturado' });
       if (tipoEntrega === "Entrega" && clienteSelecionado) {
         const ec = clienteSelecionado.endereco_principal || {};

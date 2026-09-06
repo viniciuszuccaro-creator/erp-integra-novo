@@ -47,6 +47,28 @@ export default function useConciliacaoForm() {
           status_conferencia: "Conciliado",
           data_credito_efetiva: lancamentoBanco.data
         });
+      } else {
+        // Fluxo manual: 'movimento' é um extrato bancário pendente — persistir a conciliação de fato
+        // (antes este ramo não gravava nada e o extrato permanecia pendente apesar do toast de sucesso)
+        const valorInformado = lancamentoBanco?.valor ?? movimento.valor;
+        const diferenca = Math.abs(valorInformado - (movimento.valor || 0));
+        await updateInContext('ExtratoBancario', movimento.id, {
+          conciliado: true,
+          data_conciliacao: new Date().toISOString()
+        });
+        await createInContext('ConciliacaoBancaria', {
+          empresa_id: movimento.empresa_id || empresaAtual?.id,
+          group_id: movimento.group_id || grupoAtual?.id,
+          extrato_bancario_id: movimento.id,
+          data_conciliacao: new Date().toISOString(),
+          valor_extrato: valorInformado,
+          valor_movimento: movimento.valor,
+          valor_diferenca: diferenca,
+          tem_divergencia: diferenca > 0.01,
+          status: diferenca > 0.01 ? 'divergente' : 'conciliado',
+          conciliado_por_ia: false,
+          observacoes: lancamentoBanco?.descricao || 'Conciliação manual'
+        });
       }
 
       // Regra-Mãe 5d: auditoria completa da conciliação manual (antes/depois, grupo/empresa, usuário)
@@ -60,14 +82,19 @@ export default function useConciliacaoForm() {
           registro_id: movimento?.id,
           descricao: "Conciliação bancária manual realizada",
           data_hora: new Date().toISOString(), sucesso: true,
-          dados_anteriores: { status_conferencia: movimento?.status_conferencia },
-          dados_novos: { status_conferencia: "Conciliado", data_credito_efetiva: lancamentoBanco?.data }
+          dados_anteriores: movimento?.tipo === "pagamento_omnichannel"
+            ? { status_conferencia: movimento?.status_conferencia }
+            : { conciliado: movimento?.conciliado },
+          dados_novos: movimento?.tipo === "pagamento_omnichannel"
+            ? { status_conferencia: "Conciliado", data_credito_efetiva: lancamentoBanco?.data }
+            : { conciliado: true, valor_informado: lancamentoBanco?.valor }
         });
       } catch (auditErr) { console.error('[conciliacao] falha no log de auditoria:', auditErr); }
       return true;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ExtratoBancario'] });
+      queryClient.invalidateQueries({ queryKey: ['ConciliacaoBancaria'] });
       queryClient.invalidateQueries({ queryKey: ['CaixaMovimento'] });
       queryClient.invalidateQueries({ queryKey: ['extratos-bancarios'] });
       queryClient.invalidateQueries({ queryKey: ['caixa-movimentos'] });

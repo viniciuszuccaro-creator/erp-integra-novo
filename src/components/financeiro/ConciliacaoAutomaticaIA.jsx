@@ -24,13 +24,13 @@ export default function ConciliacaoAutomaticaIA({ empresaId }) {
   const { data: extratos = [] } = useQuery({
     queryKey: ['extratos-pendentes', contextoKey],
     queryFn: () => filterInContext('ExtratoBancario', { conciliado: false }, '-created_date', 200),
-    enabled: !!contexto,
+    enabled: !!grupoAtual?.id,
   });
 
   const { data: movimentos = [] } = useQuery({
     queryKey: ['movimentos-nao-conciliados', contextoKey],
     queryFn: () => filterInContext('CaixaMovimento', { conciliado: false }, '-created_date', 200),
-    enabled: !!contexto,
+    enabled: !!grupoAtual?.id,
   });
 
   const executarConciliacaoIA = async () => {
@@ -42,9 +42,12 @@ export default function ConciliacaoAutomaticaIA({ empresaId }) {
       const matches = [];
       let conciliados = 0;
       let divergencias = 0;
+      // Cada movimento do caixa só pode casar com UM extrato — evita vínculo duplicado na aplicação
+      const movimentosUsados = new Set();
 
       extratos.forEach(extrato => {
         const movimentoMatch = movimentos.find(mov => {
+          if (movimentosUsados.has(mov.id)) return false;
           const diferencaValor = Math.abs(Math.abs(extrato.valor) - Math.abs(mov.valor));
           const diferencaDias = Math.abs(
             new Date(extrato.data_movimento).getTime() - new Date(mov.data_movimento).getTime()
@@ -54,6 +57,7 @@ export default function ConciliacaoAutomaticaIA({ empresaId }) {
         });
 
         if (movimentoMatch) {
+          movimentosUsados.add(movimentoMatch.id);
           if (Math.abs(extrato.valor - movimentoMatch.valor) < 0.01) {
             conciliados++;
           } else {
@@ -131,7 +135,8 @@ export default function ConciliacaoAutomaticaIA({ empresaId }) {
       queryClient.invalidateQueries(['conciliacoes-bancarias']);
       toast.success('✅ Conciliações aplicadas com sucesso!');
       setResultados(null);
-    }
+    },
+    onError: (error) => toast.error('Erro ao aplicar conciliações: ' + error.message)
   });
 
   return (

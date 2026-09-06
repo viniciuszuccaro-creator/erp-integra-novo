@@ -86,8 +86,13 @@ export default function OrdensLiquidacaoPendentes() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['caixa-ordens-liquidacao'] });
       queryClient.invalidateQueries({ queryKey: ['liquidacao'] });
+      // Chaves por nome de entidade (useRLSQuery) + chaves legadas — cobre abas Receber/Pagar e Caixa Central
+      queryClient.invalidateQueries({ queryKey: ['ContaReceber'] });
+      queryClient.invalidateQueries({ queryKey: ['ContaPagar'] });
       queryClient.invalidateQueries({ queryKey: ['contasReceber'] });
       queryClient.invalidateQueries({ queryKey: ['contasPagar'] });
+      queryClient.invalidateQueries({ queryKey: ['contasReceber-liquidacao'] });
+      queryClient.invalidateQueries({ queryKey: ['contasPagar-liquidacao'] });
       toast({ title: "✅ Liquidação realizada com sucesso!" });
       setLiquidacaoDialogOpen(false);
       setOrdemSelecionada(null);

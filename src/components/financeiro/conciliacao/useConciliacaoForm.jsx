@@ -50,22 +50,27 @@ export default function useConciliacaoForm() {
       }
 
       // Regra-Mãe 5d: auditoria completa da conciliação manual (antes/depois, grupo/empresa, usuário)
-      await base44.entities.AuditLog.create({
-        group_id: grupoAtual?.id, grupo_id: grupoAtual?.id, empresa_id: empresaAtual?.id,
-        usuario: user?.full_name || 'Sistema', usuario_id: user?.id,
-        acao: "Conciliação", modulo: "Financeiro", tipo_auditoria: "operacional",
-        entidade: movimento?.tipo === "pagamento_omnichannel" ? "PagamentoOmnichannel" : "ExtratoBancario",
-        registro_id: movimento?.id,
-        descricao: "Conciliação bancária manual realizada",
-        data_hora: new Date().toISOString(), sucesso: true,
-        dados_anteriores: { status_conferencia: movimento?.status_conferencia },
-        dados_novos: { status_conferencia: "Conciliado", data_credito_efetiva: lancamentoBanco?.data }
-      });
+      // Best-effort: falha no log de auditoria não pode reverter/quebrar a conciliação já efetivada
+      try {
+        await base44.entities.AuditLog.create({
+          group_id: grupoAtual?.id, grupo_id: grupoAtual?.id, empresa_id: empresaAtual?.id,
+          usuario: user?.full_name || 'Sistema', usuario_id: user?.id,
+          acao: "Conciliação", modulo: "Financeiro", tipo_auditoria: "operacional",
+          entidade: movimento?.tipo === "pagamento_omnichannel" ? "PagamentoOmnichannel" : "ExtratoBancario",
+          registro_id: movimento?.id,
+          descricao: "Conciliação bancária manual realizada",
+          data_hora: new Date().toISOString(), sucesso: true,
+          dados_anteriores: { status_conferencia: movimento?.status_conferencia },
+          dados_novos: { status_conferencia: "Conciliado", data_credito_efetiva: lancamentoBanco?.data }
+        });
+      } catch (auditErr) { console.error('[conciliacao] falha no log de auditoria:', auditErr); }
       return true;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['extratos-bancarios']);
-      queryClient.invalidateQueries(['caixa-movimentos']);
+      queryClient.invalidateQueries({ queryKey: ['ExtratoBancario'] });
+      queryClient.invalidateQueries({ queryKey: ['CaixaMovimento'] });
+      queryClient.invalidateQueries({ queryKey: ['extratos-bancarios'] });
+      queryClient.invalidateQueries({ queryKey: ['caixa-movimentos'] });
       setLancamentoSelecionado(null);
       setMovimentoParaConciliar(null);
       toast.success("Conciliação realizada com sucesso!");
@@ -81,25 +86,29 @@ export default function useConciliacaoForm() {
       if (!contextoValido) throw new Error("Contexto de grupo/empresa obrigatório (Regra-Mãe 5a)");
       const anterior = await base44.entities.ConciliacaoBancaria.get(concId).catch(() => null);
       await updateInContext('ConciliacaoBancaria', concId, { status: 'resolvido', tem_divergencia: false });
-      await base44.entities.AuditLog.create({
-        group_id: grupoAtual?.id, grupo_id: grupoAtual?.id,
-        empresa_id: empresaAtual?.id,
-        usuario: user?.full_name || 'Sistema',
-        usuario_id: user?.id,
-        acao: "Edição",
-        modulo: "Financeiro",
-        tipo_auditoria: "operacional",
-        entidade: "ConciliacaoBancaria",
-        registro_id: concId,
-        descricao: "Divergência de conciliação resolvida",
-        data_hora: new Date().toISOString(),
-        sucesso: true,
-        dados_anteriores: anterior ? { status: anterior.status, tem_divergencia: anterior.tem_divergencia } : undefined,
-        dados_novos: { status: 'resolvido', tem_divergencia: false }
-      });
+      // Best-effort: falha no log não pode reverter a resolução já persistida
+      try {
+        await base44.entities.AuditLog.create({
+          group_id: grupoAtual?.id, grupo_id: grupoAtual?.id,
+          empresa_id: empresaAtual?.id,
+          usuario: user?.full_name || 'Sistema',
+          usuario_id: user?.id,
+          acao: "Edição",
+          modulo: "Financeiro",
+          tipo_auditoria: "operacional",
+          entidade: "ConciliacaoBancaria",
+          registro_id: concId,
+          descricao: "Divergência de conciliação resolvida",
+          data_hora: new Date().toISOString(),
+          sucesso: true,
+          dados_anteriores: anterior ? { status: anterior.status, tem_divergencia: anterior.tem_divergencia } : undefined,
+          dados_novos: { status: 'resolvido', tem_divergencia: false }
+        });
+      } catch (auditErr) { console.error('[conciliacao] falha no log de auditoria:', auditErr); }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['conciliacoes-bancarias']);
+      queryClient.invalidateQueries({ queryKey: ['ConciliacaoBancaria'] });
+      queryClient.invalidateQueries({ queryKey: ['conciliacoes-bancarias'] });
       toast.success("Divergência resolvida!");
     },
     onError: (error) => toast.error("Erro: " + error.message)
@@ -120,7 +129,8 @@ export default function useConciliacaoForm() {
         data_importacao: new Date().toISOString(),
         conciliado: false
       });
-      queryClient.invalidateQueries(['extratos-bancarios']);
+      queryClient.invalidateQueries({ queryKey: ['ExtratoBancario'] });
+      queryClient.invalidateQueries({ queryKey: ['extratos-bancarios'] });
       toast.success("Extrato importado!");
     } catch (error) {
       toast.error("Erro ao importar: " + error.message);

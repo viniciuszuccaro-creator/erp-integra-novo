@@ -80,16 +80,19 @@ export default function LiquidarReceberPagar() {
       return ordens;
     },
     onSuccess: async (ordens, { titulos, tipo }) => {
-      await base44.entities.AuditLog.create({
-        acao: 'Criação', modulo: 'Financeiro', entidade: 'CaixaOrdemLiquidacao',
-        descricao: `${ordens.length} título(s) enviado(s) ao Caixa (${tipo === 'receber' ? 'Contas a Receber' : 'Contas a Pagar'})`,
-        data_hora: new Date().toISOString(),
-        group_id: groupId, grupo_id: groupId,
-        empresa_id: empresaAtual?.id || titulos?.[0]?.empresa_id,
-        usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
-        tipo_auditoria: 'operacional', sucesso: true,
-        dados_novos: { ordens: ordens.length, titulos_ids: titulos?.map(t => t.id) }
-      });
+      // Best-effort: falha no log não pode ocultar o sucesso das ordens já criadas
+      try {
+        await base44.entities.AuditLog.create({
+          acao: 'Criação', modulo: 'Financeiro', entidade: 'CaixaOrdemLiquidacao',
+          descricao: `${ordens.length} título(s) enviado(s) ao Caixa (${tipo === 'receber' ? 'Contas a Receber' : 'Contas a Pagar'})`,
+          data_hora: new Date().toISOString(),
+          group_id: groupId, grupo_id: groupId,
+          empresa_id: empresaAtual?.id || titulos?.[0]?.empresa_id,
+          usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
+          tipo_auditoria: 'operacional', sucesso: true,
+          dados_novos: { ordens: ordens.length, titulos_ids: titulos?.map(t => t.id) }
+        });
+      } catch (auditErr) { console.error('[caixa-central] falha no log de auditoria:', auditErr); }
       queryClient.invalidateQueries({ queryKey: ['caixa-ordens-liquidacao'] });
       toast({ title: `✅ ${ordens.length} título(s) enviado(s) para Caixa!` });
       setTitulosSelecionadosReceber([]);

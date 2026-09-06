@@ -19,17 +19,22 @@ const CartoesACompensar = React.lazy(() => import('./CartoesACompensar'));
 const ConciliacaoBancariaTab = React.lazy(() => import('./ConciliacaoBancariaTab'));
 
 export default function CaixaCentralLiquidacao({ windowMode = false }) {
-  const { filterInContext } = useContextoVisual();
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
   const { openWindow } = useWindow();
 
+  // Regra-Mãe 5a: contexto multiempresa explícito nas chaves — impede cache cruzado entre empresas/grupo
+  const contextoKey = `${grupoAtual?.id || 'nogroup'}:${empresaAtual?.id || 'all'}:${contexto}`;
+
   const { data: contasReceber = [] } = useQuery({
-    queryKey: ['liquidacao', 'receber'],
+    queryKey: ['liquidacao', 'receber', contextoKey],
     queryFn: () => filterInContext('ContaReceber', { status: 'Pendente' }, '-data_vencimento', 50),
+    enabled: !!(empresaAtual?.id || contexto === 'grupo'),
   });
 
   const { data: contasPagar = [] } = useQuery({
-    queryKey: ['liquidacao', 'pagar'],
+    queryKey: ['liquidacao', 'pagar', contextoKey],
     queryFn: () => filterInContext('ContaPagar', { status: 'Pendente' }, '-data_vencimento', 50),
+    enabled: !!(empresaAtual?.id || contexto === 'grupo'),
   });
 
   const totalReceber = contasReceber.reduce((sum, c) => sum + (c.valor || 0), 0);

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 
 const DEFAULT_FORM = {
   perda_aco_percentual: 5,
@@ -69,7 +70,7 @@ export default function useConfigProducao({ empresaId }) {
           historico.push({ data: new Date().toISOString(), usuario: user?.full_name, campo, valor_anterior: config?.[campo], valor_novo: data[campo] });
         }
       });
-      const stamped = carimbarContexto({ ...data, chave: `config_producao_${empresaId}`, tipo: "Configuração Geral", historico_alteracoes: historico }, "empresa_id");
+      const stamped = carimbarContexto(sanitizeFlow({ ...data, chave: `config_producao_${empresaId}`, tipo: "Configuração Geral", historico_alteracoes: historico }), "empresa_id");
       if (config?.id) return await base44.entities.ConfiguracaoProducao.update(config.id, stamped);
       return await base44.entities.ConfiguracaoProducao.create(stamped);
     },
@@ -79,7 +80,7 @@ export default function useConfigProducao({ empresaId }) {
   const toggleBloquear = useMutation({
     mutationFn: async (bloquear) => {
       const dados = { ...formData, bloqueado_edicao: bloquear, bloqueado_por: bloquear ? user?.full_name : null, bloqueado_em: bloquear ? new Date().toISOString() : null };
-      const stamped = carimbarContexto({ ...dados, chave: `config_producao_${empresaId}`, tipo: "Configuração Geral" }, "empresa_id");
+      const stamped = carimbarContexto(sanitizeFlow({ ...dados, chave: `config_producao_${empresaId}`, tipo: "Configuração Geral" }), "empresa_id");
       if (config?.id) return await base44.entities.ConfiguracaoProducao.update(config.id, stamped);
       return await base44.entities.ConfiguracaoProducao.create(stamped);
     },

@@ -3,6 +3,7 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useRLSQuery } from "@/components/lib/useRLSQuery";
 import { useUser } from "@/components/lib/UserContext";
 
@@ -158,7 +159,7 @@ export default function useApontamentoSimples(opId, op, onApontamentoSalvo) {
           for (const material of op.materia_prima_prevista || op.materiais_necessarios || []) {
             const quantidadeKg = Number(material.quantidade_prevista ?? material.quantidade_kg ?? 0);
             if (quantidadeKg <= 0) continue;
-            const movBaixa = await base44.entities.MovimentacaoEstoque.create({
+            const movBaixa = await base44.entities.MovimentacaoEstoque.create(sanitizeFlow({
               ...ctx,
               tipo_movimento: "saida",
               origem_movimento: "producao",
@@ -172,7 +173,7 @@ export default function useApontamentoSimples(opId, op, onApontamentoSalvo) {
               data_movimentacao: new Date().toISOString(),
               responsavel: operadorNome,
               responsavel_id: operadorId,
-            });
+            }));
             await base44.entities.AuditLog.create({
               ...ctx,
               usuario: operadorNome,
@@ -190,10 +191,10 @@ export default function useApontamentoSimples(opId, op, onApontamentoSalvo) {
             baixas.push(movBaixa.id);
             const produto = await base44.entities.Produto.filter({ id: material.produto_id });
             if (produto[0]) {
-              await base44.entities.Produto.update(material.produto_id, {
+              await base44.entities.Produto.update(material.produto_id, sanitizeFlow({
                 estoque_atual: (produto[0].estoque_atual || 0) - quantidadeKg,
                 estoque_reservado: (produto[0].estoque_reservado || 0) - quantidadeKg,
-              });
+              }));
             }
           }
           dadosAtualizados.estoque_baixado = true;
@@ -201,7 +202,7 @@ export default function useApontamentoSimples(opId, op, onApontamentoSalvo) {
         }
       }
 
-      const opAtualizada = await base44.entities.OrdemProducao.update(opId, dadosAtualizados);
+      const opAtualizada = await base44.entities.OrdemProducao.update(opId, sanitizeFlow(dadosAtualizados));
       await base44.entities.AuditLog.create({
         ...ctx,
         usuario: operadorNome,

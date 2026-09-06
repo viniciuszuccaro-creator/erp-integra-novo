@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Factory, Plus, Search, Edit, Trash2, Eye, Clock } from "lucide-react";
 import ConfirmDialog from "@/components/ui/confirm-dialog";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 import { useWindow } from "@/components/lib/useWindow";
 import FormularioOrdemProducao from "./FormularioOrdemProducao";
 
@@ -29,7 +30,9 @@ export default function OrdensProducaoListagem({ windowMode }) {
   const [search, setSearch] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [itemParaExcluir, setItemParaExcluir] = useState(null);
-  const { empresaAtual, filterInContext } = useContextoVisual();
+  const { empresaAtual, filterInContext, deleteInContext } = useContextoVisual();
+  const { hasPermission } = usePermissions();
+  const podeExcluir = hasPermission('Producao', null, 'excluir');
   const { openWindow } = useWindow();
   const qc = useQueryClient();
 
@@ -39,8 +42,9 @@ export default function OrdensProducaoListagem({ windowMode }) {
     staleTime: 30000,
   });
 
+  // Regra-Mãe 5: exclusão protegida — inativação lógica + auditoria via deleteInContext (Vol 3.4)
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.OrdemProducao.delete(id),
+    mutationFn: (id) => deleteInContext('OrdemProducao', id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['ops-listagem'] })
   });
 
@@ -107,9 +111,11 @@ export default function OrdensProducaoListagem({ windowMode }) {
                       <Button variant="ghost" size="icon" onClick={() => openWindow(FormularioOrdemProducao, { op, windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['ops-listagem'] }) }, { title: `Editar OP: ${op.numero_op || ''}`, width: 1200, height: 750 })}>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="text-red-600" onClick={() => setItemParaExcluir(op)}>
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      {podeExcluir && (
+                        <Button variant="ghost" size="icon" className="text-red-600" onClick={() => setItemParaExcluir(op)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

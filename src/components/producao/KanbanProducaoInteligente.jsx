@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import FormularioOrdemProducao from "./FormularioOrdemProducao";
 import { concluirOPCompleto } from "@/components/lib/useFluxoPedido";
 import usePermissions from "@/components/lib/usePermissions";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 
 const colunas = [
@@ -45,19 +46,36 @@ export default function KanbanProducaoInteligente({ windowMode = false }) {
   });
 
   const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }) => base44.entities.OrdemProducao.update(id, { 
-      status,
-      historico_mudancas_status: [
-        ...(ops.find(op => op.id === id)?.historico_mudancas_status || []),
-        {
-          data_hora: new Date().toISOString(),
-          status_anterior: ops.find(op => op.id === id)?.status,
-          status_novo: status,
-          usuario: "Sistema",
-          motivo: "Movido no Kanban"
-        }
-      ]
-    }),
+    mutationFn: async ({ id, status }) => {
+      const opAntes = ops.find(op => op.id === id);
+      const updated = await base44.entities.OrdemProducao.update(id, sanitizeFlow({
+        status,
+        historico_mudancas_status: [
+          ...(opAntes?.historico_mudancas_status || []),
+          {
+            data_hora: new Date().toISOString(),
+            status_anterior: opAntes?.status,
+            status_novo: status,
+            usuario: "Sistema",
+            motivo: "Movido no Kanban"
+          }
+        ]
+      }));
+      // Regra-Mãe 5d: auditoria da mudança de status no Kanban
+      try {
+        const me = await base44.auth.me().catch(() => null);
+        await base44.entities.AuditLog.create({
+          usuario: me?.email || 'Usuário',
+          usuario_id: me?.id,
+          acao: "Edição", modulo: "Produção", tipo_auditoria: "ui", entidade: "OrdemProducao", registro_id: id,
+          descricao: `Status alterado no Kanban: ${opAntes?.status || '-'} → ${status}`,
+          empresa_id: opAntes?.empresa_id || null, group_id: opAntes?.group_id || null,
+          dados_anteriores: { status: opAntes?.status }, dados_novos: { status },
+          data_hora: new Date().toISOString()
+        });
+      } catch (e) { console.error('[kanban] audit catch:', e); }
+      return updated;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(["ordens-producao"]);
       toast.success("Status atualizado");

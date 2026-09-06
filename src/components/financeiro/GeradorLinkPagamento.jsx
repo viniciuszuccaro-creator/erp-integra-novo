@@ -49,6 +49,10 @@ export default function GeradorLinkPagamento({
       if (!groupId || !empresaId) throw new Error('Contexto de grupo/empresa obrigatório para gerar link (Regra-Mãe 5a).');
       if (!podeGerar) throw new Error('Seu perfil não permite gerar links de pagamento.');
 
+      // ContaReceber usa 'valor'/ 'cliente'; Pedido usa 'valor_total'/ 'cliente_nome' — normaliza aqui
+      const valorTitulo = titulo?.valor_total ?? titulo?.valor ?? pedido?.valor_total ?? 0;
+      const clienteNomeTitulo = titulo?.cliente_nome || titulo?.cliente || pedido?.cliente_nome;
+
       // Criar registro de pagamento omnichannel
       const pagamento = await createInContext('PagamentoOmnichannel', {
         group_id: titulo?.group_id || pedido?.group_id,
@@ -56,11 +60,11 @@ export default function GeradorLinkPagamento({
         origem_pagamento: "Link Pagamento",
         id_pedido_vinculado: pedido?.id,
         id_cliente: titulo?.cliente_id || pedido?.cliente_id,
-        cliente_nome: titulo?.cliente_nome || pedido?.cliente_nome,
+        cliente_nome: clienteNomeTitulo,
         cliente_cpf_cnpj: titulo?.cliente_cpf_cnpj || pedido?.cliente_cpf_cnpj,
-        valor_bruto: titulo?.valor_total || pedido?.valor_total || 0,
-        valor_liquido: titulo?.valor_total || pedido?.valor_total || 0,
-        forma_pagamento: "Link Pagamento",
+        valor_bruto: valorTitulo,
+        valor_liquido: valorTitulo,
+        forma_pagamento: "PIX", // enum do schema: 'Link Pagamento' não é forma válida — o canal fica em origem_pagamento
         gateway_utilizado: config.gateway,
         status_transacao: "Pendente",
         status_conferencia: "Pendente",
@@ -93,12 +97,12 @@ export default function GeradorLinkPagamento({
           titulo_id: titulo.id,
           tipo_titulo: "ContaReceber",
           numero_titulo: titulo.numero_titulo,
-          valor_titulo: titulo.valor_total,
+          valor_titulo: valorTitulo,
           cliente_fornecedor_id: titulo.cliente_id,
-          cliente_fornecedor_nome: titulo.cliente_nome
+          cliente_fornecedor_nome: clienteNomeTitulo
         }] : [],
         valor_total: pagamento.valor_bruto,
-        forma_pagamento_pretendida: "Link Pagamento",
+        forma_pagamento_pretendida: "PIX",
         status: "Pendente",
         data_ordem: new Date().toISOString(),
         usuario_solicitante_id: user.id,
@@ -106,31 +110,34 @@ export default function GeradorLinkPagamento({
         pedido_omnichannel_id: pedido?.id
       });
 
-      // Registrar auditoria
-      await base44.entities.AuditLog.create({
-        group_id: pagamento.group_id,
+      // Registrar auditoria (best-effort, campos no padrão do AuditLog)
+      try { await base44.entities.AuditLog.create({
+        group_id: pagamento.group_id, grupo_id: pagamento.group_id,
         empresa_id: pagamento.empresa_id,
-        usuario_id: user.id,
-        usuario_nome: user.full_name,
-        acao: "Geração de Link de Pagamento",
-        modulo: "Financeiro",
-        entidade: "PagamentoOmnichannel",
-        entidade_id: pagamento.id,
-        detalhes: {
+        acao: 'Emissão', modulo: 'Financeiro', entidade: 'PagamentoOmnichannel',
+        registro_id: pagamento.id,
+        descricao: 'Geração de link de pagamento',
+        data_hora: new Date().toISOString(),
+        usuario: user?.full_name || 'Sistema', usuario_id: user?.id,
+        tipo_auditoria: 'operacional', sucesso: true,
+        dados_novos: {
           valor: pagamento.valor_bruto,
           gateway: config.gateway,
           validade_dias: config.validade_dias,
           titulo_id: titulo?.id,
           pedido_id: pedido?.id
         }
-      });
+      }); } catch (e) { console.error('[GeradorLinkPagamento] Falha ao auditar:', e?.message || e); }
 
       return { link, pagamento };
     },
     onSuccess: (data) => {
       setLinkGerado(data.link);
-      queryClient.invalidateQueries(['contas-receber']);
-      queryClient.invalidateQueries(['pagamentos-omnichannel']);
+      // React Query v5: invalidação exige objeto { queryKey } + chaves unificadas por entidade
+      queryClient.invalidateQueries({ queryKey: ['contasReceber'] });
+      queryClient.invalidateQueries({ queryKey: ['contas-receber'] });
+      queryClient.invalidateQueries({ queryKey: ['ContaReceber'] });
+      queryClient.invalidateQueries({ queryKey: ['pagamentos-omnichannel'] });
       toast.success("Link de pagamento gerado com sucesso!");
     }
   });
@@ -144,7 +151,7 @@ export default function GeradorLinkPagamento({
     }
   };
 
-  const valor = titulo?.valor_total || pedido?.valor_total || 0;
+  const valor = titulo?.valor_total ?? titulo?.valor ?? pedido?.valor_total ?? 0;
 
   return (
     <Card className="w-full">
@@ -161,7 +168,7 @@ export default function GeradorLinkPagamento({
               <div className="flex justify-between mb-2">
                 <span className="text-sm text-slate-600">Cliente:</span>
                 <span className="font-medium">
-                  {titulo?.cliente_nome || pedido?.cliente_nome}
+                  {titulo?.cliente_nome || titulo?.cliente || pedido?.cliente_nome}
                 </span>
               </div>
               <div className="flex justify-between">

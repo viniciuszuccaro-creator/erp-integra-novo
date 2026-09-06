@@ -79,6 +79,7 @@ export default function GerarLinkPagamentoModal({ isOpen, onClose, contaReceber 
     onSuccess: (link) => {
       setLinkGerado(link);
       queryClient.invalidateQueries({ queryKey: ['contasReceber'] });
+      queryClient.invalidateQueries({ queryKey: ['ContaReceber'] });
       queryClient.invalidateQueries({ queryKey: ['pagamentos-omnichannel'] });
       toast.success('✅ Link de pagamento gerado!');
     },

@@ -16,7 +16,7 @@ export default function ChatCliente({ clienteId, clienteNome }) {
   const [conversaAtiva, setConversaAtiva] = useState(null);
   const messagesEndRef = useRef(null);
   const queryClient = useQueryClient();
-  const { filterInContext, grupoAtual, empresaAtual } = useContextoVisual();
+  const { filterInContext, grupoAtual, empresaAtual, createInContext, updateInContext } = useContextoVisual();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   const { data: chamados = [] } = useQuery({
@@ -55,12 +55,13 @@ export default function ChatCliente({ clienteId, clienteNome }) {
       };
 
       if (conversaAtiva) {
-        return base44.entities.Chamado.update(conversaAtiva.id, {
+        // Regra-Mãe 5: persistência protegida com sanitização, contexto e auditoria
+        return updateInContext('Chamado', conversaAtiva.id, {
           mensagens: [...mensagens, novaMsg],
           status: conversaAtiva.status === 'Aguardando Cliente' ? 'Em Andamento' : conversaAtiva.status
         });
       } else {
-        return base44.entities.Chamado.create({
+        return createInContext('Chamado', {
           cliente_id: clienteId,
           cliente_nome: clienteNome,
           group_id: grupoAtual?.id,

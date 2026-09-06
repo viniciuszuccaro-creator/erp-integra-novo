@@ -1053,6 +1053,13 @@ Estado consolidado:
 - `usePontoEletronico.jsx`: registro de ponto revalida RBAC e contexto de grupo na persistência (fail-closed) e gera `AuditLog` com contexto e dados do registro; foto facial redimensionada antes de salvar (evita campo oversized que quebra operações do registro); toast de erro adicionado. Validação por IA mantém bypass automático enquanto créditos do workspace estiverem esgotados.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### Auditoria/Dashboard/Relatórios/Portal — Regra-Mãe aplicada (2026-09-06, lotes 10-11)
+- Auditoria e Dashboard já estavam limpos (sem mutações cruas).
+- `AgendamentoRelatorios.jsx`: update de ConfiguracaoSistema migrado para `updateInContext` (sanitização + contexto + auditoria).
+- `ChatCliente.jsx` (portal): envio de mensagens migrado para `updateInContext`/`createInContext`.
+- `ChatbotPortal.jsx`: criação de chamado sanitizada contra injeção (entrada do usuário) e auditoria complementada com usuário e contexto.
+- Próximo lote: integrações (12).
+
 ### Produção — Kanban, Listagem, Apontamento e Config — Regra-Mãe aplicada (2026-09-06, lote 9)
 - `OrdensProducaoListagem.jsx`: exclusão de OP migrada para `deleteInContext` (inativação lógica Vol 3.4 + auditoria completa) e botão de excluir agora exige RBAC `Producao.excluir` (Regra-Mãe 5b/5d).
 - `KanbanProducaoInteligente.jsx`: mudança de status via drag sanitizada e auditada (antes/depois com usuário, grupo e empresa).

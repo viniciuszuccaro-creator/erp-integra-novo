@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Bot, Send, Loader2 } from 'lucide-react';
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 
 export default function ChatbotPortal({ cliente }) {
   const { filterInContext } = useContextoVisual();
@@ -50,7 +51,8 @@ export default function ChatbotPortal({ cliente }) {
       if (intent === 'open_ticket') {
         const titulo = (data.titulo || input || 'Chamado via Chatbot').slice(0, 80);
         const descricao = data.descricao || input;
-        const ch = await base44.entities.Chamado.create({
+        // Regra-Mãe 5c/5d: sanitização da entrada do usuário + auditoria com usuário e contexto
+        const ch = await base44.entities.Chamado.create(sanitizeFlow({
           titulo,
           descricao,
           cliente_id: cliente.id,
@@ -59,8 +61,8 @@ export default function ChatbotPortal({ cliente }) {
           cliente_nome: cliente.nome || cliente.nome_fantasia,
           origem: 'Portal/Chatbot',
           status: 'Aberto'
-        });
-        try { await base44.entities.AuditLog.create({ acao: 'Criação', modulo: 'CRM', tipo_auditoria: 'entidade', entidade: 'Chamado', registro_id: ch.id, descricao: 'Chamado criado via Chatbot no Portal', data_hora: new Date().toISOString() }); } catch (e) { console.error('[portal] catch:', e); }
+        }));
+        try { await base44.entities.AuditLog.create({ acao: 'Criação', modulo: 'CRM', tipo_auditoria: 'entidade', entidade: 'Chamado', registro_id: ch.id, descricao: 'Chamado criado via Chatbot no Portal', usuario: cliente?.nome || cliente?.nome_fantasia || 'Cliente Portal', empresa_id: ch.empresa_id || null, group_id: ch.group_id || null, data_hora: new Date().toISOString() }); } catch (e) { console.error('[portal] catch:', e); }
         setMessages((m) => [...m, { role: 'assistant', content: `Chamado aberto com sucesso (#${ch.id}). Em breve nossa equipe entrará em contato.` }]);
       } else if (intent === 'query_order_status') {
         const numero = String(data.numero_pedido || '').trim();

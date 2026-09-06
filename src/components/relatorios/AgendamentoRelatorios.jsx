@@ -18,7 +18,7 @@ import { useContextoVisual } from '@/components/lib/useContextoVisual';
 export default function AgendamentoRelatorios({ empresaId }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { filterInContext, createInContext } = useContextoVisual();
+  const { filterInContext, createInContext, updateInContext } = useContextoVisual();
 
   const [agendamento, setAgendamento] = useState({
     ativo: false,
@@ -39,7 +39,8 @@ export default function AgendamentoRelatorios({ empresaId }) {
       });
 
       if (configs.length > 0) {
-        return await base44.entities.ConfiguracaoSistema.update(configs[0].id, {
+        // Regra-Mãe 5: persistência protegida com sanitização, contexto e auditoria
+        return await updateInContext('ConfiguracaoSistema', configs[0].id, {
           categoria: 'Sistema',
           configuracoes_sistema: data
         });

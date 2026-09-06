@@ -30,7 +30,7 @@ function invalidateAll(qc, entity) {
   qc.invalidateQueries({ queryKey: ["viz-v33", entity] });
   qc.invalidateQueries({ queryKey: ["viz-count-v2", entity] });
   qc.invalidateQueries({ queryKey: ["entityCounts_v5"] });
-  qc.invalidateQueries({ queryKey: ["cadastros-all-counts-v5"] });
+  qc.invalidateQueries({ queryKey: ["cadastros-all-counts-v7"] });
 }
 
 export default function VisualizadorUniversalEntidadeV24({

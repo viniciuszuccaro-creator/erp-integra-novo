@@ -27,7 +27,9 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
   const { page, setPage, pageSize, setPageSize } = useBackendPagination('ContaPagar', 20);
   const [sortField, setSortField, sortDirection, setSortDirection] = usePersistedSort('ContaPagar', 'data_vencimento', 'asc');
 
-  const { data: contasBackend = [] } = useRLSQuery('ContaPagar', {}, 'data_vencimento', pageSize);
+  // Paginação real (skip) + ordenação persisted-sort aplicada na consulta (antes era ignorada)
+  const orderStr = `${sortDirection === 'desc' ? '-' : ''}${sortField}`;
+  const { data: contasBackend = [] } = useRLSQuery('ContaPagar', {}, orderStr, pageSize, { skip: (page - 1) * pageSize });
   const contasList = Array.isArray(contas) && contas.length ? contas : contasBackend;
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -363,7 +365,7 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
         aprovarPending={aprovarPagamentoMutation.isPending}
         sortField={sortField}
         sortDirection={sortDirection}
-        onSortChange={(sf, sd) => { setSortField(sf); setSortDirection(sd); }}
+        onSortChange={(sf, sd) => { setSortField(sf); setSortDirection(sd); setPage(1); }}
       />
 
       {/* Paginação backend padronizada */}

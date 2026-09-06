@@ -94,6 +94,7 @@ export default function LiquidarReceberPagar() {
         });
       } catch (auditErr) { console.error('[caixa-central] falha no log de auditoria:', auditErr); }
       queryClient.invalidateQueries({ queryKey: ['caixa-ordens-liquidacao'] });
+      queryClient.invalidateQueries({ queryKey: ['CaixaOrdemLiquidacao'] });
       toast({ title: `✅ ${ordens.length} título(s) enviado(s) para Caixa!` });
       setTitulosSelecionadosReceber([]);
       setTitulosSelecionadosPagar([]);

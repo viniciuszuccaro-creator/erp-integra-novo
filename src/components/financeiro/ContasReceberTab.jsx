@@ -42,7 +42,8 @@ export default function ContasReceberTab({ contas, empresas = [], windowMode = f
   const { create: createRLS, update: updateRLS } = useRLS();
   const { page, setPage, pageSize, setPageSize } = useBackendPagination('ContaReceber', 20);
   const [sortField, setSortField, sortDirection, setSortDirection] = usePersistedSort('ContaReceber', 'data_vencimento', 'asc');
-  const { data: contasBackend = [] } = useRLSQuery('ContaReceber', {}, 'data_vencimento', pageSize);
+  // Paginação real: skip enviado ao backend (antes o botão "Próxima" não mudava os dados)
+  const { data: contasBackend = [] } = useRLSQuery('ContaReceber', {}, 'data_vencimento', pageSize, { skip: (page - 1) * pageSize });
   const contasList = Array.isArray(contas) && contas.length ? contas : contasBackend;
   const queryClient = useQueryClient();
   const { toast } = useToast();

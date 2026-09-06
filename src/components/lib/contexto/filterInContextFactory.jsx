@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { DEFAULT_SORTS, normalizeSortField, getLastSort, setLastSort } from "./contextoSorts";
 
 export function createFilterInContext({ getFiltroContexto, empresasDoGrupo }) {
-  const filterInContext = async (entityName, criterios = {}, order = undefined, limit = undefined, campo = 'empresa_id') => {
+  const filterInContext = async (entityName, criterios = {}, order = undefined, limit = undefined, campo = 'empresa_id', skip = 0) => {
     const ENTITY_CONTEXT_FIELD = { Fornecedor: 'empresa_dona_id', Transportadora: 'empresa_dona_id', Colaborador: 'empresa_alocada_id', NotaFiscal: 'empresa_faturamento_id', TransferenciaFilial: 'empresa_origem_id' };
     const SHARED_SET = new Set(['Cliente', 'Fornecedor', 'Transportadora', 'Produto', 'Representante', 'RegiaoAtendimento']);
     const ctxCampo = ENTITY_CONTEXT_FIELD[entityName] || campo || 'empresa_id';
@@ -56,6 +56,7 @@ export function createFilterInContext({ getFiltroContexto, empresasDoGrupo }) {
         }
         const res = await base44.functions.invoke('entityListSorted', {
           entityName, filter: filtro, sortField: sortField2, sortDirection: sortDirection2, limit: limit || 100,
+          skip: Math.max(0, Number(skip) || 0),
         });
         return Array.isArray(res?.data) ? res.data : [];
       })();
@@ -98,6 +99,7 @@ export function createFilterInContext({ getFiltroContexto, empresasDoGrupo }) {
       sortField,
       sortDirection,
       limit: limit || 100,
+      skip: Math.max(0, Number(skip) || 0),
     });
     return Array.isArray(res?.data) ? res.data : [];
   };

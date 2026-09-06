@@ -51,6 +51,7 @@ export default function HistoricoTab({ arquivos }) {
                       a.href = url;
                       a.download = arquivo.arquivo_nome;
                       a.click();
+                      setTimeout(() => URL.revokeObjectURL(url), 5000);
                     }}
                   >
                     <Download className="w-4 h-4 mr-1" />

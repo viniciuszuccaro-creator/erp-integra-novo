@@ -67,6 +67,7 @@ export default function useContasReceber({ contasList, queryClient: extQueryClie
         });
       } catch (auditErr) { console.error('[contas-receber] falha no log de auditoria:', auditErr); }
       queryClient.invalidateQueries({ queryKey: ['caixa-ordens-liquidacao'] });
+      queryClient.invalidateQueries({ queryKey: ['CaixaOrdemLiquidacao'] });
       toast({ title: `✅ ${ordens.length} título(s) enviado(s) para o Caixa!` });
       setContasSelecionadas([]);
     },

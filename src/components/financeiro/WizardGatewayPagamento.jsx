@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -41,14 +41,18 @@ export default function WizardGatewayPagamento({ onConfigurado, tipo = 'Boleto' 
     enabled: !!empresaAtual?.id,
   });
 
-  if (dismissed) return null;
-
   const temGateway = gateways.length > 0;
   const temApiKey = !!configCobranca?.integracao_boletos?.api_key;
   const configurado = temGateway || temApiKey;
 
+  // Callback do pai só via efeito — chamar durante o render dispara erro de update de estado do React
+  useEffect(() => {
+    if (configurado && onConfigurado) onConfigurado(true);
+  }, [configurado]);
+
+  if (dismissed) return null;
+
   if (configurado) {
-    if (onConfigurado) onConfigurado(true);
     return (
       <div className="flex items-center gap-2 text-emerald-700 text-sm bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
         <CheckCircle2 className="w-4 h-4 flex-shrink-0" />

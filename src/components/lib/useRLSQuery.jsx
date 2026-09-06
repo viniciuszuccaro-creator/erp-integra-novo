@@ -35,10 +35,13 @@ export function useRLSQuery(
 
   const scopeKey = `${empresaAtual?.id || 'all'}:${grupoAtual?.id || 'nogroup'}:${contexto}`;
   const criteriosKey = JSON.stringify(criterios);
+  // Paginação real: skip repassado ao entityListSorted (6º parâmetro do filterInContext)
+  const { skip: skipOpt, ...queryOptionsRest } = queryOptions;
+  const skip = Math.max(0, Number(skipOpt ?? 0) || 0);
 
   return useQuery({
-    queryKey: [entityName, scopeKey, criteriosKey, order, limit],
-    queryFn: () => filterInContext(entityName, criterios, order, limit),
+    queryKey: [entityName, scopeKey, criteriosKey, order, limit, skip],
+    queryFn: () => filterInContext(entityName, criterios, order, limit, undefined, skip),
     staleTime: queryOptions.staleTime ?? 15_000,
     gcTime: queryOptions.gcTime ?? 300_000,
     enabled: queryOptions.enabled !== undefined
@@ -48,7 +51,7 @@ export function useRLSQuery(
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     placeholderData: (prev) => prev, // Mantém dados anteriores durante refetch — impede reset
-    ...queryOptions,
+    ...queryOptionsRest,
   });
 }
 

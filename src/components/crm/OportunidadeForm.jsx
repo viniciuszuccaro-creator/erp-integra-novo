@@ -11,12 +11,18 @@ import FormWrapper from "@/components/common/FormWrapper";
 import { Badge } from "@/components/ui/badge";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import useRLSQuery from "@/components/lib/useRLSQuery";
+import usePermissions from "@/components/lib/usePermissions";
+import { useUser } from "@/components/lib/UserContext";
+import { base44 } from "@/api/base44Client";
+import { toast } from "sonner";
 
 /**
  * V21.1.2: Oportunidade Form - Adaptado para Window Mode
  */
-export default function OportunidadeForm({ oportunidade, onSubmit, windowMode = false }) {
-  const { carimbarContexto } = useContextoVisual();
+export default function OportunidadeForm({ oportunidade, onSubmit, onSuccess, windowMode = false }) {
+  const { createInContext, updateInContext } = useContextoVisual();
+  const { canCreate, canEdit } = usePermissions();
+  const { user } = useUser();
   const { data: clientes = [] } = useRLSQuery('Cliente', {}, '-created_date', 9999);
   const { data: origens = [] } = useRLSQuery('ParametroOrigemPedido', { ativo: true }, '-updated_date', 100);
   const { data: representantes = [] } = useRLSQuery('Representante', {}, '-updated_date', 9999);
@@ -49,8 +55,30 @@ export default function OportunidadeForm({ oportunidade, onSubmit, windowMode = 
     cliente_nome: z.string().min(1, 'Cliente é obrigatório'),
   });
 
-  const handleSubmit = async () => {
-    onSubmit(carimbarContexto(formData, 'empresa_id'));
+  const podeSalvar = oportunidade ? canEdit('CRM') : canCreate('CRM');
+
+  // Regra-Mãe 5: persistência própria com validação dupla RBAC + contexto (fail-closed).
+  // Corrige fluxo quebrado: o formulário chamava um "onSubmit" que a listagem nunca passava (salvar não persistia).
+  const handleSubmit = async (dados) => {
+    if (!podeSalvar) throw new Error('Sem permissão para salvar oportunidades.');
+    if (!dados?.group_id) throw new Error('Sem contexto de grupo/empresa — operação bloqueada.');
+    const salvou = oportunidade
+      ? await updateInContext('Oportunidade', oportunidade.id, dados)
+      : await createInContext('Oportunidade', dados);
+    try {
+      await base44.entities.AuditLog.create({
+        acao: oportunidade ? 'Edição' : 'Criação', modulo: 'CRM', entidade: 'Oportunidade', registro_id: salvou?.id,
+        group_id: salvou?.group_id, empresa_id: salvou?.empresa_id,
+        usuario: user?.full_name || user?.email || 'Sistema', usuario_id: user?.id,
+        descricao: `Oportunidade "${dados.titulo}" ${oportunidade ? 'atualizada' : 'criada'} via formulário`,
+        ...(oportunidade ? { dados_anteriores: { etapa: oportunidade.etapa, status: oportunidade.status, valor_estimado: oportunidade.valor_estimado } } : {}),
+        dados_novos: salvou,
+        data_hora: new Date().toISOString(), sucesso: true
+      });
+    } catch (_) { console.error('[crm] falha ao auditar oportunidade:', _); }
+    toast.success(oportunidade ? 'Oportunidade atualizada!' : 'Oportunidade criada!');
+    if (typeof onSubmit === 'function') onSubmit(salvou); // retrocompatibilidade
+    if (typeof onSuccess === 'function') onSuccess(salvou);
   };
 
   const content = (
@@ -233,7 +261,7 @@ export default function OportunidadeForm({ oportunidade, onSubmit, windowMode = 
       </Card>
 
       <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
-        <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+        <Button type="submit" disabled={!podeSalvar} className="bg-blue-600 hover:bg-blue-700">
           <Save className="w-4 h-4 mr-2" />
           {oportunidade ? 'Atualizar' : 'Criar'} Oportunidade
         </Button>

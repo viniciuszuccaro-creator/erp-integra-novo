@@ -1053,6 +1053,12 @@ Estado consolidado:
 - `usePontoEletronico.jsx`: registro de ponto revalida RBAC e contexto de grupo na persistência (fail-closed) e gera `AuditLog` com contexto e dados do registro; foto facial redimensionada antes de salvar (evita campo oversized que quebra operações do registro); toast de erro adicionado. Validação por IA mantém bypass automático enquanto créditos do workspace estiverem esgotados.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### CRM (Oportunidades) — Regra-Mãe aplicada (2026-09-06)
+- `OportunidadeForm.jsx`: **correção de fluxo quebrado** — o formulário chamava um `onSubmit` que a listagem nunca passava (criar/editar oportunidade não persistia nada); agora persiste via `createInContext`/`updateInContext` (carimba grupo/empresa), valida RBAC e contexto na persistência (fail-closed), gera `AuditLog` com antes/depois, e mantém retrocompatibilidade + chamada de `onSuccess`. Botão salvar desabilita sem permissão.
+- `OportunidadesListagem.jsx`: exclusão de oportunidade era física, sem RBAC e sem auditoria — agora revalida `excluir` e contexto na persistência (fail-closed) e gera `AuditLog` completo com estado "antes"; feedback de erro adicionado (falhas antes silenciosas). Botões Nova/Editar/Excluir passaram a RBACButton (módulo CRM).
+- Verificado: `InventarioForm.jsx` (Estoque/Inventário) já estava compliance (RBAC, contexto validado, auditoria com group_id). `InventarioContagem.jsx` é UI pura — ok.
+- Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
+
 ### Expedição/Logística (Entregas e Ocorrências) — Regra-Mãe aplicada (2026-09-06)
 - `useEntregaForm.jsx`: criação de entrega corrigida — antes gravava direto podendo gerar registro órfão (sem contexto); agora persiste via `createInContext` (carimba grupo/empresa do contexto ativo). Criação e edição revalidam RBAC na persistência (fail-closed); AuditLog de criar/editar ganhou `group_id`. Verificado: `concluirOP.jsx` (Produção → Estoque/Expedição) já estava compliance (auditoria com antes/depois e contexto).
 - `RegistroOcorrenciaLogistica.jsx`: ocorrências logísticas (Avaria, Extravio, Entrega Frustrada etc.) — antes sem nenhuma auditoria — agora revalidam RBAC e contexto na persistência (fail-closed) e geram `AuditLog` completo (tipo, descrição, resolução, foto, impacto no pedido, contagem antes/depois); toast de erro adicionado (falhas antes silenciosas).

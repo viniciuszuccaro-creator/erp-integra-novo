@@ -10,6 +10,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Search, TrendingUp, Edit, Trash2, Eye } from "lucide-react";
 import ConfirmDialog from "@/components/ui/confirm-dialog";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
+import { useUser } from "@/components/lib/UserContext";
+import RBACButton from "@/components/lib/RBACButton";
+import { toast } from "sonner";
 import OportunidadeForm from "./OportunidadeForm";
 import { useWindow } from "@/components/lib/useWindow";
 
@@ -18,6 +22,8 @@ export default function OportunidadesListagem({ oportunidades: propOps = [], win
   const [filtroEstagio, setFiltroEstagio] = useState("todos");
   const [itemParaExcluir, setItemParaExcluir] = useState(null);
   const { empresaAtual, filterInContext } = useContextoVisual();
+  const { canCreate, canEdit, canDelete } = usePermissions();
+  const { user } = useUser();
   const { openWindow } = useWindow();
   const qc = useQueryClient();
 
@@ -29,8 +35,25 @@ export default function OportunidadesListagem({ oportunidades: propOps = [], win
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Oportunidade.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['oportunidades-list'] })
+    mutationFn: async (op) => {
+      // Regra-Mãe 5: validação dupla RBAC + contexto na persistência (fail-closed)
+      if (!canDelete('CRM')) throw new Error('Sem permissão para excluir oportunidades.');
+      if (!op?.group_id) throw new Error('Registro sem contexto de grupo — exclusão bloqueada.');
+      await base44.entities.Oportunidade.delete(op.id);
+      // Regra-Mãe 5d: auditoria completa da exclusão com estado "antes"
+      try {
+        await base44.entities.AuditLog.create({
+          acao: 'Exclusão', modulo: 'CRM', entidade: 'Oportunidade', registro_id: op.id,
+          group_id: op.group_id, empresa_id: op.empresa_id,
+          usuario: user?.full_name || user?.email || 'Sistema', usuario_id: user?.id,
+          descricao: `Oportunidade "${op.titulo}" excluída (cliente: ${op.cliente_nome})`,
+          dados_anteriores: op,
+          data_hora: new Date().toISOString(), sucesso: true
+        });
+      } catch (_) { console.error('[crm] falha ao auditar exclusão:', _); }
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['oportunidades-list'] }); toast.success('Oportunidade excluída'); },
+    onError: (e) => toast.error(e?.message || 'Erro ao excluir oportunidade')
   });
 
   const estagios = ["Prospecção","Qualificação","Proposta","Negociação","Fechado Ganho","Fechado Perdido"];
@@ -53,9 +76,9 @@ export default function OportunidadesListagem({ oportunidades: propOps = [], win
     <div className="h-full w-full flex flex-col gap-4 p-4 overflow-auto">
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-xl font-bold flex items-center gap-2"><TrendingUp className="w-5 h-5 text-blue-600" /> Oportunidades</h2>
-        <Button size="sm" onClick={() => openWindow(OportunidadeForm, { windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['oportunidades-list'] }) }, { title: 'Nova Oportunidade', width: 900, height: 650 })}>
+        <RBACButton module="CRM" action="criar" size="sm" onClick={() => openWindow(OportunidadeForm, { windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['oportunidades-list'] }) }, { title: 'Nova Oportunidade', width: 900, height: 650 })}>
           <Plus className="w-4 h-4 mr-1" /> Nova
-        </Button>
+        </RBACButton>
       </div>
 
       <div className="flex gap-3 flex-wrap">
@@ -95,12 +118,12 @@ export default function OportunidadesListagem({ oportunidades: propOps = [], win
                   <TableCell>{op.responsavel}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openWindow(OportunidadeForm, { oportunidade: op, windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['oportunidades-list'] }) }, { title: `Editar: ${op.titulo}`, width: 900, height: 650 })}>
+                      <RBACButton module="CRM" action="editar" variant="ghost" size="icon" onClick={() => openWindow(OportunidadeForm, { oportunidade: op, windowMode: true, onSuccess: () => qc.invalidateQueries({ queryKey: ['oportunidades-list'] }) }, { title: `Editar: ${op.titulo}`, width: 900, height: 650 })}>
                         <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="text-red-600" onClick={() => setItemParaExcluir(op)}>
+                      </RBACButton>
+                      <RBACButton module="CRM" action="excluir" variant="ghost" size="icon" className="text-red-600" onClick={() => setItemParaExcluir(op)}>
                         <Trash2 className="w-4 h-4" />
-                      </Button>
+                      </RBACButton>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -115,7 +138,7 @@ export default function OportunidadesListagem({ oportunidades: propOps = [], win
           )}
         </CardContent>
       </Card>
-      <ConfirmDialog open={!!itemParaExcluir} onOpenChange={(open) => !open && setItemParaExcluir(null)} onConfirm={() => { if (itemParaExcluir) deleteMutation.mutate(itemParaExcluir.id); setItemParaExcluir(null); }} title="Confirmar Exclusão" description="Excluir esta oportunidade? Esta ação não pode ser desfeita." confirmText="Excluir" />
+      <ConfirmDialog open={!!itemParaExcluir} onOpenChange={(open) => !open && setItemParaExcluir(null)} onConfirm={() => { if (itemParaExcluir) deleteMutation.mutate(itemParaExcluir); setItemParaExcluir(null); }} title="Confirmar Exclusão" description="Excluir esta oportunidade? Esta ação não pode ser desfeita." confirmText="Excluir" />
     </div>
   );
 }

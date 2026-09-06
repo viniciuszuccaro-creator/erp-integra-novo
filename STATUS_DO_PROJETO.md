@@ -1053,6 +1053,13 @@ Estado consolidado:
 - `usePontoEletronico.jsx`: registro de ponto revalida RBAC e contexto de grupo na persistência (fail-closed) e gera `AuditLog` com contexto e dados do registro; foto facial redimensionada antes de salvar (evita campo oversized que quebra operações do registro); toast de erro adicionado. Validação por IA mantém bypass automático enquanto créditos do workspace estiverem esgotados.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### Hub de Atendimento + Pedidos/Boletos via Chat — Regra-Mãe aplicada (2026-09-06, lote 4)
+- `hub-atendimento/useHubAtendimentoData.jsx`: enviar mensagem, assumir e resolver conversa usavam `MensagemOmnicanal.create`/`ConversaOmnicanal.update` crus — migrados para `createInContext`/`updateInContext`, RBAC `editar` HubAtendimento, fail-closed.
+- `chatbot/CriarPedidoChat.jsx`: criar pedido via chat usava `Pedido.create`/`ConversaOmnicanal.update` crus — migrados para persistência protegida, RBAC `criar` Comercial + exigência de contexto grupo/empresa, fail-closed.
+- `chatbot/GerarBoletoChat.jsx`: gerar boleto usava `ContaReceber.update`/`ConversaOmnicanal.update` crus — migrados para `updateInContext`, RBAC `editar` Financeiro, fail-closed.
+- ConsultarEntregaChat/HistoricoClienteChat: sem mutações cruas (somente leitura) — nada a mudar.
+- Próximos lotes (por prioridade de risco): financeiro (21), lib/hooks (30), sistema (13), mobile (9), produção (9).
+
 ### Chatbot — Cluster de Canais completo — Regra-Mãe aplicada (2026-09-06, lote 3)
 - Varredura global executada (regex em todo `src/`): 163 mutações cruas restantes em ~22 módulos, agrupadas por módulo para lotes (AuditLog.create ignorado — é o próprio mecanismo de auditoria).
 - `chatbot/AutomacaoFluxos.jsx`: salvar automações usava `ConfiguracaoCanal.update` cru — migrado para `updateInContext`, RBAC `editar` HubAtendimento, fail-closed.

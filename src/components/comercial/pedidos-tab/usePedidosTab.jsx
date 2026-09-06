@@ -16,7 +16,7 @@ import { useConfirm } from "@/components/ui/confirm-dialog";
  */
 export default function usePedidosTab({ pedidos, empresaId }) {
   const { canEdit, canCreate, canApprove, canDelete } = usePermissions();
-  const { deleteInContext } = useContextoVisual();
+  const { deleteInContext, grupoAtual } = useContextoVisual();
   const { page, setPage, pageSize, setPageSize } = useBackendPagination('Pedido', 20);
   const [sortField, setSortField, sortDirection, setSortDirection] = usePersistedSort('Pedido', 'data_pedido', 'desc');
   const { data: pedidosBackend = [] } = useRLSQuery('Pedido', {}, `-${sortField}`, pageSize, { staleTime: 120000 });
@@ -45,8 +45,13 @@ export default function usePedidosTab({ pedidos, empresaId }) {
   const deleteMutation = useMutation({
     mutationFn: (id) => deleteInContext('Pedido', id),
     onSuccess: async (_data, id) => {
+      // Chave alinhada ao useRLSQuery (listagem em ['Pedido']) + chaves derivadas do módulo
+      queryClient.invalidateQueries({ queryKey: ['Pedido'] });
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
       toast({ title: "✅ Pedido excluído!" });
+    },
+    onError: (err) => {
+      toast({ title: "Erro ao excluir pedido", description: err?.message || 'Tente novamente.', variant: "destructive" });
     },
   });
 
@@ -84,7 +89,7 @@ export default function usePedidosTab({ pedidos, empresaId }) {
     try {
       await base44.functions.invoke('whatsappSend', { template: 'aprovacao_pendente', pedido_ids: alvo });
       toast({ title: '📲 WhatsApp enviado', description: `${alvo.length} pedido(s)` });
-      try { await base44.entities.AuditLog.create({ acao: 'Notificação', modulo: 'Comercial', entidade: 'Pedido', descricao: `WhatsApp aprovação pendente (${alvo.length})`, data_hora: new Date().toISOString() }); } catch (e) { console.error('[pedidos-tab] catch:', e); }
+      try { await base44.entities.AuditLog.create({ acao: 'Notificação', modulo: 'Comercial', entidade: 'Pedido', descricao: `WhatsApp aprovação pendente (${alvo.length})`, data_hora: new Date().toISOString(), group_id: grupoAtual?.id || null, empresa_id: empresaId || null }); } catch (e) { console.error('[pedidos-tab] catch:', e); }
     } catch { toast({ title: 'Falha ao notificar WhatsApp', variant: 'destructive' }); }
   };
 
@@ -94,7 +99,7 @@ export default function usePedidosTab({ pedidos, empresaId }) {
     try {
       await base44.functions.invoke('sendEmailProvider', { tipo: 'aprovacao_pendente', pedido_ids: alvo });
       toast({ title: '✉️ E-mails enviados', description: `${alvo.length} pedido(s)` });
-      try { await base44.entities.AuditLog.create({ acao: 'Notificação', modulo: 'Comercial', entidade: 'Pedido', descricao: `Email aprovação pendente (${alvo.length})`, data_hora: new Date().toISOString() }); } catch (e) { console.error('[pedidos-tab] catch:', e); }
+      try { await base44.entities.AuditLog.create({ acao: 'Notificação', modulo: 'Comercial', entidade: 'Pedido', descricao: `Email aprovação pendente (${alvo.length})`, data_hora: new Date().toISOString(), group_id: grupoAtual?.id || null, empresa_id: empresaId || null }); } catch (e) { console.error('[pedidos-tab] catch:', e); }
     } catch { toast({ title: 'Falha ao notificar por email', variant: 'destructive' }); }
   };
 

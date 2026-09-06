@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,7 +62,7 @@ export default function ExportacaoSPED({ empresaId }) {
 
       const periodoApuracao = periodoInicial.substring(0, 7); // YYYY-MM
 
-      const novoSPED = await base44.entities.SPEDFiscal.create({
+      const novoSPED = await base44.entities.SPEDFiscal.create(sanitizeFlow({
         empresa_id: empresaId,
         group_id: grupoAtual?.id,
         tipo_sped: tipoSped,
@@ -109,7 +110,7 @@ export default function ExportacaoSPED({ empresaId }) {
           }
         ],
         usuario_geracao: user?.full_name || "Sistema"
-      });
+      }));
 
       // Regra-Mãe 5d: auditoria completa da geração do SPED
       try { await base44.entities.AuditLog.create({

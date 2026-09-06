@@ -1,6 +1,7 @@
 import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
@@ -59,10 +60,10 @@ export default function ConfigFinanceiroLogistica({ empresaId }) {
     mutationFn: async (values) => {
       const rows = await filterInContext('ConfiguracaoSistema', { chave: cfgKey }, undefined, 1);
       if (rows?.length) {
-        await base44.entities.ConfiguracaoSistema.update(rows[0].id, { valor_json: values });
+        await base44.entities.ConfiguracaoSistema.update(rows[0].id, sanitizeFlow({ valor_json: values }));
       } else {
         const scope = getFiltroContexto?.('empresa_id', true) || {};
-        await base44.entities.ConfiguracaoSistema.create({ chave: cfgKey, valor_json: values, group_id: scope.group_id, empresa_id: scope.empresa_id });
+        await base44.entities.ConfiguracaoSistema.create(sanitizeFlow({ chave: cfgKey, valor_json: values, group_id: scope.group_id, empresa_id: scope.empresa_id }));
       }
       return values;
     },

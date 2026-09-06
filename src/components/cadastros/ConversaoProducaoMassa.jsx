@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { 
   Factory, CheckCircle2, AlertTriangle, 
   ArrowRight, Sparkles, Loader2, Package 
@@ -120,11 +121,11 @@ Retorne apenas os índices (0, 1, 2...) dos produtos que DEVEM ir para produçã
       for (const produtoId of produtosSelecionados) {
         const produto = produtos.find(p => p.id === produtoId);
         
-        await base44.entities.Produto.update(produtoId, {
+        await base44.entities.Produto.update(produtoId, sanitizeFlow({
           tipo_item: 'Matéria-Prima Produção',
           setor_atividade_id: 'setor-fabrica-001',
           setor_atividade_nome: 'Fábrica'
-        });
+        }));
 
         concluidos++;
         setProgresso(Math.round((concluidos / total) * 100));

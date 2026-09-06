@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
 import { useUser } from "@/components/lib/UserContext";
@@ -51,7 +52,7 @@ export default function usePontoEletronico() {
       // Regra-Mãe 5: validação dupla RBAC + contexto na persistência (fail-closed)
       if (!canCreate('RH')) throw new Error('Sem permissão para registrar ponto.');
       if (!grupoAtual?.id) throw new Error('Sem contexto de grupo ativo — operação bloqueada.');
-      return base44.entities.Ponto.create(carimbarContexto(data, 'empresa_id'));
+      return base44.entities.Ponto.create(sanitizeFlow(carimbarContexto(data, 'empresa_id')));
     },
     onSuccess: async (ponto) => {
       // Regra-Mãe 5d: auditoria com contexto e estado do registro

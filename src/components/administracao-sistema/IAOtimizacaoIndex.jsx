@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import IAPanel from "@/components/administracao-sistema/configuracoes-gerais/IAPanel";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import ContextoConfigBanner from "@/components/administracao-sistema/common/ContextoConfigBanner";
 import HerancaConfigNotice from "@/components/administracao-sistema/common/HerancaConfigNotice";
 import { Brain, Zap, RefreshCw } from "lucide-react";
@@ -126,14 +127,14 @@ export default function IAOtimizacaoIndex({ initialTab }) {
       for (const cfg of IA_CONFIGS_PADRAO) {
         const key = `${cfg.modulo}::${cfg.funcionalidade}`;
         if (existentesKeys.has(key)) continue;
-        const created = await base44.entities.IAConfig.create({
+        const created = await base44.entities.IAConfig.create(sanitizeFlow({
           ...cfg,
           ativo: true,
           empresa_id: eId || null,
           group_id: gId || null,
           origem_configuracao: eId ? "empresa" : "grupo",
           criado_por: user?.email || user?.full_name || "Sistema",
-        });
+        }));
         criadas.push(created);
       }
 
@@ -283,4 +284,3 @@ export default function IAOtimizacaoIndex({ initialTab }) {
     </div>
   );
 }
-

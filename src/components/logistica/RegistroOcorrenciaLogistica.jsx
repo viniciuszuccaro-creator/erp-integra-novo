@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -66,14 +67,14 @@ export default function RegistroOcorrenciaLogistica({ pedido, entrega, onClose, 
 
       if (entrega) {
         const ocorrenciasAtuais = entrega.ocorrencias || [];
-        await base44.entities.Entrega.update(entrega.id, {
+        await base44.entities.Entrega.update(entrega.id, sanitizeFlow({
           group_id: entrega.group_id || ctxGroupId,
           empresa_id: entrega.empresa_id || ctxEmpresaId,
           ocorrencias: [...ocorrenciasAtuais, novaOcorrencia]
-        });
+        }));
       } else {
         // Criar entrega se não existir
-        await base44.entities.Entrega.create(carimbarContexto({
+        await base44.entities.Entrega.create(sanitizeFlow(carimbarContexto({
           pedido_id: pedido.id,
           numero_pedido: pedido.numero_pedido,
           cliente_id: pedido.cliente_id,
@@ -83,14 +84,14 @@ export default function RegistroOcorrenciaLogistica({ pedido, entrega, onClose, 
           endereco_entrega_completo: pedido.endereco_entrega_principal,
           status: 'Em Trânsito',
           ocorrencias: [novaOcorrencia]
-        }, 'empresa_id'));
+        }, 'empresa_id')));
       }
 
       // Se for entrega frustrada, marcar no pedido
       if (tipoOcorrencia === "Entrega Frustrada") {
-        await base44.entities.Pedido.update(pedido.id, {
+        await base44.entities.Pedido.update(pedido.id, sanitizeFlow({
           status: 'Em Trânsito' // Mantém para nova tentativa
-        });
+        }));
       }
     },
     onSuccess: async () => {

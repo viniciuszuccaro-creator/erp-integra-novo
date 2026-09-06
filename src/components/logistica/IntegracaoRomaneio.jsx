@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -63,7 +64,7 @@ export default function IntegracaoRomaneio({ pedidosSelecionados = [], onClose, 
       const valorTotal = pedidosParaRomaneio.reduce((sum, p) => sum + (p.valor_total || 0), 0);
       
       // Criar romaneio
-      const romaneio = await base44.entities.Romaneio.create({
+      const romaneio = await base44.entities.Romaneio.create(sanitizeFlow({
         data_saida: new Date().toISOString(),
         motorista: motorista,
         veiculo: veiculo,
@@ -75,11 +76,11 @@ export default function IntegracaoRomaneio({ pedidosSelecionados = [], onClose, 
         responsavel_criacao: user?.full_name || "Sistema",
         empresa_id: pedidosParaRomaneio[0]?.empresa_id,
         group_id: pedidosParaRomaneio[0]?.group_id || grupoAtual?.id
-      });
+      }));
 
       // Criar entregas e vincular ao romaneio
       for (const pedido of pedidosParaRomaneio) {
-        await base44.entities.Entrega.create({
+        await base44.entities.Entrega.create(sanitizeFlow({
           pedido_id: pedido.id,
           numero_pedido: pedido.numero_pedido,
           cliente_id: pedido.cliente_id,
@@ -95,12 +96,12 @@ export default function IntegracaoRomaneio({ pedidosSelecionados = [], onClose, 
           status: 'Saiu para Entrega',
           peso_total_kg: pedido.peso_total_kg,
           valor_mercadoria: pedido.valor_total
-        });
+        }));
 
         // Atualizar status do pedido
-        await base44.entities.Pedido.update(pedido.id, {
+        await base44.entities.Pedido.update(pedido.id, sanitizeFlow({
           status: 'Em Trânsito'
-        });
+        }));
       }
 
       return romaneio;

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -114,13 +115,13 @@ export default function ComprovanteEntregaDigital({ pedido, entrega, onSuccess, 
       };
 
       if (entrega) {
-        await base44.entities.Entrega.update(entrega.id, {
+        await base44.entities.Entrega.update(entrega.id, sanitizeFlow({
           status: 'Entregue',
           data_entrega: new Date().toISOString(),
           comprovante_entrega: comprovanteData
-        });
+        }));
       } else {
-        await base44.entities.Entrega.create({
+        await base44.entities.Entrega.create(sanitizeFlow({
           pedido_id: pedido.id,
           numero_pedido: pedido.numero_pedido,
           cliente_id: pedido.cliente_id,
@@ -131,13 +132,13 @@ export default function ComprovanteEntregaDigital({ pedido, entrega, onSuccess, 
           status: 'Entregue',
           data_entrega: new Date().toISOString(),
           comprovante_entrega: comprovanteData
-        });
+        }));
       }
 
       // Atualizar pedido
-      await base44.entities.Pedido.update(pedido.id, {
+      await base44.entities.Pedido.update(pedido.id, sanitizeFlow({
         status: 'Entregue'
-      });
+      }));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });

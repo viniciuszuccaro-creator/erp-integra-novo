@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -58,11 +59,11 @@ export default function PontoTab({ pontos, colaboradores }) {
 
       const { horas_trabalhadas, horas_extras } = calcularHoras();
 
-      return base44.entities.Ponto.create(carimbarContexto({
+      return base44.entities.Ponto.create(sanitizeFlow(carimbarContexto({
         ...data,
         horas_trabalhadas,
         horas_extras
-      }, 'empresa_id'));
+      }, 'empresa_id')));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pontos'] });
@@ -72,19 +73,19 @@ export default function PontoTab({ pontos, colaboradores }) {
   });
 
   const aprovarMutation = useMutation({
-    mutationFn: ({ id }) => base44.entities.Ponto.update(id, {
+    mutationFn: ({ id }) => base44.entities.Ponto.update(id, sanitizeFlow({
       status: 'Aprovado',
       aprovado_por: 'Sistema'
-    }),
+    })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pontos'] });
     },
   });
 
   const rejeitarMutation = useMutation({
-    mutationFn: ({ id }) => base44.entities.Ponto.update(id, {
+    mutationFn: ({ id }) => base44.entities.Ponto.update(id, sanitizeFlow({
       status: 'Rejeitado'
-    }),
+    })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pontos'] });
     },

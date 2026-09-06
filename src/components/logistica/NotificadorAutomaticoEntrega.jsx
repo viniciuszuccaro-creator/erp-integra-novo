@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,7 +38,7 @@ export default function NotificadorAutomaticoEntrega({ pedido, entrega, onClose,
       // Registrar notificação no histórico da entrega
       if (entrega) {
         const notificacoesAtuais = entrega.notificacoes_enviadas || [];
-        await base44.entities.Entrega.update(entrega.id, {
+        await base44.entities.Entrega.update(entrega.id, sanitizeFlow({
           notificacoes_enviadas: [
             ...notificacoesAtuais,
             {
@@ -49,7 +50,7 @@ export default function NotificadorAutomaticoEntrega({ pedido, entrega, onClose,
               mensagem: mensagemFinal
             }
           ]
-        });
+        }));
       }
 
       // Enviar email (integração Core)

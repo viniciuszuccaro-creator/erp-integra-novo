@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { useToast } from "@/components/ui/use-toast";
@@ -61,9 +62,9 @@ export function useConfigExpedicao({ empresaId }) {
         configuracoes_email: configEmail
       };
       if (config) {
-        return await base44.entities.ConfiguracaoSistema.update(config.id, dadosConfig);
+        return await base44.entities.ConfiguracaoSistema.update(config.id, sanitizeFlow(dadosConfig));
       }
-      return await base44.entities.ConfiguracaoSistema.create(dadosConfig);
+      return await base44.entities.ConfiguracaoSistema.create(sanitizeFlow(dadosConfig));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['config-expedicao', contextoKey] });

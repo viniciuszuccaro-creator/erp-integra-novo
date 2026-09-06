@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useUser } from "@/components/lib/UserContext";
 import { useToast } from "@/components/ui/use-toast";
 import useRLSQuery from "@/components/lib/useRLSQuery";
@@ -59,8 +60,8 @@ export default function useConfigFiscal({ empresaId, groupId }) {
         historico_alteracoes: [...(config?.historico_alteracoes || []), { data: new Date().toISOString(), usuario: user?.email || "Sistema", campo_alterado: "configuracao_geral", valor_anterior: JSON.stringify(config || {}), valor_novo: JSON.stringify(formData) }]
       };
 
-      if (config?.id) { const result = await base44.entities.ConfigFiscalEmpresa.update(config.id, dadosCompletos); return { ...result, __auditAction: "Edicao", __auditPrevious: config }; }
-      const result = await base44.entities.ConfigFiscalEmpresa.create(dadosCompletos); return { ...result, __auditAction: "Criacao" };
+      if (config?.id) { const result = await base44.entities.ConfigFiscalEmpresa.update(config.id, sanitizeFlow(dadosCompletos)); return { ...result, __auditAction: "Edicao", __auditPrevious: config }; }
+      const result = await base44.entities.ConfigFiscalEmpresa.create(sanitizeFlow(dadosCompletos)); return { ...result, __auditAction: "Criacao" };
     },
     onSuccess: async (result) => {
       queryClient.invalidateQueries({ queryKey: ['config-fiscal'] });

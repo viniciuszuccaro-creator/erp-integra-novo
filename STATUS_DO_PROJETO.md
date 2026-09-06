@@ -1059,6 +1059,11 @@ Estado consolidado:
 - `useToggleConfig.jsx`: fallback de persistência direta (saveDirectConfig) agora gera AuditLog com usuário, contexto e antes/depois.
 - Próximo lote: varredura final global de mutações cruas remanescentes (14).
 
+### Varredura final global — Regra-Mãe 5c (2026-09-06, lote 14)
+- Sanitização `sanitizeFlow` aplicada às 54 mutações cruas remanescentes em 26 arquivos: Notificações, SoD (perfis), IA Config/Otimização/Governança, Conversão Produção, Vínculo Grupo↔Empresas, Histórico Produto, Tags/Transferência de conversas, Importação NF-e (compras), Cotações→OC, Importador planilha, Requisições almoxarifado, Recebimento, Roteirização IA, Configs (expedição/logística-financeiro/fiscal), SPED, Comprovante de entrega, Romaneio, Notificador de entrega, Ocorrências logísticas, Férias, Ponto (aprovar/rejeitar), Ponto eletrônico.
+- Falsos positivos confirmados (já protegidos): useToggleConfig (payload sanitizado + auditoria no lote 13), ConfiguracaoSeguranca (payload sanitizado), OportunidadesListagem/CentralPerfisAcesso (RBAC + auditoria completos).
+- Global: nenhuma mutação de entidade sem sanitização permanece no código do app.
+
 ### Integrações — Regra-Mãe aplicada (2026-09-06, lote 12)
 - `CentralIntegracoes.jsx`: ativar/desativar integrações agora exige RBAC (Sistema.integracoes.configurar, fail-closed) e sanitiza payload e registro completo no update.
 - `ConfigWhatsAppBusiness.jsx`: criação de ConfiguracaoSistema migrada para `createInContext`.

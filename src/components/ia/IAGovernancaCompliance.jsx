@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { sanitizeFlow } from '@/components/lib/contexto/contextoCrud';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -88,13 +89,13 @@ export default function IAGovernancaCompliance() {
         
         // Atualizar perfil com conflitos detectados
         if (conflitos.length > 0) {
-          await base44.entities.PerfilAcesso.update(perfil.id, {
+          await base44.entities.PerfilAcesso.update(perfil.id, sanitizeFlow({
             conflitos_sod_detectados: conflitos,
             permissoes_sensiveis: permissoesSensiveis
-          });
+          }));
           
           // Registrar no log de IA
-          await base44.entities.LogsIA.create({
+          await base44.entities.LogsIA.create(sanitizeFlow({
             tipo_ia: 'IA_Governanca',
             contexto_execucao: 'Sistema',
             group_id: perfil.group_id,
@@ -106,7 +107,7 @@ export default function IAGovernancaCompliance() {
             ...scope,
             dados_entrada: { perfil_id: perfil.id },
             dados_saida: { conflitos }
-          });
+          }));
         }
       }
       
@@ -136,7 +137,7 @@ export default function IAGovernancaCompliance() {
         }
         
         if (alertas.length > 0) {
-          await base44.entities.LogsIA.create({
+          await base44.entities.LogsIA.create(sanitizeFlow({
             tipo_ia: 'IA_Governanca',
             contexto_execucao: 'Sistema',
             group_id: usuario.group_id,
@@ -147,7 +148,7 @@ export default function IAGovernancaCompliance() {
             confianca_ia: 85,
             ...scope,
             dados_saida: { alertas }
-          });
+          }));
         }
       }
       

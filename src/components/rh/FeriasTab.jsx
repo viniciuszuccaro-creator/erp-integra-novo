@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -53,7 +54,7 @@ export default function FeriasTab({ windowMode = false }) {
       // Regra-Mãe 5: validação dupla RBAC + contexto na persistência (fail-closed)
       if (!canCreate('RH')) throw new Error('Sem permissão para solicitar férias.');
       if (!grupoAtual?.id) throw new Error('Sem contexto de grupo ativo — operação bloqueada.');
-      return base44.entities.Ferias.create(carimbarContexto(data));
+      return base44.entities.Ferias.create(sanitizeFlow(carimbarContexto(data)));
     },
     onSuccess: async (f) => {
       await base44.entities.AuditLog.create({
@@ -81,7 +82,7 @@ export default function FeriasTab({ windowMode = false }) {
       if (mudancaStatus && !canApprove('RH')) throw new Error('Sem permissão para aprovar/rejeitar férias.');
       if (!mudancaStatus && !canEdit('RH')) throw new Error('Sem permissão para editar férias.');
       if (antes && !antes.group_id && !grupoAtual?.id) throw new Error('Registro sem contexto de grupo — operação bloqueada.');
-      return base44.entities.Ferias.update(id, data);
+      return base44.entities.Ferias.update(id, sanitizeFlow(data));
     },
     onSuccess: async (_r, { id, data, antes }) => {
       await base44.entities.AuditLog.create({

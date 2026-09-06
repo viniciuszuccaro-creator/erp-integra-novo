@@ -24,9 +24,10 @@ const STATUS_COLORS = {
 export default function FeriasTab({ windowMode = false }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { filterInContext, carimbarContexto } = useContextoVisual();
-  const { canCreate, canApprove, hasPermission } = usePermissions();
-  const canAprovar = canApprove('RH') || hasPermission('RH', null, 'visualizar');
+  const { filterInContext, carimbarContexto, grupoAtual, empresaAtual } = useContextoVisual();
+  const { canCreate, canEdit, canApprove } = usePermissions();
+  // Regra-Mãe 5b: aprovação exige ação 'aprovar' — fail-closed (antes qualquer usuário com 'visualizar' podia aprovar/rejeitar)
+  const canAprovar = canApprove('RH');
 
   const [search, setSearch] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
@@ -48,12 +49,19 @@ export default function FeriasTab({ windowMode = false }) {
   const { data: user } = useQuery({ queryKey: ['user'], queryFn: () => base44.auth.me() });
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Ferias.create(carimbarContexto(data)),
+    mutationFn: async (data) => {
+      // Regra-Mãe 5: validação dupla RBAC + contexto na persistência (fail-closed)
+      if (!canCreate('RH')) throw new Error('Sem permissão para solicitar férias.');
+      if (!grupoAtual?.id) throw new Error('Sem contexto de grupo ativo — operação bloqueada.');
+      return base44.entities.Ferias.create(carimbarContexto(data));
+    },
     onSuccess: async (f) => {
       await base44.entities.AuditLog.create({
         usuario: user?.full_name || 'Usuário', usuario_id: user?.id,
-        acao: 'Criação', modulo: 'RH', entidade: 'Ferias',
+        acao: 'Criação', modulo: 'RH', entidade: 'Ferias', registro_id: f?.id,
+        group_id: f?.group_id || grupoAtual?.id, empresa_id: f?.empresa_id || empresaAtual?.id,
         descricao: `Férias solicitadas para ${f.colaborador_nome}`,
+        dados_novos: { colaborador: f.colaborador_nome, tipo: f.tipo, data_inicio: f.data_inicio, data_fim: f.data_fim, dias_solicitados: f.dias_solicitados, status: f.status },
         data_hora: new Date().toISOString(),
       }).catch(() => {});
       queryClient.invalidateQueries({ queryKey: ['ferias-tab'] });
@@ -62,15 +70,28 @@ export default function FeriasTab({ windowMode = false }) {
       setEditingFerias(null);
       toast({ title: "✅ Férias solicitadas!" });
     },
+    onError: (error) => { toast({ title: "❌ Erro ao salvar férias", description: error?.message, variant: "destructive" }); },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Ferias.update(id, data),
-    onSuccess: async (_r, { id, data }) => {
+    mutationFn: async ({ id, data, antes }) => {
+      // Regra-Mãe 5: validação dupla RBAC na persistência (fail-closed)
+      // Mudança de status p/ Aprovada/Rejeitada = ação 'aprovar'; edição comum = 'editar'
+      const mudancaStatus = data.status && antes?.status && data.status !== antes.status;
+      if (mudancaStatus && !canApprove('RH')) throw new Error('Sem permissão para aprovar/rejeitar férias.');
+      if (!mudancaStatus && !canEdit('RH')) throw new Error('Sem permissão para editar férias.');
+      if (antes && !antes.group_id && !grupoAtual?.id) throw new Error('Registro sem contexto de grupo — operação bloqueada.');
+      return base44.entities.Ferias.update(id, data);
+    },
+    onSuccess: async (_r, { id, data, antes }) => {
       await base44.entities.AuditLog.create({
         usuario: user?.full_name || 'Usuário', usuario_id: user?.id,
-        acao: 'Edição', modulo: 'RH', entidade: 'Ferias',
+        acao: (data.status === 'Aprovada' || data.status === 'Rejeitada') ? 'Aprovação' : 'Edição',
+        modulo: 'RH', entidade: 'Ferias', registro_id: id,
+        group_id: antes?.group_id || grupoAtual?.id, empresa_id: antes?.empresa_id || empresaAtual?.id,
         descricao: `Férias ${data.status || 'atualizada'} - ${data.colaborador_nome || ''}`,
+        dados_anteriores: antes ? { status: antes.status, data_inicio: antes.data_inicio, data_fim: antes.data_fim, dias_solicitados: antes.dias_solicitados } : undefined,
+        dados_novos: { status: data.status, data_inicio: data.data_inicio, data_fim: data.data_fim, dias_solicitados: data.dias_solicitados, aprovado_por: data.aprovado_por },
         data_hora: new Date().toISOString(),
       }).catch(() => {});
       queryClient.invalidateQueries({ queryKey: ['ferias-tab'] });
@@ -79,18 +100,19 @@ export default function FeriasTab({ windowMode = false }) {
       setEditingFerias(null);
       toast({ title: "✅ Férias atualizadas!" });
     },
+    onError: (error) => { toast({ title: "❌ Erro ao atualizar férias", description: error?.message, variant: "destructive" }); },
   });
 
   const handleSubmit = (data) => {
     if (editingFerias) {
-      updateMutation.mutate({ id: editingFerias.id, data });
+      updateMutation.mutate({ id: editingFerias.id, data, antes: editingFerias });
     } else {
       createMutation.mutate(data);
     }
   };
 
-  const handleAprovar = (f) => updateMutation.mutate({ id: f.id, data: { ...f, status: 'Aprovada', aprovado_por: user?.full_name } });
-  const handleRejeitar = (f) => updateMutation.mutate({ id: f.id, data: { ...f, status: 'Rejeitada' } });
+  const handleAprovar = (f) => updateMutation.mutate({ id: f.id, data: { ...f, status: 'Aprovada', aprovado_por: user?.full_name }, antes: f });
+  const handleRejeitar = (f) => updateMutation.mutate({ id: f.id, data: { ...f, status: 'Rejeitada' }, antes: f });
 
   const filtered = ferias.filter(f => {
     const matchSearch = !search ||
@@ -204,7 +226,7 @@ export default function FeriasTab({ windowMode = false }) {
                              </Button>
                            </>
                          )}
-                         {canCreate('RH') && (
+                         {canEdit('RH') && (
                            <Button variant="ghost" size="sm" className="h-7 text-xs"
                              onClick={() => { setEditingFerias(f); setFormOpen(true); }}>
                              Editar

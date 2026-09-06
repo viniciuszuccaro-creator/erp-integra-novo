@@ -3,11 +3,15 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
+import { useUser } from "@/components/lib/UserContext";
 
 export default function usePontoEletronico() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const videoRef = useRef(null);
+  const { canCreate } = usePermissions();
+  const { user } = useUser();
 
   const [registroPonto, setRegistroPonto] = useState({
     colaborador_id: "",
@@ -43,8 +47,22 @@ export default function usePontoEletronico() {
   });
 
   const registrarPontoMutation = useMutation({
-    mutationFn: (data) => base44.entities.Ponto.create(carimbarContexto(data, 'empresa_id')),
-    onSuccess: () => {
+    mutationFn: async (data) => {
+      // Regra-Mãe 5: validação dupla RBAC + contexto na persistência (fail-closed)
+      if (!canCreate('RH')) throw new Error('Sem permissão para registrar ponto.');
+      if (!grupoAtual?.id) throw new Error('Sem contexto de grupo ativo — operação bloqueada.');
+      return base44.entities.Ponto.create(carimbarContexto(data, 'empresa_id'));
+    },
+    onSuccess: async (ponto) => {
+      // Regra-Mãe 5d: auditoria com contexto e estado do registro
+      await base44.entities.AuditLog.create({
+        usuario: user?.email || user?.full_name || 'Usuário', usuario_id: user?.id,
+        acao: 'Criação', modulo: 'RH', entidade: 'Ponto', registro_id: ponto?.id,
+        group_id: ponto?.group_id || grupoAtual?.id, empresa_id: ponto?.empresa_id || empresaAtual?.id,
+        descricao: `Ponto registrado - ${ponto?.colaborador_nome} (${ponto?.tipo})`,
+        dados_novos: { colaborador: ponto?.colaborador_nome, tipo: ponto?.tipo, data_hora: ponto?.data_hora, requer_aprovacao: !!ponto?.requer_aprovacao, biometria_validada: !!ponto?.biometria_validada },
+        data_hora: new Date().toISOString(),
+      }).catch(() => {});
       toast({
         title: "✅ Ponto registrado",
         description: "Registro efetuado com sucesso!",
@@ -62,6 +80,9 @@ export default function usePontoEletronico() {
         observacoes: "",
       });
       setCameraAtiva(false);
+    },
+    onError: (error) => {
+      toast({ title: "❌ Erro ao registrar ponto", description: error?.message, variant: "destructive" });
     },
   });
 
@@ -130,9 +151,14 @@ Detecte anomalias: horário fora do expediente, intervalo curto, duplicidade, lo
       const canvas = document.createElement("canvas");
       canvas.width = videoRef.current.videoWidth;
       canvas.height = videoRef.current.videoHeight;
+      // Redimensiona a foto antes de salvar (evita campo oversized no registro — Regra-Mãe 5c)
+      const maxW = 480;
+      const scale = Math.min(1, maxW / canvas.width);
+      canvas.width = Math.round(canvas.width * scale);
+      canvas.height = Math.round(canvas.height * scale);
       const ctx = canvas.getContext("2d");
-      ctx.drawImage(videoRef.current, 0, 0);
-      const fotoUrl = canvas.toDataURL("image/jpeg");
+      ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+      const fotoUrl = canvas.toDataURL("image/jpeg", 0.6);
       setRegistroPonto((prev) => ({ ...prev, foto_facial_url: fotoUrl }));
 
       const stream = videoRef.current.srcObject;

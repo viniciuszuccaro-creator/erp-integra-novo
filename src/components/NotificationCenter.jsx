@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bell, X, Check, AlertTriangle, Info, CheckCircle2, XCircle, Target } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
@@ -39,10 +40,10 @@ export default function NotificationCenter() {
   const lidas = notificacoes.filter(n => n.lida);
 
   const marcarComoLidaMutation = useMutation({
-    mutationFn: (id) => base44.entities.Notificacao.update(id, { 
+    mutationFn: (id) => base44.entities.Notificacao.update(id, sanitizeFlow({ 
       lida: true, 
       data_leitura: new Date().toISOString() 
-    }),
+    })),
     onSuccess: () => {
       queryClient.invalidateQueries(['notificacoes']);
     },
@@ -51,10 +52,10 @@ export default function NotificationCenter() {
   const marcarTodasComoLidasMutation = useMutation({
     mutationFn: async () => {
       const promises = naoLidas.map(n => 
-        base44.entities.Notificacao.update(n.id, { 
+        base44.entities.Notificacao.update(n.id, sanitizeFlow({ 
           lida: true, 
           data_leitura: new Date().toISOString() 
-        })
+        }))
       );
       return Promise.all(promises);
     },
@@ -64,7 +65,7 @@ export default function NotificationCenter() {
   });
 
   const arquivarMutation = useMutation({
-    mutationFn: (id) => base44.entities.Notificacao.update(id, { arquivada: true }),
+    mutationFn: (id) => base44.entities.Notificacao.update(id, sanitizeFlow({ arquivada: true })),
     onSuccess: () => {
       queryClient.invalidateQueries(['notificacoes']);
     },

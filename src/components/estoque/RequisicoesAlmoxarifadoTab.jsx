@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,7 +42,7 @@ export default function RequisicoesAlmoxarifadoTab({ requisicoes, produtos }) {
     mutationFn: async (data) => {
       // Criar requisição como MovimentacaoEstoque
       for (const item of data.itens) {
-        await base44.entities.MovimentacaoEstoque.create({
+        await base44.entities.MovimentacaoEstoque.create(sanitizeFlow({
           empresa_id: empresaAtual?.id,
           group_id: grupoAtual?.id,
           produto_id: item.produto_id,
@@ -55,14 +56,14 @@ export default function RequisicoesAlmoxarifadoTab({ requisicoes, produtos }) {
           localizacao_destino: data.setor,
           responsavel: data.solicitante,
           observacoes: data.observacoes
-        });
+        }));
 
         // Atualizar estoque
         const produto = produtos.find(p => p.id === item.produto_id);
         if (produto) {
-          await base44.entities.Produto.update(produto.id, {
+          await base44.entities.Produto.update(produto.id, sanitizeFlow({
             estoque_atual: (produto.estoque_atual || 0) - item.quantidade
-          });
+          }));
         }
       }
     },
@@ -80,9 +81,9 @@ export default function RequisicoesAlmoxarifadoTab({ requisicoes, produtos }) {
       for (const item of itens) {
         const produto = produtos.find(p => p.id === item.produto_id);
         if (produto) {
-          await base44.entities.Produto.update(produto.id, {
+          await base44.entities.Produto.update(produto.id, sanitizeFlow({
             estoque_atual: (produto.estoque_atual || 0) - item.quantidade
-          });
+          }));
         }
       }
     },

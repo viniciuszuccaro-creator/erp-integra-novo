@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { toast } from "sonner";
 
@@ -56,7 +57,7 @@ export default function useRecebimentoTab(recebimentos, ordensCompra, produtos) 
       }
 
       if (data.ordem_compra_id) {
-        await base44.entities.OrdemCompra.update(data.ordem_compra_id, { status: "Recebida" });
+        await base44.entities.OrdemCompra.update(data.ordem_compra_id, sanitizeFlow({ status: "Recebida" }));
       }
 
       try {

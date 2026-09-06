@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -318,7 +319,7 @@ export default function ImportadorProdutosPlanilha({ onConcluido, closeSelf }) {
       for (let i = 0; i < produtos.length; i += chunkSize) {
         const chunk = produtos.slice(i, i + chunkSize);
         if (delay) await sleep(delay);
-        const results = await Promise.allSettled(chunk.map(p => base44.entities.Produto.create(p)));
+        const results = await Promise.allSettled(chunk.map(p => base44.entities.Produto.create(sanitizeFlow(p))));
         const failures = results.filter(r => r.status === 'rejected');
         if (failures.length > 0) delay = Math.min((delay || 400) * 1.5, 5000);
         failedTotal += failures.length;

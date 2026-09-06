@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -100,12 +101,12 @@ export default function GrupoEmpresarialForm({ grupo, onSubmit, isSubmitting, wi
       // Atualiza em lotes — usa bulkUpdate para performance
       if (toLink.length) {
         await base44.entities.Empresa.bulkUpdate(
-          toLink.map(id => ({ id, group_id: grupoId }))
+          toLink.map(id => sanitizeFlow({ id, group_id: grupoId }))
         );
       }
       if (toUnlink.length) {
         await base44.entities.Empresa.bulkUpdate(
-          toUnlink.map(id => ({ id, group_id: null }))
+          toUnlink.map(id => sanitizeFlow({ id, group_id: null }))
         );
       }
 

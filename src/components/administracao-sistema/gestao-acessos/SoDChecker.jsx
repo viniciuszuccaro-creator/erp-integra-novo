@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import usePermissions from "@/components/lib/usePermissions";
 import { useUser } from "@/components/lib/UserContext";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
@@ -95,10 +96,10 @@ export default function SoDChecker() {
 
       const ids = Object.keys(porPerfil);
       for (const perfilId of ids) {
-        await base44.entities.PerfilAcesso.update(perfilId, {
+        await base44.entities.PerfilAcesso.update(perfilId, sanitizeFlow({
           conflitos_sod_detectados: porPerfil[perfilId],
           requer_aprovacao_especial: porPerfil[perfilId].length > 0,
-        });
+        }));
       }
 
       await audit({

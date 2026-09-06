@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -87,7 +88,7 @@ export default function ImportacaoNFeRecebimento({ windowMode = false }) {
   const confirmarRecebimentoMutation = useMutation({
     mutationFn: async (dados) => {
       // 1. Criar registro de importação
-      const importacao = await base44.entities.ImportacaoXMLNFe.create({
+      const importacao = await base44.entities.ImportacaoXMLNFe.create(sanitizeFlow({
         tipo_nfe: "Entrada",
         chave_acesso: dados.nfe.chave,
         numero_nfe: dados.nfe.numero,
@@ -99,12 +100,12 @@ export default function ImportacaoNFeRecebimento({ windowMode = false }) {
         quantidade_itens: dados.nfe.itens.length,
         status_processamento: "Processado",
         data_importacao: new Date().toISOString()
-      });
+      }));
 
       // 2. Criar movimentações de estoque para cada item
       for (const item of dados.nfe.itens) {
         if (item.produto_encontrado && item.produto_id) {
-          await base44.entities.MovimentacaoEstoque.create({
+          await base44.entities.MovimentacaoEstoque.create(sanitizeFlow({
             origem_movimento: "nfe",
             tipo_movimento: "entrada",
             produto_id: item.produto_id,
@@ -119,7 +120,7 @@ export default function ImportacaoNFeRecebimento({ windowMode = false }) {
             responsavel: "Sistema - Importação XML",
             group_id: grupoAtual?.id || empresaAtual?.group_id || null,
             empresa_id: empresaAtual?.id || null
-          });
+          }));
 
           // Atualizar estoque do produto
           const produto = await filterInContext('Produto', { id: item.produto_id });

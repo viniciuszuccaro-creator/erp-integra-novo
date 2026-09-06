@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
@@ -72,7 +73,7 @@ export default function useCotacoesTab({ cotacoes, setCotacoes }) {
         condicao_pagamento: proposta.forma_pagamento,
         prazo_entrega_acordado: proposta.prazo_entrega,
       }, "empresa_id");
-      const result = await base44.entities.OrdemCompra.create(ordemCompra);
+      const result = await base44.entities.OrdemCompra.create(sanitizeFlow(ordemCompra));
       try {
         const me = await base44.auth.me();
         await base44.entities.AuditLog.create({

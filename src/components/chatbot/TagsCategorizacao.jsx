@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { sanitizeFlow } from '@/components/lib/contexto/contextoCrud';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -46,11 +47,11 @@ export default function TagsCategorizacao({ conversa }) {
 
   const salvarTagsMutation = useMutation({
     mutationFn: async (tags) => {
-      await base44.entities.ConversaOmnicanal.update(conversa.id, {
+      await base44.entities.ConversaOmnicanal.update(conversa.id, sanitizeFlow({
         tags,
         group_id: conversa.group_id,
         empresa_id: conversa.empresa_id,
-      });
+      }));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversas-omnicanal'] });

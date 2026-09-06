@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -97,11 +98,11 @@ export default function HistoricoProduto({ produtoId, produto }) {
   const enviarParaProducao = async () => {
     setConvertendo(true);
     try {
-      await base44.entities.Produto.update(produtoId, {
+      await base44.entities.Produto.update(produtoId, sanitizeFlow({
         tipo_item: 'Matéria-Prima Produção',
         setor_atividade_id: 'setor-fabrica-001',
         setor_atividade_nome: 'Fábrica'
-      });
+      }));
       
       toast.success('🏭 Produto convertido para Produção!');
       window.location.reload(); // Recarregar para atualizar dados

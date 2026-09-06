@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -55,7 +56,7 @@ Retorne a melhor sequência de entregas, distância total, tempo estimado e cust
       const motorista = motoristas.find(m => m.id === motoristaId);
       const veiculo = veiculos.find(v => v.id === veiculoId);
 
-      return base44.entities.RoteirizacaoInteligente.create({
+      return base44.entities.RoteirizacaoInteligente.create(sanitizeFlow({
         data_rota: dataRota,
         group_id: grupoAtual?.id || empresaAtual?.group_id || null,
         empresa_id: empresaAtual?.id || null,
@@ -83,7 +84,7 @@ Retorne a melhor sequência de entregas, distância total, tempo estimado e cust
           economia_vs_rota_manual: result.economia_vs_manual
         },
         status: "Planejada"
-      });
+      }));
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["roteirizacao-inteligente"]);

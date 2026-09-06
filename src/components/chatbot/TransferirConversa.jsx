@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { sanitizeFlow } from '@/components/lib/contexto/contextoCrud';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -77,10 +78,10 @@ export default function TransferirConversa({ conversa, onTransferido }) {
         updates.departamento = null;
       }
 
-      await base44.entities.ConversaOmnicanal.update(conversa.id, updates);
+      await base44.entities.ConversaOmnicanal.update(conversa.id, sanitizeFlow(updates));
 
       // Criar mensagem de sistema
-      await base44.entities.MensagemOmnicanal.create({
+      await base44.entities.MensagemOmnicanal.create(sanitizeFlow({
         conversa_id: conversa.id,
         sessao_id: conversa.sessao_id,
         canal: conversa.canal,
@@ -96,11 +97,11 @@ export default function TransferirConversa({ conversa, onTransferido }) {
         tipo_conteudo: 'texto',
         data_envio: new Date().toISOString(),
         interno: true
-      });
+      }));
 
       // Notificar novo atendente
       if (tipo === 'atendente' && destinoId) {
-        await base44.entities.Notificacao.create({
+        await base44.entities.Notificacao.create(sanitizeFlow({
           titulo: '📨 Conversa Transferida',
           mensagem: `${user?.full_name} transferiu uma conversa para você.\nCliente: ${conversa.cliente_nome}\nCanal: ${conversa.canal}${nota ? `\nNota: ${nota}` : ''}`,
           tipo: 'info',
@@ -110,7 +111,7 @@ export default function TransferirConversa({ conversa, onTransferido }) {
           link_acao: `/hub-atendimento?conversa=${conversa.id}`,
           empresa_id: conversa.empresa_id,
           group_id: conversa.group_id,
-        });
+        }));
       }
     },
     onSuccess: () => {

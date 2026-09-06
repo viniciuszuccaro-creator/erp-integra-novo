@@ -1188,6 +1188,7 @@ Estado consolidado:
 - Cobertura final: 100% das entidades com as quatro operações (`create`/`read`/`update`/`delete`) validando contexto de grupo.
 - Validação programática pós-rewrite (2026-09-06): varredura das 150 entidades confirmou as 4 operações RLS presentes em todas (única exceção: `User`, entidade interna da plataforma). Suítes re-executadas sem regressão: unitária 209 pass · 0 fail; E2E estática 37 pass · 0 fail.
 - Checks de integridade ao vivo pós-RLS (2026-09-06): as 5 fases re-executadas no banco real — 100/100 em todas (Fase 1 Segurança/RBAC, Fase 2 Multiempresa, Fase 3 Fluxo de negócio, Fase 4 Omnicanal/Portal/Mobile, Fase 5 Integrações). Zero regressões.
+- Pré-voo de automações pós-RLS (2026-09-06): inventário completo — 670 automações (~150 ativas, ~520 legadas arquivadas). Essenciais todas ativas: propagações syncBidirectional (Cadastros Gerais), sanitizeOnWrite, auditEntityEvents, espelhos legacy, fluxos Pedido/Entrega/NF, backups e jobs noturnos. Falhas registradas (marketplaceSync, propagação noturna, deployAudit heartbeat, lembretes financeiros, IA churn/anomalias) são exclusivamente do bloqueio de créditos de integração do workspace — todas ativas com retry agendado, retomam sozinhas na renovação (07/09).
 
 ### Próximo passo sugerido
 - Republicar o app para consolidar na versão publicada todo o endurecimento Financeiro/Fiscal/Rateio/Compras/Estoque/Contratos/RH/Expedição/RLS desta semana (créditos de integração do workspace renovam em 07/09 — jobs agendados, IA e notificações retomam automaticamente aí).

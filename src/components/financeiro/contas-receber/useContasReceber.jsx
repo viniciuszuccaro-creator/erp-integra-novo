@@ -54,15 +54,18 @@ export default function useContasReceber({ contasList, queryClient: extQueryClie
       return ordens;
     },
     onSuccess: async (ordens, titulos) => {
-      await base44.entities.AuditLog.create({
-        acao: 'Criação', modulo: 'Financeiro', entidade: 'CaixaOrdemLiquidacao',
-        descricao: `${ordens.length} título(s) enviado(s) ao Caixa (Contas a Receber)`,
-        data_hora: new Date().toISOString(),
-        group_id: titulos?.[0]?.group_id, grupo_id: titulos?.[0]?.group_id, empresa_id: titulos?.[0]?.empresa_id,
-        usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
-        tipo_auditoria: 'operacional', sucesso: true,
-        dados_novos: { ordens: ordens.length, titulos_ids: titulos?.map(t => t.id) }
-      });
+      // Auditoria best-effort: falha no log não pode reverter a operação nem esconder o feedback
+      try {
+        await base44.entities.AuditLog.create({
+          acao: 'Criação', modulo: 'Financeiro', entidade: 'CaixaOrdemLiquidacao',
+          descricao: `${ordens.length} título(s) enviado(s) ao Caixa (Contas a Receber)`,
+          data_hora: new Date().toISOString(),
+          group_id: titulos?.[0]?.group_id, grupo_id: titulos?.[0]?.group_id, empresa_id: titulos?.[0]?.empresa_id,
+          usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
+          tipo_auditoria: 'operacional', sucesso: true,
+          dados_novos: { ordens: ordens.length, titulos_ids: titulos?.map(t => t.id) }
+        });
+      } catch (auditErr) { console.error('[contas-receber] falha no log de auditoria:', auditErr); }
       queryClient.invalidateQueries({ queryKey: ['caixa-ordens-liquidacao'] });
       toast({ title: `✅ ${ordens.length} título(s) enviado(s) para o Caixa!` });
       setContasSelecionadas([]);
@@ -100,19 +103,21 @@ export default function useContasReceber({ contasList, queryClient: extQueryClie
     },
     onSuccess: async (_data, vars) => {
       const conta = contasList.find(c => c.id === vars?.id) || {};
-      await base44.entities.AuditLog.create({
-        acao: 'Baixa', modulo: 'Financeiro', entidade: 'ContaReceber', registro_id: vars?.id,
-        descricao: 'Baixa de título registrada', data_hora: new Date().toISOString(),
-        group_id: conta.group_id, grupo_id: conta.group_id, empresa_id: conta.empresa_id,
-        usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
-        tipo_auditoria: 'operacional', sucesso: true,
-        dados_anteriores: { status: conta.status, valor: conta.valor, data_recebimento: conta.data_recebimento, valor_recebido: conta.valor_recebido },
-        dados_novos: {
-          status: 'Recebido', data_recebimento: vars?.dados?.data_recebimento, forma_recebimento: vars?.dados?.forma_recebimento,
-          juros: vars?.dados?.juros, multa: vars?.dados?.multa, desconto: vars?.dados?.desconto,
-          valor_recebido: (conta.valor || 0) + (vars?.dados?.juros || 0) + (vars?.dados?.multa || 0) - (vars?.dados?.desconto || 0)
-        }
-      });
+      try {
+        await base44.entities.AuditLog.create({
+          acao: 'Baixa', modulo: 'Financeiro', entidade: 'ContaReceber', registro_id: vars?.id,
+          descricao: 'Baixa de título registrada', data_hora: new Date().toISOString(),
+          group_id: conta.group_id, grupo_id: conta.group_id, empresa_id: conta.empresa_id,
+          usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
+          tipo_auditoria: 'operacional', sucesso: true,
+          dados_anteriores: { status: conta.status, valor: conta.valor, data_recebimento: conta.data_recebimento, valor_recebido: conta.valor_recebido },
+          dados_novos: {
+            status: 'Recebido', data_recebimento: vars?.dados?.data_recebimento, forma_recebimento: vars?.dados?.forma_recebimento,
+            juros: vars?.dados?.juros, multa: vars?.dados?.multa, desconto: vars?.dados?.desconto,
+            valor_recebido: (conta.valor || 0) + (vars?.dados?.juros || 0) + (vars?.dados?.multa || 0) - (vars?.dados?.desconto || 0)
+          }
+        });
+      } catch (auditErr) { console.error('[contas-receber] falha no log de auditoria:', auditErr); }
       queryClient.invalidateQueries({ queryKey: ['ContaReceber'] });
       setDialogBaixaOpen(false); setContaAtual(null);
       toast({ title: "✅ Título baixado com sucesso!" });
@@ -132,14 +137,16 @@ export default function useContasReceber({ contasList, queryClient: extQueryClie
     },
     onSuccess: async () => {
       const contasCtx = contasSelecionadas.map(cid => contasList.find(c => c.id === cid)).filter(Boolean);
-      await base44.entities.AuditLog.create({
-        acao: 'Baixa', modulo: 'Financeiro', entidade: 'ContaReceber',
-        descricao: `Baixa múltipla (${contasSelecionadas.length} título(s))`, data_hora: new Date().toISOString(),
-        group_id: contasCtx[0]?.group_id, grupo_id: contasCtx[0]?.group_id, empresa_id: contasCtx[0]?.empresa_id,
-        usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
-        tipo_auditoria: 'operacional', sucesso: true,
-        dados_novos: { titulos_ids: [...contasSelecionadas], ...dadosBaixa }
-      });
+      try {
+        await base44.entities.AuditLog.create({
+          acao: 'Baixa', modulo: 'Financeiro', entidade: 'ContaReceber',
+          descricao: `Baixa múltipla (${contasSelecionadas.length} título(s))`, data_hora: new Date().toISOString(),
+          group_id: contasCtx[0]?.group_id, grupo_id: contasCtx[0]?.group_id, empresa_id: contasCtx[0]?.empresa_id,
+          usuario: authUser?.full_name || authUser?.email, usuario_id: authUser?.id,
+          tipo_auditoria: 'operacional', sucesso: true,
+          dados_novos: { titulos_ids: [...contasSelecionadas], ...dadosBaixa }
+        });
+      } catch (auditErr) { console.error('[contas-receber] falha no log de auditoria:', auditErr); }
       setContasSelecionadas([]); setDialogBaixaOpen(false);
       toast({ title: `✅ ${contasSelecionadas.length} título(s) baixado(s)!` });
     },
@@ -148,7 +155,8 @@ export default function useContasReceber({ contasList, queryClient: extQueryClie
 
   const enviarWhatsAppMutation = useMutation({
     mutationFn: async (contaId) => { await updateRLS('ContaReceber', contaId, { data_envio_cobranca: new Date().toISOString() }); return { sucesso: true }; },
-    onSuccess: () => toast({ title: "✅ WhatsApp enviado (simulação)!" })
+    onSuccess: () => toast({ title: "✅ WhatsApp enviado (simulação)!" }),
+    onError: (err) => toast({ title: 'Erro ao registrar envio de cobrança', description: err?.message, variant: 'destructive' })
   });
 
   const toggleSelecao = (contaId) => setContasSelecionadas(prev => prev.includes(contaId) ? prev.filter(id => id !== contaId) : [...prev, contaId]);

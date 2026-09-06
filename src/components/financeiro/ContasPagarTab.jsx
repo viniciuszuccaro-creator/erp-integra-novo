@@ -187,6 +187,10 @@ export default function ContasPagarTab({ contas, windowMode = false }) {
 
   const aprovarPagamentoMutation = useMutation({
     mutationFn: async (contaId) => {
+      // Regra-Mãe 5b: validação dupla — bloqueio também na persistência, não só na UI
+      if (!hasPermission('Financeiro', 'ContaPagar', 'aprovar')) {
+        throw new Error('Sem permissão para aprovar pagamento');
+      }
       return await updateRLS('ContaPagar', contaId, {
         status_pagamento: "Aprovado",
         aprovado_por: authUser?.full_name || authUser?.email,

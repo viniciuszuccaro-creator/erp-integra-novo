@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { useUser } from "@/components/lib/UserContext";
+import usePermissions from "@/components/lib/usePermissions";
+import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
 import { useToast } from "@/components/ui/use-toast";
 import { useWindow } from "@/components/lib/useWindow";
 import ConfiguracaoNFeForm from "@/components/cadastros/ConfiguracaoNFeForm";
@@ -30,8 +32,11 @@ export default function CentralIntegracoes() {
   const { toast } = useToast();
   const { empresaAtual, grupoAtual } = useContextoVisual();
   const { user } = useUser();
+  const { hasPermission } = usePermissions();
   const { openWindow } = useWindow();
   const [salvandoKey, setSalvandoKey] = React.useState(null);
+  // Regra-Mãe 5b: RBAC granular — integrações exigem permissão de configuração no módulo Sistema
+  const podeConfigurarIntegracoes = hasPermission("Sistema", "integracoes", "configurar");
 
   const grupoAtivoId = grupoAtual?.id
     || empresaAtual?.group_id
@@ -71,19 +76,25 @@ export default function CentralIntegracoes() {
       toast({ title: "Selecione um grupo ou empresa", variant: "destructive" });
       return;
     }
+    // Regra-Mãe 5b: fail-closed — sem permissão não persiste
+    if (!podeConfigurarIntegracoes) {
+      toast({ title: "Sem permissão para configurar integrações", variant: "destructive" });
+      return;
+    }
 
     setSalvandoKey(key);
     try {
       const existentes = await base44.entities.ConfiguracaoSistema.filter({ chave: chaveIntegracoes, ...scope }, undefined, 1);
-      const payload = {
+      // Regra-Mãe 5c: sanitização da persistência
+      const payload = sanitizeFlow({
         chave: chaveIntegracoes,
         categoria: "Integracoes",
         ...scope,
         [key]: { ...(existentes?.[0]?.[key] || {}), ativo },
-      };
+      });
 
       if (existentes && existentes.length > 0) {
-        await base44.entities.ConfiguracaoSistema.update(existentes[0].id, { ...existentes[0], ...payload });
+        await base44.entities.ConfiguracaoSistema.update(existentes[0].id, sanitizeFlow({ ...existentes[0], ...payload }));
       } else {
         await base44.entities.ConfiguracaoSistema.create(payload);
       }

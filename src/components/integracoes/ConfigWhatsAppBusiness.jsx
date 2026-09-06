@@ -25,7 +25,7 @@ import WhatsAppBusinessEngine from '../sistema/WhatsAppBusinessEngine';
 export default function ConfigWhatsAppBusiness({ empresaId }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { grupoAtual, empresaAtual } = useContextoVisual();
+  const { grupoAtual, empresaAtual, createInContext } = useContextoVisual();
 
   const [config, setConfig] = useState({
     ativo: false,
@@ -43,7 +43,8 @@ export default function ConfigWhatsAppBusiness({ empresaId }) {
 
   const salvarMutation = useMutation({
     mutationFn: async (dados) => {
-      await base44.entities.ConfiguracaoSistema.create({
+      // Regra-Mãe 5: persistência protegida com sanitização, contexto e auditoria
+      await createInContext('ConfiguracaoSistema', {
         chave: `whatsapp_business_${empresaId}`,
         categoria: 'Integracoes',
         empresa_id: empresaId || empresaAtual?.id,

@@ -7,12 +7,12 @@ import useContextoVisual from '@/components/lib/useContextoVisual';
 import { CheckCircle2, TrendingUp, TrendingDown } from 'lucide-react';
 
 export default function HistoricoLiquidacoes() {
-  const { filterInContext, empresaAtual } = useContextoVisual();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
 
   const { data: ordensLiquidacao = [], isLoading } = useQuery({
-    queryKey: ['caixa-ordens-liquidacao', empresaAtual?.id],
+    queryKey: ['caixa-ordens-liquidacao', grupoAtual?.id || 'nogroup', empresaAtual?.id || 'all'],
     queryFn: () => filterInContext('CaixaOrdemLiquidacao', {}, '-created_date'),
-    enabled: !!empresaAtual?.id
+    enabled: !!(empresaAtual?.id || grupoAtual?.id)
   });
 
   const ordensLiquidadas = ordensLiquidacao.filter(o => o.status === "Liquidado");

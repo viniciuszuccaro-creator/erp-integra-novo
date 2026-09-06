@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,12 +17,12 @@ import {
 } from 'lucide-react';
 
 export default function MovimentosDiarios() {
-  const { filterInContext, empresaAtual } = useContextoVisual();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
   const [dataFiltro, setDataFiltro] = useState(new Date().toISOString().split('T')[0]);
   const [abaOperador, setAbaOperador] = useState("todos");
 
   const { data: movimentosCaixa = [], isLoading } = useQuery({
-    queryKey: ['movimentos-caixa', dataFiltro, empresaAtual?.id],
+    queryKey: ['movimentos-caixa', dataFiltro, grupoAtual?.id || 'nogroup', empresaAtual?.id || 'all'],
     queryFn: async () => {
       const movsCaixa = await filterInContext('CaixaMovimento', {
         data_movimento: {
@@ -48,10 +48,13 @@ export default function MovimentosDiarios() {
   });
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['pedidos-movimentos', empresaAtual?.id],
+    queryKey: ['pedidos-movimentos', grupoAtual?.id || 'nogroup', empresaAtual?.id || 'all'],
     queryFn: () => filterInContext('Pedido', {}, undefined, 100),
-    enabled: !!empresaAtual?.id
+    enabled: !!(empresaAtual?.id || grupoAtual?.id)
   });
+
+  // O(1): mapa de pedidos para reconciliação com movimentos (antes O(n²) por linha)
+  const pedidosMap = useMemo(() => new Map(pedidos.map(p => [p.id, p])), [pedidos]);
 
   const operadoresUnicos = [...new Set(movimentosCaixa.map(m => m.usuario_operador_nome).filter(Boolean))];
   const movimentosFiltrados = abaOperador === "todos" 
@@ -165,7 +168,7 @@ export default function MovimentosDiarios() {
                   </TableHeader>
                   <TableBody>
                     {movimentosFiltrados.map((mov) => {
-                      const pedidoVinculado = pedidos.find(p => p.id === mov.pedido_id);
+                      const pedidoVinculado = pedidosMap.get(mov.pedido_id);
 
                       return (
                         <TableRow key={mov.id}>

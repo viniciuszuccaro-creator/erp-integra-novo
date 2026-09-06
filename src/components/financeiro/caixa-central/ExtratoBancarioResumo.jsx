@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import useContextoVisual from '@/components/lib/useContextoVisual';
+import { exportarCSV } from '@/components/relatorios/exportUtils';
 import { 
   Building2, 
   TrendingUp, 
@@ -17,19 +18,19 @@ import {
 } from 'lucide-react';
 
 export default function ExtratoBancarioResumo() {
-  const { filterInContext, empresaAtual } = useContextoVisual();
+  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
   const [dataInicio, setDataInicio] = useState(new Date(new Date().setDate(1)).toISOString().split('T')[0]);
   const [dataFim, setDataFim] = useState(new Date().toISOString().split('T')[0]);
 
   const { data: extratos = [], isLoading } = useQuery({
-    queryKey: ['extrato-bancario', dataInicio, dataFim, empresaAtual?.id],
+    queryKey: ['extrato-bancario', dataInicio, dataFim, grupoAtual?.id || 'nogroup', empresaAtual?.id || 'all'],
     queryFn: () => filterInContext('ExtratoBancario', {
       data_lancamento: {
         $gte: new Date(dataInicio + 'T00:00:00').toISOString(),
         $lte: new Date(dataFim + 'T23:59:59').toISOString()
       }
     }, '-data_lancamento'),
-    enabled: !!empresaAtual?.id
+    enabled: !!(empresaAtual?.id || grupoAtual?.id)
   });
 
   const totalEntradas = extratos.filter(e => e.tipo_lancamento === 'Crédito').reduce((sum, e) => sum + (e.valor || 0), 0);
@@ -83,7 +84,18 @@ export default function ExtratoBancarioResumo() {
                   className="w-40 h-8"
                 />
               </div>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={extratos.length === 0}
+                onClick={() => exportarCSV(
+                  extratos.map(e => ({
+                    data: e.data_lancamento, conta: e.conta_bancaria_nome, tipo: e.tipo_lancamento,
+                    historico: e.historico || e.descricao, valor: e.valor, saldo: e.saldo_apos
+                  })),
+                  'extrato_bancario'
+                )}
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Exportar
               </Button>

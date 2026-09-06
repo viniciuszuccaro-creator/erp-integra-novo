@@ -70,10 +70,11 @@ export default function useRemessaRetorno() {
       if (!titulos.length) throw new Error("Selecione ao menos um título.");
 
       const numeroArquivo = arquivos.filter(a => a.tipo_arquivo === 'Remessa').length + 1;
-      const conteudoCNAB = titulos.map((t, idx) => {
-        const nossoNumero = String(Date.now() + idx).substring(0, 10);
-        return `REG:${nossoNumero}|CLIENTE:${t.cliente}|VALOR:${t.valor}|VENC:${t.data_vencimento}`;
-      }).join('\n');
+      // Nosso número calculado UMA vez por título — mesmo valor no arquivo CNAB, no título e no retorno
+      const nos = titulos.map((t, idx) => ({ titulo: t, nossoNumero: String(Date.now() + idx).substring(0, 10) }));
+      const conteudoCNAB = nos.map(({ titulo: t, nossoNumero }) =>
+        `REG:${nossoNumero}|CLIENTE:${t.cliente}|VALOR:${t.valor}|VENC:${t.data_vencimento}`
+      ).join('\n');
 
       const arquivo = await createInContext('ArquivoRemessaRetorno', {
         ...(titulos[0].empresa_id ? { empresa_id: titulos[0].empresa_id } : {}),
@@ -90,9 +91,9 @@ export default function useRemessaRetorno() {
         arquivo_nome: `REM${banco.codigo}_${numeroArquivo}.REM`,
         conteudo_arquivo: conteudoCNAB,
         status: 'Gerado',
-        titulos_incluidos: titulos.map((t, idx) => ({
+        titulos_incluidos: nos.map(({ titulo: t, nossoNumero }) => ({
           titulo_id: t.id,
-          nosso_numero: String(Date.now() + idx).substring(0, 10),
+          nosso_numero: nossoNumero,
           valor: t.valor,
           vencimento: t.data_vencimento,
           cliente_nome: t.cliente,
@@ -100,8 +101,7 @@ export default function useRemessaRetorno() {
         }))
       });
 
-      for (const titulo of titulos) {
-        const nossoNumero = String(Date.now()).substring(0, 10);
+      for (const { titulo, nossoNumero } of nos) {
         await updateInContext('ContaReceber', titulo.id, {
           arquivo_remessa_id: arquivo.id,
           nosso_numero: nossoNumero,
@@ -114,6 +114,7 @@ export default function useRemessaRetorno() {
     onSuccess: (arquivo) => {
       auditRemessa('Emissão', `Remessa CNAB gerada (${arquivo.quantidade_titulos} títulos)`, { arquivo_id: arquivo.id, arquivo_nome: arquivo.arquivo_nome, banco: arquivo.banco_nome, valor_total: arquivo.valor_total, titulos_ids: arquivo.titulos_incluidos?.map(t => t.titulo_id) });
       queryClient.invalidateQueries({ queryKey: ['contasReceber'] });
+      queryClient.invalidateQueries({ queryKey: ['ContaReceber'] });
       queryClient.invalidateQueries({ queryKey: ['arquivos-remessa-retorno'] });
       toast.success(`✅ Remessa gerada! ${arquivo.quantidade_titulos} títulos`);
       setTitulosSelecionados([]);
@@ -189,6 +190,7 @@ export default function useRemessaRetorno() {
     onSuccess: ({ arquivo, titulosBaixados, titulosAntes }) => {
       auditRemessa('Baixa', `Retorno CNAB processado (${titulosBaixados} título(s) baixado(s))`, { arquivo_id: arquivo.id, arquivo_nome: arquivo.arquivo_nome, titulos_baixados: titulosAntes });
       queryClient.invalidateQueries({ queryKey: ['contasReceber'] });
+      queryClient.invalidateQueries({ queryKey: ['ContaReceber'] });
       queryClient.invalidateQueries({ queryKey: ['arquivos-remessa-retorno'] });
       toast.success(`✅ Retorno processado! ${titulosBaixados} título(s) baixado(s)`);
       setProcessandoRetorno(false);

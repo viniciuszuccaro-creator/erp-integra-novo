@@ -20,19 +20,24 @@ export default function RelatorioDRE() {
     data_inicio: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0],
     data_fim: new Date().toISOString().split('T')[0],
   });
-  const { filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const { filterInContext, empresaAtual, grupoAtual, contexto } = useContextoVisual();
   const { user } = useUser();
   const { canExport } = usePermissions();
   const groupId = grupoAtual?.id || empresaAtual?.group_id || null;
   const podeExportar = canExport('Relatórios', 'DRE') || canExport('Financeiro');
+  // Regra-Mãe 5a: contexto multiempresa explícito nas chaves — impede cache cruzado entre empresas/grupo
+  const contextoKey = `${grupoAtual?.id || 'nogroup'}:${empresaAtual?.id || 'all'}:${contexto}`;
+  const contextoValido = !!(empresaAtual?.id || contexto === 'grupo');
 
   const { data: pedidos = [] } = useQuery({
-    queryKey: ['dre-pedidos', empresaAtual?.id],
+    queryKey: ['dre-pedidos', contextoKey],
     queryFn: () => filterInContext('Pedido', {}, '-data_pedido', 9999),
+    enabled: contextoValido,
   });
   const { data: pagar = [] } = useQuery({
-    queryKey: ['dre-pagar', empresaAtual?.id],
+    queryKey: ['dre-pagar', contextoKey],
     queryFn: () => filterInContext('ContaPagar', {}, '-data_vencimento', 9999),
+    enabled: contextoValido,
   });
 
   const filtrar = (lista, campo) => {

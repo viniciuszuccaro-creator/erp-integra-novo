@@ -1053,6 +1053,13 @@ Estado consolidado:
 - `usePontoEletronico.jsx`: registro de ponto revalida RBAC e contexto de grupo na persistência (fail-closed) e gera `AuditLog` com contexto e dados do registro; foto facial redimensionada antes de salvar (evita campo oversized que quebra operações do registro); toast de erro adicionado. Validação por IA mantém bypass automático enquanto créditos do workspace estiverem esgotados.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### Integrações — Regra-Mãe aplicada (2026-09-06, lote 12)
+- `CentralIntegracoes.jsx`: ativar/desativar integrações agora exige RBAC (Sistema.integracoes.configurar, fail-closed) e sanitiza payload e registro completo no update.
+- `ConfigWhatsAppBusiness.jsx`: criação de ConfiguracaoSistema migrada para `createInContext`.
+- `SincronizacaoMarketplacesAtiva.jsx`: criação de Pedido (importação) e update de PedidoExterno migrados para `createInContext`/`updateInContext`; criação de PedidoExterno na sincronização agora carimba group_id/empresa_id do contexto atual (corrige registros sem contexto); botões de sincronizar/importar protegidos por RBAC.
+- `IntegrationConfigButtons.jsx`: persistência de configuração de integrações migrada para `updateInContext`/`createInContext`.
+- Próximo lote: componentes lib compartilhados (13).
+
 ### Auditoria/Dashboard/Relatórios/Portal — Regra-Mãe aplicada (2026-09-06, lotes 10-11)
 - Auditoria e Dashboard já estavam limpos (sem mutações cruas).
 - `AgendamentoRelatorios.jsx`: update de ConfiguracaoSistema migrado para `updateInContext` (sanitização + contexto + auditoria).

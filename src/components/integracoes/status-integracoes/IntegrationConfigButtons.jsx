@@ -7,6 +7,7 @@ import ConfiguracaoBoletosForm from '@/components/cadastros/ConfiguracaoBoletosF
 import ConfiguracaoWhatsAppForm from '@/components/cadastros/ConfiguracaoWhatsAppForm';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/use-toast';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 
 const ENTITY_MAP = {
   nfe: { form: ConfiguracaoNFeForm, key: 'integracao_nfe', queryKey: 'configs-integracoes', title: '⚙️ Configurar NF-e' },
@@ -18,6 +19,7 @@ export default function IntegrationConfigButtons({ integracao, empresaId, groupI
   const { openWindow } = useWindow();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { createInContext, updateInContext } = useContextoVisual();
   const scopeId = empresaId || groupId || null;
   const scope = empresaId ? { empresa_id: empresaId } : groupId ? { group_id: groupId } : {};
 
@@ -31,11 +33,12 @@ export default function IntegrationConfigButtons({ integracao, empresaId, groupI
         const chave = `integracoes_${scopeId}`;
         const existentes = await base44.entities.ConfiguracaoSistema.filter({ chave, ...scope }, undefined, 1);
         const payload = { chave, categoria: 'Integracoes', ...scope, [cfg.key]: data };
+        // Regra-Mãe 5: persistência protegida com sanitização, contexto e auditoria
         if (existentes && existentes.length > 0) {
-          await base44.entities.ConfiguracaoSistema.update(existentes[0].id, { ...existentes[0], ...payload });
+          await updateInContext('ConfiguracaoSistema', existentes[0].id, { ...existentes[0], ...payload });
           toast({ title: `✅ Integração atualizada!` });
         } else {
-          await base44.entities.ConfiguracaoSistema.create(payload);
+          await createInContext('ConfiguracaoSistema', payload);
           toast({ title: `✅ Integração criada!` });
         }
         queryClient.invalidateQueries({ queryKey: [cfg.queryKey] });

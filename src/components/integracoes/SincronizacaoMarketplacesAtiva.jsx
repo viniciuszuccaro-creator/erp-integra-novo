@@ -15,6 +15,7 @@ import {
   Upload
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import usePermissions from "@/components/lib/usePermissions";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 
 /**
@@ -24,8 +25,11 @@ import { useContextoVisual } from "@/components/lib/useContextoVisual";
 export default function SincronizacaoMarketplacesAtiva() {
   const [sincronizando, setSincronizando] = useState(false);
   const queryClient = useQueryClient();
-  const { filterInContext, createInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const { filterInContext, createInContext, updateInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const { hasPermission } = usePermissions();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+  // Regra-Mãe 5b: RBAC granular — sincronizar/importar exigem edição em integrações
+  const podeSincronizar = hasPermission('Sistema', 'integracoes', 'editar');
 
   const { data: pedidosExternos = [] } = useQuery({
     queryKey: ['pedidos-externos-pendentes', contextoKey],
@@ -75,8 +79,8 @@ export default function SincronizacaoMarketplacesAtiva() {
         }
       }
 
-      // 2. Criar pedido no ERP
-      const pedidoERP = await base44.entities.Pedido.create({
+      // 2. Criar pedido no ERP — Regra-Mãe 5: persistência protegida (sanitização + contexto + auditoria)
+      const pedidoERP = await createInContext('Pedido', {
         numero_pedido: `${pedidoExterno.origem.substring(0, 3).toUpperCase()}-${pedidoExterno.numero_pedido_externo}`,
         cliente_id: clienteId,
         cliente_nome: pedidoExterno.cliente_nome,
@@ -107,8 +111,8 @@ export default function SincronizacaoMarketplacesAtiva() {
         observacoes_publicas: `Importado de ${pedidoExterno.origem} - Pedido #${pedidoExterno.numero_pedido_externo}`
       });
 
-      // 3. Atualizar pedido externo
-      await base44.entities.PedidoExterno.update(pedidoExterno.id, {
+      // 3. Atualizar pedido externo — Regra-Mãe 5: persistência protegida
+      await updateInContext('PedidoExterno', pedidoExterno.id, {
         status_importacao: 'Importado',
         validado: true,
         pedido_erp_id: pedidoERP.id,
@@ -162,10 +166,12 @@ export default function SincronizacaoMarketplacesAtiva() {
     ];
 
     for (const pedido of novosPedidos) {
-      await base44.entities.PedidoExterno.create({
+      // Regra-Mãe 5: persistência protegida + carimbo obrigatório do contexto atual
+      // (corrige estampagem ausente: registros criados sem grupo/empresa explícitos)
+      await createInContext('PedidoExterno', {
         ...pedido,
-        group_id: pedido.group_id,
-        empresa_id: pedido.empresa_id,
+        group_id: grupoAtual?.id,
+        empresa_id: empresaAtual?.id,
         status_importacao: 'A Validar',
         json_completo: pedido
       });
@@ -201,7 +207,7 @@ export default function SincronizacaoMarketplacesAtiva() {
             </CardTitle>
             <Button
             onClick={sincronizarTodos}
-            disabled={sincronizando}
+            disabled={sincronizando || !podeSincronizar}
               size="sm"
               className="bg-blue-600 hover:bg-blue-700"
             >
@@ -276,7 +282,7 @@ export default function SincronizacaoMarketplacesAtiva() {
                         <Button
                           size="sm"
                           onClick={() => importarPedidoMutation.mutate(pe)}
-                          disabled={importarPedidoMutation.isPending}
+                          disabled={importarPedidoMutation.isPending || !podeSincronizar}
                           className="bg-green-600 hover:bg-green-700"
                         >
                           <Download className="w-4 h-4 mr-1" />

@@ -39,9 +39,9 @@ async function liberarReservaEstoque(movimentacaoReserva, empresaId) {
   }, { group_id: movimentacaoReserva.group_id, empresa_id: empresaId })));
 
   await auditar("Estoque", "MovimentacaoEstoque", "create", mov.id, "Liberação de reserva - pedido cancelado", empresaId, null, mov);
-  await base44.entities.Produto.update(produto.id, withFlowContext({
+  await base44.entities.Produto.update(produto.id, sanitizeFlow(withFlowContext({
     estoque_reservado: Math.max(0, (produto.estoque_reservado || 0) - movimentacaoReserva.quantidade)
-  }, produto));
+  }, produto)));
 }
 
 /**
@@ -71,7 +71,7 @@ export async function cancelarPedidoCompleto(pedido, empresaId) {
     });
 
     for (const conta of contas) {
-      await base44.entities.ContaReceber.update(conta.id, withFlowContext({ status: "Cancelado" }, conta));
+      await base44.entities.ContaReceber.update(conta.id, sanitizeFlow(withFlowContext({ status: "Cancelado" }, conta)));
       await auditar("Financeiro", "ContaReceber", "update", conta.id, `Conta a receber cancelada (Pedido ${pedido.numero_pedido})`, empresaId, { status: conta.status }, { status: "Cancelado" });
       resultados.contasCanceladas.push(conta);
     }
@@ -80,7 +80,7 @@ export async function cancelarPedidoCompleto(pedido, empresaId) {
       await atualizarLimiteCreditoCliente(pedido.cliente_id, pedido.valor_total, 'remover');
     }
 
-    await base44.entities.Pedido.update(pedido.id, withFlowContext({ status: "Cancelado" }, pedido));
+    await base44.entities.Pedido.update(pedido.id, sanitizeFlow(withFlowContext({ status: "Cancelado" }, pedido)));
     await auditar("Comercial", "Pedido", "update", pedido.id, `Pedido ${pedido.numero_pedido} cancelado`, empresaId, null, { status: "Cancelado" });
   } catch (error) {
     resultados.erros.push(`Erro ao cancelar: ${error.message}`);

@@ -54,12 +54,12 @@ export async function atualizarLimiteCreditoCliente(clienteId, valor, operacao =
   const limiteAtual = cliente.condicao_comercial?.limite_credito_utilizado || 0;
   const novoLimite = operacao === 'adicionar' ? limiteAtual + valor : limiteAtual - valor;
 
-  await base44.entities.Cliente.update(clienteId, withFlowContext({
+  await base44.entities.Cliente.update(clienteId, sanitizeFlow(withFlowContext({
     condicao_comercial: {
       ...(cliente.condicao_comercial || {}),
       limite_credito_utilizado: Math.max(0, novoLimite)
     }
-  }, cliente));
+  }, cliente)));
   // Regra-Mãe 5d: auditoria do ajuste de limite de crédito (antes/depois)
   await auditar("CRM", "Cliente", "update", clienteId,
     `Limite de crédito utilizado atualizado: R$ ${Math.max(0, novoLimite).toFixed(2)}`,
@@ -113,7 +113,7 @@ export async function baixarEstoqueItemAprovacao(item, pedido, empresaId) {
     aprovado: true
   }, { group_id: pedido.group_id, empresa_id: empresaId })));
 
-  await base44.entities.Produto.update(item.produto_id, withFlowContext({ estoque_atual: novoEstoque }, produto));
+  await base44.entities.Produto.update(item.produto_id, sanitizeFlow(withFlowContext({ estoque_atual: novoEstoque }, produto)));
   await auditar("Estoque", "MovimentacaoEstoque", "create", movimentacao.id, `Baixa por faturamento - Pedido ${pedido.numero_pedido}`, empresaId, null, movimentacao);
   return movimentacao;
 }
@@ -181,10 +181,10 @@ async function gerarOPAutomatica(pedido, empresaId) {
   }, { group_id: pedido.group_id, empresa_id: empresaId })));
 
   await auditar("Produção", "OrdemProducao", "create", op.id, `OP ${numeroOP} gerada do Pedido ${pedido.numero_pedido}`, empresaId, null, op);
-  await base44.entities.Pedido.update(pedido.id, withFlowContext({
+  await base44.entities.Pedido.update(pedido.id, sanitizeFlow(withFlowContext({
     ordem_producao_ids: [...(pedido.ordem_producao_ids || []), op.id],
     status: "Em Produção"
-  }, pedido));
+  }, pedido)));
 
   return op;
 }
@@ -263,10 +263,10 @@ export async function aprovarPedidoCompleto(pedido, empresaId) {
       await atualizarLimiteCreditoCliente(pedido.cliente_id, pedido.valor_total, 'adicionar');
     }
 
-    await base44.entities.Pedido.update(pedido.id, withFlowContext({
+    await base44.entities.Pedido.update(pedido.id, sanitizeFlow(withFlowContext({
       status: "Aprovado",
       data_aprovacao: new Date().toISOString()
-    }, pedido));
+    }, pedido)));
     await auditar("Comercial", "Pedido", "update", pedido.id, `Pedido ${pedido.numero_pedido} aprovado`, empresaId, null, { status: "Aprovado" });
 
     const userHC = await getUsuarioAtual();

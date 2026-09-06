@@ -106,9 +106,9 @@ export async function executarFechamentoCompleto(pedido, empresaId, callbacks = 
       const tipoFrete = pedido.tipo_frete || 'CIF';
 
       if (tipoFrete === 'Retirada') {
-        await base44.entities.Pedido.update(pedido.id, withFlowContext({
+        await base44.entities.Pedido.update(pedido.id, sanitizeFlow(withFlowContext({
           observacoes_internas: (pedido.observacoes_internas || '') + '\n[AUTOMAÇÃO] Cliente irá retirar na loja.'
-        }, pedido));
+        }, pedido)));
         onLog(`✅ Pedido marcado para RETIRADA`, 'success');
       } else {
         const user = await getUsuarioAtual();
@@ -152,11 +152,11 @@ export async function executarFechamentoCompleto(pedido, empresaId, callbacks = 
     // ETAPA 4: Atualizar Status
     onLog('📝 Atualizando status do pedido...', 'info');
     try {
-      await base44.entities.Pedido.update(pedido.id, withFlowContext({
+      await base44.entities.Pedido.update(pedido.id, sanitizeFlow(withFlowContext({
         status: 'Pronto para Faturar',
         observacoes_internas: (pedido.observacoes_internas || '') +
           `\n[AUTOMAÇÃO ${new Date().toLocaleString('pt-BR')}] Fluxo automático concluído com sucesso.`
-      }, pedido));
+      }, pedido)));
       await auditar("Comercial", "Pedido", "update", pedido.id, `Pedido ${pedido.numero_pedido} pronto para faturar (fechamento automático)`, empresaId, null, { status: 'Pronto para Faturar' });
 
       resultados.status.sucesso = true;

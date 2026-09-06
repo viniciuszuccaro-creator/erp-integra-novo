@@ -47,10 +47,10 @@ async function baixarEstoqueItem(item, pedido, empresaId, quantidadeFaturar) {
     responsavel_id: user?.id
   }, { group_id: pedido.group_id, empresa_id: empresaId })));
 
-  await base44.entities.Produto.update(item.produto_id, withFlowContext({
+  await base44.entities.Produto.update(item.produto_id, sanitizeFlow(withFlowContext({
     estoque_atual: novoEstoque,
     estoque_reservado: novoReservado
-  }, produto));
+  }, produto)));
 
   await auditar("Estoque", "MovimentacaoEstoque", "create", movimentacao.id,
     `Baixa por faturamento ${quantidadeFaturar != null ? 'parcial' : 'total'} - Pedido ${pedido.numero_pedido}`,
@@ -256,7 +256,7 @@ export async function faturarPedidoCompleto(pedido, nfe, empresaId, itensParaFat
       itens_corte_dobra: pedido.itens_corte_dobra,
     };
 
-    await base44.entities.Pedido.update(pedido.id, withFlowContext(updateData, pedido));
+    await base44.entities.Pedido.update(pedido.id, sanitizeFlow(withFlowContext(updateData, pedido)));
 
     // Vol 5.2: Auditoria com antes/depois
     await auditar("Comercial", "Pedido", "update", pedido.id,

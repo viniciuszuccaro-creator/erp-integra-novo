@@ -181,9 +181,9 @@ async function criarClienteAsaas(conta, config) {
   const resultado = await response.json();
   
   // Salvar ID do cliente no sistema
-  await base44.entities.Cliente.update(cliente.id, withFlowContext({
+  await base44.entities.Cliente.update(cliente.id, sanitizeFlow(withFlowContext({
     cliente_asaas_id: resultado.id
-  }, cliente));
+  }, cliente)));
   
   return resultado.id;
 }
@@ -283,14 +283,14 @@ export async function gerarCobranca(contaReceber, tipo = 'BOLETO') {
     }
 
     // 5. Atualizar log de sucesso
-    await base44.entities.LogCobranca.update(logId.id, withFlowContext({
+    await base44.entities.LogCobranca.update(logId.id, sanitizeFlow(withFlowContext({
       retorno_recebido: resultado,
       status_operacao: 'sucesso',
       id_cobranca_externa: resultado.id,
       linha_digitavel: resultado.linha_digitavel,
       pix_copia_cola: resultado.pix_copia_cola,
       url_boleto: resultado.url_boleto
-    }, contaReceber));
+    }, contaReceber)));
 
     return {
       ...resultado,
@@ -299,10 +299,10 @@ export async function gerarCobranca(contaReceber, tipo = 'BOLETO') {
     
   } catch (error) {
     // 6. Atualizar log de erro
-    await base44.entities.LogCobranca.update(logId.id, withFlowContext({
+    await base44.entities.LogCobranca.update(logId.id, sanitizeFlow(withFlowContext({
       status_operacao: 'erro',
       mensagem: error.message
-    }, contaReceber));
+    }, contaReceber)));
 
     throw error;
   }

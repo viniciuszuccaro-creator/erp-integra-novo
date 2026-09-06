@@ -41,7 +41,7 @@ async function baixarMaterialProducao(material, op, empresaId) {
   }, { group_id: op.group_id, empresa_id: empresaId })));
 
   await auditar("Estoque", "MovimentacaoEstoque", "create", movConsumo.id, `Consumo na produção - OP ${op.numero_op}`, empresaId, null, movConsumo);
-  await base44.entities.Produto.update(produto.id, withFlowContext({ estoque_atual: Math.max(0, novoEstoque) }, produto));
+  await base44.entities.Produto.update(produto.id, sanitizeFlow(withFlowContext({ estoque_atual: Math.max(0, novoEstoque) }, produto)));
 
   return movConsumo;
 }
@@ -109,7 +109,7 @@ export async function concluirOPCompleto(op, empresaId) {
     );
 
     if (op.pedido_id) {
-      await base44.entities.Pedido.update(op.pedido_id, withFlowContext({ status: "Pronto para Faturar" }, { group_id: op.group_id, empresa_id: op.empresa_id || empresaId }));
+      await base44.entities.Pedido.update(op.pedido_id, sanitizeFlow(withFlowContext({ status: "Pronto para Faturar" }, { group_id: op.group_id, empresa_id: op.empresa_id || empresaId })));
       await auditar("Comercial", "Pedido", "update", op.pedido_id,
         `Pedido ${op.numero_pedido || ''} pronto para faturar (via OP ${op.numero_op})`,
         empresaId, { status: op.status }, { status: "Pronto para Faturar" });

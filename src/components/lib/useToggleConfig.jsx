@@ -73,7 +73,7 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
   const pendingRef = useRef({});
   const confirmedTimeoutsRef = useRef({});
   const invalidationTimeoutsRef = useRef({});
-  const { hasPermission } = usePermissions();
+  const { hasPermission, user } = usePermissions();
 
   // Persiste confirmedMap no localStorage a cada mudança
   useEffect(() => {
@@ -172,11 +172,47 @@ export function useToggleConfig(empresaId, grupoId, queryKey) {
     });
 
     if (latest?.id) {
-      return await base44.entities.ConfiguracaoSistema.update(latest.id, payload);
+      const updated = await base44.entities.ConfiguracaoSistema.update(latest.id, payload);
+      // Regra-Mãe 5d: auditoria da alteração de configuração (antes/depois + contexto)
+      try {
+        await base44.entities.AuditLog.create({
+          usuario: user?.full_name || user?.email || 'Sistema',
+          usuario_id: user?.id || null,
+          empresa_id: scope?.empresa_id || null,
+          group_id: scope?.group_id || null,
+          acao: 'Edicao',
+          modulo: 'Sistema',
+          entidade: 'ConfiguracaoSistema',
+          registro_id: latest.id,
+          descricao: `Configuração "${chave}" alterada para ${ativa ? 'ativa' : 'inativa'} (fallback direto)`,
+          dados_anteriores: { ativa: latest.ativa },
+          dados_novos: { ativa },
+          sucesso: true,
+          data_hora: new Date().toISOString(),
+        });
+      } catch (e) { console.error('[lib] catch:', e); }
+      return updated;
     }
 
-    return await base44.entities.ConfiguracaoSistema.create(payload);
-  }, [findMatchingRecord]);
+    const created = await base44.entities.ConfiguracaoSistema.create(payload);
+    try {
+      await base44.entities.AuditLog.create({
+        usuario: user?.full_name || user?.email || 'Sistema',
+        usuario_id: user?.id || null,
+        empresa_id: scope?.empresa_id || null,
+        group_id: scope?.group_id || null,
+        acao: 'Criacao',
+        modulo: 'Sistema',
+        entidade: 'ConfiguracaoSistema',
+        registro_id: created?.id || null,
+        descricao: `Configuração "${chave}" criada como ${ativa ? 'ativa' : 'inativa'} (fallback direto)`,
+        dados_novos: { ativa },
+        sucesso: true,
+        data_hora: new Date().toISOString(),
+      });
+    } catch (e) { console.error('[lib] catch:', e); }
+    return created;
+  }, [findMatchingRecord, user]);
 
   const persistToggle = useCallback(async (chave, categoria, newValue, scope) => {
     // Retry com backoff exponencial para lidar com 429 rate limit transitório

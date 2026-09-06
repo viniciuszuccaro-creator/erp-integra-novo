@@ -1053,6 +1053,12 @@ Estado consolidado:
 - `usePontoEletronico.jsx`: registro de ponto revalida RBAC e contexto de grupo na persistência (fail-closed) e gera `AuditLog` com contexto e dados do registro; foto facial redimensionada antes de salvar (evita campo oversized que quebra operações do registro); toast de erro adicionado. Validação por IA mantém bypass automático enquanto créditos do workspace estiverem esgotados.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### Lib compartilhada / Fluxos de pedido — Regra-Mãe reforçada (2026-09-06, lote 13)
+- `fluxoPedido` (aprovar, cancelar, concluirOP, faturar, fechamentoAutomatico): todos os updates remanescentes (Cliente, Produto, Pedido, ContaReceber) agora envolvidos em `sanitizeFlow(withFlowContext(...))` — sanitização antes de toda persistência, auditoria antes/depois já preservada via auditHelper.
+- `integracaoBoletos.jsx`: update de Cliente (Asaas) e updates de LogCobranca (sucesso/erro) sanitizados.
+- `useToggleConfig.jsx`: fallback de persistência direta (saveDirectConfig) agora gera AuditLog com usuário, contexto e antes/depois.
+- Próximo lote: varredura final global de mutações cruas remanescentes (14).
+
 ### Integrações — Regra-Mãe aplicada (2026-09-06, lote 12)
 - `CentralIntegracoes.jsx`: ativar/desativar integrações agora exige RBAC (Sistema.integracoes.configurar, fail-closed) e sanitiza payload e registro completo no update.
 - `ConfigWhatsAppBusiness.jsx`: criação de ConfiguracaoSistema migrada para `createInContext`.

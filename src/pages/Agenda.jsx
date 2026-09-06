@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { useWindow } from "@/components/lib/useWindow";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 import ProtectedSection from "@/components/security/ProtectedSection";
 import SemEmpresaBanner from "@/components/common/SemEmpresaBanner";
 import ErrorBoundary from "@/components/lib/ErrorBoundary";
@@ -36,6 +37,7 @@ function Agenda() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { filterInContext, carimbarContexto, createInContext, updateInContext, deleteInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const { canCreate, canEdit, canDelete } = usePermissions();
   const groupId = grupoAtual?.id || empresaAtual?.group_id || null;
   const contextoValido = !!(empresaAtual?.id || groupId);
 
@@ -79,6 +81,8 @@ function Agenda() {
 
   const createEventoMutation = useMutation({
     mutationFn: async (data) => {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canCreate('Agenda')) throw new Error('Sem permissão para criar eventos.');
       const dataInicio = `${data.data_inicio}T${data.hora_inicio || "00:00"}:00`;
       const dataFim = `${data.data_fim}T${data.hora_fim || "23:59"}:00`;
 
@@ -94,10 +98,13 @@ function Agenda() {
       queryClient.invalidateQueries({ queryKey: ["eventos"] });
       toast({ title: "Evento criado com sucesso" });
     },
+    onError: (e) => toast({ title: "Erro ao criar evento", description: e?.message, variant: "destructive" }),
   });
 
   const updateEventoMutation = useMutation({
     mutationFn: async (data) => {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('Agenda')) throw new Error('Sem permissão para editar eventos.');
       const dataInicio = `${data.data_inicio}T${data.hora_inicio || "00:00"}:00`;
       const dataFim = `${data.data_fim}T${data.hora_fim || "23:59"}:00`;
 
@@ -111,10 +118,13 @@ function Agenda() {
       queryClient.invalidateQueries({ queryKey: ["eventos"] });
       toast({ title: "Evento atualizado com sucesso" });
     },
+    onError: (e) => toast({ title: "Erro ao atualizar evento", description: e?.message, variant: "destructive" }),
   });
 
   const deleteEventoMutation = useMutation({
     mutationFn: async (id) => {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canDelete('Agenda')) throw new Error('Sem permissão para excluir eventos.');
       return await deleteInContext('Evento', id);
     },
     onSuccess: () => {
@@ -122,6 +132,7 @@ function Agenda() {
       toast({ title: "Evento deletado com sucesso" });
       setEventoSelecionado(null);
     },
+    onError: (e) => toast({ title: "Erro ao excluir evento", description: e?.message, variant: "destructive" }),
   });
 
   const handleNovoEvento = () => {

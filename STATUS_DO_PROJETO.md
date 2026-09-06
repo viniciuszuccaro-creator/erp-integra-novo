@@ -1053,6 +1053,12 @@ Estado consolidado:
 - `usePontoEletronico.jsx`: registro de ponto revalida RBAC e contexto de grupo na persistência (fail-closed) e gera `AuditLog` com contexto e dados do registro; foto facial redimensionada antes de salvar (evita campo oversized que quebra operações do registro); toast de erro adicionado. Validação por IA mantém bypass automático enquanto créditos do workspace estiverem esgotados.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### Agenda + Central de Aprovações (Comercial) — Regra-Mãe aplicada (2026-09-06)
+- `Agenda.jsx`: criar/editar/excluir evento agora valida RBAC (criar/editar/excluir do módulo Agenda) na persistência, fail-closed; mutações ganharam feedback de erro (falhas antes silenciosas). Persistência já usava `createInContext`/`updateInContext`/`deleteInContext` (carimbo de contexto + auditoria + exclusão lógica de Evento preservados).
+- `useCentralAprovacoes.jsx`: aprovar/negar desconto de pedido usava `Pedido.update` cru — sem RBAC, sem auditoria e sem carimbo; migrado para `updateInContext('Pedido')` (auditoria antes/depois automática), com RBAC granular `aprovar` do módulo Comercial (fail-closed), validação de contexto de grupo do pedido e feedback de erro na negação.
+- `OportunidadeForm.jsx`: ajuste de segurança da correção anterior — quando um `onSubmit` externo é passado (ex.: Ações Rápidas globais), o formulário delega a persistência a ele em vez de gravar duplicado; RBAC e `onSuccess` mantidos.
+- Verificado sem alteração necessária: `CentralAprovacoesManager.jsx` (gate visual de acesso já existe), `AnalisePedidoAprovacao.jsx` (puro cálculo/UI), `AgendaFormDialog.jsx` (delega persistência à página via `onSave`).
+
 ### CRM (Oportunidades) — Regra-Mãe aplicada (2026-09-06)
 - `OportunidadeForm.jsx`: **correção de fluxo quebrado** — o formulário chamava um `onSubmit` que a listagem nunca passava (criar/editar oportunidade não persistia nada); agora persiste via `createInContext`/`updateInContext` (carimba grupo/empresa), valida RBAC e contexto na persistência (fail-closed), gera `AuditLog` com antes/depois, e mantém retrocompatibilidade + chamada de `onSuccess`. Botão salvar desabilita sem permissão.
 - `OportunidadesListagem.jsx`: exclusão de oportunidade era física, sem RBAC e sem auditoria — agora revalida `excluir` e contexto na persistência (fail-closed) e gera `AuditLog` completo com estado "antes"; feedback de erro adicionado (falhas antes silenciosas). Botões Nova/Editar/Excluir passaram a RBACButton (módulo CRM).

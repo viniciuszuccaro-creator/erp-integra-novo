@@ -61,6 +61,8 @@ export default function OportunidadeForm({ oportunidade, onSubmit, onSuccess, wi
   // Corrige fluxo quebrado: o formulário chamava um "onSubmit" que a listagem nunca passava (salvar não persistia).
   const handleSubmit = async (dados) => {
     if (!podeSalvar) throw new Error('Sem permissão para salvar oportunidades.');
+    // Fluxos legados (ex.: Ações Rápidas) persistem via onSubmit próprio — delega para evitar duplicação
+    if (typeof onSubmit === 'function') { await onSubmit(dados); return; }
     if (!dados?.group_id) throw new Error('Sem contexto de grupo/empresa — operação bloqueada.');
     const salvou = oportunidade
       ? await updateInContext('Oportunidade', oportunidade.id, dados)
@@ -77,7 +79,6 @@ export default function OportunidadeForm({ oportunidade, onSubmit, onSuccess, wi
       });
     } catch (_) { console.error('[crm] falha ao auditar oportunidade:', _); }
     toast.success(oportunidade ? 'Oportunidade atualizada!' : 'Oportunidade criada!');
-    if (typeof onSubmit === 'function') onSubmit(salvou); // retrocompatibilidade
     if (typeof onSuccess === 'function') onSuccess(salvou);
   };
 

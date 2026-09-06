@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 import { useUser } from "@/components/lib/UserContext";
 import { useToast } from "@/components/ui/use-toast";
 import AutomacaoFluxoPedido from "@/components/comercial/AutomacaoFluxoPedido";
@@ -13,7 +14,8 @@ export default function useCentralAprovacoes(empresaId) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { user } = useUser();
-  const { filterInContext } = useContextoVisual();
+  const { filterInContext, updateInContext } = useContextoVisual();
+  const { canApprove } = usePermissions();
 
   const { data: pedidos = [] } = useQuery({
     queryKey: ['pedidos-aprovacoes', empresaId],
@@ -26,8 +28,11 @@ export default function useCentralAprovacoes(empresaId) {
 
   const aprovarPedidoMutation = useMutation({
     mutationFn: async ({ pedidoId, dados, executarFechamento = false }) => {
+      // Regra-Mãe 5: RBAC granular na persistência (fail-closed)
+      if (!canApprove('Comercial')) throw new Error('Sem permissão para aprovar descontos.');
       const pedidosCompletos = await base44.entities.Pedido.filter({ id: pedidoId });
       const pedido = pedidosCompletos[0];
+      if (!pedido?.group_id) throw new Error('Pedido sem contexto de grupo — aprovação bloqueada.');
 
       const itensRevenda = [], itensArmado = [], itensCorte = [];
       if (dados.itensAtualizados) {
@@ -38,7 +43,7 @@ export default function useCentralAprovacoes(empresaId) {
         });
       }
 
-      await base44.entities.Pedido.update(pedidoId, {
+      await updateInContext('Pedido', pedidoId, {
         status_aprovacao: "aprovado",
         status: "Aprovado",
         usuario_aprovador_id: user?.id,
@@ -85,7 +90,9 @@ export default function useCentralAprovacoes(empresaId) {
 
   const negarPedidoMutation = useMutation({
     mutationFn: async ({ pedidoId, comentarios }) => {
-      await base44.entities.Pedido.update(pedidoId, {
+      // Regra-Mãe 5: RBAC granular na persistência (fail-closed)
+      if (!canApprove('Comercial')) throw new Error('Sem permissão para negar descontos.');
+      await updateInContext('Pedido', pedidoId, {
         status_aprovacao: "negado",
         usuario_aprovador_id: user?.id,
         data_aprovacao: new Date().toISOString(),
@@ -96,7 +103,8 @@ export default function useCentralAprovacoes(empresaId) {
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
       queryClient.invalidateQueries({ queryKey: ['pedidos-aprovacoes'] });
       toast({ title: "❌ Desconto negado" });
-    }
+    },
+    onError: (error) => toast({ title: "❌ Erro ao negar", description: error.message, variant: "destructive" })
   });
 
   const pedidosPendentes = pedidos.filter(p => p.status_aprovacao === "pendente");

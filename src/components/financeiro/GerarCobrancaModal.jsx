@@ -127,6 +127,7 @@ export default function GerarCobrancaModal({ isOpen, onClose, contaReceber }) {
     onSuccess: (data) => {
       auditCobranca('Emissão', 'Boleto gerado (simulado)', { forma_cobranca: 'Boleto', status_cobranca: 'gerada_simulada', id_cobranca_externa: data.id, linha_digitavel: data.identificationField });
       queryClient.invalidateQueries({ queryKey: ['contasReceber'] });
+      queryClient.invalidateQueries({ queryKey: ['ContaReceber'] });
       setCobrancaGerada({ tipo: 'boleto', dados: data });
       toast.success("✅ Boleto gerado!");
     },
@@ -188,6 +189,7 @@ export default function GerarCobrancaModal({ isOpen, onClose, contaReceber }) {
     onSuccess: (data) => {
       auditCobranca('Emissão', 'PIX gerado (simulado)', { forma_cobranca: 'PIX', status_cobranca: 'gerada_simulada', id_cobranca_externa: data.id });
       queryClient.invalidateQueries({ queryKey: ['contasReceber'] });
+      queryClient.invalidateQueries({ queryKey: ['ContaReceber'] });
       setCobrancaGerada({ tipo: 'pix', dados: data });
       toast.success("✅ PIX gerado!");
     },

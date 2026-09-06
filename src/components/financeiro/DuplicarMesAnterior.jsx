@@ -62,8 +62,8 @@ export default function DuplicarMesAnterior({ empresaId }) {
       const inicio = new Date(parseInt(ano), parseInt(mes) - 1, 1);
       const fim = new Date(parseInt(ano), parseInt(mes), 0);
 
-      const filtro = empresaSelecionada ? { empresa_id: empresaSelecionada } : {};
-      const list = await base44.entities.ContaPagar.filter(filtro);
+      // Regra-Mãe 5a: consulta sempre no contexto do grupo/empresa — nunca sem filtro (evita vazamento entre grupos)
+      const list = await filterInContext('ContaPagar', empresaSelecionada ? { empresa_id: empresaSelecionada } : {}, 'data_vencimento', 999);
 
       let contasFiltradas = list.filter(c => {
         const dataVenc = new Date(c.data_vencimento);
@@ -130,6 +130,7 @@ export default function DuplicarMesAnterior({ empresaId }) {
     },
     onSuccess: (novasContas) => {
       queryClient.invalidateQueries({ queryKey: ['contasPagar'] });
+      queryClient.invalidateQueries({ queryKey: ['ContaPagar'] });
       queryClient.invalidateQueries({ queryKey: ['contas-pagar-mes-anterior'] });
       toast({ title: `✅ ${novasContas.length} despesa(s) duplicada(s) para ${mesDestino}!` });
       setDialogOpen(false);

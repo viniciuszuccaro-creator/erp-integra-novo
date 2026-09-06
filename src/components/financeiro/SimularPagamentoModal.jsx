@@ -50,7 +50,7 @@ export default function SimularPagamentoModal({ isOpen, onClose, contaReceber })
       const pagamento = await createInContext('PagamentoOmnichannel', {
         group_id: contaReceber.group_id,
         empresa_id: contaReceber.empresa_id,
-        origem_pagamento: "Simulação Manual",
+        origem_pagamento: 'Link Pagamento', // enum do schema: simulação registrada como Link de Pagamento
         id_cliente: contaReceber.cliente_id,
         cliente_nome: contaReceber.cliente,
         cliente_cpf_cnpj: contaReceber.cliente_cpf_cnpj,
@@ -158,10 +158,14 @@ export default function SimularPagamentoModal({ isOpen, onClose, contaReceber })
       return pagamento;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['contasReceber']);
-      queryClient.invalidateQueries(['pagamentos-omnichannel']);
-      queryClient.invalidateQueries(['caixa-ordens-liquidacao']);
-      queryClient.invalidateQueries(['historico-cliente']);
+      // React Query v5: invalidação exige objeto { queryKey } + chaves unificadas por entidade
+      // (antes: formato de array lançava erro no onSuccess após o título já baixado)
+      queryClient.invalidateQueries({ queryKey: ['contasReceber'] });
+      queryClient.invalidateQueries({ queryKey: ['ContaReceber'] });
+      queryClient.invalidateQueries({ queryKey: ['pagamentos-omnichannel'] });
+      queryClient.invalidateQueries({ queryKey: ['caixa-ordens-liquidacao'] });
+      queryClient.invalidateQueries({ queryKey: ['CaixaOrdemLiquidacao'] });
+      queryClient.invalidateQueries({ queryKey: ['historico-cliente'] });
       setPago(true);
       setProcessando(false);
       toast.success("✅ Pagamento simulado com sucesso!");

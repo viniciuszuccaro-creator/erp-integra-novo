@@ -10,26 +10,30 @@ import { useContextoVisual } from '@/components/lib/useContextoVisual';
 export default function AlertasFinanceirosEmpresa({ empresaId, groupId, windowMode = false }) {
   const { filterInContext, grupoAtual, empresaAtual, contexto } = useContextoVisual();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
+  const contextoAlertas = !!(empresaId || groupId);
   const { data: contasPagar = [] } = useQuery({
-    queryKey: ['alertas-pagar', empresaId],
+    queryKey: ['alertas-pagar', contextoKey, empresaId || 'all'],
     queryFn: () => base44.entities.ContaPagar.filter(
       empresaId ? { empresa_id: empresaId } : { group_id: groupId }
     ),
+    enabled: contextoAlertas,
   });
 
   const { data: contasReceber = [] } = useQuery({
-    queryKey: ['alertas-receber', empresaId],
+    queryKey: ['alertas-receber', contextoKey, empresaId || 'all'],
     queryFn: () => base44.entities.ContaReceber.filter(
       empresaId ? { empresa_id: empresaId } : { group_id: groupId }
     ),
+    enabled: contextoAlertas,
   });
 
   const { data: conciliacoes = [] } = useQuery({
-    queryKey: ['alertas-conciliacao', empresaId],
+    queryKey: ['alertas-conciliacao', contextoKey, empresaId || 'all'],
     queryFn: () => base44.entities.ConciliacaoBancaria.filter({ 
       status: 'Pendente',
       ...(empresaId ? { empresa_id: empresaId } : { group_id: groupId })
     }),
+    enabled: contextoAlertas,
   });
 
   const { data: pedidosAprovacao = [] } = useQuery({

@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import usePermissions from '@/components/lib/usePermissions';
 
 /**
  * V21.6 - CRIAR PEDIDO DIRETO DO CHAT
@@ -33,7 +34,8 @@ export default function CriarPedidoChat({ conversa, clienteId, onPedidoCriado })
   const [buscaProduto, setBuscaProduto] = useState('');
   const [mostrarBusca, setMostrarBusca] = useState(false);
   const queryClient = useQueryClient();
-  const { empresaAtual, filterInContext, grupoAtual, contexto } = useContextoVisual();
+  const { empresaAtual, filterInContext, grupoAtual, contexto, createInContext, updateInContext } = useContextoVisual();
+  const { canCreate, canEdit } = usePermissions();
   const contextoKey = `${grupoAtual?.id || 'sem-grupo'}-${empresaAtual?.id || 'sem-empresa'}`;
 
   // Buscar cliente
@@ -65,6 +67,9 @@ export default function CriarPedidoChat({ conversa, clienteId, onPedidoCriado })
   const criarPedidoMutation = useMutation({
     mutationFn: async () => {
       if (carrinho.length === 0) throw new Error('Carrinho vazio');
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canCreate('Comercial')) throw new Error('Sem permissão para criar pedidos.');
+      if (!grupoAtual?.id || !empresaAtual?.id) throw new Error('Contexto de grupo/empresa obrigatório.');
 
       const valorTotal = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
       const pesoTotal = carrinho.reduce((sum, item) => sum + ((item.peso || 0) * item.quantidade), 0);
@@ -77,7 +82,7 @@ export default function CriarPedidoChat({ conversa, clienteId, onPedidoCriado })
       const novoNumero = `PED-${String(parseInt(ultimoNumero) + 1).padStart(6, '0')}`;
 
       // Criar pedido
-      const pedido = await base44.entities.Pedido.create({
+      const pedido = await createInContext('Pedido', {
         numero_pedido: novoNumero,
         tipo: 'Pedido',
         origem_pedido: 'Chatbot',
@@ -108,7 +113,7 @@ export default function CriarPedidoChat({ conversa, clienteId, onPedidoCriado })
 
       // Vincular pedido à conversa
       if (conversa?.id) {
-        await base44.entities.ConversaOmnicanal.update(conversa.id, {
+        await updateInContext('ConversaOmnicanal', conversa.id, {
           pedido_gerado_id: pedido.id,
           acoes_automaticas_executadas: [
             ...(conversa.acoes_automaticas_executadas || []),

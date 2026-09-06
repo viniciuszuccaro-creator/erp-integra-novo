@@ -12,8 +12,8 @@ export function useHubAtendimentoData({
   conversaSelecionada, setConversaSelecionada, setMensagemAtendente,
 }) {
   const queryClient = useQueryClient();
-  const { user, isAdmin, hasPermission } = usePermissions();
-  const { empresaAtual, filterInContext } = useContextoVisual();
+  const { user, isAdmin, hasPermission, canEdit } = usePermissions();
+  const { empresaAtual, filterInContext, createInContext, updateInContext } = useContextoVisual();
 
   const podeAtenderTransbordo = isAdmin() || hasPermission('chatbot', null, 'visualizar') || hasPermission('CRM', null, 'visualizar');
 
@@ -86,12 +86,14 @@ export function useHubAtendimentoData({
   const enviarMensagemMutation = useMutation({
     mutationFn: async ({ mensagem, arquivo }) => {
       if (!conversaSelecionada) return;
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('HubAtendimento')) throw new Error('Sem permissão para enviar mensagens.');
       let arquivoUrl = null;
       if (arquivo) {
         const result = await base44.integrations.Core.UploadFile({ file: arquivo });
         arquivoUrl = result.file_url;
       }
-      const novaMensagem = await base44.entities.MensagemOmnicanal.create({
+      const novaMensagem = await createInContext('MensagemOmnicanal', {
         conversa_id: conversaSelecionada.id,
         empresa_id: conversaSelecionada.empresa_id || empresaAtual?.id,
         group_id: empresaAtual?.group_id || null,
@@ -106,7 +108,7 @@ export function useHubAtendimentoData({
         data_envio: new Date().toISOString(),
         resposta_automatica: false,
       });
-      await base44.entities.ConversaOmnicanal.update(conversaSelecionada.id, {
+      await updateInContext('ConversaOmnicanal', conversaSelecionada.id, {
         data_ultima_mensagem: new Date().toISOString(),
         total_mensagens: (conversaSelecionada.total_mensagens || 0) + 1,
         mensagens_humano: (conversaSelecionada.mensagens_humano || 0) + 1,
@@ -124,7 +126,9 @@ export function useHubAtendimentoData({
   // Assumir conversa
   const assumirConversaMutation = useMutation({
     mutationFn: async (conversaId) => {
-      await base44.entities.ConversaOmnicanal.update(conversaId, {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('HubAtendimento')) throw new Error('Sem permissão para assumir conversas.');
+      await updateInContext('ConversaOmnicanal', conversaId, {
         atendente_id: user.id,
         atendente_nome: user.full_name,
         status: 'Em Progresso',
@@ -138,7 +142,9 @@ export function useHubAtendimentoData({
   // Resolver conversa
   const resolverConversaMutation = useMutation({
     mutationFn: async (conversaId) => {
-      await base44.entities.ConversaOmnicanal.update(conversaId, {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('HubAtendimento')) throw new Error('Sem permissão para resolver conversas.');
+      await updateInContext('ConversaOmnicanal', conversaId, {
         status: 'Resolvida',
         resolvido: true,
         data_finalizacao: new Date().toISOString(),

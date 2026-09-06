@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
+import usePermissions from '@/components/lib/usePermissions';
 
 /**
  * V21.6 - GERAR 2ª VIA DE BOLETO NO CHAT
@@ -30,7 +31,8 @@ import { useContextoVisual } from '@/components/lib/useContextoVisual';
 export default function GerarBoletoChat({ conversa, clienteId, onBoletoEnviado }) {
   const [tituloSelecionado, setTituloSelecionado] = useState(null);
   const [copiado, setCopiado] = useState(false);
-  const { empresaAtual } = useContextoVisual();
+  const { empresaAtual, updateInContext } = useContextoVisual();
+  const { canEdit } = usePermissions();
 
   // Buscar títulos do cliente
   const { data: titulos = [], isLoading } = useQuery({
@@ -48,6 +50,8 @@ export default function GerarBoletoChat({ conversa, clienteId, onBoletoEnviado }
   // Gerar/Enviar boleto
   const enviarBoletoMutation = useMutation({
     mutationFn: async (titulo) => {
+      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
+      if (!canEdit('Financeiro')) throw new Error('Sem permissão para gerar boletos.');
       // Em produção, chamar integração de boleto
       // Por hora, simular geração
       
@@ -58,7 +62,7 @@ export default function GerarBoletoChat({ conversa, clienteId, onBoletoEnviado }
         `https://boleto.exemplo.com/${titulo.id}`;
 
       // Atualizar título com dados do boleto — preserva group_id/empresa_id
-      await base44.entities.ContaReceber.update(titulo.id, {
+      await updateInContext('ContaReceber', titulo.id, {
         linha_digitavel: linhaDigitavel,
         url_boleto_pdf: urlBoleto,
         status_cobranca: 'gerada',
@@ -69,7 +73,7 @@ export default function GerarBoletoChat({ conversa, clienteId, onBoletoEnviado }
 
       // Registrar na conversa
       if (conversa?.id) {
-        await base44.entities.ConversaOmnicanal.update(conversa.id, {
+        await updateInContext('ConversaOmnicanal', conversa.id, {
           conta_receber_gerada_id: titulo.id,
           group_id: conversa?.group_id,
           empresa_id: conversa?.empresa_id,

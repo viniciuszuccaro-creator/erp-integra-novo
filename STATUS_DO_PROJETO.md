@@ -1053,6 +1053,13 @@ Estado consolidado:
 - `usePontoEletronico.jsx`: registro de ponto revalida RBAC e contexto de grupo na persistência (fail-closed) e gera `AuditLog` com contexto e dados do registro; foto facial redimensionada antes de salvar (evita campo oversized que quebra operações do registro); toast de erro adicionado. Validação por IA mantém bypass automático enquanto créditos do workspace estiverem esgotados.
 - Nenhuma tela, módulo ou componente novo criado; nenhum fluxo removido.
 
+### Produção — Kanban, Listagem, Apontamento e Config — Regra-Mãe aplicada (2026-09-06, lote 9)
+- `OrdensProducaoListagem.jsx`: exclusão de OP migrada para `deleteInContext` (inativação lógica Vol 3.4 + auditoria completa) e botão de excluir agora exige RBAC `Producao.excluir` (Regra-Mãe 5b/5d).
+- `KanbanProducaoInteligente.jsx`: mudança de status via drag sanitizada e auditada (antes/depois com usuário, grupo e empresa).
+- `useApontamentoSimples.jsx`: baixa de MP (MovimentacaoEstoque), ajuste de saldo do Produto e atualização da OP sanitizadas (auditoria já existente preservada).
+- `useConfigProducao.jsx`: salvamento e bloqueio da configuração de produção sanitizados sobre o carimbo de contexto existente.
+- Próximo lote: auditoria (10).
+
 ### Mobile — Motorista e Produção — Regra-Mãe aplicada (2026-09-06, lote 8)
 - `useEntregasMotorista.jsx`: todas as 6 mutações de Entrega (iniciar, confirmar, ocorrência, reversa, fila offline) e PosicaoVeiculo (GPS) agora sanitizadas; entrega frustrada e logística reversa ganharam auditoria completa (Regra-Mãe 5c/5d) — contexto e RBAC já preservados.
 - `producao-mobile/useProducaoMobile.jsx`: apontamento de OP, criação de Entrega e vínculo entrega_id sanitizados (RBAC + auditoria já existentes).

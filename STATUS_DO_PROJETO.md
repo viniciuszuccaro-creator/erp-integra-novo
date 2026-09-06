@@ -1187,6 +1187,7 @@ Estado consolidado:
 - Nenhum campo, enum, default ou funcionalidade alterado — apenas a política de segurança `create` (`data.group_id === user.data.group_id` OU admin) foi adicionada, fechando a brecha multiempresa na criação de registros.
 - Cobertura final: 100% das entidades com as quatro operações (`create`/`read`/`update`/`delete`) validando contexto de grupo.
 - Validação programática pós-rewrite (2026-09-06): varredura das 150 entidades confirmou as 4 operações RLS presentes em todas (única exceção: `User`, entidade interna da plataforma). Suítes re-executadas sem regressão: unitária 209 pass · 0 fail; E2E estática 37 pass · 0 fail.
+- Checks de integridade ao vivo pós-RLS (2026-09-06): as 5 fases re-executadas no banco real — 100/100 em todas (Fase 1 Segurança/RBAC, Fase 2 Multiempresa, Fase 3 Fluxo de negócio, Fase 4 Omnicanal/Portal/Mobile, Fase 5 Integrações). Zero regressões.
 
 ### Próximo passo sugerido
 - Republicar o app para consolidar na versão publicada todo o endurecimento Financeiro/Fiscal/Rateio/Compras/Estoque/Contratos/RH/Expedição/RLS desta semana (créditos de integração do workspace renovam em 07/09 — jobs agendados, IA e notificações retomam automaticamente aí).

@@ -29,7 +29,7 @@ export default function ContaPagarVinculosSection({ formData, setFormData, orden
           value={formData.centro_custo_id}
           onValueChange={(v) => {
             const cc = centrosCusto.find((c) => c.id === v);
-            setFormData({ ...formData, centro_custo_id: v, centro_custo: cc?.nome || "" });
+            setFormData({ ...formData, centro_custo_id: v, centro_custo: cc?.descricao || cc?.codigo || "" });
           }}
         >
           <SelectTrigger>
@@ -38,7 +38,7 @@ export default function ContaPagarVinculosSection({ formData, setFormData, orden
           <SelectContent>
             {centrosCusto.map((cc) => (
               <SelectItem key={cc.id} value={cc.id}>
-                {cc.nome}
+                {cc.codigo} - {cc.descricao}
               </SelectItem>
             ))}
           </SelectContent>
@@ -54,7 +54,7 @@ export default function ContaPagarVinculosSection({ formData, setFormData, orden
           <SelectContent>
             {planosContas.map((pc) => (
               <SelectItem key={pc.id} value={pc.id}>
-                {pc.codigo || pc.id} - {pc.descricao || pc.nome}
+                {pc.codigo || pc.id} - {pc.nome_conta || pc.descricao || pc.nome}
               </SelectItem>
             ))}
           </SelectContent>

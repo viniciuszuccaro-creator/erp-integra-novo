@@ -23,10 +23,14 @@ import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { useFormasPagamento } from "@/components/lib/useFormasPagamento";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import { useUser } from "@/components/lib/UserContext";
+import usePermissions from "@/components/lib/usePermissions";
 
 export default function ContaPagarForm({ conta, onSubmit, isSubmitting, windowMode = false }) {
   const [errorMessages, setErrorMessages] = useState([]);
   const { empresaAtual, filterInContext, carimbarContexto } = useContextoVisual();
+  // Regra-Mãe 5b: aprovar/rejeitar são ações separadas de editar — gate no próprio formulário
+  const { hasPermission } = usePermissions();
+  const podeAprovar = hasPermission('Financeiro', 'ContaPagar', 'aprovar');
 
   const [abaAtiva, setAbaAtiva] = useState('dados-gerais');
   const { user: authUser } = useUser();
@@ -136,20 +140,30 @@ export default function ContaPagarForm({ conta, onSubmit, isSubmitting, windowMo
             </AlertDescription>
           </Alert>
 
-          <SelectWithAudit
-            label="Status do Pagamento"
-            value={formData.status_pagamento}
-            onValueChange={(v) => setFormData({...formData, status_pagamento: v})}
-            data-action="conta_pagar.status_pagamento"
-            items={[
-              { value: 'Pendente', label: 'Pendente' },
-              { value: 'Aguardando Aprovação', label: 'Aguardando Aprovação' },
-              { value: 'Aprovado', label: 'Aprovado' },
-              { value: 'Pago', label: 'Pago' },
-              { value: 'Rejeitado', label: 'Rejeitado' },
-              { value: 'Cancelado', label: 'Cancelado' },
-            ]}
-          />
+          {podeAprovar ? (
+            <SelectWithAudit
+              label="Status do Pagamento"
+              value={formData.status_pagamento}
+              onValueChange={(v) => setFormData({...formData, status_pagamento: v})}
+              data-action="conta_pagar.status_pagamento"
+              data-permission="Financeiro.ContaPagar.aprovar"
+              data-sensitive="true"
+              items={[
+                { value: 'Pendente', label: 'Pendente' },
+                { value: 'Aguardando Aprovação', label: 'Aguardando Aprovação' },
+                { value: 'Aprovado', label: 'Aprovado' },
+                { value: 'Pago', label: 'Pago' },
+                { value: 'Rejeitado', label: 'Rejeitado' },
+                { value: 'Cancelado', label: 'Cancelado' },
+              ]}
+            />
+          ) : (
+            <div>
+              <Label>Status do Pagamento</Label>
+              <Input value={formData.status_pagamento || 'Pendente'} disabled />
+              <p className="text-xs text-slate-500 mt-1">Sem permissão para aprovar ou rejeitar pagamentos</p>
+            </div>
+          )}
 
           <div>
             <Label>Observações</Label>

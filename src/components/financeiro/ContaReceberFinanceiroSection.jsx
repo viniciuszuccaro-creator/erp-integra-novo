@@ -2,8 +2,20 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import usePermissions from "@/components/lib/usePermissions";
 
 export default function ContaReceberFinanceiroSection({ formData, setFormData, formasPagamento = [] }) {
+  // Regra-Mãe 5b: "Recebido" exige permissão de baixa/recebimento; "Cancelado" exige cancelar
+  const { hasPermission } = usePermissions();
+  const podeBaixar = ['baixar', 'liquidar', 'receber'].some(a => hasPermission('Financeiro', 'ContaReceber', a));
+  const podeCancelar = hasPermission('Financeiro', 'ContaReceber', 'cancelar');
+  const statusOptions = [
+    { value: 'Pendente', allowed: true },
+    { value: 'Recebido', allowed: podeBaixar },
+    { value: 'Atrasado', allowed: true },
+    { value: 'Cancelado', allowed: podeCancelar },
+    { value: 'Parcial', allowed: true },
+  ].filter(o => o.allowed);
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -41,11 +53,9 @@ export default function ContaReceberFinanceiroSection({ formData, setFormData, f
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Pendente">Pendente</SelectItem>
-              <SelectItem value="Recebido">Recebido</SelectItem>
-              <SelectItem value="Atrasado">Atrasado</SelectItem>
-              <SelectItem value="Cancelado">Cancelado</SelectItem>
-              <SelectItem value="Parcial">Parcial</SelectItem>
+              {statusOptions.map(o => (
+                <SelectItem key={o.value} value={o.value}>{o.value}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

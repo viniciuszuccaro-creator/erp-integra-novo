@@ -23,8 +23,8 @@ export default function ConciliacaoBancariaTab() {
   const groupId = grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null;
   const contextKey = empresaAtual?.id || groupId || "sem-contexto";
   const contextoValido = contextKey !== "sem-contexto";
-  const podeConciliar = canCreate('Financeiro', 'ConciliaÃ§Ã£o BancÃ¡ria') ||
-    canEdit('Financeiro', 'ConciliaÃ§Ã£o BancÃ¡ria') ||
+  const podeConciliar = canCreate('Financeiro', 'Conciliação Bancária') ||
+    canEdit('Financeiro', 'Conciliação Bancária') ||
     hasPermission('Financeiro', 'ConciliacaoBancaria', 'criar') ||
     hasPermission('Financeiro', 'ConciliacaoBancaria', 'editar');
   const controlesBloqueados = !contextoValido || !podeConciliar;
@@ -44,7 +44,7 @@ export default function ConciliacaoBancariaTab() {
   const gerarConciliacaoIAMutation = useMutation({
     mutationFn: async ({ contaId }) => {
       if (!contextoValido || !podeConciliar) {
-        throw new Error("Sem contexto ou permissÃ£o para gerar conciliaÃ§Ã£o.");
+        throw new Error("Sem contexto ou permissão para gerar conciliação.");
       }
       toast.info("🤖 IA analisando extratos e movimentações...");
       
@@ -106,6 +106,9 @@ Retorne sugestões de conciliação baseadas em valor, data, histórico e simila
     onSuccess: () => {
       queryClient.invalidateQueries(["conciliacao-bancaria"]);
       toast.success("✅ Conciliação gerada com IA!");
+    },
+    onError: (err) => {
+      toast.error("Erro ao gerar conciliação", { description: err?.message });
     },
   });
   const controlesDesabilitados = controlesBloqueados || gerarConciliacaoIAMutation.isPending;

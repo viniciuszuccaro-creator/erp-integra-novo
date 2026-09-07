@@ -53,7 +53,7 @@ export default function VisualizadorUniversalEntidadeV24({
 
   const queryClient = useQueryClient();
   const { empresaAtual, grupoAtual, empresasDoGrupo, createInContext, updateInContext, deleteInContext } = useContextoVisual();
-  const { canCreate, canEdit, canDelete, hasPermission } = usePermissions();
+  const { canCreate, canEdit, canDelete, canExport, hasPermission } = usePermissions();
   const { user } = useUser();
   const empresaId = empresaAtual?.id || null;
   const groupId   = grupoAtual?.id   || null;
@@ -62,6 +62,8 @@ export default function VisualizadorUniversalEntidadeV24({
   const canCreateCadastro = canCreate("Cadastros", ENTITY) || canCreate("Cadastros", null);
   const canEditCadastro   = canEdit("Cadastros", ENTITY) || canEdit("Cadastros", null);
   const canDeleteCadastro = canDelete("Cadastros", ENTITY) || canDelete("Cadastros", null);
+  // Regra-Mãe 5b: exportação é ação granular própria (Vol 3.4) — gate na toolbar
+  const canExportCadastro = canExport("Cadastros", ENTITY) || canExport("Cadastros", null);
 
   const COLUMNS = useMemo(() => {
     if (columns?.length > 0) return columns;
@@ -312,7 +314,7 @@ export default function VisualizadorUniversalEntidadeV24({
         handleActivateCrossPage={handleActivateCrossPage}
         handleCancelSelection={handleCancelSelection}
         canCreateCadastro={canCreateCadastro} canEditCadastro={canEditCadastro}
-        canDeleteCadastro={canDeleteCadastro} contextoValido={contextoValido}
+        canDeleteCadastro={canDeleteCadastro} canExportCadastro={canExportCadastro} contextoValido={contextoValido}
         onRefresh={() => { lastGoodData.current = []; everLoadedRef.current = false; invalidateAll(queryClient, ENTITY); }}
         onNew={handleNewItem} onEdit={handleEditItem}
         onDelete={handleDelete} onDeleteSelected={handleDeleteSelected}

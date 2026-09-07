@@ -17,7 +17,7 @@ export default function VisualizadorBody({
   pageSize, setPageSize, setPage,
   sortField, sortDir, handleSortDropdown,
   isFetching, items, onRefresh,
-  FormComponent, onNew, contextoValido, canCreateCadastro,
+  FormComponent, onNew, contextoValido, canCreateCadastro, canExportCadastro,
   effSelectedCount, onDeleteSelected, canDeleteCadastro,
   // banners
   showCrossPageBanner, crossPageAll, selectedIds,
@@ -55,6 +55,7 @@ export default function VisualizadorBody({
         onRefresh={onRefresh}
         FormComponent={FormComponent} onNew={onNew}
         contextoValido={contextoValido} canCreateCadastro={canCreateCadastro}
+        canExportCadastro={canExportCadastro}
         effSelectedCount={effSelectedCount}
         onDeleteSelected={onDeleteSelected} canDeleteCadastro={canDeleteCadastro}
       />

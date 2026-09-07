@@ -3,6 +3,7 @@ import { Search, RefreshCw, Plus, Trash2, X, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { base44 } from "@/api/base44Client";
 import { getDisplayValue, fmtValueText } from "@/components/cadastros/utils/tableFormatters";
 
 const PAGE_SIZES = [10, 20, 50, 100];
@@ -15,6 +16,7 @@ export default function VisualizadorToolbar({
   sortField, sortDir, handleSortDropdown,
   isFetching, onRefresh,
   FormComponent, onNew, contextoValido, canCreateCadastro,
+  canExportCadastro = true,
   effSelectedCount, onDeleteSelected, canDeleteCadastro,
   items,
 }) {
@@ -33,6 +35,20 @@ export default function VisualizadorToolbar({
     const a = document.createElement("a");
     a.href = url; a.download = `${TITULO || ENTITY}_${new Date().toISOString().slice(0,10)}.csv`;
     a.click(); URL.revokeObjectURL(url);
+    // Regra-Mãe 5d: auditoria best-effort da exportação (nunca bloqueia)
+    (async () => {
+      try {
+        const user = await base44.auth.me().catch(() => null);
+        const sample = items[0] || {};
+        await base44.entities.AuditLog.create({
+          acao: 'Exportação', modulo: 'Cadastros', tipo_auditoria: 'entidade', entidade: ENTITY,
+          descricao: `Exportação CSV de ${items.length} registro(s) de ${ENTITY}`,
+          usuario: user?.full_name || user?.email || 'Usuário', usuario_id: user?.id || null,
+          empresa_id: sample.empresa_id || null, group_id: sample.group_id || null,
+          dados_novos: { quantidade: items.length }, data_hora: new Date().toISOString(),
+        });
+      } catch { /* auditoria nunca bloqueia */ }
+    })();
   }, [items, COLUMNS, TITULO, ENTITY]);
   return (
     <div className="flex items-center gap-2 flex-wrap shrink-0">
@@ -93,7 +109,7 @@ export default function VisualizadorToolbar({
         <RefreshCw className={"w-4 h-4 " + (isFetching ? "animate-spin text-blue-500" : "text-slate-500")} />
       </button>
 
-      {items?.length > 0 && (
+      {items?.length > 0 && canExportCadastro && (
         <button
           type="button"
           onClick={handleExportCSV}

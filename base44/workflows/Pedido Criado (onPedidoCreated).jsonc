@@ -1,0 +1,37 @@
+{
+  "name": "Pedido Criado (onPedidoCreated)",
+  "description": "Quando Pedido \u00e9 criado: valida estoque, reserva itens, gera auditoria, dispara WhatsApp e cria CR. Atende \u00a74.5 e \u00a710.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "Pedido"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "pedido_criado_onpedidocreated",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "onPedidoCreated",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "onPedidoCreated"
+  }
+}

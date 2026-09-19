@@ -200,7 +200,7 @@ function runE2E() {
     }
 
     if (allPrereqOk) {
-      log('pass', `Pré-requisitos completos — fluxo pronto para execução`);
+      log('pass', `Arquivos presentes — execução real do fluxo ainda pendente`);
       console.log(`${COLORS.blue}  📝 Checklist:${COLORS.reset}`);
       flow.steps.forEach(s => console.log(`     ${COLORS.blue}${s}${COLORS.reset}`));
     } else {
@@ -219,7 +219,8 @@ function runE2E() {
   }
   console.log(`${COLORS.bold}═══════════════════════════════════════════════════${COLORS.reset}\n`);
 
-  process.exit(results.fail > 0 ? 1 : 0);
+  console.log('Homologação pendente: nenhum fluxo de UI foi executado por este script.');
+  process.exit(results.fail > 0 ? 1 : 2);
 }
 
 runE2E();

@@ -93,7 +93,7 @@ async function runIntegration() {
     log('skip', `Cliente base44 indisponível fora do runtime Vite (${err.code || err.message})`);
     console.log(`${COLORS.yellow}ℹ️  Testes de integração live requerem o ambiente empacotado do app (Vite).${COLORS.reset}`);
     console.log(`${COLORS.yellow}   Para validação estrutural estática, use: npm run test:unit${COLORS.reset}`);
-    process.exit(0);
+    process.exit(2); // Ambiente indisponível: integração não executada, nunca aprovada.
   }
 
   // ── 1. Backend Functions Críticas ──
@@ -161,7 +161,7 @@ async function runIntegration() {
   }
   console.log(`${COLORS.bold}═══════════════════════════════════════════════════${COLORS.reset}\n`);
 
-  process.exit(results.fail > 0 ? 1 : 0);
+  process.exit(results.fail > 0 ? 1 : results.skip > 0 ? 2 : 0);
 }
 
 runIntegration().catch(err => {

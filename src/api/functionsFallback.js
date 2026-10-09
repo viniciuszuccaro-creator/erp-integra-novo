@@ -61,7 +61,8 @@ export function installFunctionsFallback(base44) {
             try { counts[entityName] = await api.count(item.filter || {}); }
             catch { counts[entityName] = 0; }
           }));
-          return { data: counts };
+          // Contrato original da função: { data: { counts: { entidade: n } } }
+          return { data: { counts } };
         }
         const api = base44.entities?.[payload?.entityName];
         if (!api?.count) throw e;

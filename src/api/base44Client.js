@@ -1,6 +1,7 @@
 import { createClient } from '@base44/sdk';
 import { appParams } from '@/lib/app-params';
 import { localBase44, localApiUser as localOnlyUser } from './localBase44Client';
+import { installFunctionsFallback } from './functionsFallback';
 
 const { appId, serverUrl, token, functionsVersion } = appParams;
 const apiKey = import.meta.env.VITE_BASE44_API_KEY;
@@ -29,6 +30,9 @@ const remoteBase44 = isLocalOnlyMode ? null : createClient({
 });
 
 export const base44 = isLocalOnlyMode ? localBase44 : remoteBase44;
+
+// Regra-Mãe 2: fallback de leitura — backend functions (402/404) caem para consultas diretas
+if (!isLocalOnlyMode) installFunctionsFallback(base44);
 
 if (!isLocalOnlyMode && isApiKeyMode && base44?.auth) {
   const originalUpdateMe = base44.auth.updateMe?.bind(base44.auth);

@@ -22,8 +22,14 @@ function buildSearchFilter(filter, search) {
 function isUnavailable(e) {
   const status = e?.response?.status || e?.status;
   if (status === 402 || status === 404) return true;
-  return /status code (402|404)/.test(String(e?.message || ''));
+  if (/status code (402|404)/.test(String(e?.message || ''))) return true;
+  if (/functions? (are )?blocked/i.test(String(e?.response?.data?.message || ''))) return true;
+  return false;
 }
+
+// Funções somente-leitura que podem cair para consulta SDK direta sem risco
+const READ_FUNCTIONS = new Set(['entityListSorted', 'countEntities', 'countEntitiesOptimized', 'getEntityRecord']);
+function isReadFn(fn) { return READ_FUNCTIONS.has(fn); }
 
 export function installFunctionsFallback(base44) {
   if (!base44?.functions?.invoke || base44.__functionsFallbackInstalled) return;
@@ -34,7 +40,9 @@ export function installFunctionsFallback(base44) {
     try {
       return await invoke(functionName, payload);
     } catch (e) {
-      if (!isUnavailable(e)) throw e;
+      // Fallback para as funções de LEITURA em QUALQUER falha (402/404/timeout/erro de forma):
+      // o pior caso é a consulta direta também falhar e propagar o erro original.
+      if (!isReadFn(functionName) && !isUnavailable(e)) throw e;
 
       // entityListSorted → filtro direto + ordenação + paginação (skip/limit) no cliente
       if (functionName === 'entityListSorted') {
@@ -48,6 +56,16 @@ export function installFunctionsFallback(base44) {
         const page = await api.filter(finalFilter, { sort, limit: upTo });
         const arr = Array.isArray(page?.items) ? page.items : (Array.isArray(page) ? page : []);
         return { data: arr.slice(Number(skip) || 0, upTo) };
+      }
+
+      // getEntityRecord → { data: [registro] } (contrato original: array)
+      if (functionName === 'getEntityRecord') {
+        const { entityName, filter, limit = 1 } = payload;
+        const api = base44.entities?.[entityName];
+        if (!api) throw e;
+        const page = await api.filter(filter || {}, { limit: Number(limit) || 1 });
+        const arr = Array.isArray(page?.items) ? page.items : (Array.isArray(page) ? page : []);
+        return { data: arr };
       }
 
       // countEntities → count direto por entidade (batch: {entities:[{entityName, filter}]} ou único)

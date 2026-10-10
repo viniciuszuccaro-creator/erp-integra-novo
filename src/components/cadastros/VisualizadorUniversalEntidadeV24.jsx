@@ -159,10 +159,10 @@ export default function VisualizadorUniversalEntidadeV24({
         const n = res?.data?.count ?? res?.data?.total ?? res?.data;
         return typeof n === 'number' ? n : 0;
       } catch (_) {
-        // Fallback: SDK direto com o mesmo readFilter
+        // Fallback: contagem direta no servidor com o mesmo readFilter (sem baixar registros)
         try {
-          const items = await base44.entities[ENTITY].filter(readFilter, '-created_date', 9999);
-          return Array.isArray(items) ? items.length : 0;
+          const n = await base44.entities[ENTITY].count(readFilter);
+          return typeof n === 'number' ? n : 0;
         } catch { return 0; }
       }
     },

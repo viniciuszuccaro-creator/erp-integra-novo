@@ -145,6 +145,8 @@ function LayoutContent({ children, currentPageName }) {
   // Safety-net: refetch periódico de queries ativas a cada 45s (caso WebSocket falhe)
   useEffect(() => {
     const iv = setInterval(() => {
+      // Aba em segundo plano não recarrega tudo (evita "Rate limit exceeded")
+      if (typeof document !== 'undefined' && document.hidden) return;
       try {
         queryClient.invalidateQueries({ refetchType: 'active' });
       } catch (_) {}

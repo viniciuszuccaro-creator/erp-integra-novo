@@ -26,6 +26,7 @@ export function usePredictivePrefetch() {
 
   useEffect(() => {
     const run = () => {
+      if (document.hidden || location.pathname === '/Cadastros') return;
       const now = Date.now();
       if (now - lastRunRef.current < PREDICTIVE_INTERVAL_MS) return;
       if (!empresaAtual?.id && !grupoAtual?.id) return;

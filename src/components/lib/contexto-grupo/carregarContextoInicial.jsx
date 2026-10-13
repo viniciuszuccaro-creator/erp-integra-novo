@@ -84,11 +84,11 @@ export function criarCarregadorContextoInicial({
         const empresaId = currentUser.empresa_atual_id || currentUser.empresa_padrao_id || localStorage.getItem('empresa_atual_id');
         if (empresaId) {
           const empresas = await base44.entities.Empresa.filter({ id: empresaId });
-          if (empresas[0]) {
+          if (empresas[0] && (!loadedGrupo || empresas[0].group_id === loadedGrupo.id)) {
             loadedEmpresa = empresas[0];
             setEmpresaAtual(empresas[0]);
           } else if (isRemoteApiKeyMode || currentUser?.role === 'admin') {
-            const todasEmpresas = await base44.entities.Empresa.list();
+            const todasEmpresas = loadedGrupo?.id ? await base44.entities.Empresa.filter({ group_id: loadedGrupo.id }) : [];
             const ativa = todasEmpresas.find(e => e.status === 'Ativa') || todasEmpresas[0];
             if (ativa) {
               loadedEmpresa = ativa;
@@ -97,7 +97,7 @@ export function criarCarregadorContextoInicial({
             }
           }
         } else if (isRemoteApiKeyMode || currentUser?.role === 'admin') {
-          const empresas = await base44.entities.Empresa.list();
+          const empresas = loadedGrupo?.id ? await base44.entities.Empresa.filter({ group_id: loadedGrupo.id }) : [];
           const ativa = empresas.find(e => e.status === 'Ativa') || empresas[0];
           if (ativa) {
             loadedEmpresa = ativa;

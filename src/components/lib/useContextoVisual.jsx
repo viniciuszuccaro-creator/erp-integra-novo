@@ -32,11 +32,9 @@ export function useContextoVisual() {
     setContexto(estaNoGrupoContexto ? 'grupo' : 'empresa');
   }, [estaNoGrupoContexto]);
 
-  const { data: empresas = [], isLoading: loadingEmpresas } = useQuery({
-    queryKey: ['empresas'],
-    queryFn: () => base44.entities.Empresa.list(),
-    staleTime: 15000,
-  });
+  // Reutiliza a consulta das empresas do grupo; não abre outra leitura a cada janela.
+  const empresas = empresasDoGrupoContexto;
+  const loadingEmpresas = loadingContextoGrupoEmpresa;
 
   const [empresaAtualId, setEmpresaAtualId] = useState(null);
   const [filtroEmpresa, setFiltroEmpresa] = useState('todas');
@@ -50,8 +48,8 @@ export function useContextoVisual() {
     }
   }, [empresaContexto]);
 
-  const empresaAtual = (contexto === 'grupo') ? null : (empresas.find(empresa => empresa.id === empresaAtualId) || empresaContexto || null);
-  const empresasDoGrupo = empresas.filter(empresa => empresa.group_id === grupoAtual?.id);
+  const empresaAtual = contexto === 'grupo' ? null : (empresaContexto || empresas.find(empresa => empresa.id === empresaAtualId) || null);
+  const empresasDoGrupo = empresas;
   const estaNoGrupo = contexto === 'grupo';
 
   useEffect(() => {

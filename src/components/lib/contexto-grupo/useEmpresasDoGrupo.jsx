@@ -9,20 +9,20 @@ export function useEmpresasDoGrupo(grupoAtual, contexto) {
       if (!grupoAtual?.id) return [];
       try {
         const empresas = await base44.entities.Empresa.filter({
-          grupo_id: grupoAtual.id,
-          status: 'Ativa'
+          group_id: grupoAtual.id
         });
         try { sessionStorage.setItem(`empresas_grupo_${grupoAtual.id}`, JSON.stringify(empresas || [])); } catch (e) { console.error('[lib] catch:', e); }
         return empresas || [];
       } catch (error) {
         if (error?.status === 429 || error?.response?.status === 429 || String(error?.message || '').includes('Rate limit')) {
-          try { return JSON.parse(sessionStorage.getItem(`empresas_grupo_${grupoAtual.id}`) || '[]'); } catch { return []; }
+          const cached = sessionStorage.getItem(`empresas_grupo_${grupoAtual.id}`);
+          if (cached) return JSON.parse(cached);
         }
         throw error;
       }
     },
-    enabled: !!grupoAtual && contexto === 'grupo',
-    staleTime: 15000,
+    enabled: !!grupoAtual?.id,
+    staleTime: 300000,
     gcTime: 300000,
     retry: 0,
     refetchOnWindowFocus: false,

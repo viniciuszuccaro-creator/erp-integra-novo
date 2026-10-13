@@ -1,6 +1,6 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import useCountEntitiesOptimized from "@/components/lib/useCountEntitiesOptimized";
+import useEntityCounts from '@/components/lib/useEntityCounts';
 
 /**
  * CountBadgeSimplificado — badge de contagem para uma ou mais entidades
@@ -15,19 +15,12 @@ export default function CountBadgeSimplificado({ entities = [], className = "", 
   const list = Array.isArray(entities) ? entities.filter(Boolean) : [entities].filter(Boolean);
 
   // Se allCounts foi fornecido pelo pai, não faz fetch próprio (evita burst de 429s)
-  const hasParentCounts = allCounts !== undefined;
-  const { counts, circuitState } = useCountEntitiesOptimized(hasParentCounts ? [] : list);
-
-  let total;
-  if (precomputedTotal !== undefined) {
-    total = precomputedTotal;
-  } else if (hasParentCounts) {
-    total = list.reduce((s, e) => s + (Number(allCounts[e]) || 0), 0);
-  } else {
-    total = list.reduce((s, e) => s + (counts[e] || 0), 0);
-  }
-
-  const isLoading = isLoadingProp || circuitState === 'LOADING';
+  const hasParentCounts = allCounts !== undefined || precomputedTotal !== undefined;
+  const { counts, isLoading: ownLoading } = useEntityCounts(hasParentCounts ? [] : list);
+  const source = allCounts ?? counts;
+  const total = precomputedTotal !== undefined ? precomputedTotal :
+    list.every(e => Number.isFinite(source[e])) ? list.reduce((sum, e) => sum + source[e], 0) : undefined;
+  const isLoading = isLoadingProp ?? ownLoading;
 
   if (!list.length) return null;
 
@@ -36,11 +29,8 @@ export default function CountBadgeSimplificado({ entities = [], className = "", 
       variant="outline"
       className={`ml-1 rounded-sm bg-slate-100 text-slate-600 border-slate-300 text-xs font-semibold tabular-nums shrink-0 ${className}`}
     >
-      {(isLoading && total === 0) ? (
-        <span className="animate-pulse opacity-60">···</span>
-      ) : (
-        total.toLocaleString("pt-BR")
-      )}
+      {Number.isFinite(total) ? total.toLocaleString('pt-BR') :
+        isLoading ? <span className="animate-pulse opacity-60">···</span> : '—'}
     </Badge>
   );
 }

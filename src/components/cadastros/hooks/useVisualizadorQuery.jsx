@@ -1,63 +1,56 @@
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { useEffect, useRef } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { base44, isLocalOnlyMode } from '@/api/base44Client';
+import { buildSearchFilter } from '@/api/functionsFallback';
 
-const UNSORTABLE_BACKEND = new Set(["contatos","documentos","locais_entrega","lotes","itens"]);
-
+const UNSORTABLE_BACKEND = new Set(['contatos','documentos','locais_entrega','lotes','itens']);
 export default function useVisualizadorQuery({
-  ENTITY, readFilter, sortField, sortDir, page, pageSize,
-  debouncedSearch, empresaId, groupId, contextoValido, canViewCadastro,
-  lastGoodData, everLoadedRef,
+  ENTITY, readFilter, sortField, sortDir, page, pageSize, debouncedSearch,
+  empresaId, groupId, contextoValido, canViewCadastro, lastGoodData, everLoadedRef,
 }) {
-  const backendSortField = UNSORTABLE_BACKEND.has(sortField) ? "updated_date" : sortField;
-
-  // P2: empresaId e groupId já estão na key — readFilter é derivado deles, não precisa ser serializado separado
-  const queryKey = useMemo(
-    () => ["viz-v33", ENTITY, sortField, sortDir, page, pageSize, debouncedSearch, empresaId ?? null, groupId ?? null],
-    [ENTITY, sortField, sortDir, page, pageSize, debouncedSearch, empresaId, groupId]
-  );
-
-  const { data: rawItems, isFetching, isError, status } = useQuery({
+  const sort = `${sortDir === 'desc' ? '-' : ''}${UNSORTABLE_BACKEND.has(sortField) ? 'updated_date' : sortField === 'id' ? 'created_date' : sortField}`;
+  const filter = buildSearchFilter(readFilter, debouncedSearch);
+  const scope = JSON.stringify([ENTITY, empresaId, groupId, filter, sort, pageSize]);
+  const cursorsRef = useRef({ scope, positions: new Map([[0, undefined]]) });
+  if (cursorsRef.current.scope !== scope) cursorsRef.current = { scope, positions: new Map([[0, undefined]]) };
+  const queryKey = ['viz-v33', ENTITY, scope, page];
+  const { data, isFetching, isError, status } = useQuery({
     queryKey,
     queryFn: async () => {
-      if (!ENTITY) return [];
-      const res = await base44.functions.invoke("entityListSorted", {
-        entityName: ENTITY,
-        filter: readFilter,
-        search: debouncedSearch?.trim() || undefined,
-        sortField: backendSortField,
-        sortDirection: sortDir,
-        limit: pageSize,
-        skip: (page - 1) * pageSize,
-      });
-      return Array.isArray(res?.data) ? res.data : [];
+      if (isLocalOnlyMode) {
+        const res = await base44.functions.invoke('entityListSorted', {
+          entityName: ENTITY, filter, sortField: sort.replace(/^-/, ''), sortDirection: sortDir,
+          limit: pageSize, skip: (page - 1) * pageSize,
+        });
+        return { items: res.data, has_more: res.data.length === pageSize };
+      }
+      const api = base44.entities[ENTITY];
+      const positions = cursorsRef.current.positions;
+      const target = (page - 1) * pageSize;
+      if (target === 0) { positions.clear(); positions.set(0, undefined); }
+      let offset = Math.max(...[...positions.keys()].filter(n => n <= target));
+      let cursor = positions.get(offset);
+      // Saltos (incluindo Última): consulta apenas IDs para obter o cursor de destino.
+      // Próxima/Anterior reutilizam os cursores existentes, sem baixar páginas anteriores.
+      while (offset < target) {
+        const skipped = await api.filter(filter, { sort, limit: Math.min(1000, target - offset), cursor, fields: ['id'] });
+        if (!skipped.items.length || !skipped.has_more) return { items: [], has_more: false };
+        offset += skipped.items.length;
+        cursor = skipped.next_cursor;
+        positions.set(offset, cursor);
+      }
+      const result = await api.filter(filter, { sort, limit: pageSize, cursor });
+      if (result.has_more) positions.set(target + result.items.length, result.next_cursor);
+      return result;
     },
-    staleTime: 15000,
-    gcTime: 300000,
-    retry: 1,
-    retryDelay: (attempt) => Math.min(800 * (attempt + 1), 3000),
+    staleTime: 120_000, gcTime: 600_000, retry: 0,
     refetchOnWindowFocus: false,
-    refetchOnMount: true,
-    placeholderData: (prev) => prev !== undefined ? prev : [],
-    // P2: só executa quando há contexto multiempresa válido E permissão
     enabled: !!ENTITY && contextoValido && canViewCadastro,
   });
-
-  const items = useMemo(() => {
-    const arr = Array.isArray(rawItems) ? rawItems : [];
-    if (arr.length > 0) {
-      lastGoodData.current = arr;
-      everLoadedRef.current = true;
-      return arr;
-    }
-    if (lastGoodData.current.length > 0) {
-      if (isFetching || status === 'pending') return lastGoodData.current;
-      if (isError) return lastGoodData.current;
-    }
-    everLoadedRef.current = true;
-    lastGoodData.current = [];
-    return [];
-  }, [rawItems, isFetching, isError, status]);
-
-  return { items, isFetching, isError, status, queryKey };
+  const items = data?.items || [];
+  useEffect(() => {
+    lastGoodData.current = data?.items || [];
+    everLoadedRef.current = data !== undefined;
+  }, [data, scope, page, lastGoodData, everLoadedRef]);
+  return { items, isFetching, isError, status, queryKey, hasMore: data?.has_more };
 }

@@ -26,10 +26,19 @@ export function useContextoGrupoEmpresa() {
 
   useEffect(() => {
     carregarContextoInicial();
+    const sync = ({ detail }) => {
+      setUser(detail.user);
+      setContexto(detail.contexto);
+      setGrupoAtual(detail.grupoAtual || null);
+      setEmpresaAtual(detail.empresaAtual || null);
+      setIsLoadingContexto(false);
+    };
+    window.addEventListener('erp-contexto-changed', sync);
+    return () => window.removeEventListener('erp-contexto-changed', sync);
   }, []);
 
   const { trocarParaGrupo, trocarParaEmpresa } = useTrocasContexto({
-    user,
+    user, grupoAtual,
     setUser,
     setContexto,
     setGrupoAtual,
@@ -38,6 +47,8 @@ export function useContextoGrupoEmpresa() {
   });
 
   const empresasDoGrupo = useEmpresasDoGrupo(grupoAtual, contexto);
+  const empresasState = queryClient.getQueryState(['empresas-grupo', grupoAtual?.id]);
+  const loadingEmpresas = !!grupoAtual?.id && !empresasState?.data && empresasState?.status !== 'error';
 
   // Getters preservam a leitura do valor atual no momento da chamada (como nos closures originais)
   const grupoAtualRef = useRef(grupoAtual);
@@ -73,7 +84,7 @@ export function useContextoGrupoEmpresa() {
     ratearDocumento,
     sincronizarBaixaParaEmpresas,
     sincronizarBaixaParaGrupo,
-    isLoading: isLoadingContexto || !user
+    isLoading: isLoadingContexto || !user || loadingEmpresas
   };
 }
 

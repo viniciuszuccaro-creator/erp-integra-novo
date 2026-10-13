@@ -28,7 +28,7 @@ export default function Cadastros() {
   const [searchTerm, setSearchTerm] = useState("");
   const [acordeonAberto, setAcordeonAberto] = useState([]);
   const [abaGerenciamento, setAbaGerenciamento] = useState("cadastros");
-  const { counts: allCounts, totals, isLoading: countsLoading } = useCadastrosAllCounts();
+  const { counts: allCounts, totals, isLoading: countsLoading, isError: countsError, refetch: refreshCounts } = useCadastrosAllCounts();
   // countsLoading passado para blocos filhos (exibe skeleton nas grades)
   const { isAdmin, hasPermission } = usePermissions();
   const { empresaAtual, grupoAtual } = useContextoVisual();
@@ -123,6 +123,12 @@ export default function Cadastros() {
             </Card>
           )}
 
+          {countsError && (
+            <div role="alert" className="w-full rounded-sm border border-border bg-muted p-3 text-sm text-muted-foreground">
+              Algumas contagens não puderam ser atualizadas; os valores confirmados foram mantidos.
+              <button onClick={refreshCounts} className="ml-2 underline text-primary">Tentar novamente</button>
+            </div>
+          )}
           {/* SUMÁRIO RÁPIDO — barra de totais compacta (P4: sem cards redundantes) */}
           <div className="flex flex-wrap gap-2 items-center">
             {[
@@ -142,7 +148,7 @@ export default function Cadastros() {
                 <Icon className="w-3.5 h-3.5" />
                 <span>{label}</span>
                 <span className="font-bold tabular-nums">
-                  {countsLoading ? "…" : (total ?? 0).toLocaleString('pt-BR')}
+                  {Number.isFinite(total) ? total.toLocaleString('pt-BR') : countsLoading ? '…' : '—'}
                 </span>
               </button>
             ))}
@@ -166,7 +172,7 @@ export default function Cadastros() {
                     <p className="font-bold text-lg text-blue-900">1️⃣ Pessoas & Parceiros</p>
                     <p className="text-xs text-blue-700">Clientes • Fornecedores • Transportadoras • Colaboradores • Representantes • Contatos B2B</p>
                   </div>
-                  <GroupCountBadge precomputedTotal={totals.bloco1} badgeClassName="ml-auto bg-blue-600 text-white border-blue-600 text-xs" />
+                  <GroupCountBadge isLoading={countsLoading} precomputedTotal={totals.bloco1} badgeClassName="ml-auto bg-blue-600 text-white border-blue-600 text-xs" />
                 </div>
               </AccordionTrigger>
               <AccordionContent className="p-6 bg-white">
@@ -182,7 +188,7 @@ export default function Cadastros() {
                     <p className="font-bold text-lg text-purple-900">2️⃣ Produtos & Serviços</p>
                     <p className="text-xs text-purple-700">Produtos • Serviços • Setores • Grupos • Marcas • Tabelas de Preço</p>
                   </div>
-                  <GroupCountBadge precomputedTotal={totals.bloco2} badgeClassName="ml-auto bg-purple-600 text-white border-purple-600 text-xs" />
+                  <GroupCountBadge isLoading={countsLoading} precomputedTotal={totals.bloco2} badgeClassName="ml-auto bg-purple-600 text-white border-purple-600 text-xs" />
                 </div>
               </AccordionTrigger>
               <AccordionContent className="p-6 bg-white">
@@ -198,7 +204,7 @@ export default function Cadastros() {
                     <p className="font-bold text-lg text-green-900">3️⃣ Financeiro & Fiscal</p>
                     <p className="text-xs text-green-700">Bancos • Contas • Formas Pagamento • Plano Contas • Centros Custo</p>
                   </div>
-                  <GroupCountBadge precomputedTotal={totals.bloco3} badgeClassName="ml-auto bg-green-600 text-white border-green-600 text-xs" />
+                  <GroupCountBadge isLoading={countsLoading} precomputedTotal={totals.bloco3} badgeClassName="ml-auto bg-green-600 text-white border-green-600 text-xs" />
                 </div>
               </AccordionTrigger>
               <AccordionContent className="p-6 bg-white">
@@ -214,7 +220,7 @@ export default function Cadastros() {
                     <p className="font-bold text-lg text-orange-900">4️⃣ Logística, Frota & Almoxarifado</p>
                     <p className="text-xs text-orange-700">Veículos • Motoristas • Tipos Frete • Locais Estoque • Rotas</p>
                   </div>
-                  <GroupCountBadge precomputedTotal={totals.bloco4} badgeClassName="ml-auto bg-orange-600 text-white border-orange-600 text-xs" />
+                  <GroupCountBadge isLoading={countsLoading} precomputedTotal={totals.bloco4} badgeClassName="ml-auto bg-orange-600 text-white border-orange-600 text-xs" />
                 </div>
               </AccordionTrigger>
               <AccordionContent className="p-6 bg-white">
@@ -230,7 +236,7 @@ export default function Cadastros() {
                     <p className="font-bold text-lg text-indigo-900">5️⃣ Estrutura Organizacional</p>
                     <p className="text-xs text-indigo-700">Grupos • Empresas • Departamentos • Cargos • Turnos</p>
                   </div>
-                  <GroupCountBadge precomputedTotal={totals.bloco5} badgeClassName="ml-auto bg-indigo-600 text-white border-indigo-600 text-xs" />
+                  <GroupCountBadge isLoading={countsLoading} precomputedTotal={totals.bloco5} badgeClassName="ml-auto bg-indigo-600 text-white border-indigo-600 text-xs" />
                 </div>
               </AccordionTrigger>
               <AccordionContent className="p-6 bg-white">
@@ -246,7 +252,7 @@ export default function Cadastros() {
                     <p className="font-bold text-lg text-cyan-900">6️⃣ Tecnologia, IA & Parâmetros</p>
                     <p className="text-xs text-cyan-700">APIs • Webhooks • Chatbot • Jobs • Gateways • Parâmetros Operacionais</p>
                   </div>
-                  <GroupCountBadge precomputedTotal={totals.bloco6} badgeClassName="ml-auto bg-cyan-600 text-white border-cyan-600 text-xs" />
+                  <GroupCountBadge isLoading={countsLoading} precomputedTotal={totals.bloco6} badgeClassName="ml-auto bg-cyan-600 text-white border-cyan-600 text-xs" />
                 </div>
               </AccordionTrigger>
               <AccordionContent className="p-6 bg-white">

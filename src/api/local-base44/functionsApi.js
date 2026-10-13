@@ -41,8 +41,9 @@ export const functions = {
       case 'entityListSorted': {
         if (!payload.entityName) return { data: [] };
         const filter = expandLocalContextFilter(payload.entityName, payload.filter || {});
-        const data = await entities[payload.entityName].filter(filter, payload.sortField, payload.limit);
-        return { data: sortRecords(data, payload.sortField, payload.sortDirection) };
+        const order = `${payload.sortDirection === 'desc' ? '-' : ''}${payload.sortField || 'created_date'}`;
+        const data = await entities[payload.entityName].filter(filter, order, payload.limit, payload.skip || 0);
+        return { data };
       }
       case 'upsertConfig':
         return upsertConfig(payload);

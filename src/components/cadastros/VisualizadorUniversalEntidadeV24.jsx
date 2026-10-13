@@ -14,7 +14,8 @@ import { base44 } from "@/api/base44Client";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import usePermissions from "@/components/lib/usePermissions";
 import { useUser } from "@/components/lib/UserContext";
-import { SIMPLE_CATALOG } from "@/components/lib/useEntityCounts";
+import { SIMPLE_CATALOG, buildContextFilter, entityCountKey, countEntityRecords } from '@/components/lib/useEntityCounts';
+import { buildSearchFilter } from '@/api/functionsFallback';
 import { AlertCircle } from "lucide-react";
 import useVisualizadorState from "@/components/cadastros/hooks/useVisualizadorState";
 import useVisualizadorQuery from "@/components/cadastros/hooks/useVisualizadorQuery";
@@ -30,7 +31,7 @@ function invalidateAll(qc, entity) {
   qc.invalidateQueries({ queryKey: ["viz-v33", entity] });
   qc.invalidateQueries({ queryKey: ["viz-count-v2", entity] });
   qc.invalidateQueries({ queryKey: ["entityCounts_v5"] });
-  qc.invalidateQueries({ queryKey: ["cadastros-all-counts-v7"] });
+  // Cartões e tabela compartilham viz-count-v2; não recarregar os 48 cadastros.
 }
 
 export default function VisualizadorUniversalEntidadeV24({
@@ -52,12 +53,12 @@ export default function VisualizadorUniversalEntidadeV24({
   }, [FormComponent]);
 
   const queryClient = useQueryClient();
-  const { empresaAtual, grupoAtual, empresasDoGrupo, createInContext, updateInContext, deleteInContext } = useContextoVisual();
+  const { empresaAtual, grupoAtual, empresasDoGrupo, isLoading: contextLoading, createInContext, updateInContext, deleteInContext } = useContextoVisual();
   const { canCreate, canEdit, canDelete, canExport, hasPermission } = usePermissions();
   const { user } = useUser();
   const empresaId = empresaAtual?.id || null;
   const groupId   = grupoAtual?.id   || null;
-  const contextoValido = !!(empresaId || groupId || isSimple);
+  const contextoValido = !contextLoading && !!(empresaId || groupId);
   const canViewCadastro   = hasPermission("Cadastros", ENTITY, "visualizar") || hasPermission("Cadastros", null, "visualizar");
   const canCreateCadastro = canCreate("Cadastros", ENTITY) || canCreate("Cadastros", null);
   const canEditCadastro   = canEdit("Cadastros", ENTITY) || canEdit("Cadastros", null);
@@ -87,43 +88,13 @@ export default function VisualizadorUniversalEntidadeV24({
     isItemSelected, handleItemCheck, handleActivateCrossPage, handleCancelSelection,
   } = state;
 
-  // ── Filtro multiempresa ────────────────────────────────────────────────────────
-  // PURE_CATALOG: apenas entidades SEM group_id no schema (verdadeiramente globais)
-  // MoedaIndice: não tem group_id — catálogo de referência global
-  // GrupoEmpresarial: é o próprio grupo — não filtra por group_id
-  const PURE_CATALOG = isSimple && (ENTITY === 'MoedaIndice' || ENTITY === 'GrupoEmpresarial');
-  const readFilter = useMemo(() => {
-    // Exclui registros mesclados (duplicatas desativadas) de todas as consultas e contagens
-    const excludeMerged = { _merged: { $ne: true } };
-    if (PURE_CATALOG) return { ...excludeMerged };
-    if (isSimple && !groupId && !empresaId) return { ...excludeMerged };
-    const ctxCampo = ENTITY_CONTEXT_FIELD[ENTITY] || "empresa_id";
-    const orConds = [];
-    if (empresaId) {
-      orConds.push({ [ctxCampo]: empresaId });
-      if (ENTITY === "Cliente") orConds.push({ empresa_dona_id: empresaId }, { empresas_compartilhadas_ids: { $in: [empresaId] } });
-      else if (SHARED_ENTITIES.has(ENTITY)) orConds.push({ empresas_compartilhadas_ids: { $in: [empresaId] } });
-    }
-    if (groupId) {
-      orConds.push({ group_id: groupId });
-      // Inclui registros órfãos (sem empresa_id E sem group_id) no contexto de grupo
-      // Estes são registros legados criados antes da implementação multiempresa
-      orConds.push({ empresa_id: null, group_id: null });
-      if (!empresaId && Array.isArray(empresasDoGrupo) && empresasDoGrupo.length) {
-        const ids = empresasDoGrupo.map(e => e.id).filter(Boolean);
-        if (ids.length) {
-          if (ENTITY === "Cliente") orConds.push({ empresa_id: { $in: ids } }, { empresa_dona_id: { $in: ids } }, { empresas_compartilhadas_ids: { $in: ids } });
-          else if (ENTITY === "Fornecedor" || ENTITY === "Transportadora") orConds.push({ empresa_dona_id: { $in: ids } }, { empresas_compartilhadas_ids: { $in: ids } });
-          else if (ENTITY === "Colaborador") orConds.push({ empresa_alocada_id: { $in: ids } });
-          else orConds.push({ [ctxCampo]: { $in: ids } });
-        }
-      }
-    }
-    return orConds.length ? { $or: orConds, ...excludeMerged } : { ...excludeMerged };
-  }, [ENTITY, isSimple, PURE_CATALOG, empresaId, groupId, empresasDoGrupo]);
+  // Mesmo filtro canônico das contagens e dos seletores; nenhum órfão de outro grupo.
+  const readFilter = useMemo(() => buildContextFilter(ENTITY, empresaId, groupId, empresasDoGrupo),
+    [ENTITY, empresaId, groupId, empresasDoGrupo]);
+  const filteredReadFilter = useMemo(() => buildSearchFilter(readFilter, debouncedSearch), [readFilter, debouncedSearch]);
 
   // ── Query principal ───────────────────────────────────────────────────────────
-  const { items, isFetching, isError } = useVisualizadorQuery({
+  const { items, isFetching, isError, hasMore } = useVisualizadorQuery({
     ENTITY, readFilter, sortField, sortDir, page, pageSize,
     debouncedSearch, empresaId, groupId, contextoValido, canViewCadastro,
     lastGoodData, everLoadedRef,
@@ -132,8 +103,7 @@ export default function VisualizadorUniversalEntidadeV24({
   // ── handleCloseForm centralizado ──────────────────────────────────────────────
   const handleCloseForm = useCallback((wasSaved) => {
     setShowForm(false); setEditItem(null); setEditError(null);
-    if (wasSaved) { setPage(1); }
-    setTimeout(() => invalidateAll(queryClient, ENTITY), 50);
+    if (wasSaved) { setPage(1); invalidateAll(queryClient, ENTITY); }
   }, [ENTITY, queryClient]);
 
   // ── CRUD ─────────────────────────────────────────────────────────────────────
@@ -146,42 +116,34 @@ export default function VisualizadorUniversalEntidadeV24({
   });
 
   // ── Contagem — usa o MESMO readFilter da tabela para garantir que bate ──────
-  const readFilterKey = useMemo(() => JSON.stringify(readFilter), [readFilter]);
-  const { data: accurateCount, isLoading: countsLoading } = useQuery({
-    queryKey: ['viz-count-v2', ENTITY, readFilterKey],
-    queryFn: async () => {
-      if (!ENTITY || !contextoValido) return 0;
-      try {
-        const res = await base44.functions.invoke("countEntities", {
-          entityName: ENTITY,
-          filter: readFilter,
-        });
-        const n = res?.data?.count ?? res?.data?.total ?? res?.data;
-        return typeof n === 'number' ? n : 0;
-      } catch (_) {
-        // Fallback: contagem direta no servidor com o mesmo readFilter (sem baixar registros)
-        try {
-          const n = await base44.entities[ENTITY].count(readFilter);
-          return typeof n === 'number' ? n : 0;
-        } catch { return 0; }
-      }
-    },
-    staleTime: 60_000,
-    gcTime: 300_000,
-    refetchOnWindowFocus: false,
-    retry: 1,
+  const { data: accurateCount, isPending: countsLoading, isError: countError } = useQuery({
+    queryKey: entityCountKey(ENTITY, filteredReadFilter),
+    queryFn: () => countEntityRecords(ENTITY, filteredReadFilter),
+    staleTime: 300_000, gcTime: 600_000,
+    refetchOnWindowFocus: false, retry: 0,
     enabled: !!ENTITY && contextoValido && canViewCadastro,
   });
-  const totalCount = Number(accurateCount || 0);
+  const totalCount = Number.isFinite(accurateCount) ? accurateCount : null;
 
   // Efeitos
   useEffect(() => { resetCache(); }, [ENTITY, empresaId, groupId, debouncedSearch]);
   useEffect(() => {
+    if (!Number.isFinite(totalCount)) return;
+    const lastPage = Math.max(1, Math.ceil(totalCount / pageSize));
+    if (page > lastPage) setPage(lastPage);
+  }, [totalCount, pageSize, page, setPage]);
+  useEffect(() => {
     if (!ENTITY) return;
     const api = base44.entities?.[ENTITY];
     if (!api?.subscribe) return;
-    const unsub = api.subscribe(() => invalidateAll(queryClient, ENTITY));
-    return () => typeof unsub === "function" && unsub();
+    let timer;
+    const unsub = api.subscribe(() => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['viz-v33', ENTITY], refetchType: document.hidden ? 'none' : 'active' });
+      }, 500);
+    });
+    return () => { clearTimeout(timer); if (typeof unsub === 'function') unsub(); };
   }, [ENTITY, queryClient]);
 
   const handleNewItem = useCallback(() => {
@@ -225,7 +187,7 @@ export default function VisualizadorUniversalEntidadeV24({
       if (crossPageAll) {
         let skipAcc = 0;
         while (true) {
-          const res = await base44.functions.invoke("entityListSorted", { entityName: ENTITY, filter: readFilter, sortField: "id", sortDirection: "asc", limit: 500, skip: skipAcc });
+          const res = await base44.functions.invoke("entityListSorted", { entityName: ENTITY, filter: filteredReadFilter, sortField: "id", sortDirection: "asc", limit: 500, skip: skipAcc });
           const arr = Array.isArray(res?.data) ? res.data : [];
           if (!arr.length) break;
           arr.forEach(i => { if (i.id && !deselectedIds.has(i.id)) idsToDelete.push(i.id); });
@@ -252,7 +214,7 @@ export default function VisualizadorUniversalEntidadeV24({
     } catch (e) { console.error("Erro ao excluir em massa:", e?.message || e); return; }
     setSelectedIds(new Set()); setDeselectedIds(new Set()); setCrossPageAll(false); setPage(1);
     invalidateAll(queryClient, ENTITY);
-  }, [ENTITY, crossPageAll, totalCount, selectedIds, deselectedIds, readFilter, queryClient, deleteInContext, canDeleteCadastro, user, empresaId, groupId]);
+  }, [ENTITY, crossPageAll, totalCount, selectedIds, deselectedIds, filteredReadFilter, queryClient, deleteInContext, canDeleteCadastro, user, empresaId, groupId]);
 
   const allPageSelected  = items.length > 0 && items.every(i => isItemSelected(i.id));
   const somePageSelected = items.some(i => isItemSelected(i.id));
@@ -301,7 +263,7 @@ export default function VisualizadorUniversalEntidadeV24({
         IconeProp={IconeProp} FormComponent={FormComponent} windowMode={windowMode}
         items={items} isFetching={isFetching} isError={isError}
         everLoadedRef={everLoadedRef} lastGoodData={lastGoodData}
-        totalCount={totalCount} countsLoading={countsLoading}
+        totalCount={totalCount} countsLoading={countsLoading} countError={countError} hasMore={hasMore}
         page={page} pageSize={pageSize} setPage={setPage} setPageSize={setPageSize}
         search={search} setSearch={setSearch} debouncedSearch={debouncedSearch}
         sortField={sortField} sortDir={sortDir}
@@ -315,7 +277,7 @@ export default function VisualizadorUniversalEntidadeV24({
         handleCancelSelection={handleCancelSelection}
         canCreateCadastro={canCreateCadastro} canEditCadastro={canEditCadastro}
         canDeleteCadastro={canDeleteCadastro} canExportCadastro={canExportCadastro} contextoValido={contextoValido}
-        onRefresh={() => { lastGoodData.current = []; everLoadedRef.current = false; invalidateAll(queryClient, ENTITY); }}
+        onRefresh={() => invalidateAll(queryClient, ENTITY)}
         onNew={handleNewItem} onEdit={handleEditItem}
         onDelete={handleDelete} onDeleteSelected={handleDeleteSelected}
         showForm={showForm} formProps={formProps} formKey={formKey}

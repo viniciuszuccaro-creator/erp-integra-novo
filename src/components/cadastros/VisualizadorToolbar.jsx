@@ -55,9 +55,8 @@ export default function VisualizadorToolbar({
       <div className="flex items-center gap-1.5 shrink-0">
         <span className="text-sm font-semibold text-slate-700 truncate max-w-[160px]">{TITULO}:</span>
         <Badge variant="outline" className="rounded-sm bg-blue-50 text-blue-700 border-blue-200 font-bold tabular-nums min-w-[32px] text-center">
-          {(countsLoading && totalCount === 0)
-            ? <span className="animate-pulse text-[10px]">···</span>
-            : totalCount.toLocaleString("pt-BR")}
+          {Number.isFinite(totalCount) ? totalCount.toLocaleString('pt-BR') :
+            countsLoading ? <span className="animate-pulse text-[10px]">···</span> : '—'}
         </Badge>
       </div>
 

@@ -148,7 +148,9 @@ function LayoutContent({ children, currentPageName }) {
       // Aba em segundo plano não recarrega tudo (evita "Rate limit exceeded")
       if (typeof document !== 'undefined' && document.hidden) return;
       try {
-        queryClient.invalidateQueries({ refetchType: 'active' });
+        queryClient.invalidateQueries({ refetchType: 'active', predicate: q =>
+          !['viz-v33', 'viz-count-v2', 'cadastros-all-counts-v7', 'empresas', 'empresas-grupo'].includes(q.queryKey[0])
+        });
       } catch (_) {}
     }, 45000);
     return () => clearInterval(iv);
@@ -166,8 +168,9 @@ function LayoutContent({ children, currentPageName }) {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Idle prefetch common datasets (multiempresa-aware) + Cadastro Gerais
+  // Cadastros prioriza a janela aberta; evita prefetch de outros módulos concorrendo com ela.
   useEffect(() => {
+    if (currentPageName === 'Cadastros') return;
     const can = (contexto === 'grupo') || !!empresaAtual?.id;
     if (!can) return;
     const run = () => {
@@ -190,7 +193,7 @@ function LayoutContent({ children, currentPageName }) {
       setTimeout(run, 1500);
       setTimeout(runRef, 3000);
     }
-  }, [empresaAtual?.id, grupoAtual?.id, contexto]);
+  }, [empresaAtual?.id, grupoAtual?.id, contexto, currentPageName]);
 
   const isMobilePage = false;
 

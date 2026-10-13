@@ -183,7 +183,7 @@ export function useInvalidationBus(entities = [], options = {}) {
         setTimeout(() => {
           keys.forEach((qk) => {
             try {
-              queryClient.invalidateQueries({ queryKey: qk, exact: false });
+              queryClient.invalidateQueries({ queryKey: qk, exact: false, refetchType: document.hidden ? 'none' : 'active' });
             } catch (_) { console.error('[lib] catch:', _); }
           });
         }, 0);

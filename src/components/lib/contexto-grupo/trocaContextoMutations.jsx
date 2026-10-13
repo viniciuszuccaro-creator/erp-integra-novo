@@ -2,10 +2,10 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { base44, isApiKeyMode, isLocalOnlyMode } from "@/api/base44Client";
-import { CONTEXTO_CACHE_KEY } from "./contextoCache";
+import { writeContextoCache } from '@/components/lib/contexto-grupo/contextoCache';
 
 export function useTrocasContexto({
-  user,
+  user, grupoAtual,
   setUser,
   setContexto,
   setGrupoAtual,
@@ -56,9 +56,11 @@ export function useTrocasContexto({
       setUser((prev) => prev ? { ...prev, contexto_atual: 'grupo', grupo_atual_id: grupo?.id || prev.grupo_atual_id } : prev);
       try { localStorage.setItem('contexto_atual', 'grupo'); } catch (e) { console.error('[lib] catch:', e); }
       try { if (grupo?.id) localStorage.setItem('group_atual_id', grupo.id); } catch (e) { console.error('[lib] catch:', e); }
-      try { sessionStorage.removeItem(CONTEXTO_CACHE_KEY); } catch (e) { console.error('[lib] catch:', e); }
-      queryClient.invalidateQueries();
-      // Evitar reload completo; atualizar queries e deixar GuardRails liberar
+      const detail = { user: { ...user, contexto_atual: 'grupo', grupo_atual_id: grupo?.id }, contexto: 'grupo', grupoAtual: grupo, empresaAtual: null };
+      writeContextoCache(detail);
+      window.dispatchEvent(new CustomEvent('erp-contexto-changed', { detail }));
+      queryClient.invalidateQueries({ refetchType: 'none' });
+      // Todas as janelas recebem o mesmo contexto antes de consultar novamente.
     },
     onError: (error) => {
       // V21.7: Mostrar erro amigável
@@ -102,15 +104,21 @@ export function useTrocasContexto({
 
       return empresa;
     },
-    onSuccess: (empresa) => {
+    onSuccess: async (empresa) => {
+      const grupo = empresa?.group_id === grupoAtual?.id ? grupoAtual :
+        empresa?.group_id ? await base44.entities.GrupoEmpresarial.get(empresa.group_id) : null;
+      setGrupoAtual(grupo);
       setContexto('empresa');
       setEmpresaAtual(empresa);
       setUser((prev) => prev ? { ...prev, contexto_atual: 'empresa', empresa_atual_id: empresa?.id || prev.empresa_atual_id } : prev);
       try { localStorage.setItem('contexto_atual', 'empresa'); } catch (e) { console.error('[lib] catch:', e); }
       try { if (empresa?.id) localStorage.setItem('empresa_atual_id', empresa.id); } catch (e) { console.error('[lib] catch:', e); }
-      try { sessionStorage.removeItem(CONTEXTO_CACHE_KEY); } catch (e) { console.error('[lib] catch:', e); }
-      queryClient.invalidateQueries();
-      // Sem reload completo
+      if (grupo?.id) localStorage.setItem('group_atual_id', grupo.id);
+      const detail = { user: { ...user, contexto_atual: 'empresa', empresa_atual_id: empresa?.id, grupo_atual_id: grupo?.id }, contexto: 'empresa', grupoAtual: grupo, empresaAtual: empresa };
+      writeContextoCache(detail);
+      window.dispatchEvent(new CustomEvent('erp-contexto-changed', { detail }));
+      queryClient.invalidateQueries({ refetchType: 'none' });
+      // Sem reload completo e sem mistura de filtros entre janelas.
     },
     onError: (error) => {
       // V21.7: Mostrar erro amigável

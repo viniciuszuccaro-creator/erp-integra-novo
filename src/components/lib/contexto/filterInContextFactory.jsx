@@ -1,108 +1,70 @@
-// Regra-Mãe 3: Extraído de useContextoVisual.jsx — consulta server-side ordenada com filtro multiempresa
-import { base44 } from "@/api/base44Client";
-import { DEFAULT_SORTS, normalizeSortField, getLastSort, setLastSort } from "./contextoSorts";
+// Filtro canônico: tabelas, badges e seletores consultam o mesmo cadastro único.
+import { base44 } from '@/api/base44Client';
+import { DEFAULT_SORTS, normalizeSortField, getLastSort, setLastSort } from '@/components/lib/contexto/contextoSorts';
+
+export const SIMPLE_CATALOG = new Set([
+  'Banco','FormaPagamento','TipoDespesa','MoedaIndice','TipoFrete','UnidadeMedida',
+  'Departamento','Cargo','Turno','GrupoProduto','Marca','SetorAtividade','LocalEstoque',
+  'TabelaFiscal','CentroResultado','OperadorCaixa','RotaPadrao','ModeloDocumento',
+  'KitProduto','CatalogoWeb','Servico','CondicaoComercial','TabelaPreco','PerfilAcesso',
+  'ConfiguracaoNFe','ConfiguracaoBoletos','ConfiguracaoWhatsApp','GatewayPagamento',
+  'ApiExterna','Webhook','ChatbotIntent','ChatbotCanal','JobAgendado','EventoNotificacao',
+  'SegmentoCliente','RegiaoAtendimento','ContatoB2B','CentroCusto','PlanoDeContas',
+  'PlanoContas','Veiculo','Motorista','Representante','GrupoEmpresarial','Empresa',
+  'ConfiguracaoDespesaRecorrente',
+]);
+const CADASTROS = new Set([...SIMPLE_CATALOG, 'Cliente','Fornecedor','Transportadora','Produto','Colaborador']);
+const CONTEXT_FIELDS = {
+  Fornecedor: 'empresa_dona_id', Transportadora: 'empresa_dona_id',
+  Colaborador: 'empresa_alocada_id', NotaFiscal: 'empresa_faturamento_id',
+  TransferenciaFilial: 'empresa_origem_id',
+};
+
+export function buildContextFilter(entityName, empresaId, groupId, empresasDoGrupo = [], campo = 'empresa_id') {
+  if (!groupId && !empresaId) return { id: { $in: [] } };
+  const ctx = CONTEXT_FIELDS[entityName] || campo;
+  const ids = [...new Set([empresaId, ...empresasDoGrupo.map(e => typeof e === 'string' ? e : e.id)].filter(Boolean))].sort();
+  const companyConditions = ids.length ? [
+    { [ctx]: { $in: ids } }, { empresa_id: { $in: ids } },
+    { empresas_compartilhadas_ids: { $in: ids } },
+    ...(entityName === 'Cliente' ? [{ empresa_dona_id: { $in: ids } }] : []),
+    ...(entityName === 'TransferenciaFilial' ? [{ empresa_destino_id: { $in: ids } }] : []),
+  ] : [];
+  if (entityName === 'GrupoEmpresarial') return { id: groupId || { $in: [] }, _merged: { $ne: true } };
+  if (entityName === 'Empresa') return groupId ? { group_id: groupId, _merged: { $ne: true } } : { id: empresaId, _merged: { $ne: true } };
+  if (groupId && (CADASTROS.has(entityName) || !empresaId)) {
+    return { _merged: { $ne: true }, $or: [
+      { group_id: groupId },
+      ...(entityName === 'PerfilAcesso' ? [{ grupo_id: groupId, group_id: null }] : []),
+      ...(companyConditions.length ? [{ group_id: null, $or: companyConditions }] : []),
+    ] };
+  }
+  const ownCompany = [
+    { [ctx]: empresaId },
+    ...(entityName === 'Cliente' ? [{ empresa_dona_id: empresaId }] : []),
+    ...(CADASTROS.has(entityName) ? [{ empresas_compartilhadas_ids: { $in: [empresaId] } }] : []),
+  ];
+  return { _merged: { $ne: true }, $and: [
+    ...(groupId ? [{ $or: [{ group_id: groupId }, { group_id: null }] }] : []),
+    { $or: ownCompany },
+  ] };
+}
 
 export function createFilterInContext({ getFiltroContexto, empresasDoGrupo }) {
-  const filterInContext = async (entityName, criterios = {}, order = undefined, limit = undefined, campo = 'empresa_id', skip = 0) => {
-    const ENTITY_CONTEXT_FIELD = { Fornecedor: 'empresa_dona_id', Transportadora: 'empresa_dona_id', Colaborador: 'empresa_alocada_id', NotaFiscal: 'empresa_faturamento_id', TransferenciaFilial: 'empresa_origem_id' };
-    const SHARED_SET = new Set(['Cliente', 'Fornecedor', 'Transportadora', 'Produto', 'Representante', 'RegiaoAtendimento']);
-    const ctxCampo = ENTITY_CONTEXT_FIELD[entityName] || campo || 'empresa_id';
-
-    const scope = getFiltroContexto(ctxCampo, true) || {};
-    const groupId = scope.group_id;
-    const empresaId = scope[ctxCampo];
-
-    // Detecta suporte a contexto via schema
-    let hasGroupField = true;
-    let hasCtxField = true;
-    try {
-      const sch = (base44.entities?.[entityName]?.schema ? await base44.entities[entityName].schema() : null);
-      const props = sch?.properties || {};
-      hasGroupField = Object.prototype.hasOwnProperty.call(props, 'group_id');
-      hasCtxField = Object.prototype.hasOwnProperty.call(props, ctxCampo);
-    } catch (e) { console.error('[lib] catch:', e); }
-    const noContext = !hasGroupField && !hasCtxField;
-
-    if (!groupId && !empresaId && !noContext) return [];
-
-    const rest = { ...criterios };
-
-    // Contexto de GRUPO (sem empresa específica): filtro simples por group_id (indexado e rápido)
-    // O backend expandGroupFilter retorna { group_id } diretamente, sem $or/$in complexo
-    if (groupId && !empresaId) {
-      const filtro = noContext ? { ...rest } : { ...rest, group_id: groupId };
-      if (entityName === 'PerfilAcesso') {
-        // Inclui legacy (group_id: null) para perfis criados antes do multi-tenant
-        filtro.$or = [{ group_id: groupId }, { grupo_id: groupId }, { group_id: null, empresa_id: null }];
-        delete filtro.group_id;
-      }
-      // TransferenciaFilial precisa de empresa_origem/destino (backend não expande)
-      if (entityName === 'TransferenciaFilial' && Array.isArray(empresasDoGrupo) && empresasDoGrupo.length) {
-        const empresasIds = empresasDoGrupo.map(e => e.id).filter(Boolean);
-        filtro.$or = [{ group_id: groupId }, { empresa_origem_id: { $in: empresasIds } }, { empresa_destino_id: { $in: empresasIds } }];
-        delete filtro.group_id;
-      }
-      // seguir para sort + invoke abaixo
-      return (async () => {
-        let sortField2, sortDirection2;
-        if (typeof order === 'string' && order.length) {
-          sortDirection2 = order.startsWith('-') ? 'desc' : 'asc';
-          sortField2 = normalizeSortField(entityName, order.replace(/^-/, ''));
-          setLastSort(entityName, { sortField: sortField2, sortDirection: sortDirection2 });
-        } else {
-          const last = getLastSort(entityName);
-          sortField2 = normalizeSortField(entityName, last?.sortField || DEFAULT_SORTS[entityName]?.field || 'updated_date');
-          sortDirection2 = last?.sortDirection || DEFAULT_SORTS[entityName]?.direction || 'desc';
-        }
-        const res = await base44.functions.invoke('entityListSorted', {
-          entityName, filter: filtro, sortField: sortField2, sortDirection: sortDirection2, limit: limit || 100,
-          skip: Math.max(0, Number(skip) || 0),
-        });
-        return Array.isArray(res?.data) ? res.data : [];
-      })();
-    }
-
-    // Contexto de EMPRESA: $or mínimo com empresaId + shared (para entidades compartilhadas)
-    const orConds = [];
-    if (empresaId) {
-      if (entityName === 'Cliente') {
-        orConds.push(
-          { empresa_id: empresaId },
-          { empresa_dona_id: empresaId },
-          { empresas_compartilhadas_ids: { $in: [empresaId] } }
-        );
-      } else {
-        orConds.push({ [ctxCampo]: empresaId });
-        if (SHARED_SET.has(entityName)) {
-          orConds.push({ empresas_compartilhadas_ids: { $in: [empresaId] } });
-        }
-      }
-    }
-
-    const filtro = noContext ? { ...rest } : { ...rest, ...(orConds.length ? { $or: orConds } : {}) };
-
-    // Derivar sort
-    let sortField, sortDirection;
-    if (typeof order === 'string' && order.length) {
-      sortDirection = order.startsWith('-') ? 'desc' : 'asc';
-      sortField = normalizeSortField(entityName, order.replace(/^-/, ''));
-      setLastSort(entityName, { sortField, sortDirection });
-    } else {
-      const last = getLastSort(entityName);
-      sortField = normalizeSortField(entityName, last?.sortField || DEFAULT_SORTS[entityName]?.field || 'updated_date');
-      sortDirection = last?.sortDirection || DEFAULT_SORTS[entityName]?.direction || 'desc';
-    }
-
+  const filterInContext = async (entityName, criterios = {}, order, limit = 100, campo = 'empresa_id', skip = 0) => {
+    const ctx = CONTEXT_FIELDS[entityName] || campo;
+    const scope = getFiltroContexto(ctx, true) || {};
+    if (!scope.group_id && !scope[ctx]) return [];
+    const contextFilter = buildContextFilter(entityName, scope[ctx], scope.group_id, empresasDoGrupo, ctx);
+    const filter = Object.keys(criterios).length ? { $and: [contextFilter, criterios] } : contextFilter;
+    const last = getLastSort(entityName);
+    const sortField = normalizeSortField(entityName, order ? order.replace(/^-/, '') : last?.sortField || DEFAULT_SORTS[entityName]?.field || 'updated_date');
+    const sortDirection = order ? (order.startsWith('-') ? 'desc' : 'asc') : last?.sortDirection || DEFAULT_SORTS[entityName]?.direction || 'desc';
+    if (order) setLastSort(entityName, { sortField, sortDirection });
     const res = await base44.functions.invoke('entityListSorted', {
-      entityName,
-      filter: filtro,
-      sortField,
-      sortDirection,
-      limit: limit || 100,
-      skip: Math.max(0, Number(skip) || 0),
+      entityName, filter, sortField, sortDirection, limit: limit || 100, skip: Math.max(0, Number(skip) || 0),
     });
-    return Array.isArray(res?.data) ? res.data : [];
+    return res.data;
   };
-
   return { filterInContext };
 }

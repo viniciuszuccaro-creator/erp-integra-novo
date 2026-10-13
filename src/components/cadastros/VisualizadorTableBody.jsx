@@ -18,7 +18,7 @@ export default function VisualizadorTableBody({
     return <ChevronUp className="w-3.5 h-3.5 text-blue-500" />;
   }
 
-  const isInitialLoad = isFetching && !everLoadedRef.current && lastGoodData.current.length === 0;
+  const isInitialLoad = isFetching && items.length === 0;
 
   if (isInitialLoad) {
     return (

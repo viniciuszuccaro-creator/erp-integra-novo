@@ -13,7 +13,7 @@ export default function VisualizadorBody({
   // identidade
   ENTITY, TITULO, COLUMNS, IconeProp, windowMode,
   // toolbar
-  totalCount, countsLoading, search, setSearch,
+  totalCount, countsLoading, countError, hasMore, search, setSearch,
   pageSize, setPageSize, setPage,
   sortField, sortDir, handleSortDropdown,
   isFetching, items, onRefresh,
@@ -81,6 +81,12 @@ export default function VisualizadorBody({
         </div>
       )}
 
+      {countError && (
+        <div role="alert" className="w-full rounded-sm border border-border bg-muted p-2 text-xs text-muted-foreground">
+          Não foi possível atualizar a contagem; a lista continua disponível.
+          <button onClick={onRefresh} className="ml-2 underline text-primary">Tentar novamente</button>
+        </div>
+      )}
       {/* Tabela */}
       <div className="flex-1 overflow-auto rounded-sm border border-slate-200 bg-white min-h-0 relative">
         {isFetching && items.length > 0 && (
@@ -109,12 +115,12 @@ export default function VisualizadorBody({
 
       {/* Paginação */}
       {(() => {
-        const totalPages = totalCount > 0 ? Math.ceil(totalCount / pageSize) : 1;
-        const hasNext = items.length >= pageSize && page < totalPages;
+        const totalPages = Number.isFinite(totalCount) ? Math.max(1, Math.ceil(totalCount / pageSize)) : null;
+        const hasNext = hasMore ?? (items.length >= pageSize && (totalPages === null || page < totalPages));
         return (
           <div className="flex items-center justify-between text-xs text-slate-500 shrink-0 flex-wrap gap-1">
             <span className="tabular-nums">
-              {items.length} de {totalCount.toLocaleString('pt-BR')} registros
+              {items.length}{Number.isFinite(totalCount) ? ` de ${totalCount.toLocaleString('pt-BR')}` : ''} registros{!Number.isFinite(totalCount) ? countsLoading ? ' · contando…' : ' · total indisponível' : ''}
               {totalPages > 1 ? ` · pág. ${page} / ${totalPages}` : ''}
             </span>
             <div className="flex gap-1">

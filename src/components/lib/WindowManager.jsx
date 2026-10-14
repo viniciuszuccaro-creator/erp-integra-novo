@@ -51,14 +51,16 @@ export function WindowProvider({ children }) {
   }, []);
 
   // Trazer janela para frente - V21.6.4 CORREÇÃO TOTAL
+  // Teto de 990M: garante que portais Radix (999.9M) fiquem sempre acima das janelas
+  const nextZ = (prev) => Math.min(Math.max(...prev.map(w => w.zIndex), 99999000) + 100000, 990000000);
   const bringToFront = useCallback((windowId) => {
-    setActiveWindowId(windowId);
-    setWindows(prev => {
-      const maxZ = Math.max(...prev.map(w => w.zIndex), 99999000);
-      return prev.map(w => 
-        w.id === windowId ? { ...w, zIndex: maxZ + 100000, isMinimized: false } : w
-      );
-    });
+  setActiveWindowId(windowId);
+  setWindows(prev => {
+    const z = nextZ(prev);
+    return prev.map(w => 
+      w.id === windowId ? { ...w, zIndex: z, isMinimized: false } : w
+    );
+  });
   }, []);
 
   // Abrir nova janela - V21.7 CORREÇÃO ESTADO UNIFICADO
@@ -71,19 +73,16 @@ export function WindowProvider({ children }) {
         const janelaExistente = prevWindows.find(w => w.uniqueKey === options.uniqueKey);
         if (janelaExistente) {
           setActiveWindowId(janelaExistente.id);
-          const maxZ = Math.max(...prevWindows.map(w => w.zIndex), 99999000);
           return prevWindows.map(w => 
             w.id === janelaExistente.id 
-              ? { ...w, zIndex: maxZ + 100000, isMinimized: false }
+              ? { ...w, zIndex: nextZ(prevWindows), isMinimized: false }
               : w
           );
         }
       }
 
-      // 2. Calcular z-index sempre no topo
-      const baseZ = 99999000;
-      const currentMaxZ = prevWindows.length > 0 ? Math.max(...prevWindows.map(w => w.zIndex), baseZ) : baseZ;
-      const finalZ = currentMaxZ + 100000;
+      // 2. Calcular z-index sempre no topo (com teto abaixo dos portais)
+      const finalZ = nextZ(prevWindows);
 
       // 3. Cascata inteligente
       const offsetBase = prevWindows.length * 40;

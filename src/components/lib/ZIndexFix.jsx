@@ -43,41 +43,43 @@ export function injectGlobalZIndexStyles() {
       position: relative;
     }
     
-    /* Select Content - abaixo de janelas */
+    /* Select Content - acima das janelas */
     [data-radix-select-content] {
-      z-index: 999999 !important;
+      z-index: 999999999 !important;
     }
     
-    /* Dropdown Menu Content - abaixo de janelas */
+    /* Dropdown Menu Content - acima das janelas */
     [data-radix-dropdown-menu-content] {
-      z-index: 999999 !important;
+      z-index: 999999999 !important;
     }
     
-    /* Popover Content - abaixo de janelas */
+    /* Popover Content - acima das janelas */
     [data-radix-popover-content] {
-      z-index: 999999 !important;
+      z-index: 999999999 !important;
     }
     
-    /* Command Dialog - abaixo de janelas */
+    /* Command Dialog - acima das janelas */
     [data-radix-dialog-content][cmdk-dialog-content] {
-      z-index: 999999 !important;
+      z-index: 999999999 !important;
     }
     
-    /* Tooltip Content - abaixo de janelas */
+    /* Tooltip Content - acima das janelas */
     [data-radix-tooltip-content] {
-      z-index: 999999 !important;
+      z-index: 999999999 !important;
     }
     
-    /* Context Menu - abaixo de janelas */
+    /* Context Menu - acima das janelas */
     [data-radix-context-menu-content] {
-      z-index: 999999 !important;
+      z-index: 999999999 !important;
     }
     
-    /* Garantia adicional para portals - mas abaixo de janelas */
+    /* Garantia adicional para portals - SEMPRE acima das janelas */
+    [data-radix-portal] > div,
     [data-radix-portal] > [role="dialog"],
+    [data-radix-portal] > [role="alertdialog"],
     [data-radix-portal] > [role="menu"],
     [data-radix-portal] > [role="listbox"] {
-      z-index: 999999 !important;
+      z-index: 999999999 !important;
     }
   `;
   

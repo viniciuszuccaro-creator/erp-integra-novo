@@ -134,6 +134,8 @@ export function installFunctionsFallback(base44) {
     const e = new Error(`Leitura indisponível para ${payload.entityName || functionName}`);
 
       // entityListSorted → filtro direto + ordenação + paginação (skip/limit)
+      // SDK autenticado: assinatura paginada { sort, limit, cursor } — o salto (skip)
+      // é feito juntando as páginas por cursor até o alvo, sem assinatura legada.
       if (functionName === 'entityListSorted') {
         const { entityName, filter, search, sortField, sortDirection, limit = 50, skip = 0 } = payload;
         const api = base44.entities?.[entityName];
@@ -141,9 +143,21 @@ export function installFunctionsFallback(base44) {
         const sf = (!sortField || sortField === 'id') ? 'created_date' : sortField;
         const sort = `${sortDirection === 'desc' ? '-' : ''}${sf}`;
         const finalFilter = buildSearchFilter(filter, search);
-        // Contrato legado por offset: o servidor pagina, sem baixar o prefixo da coleção.
-        const arr = await api.filter(finalFilter, sort, Number(limit) || 50, Math.max(0, Number(skip) || 0));
-        return { data: arr };
+        const lim = Number(limit) || 50;
+        const start = Math.max(0, Number(skip) || 0);
+        const target = start + lim;
+        const collected = [];
+        let cursor; let waves = 0;
+        while (collected.length < target && waves < 100) {
+          const page = await api.filter(finalFilter, { sort, limit: Math.min(1000, target - collected.length), cursor });
+          const items = Array.isArray(page) ? page : (page?.items || []);
+          if (!items.length) break;
+          collected.push(...items);
+          if (Array.isArray(page) || !page?.has_more) break;
+          cursor = page.next_cursor;
+          waves++;
+        }
+        return { data: collected.slice(start, start + lim) };
       }
 
       // getEntityRecord → { data: [registro] } (contrato original: array)

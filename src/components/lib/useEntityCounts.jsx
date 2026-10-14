@@ -1,6 +1,6 @@
 // Contagens individuais compartilhadas entre cartões e tabelas; falhas não viram zero.
 import { useQueries, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { base44, isLocalOnlyMode } from '@/api/base44Client';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import usePermissions from '@/components/lib/usePermissions';
@@ -25,15 +25,25 @@ export function useEntityCounts(entities = []) {
   const empresaId = empresaAtual?.id || null;
   const ready = !contextLoading && !!(groupId || empresaId);
   const allowed = names.map(e => hasPermission('Cadastros', e, 'visualizar') || hasPermission('Cadastros', null, 'visualizar'));
+  const allowedKey = allowed.join(',');
   const filters = names.map(e => buildContextFilter(e, empresaId, groupId, empresasDoGrupo));
+  // Escalonamento: libera as contagens em janelas (4 a cada 120ms) para evitar
+  // a rajada inicial de ~49 consultas concorrentes que atrasava os blocos.
+  const [released, setReleased] = useState(0);
+  const entitiesKey = names.join(',');
+  useEffect(() => { setReleased(0); }, [entitiesKey, groupId, empresaId]);
+  useEffect(() => {
+    if (!ready || !allowedKey || released >= names.length) return;
+    const t = setInterval(() => setReleased(c => Math.min(names.length, c + 4)), 120);
+    return () => clearInterval(t);
+  }, [ready, allowedKey, entitiesKey, released, names.length, groupId, empresaId]);
   const queries = useQueries({ queries: names.map((e, i) => ({
     queryKey: entityCountKey(e, filters[i]),
     queryFn: () => countEntityRecords(e, filters[i]),
-    enabled: ready && allowed[i],
+    enabled: ready && allowed[i] && i < released,
     staleTime: 300_000, gcTime: 600_000,
     refetchOnWindowFocus: false, retry: 0,
   })) });
-  const entitiesKey = names.join(',');
   useEffect(() => {
     if (!ready || !names.length) return;
     const timers = new Map();
@@ -45,7 +55,7 @@ export function useEntityCounts(entities = []) {
       }), 500));
     }) : null).filter(Boolean);
     return () => { timers.forEach(clearTimeout); unsubs.forEach(unsub => unsub()); };
-  }, [entitiesKey, groupId, empresaId, ready, allowed.join(','), queryClient]);
+  }, [entitiesKey, groupId, empresaId, ready, allowedKey, queryClient]);
   const counts = Object.fromEntries(names.map((name, i) => [name, allowed[i] ? queries[i].data : 0]));
   const complete = names.every((name, i) => !allowed[i] || Number.isFinite(counts[name]));
   const total = complete ? names.reduce((n, name) => n + (counts[name] ?? 0), 0) : undefined;

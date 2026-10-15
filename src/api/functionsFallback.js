@@ -42,8 +42,10 @@ const READ_FUNCTIONS = new Set(['entityListSorted', 'countEntities', 'countEntit
 function isReadFn(fn) { return READ_FUNCTIONS.has(fn); }
 
 // Leituras interativas têm prioridade sobre contagens; uma recusa pausa toda a fila.
-const MAX_CONCURRENT = 4;
-const START_INTERVAL_MS = 120;
+// 6 concorrentes / 80ms: contagens dos 6 blocos de Cadastros (~49 consultas)
+// terminam ~40% mais rápido sem aproximar o limite de taxa (429 tem retry + pausa).
+const MAX_CONCURRENT = 6;
+const START_INTERVAL_MS = 80;
 let active = 0;
 let nextStart = 0;
 let pausedUntil = 0;

@@ -44,8 +44,8 @@ function isReadFn(fn) { return READ_FUNCTIONS.has(fn); }
 // Leituras interativas têm prioridade sobre contagens; uma recusa pausa toda a fila.
 // 6 concorrentes / 80ms: contagens dos 6 blocos de Cadastros (~49 consultas)
 // terminam ~40% mais rápido sem aproximar o limite de taxa (429 tem retry + pausa).
-const MAX_CONCURRENT = 6;
-const START_INTERVAL_MS = 80;
+const MAX_CONCURRENT = 10;
+const START_INTERVAL_MS = 40;
 let active = 0;
 let nextStart = 0;
 let pausedUntil = 0;

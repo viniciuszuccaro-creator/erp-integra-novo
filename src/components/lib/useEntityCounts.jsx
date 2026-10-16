@@ -8,11 +8,21 @@ import { buildContextFilter } from '@/components/lib/contexto/filterInContextFac
 export { buildContextFilter, SIMPLE_CATALOG } from '@/components/lib/contexto/filterInContextFactory';
 
 export const entityCountKey = (entityName, filter) => ['viz-count-v2', entityName, JSON.stringify(filter)];
+const countCacheKey = (entityName, filter) => `viz-count-cache:${entityName}:${JSON.stringify(filter)}`;
+// Cache local do último valor conhecido: badges/totais aparecem instantaneamente
+// na abertura da página e a contagem real é atualizada em segundo plano.
+function readCountCache(entityName, filter) {
+  try {
+    const v = JSON.parse(localStorage.getItem(countCacheKey(entityName, filter)) || '{}')?.v;
+    return Number.isFinite(v) ? v : undefined;
+  } catch { return undefined; }
+}
 export async function countEntityRecords(entityName, filter) {
   const n = isLocalOnlyMode
     ? (await base44.functions.invoke('countEntities', { entityName, filter })).data.count
     : await base44.entities[entityName].count(filter);
   if (!Number.isFinite(n) || n < 0) throw new Error(`Contagem inválida de ${entityName}`);
+  try { localStorage.setItem(countCacheKey(entityName, filter), JSON.stringify({ v: n, t: Date.now() })); } catch {}
   return n;
 }
 
@@ -35,6 +45,8 @@ export function useEntityCounts(entities = []) {
     queryKey: entityCountKey(e, filters[i]),
     queryFn: () => countEntityRecords(e, filters[i]),
     enabled: ready && allowed[i],
+    initialData: readCountCache(e, filters[i]),
+    initialDataUpdatedAt: 0, // valor em cache visível já; recarrega em segundo plano
     staleTime: 300_000, gcTime: 600_000,
     refetchOnWindowFocus: false, retry: 0,
   })) });

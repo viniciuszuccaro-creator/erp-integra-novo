@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, startTransition } from "react";
+import { useQuery } from '@tanstack/react-query';
+import { countEntityRecords, buildContextFilter } from '@/components/lib/useEntityCounts';
 import { base44 } from "@/api/base44Client";
 import { Box, TrendingUp, PackageCheck, PackageMinus, PackageOpen, Clock, BarChart3, Sparkles, ArrowLeftRight, Download } from "lucide-react";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
@@ -47,12 +49,33 @@ export default function Estoque() {
     { staleTime: 300000, enabled: contextoValido }
   );
 
-  const contagensTotais = useMemo(() => ({
+  const contagensLista = useMemo(() => ({
     total: produtosParaKPIs.length,
     revenda: produtosParaKPIs.filter(p => p.tipo_item === 'Revenda').length,
     producao: produtosParaKPIs.filter(p => p.tipo_item === 'Matéria-Prima Produção').length,
     estoqueBaixo: produtosParaKPIs.filter(p => p.tipo_item === 'Revenda' && isProdutoEstoqueBaixo(p)).length,
   }), [produtosParaKPIs]);
+
+  // Contagens precisas no servidor (fonte da verdade — a lista é limitada e conta só ativos)
+  const produtoCountFilter = useMemo(
+    () => buildContextFilter('Produto', empresaAtual?.id || null, groupId, empresasDoGrupo),
+    [empresaAtual?.id, groupId, empresasDoGrupo]
+  );
+  const { data: kpisProduto = {} } = useQuery({
+    queryKey: ['viz-count-v2', 'Produto', 'estoque-kpis', JSON.stringify(produtoCountFilter)],
+    queryFn: async () => ({
+      total: await countEntityRecords('Produto', produtoCountFilter),
+      estoqueBaixo: await countEntityRecords('Produto', { ...produtoCountFilter, status: 'Ativo', estoque_atual: { $lte: 0 } }),
+    }),
+    enabled: contextoValido,
+    staleTime: 60000, retry: 1, refetchOnWindowFocus: false,
+  });
+
+  const contagensTotais = {
+    ...contagensLista,
+    ...(Number.isFinite(kpisProduto.total) ? { total: kpisProduto.total } : {}),
+    ...(Number.isFinite(kpisProduto.estoqueBaixo) ? { estoqueBaixo: kpisProduto.estoqueBaixo } : {}),
+  };
 
   const { data: movimentacoes = [] } = useRLSQuery(
     'MovimentacaoEstoque', {}, '-data_movimentacao', ESTOQUE_LIST_LIMIT,

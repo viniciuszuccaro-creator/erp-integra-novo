@@ -2,7 +2,7 @@ import { safeArray, safeNumber, safeDate, safeDateKey, isBefore, isBeforeOrEqual
 import { getPedidoItens } from "@/components/dashboard/utils/dashboardOrderItems";
 import { getProdutoEstoqueDisponivel } from "@/components/estoque/utils/estoqueSafeData";
 
-export default function useDashboardDerivedData({ pedidos = [], contasReceber = [], contasPagar = [], entregas = [], ordensProducao = [], colaboradores = [], clientes = [], produtos = [], periodo = "mes", cadastroCounts = {} }) {
+export default function useDashboardDerivedData({ pedidos = [], contasReceber = [], contasPagar = [], entregas = [], ordensProducao = [], colaboradores = [], clientes = [], produtos = [], periodo = "mes", cadastroCounts = {}, estoqueBaixoCount = null }) {
   pedidos = safeArray(pedidos);
   contasReceber = safeArray(contasReceber);
   contasPagar = safeArray(contasPagar);
@@ -56,11 +56,14 @@ export default function useDashboardDerivedData({ pedidos = [], contasReceber = 
 
   const fluxoCaixa = receitasPendentes - despesasPendentes;
 
-  // Estoque Crítico = produtos ativos com estoque disponível <= 0 (sem estoque)
-  const produtosBaixoEstoque = produtos.filter((p) => {
-    if (p.status !== "Ativo") return false;
-    return getProdutoEstoqueDisponivel(p) <= 0;
-  }).length;
+  // Estoque Crítico = produtos ativos com estoque disponível <= 0 (sem estoque).
+  // Contagem server-side (precisa, a lista carregada é limitada a 500 registros).
+  const produtosBaixoEstoque = estoqueBaixoCount != null
+    ? estoqueBaixoCount
+    : produtos.filter((p) => {
+        if (p.status !== "Ativo") return false;
+        return getProdutoEstoqueDisponivel(p) <= 0;
+      }).length;
 
   // Usa contagens precisas do countEntities batch quando disponíveis (não limitadas a 80 registros)
   // Fallback: filtra os registros carregados (limitados a DASHBOARD_LIST_LIMIT)

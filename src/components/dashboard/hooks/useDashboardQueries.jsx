@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import useRLSQuery from "@/components/lib/useRLSQuery";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { DASHBOARD_LIST_LIMIT, DASHBOARD_REFETCH_INTERVAL_MS, dashboardQueryDefaults } from "@/components/dashboard/config/dashboardQueryConfig";
+import { countEntityRecords, buildContextFilter } from '@/components/lib/useEntityCounts';
 
 /**
  * Hook extraído de Dashboard.jsx (Regra-Mãe regra 3).
@@ -11,7 +12,7 @@ import { DASHBOARD_LIST_LIMIT, DASHBOARD_REFETCH_INTERVAL_MS, dashboardQueryDefa
  */
 export function useDashboardQueries({ canSeeFinanceiro, canSeeCRM, canSeeComercial, canSeeEstoque, canSeeExpedicao, canSeeRH, canSeeProducao, canSeeFiscal, periodo, autoRefresh, empresaAtual, estaNoGrupo, grupoAtual, getFiltroContexto }) {
   const queryClient = useQueryClient();
-  const { filterInContext } = useContextoVisual();
+  const { filterInContext, empresasDoGrupo } = useContextoVisual();
   const hasContextoAtivo = Boolean(empresaAtual?.id || estaNoGrupo || grupoAtual?.id);
   const refetchInterval = (empresaAtual?.id || estaNoGrupo) ? (autoRefresh ? DASHBOARD_REFETCH_INTERVAL_MS : false) : false;
 
@@ -137,6 +138,18 @@ export function useDashboardQueries({ canSeeFinanceiro, canSeeCRM, canSeeComerci
     enabled: Boolean(hasContextoAtivo),
   });
 
+  // Estoque Baixo com contagem server-side — a lista de produtos é limitada a 500
+  // e subestimava o KPI (filtrava apenas os registros carregados).
+  const { data: estoqueBaixoServer = null } = useQuery({
+    queryKey: ['dash-estoque-baixo', empresaAtual?.id, grupoAtual?.id, estaNoGrupo],
+    queryFn: async () => {
+      const f = buildContextFilter('Produto', empresaAtual?.id || null, grupoAtual?.id || null, empresasDoGrupo);
+      return await countEntityRecords('Produto', { ...f, status: 'Ativo', estoque_atual: { $lte: 0 } });
+    },
+    enabled: Boolean(canSeeEstoque && hasContextoAtivo),
+    staleTime: 60000, retry: 1, refetchOnWindowFocus: false,
+  });
+
   useEffect(() => {
     if (!(empresaAtual?.id || estaNoGrupo || grupoAtual?.id)) return;
     const subs = [];
@@ -160,7 +173,7 @@ export function useDashboardQueries({ canSeeFinanceiro, canSeeCRM, canSeeComerci
     return () => { subs.forEach(u => { try { u && u(); } catch (_) { console.error('[hooks] catch:', _); } }); };
   }, [empresaAtual?.id, grupoAtual?.id, estaNoGrupo]);
 
-  return { pedidos, contasReceber, contasPagar, entregas, colaboradores, produtos, clientes, ordensProducao, notasFiscais, iaConsolidado, loadingAnomIA, ccMetrics, botMetrics, hasContextoAtivo, cadastroCounts };
+  return { pedidos, contasReceber, contasPagar, entregas, colaboradores, produtos, clientes, ordensProducao, notasFiscais, iaConsolidado, loadingAnomIA, ccMetrics, botMetrics, hasContextoAtivo, cadastroCounts, estoqueBaixoServer };
 }
 
 export default useDashboardQueries;

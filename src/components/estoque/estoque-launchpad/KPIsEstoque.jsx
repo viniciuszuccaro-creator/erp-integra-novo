@@ -24,7 +24,7 @@ export default function KPIsEstoque({
         </CardHeader>
         <CardContent className="px-3 pb-2">
           <div className="text-2xl font-bold text-indigo-600">{produtosAtivos}</div>
-          <p className="text-xs text-slate-500">ativos</p>
+          <p className="text-xs text-slate-500">produtos cadastrados</p>
         </CardContent>
       </Card>
 

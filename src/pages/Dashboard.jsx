@@ -44,7 +44,7 @@ export default function Dashboard() {
     canSeeRH, canSeeProducao, canSeeFiscal, periodo, autoRefresh,
     empresaAtual, estaNoGrupo, grupoAtual, getFiltroContexto
   });
-  const { pedidos, contasReceber, contasPagar, entregas, colaboradores, produtos, clientes, ordensProducao, iaConsolidado, loadingAnomIA, ccMetrics, botMetrics, cadastroCounts } = queries;
+  const { pedidos, contasReceber, contasPagar, entregas, colaboradores, produtos, clientes, ordensProducao, iaConsolidado, loadingAnomIA, ccMetrics, botMetrics, cadastroCounts, estoqueBaixoServer } = queries;
 
   const {
     pedidosPeriodo, totalVendas, ticketMedio, receitasPendentes, despesasPendentes,
@@ -54,7 +54,7 @@ export default function Dashboard() {
     vendasUltimos30Dias, fluxo7Dias, topProdutos, vendasPorMesData, top5ClientesData,
     statusPedidosDataAll, fluxoCaixaMensalData,
     pedidosTotalCount, contasReceberPendentesCount, contasPagarPendentesCount,
-  } = useDashboardDerivedData({ pedidos, contasReceber, contasPagar, entregas, ordensProducao, colaboradores, clientes, produtos, periodo, cadastroCounts });
+  } = useDashboardDerivedData({ pedidos, contasReceber, contasPagar, entregas, ordensProducao, colaboradores, clientes, produtos, periodo, cadastroCounts, estoqueBaixoCount: estoqueBaixoServer });
 
   const pedidosRecentes = (pedidos || []).slice(0, 8);
   const pedidosPendentes = (pedidos || []).filter(p => ['Rascunho','Em Produção','Pronto para Faturar','Em Expedição'].includes(p?.status)).slice(0, 8);

@@ -134,6 +134,18 @@ const ENTITY_QUERY_KEYS = {
 // Throttle de invalidação por entidade (evita flood de invalidações em eventos rápidos)
 const INVALIDATE_THROTTLE_MS = 150;
 
+// Entidades de alto volume (auditoria, logs, telemetria): recebem gravação constante
+// e quase não mudam o que está na tela. Antes, cada registro de log invalidava os
+// mesmos 14 grupos de consultas ativos. Agora invalidam só as próprias chaves,
+// com intervalo maior — corta o "refresh" constante do sistema.
+const HEAVY_ENTITIES = new Set([
+  'AuditLog', 'Notificacao', 'SessaoUsuario', 'TokenRefresh',
+  'MonitoramentoSistema', 'LogPerformance', 'AlertaPerformance',
+  'LogsIA', 'LogCobranca', 'AuditoriaGlobal', 'AuditoriaAcesso',
+  'AuditoriaGPS', 'AuditoriaIA', 'ChatbotInteracao', 'ImportacaoXMLNFe',
+]);
+const HEAVY_THROTTLE_MS = 5000;
+
 /**
  * Hook que assina eventos real-time de uma lista de entidades e
  * invalida apenas as queries React Query afetadas.
@@ -156,10 +168,20 @@ export function useInvalidationBus(entities = [], options = {}) {
       return api.subscribe((evt) => {
         const now = Date.now();
         const last = lastInvalidateRef.current[entityName] || 0;
-        if (now - last < INVALIDATE_THROTTLE_MS) return;
+        const heavy = HEAVY_ENTITIES.has(entityName);
+        if (now - last < (heavy ? HEAVY_THROTTLE_MS : INVALIDATE_THROTTLE_MS)) return;
         lastInvalidateRef.current[entityName] = now;
 
         const baseKeys = ENTITY_QUERY_KEYS[entityName] || [[entityName], ['entityListSorted', entityName]];
+        if (heavy) {
+          // Logs/auditoria: apenas as próprias consultas, sem propagar aos módulos
+          setTimeout(() => {
+            baseKeys.forEach((qk) => {
+              try { queryClient.invalidateQueries({ queryKey: qk, exact: false, refetchType: document.hidden ? 'none' : 'active' }); } catch { /* noop */ }
+            });
+          }, 0);
+          return;
+        }
         // Sempre inclui as query keys do VisualizadorUniversal (tabela de Cadastros) e contagens
         // + chaves de módulos consumidores para propagação cross-module em tempo real
         const keys = [

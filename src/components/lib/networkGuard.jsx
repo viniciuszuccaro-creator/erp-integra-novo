@@ -80,9 +80,14 @@
           };
 
           const response = await originalFetch(input, nextInit);
-          
+
+          // Repetição apenas em leituras: repetir POST/PUT/PATCH/DELETE após 5xx
+          // podia gravar o mesmo registro duas vezes (duplicidade silenciosa).
+          const method = String(nextInit.method || (typeof input !== 'string' && input?.method) || 'GET').toUpperCase();
+          const idempotent = method === 'GET' || method === 'HEAD';
+
           // Se a resposta for 5xx (erro de servidor) e ainda temos retries, tenta novamente
-          if (response.status >= 500 && response.status < 600 && retryCount < MAX_RETRIES) {
+          if (idempotent && response.status >= 500 && response.status < 600 && retryCount < MAX_RETRIES) {
             console.warn(`Erro ${response.status}, tentando novamente... (${retryCount + 1}/${MAX_RETRIES})`);
             await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS * (retryCount + 1)));
             return attemptFetch(retryCount + 1);
@@ -93,8 +98,10 @@
 
         return originalFetch(input, init);
       } catch (error) {
-        // Network Error ou timeout - tenta retry
-        if ((error.name === 'TypeError' || error.name === 'AbortError') && retryCount < MAX_RETRIES) {
+        // Network Error ou timeout - tenta retry somente em leituras (escrita segura)
+        const msgMethod = String(init?.method || (typeof input !== 'string' && input?.method) || 'GET').toUpperCase();
+        const msgIdempotent = msgMethod === 'GET' || msgMethod === 'HEAD';
+        if (msgIdempotent && (error.name === 'TypeError' || error.name === 'AbortError') && retryCount < MAX_RETRIES) {
           console.warn(`Network Error, tentando novamente... (${retryCount + 1}/${MAX_RETRIES})`, error.message);
           await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS * (retryCount + 1)));
           return attemptFetch(retryCount + 1);

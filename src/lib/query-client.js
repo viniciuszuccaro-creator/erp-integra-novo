@@ -7,7 +7,9 @@ export const queryClientInstance = new QueryClient({
 			refetchOnWindowFocus: false,
 			refetchOnReconnect: false,
 			refetchOnMount: true,
-			staleTime: 15000,
+			// 2 min: voltar a uma tela já visitada usa o cache em vez de refazer todas
+			// as consultas (antes eram 15 s). Mutações continuam invalidando na hora.
+			staleTime: 120000,
 			gcTime: 300000,
 			retry: 1,
 			retryDelay: 1000,

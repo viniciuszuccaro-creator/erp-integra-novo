@@ -2,6 +2,7 @@ import { createClient } from '@base44/sdk';
 import { appParams } from '@/lib/app-params';
 import { localBase44, localApiUser as localOnlyUser } from './localBase44Client';
 import { installFunctionsFallback } from './functionsFallback';
+import { installRealtimeMultiplexer } from './realtimeMultiplexer';
 
 const { appId, serverUrl, token, functionsVersion } = appParams;
 const apiKey = import.meta.env.VITE_BASE44_API_KEY;
@@ -33,6 +34,9 @@ export const base44 = isLocalOnlyMode ? localBase44 : remoteBase44;
 
 // Regra-Mãe 2: fallback de leitura — backend functions (402/404) caem para consultas diretas
 if (!isLocalOnlyMode) installFunctionsFallback(base44);
+
+// Um canal de tempo real por entidade (evita dezenas de assinaturas duplicadas)
+installRealtimeMultiplexer(base44);
 
 if (!isLocalOnlyMode && isApiKeyMode && base44?.auth) {
   const originalUpdateMe = base44.auth.updateMe?.bind(base44.auth);

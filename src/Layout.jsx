@@ -142,7 +142,8 @@ function LayoutContent({ children, currentPageName }) {
     } catch (_) {}
   };
 
-  // Safety-net: refetch periódico de queries ativas a cada 45s (caso WebSocket falhe)
+  // Safety-net: refetch periódico de queries ativas (caso WebSocket falhe).
+  // 3 min: antes eram 45s e cada ciclo refazia todas as consultas abertas.
   useEffect(() => {
     const iv = setInterval(() => {
       // Aba em segundo plano não recarrega tudo (evita "Rate limit exceeded")
@@ -152,7 +153,7 @@ function LayoutContent({ children, currentPageName }) {
           !['viz-v33', 'viz-count-v2', 'cadastros-all-counts-v7', 'empresas', 'empresas-grupo'].includes(q.queryKey[0])
         });
       } catch (_) {}
-    }, 45000);
+    }, 180000);
     return () => clearInterval(iv);
   }, [queryClient]);
 

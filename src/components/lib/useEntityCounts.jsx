@@ -53,7 +53,7 @@ export function useEntityCounts(entities = []) {
   useEffect(() => {
     if (!ready || !names.length) return;
     const timers = new Map();
-    const unsubs = names.map((name, i) => allowed[i] ? base44.entities[name].subscribe(() => {
+    const unsubs = names.map((name, i) => allowed[i] && typeof base44.entities[name]?.subscribe === 'function' ? base44.entities[name].subscribe(() => {
       clearTimeout(timers.get(name));
       timers.set(name, setTimeout(() => queryClient.invalidateQueries({
         queryKey: ['viz-count-v2', name],

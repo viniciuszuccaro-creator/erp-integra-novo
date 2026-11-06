@@ -10,6 +10,7 @@ import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import EmpresaOnboarding from './pages/EmpresaOnboarding';
+import OAuthConsent from './pages/OAuthConsent';
 import EmpresaSelectorGuard from '@/components/sistema/EmpresaSelectorGuard';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -74,6 +75,9 @@ const AuthenticatedApp = () => {
     <div className="w-full h-full">
       <Routes>
         <Route path="/EmpresaOnboarding" element={<EmpresaOnboarding />} />
+        {/* Consentimento OAuth do servidor MCP — fora de qualquer guarda de autenticação:
+            a própria página trata o usuário deslogado e preserva o ctx em returnTo. */}
+        <Route path="/oauth/consent" element={<OAuthConsent />} />
         <Route path="/" element={
           <EmpresaSelectorGuard>
             <LayoutWrapper currentPageName={mainPageKey}>

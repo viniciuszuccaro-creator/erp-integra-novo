@@ -1,5 +1,6 @@
 // Rodapé fixo — totais, condição e ações da etapa
 import React from 'react';
+import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { brl } from './negociacaoUtils';
 
@@ -8,6 +9,7 @@ export default function RodapeNegociacao({
   editavel, sujo, salvando,
   acaoLabel, acaoDescricao, acaoDesabilitada,
   onSalvar, onVoltar, onAvancar,
+  onEnviar, enviando, enviarDesabilitado,
 }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 flex flex-wrap items-center gap-3">
@@ -26,6 +28,17 @@ export default function RodapeNegociacao({
         </div>
         <div className="flex items-center gap-2">
           <Button type="button" variant="outline" size="sm" onClick={onVoltar}>Voltar</Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+            onClick={onEnviar}
+            disabled={enviando || enviarDesabilitado}
+            title={enviarDesabilitado ? 'Salve as alterações antes de enviar a proposta' : 'Enviar a proposta ao cliente'}
+          >
+            <Send className="w-3.5 h-3.5 mr-1" /> {enviando ? 'Enviando…' : 'Enviar proposta'}
+          </Button>
           {editavel && (
             <Button type="button" variant="secondary" size="sm" onClick={onSalvar} disabled={!sujo || salvando}>
               {salvando ? 'Salvando…' : 'Salvar'}

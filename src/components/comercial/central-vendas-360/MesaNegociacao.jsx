@@ -11,12 +11,15 @@ import HeaderNegociacao from './HeaderNegociacao';
 import FaixaAtendimento from './FaixaAtendimento';
 import ItensNegociacaoGrid from './ItensNegociacaoGrid';
 import RodapeNegociacao from './RodapeNegociacao';
+import EnviarPropostaDialog from './EnviarPropostaDialog';
+import useEnvioProposta from './useEnvioProposta';
 import { totalizarItens } from './negociacaoUtils';
 
 export default function MesaNegociacao({ negociacao, clientes = [], empresa, grupo, onVoltar, onAtualizar }) {
   const [itens, setItens] = useState(negociacao.itens);
   const [faixaAberta, setFaixaAberta] = useState(true);
   const [salvando, setSalvando] = useState(false);
+  const [envioAberto, setEnvioAberto] = useState(false);
 
   const { hasPermission } = usePermissions();
   const { openWindow, closeWindow } = useWindow();
@@ -33,6 +36,25 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
   );
 
   const totais = negociacao.editavel ? totalizarItens(itens) : negociacao.totais;
+
+  const { enviar, enviando, dataFollowUpPadrao } = useEnvioProposta({
+    negociacao, empresa, grupo, onAtualizar,
+  });
+
+  const clienteNegociacao = useMemo(
+    () => (clientes || []).find((c) => c.id === negociacao.cliente_id) || null,
+    [clientes, negociacao.cliente_id]
+  );
+
+  const contextoNegociacao = empresa?.nome || grupo?.nome || '';
+
+  const abrirEnvio = () => {
+    if (!hasPermission('Comercial', 'Pedidos', 'editar')) {
+      toast.error('Sem permissão para enviar propostas.');
+      return;
+    }
+    setEnvioAberto(true);
+  };
 
   const registrarAuditoria = (acao, descricao, entidade) => {
     void base44.entities.AuditLog.create({
@@ -211,6 +233,20 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
         onSalvar={salvar}
         onVoltar={onVoltar}
         onAvancar={avancar}
+        onEnviar={abrirEnvio}
+        enviando={enviando}
+        enviarDesabilitado={sujo}
+      />
+
+      <EnviarPropostaDialog
+        aberto={envioAberto}
+        onOpenChange={setEnvioAberto}
+        negociacao={negociacao}
+        cliente={clienteNegociacao}
+        contexto={contextoNegociacao}
+        dataFollowUpPadrao={dataFollowUpPadrao}
+        enviando={enviando}
+        onEnviar={enviar}
       />
     </div>
   );

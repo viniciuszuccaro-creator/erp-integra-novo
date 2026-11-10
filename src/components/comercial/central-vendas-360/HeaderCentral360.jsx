@@ -1,15 +1,35 @@
 // Cabeçalho da Central 360° — identidade azul/branca, empresa, busca universal, filtros e ação primária
 import React from 'react';
-import { Building2, List, Plus, Search, ShoppingCart } from 'lucide-react';
+import { Building2, Filter, List, Plus, Search, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProtectedSection from '@/components/security/ProtectedSection';
 import { GRUPOS_NEGOCIACAO } from './negociacaoUtils';
 
+function FiltroSelect({ label, valor, opcoes = [], onChange }) {
+  return (
+    <label className="inline-flex items-center gap-1 text-[11px] text-slate-500">
+      {label}
+      <select
+        value={valor}
+        onChange={(evento) => onChange(evento.target.value)}
+        className="rounded border border-slate-200 bg-white px-1.5 py-1 text-[11px] text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+      >
+        <option value="todos">Todos</option>
+        {opcoes.map((opcao) => (
+          <option key={opcao} value={opcao}>{opcao}</option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 export default function HeaderCentral360({
   empresa, grupo, busca, setBusca, grupoFiltro, setGrupoFiltro,
   contadores = {}, total = 0, onNovo, modo, setModo,
+  filtros = {}, onFiltro, onLimparFiltros, opcoes = {},
 }) {
   const contexto = empresa?.nome || grupo?.nome || 'Grupo não selecionado';
+  const temFiltroAtivo = ['vendedor', 'cidade', 'origem'].some((campo) => filtros[campo] && filtros[campo] !== 'todos');
 
   return (
     <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
@@ -55,7 +75,7 @@ export default function HeaderCentral360({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-1 px-3 py-1.5">
+      <div className="flex flex-wrap items-center gap-1 px-3 py-1.5 border-b border-slate-100">
         <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 mr-1">{total} registros</span>
         {GRUPOS_NEGOCIACAO.map((opcao) => {
           const ativo = grupoFiltro === opcao.id;
@@ -76,6 +96,24 @@ export default function HeaderCentral360({
             </button>
           );
         })}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 px-3 py-1.5">
+        <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+          <Filter className="w-3 h-3" /> Filtros
+        </span>
+        <FiltroSelect label="Vendedor" valor={filtros.vendedor || 'todos'} opcoes={opcoes.vendedores} onChange={(valor) => onFiltro?.('vendedor', valor)} />
+        <FiltroSelect label="Cidade" valor={filtros.cidade || 'todos'} opcoes={opcoes.cidades} onChange={(valor) => onFiltro?.('cidade', valor)} />
+        <FiltroSelect label="Origem" valor={filtros.origem || 'todos'} opcoes={opcoes.origens} onChange={(valor) => onFiltro?.('origem', valor)} />
+        {temFiltroAtivo && (
+          <button
+            type="button"
+            onClick={onLimparFiltros}
+            className="rounded border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-50"
+          >
+            Limpar filtros
+          </button>
+        )}
       </div>
     </div>
   );

@@ -1,12 +1,44 @@
-// Cliente 360° — painel lateral recolhível com os atalhos e painéis existentes da Central
+// Cliente 360° — painel lateral recolhível e redimensionável com os atalhos e painéis existentes
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Users } from 'lucide-react';
 import AtalhosLateral from './AtalhosLateral';
 import PainelCorpo from './paineis/PainelCorpo';
 import { TITULOS_PAINEL } from './paineis/paineisConfig';
 
-export default function Cliente360Lateral({ negociacao, cliente, recolhido, onToggle }) {
+const LARGURA_MINIMA = 280;
+const LARGURA_MAXIMA = 560;
+
+export default function Cliente360Lateral({
+  negociacao, cliente, recolhido, onToggle, largura = 360, onRedimensionar,
+}) {
   const [painel, setPainel] = useState('cliente');
+  const [larguraLocal, setLarguraLocal] = useState(null);
+  const larguraEfetiva = larguraLocal ?? largura;
+
+  const redimensionar = (evento) => {
+    evento.preventDefault();
+    const inicioX = evento.clientX;
+    const inicial = larguraEfetiva;
+    let ultima = inicial;
+
+    const mover = (movimento) => {
+      ultima = Math.round(Math.min(LARGURA_MAXIMA, Math.max(LARGURA_MINIMA, inicial + (inicioX - movimento.clientX))));
+      setLarguraLocal(ultima);
+    };
+    const soltar = () => {
+      document.removeEventListener('mousemove', mover);
+      document.removeEventListener('mouseup', soltar);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      setLarguraLocal(null);
+      if (ultima !== inicial) onRedimensionar?.(ultima);
+    };
+
+    document.addEventListener('mousemove', mover);
+    document.addEventListener('mouseup', soltar);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  };
 
   if (recolhido) {
     return (
@@ -27,7 +59,18 @@ export default function Cliente360Lateral({ negociacao, cliente, recolhido, onTo
   }
 
   return (
-    <aside className="shrink-0 w-full lg:w-[360px] rounded-lg border border-slate-200 bg-white flex flex-col min-h-0">
+    <aside
+      style={{ '--largura-painel-360': `${larguraEfetiva}px` }}
+      className="relative shrink-0 w-full lg:w-[var(--largura-painel-360)] rounded-lg border border-slate-200 bg-white flex flex-col min-h-0"
+    >
+      <span
+        role="separator"
+        aria-orientation="vertical"
+        onMouseDown={redimensionar}
+        title="Arrastar para redimensionar o painel"
+        className="hidden lg:block absolute left-0 top-0 h-full w-1.5 cursor-col-resize select-none rounded-l-lg hover:bg-blue-400/60"
+      />
+
       <div className="flex items-center justify-between px-3 py-2 border-b border-slate-100 bg-slate-50">
         <h3 className="text-sm font-semibold text-slate-800 inline-flex items-center gap-1.5">
           <Users className="w-4 h-4 text-blue-600" /> Cliente 360°

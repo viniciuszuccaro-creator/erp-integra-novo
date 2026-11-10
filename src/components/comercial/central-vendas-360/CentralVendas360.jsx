@@ -8,7 +8,10 @@ import TabelaNegociacoes from './TabelaNegociacoes';
 import MesaNegociacao from './MesaNegociacao';
 import Cliente360Lateral from './Cliente360Lateral';
 import useCentral360Data from './useCentral360Data';
+import usePreferenciasCentral360 from './usePreferenciasCentral360';
 import { orcamentoParaNegociacao, pedidoParaNegociacao } from './negociacaoUtils';
+
+const cidadeDoCliente = (cliente) => cliente?.cidade || cliente?.endereco_cidade || '—';
 
 export default function CentralVendas360({
   pedidos = [], clientes = [], empresas = [], onCreatePedido, onEditPedido,
@@ -19,6 +22,7 @@ export default function CentralVendas360({
   const [grupo, setGrupo] = useState('todas');
   const [painelAberto, setPainelAberto] = useState(true);
 
+  const preferencias = usePreferenciasCentral360();
   const { orcamentos, isLoading, refetch, empresaAtual, grupoAtual } = useCentral360Data();
 
   const negociacoes = useMemo(() => {
@@ -34,15 +38,29 @@ export default function CentralVendas360({
     [clientes]
   );
 
-  const filtradasPorGrupo = useMemo(
-    () => porGrupo(negociacoes, grupo),
+  const porGrupo = useMemo(
+    () => (grupo === 'todas' ? negociacoes : negociacoes.filter((negociacao) => negociacao.grupo === grupo)),
     [negociacoes, grupo]
   );
 
+  const filtros = preferencias.filtros || {};
+
+  const porFiltrosRapidos = useMemo(() => {
+    return porGrupo.filter((negociacao) => {
+      if (filtros.vendedor && filtros.vendedor !== 'todos' && negociacao.vendedor !== filtros.vendedor) return false;
+      if (filtros.origem && filtros.origem !== 'todos' && negociacao.canal !== filtros.origem) return false;
+      if (filtros.cidade && filtros.cidade !== 'todos') {
+        const cliente = clientesPorId[negociacao.cliente_id] || {};
+        if (cidadeDoCliente(cliente) !== filtros.cidade) return false;
+      }
+      return true;
+    });
+  }, [porGrupo, filtros, clientesPorId]);
+
   const filtradas = useMemo(() => {
     const termo = busca.trim().toLowerCase();
-    if (!termo) return filtradasPorGrupo;
-    return filtradasPorGrupo.filter((negociacao) => {
+    if (!termo) return porFiltrosRapidos;
+    return porFiltrosRapidos.filter((negociacao) => {
       const cliente = clientesPorId[negociacao.cliente_id] || {};
       const campos = [
         negociacao.numero,
@@ -64,7 +82,7 @@ export default function CentralVendas360({
       ];
       return campos.filter(Boolean).some((valor) => String(valor).toLowerCase().includes(termo));
     });
-  }, [filtradasPorGrupo, busca, clientesPorId]);
+  }, [porFiltrosRapidos, busca, clientesPorId]);
 
   const contadores = useMemo(() => {
     return negociacoes.reduce((acc, negociacao) => {
@@ -72,6 +90,12 @@ export default function CentralVendas360({
       return acc;
     }, {});
   }, [negociacoes]);
+
+  const opcoesFiltro = useMemo(() => ({
+    vendedores: valoresUnicos(porGrupo.map((negociacao) => negociacao.vendedor)),
+    cidades: valoresUnicos(porGrupo.map((negociacao) => cidadeDoCliente(clientesPorId[negociacao.cliente_id]))),
+    origens: valoresUnicos(porGrupo.map((negociacao) => negociacao.canal)),
+  }), [porGrupo, clientesPorId]);
 
   const atualizar = async () => {
     await refetch();
@@ -105,6 +129,10 @@ export default function CentralVendas360({
           onNovo={onCreatePedido}
           modo={modo}
           setModo={setModo}
+          filtros={filtros}
+          onFiltro={preferencias.setFiltro}
+          onLimparFiltros={preferencias.limparFiltros}
+          opcoes={opcoesFiltro}
         />
 
         {modo === 'lista' ? (
@@ -128,6 +156,10 @@ export default function CentralVendas360({
                   onSelect={setSelecionada}
                   onAbrir={abrirRegistro}
                   carregando={isLoading}
+                  larguras={preferencias.larguras}
+                  onLargura={preferencias.setLargura}
+                  ordenacao={preferencias.ordenacao}
+                  onOrdenacao={preferencias.setOrdenacao}
                 />
               </div>
 
@@ -159,6 +191,8 @@ export default function CentralVendas360({
               cliente={clientesPorId[selecionada?.cliente_id] || null}
               recolhido={!painelAberto}
               onToggle={() => setPainelAberto((v) => !v)}
+              largura={preferencias.larguraPainel}
+              onRedimensionar={preferencias.setLarguraPainel}
             />
           </div>
         )}
@@ -167,6 +201,6 @@ export default function CentralVendas360({
   );
 }
 
-function porGrupo(negociacoes, grupo) {
-  return grupo === 'todas' ? negociacoes : negociacoes.filter((negociacao) => negociacao.grupo === grupo);
+function valoresUnicos(valores = []) {
+  return Array.from(new Set(valores.filter((valor) => valor && valor !== '—'))).sort((a, b) => String(a).localeCompare(String(b), 'pt-BR'));
 }

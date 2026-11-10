@@ -306,33 +306,33 @@ export default function DashboardCliente({ clienteId: propClienteId, adminMode =
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Link to={'/PortalCliente?tab=orcamentos'}>
-              <Button variant="outline" className="w-full">
+            <Button asChild variant="outline" className="w-full">
+              <Link to={'/PortalCliente?tab=orcamentos'}>
                 <FileText className="w-4 h-4 mr-2" />
                 Aprovar Orçamentos
-              </Button>
-            </Link>
+              </Link>
+            </Button>
 
-            <Link to={'/PortalCliente?tab=documentos'}>
-              <Button variant="outline" className="w-full">
+            <Button asChild variant="outline" className="w-full">
+              <Link to={'/PortalCliente?tab=documentos'}>
                 <Upload className="w-4 h-4 mr-2" />
                 Enviar Projeto
-              </Button>
-            </Link>
+              </Link>
+            </Button>
 
-            <Link to={'/PortalCliente?tab=chamados'}>
-              <Button variant="outline" className="w-full">
+            <Button asChild variant="outline" className="w-full">
+              <Link to={'/PortalCliente?tab=chamados'}>
                 <MessageSquare className="w-4 h-4 mr-2" />
                 Abrir Chamado
-              </Button>
-            </Link>
+              </Link>
+            </Button>
 
-            <Link to={'/PortalCliente?tab=documentos'}>
-              <Button variant="outline" className="w-full">
+            <Button asChild variant="outline" className="w-full">
+              <Link to={'/PortalCliente?tab=documentos'}>
                 <Download className="w-4 h-4 mr-2" />
                 Baixar Documentos
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </CardContent>
       </Card>

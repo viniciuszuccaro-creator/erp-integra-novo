@@ -33,7 +33,10 @@ export default function ContratoHistoryDialog({ contrato, open, onOpenChange }) 
                             <p>Valor anterior: <span className="font-semibold">R$ {renovacao.valor_anterior?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></p>
                             <p>Valor novo: <span className="font-semibold text-green-600">R$ {renovacao.valor_novo?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></p>
                             {renovacao.percentual_reajuste > 0 && (
-                              <p>Reajuste: <Badge className="bg-blue-100 text-blue-700">{renovacao.percentual_reajuste}% ({renovacao.indice_utilizado})</Badge></p>
+                              <div className="flex items-center gap-1">
+                                <span>Reajuste:</span>
+                                <Badge className="bg-blue-100 text-blue-700">{renovacao.percentual_reajuste}% ({renovacao.indice_utilizado})</Badge>
+                              </div>
                             )}
                           </div>
                         </div>

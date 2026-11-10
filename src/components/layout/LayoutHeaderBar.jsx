@@ -52,10 +52,12 @@ export default function LayoutHeaderBar({
           <AcoesRapidasGlobal />
           <NotificationCenter />
 
-          <Link to={createPageUrl('ConfiguracoesUsuario')}>
-            <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-              <Settings className="w-5 h-5 text-slate-600" />
-            </button>
+          <Link
+            to={createPageUrl('ConfiguracoesUsuario')}
+            title="Configurações do Usuário"
+            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+          >
+            <Settings className="w-5 h-5 text-slate-600" />
           </Link>
         </div>
       </div>

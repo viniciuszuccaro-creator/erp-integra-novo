@@ -39,35 +39,37 @@ export default function PermissoesAccordion({
 
           return (
             <AccordionItem key={modId} value={modId} className="border-b">
-              <AccordionTrigger className="px-3 py-2 hover:bg-white/50">
-                <div className="flex items-center gap-2 flex-1">
-                  <div
-                    className={`w-4 h-4 ${COR_CLASS[mod.cor] || "text-gray-600"}`}
-                    title={mod.icone}
-                  >
-                    ⊙
+              <div className="flex items-center gap-2">
+                <AccordionTrigger className="px-3 py-2 hover:bg-white/50 flex-1">
+                  <div className="flex items-center gap-2 flex-1">
+                    <div
+                      className={`w-4 h-4 ${COR_CLASS[mod.cor] || "text-gray-600"}`}
+                      title={mod.icone}
+                    >
+                      ⊙
+                    </div>
+                    <span className="text-sm font-medium">{mod.nome}</span>
+                    {qtd > 0 && (
+                      <Badge className="bg-blue-100 text-blue-700 text-xs">{qtd}</Badge>
+                    )}
                   </div>
-                  <span className="text-sm font-medium">{mod.nome}</span>
-                  {qtd > 0 && (
-                    <Badge className="bg-blue-100 text-blue-700 text-xs">{qtd}</Badge>
-                  )}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="ml-auto h-5 px-2 text-xs"
-                    disabled={disabled}
-                    data-action={`RBAC.Permissoes.modulo.${modId}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggleModulo(modId);
-                    }}
-                  >
-                    <CheckSquare className="w-3 h-3 mr-1" />
-                    Tudo
-                  </Button>
-                </div>
-              </AccordionTrigger>
+                </AccordionTrigger>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="mr-2 h-5 px-2 text-xs shrink-0"
+                  disabled={disabled}
+                  data-action={`RBAC.Permissoes.modulo.${modId}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleModulo(modId);
+                  }}
+                >
+                  <CheckSquare className="w-3 h-3 mr-1" />
+                  Tudo
+                </Button>
+              </div>
               <AccordionContent className="px-3 pb-3">
                 <div className="space-y-2">
                   {Object.entries(mod.secoes).map(([secId, sec]) => {

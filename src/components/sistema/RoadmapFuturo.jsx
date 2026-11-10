@@ -136,6 +136,12 @@ export default function RoadmapFuturo() {
           blue: 'border-blue-200 bg-blue-50',
           purple: 'border-purple-200 bg-purple-50'
         };
+        // Classes estáticas por cor (Tailwind purga classes montadas dinamicamente)
+        const iconeClasses = {
+          green: 'bg-green-100 text-green-600',
+          blue: 'bg-blue-100 text-blue-600',
+          purple: 'bg-purple-100 text-purple-600'
+        };
 
         return (
           <Card key={idx} className={`border-2 ${corClasses[fase.cor]}`}>
@@ -149,8 +155,8 @@ export default function RoadmapFuturo() {
                   return (
                     <div key={i} className="p-4 bg-white border rounded-lg hover:shadow-md transition-shadow">
                       <div className="flex items-start gap-3">
-                        <div className={`p-2 rounded-lg bg-${fase.cor}-100`}>
-                          <Icon className={`w-5 h-5 text-${fase.cor}-600`} />
+                        <div className={`p-2 rounded-lg ${iconeClasses[fase.cor] || iconeClasses.blue}`}>
+                          <Icon className="w-5 h-5" />
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">

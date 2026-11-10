@@ -22,13 +22,13 @@ export default function TabelasPrecoTab() {
             As Tabelas de Preço agora são gerenciadas exclusivamente no <strong>Hub de Cadastros</strong>.
             Aqui você apenas visualiza quais estão ativas e consome os preços nos pedidos.
           </p>
-          <Link to={createPageUrl('Cadastros')}>
-            <Button className="bg-blue-600 hover:bg-blue-700">
+          <Button asChild className="bg-blue-600 hover:bg-blue-700">
+            <Link to={createPageUrl('Cadastros')}>
               <DollarSign className="w-4 h-4 mr-2" />
               Ir para Cadastros - Tabelas de Preço
               <ChevronRight className="w-4 h-4 ml-2" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </AlertDescription>
       </Alert>
 

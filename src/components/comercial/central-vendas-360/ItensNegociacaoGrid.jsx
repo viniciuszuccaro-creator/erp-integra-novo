@@ -40,7 +40,7 @@ export default function ItensNegociacaoGrid({ itens, setItens, editavel }) {
     <div className="flex-1 min-h-0 rounded-lg border border-slate-200 bg-white flex flex-col">
       <div className="flex items-center justify-between px-3 py-2 border-b border-slate-100">
         <h3 className="text-sm font-semibold text-slate-800">
-          Itens do orçamento <span className="text-xs font-normal text-slate-500">({itens.length})</span>
+          Itens da negociação <span className="text-xs font-normal text-slate-500">({itens.length})</span>
         </h3>
         {editavel && (
           <Button type="button" size="sm" variant="outline" onClick={incluir} className="h-7 text-xs">

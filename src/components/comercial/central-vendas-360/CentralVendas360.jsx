@@ -7,7 +7,9 @@ import HeaderCentral360 from './HeaderCentral360';
 import TabelaNegociacoes from './TabelaNegociacoes';
 import MesaNegociacao from './MesaNegociacao';
 import Cliente360Lateral from './Cliente360Lateral';
+import NovaNegociacaoDialog from './NovaNegociacaoDialog';
 import useCentral360Data from './useCentral360Data';
+import useNovaNegociacao from './useNovaNegociacao';
 import usePreferenciasCentral360 from './usePreferenciasCentral360';
 import { orcamentoParaNegociacao, pedidoParaNegociacao } from './negociacaoUtils';
 
@@ -21,9 +23,28 @@ export default function CentralVendas360({
   const [busca, setBusca] = useState('');
   const [grupo, setGrupo] = useState('todas');
   const [painelAberto, setPainelAberto] = useState(true);
+  const [novaNegociacaoAberta, setNovaNegociacaoAberta] = useState(false);
 
   const preferencias = usePreferenciasCentral360();
   const { orcamentos, isLoading, refetch, empresaAtual, grupoAtual } = useCentral360Data();
+  const { criarOrcamento, salvando, dataPadraoValidade } = useNovaNegociacao({ orcamentos });
+
+  // Abertura de negociação: proposta nasce na mesa da Central; pedido direto usa o formulário completo existente
+  const abrirNegociacao = async (dados) => {
+    if (dados.tipo === 'pedido') {
+      setNovaNegociacaoAberta(false);
+      onCreatePedido?.(dados.cliente);
+      return;
+    }
+    const criado = await criarOrcamento(dados);
+    if (!criado) return;
+    setNovaNegociacaoAberta(false);
+    setBusca('');
+    setGrupo('todas');
+    setModo('central');
+    await refetch();
+    setSelecionada(orcamentoParaNegociacao(criado));
+  };
 
   const negociacoes = useMemo(() => {
     const lista = [
@@ -126,7 +147,7 @@ export default function CentralVendas360({
           setGrupoFiltro={setGrupo}
           contadores={contadores}
           total={negociacoes.length}
-          onNovo={onCreatePedido}
+          onNovo={() => setNovaNegociacaoAberta(true)}
           modo={modo}
           setModo={setModo}
           filtros={filtros}
@@ -196,6 +217,15 @@ export default function CentralVendas360({
             />
           </div>
         )}
+
+        <NovaNegociacaoDialog
+          aberto={novaNegociacaoAberta}
+          onOpenChange={setNovaNegociacaoAberta}
+          clientes={clientes}
+          onConfirmar={abrirNegociacao}
+          salvando={salvando}
+          validadePadrao={dataPadraoValidade}
+        />
       </div>
     </ProtectedSection>
   );

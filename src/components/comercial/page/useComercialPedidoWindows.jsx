@@ -11,14 +11,20 @@ export default function useComercialPedidoWindows({ clientes, refetchPedidos }) 
   const { createInContext, updateInContext } = useContextoVisual();
   const { user } = useUser();
 
-  const handleCreateNewPedido = () => {
+  const handleCreateNewPedido = (cliente = null) => {
     let pedidoCriado = false;
     openWindow(
       PedidoFormCompleto,
       {
         clientes,
         windowMode: true,
-        pedido: { status: 'Rascunho' },
+        pedido: {
+          status: 'Rascunho',
+          ...(cliente?.id ? {
+            cliente_id: cliente.id,
+            cliente_nome: cliente.nome_fantasia || cliente.razao_social || cliente.nome || cliente.nome_completo || '',
+          } : {}),
+        },
         onSubmit: async (formData) => {
           if (pedidoCriado) return;
           pedidoCriado = true;

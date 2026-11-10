@@ -69,7 +69,7 @@ export default function HeaderCentral360({
           </button>
           <ProtectedSection module="Comercial" section="Pedidos" action="criar">
             <Button onClick={onNovo} size="sm" className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="w-4 h-4 mr-1" /> Novo orçamento
+              <Plus className="w-4 h-4 mr-1" /> Nova negociação
             </Button>
           </ProtectedSection>
         </div>

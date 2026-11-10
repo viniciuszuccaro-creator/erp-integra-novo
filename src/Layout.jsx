@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import { 
         LayoutDashboard, Users, ShoppingCart, Truck, DollarSign, Package,
         UserCircle, Box, FileText, Settings, Calendar, BarChart3, Factory,
-        MessageCircle, Building2,
+        MessageCircle, Building2, BookOpen,
       } from "lucide-react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useQueryClient } from "@tanstack/react-query";
@@ -47,6 +47,7 @@ const navigationItems = [
     { title: "Recursos Humanos", url: "/RH", icon: UserCircle, group: "administrativo" },
     { title: "Fiscal e Tributário", url: "/Fiscal", icon: FileText, group: "administrativo" },
     { title: "Gestão de Contratos", url: "/Contratos", icon: FileText, group: "administrativo" },
+    { title: "Documentação", url: "/Documentacao", icon: BookOpen, group: "sistema" },
     { title: "Administração do Sistema", url: "/AdministracaoSistema?tab=integracoes", icon: Settings, group: "sistema" },
     { title: "Hub de Atendimento", url: "/HubAtendimento", icon: MessageCircle, group: "principal" },
   ];
@@ -65,6 +66,7 @@ const titleToModule = {
   "Agenda e Calendário": "Agenda",
   "Relatórios e Análises": "Relatórios",
   "Administração do Sistema": "Sistema",
+  "Documentação": "Sistema",
   "Produção e Manufatura": "Produção",
   "Expedição e Logística": "Expedição",
 };

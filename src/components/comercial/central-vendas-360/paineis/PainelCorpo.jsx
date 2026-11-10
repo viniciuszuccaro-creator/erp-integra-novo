@@ -6,11 +6,14 @@ import PainelResumo from './PainelResumo';
 import PainelCliente from './PainelCliente';
 import PainelAtendimento from './PainelAtendimento';
 import PainelHistorico from './PainelHistorico';
+import useTitulosFinanceiros from './usePainelFinanceiro';
 import { brl, dataCurta } from '../negociacaoUtils';
 
 export default function PainelCorpo({ painel, negociacao, cliente }) {
   const { pedidoId, clienteId } = FILTRO_RELACIONADO(negociacao);
   const registro = negociacao?.registro || {};
+  const financeiro = useTitulosFinanceiros({ clienteId, pedidoId, modo: 'cliente', ativo: painel === 'financeiro' });
+  const pagamento = useTitulosFinanceiros({ clienteId, pedidoId, modo: 'pedido', ativo: painel === 'pagamento' });
 
   switch (painel) {
     case 'cliente':
@@ -19,17 +22,31 @@ export default function PainelCorpo({ painel, negociacao, cliente }) {
       return <PainelHistorico clienteId={clienteId} />;
     case 'financeiro':
       return (
-        <PainelRegistros
-          entity="ContaReceber"
-          filter={{ cliente_id: clienteId }}
-          ordenacao="-data_vencimento"
-          vazio="Nenhum título financeiro em aberto para este cliente."
-          campos={[
-            { key: 'descricao', destaque: true },
-            { key: 'valor', label: 'Valor', tipo: 'moeda' },
-            { key: 'data_vencimento', label: 'Vencimento', tipo: 'data' },
-            { key: 'status', label: 'Situação' },
+        <PainelResumo
+          linhas={[
+            { label: 'Em aberto', valor: `${brl(financeiro.totais.aberto)} · ${financeiro.totais.abertos} título(s)` },
+            { label: 'Recebido', valor: brl(financeiro.totais.recebido) },
+            { label: 'Total do cliente', valor: brl(financeiro.totais.total) },
           ]}
+          bloco={
+            <PainelRegistros
+              entity="ContaReceber"
+              filter={{ cliente_id: clienteId }}
+              registros={financeiro.titulos}
+              carregando={financeiro.isLoading}
+              vazio={financeiro.permitido
+                ? 'Nenhum título financeiro para este cliente.'
+                : 'Sem permissão de leitura no módulo Financeiro.'}
+              campos={[
+                { key: 'descricao', destaque: true },
+                { key: 'numero_parcela', label: 'Parcela' },
+                { key: 'valor', label: 'Valor', tipo: 'moeda' },
+                { key: 'data_vencimento', label: 'Vencimento', tipo: 'data' },
+                { key: 'status', label: 'Situação', tipo: 'situacao' },
+              ]}
+            />
+          }
+          nota="Títulos reais do cliente no contexto de grupo/empresa ativo. Cobranças e baixas permanecem no módulo Financeiro."
         />
       );
     case 'estoque':
@@ -81,18 +98,48 @@ export default function PainelCorpo({ painel, negociacao, cliente }) {
           ]}
         />
       );
-    case 'pagamento':
+    case 'pagamento': {
+      const parcelas = pagamento.titulos.length
+        ? `${pagamento.titulos.length}x`
+        : (registro.numero_parcelas ? `${registro.numero_parcelas}x` : '—');
       return (
         <PainelResumo
           linhas={[
             { label: 'Forma de pagamento', valor: registro.forma_pagamento || negociacao?.condicao_pagamento },
-            { label: 'Parcelas', valor: registro.numero_parcelas ? `${registro.numero_parcelas}x` : '—' },
+            { label: 'Parcelas', valor: parcelas },
             { label: 'Total', valor: brl(negociacao?.totais?.total || 0) },
+            { label: 'Recebido', valor: brl(pagamento.totais.recebido) },
+            { label: 'Em aberto', valor: brl(pagamento.totais.aberto) },
             { label: 'Previsão de entrega', valor: dataCurta(registro.data_prevista_entrega) },
           ]}
-          nota="Cobranças, links de pagamento e confirmação pelo provedor são tratados no módulo Financeiro."
+          bloco={
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-slate-500">
+                {pagamento.porPedido ? 'Parcelas do pedido' : 'Títulos do cliente'}
+              </p>
+              <PainelRegistros
+                entity="ContaReceber"
+                filter={pagamento.porPedido ? { pedido_id: pedidoId } : { cliente_id: clienteId }}
+                registros={pagamento.titulos}
+                carregando={pagamento.isLoading}
+                vazio={pagamento.permitido
+                  ? 'Nenhuma parcela registrada para esta negociação.'
+                  : 'Sem permissão de leitura no módulo Financeiro.'}
+                campos={[
+                  { key: 'descricao', destaque: true },
+                  { key: 'numero_parcela', label: 'Parcela' },
+                  { key: 'valor', label: 'Valor', tipo: 'moeda' },
+                  { key: 'data_vencimento', label: 'Vencimento', tipo: 'data' },
+                  { key: 'forma_recebimento', label: 'Forma' },
+                  { key: 'status', label: 'Situação', tipo: 'situacao' },
+                ]}
+              />
+            </div>
+          }
+          nota="Parcelas reais do pedido ou do cliente no contexto ativo. Links de pagamento e confirmação pelo provedor são tratados no módulo Financeiro."
         />
       );
+    }
     case 'atendimento':
     default:
       return <PainelAtendimento negociacao={negociacao} cliente={cliente} />;

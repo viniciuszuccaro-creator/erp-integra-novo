@@ -68,7 +68,7 @@ const itemNormalizado = (item, tipo, indice) => {
     valor_unitario: valorUnitario,
     desconto_percentual: numero(item.desconto_percentual),
     valor_total: numero(item.valor_total) || quantidade * valorUnitario,
-    tipo,
+    tipo: item.tipo === 'servico' ? 'servico' : tipo,
   };
 };
 

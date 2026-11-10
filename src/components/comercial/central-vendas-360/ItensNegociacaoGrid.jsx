@@ -68,9 +68,15 @@ export default function ItensNegociacaoGrid({ itens, setItens, editavel }) {
             >
               <div className="flex items-center gap-1.5 min-w-0">
                 <span
-                  className={`shrink-0 rounded px-1 py-0.5 text-[10px] font-semibold ${item.tipo === 'fabricacao' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}
+                  className={`shrink-0 rounded px-1 py-0.5 text-[10px] font-semibold ${
+                    item.tipo === 'fabricacao'
+                      ? 'bg-purple-100 text-purple-700'
+                      : item.tipo === 'servico'
+                        ? 'bg-amber-100 text-amber-700'
+                        : 'bg-blue-100 text-blue-700'
+                  }`}
                 >
-                  {item.tipo === 'fabricacao' ? 'FAB' : 'REV'}
+                  {item.tipo === 'fabricacao' ? 'FAB' : item.tipo === 'servico' ? 'SER' : 'REV'}
                 </span>
                 {editavel ? (
                   <input

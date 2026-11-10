@@ -40,13 +40,13 @@ export function buildComercialModules({
       props: { clientes }
     },
     {
-      title: 'Central de Vendas 360',
+      title: 'Central de Vendas 360°',
       sectionKey: 'Pedidos',
       description: 'Atendimento, orçamento e acompanhamento',
       icon: ShoppingCart,
       color: 'purple',
       component: CentralVendas360,
-      windowTitle: ' Central de Vendas 360',
+      windowTitle: ' Central de Vendas 360°',
       width: 1650,
       height: 900,
       props: { pedidos, clientes, empresas, onCreatePedido, onEditPedido }

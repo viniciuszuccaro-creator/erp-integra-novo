@@ -10,14 +10,11 @@ import PedidoFormCompleto from '@/components/comercial/PedidoFormCompleto';
 import HeaderNegociacao from './HeaderNegociacao';
 import FaixaAtendimento from './FaixaAtendimento';
 import ItensNegociacaoGrid from './ItensNegociacaoGrid';
-import AtalhosLateral from './AtalhosLateral';
-import PainelLateral from './PainelLateral';
 import RodapeNegociacao from './RodapeNegociacao';
 import { totalizarItens } from './negociacaoUtils';
 
 export default function MesaNegociacao({ negociacao, clientes = [], empresa, grupo, onVoltar, onAtualizar }) {
   const [itens, setItens] = useState(negociacao.itens);
-  const [painel, setPainel] = useState(null);
   const [faixaAberta, setFaixaAberta] = useState(true);
   const [salvando, setSalvando] = useState(false);
 
@@ -28,7 +25,6 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
 
   useEffect(() => {
     setItens(negociacao.itens);
-    setPainel(null);
   }, [negociacao.chave]);
 
   const sujo = useMemo(
@@ -37,7 +33,6 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
   );
 
   const totais = negociacao.editavel ? totalizarItens(itens) : negociacao.totais;
-  const cliente = clientes.find((c) => c.id === negociacao.cliente_id) || null;
 
   const registrarAuditoria = (acao, descricao, entidade) => {
     void base44.entities.AuditLog.create({
@@ -199,12 +194,8 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
       <HeaderNegociacao negociacao={negociacao} empresa={empresa} grupo={grupo} sujo={sujo} salvando={salvando} />
       <FaixaAtendimento negociacao={negociacao} aberta={faixaAberta} onToggle={() => setFaixaAberta((v) => !v)} />
 
-      <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-2">
+      <div className="flex-1 min-h-0 flex">
         <ItensNegociacaoGrid itens={itens} setItens={setItens} editavel={negociacao.editavel} />
-        <AtalhosLateral ativo={painel} onSelect={setPainel} />
-        {painel && (
-          <PainelLateral painel={painel} negociacao={negociacao} cliente={cliente} onClose={() => setPainel(null)} />
-        )}
       </div>
 
       <RodapeNegociacao

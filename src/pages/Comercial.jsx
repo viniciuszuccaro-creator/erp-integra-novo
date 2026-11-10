@@ -74,16 +74,16 @@ export default function Comercial() {
   const handleKPIDrillDown = (dataKey) => {
     const moduleMap = {
       clientes: modules.find(m => m.title === 'Clientes'),
-      pedidos: modules.find(m => m.title === 'Pedidos'),
-      vendas: modules.find(m => m.title === 'Pedidos'),
-      ticket: modules.find(m => m.title === 'Pedidos'),
+      pedidos: modules.find(m => m.title === 'Central de Vendas 360'),
+      vendas: modules.find(m => m.title === 'Central de Vendas 360'),
+      ticket: modules.find(m => m.title === 'Central de Vendas 360'),
       faturado: modules.find(m => m.title === 'Notas Fiscais'),
-      pendente: modules.find(m => m.title === 'Pedidos'),
-      peso: modules.find(m => m.title === 'Pedidos'),
-      margem: modules.find(m => m.title === 'Pedidos'),
+      pendente: modules.find(m => m.title === 'Central de Vendas 360'),
+      peso: modules.find(m => m.title === 'Central de Vendas 360'),
+      margem: modules.find(m => m.title === 'Central de Vendas 360'),
       // V21.4: Novos drill-downs
-      etapas: modules.find(m => m.title === 'Pedidos'),
-      producao: modules.find(m => m.title === 'Pedidos'),
+      etapas: modules.find(m => m.title === 'Central de Vendas 360'),
+      producao: modules.find(m => m.title === 'Central de Vendas 360'),
       expedicao: modules.find(m => m.title === 'Logística Entrega'),
     };
     const targetModule = moduleMap[dataKey];

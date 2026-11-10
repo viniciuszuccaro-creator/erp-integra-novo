@@ -4,6 +4,7 @@ import { Users, ShoppingCart, FileText, TrendingUp, ShieldCheck, Truck, Package 
 
 const ClientesTab = React.lazy(() => import("../ClientesTab"));
 const PedidosTab = React.lazy(() => import("../PedidosTab"));
+const CentralVendas360 = React.lazy(() => import("../central-vendas-360/CentralVendas360"));
 const ComissoesTab = React.lazy(() => import("../ComissoesTab"));
 const NotasFiscaisTab = React.lazy(() => import("../NotasFiscaisTab"));
 const TabelasPrecoTab = React.lazy(() => import("../TabelasPrecoTab"));
@@ -39,15 +40,15 @@ export function buildComercialModules({
       props: { clientes }
     },
     {
-      title: 'Pedidos',
+      title: 'Central de Vendas 360',
       sectionKey: 'Pedidos',
-      description: 'Orçamentos e vendas',
+      description: 'Atendimento, orçamento e acompanhamento',
       icon: ShoppingCart,
       color: 'purple',
-      component: PedidosTab,
-      windowTitle: ' Pedidos',
-      width: 1500,
-      height: 850,
+      component: CentralVendas360,
+      windowTitle: ' Central de Vendas 360',
+      width: 1650,
+      height: 900,
       props: { pedidos, clientes, empresas, onCreatePedido, onEditPedido }
     },
     {

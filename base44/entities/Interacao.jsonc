@@ -23,6 +23,25 @@
       ],
       "description": "Tipo de intera\u00e7\u00e3o"
     },
+    "categoria_retorno": {
+      "type": "string",
+      "enum": [
+        "Negocia\u00e7\u00e3o",
+        "P\u00f3s-venda",
+        "Cobran\u00e7a",
+        "Entrega",
+        "Outros"
+      ],
+      "enumColors": [
+        "blue",
+        "purple",
+        "yellow",
+        "green",
+        "gray"
+      ],
+      "default": "Negocia\u00e7\u00e3o",
+      "description": "Tipo do retorno/follow-up agendado (usado nos filtros da Central 360)"
+    },
     "titulo": {
       "type": "string"
     },

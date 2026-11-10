@@ -116,6 +116,7 @@ export default function useEnvioProposta({ negociacao, empresa, grupo, onAtualiz
       if (followUpAtivo && followUpData) {
         await createInContext('Interacao', {
           tipo: canal === 'whatsapp' ? 'WhatsApp' : 'E-mail',
+          categoria_retorno: 'Negociação',
           titulo: `Follow-up da proposta ${negociacao.numero}`,
           descricao: `Proposta enviada por ${canal === 'whatsapp' ? 'WhatsApp' : 'e-mail'} para ${destinatario}.`,
           data_interacao: new Date().toISOString(),

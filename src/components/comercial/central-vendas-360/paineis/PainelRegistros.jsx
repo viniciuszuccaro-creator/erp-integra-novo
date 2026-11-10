@@ -27,7 +27,7 @@ function ValorCampo({ registro, campo }) {
 }
 
 export default function PainelRegistros({
-  entity, filter, campos, vazio, ordenacao = '-created_date', registros, carregando,
+  entity, filter, campos, vazio, ordenacao = '-created_date', registros, carregando, renderAcao,
 }) {
   const ativo = Object.keys(filter || {}).some((chave) => Boolean(filter[chave]));
   // Quando o painel já carregou os registros (fonte externa), evita consulta duplicada.
@@ -67,6 +67,7 @@ export default function PainelRegistros({
               )}
             </div>
           ))}
+          {renderAcao ? renderAcao(registro) : null}
         </div>
       ))}
     </div>

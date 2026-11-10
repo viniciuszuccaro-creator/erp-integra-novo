@@ -4,7 +4,9 @@ import { FILTRO_RELACIONADO } from './paineisConfig';
 import PainelRegistros from './PainelRegistros';
 import PainelResumo from './PainelResumo';
 import PainelCliente from './PainelCliente';
-import { proximaAcao, brl, dataCurta } from '../negociacaoUtils';
+import PainelAtendimento from './PainelAtendimento';
+import PainelHistorico from './PainelHistorico';
+import { brl, dataCurta } from '../negociacaoUtils';
 
 export default function PainelCorpo({ painel, negociacao, cliente }) {
   const { pedidoId, clienteId } = FILTRO_RELACIONADO(negociacao);
@@ -14,19 +16,7 @@ export default function PainelCorpo({ painel, negociacao, cliente }) {
     case 'cliente':
       return <PainelCliente cliente={cliente} />;
     case 'historico':
-      return (
-        <PainelRegistros
-          entity="Pedido"
-          filter={{ cliente_id: clienteId }}
-          ordenacao="-data_pedido"
-          vazio="Nenhum pedido anterior localizado para este cliente."
-          campos={[
-            { key: 'numero_pedido', destaque: true },
-            { key: 'status', label: 'Situação' },
-            { key: 'valor_total', label: 'Valor', tipo: 'moeda' },
-          ]}
-        />
-      );
+      return <PainelHistorico clienteId={clienteId} />;
     case 'financeiro':
       return (
         <PainelRegistros
@@ -105,16 +95,6 @@ export default function PainelCorpo({ painel, negociacao, cliente }) {
       );
     case 'atendimento':
     default:
-      return (
-        <PainelResumo
-          linhas={[
-            { label: 'Canal', valor: negociacao?.canal || '—' },
-            { label: 'Responsável', valor: negociacao?.vendedor || '—' },
-            { label: 'Próxima ação', valor: proximaAcao(negociacao) },
-            { label: 'Última atualização', valor: dataCurta(registro.updated_date) },
-          ]}
-          nota={registro.observacoes_internas || registro.observacoes || 'Sem resumo registrado nesta negociação.'}
-        />
-      );
+      return <PainelAtendimento negociacao={negociacao} cliente={cliente} />;
   }
 }

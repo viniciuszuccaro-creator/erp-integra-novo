@@ -14,6 +14,9 @@ export const ESTILO_TITULO = {
   'Saldo parcial': 'bg-amber-100 text-amber-800 border-amber-200',
   'Sem saldo': 'bg-red-100 text-red-800 border-red-200',
   'Sem cadastro': 'bg-slate-100 text-slate-600 border-slate-200',
+  Hoje: 'bg-amber-100 text-amber-800 border-amber-200',
+  Agendado: 'bg-blue-100 text-blue-800 border-blue-200',
+  'Sem data': 'bg-slate-100 text-slate-600 border-slate-200',
 };
 
 const ABERTOS = ['Pendente', 'Atrasado', 'Parcial'];

@@ -1,12 +1,14 @@
 // Central de Vendas 360 — atalhos laterais e configuração dos painéis
 import {
   MessageSquare, User, History, DollarSign, Box, Factory, Truck, FileText, CreditCard,
+  CalendarClock,
 } from 'lucide-react';
 
 export const ATALHOS_360 = [
   { id: 'atendimento', label: 'Atendimento', icon: MessageSquare },
   { id: 'cliente', label: 'Cliente', icon: User },
   { id: 'historico', label: 'Histórico', icon: History },
+  { id: 'retornos', label: 'Retornos', icon: CalendarClock },
   { id: 'financeiro', label: 'Financeiro', icon: DollarSign },
   { id: 'estoque', label: 'Estoque', icon: Box },
   { id: 'producao', label: 'Produção', icon: Factory },

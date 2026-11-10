@@ -8,6 +8,7 @@ import PainelAtendimento from './PainelAtendimento';
 import PainelHistorico from './PainelHistorico';
 import useTitulosFinanceiros from './usePainelFinanceiro';
 import usePainelEstoque from './usePainelEstoque';
+import usePainelRetornos from './usePainelRetornos';
 import { brl, dataCurta } from '../negociacaoUtils';
 
 export default function PainelCorpo({ painel, negociacao, cliente }) {
@@ -16,12 +17,47 @@ export default function PainelCorpo({ painel, negociacao, cliente }) {
   const financeiro = useTitulosFinanceiros({ clienteId, pedidoId, modo: 'cliente', ativo: painel === 'financeiro' });
   const pagamento = useTitulosFinanceiros({ clienteId, pedidoId, modo: 'pedido', ativo: painel === 'pagamento' });
   const estoque = usePainelEstoque({ itens: negociacao?.itens, ativo: painel === 'estoque' });
+  const retornos = usePainelRetornos({ clienteId, ativo: painel === 'retornos' });
 
   switch (painel) {
     case 'cliente':
       return <PainelCliente cliente={cliente} />;
     case 'historico':
       return <PainelHistorico clienteId={clienteId} />;
+    case 'retornos':
+      return (
+        <PainelResumo
+          linhas={[
+            { label: 'Retornos pendentes', valor: String(retornos.totais.total) },
+            { label: 'Atrasados', valor: String(retornos.totais.atrasados) },
+            { label: 'Para hoje', valor: String(retornos.totais.hoje) },
+            { label: 'Agendados', valor: String(retornos.totais.agendados) },
+          ]}
+          bloco={
+            <PainelRegistros
+              entity="Interacao"
+              filter={{ cliente_id: clienteId }}
+              registros={retornos.retornos}
+              carregando={retornos.isLoading}
+              vazio={retornos.permitido
+                ? (retornos.temCliente
+                  ? 'Nenhum retorno pendente para este cliente.'
+                  : 'Negociação sem cliente vinculado — sem retornos a cobrar.')
+                : 'Sem permissão de leitura no módulo CRM.'}
+              ordenacao="-data_proxima_acao"
+              campos={[
+                { key: 'titulo', destaque: true },
+                { key: 'proxima_acao', label: 'Próxima ação' },
+                { key: 'data_proxima_acao', label: 'Retorno', tipo: 'data' },
+                { key: 'responsavel', label: 'Responsável' },
+                { key: 'tipo', label: 'Canal' },
+                { key: 'situacao', label: 'Situação', tipo: 'situacao' },
+              ]}
+            />
+          }
+          nota="Follow-ups reais registrados no CRM (Interações) com próxima ação datada. Novos retornos são agendados no envio da proposta; o desfecho é registrado no módulo CRM."
+        />
+      );
     case 'financeiro':
       return (
         <PainelResumo

@@ -3,12 +3,17 @@
 import useRLSQuery from '@/components/lib/useRLSQuery';
 import usePermissions from '@/components/lib/usePermissions';
 
+// Estilos de situação reaproveitados por todos os painéis laterais (títulos e saldos)
 export const ESTILO_TITULO = {
   Pendente: 'bg-amber-100 text-amber-800 border-amber-200',
   Parcial: 'bg-blue-100 text-blue-800 border-blue-200',
   Atrasado: 'bg-red-100 text-red-800 border-red-200',
   Recebido: 'bg-green-100 text-green-800 border-green-200',
   Cancelado: 'bg-slate-100 text-slate-600 border-slate-200',
+  Suficiente: 'bg-green-100 text-green-800 border-green-200',
+  'Saldo parcial': 'bg-amber-100 text-amber-800 border-amber-200',
+  'Sem saldo': 'bg-red-100 text-red-800 border-red-200',
+  'Sem cadastro': 'bg-slate-100 text-slate-600 border-slate-200',
 };
 
 const ABERTOS = ['Pendente', 'Atrasado', 'Parcial'];

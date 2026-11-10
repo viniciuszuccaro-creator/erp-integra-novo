@@ -7,6 +7,7 @@ import PainelCliente from './PainelCliente';
 import PainelAtendimento from './PainelAtendimento';
 import PainelHistorico from './PainelHistorico';
 import useTitulosFinanceiros from './usePainelFinanceiro';
+import usePainelEstoque from './usePainelEstoque';
 import { brl, dataCurta } from '../negociacaoUtils';
 
 export default function PainelCorpo({ painel, negociacao, cliente }) {
@@ -14,6 +15,7 @@ export default function PainelCorpo({ painel, negociacao, cliente }) {
   const registro = negociacao?.registro || {};
   const financeiro = useTitulosFinanceiros({ clienteId, pedidoId, modo: 'cliente', ativo: painel === 'financeiro' });
   const pagamento = useTitulosFinanceiros({ clienteId, pedidoId, modo: 'pedido', ativo: painel === 'pagamento' });
+  const estoque = usePainelEstoque({ itens: negociacao?.itens, ativo: painel === 'estoque' });
 
   switch (painel) {
     case 'cliente':
@@ -52,11 +54,34 @@ export default function PainelCorpo({ painel, negociacao, cliente }) {
     case 'estoque':
       return (
         <PainelResumo
-          linhas={(negociacao?.itens || []).slice(0, 8).map((item) => ({
-            label: item.descricao,
-            valor: `${item.quantidade} ${item.unidade}`,
-          }))}
-          nota="Disponibilidade, reservas e saldos por depósito são consultados no módulo Estoque e Almoxarifado."
+          linhas={[
+            { label: 'Itens analisados', valor: String(estoque.totais.itens) },
+            { label: 'Sem saldo suficiente', valor: `${estoque.totais.pendentes} item(ns)` },
+            { label: 'Sem saldo', valor: `${estoque.totais.semSaldo} item(ns)` },
+            { label: 'Necessidade estimada', valor: brl(estoque.totais.valor) },
+          ]}
+          bloco={
+            <PainelRegistros
+              entity="Produto"
+              filter={{ id: { $in: (negociacao?.itens || []).map((item) => item.produto_id).filter(Boolean) } }}
+              registros={estoque.itens}
+              carregando={estoque.isLoading}
+              vazio={estoque.permitido
+                ? (estoque.temItens
+                  ? 'Nenhum saldo localizado para os itens desta negociação.'
+                  : 'Negociação sem itens de revenda com produto vinculado.')
+                : 'Sem permissão de leitura no módulo Estoque.'}
+              campos={[
+                { key: 'descricao', destaque: true },
+                { key: 'codigo', label: 'Código' },
+                { key: 'necessario', label: 'Necessário' },
+                { key: 'disponivel', label: 'Disponível' },
+                { key: 'minimo', label: 'Mínimo' },
+                { key: 'situacao', label: 'Saldo', tipo: 'situacao' },
+              ]}
+            />
+          }
+          nota="Saldos reais do cadastro único de produtos no contexto de grupo/empresa ativo. Reservas, transferências e ajustes permanecem no módulo Estoque e Almoxarifado."
         />
       );
     case 'producao':

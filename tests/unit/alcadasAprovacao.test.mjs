@@ -26,6 +26,13 @@ export default async function testAlcadasAprovacao(log, root) {
   check('limite individual libera valor dentro da faixa', avaliarAlcada({ solicitacao: { ...solicitacaoBase, valor_solicitado: 4000 }, user: { ...gerente, restricoes_adicionais: { limite_aprovacao_valor: 5000 } }, perfil: perfilGerencial }).permitido);
   check('administrador não é limitado por valor', avaliarAlcada({ solicitacao: { ...solicitacaoBase, nivel_alcada: 'Diretor', valor_solicitado: 999999 }, user: { id: 'adm', role: 'admin' }, perfil: null }).permitido);
 
+  const outraEmpresa = { ...gerente, empresas_vinculadas: [{ empresa_id: 'ffffffffffffffffffffffff', ativo: true, nivel_acesso: 'Administrador' }] };
+  check('vínculo de outra empresa não eleva a alçada', !avaliarAlcada({ solicitacao: { ...solicitacaoBase, nivel_alcada: 'Gerente' }, user: outraEmpresa, perfil: { nivel_perfil: 'Operacional', permissoes: {} } }).permitido);
+
+  const perfilSemFinanceiro = { nivel_perfil: 'Gerencial', permissoes: { Comercial: { Aprovacoes: ['aprovar'] }, Financeiro: { Aprovacoes: ['ver'] } } };
+  const semCategoria = avaliarAlcada({ solicitacao: solicitacaoBase, user: gerente, perfil: perfilSemFinanceiro });
+  check('categoria sem permissão de aprovação bloqueia', !semCategoria.permitido && /Financeiro/.test(semCategoria.motivo || ''));
+
   globalThis.Deno = { serve: (h) => { globalThis.__aprovHandler = h; } };
   await import(url(ler('entry.ts')
     .replace("import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';", 'const createClientFromRequest = () => globalThis.__aprovCliente;')
@@ -37,12 +44,16 @@ export default async function testAlcadasAprovacao(log, root) {
       usuario: clone(opcoes.usuario || gerente),
       solicitacoes: { [opcoes.solicitacao.id]: clone(opcoes.solicitacao) },
       clientes: { [opcoes.cliente.id]: clone(opcoes.cliente) },
-      logs: [], decisoes: [], clienteAtualizacoes: [],
+      logs: [], decisoes: [], clienteAtualizacoes: [], criadas: [],
     };
     const api = {
       SolicitacaoAprovacao: {
         get: async (id) => (estado.solicitacoes[id] ? clone(estado.solicitacoes[id]) : Promise.reject({ status: 404 })),
         update: async (id, dados) => { estado.decisoes.push(clone(dados)); return { ...clone(estado.solicitacoes[id]), ...clone(dados) }; },
+        create: async (dados) => { estado.criadas.push(clone(dados)); return { id: 'novasolicitacao0000000001', ...clone(dados) }; },
+      },
+      ConfiguracaoSistema: {
+        filter: async (q) => (opcoes.politicas && q?.chave === 'aprovacao_politicas' ? [{ id: 'cfg0000000000000000000001', valor_json: clone(opcoes.politicas) }] : []),
       },
       PerfilAcesso: { get: async () => opcoes.perfil || null },
       Pedido: { get: async () => null, update: async () => ({}) },
@@ -83,4 +94,18 @@ export default async function testAlcadasAprovacao(log, root) {
   const semTipo = nova({ solicitacao: { ...solicitacaoBase, nivel_alcada: 'Gerente', tipo_solicitacao: 'desconto_pedido', entidade_alvo: 'Pedido', entidade_alvo_id: 'ppp', dados_propostos: { cliente_id: clienteValido.id } }, cliente: clienteValido, perfil: perfilGerencial });
   const dadosSemTipo = await (await chamar(semTipo, { ...body, contraproposta: { limite_credito: 7500 } })).json();
   check('contraproposta não altera cadastro em aprovação de desconto', semTipo.estado.clienteAtualizacoes.length === 0 && (dadosSemTipo.contraproposta_aplicada ?? null) === null);
+
+  const decisaoGravada = aplicada.estado.decisoes.find((d) => Array.isArray(d.historico_decisoes));
+  check('decisão grava histórico imutável com nível e contraproposta', !!decisaoGravada
+    && decisaoGravada.historico_decisoes[0].nivel_aprovador === 'Gerente'
+    && decisaoGravada.historico_decisoes[0].contraproposta?.limite_credito === 7500);
+
+  // §18 — o payload de quem solicita não pode rebaixar a alçada exigida pela política.
+  const perfilCriador = { nivel_perfil: 'Vendedor', permissoes: { Comercial: { Aprovacoes: ['criar', 'aprovar'] } } };
+  const politicas = { Pedido: [{ min: 0, max: null, nivel_alcada: 'Gerente', valor_limite_alcada: 50000 }] };
+  const criacao = nova({ solicitacao: solicitacaoBase, cliente: clienteValido, perfil: perfilCriador, politicas });
+  const respCriacao = await chamar(criacao, { action: 'create', group_id: contexto.group_id, empresa_id: contexto.empresa_id, tipo_solicitacao: 'desconto_pedido', entidade_alvo: 'Pedido', entidade_alvo_id: 'ppp', dados_propostos: { valor: 30000 }, justificativa: 'teste', valor_solicitado: 30000, nivel_alcada: 'Vendedor' });
+  const criadaResp = await respCriacao.json();
+  check('payload não rebaixa o nível exigido pela política', respCriacao.status === 200 && criadaResp.nivel_alcada === 'Gerente' && criadaResp.valor_limite_alcada === 50000);
+  check('categoria da alçada é derivada no servidor', criadaResp.categoria_alcada === 'Comercial');
 }

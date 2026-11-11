@@ -173,6 +173,24 @@ A Mesa validava a proposta, mas o navegador criava o pedido e depois alterava o 
 - `npm run build` e ESLint dos arquivos alterados sem erros; endpoint real não destrutivo respondeu **404** para solicitação inexistente.
 - **Pendências mantidas**: histórico de contraproposta como registro próprio (hoje fica na solicitação + `AuditLog`), aplicação de limite por categoria orçamentária (o teto hoje é por nível/valor), decisão de desconto de pedido que ainda grava o pedido inteiro, e homologação E2E §47/§48 no Testing Agent. Nada foi publicado nem reanalisado em Security.
 
+## Continuação — §18: alçada por categoria, multiempresa e histórico imutável
+
+### O que estava aberto
+- A alçada olhava só nível e limite individual: a **categoria** da solicitação não pesava na decisão.
+- O nível do aprovador era o **maior entre todas as empresas** vinculadas, então vínculo em outra empresa elevava a alçada dentro da empresa atual.
+- Quem solicitava podia enviar `nivel_alcada`/`valor_limite_alcada` no payload e **rebaixar** a exigência; as políticas já existentes (`ConfiguracaoSistema.chave = aprovacao_politicas`) não eram aplicadas na criação.
+- O histórico da contraproposta vivia só na solicitação e no `AuditLog`, sem registro próprio imutável por decisão.
+
+### Entrega
+- `alcadas.ts`: `nivelDoAprovador` recebe o escopo (`empresaId`/`groupId`) e só considera o vínculo daquela empresa (perfil e administrador preservados); `avaliarAlcada` passou a exigir a ação `aprovar`/`gerir` no módulo da **categoria** (`categoria_alcada` ou derivada do tipo), mantendo o bloqueio de nível e de limite; novos `carregarPoliticas`, `faixaDaPolitica`, `exigenciaDaPolitica` e `nivelMaisExigente` leem as políticas já configuradas.
+- `entry.ts`: na criação, categoria, nível e teto são resolvidos no servidor e a política **só eleva** (`nivelMaisExigente`); na avaliação automática (`evaluateApproval`) a leitura de políticas passou a usar o mesmo leitor e as solicitações geradas nascem com categoria e nível exigido; na decisão, o perfil é lido uma vez, o nível do aprovador entra no bloqueio e cada decisão grava `historico_decisoes` (usuário, nível do aprovador, nível exigido, categoria, comentários, contraproposta) — campo novo em `SolicitacaoAprovacao`, com escrita restrita ao servidor.
+- Nenhum módulo, tela ou entidade nova.
+
+### Evidências e limites
+- `npm run test:unit`: **387 aprovados, 0 falhas, 11 ignorados**, incluindo vínculo de outra empresa não elevando a alçada, categoria sem permissão bloqueando, payload não rebaixando o nível da política, categoria derivada no servidor e histórico gravado com nível e contraproposta.
+- `npm run build` concluído; endpoint real respondeu **404** para solicitação inexistente (sem escrita).
+- **Pendências mantidas**: configuração das políticas por categoria na interface de Cadastros Gerais (hoje só via `upsertPolicy`), decisão de desconto de pedido que ainda grava o pedido inteiro, e homologação E2E §47/§48 no Testing Agent. Nada foi publicado nem reanalisado em Security.
+
 ## Situação
 
 O núcleo visual e de fechamento exigido pelo dossiê está agora alinhado ao texto e às tabelas, compila e passa nas verificações estáticas e nos testes puros. **Não é possível declarar 100% de implantação** enquanto os itens 1 a 9 não forem executados e homologados com backend real. Nenhuma integração, plano ou crédito é presumido.

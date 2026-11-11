@@ -152,10 +152,12 @@ Deno.serve(async (req) => {
       }
       if (s.status !== 'pendente') return Response.json({ error: 'Solicitação já decidida. O histórico é imutável.' }, { status: 409 });
       // §18 — alçada: nível exigido pela solicitação x nível real e limite individual do aprovador.
+      // O perfil também alimenta o histórico imutável de decisões.
+      const perfil = user?.perfil_acesso_id
+        ? await base44.asServiceRole.entities.PerfilAcesso.get(user.perfil_acesso_id).catch((e) => (e?.status === 404 ? null : Promise.reject(e)))
+        : null;
+      const nivelAprovador = nivelDoAprovador(user, perfil, { empresaId: s.empresa_id || null, groupId: s.group_id || null });
       if (action === 'approve') {
-        const perfil = user?.perfil_acesso_id
-          ? await base44.asServiceRole.entities.PerfilAcesso.get(user.perfil_acesso_id).catch((e) => (e?.status === 404 ? null : Promise.reject(e)))
-          : null;
         const alcada = avaliarAlcada({ solicitacao: s, user, perfil });
         if (!alcada.permitido) {
           try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: s.empresa_id || null, group_id: s.group_id || null, acao: 'Bloqueio', modulo: 'Comercial', tipo_auditoria: 'seguranca', entidade: 'SolicitacaoAprovacao', registro_id: s.id, descricao: alcada.motivo, dados_novos: { nivel_aprovador: alcada.nivel, nivel_exigido: s.nivel_alcada || null }, data_hora: new Date().toISOString() }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
@@ -163,7 +165,28 @@ Deno.serve(async (req) => {
         }
       }
       const novoStatus = action === 'approve' ? 'aprovado' : 'rejeitado';
-      const updated = await base44.entities.SolicitacaoAprovacao.update(solicitacao_id, { status: novoStatus, aprovador_id: user.id, comentarios_aprovacao: comentarios_aprovacao || null, ...(contraproposta && typeof contraproposta === 'object' ? { contraproposta } : {}), data_decisao: new Date().toISOString() });
+      // §18 — histórico imutável: cada decisão fica registrada na própria solicitação, com
+      // nível do aprovador, nível exigido e contraproposta do ato.
+      const historicoAtual = Array.isArray(s.historico_decisoes) ? s.historico_decisoes : [];
+      const registroDecisao = {
+        data_hora: new Date().toISOString(),
+        usuario_id: user.id,
+        usuario_nome: user.full_name || user.email || 'Usuário',
+        decisao: novoStatus,
+        nivel_aprovador: nivelAprovador,
+        nivel_exigido: s.nivel_alcada || null,
+        categoria: s.categoria_alcada || null,
+        comentarios: comentarios_aprovacao || null,
+        contraproposta: contraproposta && typeof contraproposta === 'object' ? contraproposta : null,
+      };
+      const updated = await base44.entities.SolicitacaoAprovacao.update(solicitacao_id, {
+        status: novoStatus,
+        aprovador_id: user.id,
+        comentarios_aprovacao: comentarios_aprovacao || null,
+        ...(contraproposta && typeof contraproposta === 'object' ? { contraproposta } : {}),
+        historico_decisoes: [...historicoAtual, registroDecisao],
+        data_decisao: new Date().toISOString(),
+      });
 
       // Multi-nível: se aprovado e há próximos níveis, reabrir pendência para o próximo nível e notificar aprovadores desse nível
       if (novoStatus === 'aprovado' && s?.dados_propostos?.niveis_total > 1) {

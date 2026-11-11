@@ -138,6 +138,64 @@
     "comentarios_aprovacao": {
       "type": "string"
     },
+    "historico_decisoes": {
+      "type": "array",
+      "description": "\u00a718: hist\u00f3rico imut\u00e1vel de decis\u00f5es, gravado apenas pelo servidor (n\u00edvel do aprovador, n\u00edvel exigido, categoria e contraproposta do ato).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "data_hora": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "usuario_id": {
+            "type": "string"
+          },
+          "usuario_nome": {
+            "type": "string"
+          },
+          "decisao": {
+            "type": "string",
+            "enum": [
+              "aprovado",
+              "rejeitado"
+            ],
+            "enumColors": [
+              "green",
+              "red"
+            ]
+          },
+          "nivel_aprovador": {
+            "type": "string"
+          },
+          "nivel_exigido": {
+            "type": "string"
+          },
+          "categoria": {
+            "type": "string"
+          },
+          "comentarios": {
+            "type": "string"
+          },
+          "contraproposta": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "rls": {
+        "create": {
+          "user_condition": {
+            "collaborator_role": "editor"
+          }
+        },
+        "update": {
+          "user_condition": {
+            "collaborator_role": "editor"
+          }
+        }
+      }
+    },
     "data_solicitacao": {
       "type": "string",
       "format": "date-time"

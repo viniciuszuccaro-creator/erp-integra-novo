@@ -1,5 +1,5 @@
 // Painel de atendimento do Cliente 360° — atalhos de atendimento, resumo e últimas interações
-import React from 'react';
+import React, { useState } from 'react';
 import {
   CalendarClock, Headset, Mail, MessageCircle, MessageSquare, Phone, Plus,
 } from 'lucide-react';
@@ -23,18 +23,31 @@ function apenasDigitos(valor) {
   return String(valor || '').replace(/\D/g, '');
 }
 
-function Atalho({ icone: Icone, label, onClick, href, cor = 'text-slate-600' }) {
+// §4 do dossiê: quando o cliente tem mais de um contato do mesmo tipo, o vendedor escolhe qual usar.
+function contatosDoTipo(cliente, tipos) {
+  const lista = Array.isArray(cliente?.contatos) ? cliente.contatos : [];
+  return lista
+    .filter((contato) => tipos.includes(String(contato?.tipo || '').trim().toLowerCase())
+      && String(contato?.valor || '').trim())
+    .map((contato, indice) => ({
+      id: contato.id || `${indice}-${contato.valor}`,
+      valor: String(contato.valor).trim(),
+      rotulo: contato.nome || contato.descricao || contato.tipo || '',
+    }));
+}
+
+function Atalho({ icone: Icone, label, onClick, href, cor = 'text-slate-600', rotulo }) {
   const classe = `flex flex-col items-center justify-center gap-1 rounded-md border border-slate-200 bg-white px-1.5 py-2 text-[10px] font-medium ${cor} hover:border-blue-300 hover:bg-blue-50`;
   if (href) {
     return (
-      <a href={href} className={classe} title={label}>
+      <a href={href} className={classe} title={rotulo || label}>
         <Icone className="w-4 h-4" />
         <span className="leading-none text-center">{label}</span>
       </a>
     );
   }
   return (
-    <button type="button" onClick={onClick} className={classe} title={label}>
+    <button type="button" onClick={onClick} className={classe} title={rotulo || label}>
       <Icone className="w-4 h-4" />
       <span className="leading-none text-center">{label}</span>
     </button>
@@ -48,6 +61,7 @@ export default function PainelAtendimento({ negociacao, cliente }) {
   const { createInContext } = useContextoVisual();
   const registrarHistorico = useRegistrarEvento();
   const queryClient = useQueryClient();
+  const [escolhaContato, setEscolhaContato] = useState(null);
 
   if (!negociacao) return <p className="text-sm text-slate-500">Selecione uma negociação para ver o atendimento.</p>;
 
@@ -55,7 +69,6 @@ export default function PainelAtendimento({ negociacao, cliente }) {
   const registro = negociacao.registro || {};
   const podeInteragir = hasPermission('CRM', null, 'criar') || hasPermission('Comercial', null, 'editar');
   const telefone = apenasDigitos(cliente?.whatsapp || cliente?.celular || cliente?.telefone);
-  const telefoneWhatsApp = telefone && telefone.length <= 11 ? `55${telefone}` : telefone;
   const email = cliente?.email || '';
 
   const invalidar = () => {
@@ -164,22 +177,58 @@ export default function PainelAtendimento({ negociacao, cliente }) {
     window.location.href = `/HubAtendimento${query}`;
   };
 
-  const abrirWhatsApp = () => {
-    if (!telefoneWhatsApp) {
+  const abrirWhatsApp = (numero) => {
+    const limpo = apenasDigitos(numero || telefone);
+    if (!limpo) {
       toast.error('Cliente sem telefone cadastrado.');
       return;
     }
-    window.open(`https://wa.me/${telefoneWhatsApp}`, '_blank', 'noopener');
+    const comPais = limpo.length <= 11 ? `55${limpo}` : limpo;
+    window.open(`https://wa.me/${comPais}`, '_blank', 'noopener');
+  };
+
+  const ligar = (numero) => {
+    const limpo = apenasDigitos(numero || telefone);
+    if (!limpo) {
+      toast.error('Cliente sem telefone cadastrado.');
+      return;
+    }
+    window.location.href = `tel:${limpo}`;
+  };
+
+  const enviarEmail = (endereco) => {
+    const alvo = String(endereco || email || '').trim();
+    if (!alvo) {
+      toast.error('Cliente sem e-mail cadastrado.');
+      return;
+    }
+    window.location.href = `mailto:${alvo}`;
+  };
+
+  // Só pergunta quando há mais de um contato do tipo; com um único, executa direto.
+  const escolherOuExecutar = (campo, tipos, executar) => {
+    const opcoes = contatosDoTipo(cliente, tipos);
+    if (opcoes.length > 1) {
+      setEscolhaContato({ campo, opcoes, executar });
+      return;
+    }
+    setEscolhaContato(null);
+    executar(opcoes[0]?.valor);
   };
 
   const atalhos = (
     <div className="grid grid-cols-2 gap-1.5">
       <Atalho icone={Plus} label="Registrar interação" onClick={abrirInteracao} cor="text-blue-700" />
       <Atalho icone={CalendarClock} label="Agendar follow-up" onClick={abrirFollowUp} cor="text-indigo-700" />
-      <Atalho icone={MessageCircle} label="WhatsApp" onClick={abrirWhatsApp} cor="text-emerald-700" />
+      <Atalho icone={MessageCircle} label="WhatsApp" onClick={() => escolherOuExecutar('whatsapp', ['whatsapp'], abrirWhatsApp)} cor="text-emerald-700" />
       <Atalho icone={Headset} label="Hub de atendimento" onClick={abrirHub} cor="text-sky-700" />
-      <Atalho icone={Phone} label="Ligar" href={telefone ? `tel:${telefone}` : undefined} onClick={telefone ? undefined : () => toast.error('Cliente sem telefone cadastrado.')} />
-      <Atalho icone={Mail} label="E-mail" href={email ? `mailto:${email}` : undefined} onClick={email ? undefined : () => toast.error('Cliente sem e-mail cadastrado.')} />
+      <Atalho
+        icone={Phone}
+        label="Ligar"
+        rotulo="Telefonia — abre o discador do dispositivo; GoTo exige integração conectada"
+        onClick={() => escolherOuExecutar('telefone', ['telefone', 'celular', 'fixo'], ligar)}
+      />
+      <Atalho icone={Mail} label="E-mail" onClick={() => escolherOuExecutar('email', ['e-mail', 'email'], enviarEmail)} />
       <Atalho icone={MessageSquare} label="Próxima ação" onClick={() => toast.info(proximaAcao(negociacao))} cor="text-amber-700" />
     </div>
   );
@@ -196,6 +245,26 @@ export default function PainelAtendimento({ negociacao, cliente }) {
         <div className="space-y-2">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Atalhos de atendimento</p>
           {atalhos}
+          {escolhaContato && (
+            <div className="rounded-md border border-blue-200 bg-blue-50 p-2 space-y-1">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-blue-700">
+                Escolher {escolhaContato.campo === 'email' ? 'e-mail' : 'telefone'} do cliente
+              </p>
+              {escolhaContato.opcoes.map((opcao) => (
+                <button
+                  key={opcao.id}
+                  type="button"
+                  onClick={() => { escolhaContato.executar(opcao.valor); setEscolhaContato(null); }}
+                  className="w-full rounded border border-blue-200 bg-white px-2 py-1 text-left text-[11px] text-slate-700 hover:bg-blue-100"
+                >
+                  {opcao.valor}{opcao.rotulo ? ` · ${opcao.rotulo}` : ''}
+                </button>
+              ))}
+              <button type="button" onClick={() => setEscolhaContato(null)} className="text-[10px] text-slate-500 underline">
+                Cancelar
+              </button>
+            </div>
+          )}
           <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 pt-1">Últimas interações</p>
           <PainelRegistros
             entity="Interacao"

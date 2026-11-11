@@ -3,17 +3,20 @@
  * Nenhuma regra de negócio nova: apenas leitura/visão unificada dos registros canônicos.
  */
 
+// §2 do dossiê: ABERTOS · FECHADOS · PRODUÇÃO · ENTREGA · RETIRA · PENDÊNCIAS.
+// A ordem canônica vem primeiro; os estados detalhados que já existiam seguem depois (nada é removido).
 export const GRUPOS_NEGOCIACAO = [
   { id: 'todas', label: 'Todas' },
   { id: 'aberto', label: 'Abertos' },
-  { id: 'aguardando', label: 'Aguardando cliente' },
-  { id: 'aprovacao', label: 'Em aprovação' },
+  { id: 'fechado', label: 'Fechados / Convertidos' },
   { id: 'producao', label: 'Produção' },
   { id: 'entrega', label: 'Entrega' },
   { id: 'retira', label: 'Retira' },
+  { id: 'pendencia', label: 'Pendências' },
+  { id: 'aguardando', label: 'Aguardando cliente' },
+  { id: 'aprovacao', label: 'Em aprovação' },
   { id: 'acompanhamento', label: 'Em execução' },
   { id: 'entregue', label: 'Entregues' },
-  { id: 'fechado', label: 'Finalizados / Convertidos' },
   { id: 'encerrado', label: 'Vencidos / Encerrados' },
   { id: 'cancelado', label: 'Cancelados' },
 ];

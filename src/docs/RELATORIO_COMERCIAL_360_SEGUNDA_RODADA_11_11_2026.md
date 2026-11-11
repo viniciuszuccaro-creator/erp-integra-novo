@@ -173,6 +173,22 @@ A Mesa validava a proposta, mas o navegador criava o pedido e depois alterava o 
 - `npm run build` e ESLint dos arquivos alterados sem erros; endpoint real não destrutivo respondeu **404** para solicitação inexistente.
 - **Pendências mantidas**: histórico de contraproposta como registro próprio (hoje fica na solicitação + `AuditLog`), aplicação de limite por categoria orçamentária (o teto hoje é por nível/valor), decisão de desconto de pedido que ainda grava o pedido inteiro, e homologação E2E §47/§48 no Testing Agent. Nada foi publicado nem reanalisado em Security.
 
+## Continuação — Dossiê 10/11/2026: abas canônicas (§2) e escolha de contato (§4)
+
+### O que estava divergente
+- §2 define a faixa de abas como **ABERTOS · FECHADOS · PRODUÇÃO · ENTREGA · RETIRA · PENDÊNCIAS**. A Central abria em "Todas", não tinha "Fechados" na ordem canônica nem a aba **Pendências**.
+- §4 pede os atalhos de comunicação com **seleção de contato quando houver múltiplos**. WhatsApp, Ligar e E-mail usavam apenas `cliente.email` / telefone principal, ignorando o cadastro de contatos.
+
+### Entrega
+- `GRUPOS_NEGOCIACAO` reordenado para a sequência do documento e com a nova aba **Pendências**; todos os estados detalhados que já existiam (Aguardando cliente, Em aprovação, Em execução, Entregues, Vencidos/Encerrados, Cancelados) continuam disponíveis logo depois, nada removido.
+- **Pendências** não cria regra nova: usa exatamente os alertas já apurados por `useAlertasComerciais` (proposta vencida, proposta vencendo, aprovação parada, negociação sem movimento) e mostra o mesmo contador na aba.
+- `PainelAtendimento`: WhatsApp, Ligar e E-mail passaram a ler o cadastro de contatos do cliente; com um único contato a ação executa direto, com vários abre a escolha do contato (valor + rótulo) antes de discar/enviar. O atalho de telefonia explicita que abre o discador do dispositivo e que GoTo depende de integração conectada, sem prometer ligação.
+
+### Evidências e limites
+- `npm run build` concluído; `npm run test:unit` **387 aprovados, 0 falhas, 11 ignorados**.
+- Nenhum componente novo: apenas os arquivos existentes da Central.
+- Ainda em aberto no dossiê: KPIs/alertas como faixa própria (§2/§37), integração real de GoTo/telefonia (§6) e a homologação E2E (§47/§48).
+
 ## Continuação — §2 do dossiê: Cliente 360° destacável em janela própria
 
 ### O que faltava

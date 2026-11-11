@@ -99,6 +99,13 @@ export default function CentralVendas360({
 
   const { alertas } = useAlertasComerciais({ negociacoes });
 
+  // §2 — aba Pendências: reaproveita exatamente as regras de alerta já apuradas (proposta vencida,
+  // aprovação parada, negociação sem movimento), sem duplicar cálculo nem consulta.
+  const chavesComAlerta = useMemo(
+    () => new Set((alertas || []).map((alerta) => alerta.chave).filter(Boolean)),
+    [alertas]
+  );
+
   // Proteção comercial: outras negociações ativas do mesmo cliente (evita propostas concorrentes)
   const concorrentes = useMemo(() => {
     if (!selecionada?.cliente_id) return [];
@@ -116,12 +123,13 @@ export default function CentralVendas360({
 
   const porGrupo = useMemo(() => {
     if (grupo === 'todas') return negociacoes;
+    if (grupo === 'pendencia') return negociacoes.filter((negociacao) => chavesComAlerta.has(negociacao.chave));
     if (grupo === 'aberto') return negociacoes.filter((negociacao) => negociacao.origem === 'orcamento' && negociacao.grupo === 'aberto');
     if (grupo === 'acompanhamento') {
       return negociacoes.filter((negociacao) => GRUPOS_EXECUCAO.includes(negociacao.grupo));
     }
     return negociacoes.filter((negociacao) => negociacao.grupo === grupo);
-  }, [negociacoes, grupo]);
+  }, [negociacoes, grupo, chavesComAlerta]);
 
   const filtros = preferencias.filtros || {};
 
@@ -182,8 +190,9 @@ export default function CentralVendas360({
     // "Em execução" permanece como visão agregada das etapas Produção + Entrega + Retira
     contagem.acompanhamento = (contagem.producao || 0) + (contagem.entrega || 0)
       + (contagem.retira || 0) + (contagem.acompanhamento || 0);
+    contagem.pendencia = chavesComAlerta.size;
     return contagem;
-  }, [negociacoes]);
+  }, [negociacoes, chavesComAlerta]);
 
   const opcoesFiltro = useMemo(() => ({
     vendedores: valoresUnicos(porGrupo.map((negociacao) => negociacao.vendedor)),

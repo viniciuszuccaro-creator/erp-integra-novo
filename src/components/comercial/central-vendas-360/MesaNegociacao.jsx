@@ -1,5 +1,6 @@
 // Mesa de trabalho da negociação — cabeçalho, atendimento, itens, atalhos, painel e rodapé
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { CheckCircle2, Printer, Send, Wrench } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { useWindow } from '@/components/lib/useWindow';
@@ -37,6 +38,7 @@ const assinaturaItens = (lista = []) => JSON.stringify(lista.map((item) => ({
 
 export default function MesaNegociacao({
   negociacao: recebida, clientes = [], empresa, grupo, onVoltar, onAtualizar, concorrentes = [],
+  onAcoesRapidas,
 }) {
   const [registroLocal, setRegistroLocal] = useState(null);
   const negociacao = registroLocal && (!recebida.registro?.updated_date || registroLocal.registro.updated_date >= recebida.registro.updated_date) ? registroLocal : recebida;
@@ -214,6 +216,53 @@ export default function MesaNegociacao({
 
   const acaoDesabilitada =
     (negociacao.origem === 'orcamento' && !['Pendente', 'Aprovado'].includes(negociacao.registro.status));
+
+  // §2 — Ações rápidas contextuais exibidas sob o Cliente 360°.
+  // Os manipuladores ficam em ref para o array não trocar de identidade a cada render.
+  const executarRef = useRef({});
+  executarRef.current = {
+    imprimir,
+    enviar: abrirEnvio,
+    avancar,
+    ajustar: () => handleEditPedido(negociacao.registro),
+  };
+
+  const acoesRapidas = useMemo(() => {
+    const lista = [];
+    if (acoes.podeExportar) {
+      lista.push({ id: 'imprimir', label: 'Imprimir', icon: Printer, onClick: () => executarRef.current.imprimir() });
+    }
+    if (acoes.podeEditar) {
+      lista.push({
+        id: 'enviar', label: 'Enviar', icon: Send, onClick: () => executarRef.current.enviar(),
+        disabled: sujo || salvando,
+        title: sujo ? 'Salve as alterações antes de enviar' : 'Enviar a proposta ao cliente',
+      });
+    }
+    if (negociacao.origem === 'orcamento') {
+      lista.push({
+        id: 'fechar', label: acaoLabel, icon: CheckCircle2, destaque: true,
+        onClick: () => executarRef.current.avancar(),
+        disabled: acaoDesabilitada || bloqueioFechamento || salvando,
+        title: bloqueioFechamento
+          ? `Resolva ${validacao.erros.length} bloqueio(s) do fechamento`
+          : 'Fechar o orçamento e seguir para pedido',
+      });
+    } else if (['producao', 'entrega', 'retira'].includes(negociacao.grupo)) {
+      lista.push({
+        id: 'ajustar', label: 'Ajustar pedido', icon: Wrench,
+        onClick: () => executarRef.current.ajustar(),
+        disabled: !acoes.podeEditar || salvando,
+        title: 'Ajustar endereço, condição de pagamento, Entrega↔Retira e tipo de NF antes da emissão',
+      });
+    }
+    return lista;
+  }, [
+    acoes.podeExportar, acoes.podeEditar, negociacao.origem, negociacao.grupo, negociacao.chave,
+    acaoLabel, acaoDesabilitada, bloqueioFechamento, validacao.erros.length, sujo, salvando,
+  ]);
+
+  useEffect(() => { onAcoesRapidas?.(acoesRapidas); }, [acoesRapidas]);
 
   return (
     <div className="w-full h-full flex flex-col gap-2 min-h-0 overflow-auto">

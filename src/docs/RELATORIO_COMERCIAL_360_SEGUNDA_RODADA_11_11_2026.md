@@ -173,6 +173,22 @@ A Mesa validava a proposta, mas o navegador criava o pedido e depois alterava o 
 - `npm run build` e ESLint dos arquivos alterados sem erros; endpoint real não destrutivo respondeu **404** para solicitação inexistente.
 - **Pendências mantidas**: histórico de contraproposta como registro próprio (hoje fica na solicitação + `AuditLog`), aplicação de limite por categoria orçamentária (o teto hoje é por nível/valor), decisão de desconto de pedido que ainda grava o pedido inteiro, e homologação E2E §47/§48 no Testing Agent. Nada foi publicado nem reanalisado em Security.
 
+## Continuação — §2 do dossiê: Ações Rápidas contextuais sob o Cliente 360°
+
+### O que estava divergente
+O documento posiciona as ações da negociação **sob o Cliente 360°**, com Imprimir/Enviar e Fechar Orçamento no Aberto, e Ajustar Pedido **apenas** em Produção, Entrega ou Retira. Elas só existiam no rodapé da mesa, longe do painel lateral que o vendedor usa como referência.
+
+### Entrega
+- `AcoesRapidas360`: faixa compacta de ações dentro do painel lateral, logo abaixo da identificação do cliente, sem criar nenhum atalho novo de negócio.
+- `MesaNegociacao` passou a **publicar** essas ações (mesmos manipuladores já existentes de imprimir, enviar, fechar/avançar e ajustar) com os mesmos bloqueios da mesa — permissões (`podeExportar`, `podeEditar`), rascunho sujo, salvamento em curso, bloqueios de fechamento e status do orçamento. Os manipuladores ficam em `ref`, então o array só é recalculado quando o estado relevante muda (sem re-render em laço).
+- Contexto por etapa: no orçamento, “Fechar orçamento”; em Produção/Entrega/Retira, “Ajustar pedido”; o botão de ajuste **não aparece** nas outras etapas, como o documento exige.
+- `CentralVendas360` transporta a lista para o `Cliente360Lateral` e a limpa quando não há negociação selecionada.
+
+### Evidências e limites
+- `npm run build` concluído e `npm run test:unit` com **387 aprovados, 0 falhas, 11 ignorados**.
+- Nada foi duplicado: as ações continuam existindo no rodapé; a faixa é a mesma ação em outro lugar, com os mesmos bloqueios.
+- Ainda em aberto no §2: Cliente 360° **destacável** em janela independente e a homologação E2E (§47/§48).
+
 ## Continuação — §2 do dossiê: faixa compacta com contadores e janelas próprias
 
 ### O que estava divergente do documento

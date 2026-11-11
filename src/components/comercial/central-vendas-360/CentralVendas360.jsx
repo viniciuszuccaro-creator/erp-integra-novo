@@ -36,6 +36,8 @@ export default function CentralVendas360({
   const { openWindow, closeWindow } = useWindow();
   const [painelAberto, setPainelAberto] = useState(true);
   const [novaNegociacaoAberta, setNovaNegociacaoAberta] = useState(false);
+  // Ações rápidas contextuais da negociação, publicadas pela mesa e exibidas sob o Cliente 360°
+  const [acoesRapidas, setAcoesRapidas] = useState([]);
 
   const preferencias = usePreferenciasCentral360();
   const {
@@ -267,6 +269,7 @@ export default function CentralVendas360({
                     onVoltar={() => selecionar(null)}
                     onAtualizar={atualizar}
                     concorrentes={concorrentes}
+                    onAcoesRapidas={setAcoesRapidas}
                   />
                 ) : (
                   <div className="flex-1 rounded-lg border border-dashed border-slate-300 bg-slate-50 flex flex-col items-center justify-center text-center p-6">
@@ -291,6 +294,7 @@ export default function CentralVendas360({
               alertas={alertas}
               validacao={validacaoSelecionada}
               onSelecionarNegociacao={selecionar}
+              acoesRapidas={selecionada ? acoesRapidas : []}
             />
           </div>
         )}

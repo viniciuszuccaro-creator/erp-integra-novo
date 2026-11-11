@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Users } from 'lucide-react';
 import AtalhosLateral from './AtalhosLateral';
+import AcoesRapidas360 from './AcoesRapidas360';
 import PainelCorpo from './paineis/PainelCorpo';
 import { TITULOS_PAINEL } from './paineis/paineisConfig';
 
@@ -10,7 +11,7 @@ const LARGURA_MAXIMA = 560;
 
 export default function Cliente360Lateral({
   negociacao, cliente, recolhido, onToggle, largura = 360, onRedimensionar,
-  alertas = [], validacao, onSelecionarNegociacao,
+  alertas = [], validacao, onSelecionarNegociacao, acoesRapidas = [],
 }) {
   const [painel, setPainel] = useState('cliente');
   const [larguraLocal, setLarguraLocal] = useState(null);
@@ -95,7 +96,9 @@ export default function Cliente360Lateral({
           </p>
         </div>
       ) : (
-        <div className="flex-1 min-h-0 flex">
+        <>
+          <AcoesRapidas360 acoes={acoesRapidas} />
+          <div className="flex-1 min-h-0 flex">
           <AtalhosLateral ativo={painel} onSelect={(id) => setPainel(id || 'cliente')} />
           <div className="flex-1 min-w-0 flex flex-col min-h-0 border-l border-slate-100">
             <div className="px-2 py-1.5 border-b border-slate-100 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
@@ -113,7 +116,8 @@ export default function Cliente360Lateral({
               />
             </div>
           </div>
-        </div>
+          </div>
+        </>
       )}
     </aside>
   );

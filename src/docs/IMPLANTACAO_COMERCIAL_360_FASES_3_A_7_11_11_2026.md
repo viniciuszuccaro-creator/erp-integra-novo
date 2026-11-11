@@ -82,6 +82,7 @@ Verificação item a item sobre o código existente (nenhum arquivo novo foi cri
 - O desconto por item passou a ser persistido no orçamento (antes era descartado e o desconto desaparecia ao recarregar).
 - Comparação de "alterações pendentes" ignora ids gerados na tela e diferença texto/número: o botão Salvar desabilita corretamente após salvar.
 - RBAC da mesa centralizado em `useAcoesComerciais` (salvar, aprovar, gerar pedido, enviar proposta, abrir pedido).
+- **Fila de pedidos externos visível na Central:** o botão "Pedidos externos" mostra quantos pedidos aguardam validação (`PedidoExterno` com `status_importacao = A Validar`) no contexto de grupo/empresa, com RBAC de Comercial/Pedidos/ver — a fila deixa de ser só um atalho para o módulo e passa a indicar o volume pendente.
 
 ### O que falta para operar 100% (fora do código do Comercial)
 1. **Publicar** — há alterações no editor ainda não publicadas (o site serve a versão de 09/11/2026).

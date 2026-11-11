@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import ProtectedSection from '@/components/security/ProtectedSection';
 import { useWindow } from '@/components/lib/useWindow';
 import usePermissions from '@/components/lib/usePermissions';
+import useRLSQuery from '@/components/lib/useRLSQuery';
 import ValidarPedidosExternos from '../ValidarPedidosExternos';
 import { GRUPOS_NEGOCIACAO } from './negociacaoUtils';
 
@@ -35,6 +36,16 @@ export default function HeaderCentral360({
   const { hasPermission } = usePermissions();
   const podeValidarExternos = hasPermission('Comercial', 'Pedidos', 'ver');
   const contexto = empresa?.nome || grupo?.nome || 'Grupo não selecionado';
+
+  // Fila visível: quantos pedidos externos aguardam validação no contexto ativo (grupo/empresa)
+  const { data: externosPendentes = [] } = useRLSQuery(
+    'PedidoExterno',
+    { status_importacao: 'A Validar' },
+    '-created_date',
+    100,
+    { enabled: podeValidarExternos, staleTime: 60000 }
+  );
+  const qtdExternosPendentes = (externosPendentes || []).length;
 
   // Fila de validação de pedidos externos: usa o módulo já existente, em janela (Regra-Mãe 1 e 2)
   const abrirPedidosExternos = () => openWindow(
@@ -88,6 +99,14 @@ export default function HeaderCentral360({
               title="Fila de validação dos pedidos recebidos dos canais externos"
             >
               <ExternalLink className="w-3.5 h-3.5" /> Pedidos externos
+              {qtdExternosPendentes > 0 && (
+                <span
+                  className="rounded-full bg-orange-100 text-orange-700 px-1.5 text-[10px] font-bold"
+                  title={`${qtdExternosPendentes} pedido(s) externo(s) aguardando validação`}
+                >
+                  {qtdExternosPendentes >= 100 ? '100+' : qtdExternosPendentes}
+                </span>
+              )}
             </button>
           )}
           <ProtectedSection module="Comercial" section="Pedidos" action="criar">

@@ -14,6 +14,26 @@ function permitido(ctx, leitura) {
   return Boolean(contem(secao));
 }
 
+export function temPermissaoLeitura(ctx, modulo, secoes) {
+  if (ctx.user?.bloqueado) return false;
+  if (ctx.user?.role === 'admin') return true;
+  if (!ctx.perfil || ctx.perfil.ativo === false) return false;
+  const chave = (v) => normalizar(v).replace(/[^a-z0-9]/g, '');
+  const permissoes = Object.entries(ctx.perfil.permissoes || {}).find(([k]) => chave(k) === chave(modulo))?.[1];
+  const aliases = secoes.map(chave);
+  const leitura = new Set(['ver', 'visualizar', 'consultar', 'read', 'view', 'listar']);
+  const contem = (v) => Array.isArray(v) ? v.some((a) => leitura.has(normalizar(a))) : v && typeof v === 'object' && Object.values(v).some(contem);
+  return Object.entries(permissoes || {}).some(([k, v]) => aliases.includes(chave(k)) && contem(v));
+}
+
+export function usuarioVinculado(ctx, groupId, empresaId) {
+  if (ctx.user?.bloqueado) return false;
+  if (ctx.user?.role === 'admin') return true;
+  const empresa = (ctx.user.empresas_vinculadas || []).some((v) => typeof v === 'string' ? v === empresaId : v.empresa_id === empresaId && v.ativo !== false);
+  const grupo = (ctx.user.grupos_vinculados || []).some((v) => typeof v === 'string' ? v === groupId : v.grupo_id === groupId && v.ativo !== false);
+  return empresa || grupo;
+}
+
 async function auditar(base44, user, registro, acao, descricao, depois = null) {
   return base44.asServiceRole.entities.AuditLog.create({
     usuario: user.full_name || user.email, usuario_id: user.id, acao, modulo: 'Expedição',
@@ -30,12 +50,8 @@ export async function processarComprovante(base44, ctx, body) {
   if (!['registrar_comprovante', 'consultar_comprovante'].includes(acao)) return Response.json({ error: 'Ação de comprovante inválida.' }, { status: 400 });
   if (![entrega_id, group_id, empresa_id].every((id) => typeof id === 'string' && /^[a-f\d]{24}$/i.test(id))) return Response.json({ error: 'Entrega, grupo e empresa válidos são obrigatórios.' }, { status: 400 });
   if (!permitido(ctx, leitura)) return Response.json({ error: 'Sem permissão em Expedição / Entrega para esta ação.' }, { status: 403 });
-  if (ctx.user.role !== 'admin') {
-    // Estes vínculos e o perfil são campos protegidos do User, nunca escolhas de contexto do navegador.
-    const empresaPermitida = (ctx.user.empresas_vinculadas || []).some((v) => (typeof v === 'string' ? v === empresa_id : v.empresa_id === empresa_id && v.ativo !== false));
-    const grupoPermitido = (ctx.user.grupos_vinculados || []).some((v) => (typeof v === 'string' ? v === group_id : v.grupo_id === group_id && v.ativo !== false));
-    if (!empresaPermitida && !grupoPermitido) return Response.json({ error: 'Usuário sem vínculo ativo com a empresa ou grupo.' }, { status: 403 });
-  }
+  // Vínculos protegidos do User; a mesma regra atende comprovantes e saldos.
+  if (!usuarioVinculado(ctx, group_id, empresa_id)) return Response.json({ error: 'Usuário sem vínculo ativo com a empresa ou grupo.' }, { status: 403 });
   const [empresas, entregas] = await Promise.all([
     base44.asServiceRole.entities.Empresa.filter({ id: empresa_id, group_id }, { limit: 1 }),
     base44.asServiceRole.entities.Entrega.filter({ id: entrega_id, group_id, empresa_id }, { limit: 1 }),

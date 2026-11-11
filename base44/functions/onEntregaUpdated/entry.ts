@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { processarComprovante } from './comprovante.ts';
+import { consultarSaldosPedido } from './saldos.ts';
 // Inlined guard helpers (relative imports break in Deno deploy)
 async function getUserAndPerfil(base44) { const user = await base44.auth.me().catch(() => null); let perfil = null; try { if (user?.perfil_acesso_id) perfil = await base44.asServiceRole.entities.PerfilAcesso.get(user.perfil_acesso_id); } catch (permErr) { console.error('PerfilAcesso fetch falhou (onEntregaUpdated):', permErr); } return { user, perfil }; }
 function _normAct(a) { if (!a) return 'visualizar'; const s = String(a).toLowerCase(); const map = { ver:'visualizar',view:'visualizar',read:'visualizar',listar:'visualizar',status:'visualizar',delete:'excluir',remove:'excluir',destroy:'excluir',apagar:'excluir',cancel:'cancelar',cancelar:'cancelar',create:'criar',add:'criar',emitir:'criar',enviar:'criar',update:'editar',edit:'editar',carta:'editar',corrigir:'editar',approve:'aprovar',aprovar:'aprovar',export:'exportar',exportar:'exportar' }; return map[s]||s; }
@@ -15,6 +16,7 @@ export default async function(req) {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json().catch(() => ({}));
+    if (body?.acao === 'consultar_saldos_pedido') return await consultarSaldosPedido(base44, ctx, body);
     if (body?.acao) return await processarComprovante(base44, ctx, body);
     const { event, data, old_data } = body || {};
     if (!event || event.type !== 'update' || !data) return Response.json({ ok: true, skipped: true });

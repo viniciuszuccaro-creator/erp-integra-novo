@@ -115,9 +115,9 @@ export function orcamentoParaNegociacao(orcamento) {
 
 export function pedidoParaNegociacao(pedido) {
   const itens = [
-    ...(pedido.itens_revenda || []).map((item, i) => itemNormalizado(item, 'revenda', i)),
-    ...(pedido.itens_armado_padrao || []).map((item, i) => itemNormalizado(item, 'fabricacao', `a${i}`)),
-    ...(pedido.itens_corte_dobra || []).map((item, i) => itemNormalizado(item, 'fabricacao', `c${i}`)),
+    ...(pedido.itens_revenda || []).map((item, i) => ({ ...itemNormalizado(item, 'revenda', i), chave_saldo: `revenda-${i}` })),
+    ...(pedido.itens_armado_padrao || []).map((item, i) => ({ ...itemNormalizado(item, 'fabricacao', `a${i}`), chave_saldo: `armado-${i}` })),
+    ...(pedido.itens_corte_dobra || []).map((item, i) => ({ ...itemNormalizado(item, 'fabricacao', `c${i}`), chave_saldo: `corte-${i}` })),
   ];
   const grupo = GRUPO_PEDIDO[pedido.status] || 'aberto';
   return {

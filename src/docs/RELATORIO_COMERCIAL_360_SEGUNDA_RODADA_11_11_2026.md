@@ -35,7 +35,7 @@ Nenhum módulo, tela ou entidade nova foi criada. As alterações ocorreram em a
 ## Pendências reais (não concluídas)
 
 1. **§47/§48 — homologação E2E/RBAC/multiempresa** no Testing Agent, com backend real: ABERTO→FECHADO, bloqueio financeiro, aprovação→fechado, produção→entrega/retira, entrega→entregue/rejeitada, pedido misto, faturamento e entrega parciais, cancelamento, reabertura, usuário sem permissão, empresa diferente, `empresa_id`/`group_id` maliciosos, desconto e preço não autorizados. Nada disso foi executado aqui.
-2. **§23 — saldos parciais por item**: as entidades existem (`Pedido.quantidade_faturada`, `EntregaItens`, `PedidoEtapa`), mas a cadeia separação → produção → entrega → faturamento → cobrança por item não foi comprovada nem alterada nesta rodada. A tela também não exibe saldo por item.
+2. **§23 — execução parcial por item**: a consulta de saldos oficiais foi integrada às duas grades nesta continuação (evidências abaixo). A cadeia de mutações separação → produção → entrega/retirada → faturamento → cobrança por item ainda não está integralmente implementada/homologada; esta consulta não a substitui.
 3. **§6 — bot de vendas autônomo** com contador de exceções, autonomia por política e aprendizado supervisionado; **§4 — GoTo/telefonia** com provedor real. Ambos seguem sem provedor conectado.
 4. **§5/§18 — autoridade de servidor nos demais caminhos**: duplicar, desmembrar, criar/editar pedido e a criação direta de pedido a partir do orçamento ainda usam escrita do navegador com as regras de acesso existentes. O endpoint cobre salvar/fechar/validar; não é bloqueio global de todas as APIs.
 5. **§18 — alçadas completas** por categoria/nível e histórico imutável de contraproposta como registro próprio; a contraproposta é gravada na solicitação, mas a aplicação de limite continua no cadastro do cliente.
@@ -43,6 +43,39 @@ Nenhum módulo, tela ou entidade nova foi criada. As alterações ocorreram em a
 7. **§7 — documentos**: agendamento de envio, reimpressão de peças com alçada/segunda via e preferências por cliente ainda não estão implementados.
 8. **§16/§17** — o motor de validação cobre as regras no servidor, mas não existe suíte automatizada com dados reais que comprove cada uma.
 9. **Publicação e nova análise de segurança** não foram executadas; dependem do botão Publish e da página Security.
+
+## Auditoria prévia desta continuação
+
+Fonte: mesmo DOCX original reenviado pelo usuário, lido nesta sessão. O texto exige execução em lotes (§50) e proíbe certificar por compilação (§53).
+
+- Reutilizar: CentralVendas360 → MesaNegociacao → ItensNegociacaoGrid/ItemNegociacaoLinha, onEntregaUpdated/comprovante.ts, Pedido, SeparacaoConferencia, OrdemProducao, EntregaItens, Entrega e PedidoEtapa.
+- Lacuna verificada no código: não há consulta de EntregaItens nos fluxos comerciais; as grades mostram apenas quantidade pedida. quantidade_faturada existe nos três grupos de itens, mas não é exibida. Registros antigos podem não possuir identidade de item ou vínculos confiáveis.
+- Escopo deste lote: consulta de saldos por item, calculada no servidor a partir das fontes proprietárias, sob demanda e com RBAC por domínio, integrada às duas grades existentes. Nenhuma movimentação de estoque, fechamento, pagamento ou entrega será executada por esta consulta.
+- Não validados: execução real dos provedores, E2E, isolamento com usuários reais e cadeia de mutações parciais. O estoque ainda tem caminhos legados com baixa direta no navegador; sua consolidação exige lote próprio, não uma substituição silenciosa.
+
+## Entrega desta continuação — consulta de saldos por item
+
+### Arquivos e componentes
+- Reutilizados/alterados: `ItensNegociacaoGrid.jsx`, `MesaNegociacao.jsx`, `negociacaoUtils.jsx`, `onEntregaUpdated/entry.ts`, `onEntregaUpdated/comprovante.ts` e a suíte existente `tests/unit/unit.test.mjs`.
+- Extrações focadas, sem módulos/telas/entidades paralelos: `useSaldosItensPedido.jsx`, `SaldoItemNegociacao.jsx`, `onEntregaUpdated/saldos.ts` e `onEntregaUpdated/saldosCalculo.ts`.
+- Nenhuma entidade, permissão, configuração compartilhada ou registro operacional foi migrado/alterado. Registros de auditoria foram criados pelas verificações de bloqueio do endpoint.
+
+### Funcionamento implementado
+- O botão **Saldos por item** expande as linhas nas duas grades existentes, sem painel permanente adicional. Consulta sob demanda; o cache inclui usuário, perfil, grupo, empresa, pedido e versão.
+- O cálculo é no servidor. Fontes: `Pedido` (quantidade pedida e faturada), `SeparacaoConferencia` (separada/conferida), `OrdemProducao` (quantidades vinculadas em OPs prontas/concluídas) e `EntregaItens` + `Entrega` (entregue/retirada e saldo a atender). O saldo a faturar usa exclusivamente a quantidade faturada oficial do item.
+- Mantém separados revenda, armado e corte/dobra; usa as referências legadas já geradas pelas etapas (`revenda-N`, `armado-N`, `corte-N`) ou IDs explícitos. Produto repetido sem referência única, unidade incompatível, OP com progresso somente em KG e entrega legada sem itens aparecem como **Sem vínculo verificável**, nunca como atendimento integral presumido.
+- Quantidades acima do pedido são exibidas com divergência. Entregas canceladas não contam. Ausência de quantidade faturada não é tratada como zero automaticamente.
+- Há estados de carregamento/erro, atualização manual e atualização por eventos das fontes autorizadas. Sem polling; em segundo plano os eventos apenas invalidam o cache sem refazer consultas.
+- RBAC no servidor exige consulta em `Comercial/Pedido(s)`. Separação, Produção, Entregas e Fiscal são autorizados separadamente; fonte sem permissão não é consultada nem devolvida. Contexto exige IDs válidos, vínculo protegido do usuário, empresa no grupo e pedido no contexto. Restrição de carteira é aplicada.
+- A interface não salva quantidades, não baixa estoque, não confirma pagamento e não conclui pedido/OP. Os vínculos ausentes continuam exigindo correção pelos módulos proprietários.
+
+### Evidências e limitações
+- Compilação concluída e ESLint sem erros nos componentes alterados.
+- Testes unitários: **240 aprovados, 0 falhas, 11 ignorados**; 22 novas verificações de cálculo e autorização, incluindo paginação, pedido misto, atendimento parcial, campos fiscais restritos, contexto malicioso, outra empresa, vínculo ausente e carteira. São testes com fontes controladas, não E2E nem prova de isolamento da API inteira.
+- Endpoint real `onEntregaUpdated`: **400** sem contexto, **404** para contexto/pedido inexistente e **200** em consulta somente leitura de um pedido existente com duas linhas de revenda. Nenhuma entrega, pedido, produto ou título foi alterado para teste.
+- Typecheck global permanece com milhares de erros preexistentes de tipagem do projeto; não é aprovado. Os erros novos detectados nos componentes de saldo foram corrigidos. Erros preexistentes em Button e acesso tipado ao SDK permanecem fora deste lote.
+- Não foram conectados provedores, publicadas alterações, executados testes de interface/E2E ou feita nova análise de segurança. Não há commit/PR criado nesta sessão.
+- Próximo lote: consolidar confirmações legadas com movimentos oficiais idempotentes e escrita parcial por item; em seguida tratar faturamento/cobranças parciais, alçadas/documentos e integrações reais. As demais pendências numeradas acima continuam abertas.
 
 ## Situação
 

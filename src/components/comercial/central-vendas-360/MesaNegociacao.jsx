@@ -286,7 +286,8 @@ export default function MesaNegociacao({
 
       <div className="flex-1 min-h-[310px] flex">
         <ItensNegociacaoGrid
-          itens={itens}
+          itens={negociacao.origem === 'pedido' ? negociacao.itens : itens}
+          pedido={negociacao.origem === 'pedido' ? negociacao.registro : undefined}
           setItens={setItens}
           editavel={podeEditarItens && !salvando}
           permiteDesconto={acoes.podeAprovarDesconto}

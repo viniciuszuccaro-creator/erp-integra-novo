@@ -356,6 +356,77 @@ async function testCentral360() {
   check('12 colunas na ordem literal do dossiê', labels.join('|') === 'Nº Orçamento|Data|Cod Cliente|Nome Cliente|Origem|Nome Vendedor|Peso|Valor|Cidade|Condição Pagamento|Situação|Prazo');
 }
 
+// Consulta real do código de saldos com fontes controladas, sem alterar banco real.
+async function testSaldosPedido() {
+  const carregar = (path) => readFileSync(join(ROOT, path), 'utf-8');
+  const url = (source) => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
+  const calculoUrl = url(carregar('base44/functions/onEntregaUpdated/saldosCalculo.ts'));
+  const comprovanteUrl = url(carregar('base44/functions/onEntregaUpdated/comprovante.ts'));
+  const calc = await import(calculoUrl);
+  const handlerSource = carregar('base44/functions/onEntregaUpdated/saldos.ts').replace("'./saldosCalculo.ts'", JSON.stringify(calculoUrl)).replace("'./comprovante.ts'", JSON.stringify(comprovanteUrl));
+  const { consultarSaldosPedido } = await import(url(handlerSource));
+  const check = (nome, ok) => log(ok ? 'pass' : 'fail', `Saldos por item: ${nome}`);
+  const pedido = { id: '111111111111111111111111', group_id: '222222222222222222222222', empresa_id: '333333333333333333333333', updated_date: 'v1', itens_revenda: [{ produto_id: 'p', quantidade: 10, quantidade_faturada: 3, unidade: 'UN' }], itens_armado_padrao: [{ produto_id: 'fab', quantidade: 8, unidade: 'PC' }] };
+  const permissoes = { separacao: true, producao: true, entregas: true, fiscal: true };
+  const fontes = {
+    entregas: [{ id: 'e1', status: 'Entregue', tipo_frete: 'CIF' }, { id: 'e2', status: 'Entregue', tipo_frete: 'Retira' }, { id: 'e3', status: 'Cancelado' }],
+    itensEntrega: [{ entrega_id: 'e1', pedido_item_id: 'revenda-0', quantidade: 4, unidade: 'UN' }, { entrega_id: 'e2', pedido_item_id: 'revenda-0', quantidade: 2 }, { entrega_id: 'e3', pedido_item_id: 'revenda-0', quantidade: 50 }],
+    separacoes: [{ status: 'concluido', tipo: 'separacao', itens: [{ item_pedido_id: 'revenda-0', quantidade_separada: 6 }] }, { status: 'concluido', tipo: 'conferencia', itens: [{ item_pedido_id: 'revenda-0', quantidade_separada: 6, quantidade_conferida: 5 }] }],
+    ops: [{ status: 'Concluída', itens_vinculados: [{ pedido_id: pedido.id, item_id: 'armado-0', quantidade: 3, unidade: 'PC' }] }],
+  };
+  const resultado = calc.calcularSaldosPedido(pedido, fontes, permissoes);
+  check('entrega e retirada parciais preservam saldo', resultado[0].entregue === 4 && resultado[0].retirada === 2 && resultado[0].saldo_atender === 4);
+  check('cancelamento não soma quantidade', !resultado[0].divergencia);
+  check('faturamento usa quantidade oficial e saldo próprio', resultado[0].faturada === 3 && resultado[0].saldo_faturar === 7);
+  check('separação não duplica conferência', resultado[0].separada === 6 && resultado[0].conferida === 5);
+  check('produção parcial preserva grupo de fabricação', resultado[1].produzida === 3 && resultado[0].produzida === null);
+  check('quantidade faturada ausente não é inventada', resultado[1].faturada === null && resultado[1].saldo_faturar === null);
+  const legado = calc.calcularSaldosPedido(pedido, { entregas: [{ id: 'legado', status: 'Entregue' }] }, permissoes);
+  check('entrega legada sem itens não prova saldo zero', legado[0].entregue === null && legado[0].saldo_atender === null);
+  const duplicado = { ...pedido, itens_revenda: [...pedido.itens_revenda, { ...pedido.itens_revenda[0] }] };
+  check('produto repetido exige identidade de item', calc.resolverItem(calc.itensCanonicos(duplicado), { produto_id: 'p' }) === null);
+  check('referência explícita errada não usa fallback por produto', calc.resolverItem(calc.itensCanonicos(pedido), { pedido_item_id: 'inexistente', produto_id: 'p' }) === null);
+  check('unidades incompatíveis não são somadas', calc.resolverItem(calc.itensCanonicos(pedido), { pedido_item_id: 'revenda-0', unidade: 'KG' }) === null);
+  const excesso = calc.calcularSaldosPedido({ ...pedido, itens_revenda: [{ ...pedido.itens_revenda[0], quantidade_faturada: 20 }] }, {}, permissoes);
+  check('sobrefaturamento é sinalizado, não ocultado', excesso[0].divergencia && excesso[0].faturada === 20);
+  const parcial = calc.calcularSaldosPedido(pedido, { ops: [{ status: 'Em Corte', progresso_fisico_kg: 10, itens_vinculados: [{ item_id: 'armado-0', quantidade: 8 }] }] }, permissoes);
+  check('progresso em KG não vira peças produzidas', parcial[1].produzida === null);
+  const oculto = calc.calcularSaldosPedido(pedido, fontes, {});
+  check('RBAC oculta todos os dados de domínios não autorizados', oculto.every((i) => ['separada', 'conferida', 'produzida', 'entregue', 'retirada', 'faturada', 'saldo_atender', 'saldo_faturar'].every((k) => i[k] === null)));
+  const chamadas = [];
+  const entidade = (nome, pagina) => ({ filter: async (filtro, opcoes) => { chamadas.push({ nome, filtro, opcoes }); return pagina(filtro, opcoes); } });
+  const entidades = {
+    AuditLog: { create: async () => ({}) },
+    Empresa: entidade('Empresa', (f) => ({ items: f.id === pedido.empresa_id && f.group_id === pedido.group_id ? [{ id: pedido.empresa_id }] : [] })),
+    Pedido: entidade('Pedido', (f) => ({ items: f.id === pedido.id && f.group_id === pedido.group_id && f.empresa_id === pedido.empresa_id ? [pedido] : [] })),
+    SeparacaoConferencia: entidade('SeparacaoConferencia', () => ({ items: [] })), OrdemProducao: entidade('OrdemProducao', () => ({ items: [] })),
+    Entrega: entidade('Entrega', (f, o) => o.cursor ? ({ items: [fontes.entregas[1]], has_more: false }) : ({ items: [fontes.entregas[0]], has_more: true, next_cursor: 'pagina2' })),
+    EntregaItens: entidade('EntregaItens', () => ({ items: fontes.itensEntrega.slice(0, 2) })),
+  };
+  const sdk = { asServiceRole: { entities: entidades } };
+  const body = { pedido_id: pedido.id, group_id: pedido.group_id, empresa_id: pedido.empresa_id };
+  const admin = { user: { id: 'admin', role: 'admin' } };
+  const resp = await consultarSaldosPedido(sdk, admin, body); const dados = await resp.json();
+  check('endpoint percorre páginas do pedido sem truncamento', resp.status === 200 && dados.itens[0].saldo_atender === 4 && chamadas.some((c) => c.opcoes.cursor === 'pagina2'));
+  check('todas as consultas levam grupo e empresa explícitos', chamadas.every((c) => c.filtro.group_id === pedido.group_id && (c.nome === 'Empresa' || c.filtro.empresa_id === pedido.empresa_id)));
+  const outra = await consultarSaldosPedido(sdk, admin, { ...body, empresa_id: '444444444444444444444444' });
+  check('pedido de outra empresa é rejeitado', outra.status === 404);
+  const usuario = { user: { id: 'v', role: 'user', empresas_vinculadas: [pedido.empresa_id] }, perfil: { ativo: true, permissoes: { Comercial: { Pedidos: ['ver'] } } } };
+  chamadas.length = 0;
+  const restrito = await consultarSaldosPedido(sdk, usuario, body); const restritos = await restrito.json();
+  check('sem permissão de domínio não consulta fontes restritas', restrito.status === 200 && chamadas.every((c) => ['Empresa', 'Pedido'].includes(c.nome)) && restritos.itens[0].faturada === null);
+  const semVinculo = await consultarSaldosPedido(sdk, { ...usuario, user: { ...usuario.user, empresas_vinculadas: [] } }, body);
+  check('empresa sem vínculo protegido é bloqueada', semVinculo.status === 403);
+  const semPerfil = await consultarSaldosPedido(sdk, { user: usuario.user }, body);
+  check('usuário sem permissão não consulta pedido', semPerfil.status === 403);
+  const invalido = await consultarSaldosPedido(sdk, admin, { ...body, group_id: { $ne: null } });
+  check('contexto malicioso não chega ao filtro', invalido.status === 400);
+  const proprio = await consultarSaldosPedido(sdk, { ...usuario, user: { ...usuario.user, restricoes_adicionais: { pode_ver_apenas_proprios_registros: true } } }, body);
+  check('restrição de carteira impede pedido de outro responsável', proprio.status === 403);
+  const bloqueado = await consultarSaldosPedido(sdk, { ...admin, user: { ...admin.user, bloqueado: true } }, body);
+  check('usuário bloqueado não ganha exceção administrativa', bloqueado.status === 403);
+}
+
 // ═══════════════════════════════════════════════════
 // EXECUÇÃO
 // ═══════════════════════════════════════════════════
@@ -371,6 +442,7 @@ async function runUnit() {
   testRouteRBACMapping();
   testLayoutResponsiveness();
   await testCentral360();
+  await testSaldosPedido();
 
   const total = results.pass + results.fail + results.skip;
   console.log(`\n${COLORS.bold}═══════════════════════════════════════════════════${COLORS.reset}`);

@@ -119,6 +119,24 @@ A Mesa validava a proposta, mas o navegador criava o pedido e depois alterava o 
 - Compilação e ESLint dos componentes alterados concluídos. Endpoint real retornou **400** para contexto ausente e **404** para registros inexistentes; nenhum orçamento/pedido real foi criado ou alterado para testes.
 - Ainda pendentes: criação direta/edição de pedido, conversor legado por eventos, cadeia operacional/fiscal/financeira parcial, comprovante legado, alçadas/documentos, telefonia/bot e homologação E2E. O DOCX original continua necessário para conferir cobertura integral. Não foi feita publicação nem conectada integração.
 
+## Continuação — §23: conclusão da produção por atendimento comprovado
+
+### Lacuna verificada e escopo entregue
+- O evento legado de entrega concluía **todas** as OPs do pedido que estivessem prontas para expedição, mesmo que a entrega fosse parcial. Também usava valores/vínculos recebidos no evento sem reler a entrega oficial.
+- Reutilizados `onEntregaUpdated/entry.ts`, `saldos.ts` e `saldosCalculo.ts`. Nenhum módulo, tela, entidade ou campo novo; o cálculo foi incorporado aos auxiliares existentes, sem criar um segundo fluxo de produção.
+- O processamento automático exige administrador ativo. As ações de consulta e registro de comprovante continuam usando as permissões específicas existentes, antes dessa guarda de eventos. O evento identifica a entrega, mas situação, versão, frete, pedido e vínculos vêm do registro relido; empresa e pedido precisam pertencer ao mesmo grupo/empresa.
+- A conclusão passa a exigir cobertura integral **da quantidade de cada item vinculado à OP**, não de todo o pedido. Soma somente entregas/retiradas confirmadas, com vínculo explícito da linha ou entrega à OP, identidade inequívoca do item e unidade compatível. Fabricar uma OP parcial do pedido continua permitido: sua própria quantidade precisa estar atendida.
+- OP sem vínculo, produto repetido sem identidade, unidade ausente/incompatível, outro pedido/empresa, quantidades inválidas, excesso e atendimento incompleto preservam a OP e retornam o motivo em `ops_pendentes`. Peso em KG e status global não substituem comprovação por item.
+- As fontes são percorridas em páginas e sempre com grupo/empresa explícitos. A segunda leitura das OPs verifica mudança de versão; as gravações individuais em lotes de até seis preservam os gatilhos existentes de propagação/auditoria. Histórico anterior é mantido; a auditoria explícita registra usuário, contexto, antes/depois e horário.
+- As consultas legadas de centro de custo, plano de contas, movimentos e títulos passam a carregar ambos os identificadores de contexto. As respostas de negação dos verificadores de permissão deixam de ser ignoradas.
+
+### Evidências e limites
+- Suíte unitária: **367 aprovados, zero falhas e 11 ignorados**. As 45 verificações novas executam os cálculos e o endpoint de produção com fontes controladas, incluindo pedido misto, atendimento parcial/cumulativo, OP parcial do pedido, vínculo conflitante, excesso, paginação, reprocessamento, mudança de versão, contexto malicioso e dados adulterados no evento.
+- `npm run build` retornou sem erro. Chamada real não destrutiva de evento sem contexto retornou **400**, sem efeitos operacionais. Nenhuma OP, entrega, pedido, produto ou título real foi alterado para testar.
+- **Controle de concorrência continua otimista**, não uma transação entre OP, pedido, entregas e itens. Uma alteração depois da última conferência ainda exige homologação/solução transacional própria; esta revisão não promete atomicidade nem processamento exatamente uma vez de todos os efeitos logísticos.
+- Este lote corrige a autorização/contexto do evento e o critério de conclusão das OPs. Não implementa a cadeia inteira de mutações parciais: baixas oficiais por produto, reconciliação do comprovante legado, frete/reversão idempotentes, faturamento/cobrança proporcionais e reabertura continuam pendentes. O movimento genérico legado de estoque não foi substituído silenciosamente nem tratado como atendimento oficial por item.
+- Homologação E2E, execução real dos gatilhos, dispositivos e concorrência entre usuários continuam pendentes. O documento original não está disponível nesta sessão; a continuação segue as lacunas registradas, sem certificar cobertura integral.
+
 ## Situação
 
 O núcleo visual e de fechamento exigido pelo dossiê está agora alinhado ao texto e às tabelas, compila e passa nas verificações estáticas e nos testes puros. **Não é possível declarar 100% de implantação** enquanto os itens 1 a 9 não forem executados e homologados com backend real. Nenhuma integração, plano ou crédito é presumido.

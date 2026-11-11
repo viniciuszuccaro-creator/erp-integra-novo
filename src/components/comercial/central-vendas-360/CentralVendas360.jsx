@@ -19,6 +19,9 @@ import useValidacaoFechamento from './useValidacaoFechamento';
 
 const cidadeDoCliente = (cliente) => cliente?.cidade || cliente?.endereco_cidade || '—';
 
+// "Em execução" agrega as etapas detalhadas (Produção, Entrega e Retira)
+const GRUPOS_EXECUCAO = ['acompanhamento', 'producao', 'entrega', 'retira'];
+
 export default function CentralVendas360({
   pedidos = [], clientes = [], empresas = [], onCreatePedido, onEditPedido,
 }) {
@@ -88,16 +91,28 @@ export default function CentralVendas360({
 
   const { alertas } = useAlertasComerciais({ negociacoes });
 
+  // Proteção comercial: outras negociações ativas do mesmo cliente (evita propostas concorrentes)
+  const concorrentes = useMemo(() => {
+    if (!selecionada?.cliente_id) return [];
+    const ativos = ['aberto', 'aguardando', 'aprovacao', 'acompanhamento', 'producao', 'entrega', 'retira'];
+    return negociacoes.filter((negociacao) => negociacao.chave !== selecionada.chave
+      && negociacao.cliente_id === selecionada.cliente_id
+      && ativos.includes(negociacao.grupo));
+  }, [negociacoes, selecionada]);
+
   const clienteSelecionado = clientesPorId[selecionada?.cliente_id] || null;
   const validacaoSelecionada = useValidacaoFechamento({
     negociacao: selecionada,
     cliente: clienteSelecionado,
   });
 
-  const porGrupo = useMemo(
-    () => (grupo === 'todas' ? negociacoes : negociacoes.filter((negociacao) => negociacao.grupo === grupo)),
-    [negociacoes, grupo]
-  );
+  const porGrupo = useMemo(() => {
+    if (grupo === 'todas') return negociacoes;
+    if (grupo === 'acompanhamento') {
+      return negociacoes.filter((negociacao) => GRUPOS_EXECUCAO.includes(negociacao.grupo));
+    }
+    return negociacoes.filter((negociacao) => negociacao.grupo === grupo);
+  }, [negociacoes, grupo]);
 
   const filtros = preferencias.filtros || {};
 
@@ -149,10 +164,14 @@ export default function CentralVendas360({
   }, {}), [filtradas, produtosPorId]);
 
   const contadores = useMemo(() => {
-    return negociacoes.reduce((acc, negociacao) => {
+    const contagem = negociacoes.reduce((acc, negociacao) => {
       acc[negociacao.grupo] = (acc[negociacao.grupo] || 0) + 1;
       return acc;
     }, {});
+    // "Em execução" permanece como visão agregada das etapas Produção + Entrega + Retira
+    contagem.acompanhamento = (contagem.producao || 0) + (contagem.entrega || 0)
+      + (contagem.retira || 0) + (contagem.acompanhamento || 0);
+    return contagem;
   }, [negociacoes]);
 
   const opcoesFiltro = useMemo(() => ({
@@ -231,6 +250,7 @@ export default function CentralVendas360({
                     grupo={grupoAtual}
                     onVoltar={() => selecionar(null)}
                     onAtualizar={atualizar}
+                    concorrentes={concorrentes}
                   />
                 ) : (
                   <div className="flex-1 rounded-lg border border-dashed border-slate-300 bg-slate-50 flex flex-col items-center justify-center text-center p-6">

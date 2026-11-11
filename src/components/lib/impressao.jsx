@@ -7,7 +7,7 @@ import { createRoot } from 'react-dom/client';
  */
 
 // Template de Pedido
-export const ImprimirPedido = ({ pedido, empresa }) => {
+export const ImprimirPedido = ({ pedido, empresa, titulo = 'PEDIDO' }) => {
   const conteudo = `
     <html>
       <head>
@@ -71,7 +71,7 @@ export const ImprimirPedido = ({ pedido, empresa }) => {
             <div>${empresa?.endereco?.cidade || ''}, ${empresa?.endereco?.estado || ''}</div>
           </div>
           <div class="pedido-info">
-            <div style="font-size: 24px; font-weight: bold;">PEDIDO</div>
+            <div style="font-size: 24px; font-weight: bold;">${titulo}</div>
             <div style="font-size: 20px;">#${pedido.numero_pedido}</div>
             <div>Data: ${new Date(pedido.data_pedido).toLocaleDateString('pt-BR')}</div>
           </div>

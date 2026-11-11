@@ -1,7 +1,10 @@
 // Rodapé fixo — totais, condição e ações da etapa
 import React from 'react';
-import { Send } from 'lucide-react';
+import { Copy, Import, MoreHorizontal, Printer, Send, Split } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { brl } from './negociacaoUtils';
 
 export default function RodapeNegociacao({
@@ -10,7 +13,9 @@ export default function RodapeNegociacao({
   acaoLabel, acaoDescricao, acaoDesabilitada,
   onSalvar, onVoltar, onAvancar,
   onEnviar, enviando, enviarDesabilitado,
+  onDuplicar, onDesmembrar, onImportar, onImprimir,
 }) {
+  const temMaisAcoes = Boolean(onDuplicar || onDesmembrar || onImportar);
   return (
     <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 flex flex-wrap items-center gap-3">
       <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-600">
@@ -28,6 +33,11 @@ export default function RodapeNegociacao({
         </div>
         <div className="flex items-center gap-2">
           <Button type="button" variant="outline" size="sm" onClick={onVoltar}>Voltar</Button>
+          {onImprimir && (
+            <Button type="button" variant="outline" size="sm" onClick={onImprimir} title="Imprimir documento">
+              <Printer className="w-3.5 h-3.5 mr-1" /> Imprimir
+            </Button>
+          )}
           <Button
             type="button"
             variant="outline"
@@ -39,6 +49,35 @@ export default function RodapeNegociacao({
           >
             <Send className="w-3.5 h-3.5 mr-1" /> {enviando ? 'Enviando…' : 'Enviar proposta'}
           </Button>
+          {temMaisAcoes && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button type="button" variant="outline" size="sm" title="Duplicar, desmembrar e importar itens">
+                  <MoreHorizontal className="w-3.5 h-3.5 mr-1" /> Mais ações
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                {onDuplicar && (
+                  <DropdownMenuItem onClick={onDuplicar}>
+                    <Copy className="w-3.5 h-3.5 mr-2" /> Duplicar orçamento
+                  </DropdownMenuItem>
+                )}
+                {onDesmembrar && (
+                  <DropdownMenuItem onClick={onDesmembrar}>
+                    <Split className="w-3.5 h-3.5 mr-2" /> Desmembrar itens
+                  </DropdownMenuItem>
+                )}
+                {onImportar && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={onImportar}>
+                      <Import className="w-3.5 h-3.5 mr-2" /> Importar itens de pedido anterior
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
           {editavel && (
             <Button type="button" variant="secondary" size="sm" onClick={onSalvar} disabled={!sujo || salvando}>
               {salvando ? 'Salvando…' : 'Salvar'}

@@ -85,6 +85,32 @@ Verificação item a item sobre o código existente (nenhum arquivo novo foi cri
 - **Busca idêntica com ou sem backend:** o fallback de leitura (`functionsFallback.js`) passou a usar os mesmos campos de busca por entidade do `entityListSorted` (Pedido, Orçamento, PedidoExterno, Cliente, Produto, entre outros). Antes, com funções de backend bloqueadas pelo plano, a busca da Central só varria campos genéricos e **não encontrava** por número do pedido, cliente, CPF/CNPJ, telefone, vendedor, origem ou cidade; agora encontra.
 - **Fila de pedidos externos visível na Central:** o botão "Pedidos externos" mostra quantos pedidos aguardam validação (`PedidoExterno` com `status_importacao = A Validar`) no contexto de grupo/empresa, com RBAC de Comercial/Pedidos/ver — a fila deixa de ser só um atalho para o módulo e passa a indicar o volume pendente.
 
+---
+
+## Complemento da implantação — 11/11/2026 (rodada do dossiê anexado)
+
+Implementado sobre a Central existente, sem módulos, telas ou entidades novas:
+
+| Requisito do dossiê | Onde | Situação |
+|---|---|---|
+| Abas de etapa PRODUÇÃO / ENTREGA / RETIRA (§6, §19–22) | `negociacaoUtils.jsx` (classificação por status do pedido) + contadores do cabeçalho; "Em execução" segue como visão agregada | ✅ |
+| ABERTO: ação primária **Fechar orçamento** (§5) | `MesaNegociacao.jsx` (rótulo da ação primária) | ✅ |
+| FECHADO → PRODUÇÃO / ENTREGA / RETIRA, sem salto de etapa (§5, §19–22) | `DestinoPedidoDialog.jsx` → pedido criado já com status e tipo de frete do destino escolhido | ✅ |
+| Mais Ações: Duplicar e Desmembrar orçamento (§5) | `RodapeNegociacao.jsx` (menu) + `useAcoesOrcamento.jsx` + `DesmembrarDialog.jsx` | ✅ |
+| Repetir pedido / importar itens de pedido anterior com preço revalidado (§12, §39) | `ImportarItensDialog.jsx` + `useAcoesOrcamento.importarItens` (preço relido do cadastro de Produto, desconto zerado) | ✅ |
+| Imprimir documento da negociação (§5, §7) | `MesaNegociacao.imprimir` reaproveitando `ImprimirPedido` (agora com título do documento) | ✅ |
+| Fila de aprovações com contador no cabeçalho (§5, §18) | `HeaderCentral360.jsx` → Central de Aprovações existente, contando pedidos com `status_aprovacao = pendente` | ✅ |
+| Proteção de carteira: sinalizar negociação ativa do mesmo cliente (§8) | `CentralVendas360.jsx` → aviso na mesa com as outras negociações ativas | ✅ |
+| Controle de concorrência / optimistic locking (§43) | `MesaNegociacao.salvar` compara `updated_date` e recusa sobrescrever versão alterada, com auditoria de bloqueio | ✅ |
+| Selecionar contato quando há múltiplos (§4) | `EnviarPropostaDialog.jsx` (seletor de contato por canal) | ✅ |
+
+### Pendências reais desta rodada (não implantadas)
+- Validação de fechamento **no backend** (§16): hoje o motor é frontend (`useValidacaoFechamento`) e o backend valida apenas reservas/propagação.
+- Contraproposta na fila de aprovações e segregação de funções dedicada (§18).
+- GoTo/telefonia (§4) depende de integração real do provedor; hoje o atalho abre o atendimento/telefone disponível.
+- Bot de vendas autônomo com contador de exceções (§6) — o Hub de Atendimento existente cobre a conversa, não o bot de vendas.
+- Testes E2E/RBAC/multiempresa (§47, §53) e publicação da versão atual.
+
 ### O que falta para operar 100% (fora do código do Comercial)
 1. **Publicar** — há alterações no editor ainda não publicadas (o site serve a versão de 09/11/2026).
 2. **Validação E2E** pela aba de testes: abrir negociação → montar itens → validar fechamento → enviar proposta → follow-up → aprovar → gerar pedido.

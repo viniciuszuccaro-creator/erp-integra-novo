@@ -1,12 +1,13 @@
 // Cabeçalho da Central 360° — identidade azul/branca, empresa, busca universal, filtros e ação primária
 import React from 'react';
-import { AlertTriangle, Building2, ExternalLink, Filter, List, Plus, Search, ShoppingCart } from 'lucide-react';
+import { AlertTriangle, Building2, ExternalLink, Filter, List, Plus, Search, ShieldCheck, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProtectedSection from '@/components/security/ProtectedSection';
 import { useWindow } from '@/components/lib/useWindow';
 import usePermissions from '@/components/lib/usePermissions';
 import useRLSQuery from '@/components/lib/useRLSQuery';
 import ValidarPedidosExternos from '../ValidarPedidosExternos';
+import CentralAprovacoesManager from '../CentralAprovacoesManager';
 import { GRUPOS_NEGOCIACAO } from './negociacaoUtils';
 
 function FiltroSelect({ label, valor, opcoes = [], onChange }) {
@@ -46,6 +47,23 @@ export default function HeaderCentral360({
     { enabled: podeValidarExternos, staleTime: 60000 }
   );
   const qtdExternosPendentes = (externosPendentes || []).length;
+
+  // Fila de aprovações comerciais com contador — reutiliza a Central de Aprovações existente
+  const podeAprovar = hasPermission('Comercial', 'Pedidos', 'aprovar')
+    || hasPermission('Comercial', 'Pedidos', 'aprovar_desconto');
+  const { data: aprovacoesPendentes = [] } = useRLSQuery(
+    'Pedido',
+    { status_aprovacao: 'pendente' },
+    '-created_date',
+    100,
+    { enabled: podeAprovar, staleTime: 60000 }
+  );
+  const qtdAprovacoesPendentes = (aprovacoesPendentes || []).length;
+  const abrirAprovacoes = () => openWindow(
+    CentralAprovacoesManager,
+    { windowMode: true },
+    { title: 'Central de Aprovações', width: 1240, height: 780 }
+  );
 
   // Fila de validação de pedidos externos: usa o módulo já existente, em janela (Regra-Mãe 1 e 2)
   const abrirPedidosExternos = () => openWindow(
@@ -91,6 +109,24 @@ export default function HeaderCentral360({
           >
             <List className="w-3.5 h-3.5" /> Lista completa
           </button>
+          {podeAprovar && (
+            <button
+              type="button"
+              onClick={abrirAprovacoes}
+              className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+              title="Fila de aprovações comerciais (desconto, limite e condição)"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" /> Aprovações
+              {qtdAprovacoesPendentes > 0 && (
+                <span
+                  className="rounded-full bg-purple-100 text-purple-700 px-1.5 text-[10px] font-bold"
+                  title={`${qtdAprovacoesPendentes} pedido(s) aguardando aprovação`}
+                >
+                  {qtdAprovacoesPendentes >= 100 ? '100+' : qtdAprovacoesPendentes}
+                </span>
+              )}
+            </button>
+          )}
           {podeValidarExternos && (
             <button
               type="button"

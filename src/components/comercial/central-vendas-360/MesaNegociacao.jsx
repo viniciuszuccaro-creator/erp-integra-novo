@@ -15,7 +15,19 @@ import useEnvioProposta from './useEnvioProposta';
 import PainelValidacaoFechamento from './PainelValidacaoFechamento';
 import useValidacaoFechamento from './useValidacaoFechamento';
 import useAcoesComerciais from './useAcoesComerciais';
-import { totalizarItens } from './negociacaoUtils';
+import useAcoesOrcamento from './useAcoesOrcamento';
+import DestinoPedidoDialog from './DestinoPedidoDialog';
+import DesmembrarDialog from './DesmembrarDialog';
+import ImportarItensDialog from './ImportarItensDialog';
+import { totalizarItens, dataCurta } from './negociacaoUtils';
+import { ImprimirPedido } from '@/components/lib/impressao';
+
+// Direcionamento operacional do pedido fechado — FECHADO → PRODUÇÃO | ENTREGA | RETIRA
+const STATUS_POR_DESTINO = {
+  producao: 'Em Produção',
+  entrega: 'Em Expedição',
+  retira: 'Pronto para Retirada',
+};
 
 // Comparação estável dos itens: ignora ids gerados na tela e a diferença texto/número
 const assinaturaItens = (lista = []) => JSON.stringify(lista.map((item) => ({
@@ -28,11 +40,16 @@ const assinaturaItens = (lista = []) => JSON.stringify(lista.map((item) => ({
   valor_total: Number(Number(item.valor_total || 0).toFixed(2)),
 })));
 
-export default function MesaNegociacao({ negociacao, clientes = [], empresa, grupo, onVoltar, onAtualizar }) {
+export default function MesaNegociacao({
+  negociacao, clientes = [], empresa, grupo, onVoltar, onAtualizar, concorrentes = [],
+}) {
   const [itens, setItens] = useState(negociacao.itens);
   const [faixaAberta, setFaixaAberta] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [envioAberto, setEnvioAberto] = useState(false);
+  const [destinoAberto, setDestinoAberto] = useState(false);
+  const [desmembrarAberto, setDesmembrarAberto] = useState(false);
+  const [importarAberto, setImportarAberto] = useState(false);
 
   const { openWindow, closeWindow } = useWindow();
   const { user } = useUser();
@@ -59,6 +76,7 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
   );
 
   const acoes = useAcoesComerciais();
+  const acoesOrcamento = useAcoesOrcamento({ negociacao, onAtualizar });
   const validacao = useValidacaoFechamento({
     negociacao: { ...negociacao, itens },
     cliente: clienteNegociacao,
@@ -66,6 +84,37 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
   const bloqueioFechamento = negociacao.origem === 'orcamento' && validacao.erros.length > 0;
 
   const contextoNegociacao = empresa?.nome || grupo?.nome || '';
+
+  const imprimir = () => {
+    const registro = negociacao.registro || {};
+    ImprimirPedido({
+      titulo: negociacao.origem === 'orcamento' ? 'ORÇAMENTO' : 'PEDIDO',
+      empresa,
+      pedido: {
+        numero_pedido: negociacao.numero,
+        data_pedido: registro.data_criacao || registro.data_pedido || new Date().toISOString(),
+        cliente_nome: negociacao.cliente_nome,
+        itens_revenda: itens.map((item) => ({
+          descricao: item.descricao,
+          quantidade: Number(item.quantidade || 0),
+          unidade: item.unidade,
+          preco_unitario: Number(item.valor_unitario || 0),
+          valor_total: Number(item.valor_total || 0),
+        })),
+        valor_produtos: Number(totais.produtos || 0),
+        desconto_geral_pedido_valor: Number(totais.desconto || 0),
+        valor_frete: Number(totais.frete || 0),
+        valor_total: Number(totais.total || 0),
+        forma_pagamento: negociacao.condicao_pagamento,
+        observacoes_publicas: [
+          negociacao.origem === 'orcamento' ? `Proposta válida até ${dataCurta(negociacao.validade)}.` : '',
+          `Prazo de entrega: ${negociacao.prazo}.`,
+          registro.observacoes || '',
+        ].filter(Boolean).join(' '),
+      },
+    });
+    registrarAuditoria('Impressão', `${negociacao.origem === 'orcamento' ? 'Orçamento' : 'Pedido'} ${negociacao.numero} impresso`, negociacao.origem === 'orcamento' ? 'OrcamentoCliente' : 'Pedido');
+  };
 
   const abrirEnvio = () => {
     if (!acoes.podeEditar) {
@@ -110,6 +159,19 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
       toast.error('Desconto acima do limite exige permissão de aprovação.');
       return;
     }
+    // Controle de concorrência: nunca sobrescrever uma versão alterada por outro usuário
+    const versaoCarregada = negociacao.registro?.updated_date;
+    const atual = await base44.entities.OrcamentoCliente.get(negociacao.registro.id).catch(() => null);
+    if (versaoCarregada && atual?.updated_date && atual.updated_date !== versaoCarregada) {
+      registrarAuditoria(
+        'Bloqueio',
+        `Conflito de versão no orçamento ${negociacao.numero}: registro alterado por outro usuário`,
+        'OrcamentoCliente'
+      );
+      toast.error('Este orçamento foi alterado por outro usuário. Recarregue antes de salvar.');
+      await onAtualizar?.();
+      return;
+    }
     setSalvando(true);
     try {
       await updateInContext('OrcamentoCliente', negociacao.registro.id, {
@@ -149,11 +211,12 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
     }
   };
 
-  const gerarPedido = () => {
+  const gerarPedido = (destino = 'entrega') => {
     if (!acoes.podeCriar) {
       toast.error('Sem permissão para criar pedidos.');
       return;
     }
+    setDestinoAberto(false);
     let criado = false;
     const janela = openWindow(
       PedidoFormCompleto,
@@ -161,10 +224,11 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
         clientes,
         windowMode: true,
         pedido: {
-          status: 'Rascunho',
+          status: STATUS_POR_DESTINO[destino] || 'Rascunho',
+          tipo_frete: destino === 'retira' ? 'Retirada' : 'CIF',
           cliente_id: negociacao.cliente_id,
           cliente_nome: negociacao.cliente_nome,
-          observacoes_publicas: `Originado do orçamento ${negociacao.numero}`,
+          observacoes_publicas: `Originado do orçamento ${negociacao.numero} — destino ${destino}`,
           itens_revenda: itens.map((item) => ({
             produto_id: item.produto_id || null,
             produto_descricao: item.descricao,
@@ -201,7 +265,7 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
   const avancar = () => {
     if (negociacao.origem === 'orcamento') {
       if (negociacao.grupo === 'aberto') return aprovarOrcamento();
-      if (negociacao.grupo === 'aguardando') return gerarPedido();
+      if (negociacao.grupo === 'aguardando') return setDestinoAberto(true);
       return undefined;
     }
     return onEditarPedido(negociacao.registro);
@@ -243,7 +307,7 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
   }
 
   const acaoLabel = negociacao.origem === 'orcamento'
-    ? (negociacao.grupo === 'aberto' ? 'Aprovar orçamento' : negociacao.grupo === 'aguardando' ? 'Gerar pedido' : 'Etapa concluída')
+    ? (negociacao.grupo === 'aberto' ? 'Fechar orçamento' : negociacao.grupo === 'aguardando' ? 'Gerar pedido' : 'Etapa concluída')
     : 'Abrir pedido';
 
   const acaoDesabilitada =
@@ -252,6 +316,13 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
   return (
     <div className="w-full h-full flex flex-col gap-2 min-h-0">
       <HeaderNegociacao negociacao={negociacao} empresa={empresa} grupo={grupo} sujo={sujo} salvando={salvando} />
+      {concorrentes.length > 0 && (
+        <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-1.5 text-[11px] text-amber-800">
+          <span className="font-semibold">Negociação ativa para este cliente:</span>{' '}
+          {concorrentes.map((outra) => `${outra.numero} (${outra.situacao})`).join(' · ')}
+          {' '}— alinhe o atendimento antes de fechar uma nova proposta.
+        </div>
+      )}
       <FaixaAtendimento negociacao={negociacao} aberta={faixaAberta} onToggle={() => setFaixaAberta((v) => !v)} />
       <PainelValidacaoFechamento validacao={validacao} />
 
@@ -280,8 +351,54 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
         onVoltar={onVoltar}
         onAvancar={avancar}
         onEnviar={abrirEnvio}
+        onImprimir={imprimir}
         enviando={enviando}
         enviarDesabilitado={sujo}
+        onDuplicar={negociacao.origem === 'orcamento'
+          ? async () => { const criado = await acoesOrcamento.duplicar(); if (criado) onVoltar?.(); }
+          : undefined}
+        onDesmembrar={negociacao.origem === 'orcamento' && negociacao.editavel
+          ? () => setDesmembrarAberto(true)
+          : undefined}
+        onImportar={negociacao.origem === 'orcamento' && negociacao.editavel
+          ? () => setImportarAberto(true)
+          : undefined}
+      />
+
+      <DestinoPedidoDialog
+        aberto={destinoAberto}
+        onOpenChange={setDestinoAberto}
+        numero={negociacao.numero}
+        salvando={salvando}
+        onConfirmar={gerarPedido}
+      />
+
+      <DesmembrarDialog
+        aberto={desmembrarAberto}
+        onOpenChange={setDesmembrarAberto}
+        itens={itens}
+        executando={acoesOrcamento.executando}
+        onConfirmar={async (ids) => {
+          const ok = await acoesOrcamento.desmembrar(ids);
+          if (ok) {
+            setDesmembrarAberto(false);
+            onVoltar?.();
+          }
+        }}
+      />
+
+      <ImportarItensDialog
+        aberto={importarAberto}
+        onOpenChange={setImportarAberto}
+        clienteId={negociacao.cliente_id}
+        importando={acoesOrcamento.importando}
+        onImportar={async (pedido) => {
+          const novos = await acoesOrcamento.importarItens(pedido);
+          if (!novos?.length) return;
+          setItens((atual) => [...atual, ...novos]);
+          setImportarAberto(false);
+          toast.success(`${novos.length} item(ns) importados de ${pedido.numero_pedido || 'pedido anterior'}. Revise os preços e salve.`);
+        }}
       />
 
       <EnviarPropostaDialog

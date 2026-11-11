@@ -30,6 +30,21 @@ export default function EnviarPropostaDialog({
     [negociacao, contexto]
   );
 
+  // Múltiplos contatos do cliente: o vendedor escolhe com quem falar (Regra: selecionar contato)
+  const contatosDoCanal = useMemo(() => {
+    const tipos = canal === 'whatsapp'
+      ? /whatsapp|celular|telefone/i
+      : /e-?mail/i;
+    const lista = (Array.isArray(cliente?.contatos) ? cliente.contatos : [])
+      .filter((contato) => contato?.valor && tipos.test(String(contato.tipo || '')));
+    const padrao = canal === 'whatsapp'
+      ? (cliente?.celular || cliente?.telefone || '')
+      : (cliente?.email || negociacao?.registro?.cliente_email || '');
+    if (padrao) lista.unshift({ nome: 'Contato principal', tipo: canal, valor: padrao });
+    return lista.filter((contato, indice, array) =>
+      array.findIndex((outro) => outro.valor === contato.valor) === indice);
+  }, [cliente, canal, negociacao]);
+
   useEffect(() => {
     if (!aberto || !negociacao) return;
     const whats = whatsappDoCliente(cliente);
@@ -83,6 +98,26 @@ export default function EnviarPropostaDialog({
             <span className="text-sm font-semibold text-slate-800">E-mail</span>
           </button>
         </div>
+
+        {contatosDoCanal.length > 1 && (
+          <div className="space-y-1.5">
+            <Label className="text-xs">Contato de envio</Label>
+            <select
+              value={destinatario}
+              onChange={(e) => setDestinatario(e.target.value)}
+              className="w-full rounded-md border border-slate-200 bg-white px-2 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              {!contatosDoCanal.some((contato) => contato.valor === destinatario) && destinatario && (
+                <option value={destinatario}>{destinatario}</option>
+              )}
+              {contatosDoCanal.map((contato, indice) => (
+                <option key={`${contato.valor}-${indice}`} value={contato.valor}>
+                  {contato.nome ? `${contato.nome} — ` : ''}{contato.valor}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div className="space-y-1.5">

@@ -239,11 +239,23 @@
       "properties": {
         "foto_comprovante": {
           "type": "string",
-          "description": "URL da foto do comprovante"
+          "description": "URI privada do canhoto; URL em registros legados"
+        },
+        "foto_mercadoria": {
+          "type": "string",
+          "description": "URI privada da foto da mercadoria recebida"
+        },
+        "foto_local": {
+          "type": "string",
+          "description": "URI privada da foto do local de entrega"
         },
         "assinatura_digital": {
           "type": "string",
-          "description": "URL da assinatura digital"
+          "description": "URI privada da assinatura digital; URL em registros legados"
+        },
+        "operacao_id": {
+          "type": "string",
+          "description": "Identificador de confirma\u00e7\u00e3o para reconhecer reenvios"
         },
         "nome_recebedor": {
           "type": "string"

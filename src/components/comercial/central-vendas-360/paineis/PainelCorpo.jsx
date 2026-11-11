@@ -13,11 +13,15 @@ import PainelRetornos from './PainelRetornos';
 import PainelCopiloto from './PainelCopiloto';
 import PainelMapaEntregas from './PainelMapaEntregas';
 import PainelVendedor from './PainelVendedor';
+import ComprovanteDigital from '@/components/expedicao/ComprovanteDigital';
+import RBACButton from '@/components/lib/RBACButton';
+import { useWindow } from '@/components/lib/useWindow';
 import { brl, dataCurta } from '../negociacaoUtils';
 
 export default function PainelCorpo({
   painel, negociacao, cliente, alertas = [], validacao, onSelecionarNegociacao, onIrParaPainel,
 }) {
+  const { openWindow } = useWindow();
   const { pedidoId, clienteId } = FILTRO_RELACIONADO(negociacao);
   const registro = negociacao?.registro || {};
   const financeiro = useTitulosFinanceiros({ clienteId, pedidoId, modo: 'cliente', ativo: painel === 'financeiro' });
@@ -152,19 +156,15 @@ export default function PainelCorpo({
                   { key: 'data_previsao', label: 'Previsão', tipo: 'data' },
                 ]}
                 renderAcao={(entrega) => (
-                  <button
-                    type="button"
-                    onClick={() => onIrParaPainel?.('mapa')}
-                    className="mt-1 inline-flex items-center rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700 hover:bg-blue-100"
-                    title="Abrir o mapa com os pontos desta negociação"
-                  >
-                    Ver no mapa
-                  </button>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    <button type="button" onClick={() => onIrParaPainel?.('mapa')} className="rounded-md border border-border px-2 py-0.5 text-xs text-primary">Ver no mapa</button>
+                    {entrega.comprovante_entrega && <RBACButton module="Expedição" section="Entrega" action="ver" size="sm" variant="outline" onClick={() => openWindow(ComprovanteDigital, { entrega, readOnly: true, windowMode: true }, { title: `Comprovante · ${entrega.numero_pedido || entrega.cliente_nome}`, width: 650, height: 700, uniqueKey: `comprovante-${entrega.id}` })}>Ver comprovante</RBACButton>}
+                  </div>
                 )}
               />
             </div>
           }
-          nota="Contadores do cliente e entregas reais no contexto ativo. Separação, roteirização e comprovantes permanecem nas telas de Expedição e Logística."
+          nota="Entregas e comprovantes reais no contexto ativo. A Central consulta as evidências; confirmação e ajustes permanecem na Expedição e no App do Motorista."
         />
       );
     case 'vendedor':

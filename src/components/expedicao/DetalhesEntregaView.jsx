@@ -4,14 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Truck, Building2, Pen } from "lucide-react";
-import { toast } from "sonner";
 import RBACButton from "@/components/lib/RBACButton";
-import useContextoVisual from "@/components/lib/useContextoVisual";
-import usePermissions from "@/components/lib/usePermissions";
 import EnvioMensagemAutomatica from "./EnvioMensagemAutomatica";
-import AssinaturaDigitalEntrega from "./AssinaturaDigitalEntrega";
+import ComprovanteDigital from '@/components/expedicao/ComprovanteDigital';
 
 /**
  * V21.1.2 - WINDOW MODE READY
@@ -26,44 +22,8 @@ export default function DetalhesEntregaView({
   windowMode = false
 }) {
   const containerClass = windowMode ? "w-full h-full flex flex-col overflow-hidden" : "";
-  const queryClient = useQueryClient();
   const [showAssinatura, setShowAssinatura] = React.useState(false);
-  const { updateInContext } = useContextoVisual();
-  const { canEdit } = usePermissions();
-
-  const confirmarEntregaAssinaturaMutation = useMutation({
-    mutationFn: async (dadosAssinatura) => {
-      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
-      if (!canEdit('Expedicao')) throw new Error('Sem permissão para confirmar entrega.');
-      return await updateInContext('Entrega', entrega.id, {
-        status: "Entregue",
-        data_entrega: new Date().toISOString(),
-        comprovante_entrega: {
-          assinatura_digital: dadosAssinatura.assinatura_base64,
-          nome_recebedor: dadosAssinatura.nome_recebedor,
-          documento_recebedor: dadosAssinatura.documento_recebedor,
-          data_hora_recebimento: dadosAssinatura.data_hora_assinatura,
-          latitude_entrega: dadosAssinatura.latitude || null,
-          longitude_entrega: dadosAssinatura.longitude || null
-        },
-        historico_status: [
-          ...(entrega.historico_status || []),
-          {
-            status: "Entregue",
-            data_hora: new Date().toISOString(),
-            usuario: "Sistema",
-            observacao: `Entrega confirmada com assinatura digital. Recebido por: ${dadosAssinatura.nome_recebedor}`
-          }
-        ]
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['entregas'] });
-      setShowAssinatura(false);
-      toast.success("✅ Entrega confirmada com assinatura!");
-    },
-    onError: (e) => toast.error(e?.message || 'Erro ao confirmar entrega'),
-  });
+  const [entregaConfirmada, setEntregaConfirmada] = React.useState(false);
 
   const content = (
     <div className={`${windowMode ? 'p-6 flex-1 overflow-auto' : 'space-y-4'}`}>
@@ -168,6 +128,7 @@ export default function DetalhesEntregaView({
             </div>
           )}
 
+          {(entrega.comprovante_entrega || entregaConfirmada) && <ComprovanteDigital entrega={entrega} windowMode readOnly />}
           {!showAssinatura ? (
             <div className="flex flex-wrap gap-2 pt-4 border-t">
               <RBACButton
@@ -204,7 +165,7 @@ export default function DetalhesEntregaView({
                 module="Expedição"
                 action="editar"
                 onClick={() => setShowAssinatura(true)}
-                disabled={!["Saiu para Entrega", "Em Trânsito"].includes(entrega.status)}
+                disabled={entregaConfirmada || !["Saiu para Entrega", "Em Trânsito"].includes(entrega.status)}
                 size="sm"
                 className="bg-green-600 hover:bg-green-700"
               >
@@ -228,10 +189,7 @@ export default function DetalhesEntregaView({
                   <Pen className="w-5 h-5 text-green-600" />
                   <h3 className="font-bold text-green-900">Assinatura Digital de Recebimento</h3>
                 </div>
-                <AssinaturaDigitalEntrega
-                  onAssinaturaConcluida={(dados) => confirmarEntregaAssinaturaMutation.mutate(dados)}
-                  isLoading={confirmarEntregaAssinaturaMutation.isPending}
-                />
+                <ComprovanteDigital entrega={entrega} windowMode onSuccess={() => { setEntregaConfirmada(true); setShowAssinatura(false); }} />
                 <RBACButton
                   module="Expedição"
                   action="editar"

@@ -7,12 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MapPin, Navigation, CheckCircle, Clock, Phone, Camera } from "lucide-react";
+import ComprovanteDigital from '@/components/expedicao/ComprovanteDigital';
 
 export default function EntregaAtivaView({
   entregaAtual, localizacao, isOffline, smsNumero, setSmsNumero,
-  fotoComprovante, setFotoComprovante, nomeRecebedor, setNomeRecebedor,
-  documentoRecebedor, setDocumentoRecebedor, setAssinaturaBase64,
-  tirarFoto, confirmarEntrega, registrarOcorrencia, registrarReversa,
+  fotoComprovante, tirarFoto, registrarOcorrencia, registrarReversa,
+  concluirComprovante, enfileirarComprovante,
   reversaMotivo, setReversaMotivo, reversaQtd, setReversaQtd, reversaValor, setReversaValor,
   onVoltar,
 }) {
@@ -48,44 +48,7 @@ export default function EntregaAtivaView({
         </CardContent>
       </Card>
 
-      <Card className="mb-4">
-        <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><CheckCircle className="w-5 h-5 text-green-600" />Comprovante de Entrega</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label className="mb-2 block">Foto do Comprovante *</Label>
-            {fotoComprovante ? (
-              <div className="relative">
-                <img src={fotoComprovante} className="w-full rounded-lg border" alt="Comprovante" />
-                <Button size="sm" variant="outline" className="absolute top-2 right-2" onClick={() => setFotoComprovante(null)}>Tirar outra</Button>
-              </div>
-            ) : (
-              <Button onClick={tirarFoto} variant="outline" className="w-full h-32 border-dashed">
-                <div className="text-center"><Camera className="w-8 h-8 mx-auto mb-2" /><p>Tirar Foto</p></div>
-              </Button>
-            )}
-          </div>
-          <div>
-            <Label>Nome de Quem Recebeu *</Label>
-            <Input value={nomeRecebedor} onChange={(e) => setNomeRecebedor(e.target.value)} placeholder="Nome completo..." className="mt-1" />
-          </div>
-          <div>
-            <Label>CPF/RG (Opcional)</Label>
-            <Input value={documentoRecebedor} onChange={(e) => setDocumentoRecebedor(e.target.value)} placeholder="000.000.000-00" className="mt-1" />
-          </div>
-          <div>
-            <Label className="mb-2 block">Assinatura Digital</Label>
-            <div className="border-2 border-dashed rounded-lg p-4 bg-white">
-              <canvas id="assinatura-canvas" width="300" height="150" className="w-full border rounded" style={{ touchAction: "none" }} />
-              <Button size="sm" variant="outline" className="mt-2" onClick={() => {
-                const canvas = document.getElementById("assinatura-canvas");
-                const ctx = canvas.getContext("2d");
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                setAssinaturaBase64(null);
-              }}>Limpar</Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <ComprovanteDigital key={entregaAtual.id} entrega={entregaAtual} windowMode onSuccess={concluirComprovante} onOffline={enfileirarComprovante} />
 
       {isOffline && (
         <Alert className="mb-4 border-amber-300 bg-amber-50">
@@ -105,13 +68,10 @@ export default function EntregaAtivaView({
       )}
 
       <div className="space-y-3">
-        <RBACButton module="Expedição" section="Entrega" action="criar" onClick={confirmarEntrega} disabled={!fotoComprovante || !nomeRecebedor} className="w-full bg-green-600 hover:bg-green-700 h-14 text-lg">
-          <CheckCircle className="w-5 h-5 mr-2" />Confirmar Entrega
-        </RBACButton>
-
         <details className="bg-white rounded-lg border">
           <summary className="p-4 cursor-pointer font-medium text-sm">⚠️ Entrega Frustrada?</summary>
           <div className="p-4 pt-0 space-y-2">
+            <RBACButton module="Expedição" section="Entrega" action="editar" variant="outline" className="w-full" onClick={tirarFoto}><Camera className="w-4 h-4 mr-2" />{fotoComprovante ? 'Foto da ocorrência anexada' : 'Fotografar ocorrência'}</RBACButton>
             <RBACButton module="Expedição" section="Entrega" action="editar" variant="outline" className="w-full justify-start" onClick={() => registrarOcorrencia("Cliente Ausente")}>Cliente Ausente</RBACButton>
             <RBACButton module="Expedição" section="Entrega" action="editar" variant="outline" className="w-full justify-start" onClick={() => registrarOcorrencia("Endereço Incorreto")}>Endereço Incorreto</RBACButton>
             <RBACButton module="Expedição" section="Entrega" action="editar" variant="outline" className="w-full justify-start" onClick={() => registrarOcorrencia("Recusa de Recebimento")}>Recusa de Recebimento</RBACButton>

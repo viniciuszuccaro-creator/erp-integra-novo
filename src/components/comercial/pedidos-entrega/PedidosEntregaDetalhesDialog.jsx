@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import TimelineEntregaVisual from "@/components/logistica/TimelineEntregaVisual";
 import IAPrevisaoEntrega from "@/components/logistica/IAPrevisaoEntrega";
 import ComprovanteEntregaDigital from "@/components/logistica/ComprovanteEntregaDigital";
+import ComprovanteDigital from '@/components/expedicao/ComprovanteDigital';
 import NotificadorAutomaticoEntrega from "@/components/logistica/NotificadorAutomaticoEntrega";
 import RegistroOcorrenciaLogistica from "@/components/logistica/RegistroOcorrenciaLogistica";
 
@@ -171,27 +172,7 @@ export default function PedidosEntregaDetalhesDialog({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <p className="text-slate-600">Recebedor</p>
-                    <p className="font-semibold">{entrega.comprovante_entrega.nome_recebedor}</p>
-                  </div>
-                  <div>
-                    <p className="text-slate-600">Data/Hora</p>
-                    <p className="font-semibold">
-                      {new Date(entrega.comprovante_entrega.data_hora_recebimento).toLocaleString('pt-BR')}
-                    </p>
-                  </div>
-                </div>
-                {entrega.comprovante_entrega.foto_comprovante && (
-                  <div className="mt-3">
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={entrega.comprovante_entrega.foto_comprovante} target="_blank" rel="noopener noreferrer">
-                        <Image className="w-4 h-4 mr-2" /> Ver Foto do Comprovante
-                      </a>
-                    </Button>
-                  </div>
-                )}
+                <ComprovanteDigital entrega={entrega} readOnly windowMode />
               </CardContent>
             </Card>
           )}

@@ -27,7 +27,6 @@ export function useAssinaturaCanvas() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     setDesenhando(true);
-    setAssinaturaVazia(false);
     const ctx = canvas.getContext('2d');
     const rect = canvas.getBoundingClientRect();
     let x, y;
@@ -38,6 +37,8 @@ export function useAssinaturaCanvas() {
       x = e.touches[0].clientX - rect.left;
       y = e.touches[0].clientY - rect.top;
     }
+    x *= canvas.width / rect.width;
+    y *= canvas.height / rect.height;
     ctx.beginPath();
     ctx.moveTo(x, y);
   }, []);
@@ -57,8 +58,11 @@ export function useAssinaturaCanvas() {
       x = e.touches[0].clientX - rect.left;
       y = e.touches[0].clientY - rect.top;
     }
+    x *= canvas.width / rect.width;
+    y *= canvas.height / rect.height;
     ctx.lineTo(x, y);
     ctx.stroke();
+    setAssinaturaVazia(false);
   }, [desenhando]);
 
   const pararDesenho = useCallback(() => {

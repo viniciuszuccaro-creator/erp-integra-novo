@@ -237,3 +237,34 @@ Pedidos cancelados, rascunhos e rejeitados não entram nos totais.
 ### Verificação
 - `npm run build` concluído; `npx eslint` sem erros nos arquivos alterados.
 - Nenhuma entidade, rota ou componente novo de tela: apenas um painel dentro do componente existente.
+
+---
+
+## Revisão 11/11/2026 — §27: comprovante completo nos fluxos principais
+
+### Implementação desta revisão
+- O formulário existente `ComprovanteDigital` é reutilizado na Expedição, no detalhe da entrega e no App do Motorista, sem nova página ou módulo.
+- Passa a exigir foto do canhoto, foto da mercadoria, foto do local, nome e documento do recebedor, assinatura desenhada e conferência explícita antes da confirmação. Cargo e observações continuam disponíveis; GPS é registrado quando autorizado no dispositivo.
+- Fotos e assinatura usam `UploadPrivateFile`; `Entrega.comprovante_entrega` guarda somente referências, nunca arquivos/base64 novos. Novos campos opcionais preservam os comprovantes legados.
+- A Central 360° e o detalhe comercial consultam o comprovante existente em modo somente leitura. O servidor verifica grupo/empresa/permissão antes de gerar links temporários dos arquivos vinculados à entrega. Comprovantes legados sem as novas evidências são identificados como tal, sem inventar arquivos.
+- O endpoint existente `onEntregaUpdated` recebe ações explícitas `registrar_comprovante` e `consultar_comprovante`. Autenticação, vínculo administrativo ao contexto, permissão granular `Expedição/Entrega`, empresa pertencente ao grupo, situação em rota, versão, arquivos privados, coordenadas, data e conferência são verificados no servidor.
+- A confirmação gera auditoria com usuário, antes/depois, grupo, empresa e data. A atualização individual da entrega preserva seus gatilhos existentes; esta revisão não altera cálculo financeiro, baixa de estoque ou conclusão de produção.
+- Perfis, grupo de acesso, vínculos empresariais, restrições e bloqueio no `User` ficam protegidos contra autoatribuição por usuários comuns. A gestão existente por administradores é preservada; administradores têm acesso global e devem atribuir os vínculos de usuários que ainda não os possuem.
+- O desenho da assinatura reutiliza o componente existente e corrige as coordenadas para o tamanho real da tela, com suporte a toque. O formulário não aceita canvas vazio.
+- No motorista, comprovantes capturados offline são persistidos no IndexedDB com seus arquivos e referenciados na fila existente, vinculados a usuário/grupo/empresa. O envio ocorre ao reconectar. Pendências têm retenção local de sete dias; registros antigos da fila sem usuário não são enviados em nome de outro usuário.
+- A versão da entrega após iniciar a rota é repassada ao formulário, inclusive quando início e confirmação são sincronizados na mesma fila offline, evitando rejeição por versão desatualizada criada pelo próprio fluxo.
+
+### Verificações e limites
+- Compilação concluída. Verificação estática executada nos componentes alterados.
+- Testes não destrutivos do endpoint: 400 para contexto ausente e 404 para entrega/empresa/grupo inexistentes. Nenhum pedido, estoque ou entrega real foi alterado para testar.
+- Não houve homologação visual/E2E, teste real de upload, teste em dispositivo offline ou comprovação integral de concorrência. O bloqueio por versão é otimista, não uma transação atômica entre registros.
+- O caminho comercial legado `ComprovanteEntregaDigital`, que também altera estoque e pedido, ainda precisa de consolidação cuidadosa com o fluxo proprietário; não foi substituído para evitar retirada ou duplicação desses efeitos. Portanto §27 não está integralmente homologado em todos os caminhos do ERP.
+
+### Critério para continuar sem falsas declarações de 100%
+1. §23: implementar saldos parciais por item e seus reflexos em separação, produção, entrega, faturamento e cobrança.
+2. Consolidar o caminho comercial legado de comprovante com os efeitos operacionais existentes.
+3. §4/§6: concluir telefonia/GoTo e bot/WhatsApp com provedores reais e configuração autorizada, sem simular conexão.
+4. §47/§48: homologar fluxos e bloqueios no Testing Agent, incluindo arquivos privados, offline, concorrência, perfis e empresas diferentes.
+5. Revisar o documento original completo para certificar cada requisito; o arquivo original não está disponível neste repositório nesta sessão. Só depois avaliar publicação desta revisão e nova análise de segurança.
+
+**Situação: implantação parcial avançada, não 100%.** Requisitos sem evidência de execução permanecem pendentes, mesmo quando a interface compila.

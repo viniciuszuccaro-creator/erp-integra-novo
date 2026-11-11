@@ -22,30 +22,6 @@ export default function AppEntregasMotorista() {
   }
 
   return (
-    <EntregaAtivaView
-      entregaAtual={hook.entregaAtual}
-      localizacao={hook.localizacao}
-      isOffline={hook.isOffline}
-      smsNumero={hook.smsNumero}
-      setSmsNumero={hook.setSmsNumero}
-      fotoComprovante={hook.fotoComprovante}
-      setFotoComprovante={hook.setFotoComprovante}
-      nomeRecebedor={hook.nomeRecebedor}
-      setNomeRecebedor={hook.setNomeRecebedor}
-      documentoRecebedor={hook.documentoRecebedor}
-      setDocumentoRecebedor={hook.setDocumentoRecebedor}
-      setAssinaturaBase64={hook.setAssinaturaBase64}
-      tirarFoto={hook.tirarFoto}
-      confirmarEntrega={hook.confirmarEntrega}
-      registrarOcorrencia={hook.registrarOcorrencia}
-      registrarReversa={hook.registrarReversa}
-      reversaMotivo={hook.reversaMotivo}
-      setReversaMotivo={hook.setReversaMotivo}
-      reversaQtd={hook.reversaQtd}
-      setReversaQtd={hook.setReversaQtd}
-      reversaValor={hook.reversaValor}
-      setReversaValor={hook.setReversaValor}
-      onVoltar={() => hook.setEntregaAtual(null)}
-    />
+    <EntregaAtivaView {...hook} onVoltar={() => hook.setEntregaAtual(null)} />
   );
 }

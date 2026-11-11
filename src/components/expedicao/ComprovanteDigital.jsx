@@ -1,327 +1,73 @@
-import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import RBACButton from "@/components/lib/RBACButton";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Camera, Upload, CheckCircle, MapPin } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
-import useContextoVisual from "@/components/lib/useContextoVisual";
-import usePermissions from "@/components/lib/usePermissions";
+import React, { useEffect, useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2 } from 'lucide-react';
+import AssinaturaCanvas from '@/components/comercial/assinatura-eletronica/AssinaturaCanvas';
+import useAssinaturaCanvas from '@/components/comercial/assinatura-eletronica/useAssinaturaCanvas';
+import useComprovanteDigital from '@/components/expedicao/useComprovanteDigital';
+import { ARQUIVOS_COMPROVANTE } from '@/components/expedicao/comprovanteDigitalStorage';
 
-/**
- * V21.1.2 - WINDOW MODE READY
- */
-export default function ComprovanteDigital({ entrega, isOpen, onClose, windowMode = false }) {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const { updateInContext } = useContextoVisual();
-  const { canEdit } = usePermissions();
-
-  const [formData, setFormData] = useState({
-    nome_recebedor: "",
-    documento_recebedor: "",
-    cargo_recebedor: "",
-    observacoes_recebimento: "",
-    foto_comprovante: null,
-  });
-
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [uploading, setUploading] = useState(false);
-
-  const updateMutation = useMutation({
-    mutationFn: async ({ id, data }) => {
-      // Regra-Mãe 5: RBAC + contexto na persistência (fail-closed)
-      if (!canEdit('Expedicao')) throw new Error('Sem permissão para confirmar entrega.');
-      return updateInContext('Entrega', id, data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['entregas'] });
-      toast({ title: "✅ Comprovante registrado com sucesso!" });
-      onClose();
-    },
-  });
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "⚠️ Arquivo muito grande",
-          description: "O arquivo deve ter no máximo 5MB",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      setFormData({ ...formData, foto_comprovante: file });
-      
-      // Criar preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+// Formulário e leitura únicos, reutilizados no motorista, na Expedição e na Central 360°.
+export default function ComprovanteDigital({ entrega, isOpen, onClose, onSuccess, onOffline, windowMode = false, readOnly = false }) {
+  const [dados, setDados] = useState({ nome_recebedor: '', documento_recebedor: '', cargo_recebedor: '', observacoes_recebimento: '' });
+  const [arquivos, setArquivos] = useState({}); const [previews, setPreviews] = useState({});
+  const [revisado, setRevisado] = useState(false); const [erroArquivo, setErroArquivo] = useState('');
+  const assinatura = useAssinaturaCanvas();
+  const hook = useComprovanteDigital({ entrega, readOnly, onOffline, onSuccess: onSuccess || onClose });
+  useEffect(() => {
+    if (!readOnly) assinatura.inicializarCanvas();
+  }, [readOnly, hook.permitido]);
+  useEffect(() => {
+    const urls = Object.fromEntries(Object.entries(arquivos).map(([k, file]) => [k, URL.createObjectURL(file)]));
+    setPreviews(urls); return () => Object.values(urls).forEach(URL.revokeObjectURL);
+  }, [arquivos]);
+  const alterar = (campo, valor) => { setRevisado(false); setDados((anterior) => ({ ...anterior, [campo]: valor })); };
+  const escolherArquivo = (campo, file) => {
+    setErroArquivo(''); if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) { setErroArquivo('Use fotos JPG, PNG ou WebP de até 5 MB.'); return; }
+    setRevisado(false); setArquivos((anterior) => ({ ...anterior, [campo]: file }));
   };
-
-  const handleSubmit = async (e) => {
+  const enviar = async (e) => {
     e.preventDefault();
-
-    if (!formData.nome_recebedor) {
-      toast({
-        title: "⚠️ Campo obrigatório",
-        description: "Informe o nome de quem recebeu",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setUploading(true);
-
-    try {
-      let fotoUrl = null;
-
-      // Upload da foto se houver
-      if (formData.foto_comprovante) {
-        const uploadResult = await base44.integrations.Core.UploadFile({
-          file: formData.foto_comprovante
-        });
-        fotoUrl = uploadResult.file_url;
-      }
-
-      // Obter geolocalização (se disponível)
-      let latitude = null;
-      let longitude = null;
-      
-      if (navigator.geolocation) {
-        try {
-          const position = await new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              timeout: 5000
-            });
-          });
-          latitude = position.coords.latitude;
-          longitude = position.coords.longitude;
-        } catch (error) {
-          console.log("Geolocalização não disponível");
-        }
-      }
-
-      // Atualizar entrega com comprovante
-      await updateMutation.mutateAsync({
-        id: entrega.id,
-        data: {
-          status: "Entregue",
-          data_entrega: new Date().toISOString(),
-          comprovante_entrega: {
-            foto_comprovante: fotoUrl,
-            nome_recebedor: formData.nome_recebedor,
-            documento_recebedor: formData.documento_recebedor,
-            cargo_recebedor: formData.cargo_recebedor,
-            data_hora_recebimento: new Date().toISOString(),
-            latitude_entrega: latitude,
-            longitude_entrega: longitude,
-            observacoes_recebimento: formData.observacoes_recebimento
-          },
-          historico_status: [
-            ...(entrega.historico_status || []),
-            {
-              status: "Entregue",
-              data_hora: new Date().toISOString(),
-              usuario: "Sistema",
-              observacao: `Entrega confirmada. Recebido por: ${formData.nome_recebedor}`,
-              localizacao: latitude && longitude ? { latitude, longitude } : null
-            }
-          ]
-        }
-      });
-    } catch (error) {
-      toast({
-        title: "❌ Erro ao registrar comprovante",
-        description: error.message || "Tente novamente",
-        variant: "destructive"
-      });
-    } finally {
-      setUploading(false);
-    }
+    if (assinatura.assinaturaVazia || !revisado || ARQUIVOS_COMPROVANTE.some(({ campo }) => !arquivos[campo])) { setErroArquivo('Inclua as três fotos, uma assinatura legível e confirme a conferência.'); return; }
+    await hook.salvar({ dados, arquivos, assinatura: assinatura.canvasRef.current, revisado });
   };
-
-  const formContent = (
-    <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Info da Entrega */}
-          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-sm text-blue-900">
-              <strong>Cliente:</strong> {entrega?.cliente_nome}
-            </p>
-            <p className="text-sm text-blue-900">
-              <strong>Endereço:</strong> {entrega?.endereco_entrega_completo?.logradouro}, {entrega?.endereco_entrega_completo?.numero}
-            </p>
-            <p className="text-sm text-blue-900">
-              <strong>Pedido:</strong> {entrega?.numero_pedido || 'Sem pedido'}
-            </p>
-          </div>
-
-          {/* Foto do Comprovante */}
+  const comprovante = hook.consulta.data?.comprovante || {};
+  const conteudo = (
+    <div className="w-full h-full min-h-0 overflow-auto space-y-4 p-4 bg-background text-foreground">
+      <div><h2 className="text-lg font-semibold">Comprovante de entrega</h2><p className="text-sm text-muted-foreground">Pedido {entrega?.numero_pedido || 'sem número'} · {entrega?.cliente_nome}</p><p className="text-xs text-muted-foreground">{entrega?.endereco_entrega_completo?.logradouro}, {entrega?.endereco_entrega_completo?.numero}</p></div>
+      {!hook.permitido ? <p role="alert">Sem permissão ou contexto de grupo/empresa inválido.</p> : readOnly ? (
+        hook.consulta.isLoading ? <p className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Carregando comprovante…</p> : hook.consulta.isError ? <Alert variant="destructive"><AlertDescription>{hook.consulta.error?.response?.data?.error || hook.consulta.error?.message || 'Falha ao carregar comprovante.'}</AlertDescription></Alert> : !Object.keys(comprovante).length ? <p className="text-muted-foreground">Nenhum comprovante registrado para esta entrega.</p> : (
           <div className="space-y-3">
-            <Label htmlFor="foto-comprovante" className="flex items-center gap-2">
-              <Camera className="w-4 h-4" />
-              Foto do Comprovante (opcional)
-            </Label>
-            
-            {previewUrl ? (
-              <div className="relative">
-                <img 
-                  src={previewUrl} 
-                  alt="Preview" 
-                  className="w-full h-64 object-cover rounded-lg border-2 border-slate-200"
-                />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  className="absolute top-2 right-2"
-                  onClick={() => {
-                    setPreviewUrl(null);
-                    setFormData({ ...formData, foto_comprovante: null });
-                  }}
-                >
-                  Remover
-                </Button>
-              </div>
-            ) : (
-              <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors">
-                <input
-                  type="file"
-                  id="foto-comprovante"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                <label htmlFor="foto-comprovante" className="cursor-pointer">
-                  <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                  <p className="text-sm text-slate-600 mb-1">
-                    Clique para tirar foto ou fazer upload
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    Máximo 5MB - JPG, PNG
-                  </p>
-                </label>
-              </div>
-            )}
+            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              {[['Recebedor', comprovante.nome_recebedor], ['Documento', comprovante.documento_recebedor], ['Cargo', comprovante.cargo_recebedor], ['Recebimento', comprovante.data_hora_recebimento ? new Date(comprovante.data_hora_recebimento).toLocaleString('pt-BR') : null], ['GPS', comprovante.latitude_entrega != null ? `${comprovante.latitude_entrega}, ${comprovante.longitude_entrega}` : 'Não disponível']].map(([label, valor]) => <div key={label}><dt className="text-muted-foreground">{label}</dt><dd className="break-words">{valor || 'Não informado'}</dd></div>)}
+            </dl>
+            {comprovante.observacoes_recebimento && <p className="text-sm whitespace-pre-wrap">{comprovante.observacoes_recebimento}</p>}
+            {[...ARQUIVOS_COMPROVANTE, { campo: 'assinatura_digital', label: 'Assinatura digital' }].map(({ campo, label }) => <div key={campo} className="space-y-1"><p className="text-sm font-medium">{label}</p>{comprovante[campo] ? <a href={comprovante[campo]} target="_blank" rel="noopener noreferrer"><img src={comprovante[campo]} alt={label} className="w-full max-h-72 object-contain rounded border bg-card" /></a> : <p className="text-xs text-muted-foreground">Não registrado no comprovante legado.</p>}</div>)}
           </div>
-
-          {/* Dados do Recebedor */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-slate-900 border-b pb-2">Dados do Recebedor</h3>
-            
-            <div>
-              <Label htmlFor="nome-recebedor">Nome de quem recebeu *</Label>
-              <Input
-                id="nome-recebedor"
-                value={formData.nome_recebedor}
-                onChange={(e) => setFormData({ ...formData, nome_recebedor: e.target.value })}
-                placeholder="Nome completo"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="documento-recebedor">CPF/RG (opcional)</Label>
-                <Input
-                  id="documento-recebedor"
-                  value={formData.documento_recebedor}
-                  onChange={(e) => setFormData({ ...formData, documento_recebedor: e.target.value })}
-                  placeholder="000.000.000-00"
-                />
-              </div>
-              <div>
-                <Label htmlFor="cargo-recebedor">Cargo (opcional)</Label>
-                <Input
-                  id="cargo-recebedor"
-                  value={formData.cargo_recebedor}
-                  onChange={(e) => setFormData({ ...formData, cargo_recebedor: e.target.value })}
-                  placeholder="Ex: Gerente, Porteiro"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="observacoes">Observações do Recebimento</Label>
-              <Textarea
-                id="observacoes"
-                value={formData.observacoes_recebimento}
-                onChange={(e) => setFormData({ ...formData, observacoes_recebimento: e.target.value })}
-                rows={3}
-                placeholder="Informações adicionais sobre o recebimento..."
-              />
-            </div>
-          </div>
-
-          {/* Info sobre Geolocalização */}
-          <div className="p-3 bg-green-50 rounded border border-green-200 text-sm text-green-800 flex items-start gap-2">
-            <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-            <p>
-              A localização GPS será registrada automaticamente no momento da confirmação (se disponível).
-            </p>
-          </div>
-
-          {/* Botões */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={onClose} disabled={uploading}>
-              Cancelar
-            </Button>
-            <RBACButton module="Expedicao" action="salvar" 
-              type="submit" 
-              disabled={uploading || !formData.nome_recebedor}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              {uploading ? (
-                <>
-                  <span className="animate-spin mr-2">⏳</span>
-                  Registrando...
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Confirmar Entrega
-                </>
-              )}
-            </RBACButton>
-          </div>
+        )
+      ) : (
+        <form onSubmit={enviar} className="w-full h-full space-y-4">
+          <fieldset disabled={hook.enviando} className="space-y-4">
+            {ARQUIVOS_COMPROVANTE.map(({ campo, label }) => <div key={campo} className="space-y-2"><Label>{label} *<Input type="file" accept="image/jpeg,image/png,image/webp" capture="environment" required={!arquivos[campo]} onChange={(e) => escolherArquivo(campo, e.target.files?.[0])} className="mt-1" /></Label>{previews[campo] && <img src={previews[campo]} alt={label} className="w-full max-h-48 object-contain rounded border" />}</div>)}
+            <p className="text-xs text-muted-foreground">Fotos e assinatura são guardadas em armazenamento privado. JPG, PNG ou WebP, até 5 MB por foto.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3"><Label>Nome completo de quem recebeu *<Input required minLength={3} maxLength={160} value={dados.nome_recebedor} onChange={(e) => alterar('nome_recebedor', e.target.value)} /></Label><Label>CPF/RG do recebedor *<Input required minLength={5} maxLength={40} value={dados.documento_recebedor} onChange={(e) => alterar('documento_recebedor', e.target.value)} /></Label></div>
+            <Label className="block">Cargo/função<Input maxLength={100} value={dados.cargo_recebedor} onChange={(e) => alterar('cargo_recebedor', e.target.value)} /></Label>
+            <Label className="block">Observações do recebimento<Textarea maxLength={2000} value={dados.observacoes_recebimento} onChange={(e) => alterar('observacoes_recebimento', e.target.value)} /></Label>
+            <AssinaturaCanvas canvasRef={assinatura.canvasRef} assinaturaVazia={assinatura.assinaturaVazia} onIniciarDesenho={(e) => { setRevisado(false); assinatura.iniciarDesenho(e); }} onDesenhar={assinatura.desenhar} onPararDesenho={assinatura.pararDesenho} onLimpar={() => { setRevisado(false); assinatura.limparAssinatura(); }} />
+            <label className="flex items-start gap-2 text-sm"><Checkbox checked={revisado} onCheckedChange={(v) => setRevisado(v === true)} /><span>Conferi mercadoria, local, canhoto, documento e legibilidade da assinatura.</span></label>
+          </fieldset>
+          {(hook.erro || erroArquivo) && <Alert variant="destructive"><AlertDescription>{hook.erro || erroArquivo}</AlertDescription></Alert>}
+          <div className="flex flex-wrap justify-end gap-2">{onClose && <Button type="button" variant="outline" onClick={onClose} disabled={hook.enviando}>Cancelar</Button>}<Button type="submit" disabled={hook.enviando || !revisado || assinatura.assinaturaVazia}>{hook.enviando && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{hook.enviando ? 'Registrando…' : 'Confirmar entrega'}</Button></div>
         </form>
+      )}
+    </div>
   );
-
-  if (windowMode) {
-    return (
-      <div className="w-full h-full overflow-auto bg-white p-6">
-        <div className="mb-4 pb-4 border-b">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-green-600" />
-            Confirmar Entrega - Comprovante Digital
-          </h2>
-        </div>
-        {formContent}
-      </div>
-    );
-  }
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-green-600" />
-            Confirmar Entrega - Comprovante Digital
-          </DialogTitle>
-        </DialogHeader>
-        {formContent}
-      </DialogContent>
-    </Dialog>
-  );
+  if (windowMode) return conteudo;
+  return <Dialog open={isOpen} onOpenChange={(aberto) => { if (!aberto && !hook.enviando) onClose?.(); }}><DialogContent className="w-full h-full max-w-2xl max-h-[90dvh] overflow-auto"><DialogHeader><DialogTitle>{readOnly ? 'Consultar comprovante' : 'Confirmar entrega'}</DialogTitle></DialogHeader>{conteudo}</DialogContent></Dialog>;
 }

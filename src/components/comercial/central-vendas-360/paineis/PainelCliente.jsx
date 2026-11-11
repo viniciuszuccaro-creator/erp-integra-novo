@@ -2,6 +2,7 @@
 import React from 'react';
 import { brl } from '../negociacaoUtils';
 import usePermissions from '@/components/lib/usePermissions';
+import { podeVerPainel } from '@/components/comercial/central-vendas-360/paineis/paineisConfig';
 
 const CAMPOS = [
   ['nome_fantasia', 'Nome fantasia'],
@@ -19,7 +20,7 @@ const CAMPOS = [
 
 export default function PainelCliente({ cliente }) {
   const { hasPermission, isLoading } = usePermissions();
-  const podeFinanceiro = !isLoading && hasPermission('Financeiro', 'Contas a Receber', 'visualizar');
+  const podeFinanceiro = !isLoading && podeVerPainel(hasPermission, 'financeiro');
   if (!cliente) {
     return <p className="text-sm text-slate-500">Cliente não localizado no cadastro para esta negociação.</p>;
   }

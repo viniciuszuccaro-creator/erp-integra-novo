@@ -118,17 +118,24 @@ Deno.serve(async (req) => {
 
     // APPROVE / REJECT generic
     if (action === 'approve' || action === 'reject') {
-      const { solicitacao_id, comentarios_aprovacao, group_id, empresa_id } = payload;
+      const { solicitacao_id, comentarios_aprovacao, contraproposta, group_id, empresa_id } = payload;
       if (!solicitacao_id) return Response.json({ error: 'solicitacao_id é obrigatório' }, { status: 400 });
       const permOk = await hasPermission(base44, user, 'Comercial', 'Aprovacoes', 'aprovar');
       if (!permOk) return Response.json({ error: 'Forbidden' }, { status: 403 });
       const ctxErr = assertContextPresence({ empresa_id, group_id }, false);
       if (ctxErr) return ctxErr;
 
-      const s = await base44.entities.SolicitacaoAprovacao.get(solicitacao_id);
+      const s = await base44.entities.SolicitacaoAprovacao.get(solicitacao_id).catch((e) => (e.status === 404 ? null : Promise.reject(e)));
       if (!s) return Response.json({ error: 'Solicitação não encontrada' }, { status: 404 });
+      if (s.group_id !== group_id || s.empresa_id !== empresa_id) return Response.json({ error: 'Solicitação fora do contexto informado.' }, { status: 403 });
+      // Segregação de funções: quem solicitou não decide a própria aprovação, em nenhum perfil.
+      if (s.solicitante_id === user.id) {
+        try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: s.empresa_id || null, group_id: s.group_id || null, acao: 'Bloqueio', modulo: 'Comercial', tipo_auditoria: 'seguranca', entidade: 'SolicitacaoAprovacao', registro_id: s.id, descricao: 'Tentativa de decidir a própria solicitação de aprovação', data_hora: new Date().toISOString() }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
+        return Response.json({ error: 'Segregação de funções: outra pessoa deve decidir esta solicitação.' }, { status: 403 });
+      }
+      if (s.status !== 'pendente') return Response.json({ error: 'Solicitação já decidida. O histórico é imutável.' }, { status: 409 });
       const novoStatus = action === 'approve' ? 'aprovado' : 'rejeitado';
-      const updated = await base44.entities.SolicitacaoAprovacao.update(solicitacao_id, { status: novoStatus, comentarios_aprovacao: comentarios_aprovacao || null, data_decisao: new Date().toISOString() });
+      const updated = await base44.entities.SolicitacaoAprovacao.update(solicitacao_id, { status: novoStatus, aprovador_id: user.id, comentarios_aprovacao: comentarios_aprovacao || null, ...(contraproposta && typeof contraproposta === 'object' ? { contraproposta } : {}), data_decisao: new Date().toISOString() });
 
       // Multi-nível: se aprovado e há próximos níveis, reabrir pendência para o próximo nível e notificar aprovadores desse nível
       if (novoStatus === 'aprovado' && s?.dados_propostos?.niveis_total > 1) {

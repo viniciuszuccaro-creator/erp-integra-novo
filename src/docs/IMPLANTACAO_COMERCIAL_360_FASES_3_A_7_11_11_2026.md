@@ -268,3 +268,9 @@ Pedidos cancelados, rascunhos e rejeitados não entram nos totais.
 5. Revisar o documento original completo para certificar cada requisito; o arquivo original não está disponível neste repositório nesta sessão. Só depois avaliar publicação desta revisão e nova análise de segurança.
 
 **Situação: implantação parcial avançada, não 100%.** Requisitos sem evidência de execução permanecem pendentes, mesmo quando a interface compila.
+
+---
+
+## Atualização posterior — 11/11/2026 (segunda rodada)
+
+O documento original `b03548fa1_ERP_ZUCCARO_COMERCIAL_360.docx` foi recebido e lido integralmente, incluindo as tabelas do mapa da tela e das 12 colunas que a extração de texto simples omitia. A auditoria, as correções e as pendências remanescentes estão em `RELATORIO_COMERCIAL_360_SEGUNDA_RODADA_11_11_2026.md`. As declarações anteriores de ✅ indicavam presença no código e não homologação; valem as pendências daquele relatório.

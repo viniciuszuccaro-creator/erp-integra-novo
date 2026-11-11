@@ -40,13 +40,17 @@ export default function useCentralAprovacoes(empresaId) {
       if (!canApprove('Comercial')) throw new Error('Sem permissão para decidir aprovações comerciais.');
       if (!solicitacao?.group_id || !solicitacao?.empresa_id) throw new Error('Solicitação sem contexto de grupo/empresa.');
       if (solicitacao.status !== 'pendente') throw new Error('Esta solicitação já foi decidida.');
-      await updateInContext('SolicitacaoAprovacao', solicitacao.id, {
-        status: aprovado ? 'aprovado' : 'rejeitado',
-        aprovador_id: user?.id || null,
+      if (solicitacao.solicitante_id === user?.id) throw new Error('Segregação de funções: outra pessoa deve decidir esta solicitação.');
+      // A decisão passa pelo endpoint, que aplica segregação de funções, contexto e histórico imutável.
+      const { data } = await base44.functions.invoke('solicitacoesAprovacao', {
+        action: aprovado ? 'approve' : 'reject',
+        solicitacao_id: solicitacao.id,
+        group_id: solicitacao.group_id,
+        empresa_id: solicitacao.empresa_id,
         comentarios_aprovacao: comentarios || '',
-        data_decisao: new Date().toISOString(),
         ...(contraproposta ? { contraproposta } : {}),
       });
+      if (data?.error) throw new Error(data.error);
       // Contraproposta de limite: aplica o novo valor no cadastro único do cliente, com histórico.
       if (aprovado && contraproposta?.limite_credito && solicitacao.dados_propostos?.cliente_id) {
         const cliente = await base44.entities.Cliente.get(solicitacao.dados_propostos.cliente_id);
@@ -59,14 +63,7 @@ export default function useCentralAprovacoes(empresaId) {
           },
         });
       }
-      await base44.entities.AuditLog.create({
-        usuario: user?.full_name || user?.email || 'Usuário', usuario_id: user?.id || null,
-        acao: aprovado ? 'Aprovação' : 'Rejeição', modulo: 'Comercial', tipo_auditoria: 'entidade',
-        entidade: 'SolicitacaoAprovacao', registro_id: solicitacao.id,
-        descricao: `${solicitacao.tipo_solicitacao} ${aprovado ? 'aprovada' : 'rejeitada'} — ${solicitacao.justificativa || ''}${contraproposta ? ' (com contraproposta)' : ''}`,
-        dados_anteriores: solicitacao, dados_novos: { aprovado, comentarios, contraproposta },
-        group_id: solicitacao.group_id, empresa_id: solicitacao.empresa_id, data_hora: new Date().toISOString(),
-      });
+      // A decisão já é auditada pelo endpoint (antes/depois, usuário, grupo e empresa).
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['solicitacoes-aprovacao-comercial'] });

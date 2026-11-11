@@ -7,6 +7,7 @@ export default function useRascunhoNegociacao({ chave, habilitado, sujo, itens, 
   const [pendente, setPendente] = useState(null);
   const [estado, setEstado] = useState('');
   const ignorar = useRef(false);
+  const gravado = useRef(false);
   useEffect(() => {
     if (!habilitado || !chave) return;
     let ativo = true;
@@ -23,17 +24,24 @@ export default function useRascunhoNegociacao({ chave, habilitado, sujo, itens, 
     if (!habilitado || pronto !== chave || pendente || !sujo) return;
     let ativo = true;
     ignorar.current = false;
+    gravado.current = false;
     const snapshot = { itens, dados, versao, salvo_em: new Date().toISOString() };
     const salvar = async () => {
       if (ignorar.current) return;
       const ok = await idbSet(chave, snapshot, 7 * 86400000);
+      if (ok) gravado.current = true;
       if (ativo) setEstado(ok ? 'Rascunho local salvo, ainda não sincronizado' : 'Não foi possível guardar o rascunho neste dispositivo');
     };
     setEstado('Guardando rascunho local…');
     const timer = setTimeout(salvar, 600);
     const guardarAoSair = () => { void salvar(); };
     window.addEventListener('pagehide', guardarAoSair);
-    return () => { ativo = false; clearTimeout(timer); window.removeEventListener('pagehide', guardarAoSair); if (!ignorar.current) void idbSet(chave, snapshot, 7 * 86400000); };
+    return () => {
+      ativo = false;
+      clearTimeout(timer);
+      window.removeEventListener('pagehide', guardarAoSair);
+      if (!ignorar.current && !gravado.current) void idbSet(chave, snapshot, 7 * 86400000);
+    };
   }, [chave, habilitado, pronto, pendente, sujo, itens, dados, versao]);
   const limpar = async () => {
     ignorar.current = true;

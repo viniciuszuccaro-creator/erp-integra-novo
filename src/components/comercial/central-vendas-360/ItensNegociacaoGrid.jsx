@@ -11,7 +11,8 @@ export default function ItensNegociacaoGrid({ itens = [], setItens, editavel, pe
     const novo = { ...item, [campo]: valor };
     return { ...novo, valor_total: Number(novo.quantidade || 0) * Number(novo.valor_unitario || 0) * (1 - Number(novo.desconto_percentual || 0) / 100) };
   }));
-  const incluir = (tipo) => setItens((atual) => [...atual, { id: `novo-${crypto.randomUUID()}`, produto_id: null, descricao: '', quantidade: 1, unidade: 'UN', valor_unitario: 0, desconto_percentual: 0, valor_total: 0, tipo }]);
+  const novoId = () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`);
+  const incluir = (tipo) => setItens((atual) => [...atual, { id: `novo-${novoId()}`, produto_id: null, descricao: '', quantidade: 1, unidade: 'UN', valor_unitario: 0, desconto_percentual: 0, valor_total: 0, tipo }]);
   const remover = (id) => setItens((atual) => atual.filter((item) => item.id !== id));
   return (
     <div className="w-full h-full flex-1 min-h-0 min-w-0 flex flex-col gap-2">

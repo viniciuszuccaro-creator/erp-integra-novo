@@ -192,6 +192,7 @@ export default function MesaNegociacao({
       {
         clientes,
         windowMode: true,
+        onCancel: () => closeWindow(janela),
         pedido: {
           status: 'Aguardando Aprovação',
           group_id: negociacao.registro.group_id,
@@ -256,7 +257,7 @@ export default function MesaNegociacao({
     (negociacao.origem === 'orcamento' && !['Pendente', 'Aprovado'].includes(negociacao.registro.status));
 
   return (
-    <div className="w-full h-full flex flex-col gap-2 min-h-0">
+    <div className="w-full h-full flex flex-col gap-2 min-h-0 overflow-auto">
       <HeaderNegociacao negociacao={negociacao} empresa={empresa} grupo={grupo} sujo={sujo} salvando={salvando}
         dados={dadosOrcamento} onAlterar={podeEditarItens && !salvando
           ? (campo, valor) => setDadosOrcamento((atual) => ({ ...atual, [campo]: valor })) : undefined} />
@@ -283,7 +284,7 @@ export default function MesaNegociacao({
         </div>
       )}
 
-      <div className="flex-1 min-h-0 flex">
+      <div className="flex-1 min-h-[310px] flex">
         <ItensNegociacaoGrid
           itens={itens}
           setItens={setItens}

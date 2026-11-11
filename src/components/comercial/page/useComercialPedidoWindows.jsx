@@ -14,12 +14,14 @@ export default function useComercialPedidoWindows({ clientes, refetchPedidos }) 
   const acoes = useAcoesComerciais();
 
   const handleCreateNewPedido = (cliente = null) => {
+    if (acoes.carregando || !acoes.podeCriar) return toast.error('Sem permissão para criar pedidos.');
     let pedidoCriado = false;
-    openWindow(
+    const janela = openWindow(
       PedidoFormCompleto,
       {
         clientes,
         windowMode: true,
+        onCancel: () => closeWindow(janela),
         pedido: {
           status: 'Rascunho',
           ...(cliente?.id ? {
@@ -38,6 +40,7 @@ export default function useComercialPedidoWindows({ clientes, refetchPedidos }) 
             });
             toast.success("Pedido criado!");
             await refetchPedidos();
+            return created;
           } catch (error) {
             pedidoCriado = false;
             toast.error("Erro: " + error.message);
@@ -61,6 +64,7 @@ export default function useComercialPedidoWindows({ clientes, refetchPedidos }) 
         pedido,
         clientes,
         windowMode: true,
+        onCancel: () => closeWindow(windowIdRef),
         onSubmit: async (formData) => {
           if (atualizacaoEmAndamento) return;
           atualizacaoEmAndamento = true;

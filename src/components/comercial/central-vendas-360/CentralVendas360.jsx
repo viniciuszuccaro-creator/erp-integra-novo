@@ -33,7 +33,7 @@ export default function CentralVendas360({
   const snapshotSelecionada = useRef(null);
   const [busca, setBusca] = useState('');
   const [grupo, setGrupo] = useState('aberto');
-  const { openWindow } = useWindow();
+  const { openWindow, closeWindow } = useWindow();
   const [painelAberto, setPainelAberto] = useState(true);
   const [novaNegociacaoAberta, setNovaNegociacaoAberta] = useState(false);
 
@@ -197,8 +197,9 @@ export default function CentralVendas360({
       return;
     }
     selecionar(negociacao);
-    openWindow(MesaNegociacao, {
-      negociacao, clientes,
+    let janela;
+    janela = openWindow(MesaNegociacao, {
+      negociacao, clientes, onVoltar: () => closeWindow(janela),
       empresa: empresas.find((item) => item.id === negociacao.registro.empresa_id) || empresaAtual,
       grupo: grupoAtual, onAtualizar: atualizar,
     }, { title: `Orçamento ${negociacao.numero}`, width: 1280, height: 850, uniqueKey: `mesa-${negociacao.chave}` });

@@ -1,6 +1,6 @@
 // Corpo dos painéis do Cliente 360° — somente leitura das entidades dos módulos proprietários
 import React from 'react';
-import { FILTRO_RELACIONADO, PERMISSOES_PAINEL } from './paineisConfig';
+import { FILTRO_RELACIONADO, podeVerPainel } from './paineisConfig';
 import usePermissions from '@/components/lib/usePermissions';
 import PainelRegistros from './PainelRegistros';
 import PainelResumo from './PainelResumo';
@@ -26,8 +26,7 @@ export default function PainelCorpo({
   const { pedidoId, clienteId } = FILTRO_RELACIONADO(negociacao);
   const registro = negociacao?.registro || {};
   const { hasPermission, isLoading: carregandoPermissao } = usePermissions();
-  const permissao = PERMISSOES_PAINEL[painel];
-  const permitido = !carregandoPermissao && !!permissao && hasPermission(...permissao, 'visualizar');
+  const permitido = !carregandoPermissao && podeVerPainel(hasPermission, painel);
   const financeiro = useTitulosFinanceiros({ clienteId, pedidoId, modo: 'cliente', ativo: permitido && painel === 'financeiro' });
   const pagamento = useTitulosFinanceiros({ clienteId, pedidoId, modo: 'pedido', ativo: permitido && painel === 'pagamento' });
   const estoque = usePainelEstoque({ itens: negociacao?.itens, ativo: permitido && painel === 'estoque' });

@@ -128,7 +128,9 @@ export function pedidoParaNegociacao(pedido) {
       frete: numero(pedido.valor_frete),
       total: numero(pedido.valor_total),
     },
-    editavel: grupo === 'aberto',
+    // Pedido tem fonte única de edição: o formulário completo (PedidoFormCompleto).
+    // Na mesa ele é leitura + "Abrir pedido", evitando gravação em entidade errada.
+    editavel: false,
   };
 }
 

@@ -76,6 +76,13 @@ Verificação item a item sobre o código existente (nenhum arquivo novo foi cri
 | Atendimento comercial conectado ao Hub | `PainelAtendimento.jsx` → `/HubAtendimento?busca=` | ✅ |
 | Fila de pedidos externos | `HeaderCentral360.jsx` → `ValidarPedidosExternos` | ✅ |
 
+### Correções aplicadas na certificação (11/11/2026)
+- A negociação em foco passou a ser relida da lista por chave: status e itens salvos aparecem na mesa na hora (antes a tela ficava presa ao registro antigo e o botão continuava em "Aprovar orçamento" após aprovar).
+- O botão "Salvar" de um **pedido** rascunho não grava mais no orçamento: agora abre o formulário completo do pedido (fonte única), como já fazia o "Abrir pedido".
+- O desconto por item passou a ser persistido no orçamento (antes era descartado e o desconto desaparecia ao recarregar).
+- Comparação de "alterações pendentes" ignora ids gerados na tela e diferença texto/número: o botão Salvar desabilita corretamente após salvar.
+- RBAC da mesa centralizado em `useAcoesComerciais` (salvar, aprovar, gerar pedido, enviar proposta, abrir pedido).
+
 ### O que falta para operar 100% (fora do código do Comercial)
 1. **Publicar** — há alterações no editor ainda não publicadas (o site serve a versão de 09/11/2026).
 2. **Validação E2E** pela aba de testes: abrir negociação → montar itens → validar fechamento → enviar proposta → follow-up → aprovar → gerar pedido.

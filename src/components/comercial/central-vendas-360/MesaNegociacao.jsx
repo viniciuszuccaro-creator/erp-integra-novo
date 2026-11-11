@@ -2,7 +2,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
-import usePermissions from '@/components/lib/usePermissions';
 import { useWindow } from '@/components/lib/useWindow';
 import { useUser } from '@/components/lib/UserContext';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
@@ -18,13 +17,23 @@ import useValidacaoFechamento from './useValidacaoFechamento';
 import useAcoesComerciais from './useAcoesComerciais';
 import { totalizarItens } from './negociacaoUtils';
 
+// Comparação estável dos itens: ignora ids gerados na tela e a diferença texto/número
+const assinaturaItens = (lista = []) => JSON.stringify(lista.map((item) => ({
+  produto_id: item.produto_id || null,
+  descricao: item.descricao || '',
+  quantidade: Number(item.quantidade || 0),
+  unidade: item.unidade || 'UN',
+  valor_unitario: Number(item.valor_unitario || 0),
+  desconto_percentual: Number(item.desconto_percentual || 0),
+  valor_total: Number(Number(item.valor_total || 0).toFixed(2)),
+})));
+
 export default function MesaNegociacao({ negociacao, clientes = [], empresa, grupo, onVoltar, onAtualizar }) {
   const [itens, setItens] = useState(negociacao.itens);
   const [faixaAberta, setFaixaAberta] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [envioAberto, setEnvioAberto] = useState(false);
 
-  const { hasPermission } = usePermissions();
   const { openWindow, closeWindow } = useWindow();
   const { user } = useUser();
   const { createInContext, updateInContext } = useContextoVisual();
@@ -34,7 +43,7 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
   }, [negociacao.chave]);
 
   const sujo = useMemo(
-    () => negociacao.editavel && JSON.stringify(itens) !== JSON.stringify(negociacao.itens),
+    () => negociacao.editavel && assinaturaItens(itens) !== assinaturaItens(negociacao.itens),
     [itens, negociacao]
   );
 
@@ -59,7 +68,7 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
   const contextoNegociacao = empresa?.nome || grupo?.nome || '';
 
   const abrirEnvio = () => {
-    if (!hasPermission('Comercial', 'Pedidos', 'editar')) {
+    if (!acoes.podeEditar) {
       toast.error('Sem permissão para enviar propostas.');
       return;
     }
@@ -83,6 +92,15 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
 
   const salvar = async () => {
     if (!negociacao.editavel) return;
+    if (!acoes.podeEditar) {
+      toast.error('Sem permissão para editar a negociação.');
+      return;
+    }
+    // Rascunho de pedido é salvo no formulário completo já existente (nunca no orçamento)
+    if (negociacao.origem !== 'orcamento') {
+      PedidoEdicao(negociacao.registro);
+      return;
+    }
     if (validacao.acimaDoLimite && !acoes.podeAprovarDesconto) {
       registrarAuditoria(
         'Bloqueio',
@@ -101,6 +119,7 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
           quantidade: Number(item.quantidade || 0),
           unidade: item.unidade,
           valor_unitario: Number(item.valor_unitario || 0),
+          desconto_percentual: Number(item.desconto_percentual || 0),
           valor_total: Number(item.valor_total || 0),
         })),
         valor_total: Number(totais.total.toFixed(2)),
@@ -116,7 +135,7 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
   };
 
   const aprovarOrcamento = async () => {
-    if (!hasPermission('Comercial', 'Pedidos', 'aprovar')) {
+    if (!acoes.podeAprovar) {
       toast.error('Sem permissão para aprovar orçamentos.');
       return;
     }
@@ -131,7 +150,7 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
   };
 
   const gerarPedido = () => {
-    if (!hasPermission('Comercial', 'Pedidos', 'criar')) {
+    if (!acoes.podeCriar) {
       toast.error('Sem permissão para criar pedidos.');
       return;
     }
@@ -189,7 +208,7 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
   };
 
   function onEditarPedido(pedido) {
-    if (!hasPermission('Comercial', 'Pedidos', 'editar')) {
+    if (!acoes.podeEditar) {
       toast.error('Sem permissão para editar pedidos.');
       return;
     }

@@ -1,5 +1,5 @@
 // Central de Vendas 360° — layout versão 6: tabela de 12 colunas, grade de itens e Cliente 360° lateral
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import ProtectedSection from '@/components/security/ProtectedSection';
 import PedidosTab from '@/components/comercial/PedidosTab';
@@ -23,7 +23,10 @@ export default function CentralVendas360({
   pedidos = [], clientes = [], empresas = [], onCreatePedido, onEditPedido,
 }) {
   const [modo, setModo] = useState('central');
-  const [selecionada, setSelecionada] = useState(null);
+  // Seleção por chave: a negociação é sempre relida da lista, então status/itens
+  // salvos aparecem na mesa imediatamente (sem ficar preso ao objeto antigo).
+  const [chaveSelecionada, setChaveSelecionada] = useState(null);
+  const snapshotSelecionada = useRef(null);
   const [busca, setBusca] = useState('');
   const [grupo, setGrupo] = useState('todas');
   const [painelAberto, setPainelAberto] = useState(true);
@@ -49,7 +52,7 @@ export default function CentralVendas360({
     setGrupo('todas');
     setModo('central');
     await refetch();
-    setSelecionada(orcamentoParaNegociacao(criado));
+    selecionar(orcamentoParaNegociacao(criado));
   };
 
   // Durante a busca, os pedidos encontrados no servidor entram junto aos já carregados pela página
@@ -67,6 +70,16 @@ export default function CentralVendas360({
     ];
     return lista.sort((a, b) => new Date(b.data || 0) - new Date(a.data || 0));
   }, [orcamentos, pedidosBase]);
+
+  // Negociação em foco relida da lista (evita estado congelado após salvar/aprovar)
+  const selecionada = useMemo(() => {
+    if (!chaveSelecionada) return null;
+    const encontrada = negociacoes.find((negociacao) => negociacao.chave === chaveSelecionada);
+    if (encontrada) snapshotSelecionada.current = encontrada;
+    return encontrada || snapshotSelecionada.current;
+  }, [negociacoes, chaveSelecionada]);
+
+  const selecionar = (negociacao) => setChaveSelecionada(negociacao?.chave || null);
 
   const clientesPorId = useMemo(
     () => (clientes || []).reduce((acc, cliente) => { acc[cliente.id] = cliente; return acc; }, {}),
@@ -148,21 +161,14 @@ export default function CentralVendas360({
     origens: valoresUnicos(porGrupo.map((negociacao) => negociacao.canal)),
   }), [porGrupo, clientesPorId]);
 
-  const atualizar = async () => {
-    await refetch();
-    setSelecionada((atual) => {
-      if (!atual) return atual;
-      const orcamentoAtualizado = orcamentos.find((o) => `orc-${o.id}` === atual.chave);
-      return orcamentoAtualizado ? orcamentoParaNegociacao(orcamentoAtualizado) : atual;
-    });
-  };
+  const atualizar = () => refetch();
 
   const abrirRegistro = (negociacao) => {
     if (negociacao.origem === 'pedido' && onEditPedido) {
       onEditPedido(negociacao.registro);
       return;
     }
-    setSelecionada(negociacao);
+    selecionar(negociacao);
   };
 
   return (
@@ -205,7 +211,7 @@ export default function CentralVendas360({
                   negociacoes={filtradas}
                   clientes={clientes}
                   selecionada={selecionada}
-                  onSelect={setSelecionada}
+                  onSelect={selecionar}
                   onAbrir={abrirRegistro}
                   carregando={isLoading}
                   larguras={preferencias.larguras}
@@ -223,7 +229,7 @@ export default function CentralVendas360({
                     clientes={clientes}
                     empresa={empresaAtual}
                     grupo={grupoAtual}
-                    onVoltar={() => setSelecionada(null)}
+                    onVoltar={() => selecionar(null)}
                     onAtualizar={atualizar}
                   />
                 ) : (
@@ -248,7 +254,7 @@ export default function CentralVendas360({
               onRedimensionar={preferencias.setLarguraPainel}
               alertas={alertas}
               validacao={validacaoSelecionada}
-              onSelecionarNegociacao={setSelecionada}
+              onSelecionarNegociacao={selecionar}
             />
           </div>
         )}

@@ -51,7 +51,7 @@ export function buildContextFilter(entityName, empresaId, groupId, empresasDoGru
 }
 
 export function createFilterInContext({ getFiltroContexto, empresasDoGrupo }) {
-  const filterInContext = async (entityName, criterios = {}, order, limit = 100, campo = 'empresa_id', skip = 0) => {
+  const filterInContext = async (entityName, criterios = {}, order, limit = 100, campo = 'empresa_id', skip = 0, search = null) => {
     const ctx = CONTEXT_FIELDS[entityName] || campo;
     const scope = getFiltroContexto(ctx, true) || {};
     if (!scope.group_id && !scope[ctx]) return [];
@@ -63,6 +63,7 @@ export function createFilterInContext({ getFiltroContexto, empresasDoGrupo }) {
     if (order) setLastSort(entityName, { sortField, sortDirection });
     const res = await base44.functions.invoke('entityListSorted', {
       entityName, filter, sortField, sortDirection, limit: limit || 100, skip: Math.max(0, Number(skip) || 0),
+      ...(search ? { search } : {}),
     });
     return res.data;
   };

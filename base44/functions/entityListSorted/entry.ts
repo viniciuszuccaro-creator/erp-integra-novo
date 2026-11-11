@@ -52,6 +52,8 @@ const DEFAULT_SORTS = {
 };
 
 const SEARCH_FIELDS = {
+  Pedido: ['numero_pedido', 'cliente_nome', 'vendedor', 'origem_pedido', 'obra_destino_nome', 'forma_pagamento'],
+  OrcamentoCliente: ['numero_orcamento', 'cliente_nome', 'vendedor_responsavel', 'descricao', 'observacoes'],
   Produto: ['descricao', 'codigo', 'codigo_barras', 'grupo_produto_nome', 'marca_nome'],
   Cliente: ['nome', 'razao_social', 'nome_fantasia', 'cpf', 'cnpj'],
   Fornecedor: ['nome', 'razao_social', 'nome_fantasia', 'cnpj', 'cpf'],

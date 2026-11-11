@@ -12,6 +12,8 @@ import useCentral360Data from './useCentral360Data';
 import useNovaNegociacao from './useNovaNegociacao';
 import usePreferenciasCentral360 from './usePreferenciasCentral360';
 import { orcamentoParaNegociacao, pedidoParaNegociacao } from './negociacaoUtils';
+import usePesosProdutos from './usePesosProdutos';
+import { pesoDaNegociacao } from './pesoNegociacao';
 
 const cidadeDoCliente = (cliente) => cliente?.cidade || cliente?.endereco_cidade || '—';
 
@@ -26,7 +28,9 @@ export default function CentralVendas360({
   const [novaNegociacaoAberta, setNovaNegociacaoAberta] = useState(false);
 
   const preferencias = usePreferenciasCentral360();
-  const { orcamentos, isLoading, refetch, empresaAtual, grupoAtual } = useCentral360Data();
+  const {
+    orcamentos, pedidosBusca, buscando, isLoading, refetch, empresaAtual, grupoAtual,
+  } = useCentral360Data({ busca });
   const { criarOrcamento, salvando, dataPadraoValidade } = useNovaNegociacao({ orcamentos });
 
   // Abertura de negociação: proposta nasce na mesa da Central; pedido direto usa o formulário completo existente
@@ -46,13 +50,21 @@ export default function CentralVendas360({
     setSelecionada(orcamentoParaNegociacao(criado));
   };
 
+  // Durante a busca, os pedidos encontrados no servidor entram junto aos já carregados pela página
+  const pedidosBase = useMemo(() => {
+    if (!buscando) return pedidos;
+    const porId = new Map((pedidos || []).filter((pedido) => pedido?.id).map((pedido) => [pedido.id, pedido]));
+    (pedidosBusca || []).forEach((pedido) => { if (pedido?.id) porId.set(pedido.id, pedido); });
+    return Array.from(porId.values());
+  }, [pedidos, pedidosBusca, buscando]);
+
   const negociacoes = useMemo(() => {
     const lista = [
       ...orcamentos.map(orcamentoParaNegociacao),
-      ...pedidos.map(pedidoParaNegociacao),
+      ...pedidosBase.map(pedidoParaNegociacao),
     ];
     return lista.sort((a, b) => new Date(b.data || 0) - new Date(a.data || 0));
-  }, [orcamentos, pedidos]);
+  }, [orcamentos, pedidosBase]);
 
   const clientesPorId = useMemo(
     () => (clientes || []).reduce((acc, cliente) => { acc[cliente.id] = cliente; return acc; }, {}),
@@ -104,6 +116,14 @@ export default function CentralVendas360({
       return campos.filter(Boolean).some((valor) => String(valor).toLowerCase().includes(termo));
     });
   }, [porFiltrosRapidos, busca, clientesPorId]);
+
+  // Peso: documento do pedido ou cálculo pelos cadastros oficiais de Produto
+  const produtosPorId = usePesosProdutos(filtradas);
+  const pesos = useMemo(() => filtradas.reduce((acc, negociacao) => {
+    const peso = pesoDaNegociacao(negociacao, produtosPorId);
+    if (peso) acc[negociacao.chave] = peso;
+    return acc;
+  }, {}), [filtradas, produtosPorId]);
 
   const contadores = useMemo(() => {
     return negociacoes.reduce((acc, negociacao) => {
@@ -181,6 +201,7 @@ export default function CentralVendas360({
                   onLargura={preferencias.setLargura}
                   ordenacao={preferencias.ordenacao}
                   onOrdenacao={preferencias.setOrdenacao}
+                  pesos={pesos}
                 />
               </div>
 

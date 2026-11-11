@@ -2,6 +2,7 @@
 import React, { useMemo, useState } from 'react';
 import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react';
 import { SITUACAO_ESTILO, brl, dataCurta } from './negociacaoUtils';
+import { TITULO_ORIGEM_PESO } from './pesoNegociacao';
 
 const COLUNAS = [
   { id: 'numero', label: 'Nº', largura: 112, min: 88, fixa: true },
@@ -20,7 +21,7 @@ const COLUNAS = [
 
 const LARGURAS_PADRAO = COLUNAS.reduce((acc, coluna) => { acc[coluna.id] = coluna.largura; return acc; }, {});
 
-const valorOrdenacao = (negociacao, campo, clientesPorId) => {
+const valorOrdenacao = (negociacao, campo, clientesPorId, pesos = {}) => {
   const cliente = clientesPorId[negociacao.cliente_id] || {};
   switch (campo) {
     case 'numero': return negociacao.numero;
@@ -31,7 +32,7 @@ const valorOrdenacao = (negociacao, campo, clientesPorId) => {
     case 'origem': return negociacao.canal || '';
     case 'cidade': return cliente.cidade || cliente.endereco_cidade || '';
     case 'itens': return negociacao.itens?.length || 0;
-    case 'peso': return Number(negociacao.registro?.peso_total || negociacao.registro?.peso_total_kg || 0);
+    case 'peso': return Number(pesos[negociacao.chave]?.kg ?? (negociacao.registro?.peso_total || negociacao.registro?.peso_total_kg || 0));
     case 'valor': return Number(negociacao.totais?.total || 0);
     case 'condicao': return negociacao.condicao_pagamento || '';
     case 'situacao': return negociacao.situacao || '';
@@ -41,7 +42,7 @@ const valorOrdenacao = (negociacao, campo, clientesPorId) => {
 
 export default function TabelaNegociacoes({
   negociacoes = [], clientes = [], selecionada, onSelect, onAbrir, carregando,
-  larguras = {}, onLargura, ordenacao, onOrdenacao,
+  larguras = {}, onLargura, ordenacao, onOrdenacao, pesos = {},
 }) {
   const [rascunho, setRascunho] = useState(null);
   const [ordenacaoLocal, setOrdenacaoLocal] = useState({ campo: 'data', direcao: 'desc' });
@@ -61,15 +62,15 @@ export default function TabelaNegociacoes({
   const ordenadas = useMemo(() => {
     const lista = [...negociacoes];
     lista.sort((a, b) => {
-      const va = valorOrdenacao(a, ordenacaoAtual.campo, clientesPorId);
-      const vb = valorOrdenacao(b, ordenacaoAtual.campo, clientesPorId);
+      const va = valorOrdenacao(a, ordenacaoAtual.campo, clientesPorId, pesos);
+      const vb = valorOrdenacao(b, ordenacaoAtual.campo, clientesPorId, pesos);
       const comparacao = typeof va === 'number' && typeof vb === 'number'
         ? va - vb
         : String(va).localeCompare(String(vb), 'pt-BR');
       return ordenacaoAtual.direcao === 'asc' ? comparacao : -comparacao;
     });
     return lista;
-  }, [negociacoes, ordenacaoAtual, clientesPorId]);
+  }, [negociacoes, ordenacaoAtual, clientesPorId, pesos]);
 
   const ordenar = (campo) => {
     const proxima = ordenacaoAtual.campo === campo
@@ -186,7 +187,8 @@ export default function TabelaNegociacoes({
             {ordenadas.map((negociacao) => {
               const cliente = clientesPorId[negociacao.cliente_id] || {};
               const ativa = selecionada?.chave === negociacao.chave;
-              const peso = Number(negociacao.registro?.peso_total || negociacao.registro?.peso_total_kg || 0);
+              const pesoInfo = pesos[negociacao.chave] || null;
+              const peso = Number(pesoInfo?.kg ?? (negociacao.registro?.peso_total || negociacao.registro?.peso_total_kg || 0));
               const fundo = ativa ? 'bg-blue-50' : 'bg-white group-hover:bg-slate-50';
               const larguraNumero = larguraDe('numero');
               const larguraCliente = larguraDe('cliente');
@@ -237,7 +239,11 @@ export default function TabelaNegociacoes({
                   <td style={{ width: larguraDe('itens'), minWidth: larguraDe('itens') }} className="px-2 py-1.5 text-center text-slate-600">
                     {negociacao.itens?.length || 0}
                   </td>
-                  <td style={{ width: larguraDe('peso'), minWidth: larguraDe('peso') }} className="px-2 py-1.5 text-right text-slate-600">
+                  <td
+                    style={{ width: larguraDe('peso'), minWidth: larguraDe('peso') }}
+                    className="px-2 py-1.5 text-right text-slate-600"
+                    title={pesoInfo ? TITULO_ORIGEM_PESO[pesoInfo.origem] : 'Sem peso no documento nem nos cadastros de Produto'}
+                  >
                     {peso > 0 ? peso.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) : '—'}
                   </td>
                   <td style={{ width: larguraDe('valor'), minWidth: larguraDe('valor') }} className="px-2 py-1.5 text-right font-semibold text-slate-800">

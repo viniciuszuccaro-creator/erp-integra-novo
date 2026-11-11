@@ -36,12 +36,13 @@ export function useRLSQuery(
   const scopeKey = `${empresaAtual?.id || 'all'}:${grupoAtual?.id || 'nogroup'}:${contexto}`;
   const criteriosKey = JSON.stringify(criterios);
   // Paginação real: skip repassado ao entityListSorted (6º parâmetro do filterInContext)
-  const { skip: skipOpt, ...queryOptionsRest } = queryOptions;
+  const { skip: skipOpt, search, ...queryOptionsRest } = queryOptions;
   const skip = Math.max(0, Number(skipOpt ?? 0) || 0);
+  const termoBusca = typeof search === 'string' && search.trim() ? search.trim() : '';
 
   return useQuery({
-    queryKey: [entityName, scopeKey, criteriosKey, order, limit, skip],
-    queryFn: () => filterInContext(entityName, criterios, order, limit, undefined, skip),
+    queryKey: [entityName, scopeKey, criteriosKey, order, limit, skip, termoBusca],
+    queryFn: () => filterInContext(entityName, criterios, order, limit, undefined, skip, termoBusca || null),
     staleTime: queryOptions.staleTime ?? 15_000,
     gcTime: queryOptions.gcTime ?? 300_000,
     enabled: queryOptions.enabled !== undefined

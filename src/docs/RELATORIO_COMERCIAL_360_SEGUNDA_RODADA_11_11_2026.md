@@ -173,6 +173,30 @@ A Mesa validava a proposta, mas o navegador criava o pedido e depois alterava o 
 - `npm run build` e ESLint dos arquivos alterados sem erros; endpoint real não destrutivo respondeu **404** para solicitação inexistente.
 - **Pendências mantidas**: histórico de contraproposta como registro próprio (hoje fica na solicitação + `AuditLog`), aplicação de limite por categoria orçamentária (o teto hoje é por nível/valor), decisão de desconto de pedido que ainda grava o pedido inteiro, e homologação E2E §47/§48 no Testing Agent. Nada foi publicado nem reanalisado em Security.
 
+## Auditoria de layout contra o dossiê (arquivo recebido em 11/11/2026)
+
+Documento conferido: `ERP_ZUCCARO_COMERCIAL_360.docx` (Revisão consolidada 10/11/2026, §2 mapa visual, §3 tabela, §4 Cliente 360°, §8 UX).
+
+### Divergências encontradas e corrigidas
+1. **Ordem das faixas (§2, mapa visual)** — o mapa manda: cabeçalho → faixa compacta → **abas** → **KPIs/alertas** → tabela | painel. A Central estava com a faixa de KPIs/alertas acima das abas. Corrigido em `HeaderCentral360`: abas primeiro, depois a faixa de KPIs/alertas, depois filtros.
+2. **"Histórico" no Mais Ações (§2, rodapé)** — o rodapé trazia apenas Duplicar, Desmembrar e Importar itens de pedido anterior. Incluído **Histórico do cliente**, que abre o painel de histórico já existente do Cliente 360° (nenhum painel novo, nenhuma consulta nova): `RodapeNegociacao` → `MesaNegociacao` → `CentralVendas360` → `Cliente360Lateral` (novo `painelSolicitado`).
+
+### Itens do documento já conformes (verificados no código, sem alteração)
+- §2 Cabeçalho: identidade azul/branca, "Central de Vendas 360°", empresa/grupo ativo e pesquisa universal com os campos pedidos (nº, CPF/CNPJ, cliente, telefone, vendedor, cidade, produto).
+- §2 Faixa compacta: Atendimento Unificado, Bot de Vendas, Entregas do Dia e Aprovações, cada um com contador do servidor e abrindo o módulo existente em janela própria (segundo monitor).
+- §2 Seletor de situação: inicial em **Abertos** e ordem canônica ABERTOS · FECHADOS · PRODUÇÃO · ENTREGA · RETIRA · PENDÊNCIAS, com as situações detalhadas em seguida (nada removido).
+- §2 Centro dominante: clique simples atualiza Cliente 360° e itens; duplo clique abre a edição em janela própria.
+- §2 Duas grades simultâneas: `ItensNegociacaoGrid` renderiza Corte e Dobra/Montagem **e** Materiais de Revenda/Serviços lado a lado, nunca por abas.
+- §2 Lateral direita: Cliente 360° retrátil, redimensionável e destacável; comunicação rápida abaixo da identificação.
+- §2 Ações rápidas: Imprimir/Enviar/Fechar no orçamento aberto; Ajustar pedido somente em Produção/Entrega/Retira.
+- §3 Tabela: as 12 colunas na ordem exata do documento, Nº Orçamento e Nome Cliente fixos, cabeçalho fixo, rolagem horizontal própria, ordenação, colunas redimensionáveis e larguras persistidas por usuário; Prazo com validade da proposta separada no tooltip.
+- §4 Comunicação: seleção de contato quando o cliente tem mais de um WhatsApp/telefone/e-mail; telefonia declara que abre o discador e que GoTo depende de integração conectada.
+- §7/§8: `w-full`/`h-full` nos containers da Central, painéis redimensionáveis e abas fixas.
+
+### Pendências declaradas (não são regressões)
+- Faixa de KPIs/alertas traz hoje **total de registros + alertas**; não há números de valor/quantidade porque o documento não define quais KPIs (§2 apenas nomeia a faixa).
+- GoTo/telefonia real continua dependente de integração (§6) e a homologação E2E (§47/§48) segue aberta.
+
 ## Continuação — Dossiê 10/11/2026: abas canônicas (§2) e escolha de contato (§4)
 
 ### O que estava divergente

@@ -38,7 +38,7 @@ const assinaturaItens = (lista = []) => JSON.stringify(lista.map((item) => ({
 
 export default function MesaNegociacao({
   negociacao: recebida, clientes = [], empresa, grupo, onVoltar, onAtualizar, concorrentes = [],
-  onAcoesRapidas,
+  onAcoesRapidas, onHistorico,
 }) {
   const [registroLocal, setRegistroLocal] = useState(null);
   const negociacao = registroLocal && (!recebida.registro?.updated_date || registroLocal.registro.updated_date >= recebida.registro.updated_date) ? registroLocal : recebida;
@@ -331,6 +331,7 @@ export default function MesaNegociacao({
         onImportar={negociacao.origem === 'orcamento' && negociacao.editavel && acoes.podeEditar
           ? () => setImportarAberto(true)
           : undefined}
+        onHistorico={onHistorico}
       />
 
       <DestinoPedidoDialog

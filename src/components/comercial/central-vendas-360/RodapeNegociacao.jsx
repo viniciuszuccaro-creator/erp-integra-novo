@@ -1,6 +1,6 @@
 // Rodapé fixo — totais, condição e ações da etapa
 import React from 'react';
-import { Copy, Import, MoreHorizontal, Printer, Send, Split } from 'lucide-react';
+import { Copy, History, Import, MoreHorizontal, Printer, Send, Split } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -13,9 +13,9 @@ export default function RodapeNegociacao({
   acaoLabel, acaoDescricao, acaoDesabilitada,
   onSalvar, onVoltar, onAvancar,
   onEnviar, enviando, enviarDesabilitado,
-  onDuplicar, onDesmembrar, onImportar, onImprimir,
+  onDuplicar, onDesmembrar, onImportar, onImprimir, onHistorico,
 }) {
-  const temMaisAcoes = Boolean(onDuplicar || onDesmembrar || onImportar);
+  const temMaisAcoes = Boolean(onDuplicar || onDesmembrar || onImportar || onHistorico);
   return (
     <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 flex flex-wrap items-center gap-3">
       <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-600">
@@ -72,6 +72,14 @@ export default function RodapeNegociacao({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={onImportar}>
                       <Import className="w-3.5 h-3.5 mr-2" /> Importar itens de pedido anterior
+                    </DropdownMenuItem>
+                  </>
+                )}
+                {onHistorico && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={onHistorico}>
+                      <History className="w-3.5 h-3.5 mr-2" /> Histórico do cliente
                     </DropdownMenuItem>
                   </>
                 )}

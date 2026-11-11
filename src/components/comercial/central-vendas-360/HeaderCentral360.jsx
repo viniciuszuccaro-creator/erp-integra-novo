@@ -93,23 +93,6 @@ export default function HeaderCentral360({
 
       <FaixaCompacta360 pendentesExternos={qtdExternosPendentes} />
 
-      {/* §2/§37: faixa de indicadores (total e alertas) separada da faixa de abas. */}
-      <div className="flex flex-wrap items-center gap-2 px-3 py-1.5 border-b border-slate-100">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{total} registros</span>
-        {alertas.length > 0 && (
-          <span
-            title={alertas.slice(0, 4).map((a) => `${a.numero}: ${a.titulo}`).join('\n')}
-            className={`inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-semibold ${
-              alertas.some((a) => a.severidade === 'critico')
-                ? 'border-red-200 bg-red-50 text-red-700'
-                : 'border-amber-200 bg-amber-50 text-amber-700'
-            }`}
-          >
-            <AlertTriangle className="w-3 h-3" /> {alertas.length} alerta(s)
-          </span>
-        )}
-      </div>
-
       {/* §2: abas são a navegação primária, em faixa própria e fixa (sem redimensionamento). */}
       <div className="flex items-center gap-1 px-3 py-1.5 border-b border-slate-100 overflow-x-auto">
         {GRUPOS_NEGOCIACAO.map((opcao) => {
@@ -131,6 +114,23 @@ export default function HeaderCentral360({
             </button>
           );
         })}
+      </div>
+
+      {/* §2 (mapa visual): faixa de KPIs / alertas imediatamente abaixo das abas. */}
+      <div className="flex flex-wrap items-center gap-2 px-3 py-1.5 border-b border-slate-100">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{total} registros</span>
+        {alertas.length > 0 && (
+          <span
+            title={alertas.slice(0, 4).map((a) => `${a.numero}: ${a.titulo}`).join('\n')}
+            className={`inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-semibold ${
+              alertas.some((a) => a.severidade === 'critico')
+                ? 'border-red-200 bg-red-50 text-red-700'
+                : 'border-amber-200 bg-amber-50 text-amber-700'
+            }`}
+          >
+            <AlertTriangle className="w-3 h-3" /> {alertas.length} alerta(s)
+          </span>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-2 px-3 py-1.5">

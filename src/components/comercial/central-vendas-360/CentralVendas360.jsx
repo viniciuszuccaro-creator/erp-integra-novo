@@ -38,6 +38,8 @@ export default function CentralVendas360({
   const [novaNegociacaoAberta, setNovaNegociacaoAberta] = useState(false);
   // Ações rápidas contextuais da negociação, publicadas pela mesa e exibidas sob o Cliente 360°
   const [acoesRapidas, setAcoesRapidas] = useState([]);
+  // §2: "Histórico" no rodapé Mais Ações leva ao painel de histórico já existente do Cliente 360°
+  const [painelSolicitado, setPainelSolicitado] = useState(null);
 
   const preferencias = usePreferenciasCentral360();
   const {
@@ -300,6 +302,10 @@ export default function CentralVendas360({
                     onAtualizar={atualizar}
                     concorrentes={concorrentes}
                     onAcoesRapidas={setAcoesRapidas}
+                    onHistorico={() => {
+                      setPainelAberto(true);
+                      setPainelSolicitado({ id: 'historico', em: Date.now() });
+                    }}
                   />
                 ) : (
                   <div className="flex-1 rounded-lg border border-dashed border-slate-300 bg-slate-50 flex flex-col items-center justify-center text-center p-6">
@@ -325,6 +331,7 @@ export default function CentralVendas360({
               validacao={validacaoSelecionada}
               onSelecionarNegociacao={selecionar}
               acoesRapidas={selecionada ? acoesRapidas : []}
+              painelSolicitado={painelSolicitado}
               onDestacar={selecionada ? destacarCliente : undefined}
             />
           </div>

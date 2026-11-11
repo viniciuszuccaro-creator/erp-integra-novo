@@ -1,5 +1,5 @@
 // Cliente 360° — painel lateral recolhível e redimensionável com os atalhos e painéis existentes
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2, Users } from 'lucide-react';
 import AtalhosLateral from './AtalhosLateral';
 import AcoesRapidas360 from './AcoesRapidas360';
@@ -12,10 +12,16 @@ const LARGURA_MAXIMA = 560;
 export default function Cliente360Lateral({
   negociacao, cliente, recolhido, onToggle, largura = 360, onRedimensionar,
   alertas = [], validacao, onSelecionarNegociacao, acoesRapidas = [], destacado = false, onDestacar,
+  painelSolicitado,
 }) {
   const [painel, setPainel] = useState('cliente');
   const [larguraLocal, setLarguraLocal] = useState(null);
   const larguraEfetiva = larguraLocal ?? largura;
+
+  // Leva ao painel pedido por outro ponto da tela (ex.: Histórico no Mais Ações do rodapé).
+  useEffect(() => {
+    if (painelSolicitado?.id) setPainel(painelSolicitado.id);
+  }, [painelSolicitado]);
 
   const redimensionar = (evento) => {
     evento.preventDefault();

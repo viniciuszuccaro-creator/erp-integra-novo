@@ -395,6 +395,17 @@ async function testSaldosPedido() {
   check('sobrefaturamento é sinalizado, não ocultado', excesso[0].divergencia && excesso[0].faturada === 20);
   const parcial = calc.calcularSaldosPedido(pedido, { ops: [{ status: 'Em Corte', progresso_fisico_kg: 10, itens_vinculados: [{ item_id: 'armado-0', quantidade: 8 }] }] }, permissoes);
   check('progresso em KG não vira peças produzidas', parcial[1].produzida === null);
+  // §23 cobrança por item: títulos oficiais do pedido rateados pela quantidade faturada
+  const comPreco = { ...pedido, itens_revenda: [{ ...pedido.itens_revenda[0], valor_unitario: 10 }], itens_armado_padrao: [{ ...pedido.itens_armado_padrao[0], valor_unitario: 5, quantidade_faturada: 2 }] };
+  const titulos = [{ valor: 100, valor_recebido: 40, status: 'Pendente' }, { valor: 900, valor_recebido: 0, status: 'Cancelado' }];
+  const cobranca = calc.calcularSaldosPedido(comPreco, { ...fontes, titulos }, { ...permissoes, financeiro: true });
+  check('cobrança rateia o título válido pela quantidade faturada', cobranca[0].valor_faturado === 30 && cobranca[0].cobrado === 30 && cobranca[0].saldo_cobrar === 45);
+  check('cobrança soma exatamente o saldo do pedido', Math.abs(cobranca.reduce((s, i) => s + (i.saldo_cobrar || 0), 0) - 60) < 0.000001);
+  check('título cancelado não entra na cobrança', cobranca[0].cobrado + cobranca[1].cobrado === 40);
+  const semTitulos = calc.calcularSaldosPedido(comPreco, fontes, { ...permissoes, financeiro: true });
+  check('sem títulos oficiais a cobrança fica sem vínculo', semTitulos.every((i) => i.cobrado === null && i.saldo_cobrar === null));
+  const semFinanceiro = calc.calcularSaldosPedido(comPreco, { ...fontes, titulos }, permissoes);
+  check('RBAC oculta cobrança sem permissão financeira', semFinanceiro.every((i) => i.cobrado === null && i.valor_faturado === null));
   const oculto = calc.calcularSaldosPedido(pedido, fontes, {});
   check('RBAC oculta todos os dados de domínios não autorizados', oculto.every((i) => ['separada', 'conferida', 'produzida', 'entregue', 'retirada', 'faturada', 'saldo_atender', 'saldo_faturar'].every((k) => i[k] === null)));
   const chamadas = [];
@@ -406,6 +417,7 @@ async function testSaldosPedido() {
     SeparacaoConferencia: entidade('SeparacaoConferencia', () => ({ items: [] })), OrdemProducao: entidade('OrdemProducao', () => ({ items: [] })),
     Entrega: entidade('Entrega', (f, o) => o.cursor ? ({ items: [fontes.entregas[1]], has_more: false }) : ({ items: [fontes.entregas[0]], has_more: true, next_cursor: 'pagina2' })),
     EntregaItens: entidade('EntregaItens', () => ({ items: fontes.itensEntrega.slice(0, 2) })),
+    ContaReceber: entidade('ContaReceber', () => ({ items: [] })),
   };
   const sdk = { asServiceRole: { entities: entidades } };
   const body = { pedido_id: pedido.id, group_id: pedido.group_id, empresa_id: pedido.empresa_id };

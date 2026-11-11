@@ -274,3 +274,42 @@ Pedidos cancelados, rascunhos e rejeitados não entram nos totais.
 ## Atualização posterior — 11/11/2026 (segunda rodada)
 
 O documento original `b03548fa1_ERP_ZUCCARO_COMERCIAL_360.docx` foi recebido e lido integralmente, incluindo as tabelas do mapa da tela e das 12 colunas que a extração de texto simples omitia. A auditoria, as correções e as pendências remanescentes estão em `RELATORIO_COMERCIAL_360_SEGUNDA_RODADA_11_11_2026.md`. As declarações anteriores de ✅ indicavam presença no código e não homologação; valem as pendências daquele relatório.
+
+---
+
+## Revisão 11/11/2026, 13h40 — §23: cobrança por item (último elo da cadeia)
+
+### O que foi entregue
+A linha de saldos oficiais por item (`SaldoItemNegociacao`, aberta pelo botão **Saldos por item** nas duas grades)
+passou a mostrar também o elo de **cobrança** — antes a cadeia parava no faturamento:
+
+- **Valor faturado** do item: quantidade oficialmente faturada × valor unitário do próprio item.
+- **Cobrado**: parcela já recebida nos títulos, rateada na proporção da quantidade faturada de cada item.
+- **Saldo a cobrar**: parcela em aberto, com o mesmo rateio.
+- Nota explícita de que a cobrança é **rateada pelos títulos do pedido**, para não confundir rateio com valor lançado por item.
+
+O cálculo é feito no servidor (`saldosCalculo.calcularCobranca`), dentro da mesma consulta já existente
+(`onEntregaUpdated › consultar_saldos_pedido`), que agora lê `ContaReceber` do próprio pedido no contexto ativo.
+Não há entidade, tela, rota ou consulta nova no frontend: apenas três campos a mais na linha de saldo existente.
+
+### Regras e limites (sem números inventados)
+- Títulos com status **Cancelado** não entram na soma.
+- Sem título válido, ou sem valor unitário/quantidade faturada verificável em qualquer item, **nada é rateado**: os campos
+  continuam `null` e a tela mostra "Sem vínculo verificável" — nunca zero.
+- O arredondamento é acumulado, de modo que a soma das parcelas dos itens é exatamente o valor do título e o recebido.
+- Exige **duas** permissões de leitura: `Financeiro / Contas a Receber` **e** `Fiscal / Notas Fiscais` (a quantidade
+  faturada é dado fiscal; sem ela o rateio não pode existir). Sem qualquer uma delas, os campos ficam ocultos e nulos.
+- Consulta sempre filtrada por `group_id` + `empresa_id` + `pedido_id`; nenhuma leitura fora do contexto ativo.
+
+### Verificação executada
+- `npm run build` concluído.
+- `npm run test:unit`: **392 pass · 0 fail** (11 skip), incluindo cinco novas checagens: rateio correto, soma exata do
+  saldo do pedido, título cancelado ignorado, ausência de título mantendo `null` e bloqueio por RBAC.
+
+### Pendências que seguem abertas (§23 e demais)
+1. **Reflexo nas mutações**: separação, produção, entrega e faturamento ainda não são limitados pelo saldo oficial ao
+   gravar — a consulta mostra o saldo, mas não impede tecnicamente o excesso no momento da gravação (a divergência
+   aparece sinalizada depois). É o próximo passo natural da cadeia.
+2. §4/§6 — telefonia/GoTo e bot de vendas com provedor real (exigem credencial de terceiro, sem simulação).
+3. §47/§48 — homologação dos fluxos e bloqueios no Testing Agent com backend real.
+4. Publicação e nova análise de segurança.

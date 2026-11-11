@@ -43,6 +43,7 @@ export async function consultarSaldosPedido(base44, ctx, body) {
     producao: temPermissaoLeitura(ctx, 'Produção', ['OrdemProducao', 'Ordens de Produção', 'ordens_producao']),
     entregas: temPermissaoLeitura(ctx, 'Expedição', ['Entrega', 'Entregas']),
     fiscal: temPermissaoLeitura(ctx, 'Fiscal', ['NotaFiscal', 'Notas Fiscais', 'notas_fiscais']),
+    financeiro: temPermissaoLeitura(ctx, 'Financeiro', ['ContaReceber', 'Contas a Receber', 'contas_receber']),
   };
   const filtro = { ...contexto, pedido_id };
   const [separacoes, ops, entregas] = await Promise.all([
@@ -53,7 +54,9 @@ export async function consultarSaldosPedido(base44, ctx, body) {
   const itensEntrega = permissoes.entregas ? await lerVinculados(base44.asServiceRole.entities.EntregaItens, {
     ...contexto, $or: [{ pedido_id }, ...(entregas.length ? [{ entrega_id: { $in: entregas.map((e) => e.id) } }] : [])],
   }) : [];
+  // §23 — cobrança: títulos oficiais do próprio pedido, no contexto ativo.
+  const titulos = permissoes.financeiro ? await lerVinculados(base44.asServiceRole.entities.ContaReceber, { ...contexto, pedido_id }) : [];
   return Response.json({ ok: true, pedido_id, pedido_versao: pedido.updated_date, permissoes,
-    itens: calcularSaldosPedido(pedido, { separacoes, ops, entregas, itensEntrega }, permissoes),
+    itens: calcularSaldosPedido(pedido, { separacoes, ops, entregas, itensEntrega, titulos }, permissoes),
   }, { headers: { 'Cache-Control': 'no-store' } });
 }

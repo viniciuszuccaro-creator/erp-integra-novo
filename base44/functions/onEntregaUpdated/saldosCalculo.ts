@@ -1,5 +1,6 @@
 // Cálculos puros das fontes proprietárias. Este arquivo não grava saldos nem status.
 const qtd = (v) => v !== null && v !== '' && Number.isFinite(Number(v)) && Number(v) >= 0 ? Number(v) : null;
+const dinheiro = (v) => v !== null && v !== '' && Number.isFinite(Number(v)) ? Number(v) : null;
 const arredondar = (v) => Math.round(v * 1e6) / 1e6;
 
 // A conclusão usa a cobertura da OP, nunca o status global de uma entrega ou o peso em KG.
@@ -39,7 +40,36 @@ export function itensCanonicos(pedido) {
     chave: `${prefixo}-${i}`, id_original: item.id || null, origem: prefixo,
     produto_id: item.produto_id || null, unidade: item.unidade || 'UN',
     quantidade: qtd(item.quantidade), faturada: Object.hasOwn(item, 'quantidade_faturada') ? qtd(item.quantidade_faturada) : null,
+    valor_unitario: dinheiro(item.valor_unitario),
   })));
+}
+
+// §23 — cobrança por item: rateio do título oficial do pedido pela quantidade realmente faturada.
+// Sem títulos válidos ou sem valor unitário em algum item faturado, nada é rateado (nunca inventar zero).
+export function calcularCobranca(itens, titulos = []) {
+  const numero = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+  const validos = (titulos || []).filter((t) => t.status !== 'Cancelado');
+  const valorTitulos = arredondar(validos.reduce((soma, t) => soma + numero(t.valor), 0));
+  const recebido = arredondar(validos.reduce((soma, t) => soma + numero(t.valor_recebido), 0));
+  const saldo = arredondar(Math.max(0, valorTitulos - recebido));
+  const pesos = itens.map((i) => i.faturada === null || !(i.faturada > 0) || i.valor_unitario === null ? null : arredondar(i.valor_unitario * i.faturada));
+  const total = pesos.every((p) => p !== null) ? arredondar(pesos.reduce((soma, p) => soma + p, 0)) : 0;
+  const rateavel = validos.length > 0 && total > 0;
+  let pesoAte = 0, recebidoAte = 0, saldoAte = 0;
+  const linhas = itens.map((_, indice) => {
+    const peso = pesos[indice];
+    if (!rateavel || peso === null) return { valor_faturado: peso, cobrado: null, saldo_cobrar: null };
+    pesoAte = arredondar(pesoAte + peso);
+    const fracao = pesoAte / total;
+    const recebidoParcial = arredondar(recebido * fracao), saldoParcial = arredondar(saldo * fracao);
+    const linha = { valor_faturado: peso, cobrado: arredondar(recebidoParcial - recebidoAte), saldo_cobrar: arredondar(saldoParcial - saldoAte) };
+    recebidoAte = recebidoParcial; saldoAte = saldoParcial;
+    return linha;
+  });
+  return {
+    pedido: rateavel ? { valor_titulos: valorTitulos, recebido, saldo } : null,
+    itens: linhas,
+  };
 }
 const candidatos = (itens, registro) => {
   const tipo = registro.origem_item || registro.tipo_item;
@@ -105,7 +135,7 @@ export function calcularSaldosPedido(pedido, fontes = {}, permissoes = {}) {
       entregue.marcar(itens); retirada.marcar(itens);
     }
   }
-  return itens.map((item) => {
+  const linhas = itens.map((item) => {
     const e = permissoes.entregas ? entregue.valor(item.chave) : null;
     const r = permissoes.entregas ? retirada.valor(item.chave) : null;
     const f = permissoes.fiscal ? item.faturada : null;
@@ -120,4 +150,13 @@ export function calcularSaldosPedido(pedido, fontes = {}, permissoes = {}) {
       divergencia: item.quantidade === null || [e, r, f, atendida, permissoes.separacao ? separada.valor(item.chave) : null, permissoes.separacao ? conferida.valor(item.chave) : null, permissoes.producao ? produzida.valor(item.chave) : null].some((v) => v !== null && v > item.quantidade + 0.000001),
     };
   });
+  // §23 — último elo da cadeia: cobrança por item, a partir do título oficial e da quantidade faturada oficial.
+  // Exige as duas permissões: sem a leitura fiscal, a quantidade faturada não pode ser rateada.
+  const cobranca = permissoes.financeiro && permissoes.fiscal ? calcularCobranca(itens, fontes.titulos || []) : null;
+  return linhas.map((item, i) => ({
+    ...item,
+    valor_faturado: cobranca ? cobranca.itens[i].valor_faturado : null,
+    cobrado: cobranca ? cobranca.itens[i].cobrado : null,
+    saldo_cobrar: cobranca ? cobranca.itens[i].saldo_cobrar : null,
+  }));
 }

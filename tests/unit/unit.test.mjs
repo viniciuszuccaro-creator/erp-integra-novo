@@ -14,6 +14,7 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { criarFonteConversao, carregarCentral360 } from './central360Fixtures.mjs';
 import testDerivacaoOrcamento from './derivacaoOrcamento.test.mjs';
+import testConclusaoEntrega from './conclusaoEntrega.test.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
@@ -538,6 +539,7 @@ async function runUnit() {
   await testSaldosPedido();
   await testConversaoPedido();
   await testDerivacaoOrcamento(log, ROOT);
+  await testConclusaoEntrega(log, ROOT);
 
   const total = results.pass + results.fail + results.skip;
   console.log(`\n${COLORS.bold}═══════════════════════════════════════════════════${COLORS.reset}`);

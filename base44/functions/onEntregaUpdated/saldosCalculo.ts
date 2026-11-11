@@ -1,6 +1,38 @@
-// Projeção somente leitura das fontes proprietárias. Não altera saldos ou status.
+// Cálculos puros das fontes proprietárias. Este arquivo não grava saldos nem status.
 const qtd = (v) => v !== null && v !== '' && Number.isFinite(Number(v)) && Number(v) >= 0 ? Number(v) : null;
 const arredondar = (v) => Math.round(v * 1e6) / 1e6;
+
+// A conclusão usa a cobertura da OP, nunca o status global de uma entrega ou o peso em KG.
+export function avaliarConclusaoOP(pedido, op, entregas = [], linhas = []) {
+  const negar = (motivo) => ({ pode_concluir: false, motivo });
+  const positivo = (v) => ['number', 'string'].includes(typeof v) && v !== '' && Number.isFinite(Number(v)) && Number(v) > 0;
+  const contexto = (r) => r.group_id === pedido.group_id && r.empresa_id === pedido.empresa_id;
+  if (!contexto(op) || op.pedido_id !== pedido.id || op.status !== 'Pronto para Expedição' || ['Cancelado', 'Rejeitado'].includes(pedido.status)) return negar('OP ou pedido fora do contexto/situação permitidos.');
+  if (!Array.isArray(op.itens_vinculados) || !op.itens_vinculados.length) return negar('OP sem vínculo verificável por item.');
+  const canonicos = itensCanonicos(pedido), previstos = new Map(), recebidos = new Map();
+  for (const vinculo of op.itens_vinculados) {
+    const item = resolverItem(canonicos, vinculo);
+    if ((vinculo.pedido_id && vinculo.pedido_id !== pedido.id) || !item || item.origem === 'revenda' || !vinculo.unidade || !positivo(vinculo.quantidade) || !positivo(item.quantidade)) return negar('Item, pedido, unidade ou quantidade da OP sem vínculo verificável.');
+    const total = arredondar((previstos.get(item.chave) || 0) + Number(vinculo.quantidade));
+    if (total > item.quantidade + 0.000001) return negar('Quantidade da OP excede o item do pedido.');
+    previstos.set(item.chave, total);
+  }
+  const confirmadas = new Map(entregas.filter((e) => contexto(e) && e.pedido_id === pedido.id && e.status === 'Entregue').map((e) => [e.id, e]));
+  for (const linha of linhas) {
+    const entrega = confirmadas.get(linha.entrega_id);
+    if (!entrega || !contexto(linha) || (linha.op_id !== op.id && entrega.op_id !== op.id)) continue;
+    if ((linha.op_id && linha.op_id !== op.id) || (entrega.op_id && entrega.op_id !== op.id) || (linha.pedido_id && linha.pedido_id !== pedido.id)) return negar('Vínculos conflitantes entre entrega, OP e pedido.');
+    const item = resolverItem(canonicos, linha);
+    if (!item || !previstos.has(item.chave) || !linha.unidade || !positivo(linha.quantidade)) return negar('Entrega da OP com item, unidade ou quantidade não verificável.');
+    recebidos.set(item.chave, arredondar((recebidos.get(item.chave) || 0) + Number(linha.quantidade)));
+  }
+  for (const [chave, quantidade] of previstos) {
+    const entregue = recebidos.get(chave) || 0;
+    if (entregue > quantidade + 0.000001) return negar('Quantidade entregue excede a quantidade vinculada à OP.');
+    if (entregue < quantidade - 0.000001) return negar('Atendimento parcial: ainda há quantidade da OP a entregar/retirar.');
+  }
+  return { pode_concluir: true, motivo: 'Todos os itens da OP foram atendidos em entregas/retiradas confirmadas e vinculadas.' };
+}
 const origens = [['itens_revenda', 'revenda'], ['itens_armado_padrao', 'armado'], ['itens_corte_dobra', 'corte']];
 export function itensCanonicos(pedido) {
   return origens.flatMap(([campo, prefixo]) => (pedido[campo] || []).map((item, i) => ({

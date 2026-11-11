@@ -3,7 +3,7 @@ import { temPermissaoLeitura, usuarioVinculado } from './comprovante.ts';
 
 const itens = (pagina) => Array.isArray(pagina) ? pagina : pagina?.items || [];
 // Só os registros deste pedido, em páginas; nunca consulta o banco inteiro nem trunca silenciosamente.
-async function lerVinculados(entidade, filtro) {
+export async function lerVinculados(entidade, filtro) {
   const registros = []; let cursor;
   do {
     const pagina = await entidade.filter(filtro, { sort: 'id', limit: 250, ...(cursor ? { cursor } : {}) });

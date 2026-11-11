@@ -12,7 +12,8 @@
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { criarFonteConversao } from './central360Fixtures.mjs';
+import { criarFonteConversao, carregarCentral360 } from './central360Fixtures.mjs';
+import testDerivacaoOrcamento from './derivacaoOrcamento.test.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
@@ -435,12 +436,7 @@ async function testSaldosPedido() {
 async function testConversaoPedido() {
   const ler = (p) => readFileSync(join(ROOT, p), 'utf-8');
   const url = (s) => `data:text/javascript;base64,${Buffer.from(s).toString('base64')}`;
-  const payloadUrl = url(ler('base44/functions/onOrcamentoConfirmed/pedidoConversaoPayload.ts'));
-  const numeroUrl = url(ler('base44/functions/onOrcamentoConfirmed/numeracaoPedido.ts'));
-  const conversaoUrl = url(ler('base44/functions/onOrcamentoConfirmed/conversaoPedido.ts').replace("'./pedidoConversaoPayload.ts'", JSON.stringify(payloadUrl)).replace("'./numeracaoPedido.ts'", JSON.stringify(numeroUrl)));
-  const { montarPedidoConversao } = await import(payloadUrl);
-  const { converterPedido } = await import(conversaoUrl);
-  const { reservarNumeroPedido } = await import(numeroUrl);
+  const { montarPedidoConversao, converterPedido, reservarNumeroPedido, endpoint } = await carregarCentral360(ROOT);
   const check = (nome, ok) => log(ok ? 'pass' : 'fail', `Conversão 360: ${nome}`);
   const clone = (v) => JSON.parse(JSON.stringify(v));
   const base = { id: '111111111111111111111111', group_id: '222222222222222222222222', empresa_id: '333333333333333333333333', cliente_id: '444444444444444444444444', cliente_nome: 'Cliente de teste', numero_orcamento: 'ORC-0001', status: 'Aprovado', updated_date: 'v1', condicoes_pagamento: 'À Vista', data_validade: '2999-01-01', prazo_entrega: '7 dias úteis', valor_total: 78, itens: [{ produto_id: '555555555555555555555555', descricao: 'Revenda', tipo: 'revenda', quantidade: 2, valor_unitario: 10, desconto_percentual: 10, valor_total: 18 }, { produto_id: '666666666666666666666666', descricao: 'Fabricação', tipo: 'fabricacao', quantidade: 3, valor_unitario: 20, valor_total: 60 }] };
@@ -505,10 +501,7 @@ async function testConversaoPedido() {
   check('reserva concorrente de número não repete sequência', new Set(numeros).size === 2);
   const legado = criarFonte(); legado.estado.pedidos.push({ group_id: base.group_id, empresa_id: base.empresa_id, numero_pedido: 'PED-000001' });
   check('número legado ocupado não é reutilizado', await reservarNumeroPedido(legado.client, base.group_id, base.empresa_id) === 'PED-000002');
-  const codigoEndpoint = ler('base44/functions/onOrcamentoConfirmed/entry.ts')
-    .replace("import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';", 'const createClientFromRequest = () => globalThis.__central360Cliente;')
-    .replace("'./conversaoPedido.ts'", JSON.stringify(conversaoUrl)).replace("'./pedidoConversaoPayload.ts'", JSON.stringify(payloadUrl));
-  const { default: endpoint } = await import(url(codigoEndpoint));
+
   const chamar = (fonte, body) => { globalThis.__central360Cliente = fonte.client; return endpoint(new Request('https://teste.local', { method: 'POST', body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } })); };
   const anonimo = criarFonte(); anonimo.estado.usuario = null;
   check('endpoint recusa chamada anônima', (await chamar(anonimo, entrada)).status === 401);
@@ -544,6 +537,7 @@ async function runUnit() {
   await testCentral360();
   await testSaldosPedido();
   await testConversaoPedido();
+  await testDerivacaoOrcamento(log, ROOT);
 
   const total = results.pass + results.fail + results.skip;
   console.log(`\n${COLORS.bold}═══════════════════════════════════════════════════${COLORS.reset}`);

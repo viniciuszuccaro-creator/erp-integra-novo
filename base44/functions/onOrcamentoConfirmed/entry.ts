@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { converterPedido } from './conversaoPedido.ts';
 import { montarPedidoConversao } from './pedidoConversaoPayload.ts';
+import { derivarOrcamento } from './derivacaoOrcamento.ts';
 // Guardas existentes preservadas; as ações novas reutilizam o mesmo contexto e validação.
 async function getUserAndPerfil(base44) {
   const user = await base44.auth.me().catch((e) => e.status === 401 ? null : Promise.reject(e));
@@ -49,15 +50,17 @@ async function auditarCentral(base44, user, registro, acao, descricao, depois = 
 // O mesmo endpoint existente recebe as ações da mesa; nunca confia em totais ou aprovação do navegador.
 async function processarCentral(base44, ctx, body) {
   const { acao, orcamento_id, group_id, empresa_id, versao } = body;
-  if (!['salvar', 'fechar', 'validar', 'converter'].includes(acao)) return Response.json({ error: 'Ação comercial inválida.' }, { status: 400 });
+  if (!['salvar', 'fechar', 'validar', 'converter', 'duplicar', 'desmembrar'].includes(acao)) return Response.json({ error: 'Ação comercial inválida.' }, { status: 400 });
   if (![orcamento_id, group_id, empresa_id, versao].every((valor) => typeof valor === 'string' && valor.trim())) {
     return Response.json({ error: 'Orçamento, grupo, empresa e versão são obrigatórios.' }, { status: 400 });
   }
   if (![orcamento_id, group_id, empresa_id].every((valor) => /^[a-f0-9]{24}$/i.test(valor))) {
     return Response.json({ error: 'Identificadores de orçamento, grupo ou empresa inválidos.' }, { status: 400 });
   }
-  const permissao = acao === 'converter' || body.preparar_pedido === true ? 'criar' : acao === 'fechar' ? 'aprovar' : acao === 'salvar' ? 'editar' : 'visualizar';
-  if (!possuiContexto(ctx.user, group_id, empresa_id) || !permiteCentral(ctx, permissao)) {
+  const derivacao = ['duplicar', 'desmembrar'].includes(acao);
+  const permissao = derivacao || acao === 'converter' || body.preparar_pedido === true ? 'criar' : acao === 'fechar' ? 'aprovar' : acao === 'salvar' ? 'editar' : 'visualizar';
+  if (!possuiContexto(ctx.user, group_id, empresa_id) || !permiteCentral(ctx, permissao)
+    || (derivacao && !permiteCentral(ctx, 'visualizar')) || (acao === 'desmembrar' && !permiteCentral(ctx, 'editar'))) {
     await auditarCentral(base44, ctx.user, { id: orcamento_id, group_id, empresa_id }, 'Bloqueio', 'Tentativa comercial sem permissão ou vínculo com o contexto.');
     return Response.json({ error: 'Sem permissão ou vínculo com o grupo/empresa para esta ação comercial.' }, { status: 403 });
   }
@@ -76,6 +79,12 @@ async function processarCentral(base44, ctx, body) {
     await auditarCentral(base44, ctx.user, registro, 'Bloqueio', error);
     return Response.json({ error, checagens }, { status });
   };
+  if (registro.origem_derivacao) {
+    const origem = pagina(await base44.entities.OrcamentoCliente.filter({ id: registro.origem_derivacao.orcamento_id, group_id, empresa_id }, { limit: 1 }))[0];
+    if (registro.origem_derivacao.confirmada !== true || !origem || (origem.derivacao_orcamento?.operacao_id === registro.origem_derivacao.operacao_id && origem.derivacao_orcamento.fase !== 'concluida')) return negar('A origem deste orçamento ainda está em conciliação. Conclua a operação na proposta de origem.', 409);
+  }
+  if (derivacao) return derivarOrcamento(base44, ctx, body, registro, auditarCentral);
+  if (registro.derivacao_orcamento && registro.derivacao_orcamento.fase !== 'concluida') return negar('Retome a duplicação/desmembramento pendente antes de editar, fechar ou converter a proposta.', 409);
   if (acao === 'converter') return converterPedido(base44, ctx, body, registro, (entrada) => processarCentral(base44, ctx, entrada), auditarCentral);
   if (body.preparar_pedido === true && (acao !== 'validar' || registro.status !== 'Aprovado')) return negar('Aprove a proposta antes de preparar a conversão.', 409);
   if (body.preparar_pedido === true && registro.conversao_pedido) {

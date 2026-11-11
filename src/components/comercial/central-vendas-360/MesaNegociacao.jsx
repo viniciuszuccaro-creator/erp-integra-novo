@@ -46,7 +46,7 @@ export default function MesaNegociacao({
   const [dadosOrcamento, setDadosOrcamento] = useState({ data_validade: negociacao.registro?.data_validade || '', condicoes_pagamento: negociacao.registro?.condicoes_pagamento || '', prazo_entrega: negociacao.registro?.prazo_entrega || '' });
   const [envioAberto, setEnvioAberto] = useState(false);
   const [destinoAberto, setDestinoAberto] = useState(false);
-  const [desmembrarAberto, setDesmembrarAberto] = useState(false);
+  const [derivacaoAberta, setDerivacaoAberta] = useState(null);
   const [importarAberto, setImportarAberto] = useState(false);
 
   const { openWindow, closeWindow } = useWindow();
@@ -273,11 +273,11 @@ export default function MesaNegociacao({
         onImprimir={acoes.podeExportar ? imprimir : undefined}
         enviando={enviando}
         enviarDesabilitado={sujo || !acoes.podeEditar || salvando}
-        onDuplicar={negociacao.origem === 'orcamento' && acoes.podeCriar
-          ? async () => { const criado = await acoesOrcamento.duplicar(); if (criado) onVoltar?.(); }
+        onDuplicar={negociacao.origem === 'orcamento' && acoes.podeCriar && !sujo && !rascunho.pendente && !rascunho.carregando
+          ? () => setDerivacaoAberta('duplicar')
           : undefined}
-        onDesmembrar={negociacao.origem === 'orcamento' && negociacao.editavel && acoes.podeEditar && acoes.podeCriar && !sujo
-          ? () => setDesmembrarAberto(true)
+        onDesmembrar={negociacao.origem === 'orcamento' && negociacao.editavel && acoes.podeEditar && acoes.podeCriar && !sujo && !rascunho.pendente && !rascunho.carregando
+          ? () => setDerivacaoAberta('desmembrar')
           : undefined}
         onImportar={negociacao.origem === 'orcamento' && negociacao.editavel && acoes.podeEditar
           ? () => setImportarAberto(true)
@@ -293,16 +293,16 @@ export default function MesaNegociacao({
       />
 
       <DesmembrarDialog
-        aberto={desmembrarAberto}
-        onOpenChange={setDesmembrarAberto}
+        aberto={Boolean(derivacaoAberta)}
+        modo={derivacaoAberta || 'desmembrar'}
+        onOpenChange={(aberto) => { if (!aberto) setDerivacaoAberta(null); }}
         itens={itens}
+        erro={acoesOrcamento.erroFechamento}
+        controle={negociacao.registro.derivacao_orcamento}
         executando={acoesOrcamento.executando}
-        onConfirmar={async (ids) => {
-          const ok = await acoesOrcamento.desmembrar(ids);
-          if (ok) {
-            setDesmembrarAberto(false);
-            onVoltar?.();
-          }
+        onConfirmar={async (ids, revisado) => {
+          const ok = derivacaoAberta === 'duplicar' ? await acoesOrcamento.duplicar(revisado) : await acoesOrcamento.desmembrar(ids, revisado);
+          if (ok) { setDerivacaoAberta(null); onVoltar?.(); }
         }}
       />
 

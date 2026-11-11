@@ -1,19 +1,11 @@
 // Ações do orçamento na Central 360° — duplicar, desmembrar e importar itens de pedido anterior.
-// Multiempresa: createInContext/updateInContext carimbam group_id/empresa_id e auditam.
+// Duplicação e desmembramento usam a autoridade de servidor do endpoint comercial existente.
 import { useRef, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
-import { useUser } from '@/components/lib/UserContext';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import useAcoesComerciais from './useAcoesComerciais';
-import { proximoNumeroOrcamento } from './useNovaNegociacao';
-import { totalizarItens, pedidoParaNegociacao } from './negociacaoUtils';
-
-const somarDias = (dias) => {
-  const data = new Date();
-  data.setDate(data.getDate() + dias);
-  return data.toISOString().slice(0, 10);
-};
+import { pedidoParaNegociacao } from './negociacaoUtils';
 
 const itemParaOrcamento = (item) => ({
   produto_id: item.produto_id || null,
@@ -31,10 +23,11 @@ export default function useAcoesOrcamento({ negociacao, onAtualizar }) {
   const [importando, setImportando] = useState(false);
   const [erroFechamento, setErroFechamento] = useState('');
   const [checagensServidor, setChecagensServidor] = useState([]);
-  const { user } = useUser();
-  const { createInContext, updateInContext, filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
+  const { empresaAtual, grupoAtual } = useContextoVisual();
   const acoes = useAcoesComerciais();
   const conversaoEmCurso = useRef(false);
+  const derivacaoEmCurso = useRef(false);
+  const tentativaDerivacao = useRef(null);
 
   const solicitarConversao = async (dados) => {
     if (!acoes.podeCriar) throw new Error('Sem permissão para criar pedidos.');
@@ -101,119 +94,41 @@ export default function useAcoesOrcamento({ negociacao, onAtualizar }) {
     }
   };
 
-  const registrarAuditoria = (acao, descricao, registroId) => {
-    void base44.entities.AuditLog.create({
-      usuario: user?.full_name || user?.email || 'Usuário',
-      usuario_id: user?.id || null,
-      acao: acao === 'Duplicação' || acao === 'Desmembramento' ? 'Criação' : acao,
-      modulo: 'Comercial',
-      tipo_auditoria: 'entidade',
-      entidade: 'OrcamentoCliente',
-      registro_id: registroId || negociacao.registro?.id || null,
-      descricao,
-      empresa_id: empresaAtual?.id || negociacao.registro?.empresa_id || null,
-      group_id: grupoAtual?.id || negociacao.registro?.group_id || null,
-      data_hora: new Date().toISOString(),
-    }).catch((erro) => { console.error('AuditLog falhou (ações do orçamento):', erro); });
-  };
-
-  const proximoNumero = async () => {
-    const lista = await filterInContext('OrcamentoCliente', {}, '-created_date', 100);
-    return proximoNumeroOrcamento(Array.isArray(lista) ? lista : []);
-  };
-
-  const criar = async ({ itens, observacoes }) => {
-    const numero = await proximoNumero();
-    const totais = totalizarItens(itens);
-    return createInContext('OrcamentoCliente', {
-      group_id: negociacao.registro.group_id,
-      empresa_id: negociacao.registro.empresa_id,
-      numero_orcamento: numero,
-      cliente_id: negociacao.cliente_id,
-      cliente_nome: negociacao.cliente_nome,
-      cliente_email: negociacao.registro?.cliente_email || null,
-      vendedor_responsavel: user?.full_name || user?.email || 'Usuário',
-      vendedor_responsavel_id: user?.id || null,
-      data_criacao: new Date().toISOString().slice(0, 10),
-      data_validade: somarDias(7),
-      itens: itens.map(itemParaOrcamento),
-      valor_total: Number(totais.total.toFixed(2)),
-      condicoes_pagamento: negociacao.registro?.condicoes_pagamento || 'À Vista',
-      prazo_entrega: negociacao.registro?.prazo_entrega || '7 dias úteis',
-      observacoes,
-      status: 'Pendente',
-    });
-  };
-
-  const duplicar = async () => {
-    if (!acoes.podeCriar) {
-      toast.error('Sem permissão para duplicar orçamentos.');
+  const derivar = async (acao, idsSelecionados = [], revisado = false) => {
+    if (derivacaoEmCurso.current) return null;
+    setErroFechamento('');
+    if (!acoes.podeCriar || (acao === 'desmembrar' && !acoes.podeEditar) || !revisado) {
+      setErroFechamento('Permissão e conferência explícita são obrigatórias para esta ação.');
       return null;
     }
+    const registro = negociacao.registro;
+    const controle = registro.derivacao_orcamento;
+    const pendente = controle && controle.fase !== 'concluida';
+    const indices = pendente ? controle.indices : acao === 'duplicar' ? [] : idsSelecionados.map((id) => negociacao.itens.findIndex((i) => i.id === id));
+    const chave = JSON.stringify([registro.id, acao, indices, pendente ? controle.versao_origem : registro.updated_date]);
+    if (!tentativaDerivacao.current || tentativaDerivacao.current.chave !== chave) tentativaDerivacao.current = { chave, id: pendente ? controle.operacao_id : crypto.randomUUID() };
+    derivacaoEmCurso.current = true;
     setExecutando(true);
     try {
-      const criado = await criar({
-        itens: negociacao.itens,
-        observacoes: `Duplicado do orçamento ${negociacao.numero}`,
+      const { data } = await base44.functions.invoke('onOrcamentoConfirmed', {
+        acao, orcamento_id: registro.id, group_id: registro.group_id, empresa_id: registro.empresa_id,
+        versao: pendente ? controle.versao_origem : registro.updated_date,
+        operacao_id: tentativaDerivacao.current.id, indices, revisado,
       });
-      registrarAuditoria(
-        'Duplicação',
-        `Orçamento ${negociacao.numero} duplicado em ${criado?.numero_orcamento}`,
-        criado?.id
-      );
-      toast.success(`Orçamento ${criado?.numero_orcamento || ''} criado a partir de ${negociacao.numero}.`);
+      if (!data?.ok) throw new Error(data?.error || 'Operação não confirmada.');
+      toast.success(data.repetida ? 'Orçamento existente conciliado, sem duplicação.' : `Orçamento ${data.novo_orcamento.numero_orcamento} ${acao === 'duplicar' ? 'duplicado' : 'desmembrado'}.`);
       await onAtualizar?.();
-      return criado;
+      return data.novo_orcamento;
     } catch (erro) {
-      toast.error(`Erro ao duplicar: ${erro.message}`);
+      setErroFechamento(erro?.response?.data?.error || erro?.data?.error || erro.message || 'Não foi possível concluir a operação.');
       return null;
     } finally {
+      derivacaoEmCurso.current = false;
       setExecutando(false);
     }
   };
-
-  const desmembrar = async (idsSelecionados = []) => {
-    if (!acoes.podeEditar || !acoes.podeCriar) {
-      toast.error('Sem permissão para desmembrar o orçamento.');
-      return false;
-    }
-    const marcados = new Set(idsSelecionados);
-    if (!marcados.size) {
-      toast.error('Selecione ao menos um item para desmembrar.');
-      return false;
-    }
-    const mover = negociacao.itens.filter((item) => marcados.has(item.id));
-    const manter = negociacao.itens.filter((item) => !marcados.has(item.id));
-    if (!mover.length) {
-      toast.error('Os itens selecionados não estão mais na negociação.');
-      return false;
-    }
-    setExecutando(true);
-    try {
-      const criado = await criar({
-        itens: mover,
-        observacoes: `Desmembrado do orçamento ${negociacao.numero}`,
-      });
-      const totaisManter = totalizarItens(manter);
-      await updateInContext('OrcamentoCliente', negociacao.registro.id, {
-        itens: manter.map(itemParaOrcamento),
-        valor_total: Number(totaisManter.total.toFixed(2)),
-      });
-      registrarAuditoria(
-        'Desmembramento',
-        `${mover.length} item(ns) do orçamento ${negociacao.numero} movidos para ${criado?.numero_orcamento}`,
-        criado?.id
-      );
-      toast.success(`Itens movidos para o novo orçamento ${criado?.numero_orcamento || ''}.`);
-      await onAtualizar?.();
-      return true;
-    } catch (erro) {
-      toast.error(`Erro ao desmembrar: ${erro.message}`);
-      return false;
-    } finally {
-      setExecutando(false);
-    }
-  };
+  const duplicar = (revisado) => derivar('duplicar', [], revisado);
+  const desmembrar = async (ids, revisado) => Boolean(await derivar('desmembrar', ids, revisado));
 
   // Repetir pedido: copia os itens como base e revalida preço pelo cadastro oficial de Produto
   const importarItens = async (pedido) => {

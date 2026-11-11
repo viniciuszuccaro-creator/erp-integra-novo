@@ -1,5 +1,9 @@
-// §25/§26 do dossiê — contadores reais de entregas do cliente no Cliente 360°
+// §25/§26/§27 do dossiê — contadores reais de entregas do cliente no Cliente 360°
 // Somente leitura; escopo grupo/empresa injetado por useRLSQuery e permissão do módulo Expedição.
+// Assina a entidade Entrega para refletir imediatamente o que o App do Motorista grava.
+import { useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 import useRLSQuery from '@/components/lib/useRLSQuery';
 import usePermissions from '@/components/lib/usePermissions';
 
@@ -25,17 +29,30 @@ export function contarEntregas(entregas = []) {
   }, { total: 0, hoje: 0, emRota: 0, prontas: 0, rejeitadas: 0, reagendadas: 0, comOcorrencia: 0, atrasadas: 0 });
 }
 
-export default function usePainelEntregasCliente({ clienteId, ativo = false }) {
+export default function usePainelEntregasCliente({ clienteId, pedidoId, ativo = false }) {
   const { hasPermission, isLoading: carregandoPermissao } = usePermissions();
   const permitido = hasPermission('Expedicao', null, 'ver');
+  const queryClient = useQueryClient();
+
+  const filtro = pedidoId ? { pedido_id: pedidoId } : { cliente_id: clienteId };
 
   const { data: entregas = [], isLoading } = useRLSQuery(
     'Entrega',
-    { cliente_id: clienteId },
+    filtro,
     '-data_previsao',
     100,
-    { enabled: ativo && permitido && Boolean(clienteId), staleTime: 30000 }
+    { enabled: ativo && permitido && Boolean(pedidoId || clienteId), staleTime: 30000 }
   );
+
+  useEffect(() => {
+    if (!ativo || !permitido || (!pedidoId && !clienteId)) return undefined;
+    const cancelar = base44.entities.Entrega.subscribe(() => {
+      queryClient.invalidateQueries({
+        predicate: (consulta) => Array.isArray(consulta.queryKey) && consulta.queryKey.includes('Entrega'),
+      });
+    });
+    return cancelar;
+  }, [ativo, permitido, clienteId, pedidoId, queryClient]);
 
   return {
     entregas,

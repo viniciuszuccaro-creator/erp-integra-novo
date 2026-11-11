@@ -192,5 +192,31 @@ Regras em `usePainelEntregasCliente.jsx`; leitura protegida pela permissão do m
 3. §27 — comprovantes digitais completos e reflexo do App do Motorista na Central.
 4. §37 — dashboard do vendedor: não existe hoje fonte de meta por vendedor no cadastro (só `RegiaoAtendimento.meta_vendas_mensal`); depende de campo novo em cadastro existente e da tela que o alimenta.
 5. §6 — bot de vendas autônomo; §4 — GoTo/telefonia com provedor real.
-6. §26 — detalhe navegável do mapa a partir do cartão de entrega.
-7. Publicação e nova análise de segurança.
+6. Publicação e nova análise de segurança.
+
+---
+
+## Revisão 11/11/2026, 09h39 — itens §26 e §27 concluídos
+
+### §26 — detalhe navegável do mapa (concluído)
+Cada cartão de entrega do painel **Entregas** ganhou a ação **Ver no mapa**, que abre o painel de mapa
+da própria Central 360° com os pontos da negociação (os pontos continuam numerados e com popup de
+cliente, situação e janela de entrega).
+
+### §27 — reflexo imediato do App do Motorista (concluído)
+`usePainelEntregasCliente` assina a entidade `Entrega` enquanto o painel está aberto e invalida as consultas
+de entrega a cada evento, de modo que status, comprovante, ocorrência e reagendamento gravados pelo
+motorista aparecem na Central sem recarregar a página. A assinatura é cancelada ao fechar o painel.
+
+### Verificação
+- `npm run build` concluído; `npx eslint` sem erros nos três arquivos alterados.
+- Consulta por pedido quando a negociação é pedido e por cliente quando é orçamento, sempre no contexto
+  de grupo/empresa e protegida pela permissão do módulo Expedição.
+
+### Pendente atualizado
+1. Testes §47/§48 no Testing Agent.
+2. §23 — saldos parciais por item.
+3. §37 — dashboard do vendedor (depende de meta por vendedor, inexistente nos cadastros atuais).
+4. §6 — bot de vendas autônomo; §4 — GoTo/telefonia com provedor real.
+5. §27 — foto da mercadoria/local e canhoto além dos campos já existentes em `Entrega.comprovante_entrega`.
+6. Publicação e nova análise de segurança.

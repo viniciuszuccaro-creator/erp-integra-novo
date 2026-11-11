@@ -15,14 +15,14 @@ import PainelMapaEntregas from './PainelMapaEntregas';
 import { brl, dataCurta } from '../negociacaoUtils';
 
 export default function PainelCorpo({
-  painel, negociacao, cliente, alertas = [], validacao, onSelecionarNegociacao,
+  painel, negociacao, cliente, alertas = [], validacao, onSelecionarNegociacao, onIrParaPainel,
 }) {
   const { pedidoId, clienteId } = FILTRO_RELACIONADO(negociacao);
   const registro = negociacao?.registro || {};
   const financeiro = useTitulosFinanceiros({ clienteId, pedidoId, modo: 'cliente', ativo: painel === 'financeiro' });
   const pagamento = useTitulosFinanceiros({ clienteId, pedidoId, modo: 'pedido', ativo: painel === 'pagamento' });
   const estoque = usePainelEstoque({ itens: negociacao?.itens, ativo: painel === 'estoque' });
-  const entregasCliente = usePainelEntregasCliente({ clienteId, ativo: painel === 'entregas' });
+  const entregasCliente = usePainelEntregasCliente({ clienteId, pedidoId, ativo: painel === 'entregas' });
 
   switch (painel) {
     case 'copiloto':
@@ -137,17 +137,29 @@ export default function PainelCorpo({
               </p>
               <PainelRegistros
                 entity="Entrega"
-                filter={{ pedido_id: pedidoId }}
-                registros={pedidoId ? undefined : entregasCliente.entregas}
+                filter={pedidoId ? { pedido_id: pedidoId } : { cliente_id: clienteId }}
+                registros={entregasCliente.entregas}
                 carregando={entregasCliente.isLoading}
                 vazio={entregasCliente.permitido
-                  ? 'Nenhuma entrega programada para este pedido.'
+                  ? (pedidoId
+                    ? 'Nenhuma entrega programada para este pedido.'
+                    : 'Nenhuma entrega programada para este cliente.')
                   : 'Sem permissão de leitura no módulo Expedição.'}
                 campos={[
                   { key: 'numero_pedido', destaque: true },
                   { key: 'status', label: 'Situação' },
                   { key: 'data_previsao', label: 'Previsão', tipo: 'data' },
                 ]}
+                renderAcao={(entrega) => (
+                  <button
+                    type="button"
+                    onClick={() => onIrParaPainel?.('mapa')}
+                    className="mt-1 inline-flex items-center rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700 hover:bg-blue-100"
+                    title="Abrir o mapa com os pontos desta negociação"
+                  >
+                    Ver no mapa
+                  </button>
+                )}
               />
             </div>
           }

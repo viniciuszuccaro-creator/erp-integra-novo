@@ -109,6 +109,7 @@ export default function Cliente360Lateral({
                 alertas={alertas}
                 validacao={validacao}
                 onSelecionarNegociacao={onSelecionarNegociacao}
+                onIrParaPainel={(id) => setPainel(id || 'cliente')}
               />
             </div>
           </div>

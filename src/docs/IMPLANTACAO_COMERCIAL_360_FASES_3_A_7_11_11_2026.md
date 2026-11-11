@@ -216,7 +216,24 @@ motorista aparecem na Central sem recarregar a página. A assinatura é cancelad
 ### Pendente atualizado
 1. Testes §47/§48 no Testing Agent.
 2. §23 — saldos parciais por item.
-3. §37 — dashboard do vendedor (depende de meta por vendedor, inexistente nos cadastros atuais).
-4. §6 — bot de vendas autônomo; §4 — GoTo/telefonia com provedor real.
-5. §27 — foto da mercadoria/local e canhoto além dos campos já existentes em `Entrega.comprovante_entrega`.
-6. Publicação e nova análise de segurança.
+3. §6 — bot de vendas autônomo; §4 — GoTo/telefonia com provedor real.
+4. §27 — foto da mercadoria/local e canhoto além dos campos já existentes em `Entrega.comprovante_entrega`.
+5. Publicação e nova análise de segurança.
+
+---
+
+## Revisão 11/11/2026, 09h55 — §37 concluído (painel do vendedor)
+
+Entregue como painel da própria Central 360° (atalho **Vendedor**), sem tela nova:
+- vendas de hoje e do mês, quantidade de pedidos e ticket médio do vendedor logado;
+- meta mensal comparada ao realizado, com percentual de atingimento, barra de progresso e quanto falta;
+- clientes para retornar (interações com `data_proxima_acao` vencida) com atalho para o painel Retornos.
+
+A meta é gravada em `ConfiguracaoSistema` na chave `comercial.meta_vendas_mensal.<id do usuário>`,
+com carimbo de `group_id`/`empresa_id`, sanitização e log em `AuditLog` (Regra-Mãe 5a/5c/5d).
+A edição da meta exige permissão de edição no módulo Comercial; a leitura exige permissão de visualização.
+Pedidos cancelados, rascunhos e rejeitados não entram nos totais.
+
+### Verificação
+- `npm run build` concluído; `npx eslint` sem erros nos arquivos alterados.
+- Nenhuma entidade, rota ou componente novo de tela: apenas um painel dentro do componente existente.

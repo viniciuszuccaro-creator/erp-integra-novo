@@ -12,6 +12,7 @@ import usePainelEntregasCliente from './usePainelEntregasCliente';
 import PainelRetornos from './PainelRetornos';
 import PainelCopiloto from './PainelCopiloto';
 import PainelMapaEntregas from './PainelMapaEntregas';
+import PainelVendedor from './PainelVendedor';
 import { brl, dataCurta } from '../negociacaoUtils';
 
 export default function PainelCorpo({
@@ -166,6 +167,8 @@ export default function PainelCorpo({
           nota="Contadores do cliente e entregas reais no contexto ativo. Separação, roteirização e comprovantes permanecem nas telas de Expedição e Logística."
         />
       );
+    case 'vendedor':
+      return <PainelVendedor onIrParaPainel={onIrParaPainel} />;
     case 'fiscal':
       return (
         <PainelRegistros

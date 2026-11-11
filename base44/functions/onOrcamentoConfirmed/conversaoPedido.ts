@@ -18,9 +18,13 @@ export async function converterPedido(base44, ctx, body, registro, validar, audi
   let controle = registro.conversao_pedido;
   const encontrados = await buscar();
   if (encontrados.length > 1) return negar('Há mais de um pedido vinculado à proposta. Revise os vínculos antes de continuar.');
+  const auditarVinculo = async (antes, depois) => {
+    await auditar(base44, ctx.user, antes, 'Edição', `Conversão confirmada; pedido ${depois.pedido_gerado_id}.`, depois);
+  };
   if (registro.pedido_gerado_id) {
     const pedido = pagina(await base44.entities.Pedido.filter({ id: registro.pedido_gerado_id, group_id: registro.group_id, empresa_id: registro.empresa_id }, { limit: 1 }))[0];
     if (!pedido || pedido.cliente_id !== registro.cliente_id) return negar('O vínculo com o pedido exige revisão no contexto da empresa.');
+    if (controle?.fase === 'concluida') await auditarVinculo(registro, registro);
     return Response.json({ ok: true, pedido, orcamento: registro, repetida: true });
   }
   const concluir = async (pedido) => {
@@ -41,13 +45,14 @@ export async function converterPedido(base44, ctx, body, registro, validar, audi
     const resultado = await api.OrcamentoCliente.updateMany({ ...escopo, updated_date: atual.updated_date, status: 'Aprovado', 'conversao_pedido.token': estado.token }, { $set: patch });
     if (resultado.updated !== 1) return negar('O pedido já foi criado; o vínculo mudou durante a gravação. Reabra a proposta para conciliar, sem criar outro pedido.');
     const depois = pagina(await api.OrcamentoCliente.filter(escopo, { limit: 1 }))[0];
-    await auditar(base44, ctx.user, registro, 'Edição', `Orçamento convertido no pedido ${pedido.numero_pedido}.`, depois);
+    await auditarVinculo(registro, depois);
     return Response.json({ ok: true, pedido, orcamento: depois, repetida: Boolean(encontrados.length) });
   };
   if (encontrados.length) return concluir(encontrados[0]);
   if (registro.status !== 'Aprovado') return negar('Somente uma proposta aprovada pode gerar pedido.');
   if (controle && controle.operacao_id !== body.operacao_id) return negar('Esta proposta já possui uma conversão iniciada. Reabra a proposta e retome a mesma operação.');
-  if (controle && ['preparando', 'criando', 'revisao'].includes(controle.fase)) return negar(controle.fase === 'preparando' ? 'Numeração em processamento. Aguarde antes de reenviar.' : 'Criação em processamento ou com resultado incerto. Se o pedido aparecer, a próxima confirmação concilia o vínculo; nenhuma segunda criação será executada.');
+  const preparacaoExpirada = controle?.fase === 'preparando' && Number.isFinite(Date.parse(controle.iniciada_em)) && Date.parse(controle.iniciada_em) < Date.now() - 180000;
+  if (controle && ['preparando', 'criando', 'revisao'].includes(controle.fase) && !preparacaoExpirada) return negar(controle.fase === 'preparando' ? 'Numeração em processamento. Aguarde três minutos para retomar uma preparação interrompida antes da criação.' : 'Criação em processamento ou com resultado incerto. Se o pedido aparecer, a próxima confirmação concilia o vínculo; nenhuma segunda criação será executada.');
   if (!controle && registro.updated_date !== body.versao) return negar('A proposta foi alterada. Recarregue e revise antes de converter.');
   if (controle && controle.versao_origem !== body.versao) return negar('A versão de origem desta operação não corresponde à proposta conferida.');
   if (!body.formulario || typeof body.formulario !== 'object' || Array.isArray(body.formulario)) return negar('Informe os dados conferidos do pedido.', 400);
@@ -61,7 +66,7 @@ export async function converterPedido(base44, ctx, body, registro, validar, audi
   if (!validacao.ok) return validacao;
   const anterior = controle;
   controle = { ...controle, operacao_id: body.operacao_id, token: crypto.randomUUID(), versao_origem: controle?.versao_origem || body.versao, usuario_id: ctx.user.id, fase: 'preparando', destino: body.destino, iniciada_em: new Date().toISOString(), payload_hash: payloadHash };
-  const condicao = anterior ? { 'conversao_pedido.token': anterior.token, 'conversao_pedido.fase': 'preparada' } : { $or: [{ conversao_pedido: { $exists: false } }, { conversao_pedido: null }] };
+  const condicao = anterior ? { 'conversao_pedido.token': anterior.token, 'conversao_pedido.fase': anterior.fase } : { $or: [{ conversao_pedido: { $exists: false } }, { conversao_pedido: null }] };
   const reserva = await api.OrcamentoCliente.updateMany({ ...escopo, status: 'Aprovado', updated_date: registro.updated_date, ...condicao }, { $set: { conversao_pedido: controle } });
   if (reserva.updated !== 1) return negar('Outra confirmação assumiu a proposta. Nenhum segundo pedido foi criado.');
   let criacaoIniciada = false;

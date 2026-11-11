@@ -510,9 +510,8 @@ async function testConversaoPedido() {
     try { const f = clone(form); alterar(f); montarPedidoConversao(base, user, 'producao', f); } catch { bloqueou = true; }
     check(`bloqueia ${nome}`, bloqueou);
   }
-  let bloqueouDestino = false;
-  try { montarPedidoConversao(base, user, 'retira'); } catch { bloqueouDestino = true; }
-  check('fabricação não salta produção', bloqueouDestino);
+  const fabricacaoRetira = montarPedidoConversao(base, user, 'retira');
+  check('retirada preserva fabricação e aguarda aprovação sem antecipar execução', fabricacaoRetira.itens_armado_padrao.length === 1 && fabricacaoRetira.tipo_frete === 'Retirada' && fabricacaoRetira.status === 'Aguardando Aprovação');
   const fHtml = { ...clone(form), observacoes_internas: '<b>Observação</b> javascript:teste' };
   check('texto não confiável é sanitizado', montarPedidoConversao(base, user, 'producao', fHtml).observacoes_internas === 'Observação teste');
   const caso = criarFonte();
@@ -539,6 +538,9 @@ async function testConversaoPedido() {
   const anteriorPost = criarFonte({ falharNumero: true });
   await anteriorPost.executar();
   check('falha anterior ao POST permite retomada segura', anteriorPost.estado.posts === 0 && anteriorPost.estado.orcamento.conversao_pedido.fase === 'preparada' && (await anteriorPost.executar()).status === 200);
+  const interrompida = criarFonte();
+  interrompida.estado.orcamento.conversao_pedido = { operacao_id: op, token: 'token-anterior', fase: 'preparando', destino: 'producao', versao_origem: 'v1', iniciada_em: '2000-01-01T00:00:00.000Z' };
+  check('preparação interrompida antes do POST pode ser retomada com reserva condicional', (await interrompida.executar()).status === 200 && interrompida.estado.posts === 1);
   const versaoErrada = criarFonte();
   check('versão desatualizada não cria pedido', (await versaoErrada.executar({ ...entrada, versao: 'antiga' })).status === 409 && versaoErrada.estado.posts === 0);
   const alterado = criarFonte({ alterarOrigem: true });
@@ -586,6 +588,7 @@ async function runUnit() {
   testLayoutResponsiveness();
   await testCentral360();
   await testSaldosPedido();
+  await testConversaoPedido();
 
   const total = results.pass + results.fail + results.skip;
   console.log(`\n${COLORS.bold}═══════════════════════════════════════════════════${COLORS.reset}`);

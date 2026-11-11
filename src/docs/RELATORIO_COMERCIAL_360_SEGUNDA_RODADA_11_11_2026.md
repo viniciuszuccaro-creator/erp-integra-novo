@@ -37,7 +37,7 @@ Nenhum módulo, tela ou entidade nova foi criada. As alterações ocorreram em a
 1. **§47/§48 — homologação E2E/RBAC/multiempresa** no Testing Agent, com backend real: ABERTO→FECHADO, bloqueio financeiro, aprovação→fechado, produção→entrega/retira, entrega→entregue/rejeitada, pedido misto, faturamento e entrega parciais, cancelamento, reabertura, usuário sem permissão, empresa diferente, `empresa_id`/`group_id` maliciosos, desconto e preço não autorizados. Nada disso foi executado aqui.
 2. **§23 — execução parcial por item**: a consulta de saldos oficiais foi integrada às duas grades nesta continuação (evidências abaixo). A cadeia de mutações separação → produção → entrega/retirada → faturamento → cobrança por item ainda não está integralmente implementada/homologada; esta consulta não a substitui.
 3. **§6 — bot de vendas autônomo** com contador de exceções, autonomia por política e aprendizado supervisionado; **§4 — GoTo/telefonia** com provedor real. Ambos seguem sem provedor conectado.
-4. **§5/§18 — autoridade de servidor nos demais caminhos**: duplicar, desmembrar, criar/editar pedido e a criação direta de pedido a partir do orçamento ainda usam escrita do navegador com as regras de acesso existentes. O endpoint cobre salvar/fechar/validar; não é bloqueio global de todas as APIs.
+4. **§5/§18 — autoridade de servidor nos demais caminhos**: duplicar, desmembrar e criar/editar pedido fora da conversão da Mesa ainda usam escrita do navegador com as regras de acesso existentes. A conversão da Mesa passou pelo servidor na continuação abaixo. Isso não é bloqueio global de todas as APIs, nem consolida automaticamente o conversor legado de eventos.
 5. **§18 — alçadas completas** por categoria/nível e histórico imutável de contraproposta como registro próprio; a contraproposta é gravada na solicitação, mas a aplicação de limite continua no cadastro do cliente.
 6. **§7 — comprovantes**: a consolidação com o caminho comercial legado (`ComprovanteEntregaDigital`, que também mexe em estoque/pedido) segue pendente e não foi substituída para não duplicar efeitos.
 7. **§7 — documentos**: agendamento de envio, reimpressão de peças com alçada/segunda via e preferências por cliente ainda não estão implementados.
@@ -76,6 +76,30 @@ Fonte: mesmo DOCX original reenviado pelo usuário, lido nesta sessão. O texto 
 - Typecheck global permanece com milhares de erros preexistentes de tipagem do projeto; não é aprovado. Os erros novos detectados nos componentes de saldo foram corrigidos. Erros preexistentes em Button e acesso tipado ao SDK permanecem fora deste lote.
 - Não foram conectados provedores, publicadas alterações, executados testes de interface/E2E ou feita nova análise de segurança. Não há commit/PR criado nesta sessão.
 - Próximo lote: consolidar confirmações legadas com movimentos oficiais idempotentes e escrita parcial por item; em seguida tratar faturamento/cobranças parciais, alçadas/documentos e integrações reais. As demais pendências numeradas acima continuam abertas.
+
+## Continuação — conversão da Mesa com autoridade de servidor
+
+### Lacuna atacada
+A Mesa validava a proposta, mas o navegador criava o pedido e depois alterava o orçamento. Uma falha entre as duas gravações podia deixar pedido sem vínculo e o reenvio podia duplicá-lo. Esta continuação altera esse caminho, não a cadeia parcial por item inteira.
+
+### Entrega integrada
+- O formulário completo existente continua sendo usado. Na conversão, os atalhos que aprovavam/faturavam diretamente cedem lugar à confirmação de criação; os mesmos atalhos permanecem intactos nas demais utilizações do formulário.
+- Preparação e confirmação passam pelo endpoint existente `onOrcamentoConfirmed`. O servidor exige RBAC de criação, contexto explícito, vínculo protegido, carteira, proposta aprovada, versão e conferência explícita; executa novamente a validação financeira/comercial ao confirmar.
+- Itens, quantidades, preços e pagamento são conferidos contra a proposta aprovada. Totais são recalculados no servidor; revenda/fabricação e desconto individual são preservados. Alterações comerciais precisam voltar à negociação, não usar a conversão como atalho de aprovação.
+- O formulário mostra totais nas convenções que os seus componentes já consomem (`valor_item` / `preco_venda_total`); antes esses valores faltavam na conversão e o cálculo do formulário podia zerar o total visual.
+- Pedido nasce `Aguardando Aprovação`, com vínculo estável em `origem_externa_id`, sem baixa artificial de estoque, produção concluída, faturamento ou recebimento.
+- Numeração da conversão é reservada por comparação atômica no cadastro existente da empresa, com checagem de colisão legada. Não deriva de registros parcialmente carregados nem de relógio do navegador. Lacunas na sequência por falhas são possíveis; números reservados não são reutilizados.
+- Controle durável no orçamento usa reserva condicional por versão/token. Reenvio encontra o pedido existente; uma falha antes do POST permite retomada, e preparação interrompida pode ser reassumida após três minutos sem corrida com a execução anterior.
+- Falha depois do POST exige conciliar pelo vínculo. Se não houver pedido verificável, a criação não é repetida automaticamente: o estado fica em revisão, exigindo conferência operacional. Isto é uma saga conservadora, não uma transação entre entidades.
+- Auditorias da reserva, criação e vínculo incluem usuário, grupo, empresa e antes/depois. Os campos de controle `OrcamentoCliente.conversao_pedido` e `Empresa.sequencial_pedido_360` têm escrita protegida; as regras de acesso existentes das demais propriedades foram preservadas.
+- Extrações de lógica ficam junto à função existente; nenhuma nova página, módulo de vendas ou entidade foi criada. A extração é a própria implementação do caminho de conversão, não um conversor paralelo exposto.
+
+### Evidências e limites
+- Verificações puras exercitam o código de produção com fontes controladas: adulteração de cliente/contexto/preço/quantidade/desconto/pagamento, totalização, concorrência, numeração, resposta perdida, retomada, vínculo e bloqueios de autenticação/RBAC/financeiro.
+- Endpoint real: 400 para contexto ausente e 404 para proposta/empresa inexistentes. Nenhum pedido real foi criado para teste.
+- Compilação e análise estática dos componentes alterados verificadas; não equivalem a E2E nem comprovam todos os gatilhos em ambiente real.
+- A proteção é do caminho da Mesa. Criação/edição direta, duplicação/desmembramento, conversão por eventos, cadeia parcial operacional/fiscal/financeira, comprovante legado, alçadas/documentos, telefonia e bot continuam com as pendências já descritas.
+- O DOCX original não está acessível no repositório desta sessão; a conferência final de cobertura exige sua disponibilização novamente. Os relatórios anteriores servem como histórico de pendências, não substituem a fonte.
 
 ## Situação
 

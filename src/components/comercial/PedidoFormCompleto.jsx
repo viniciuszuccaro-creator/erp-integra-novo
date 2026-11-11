@@ -68,11 +68,12 @@ function PedidoFormCompleto({ pedido, clientes = [], onSubmit, onCancel, windowM
   
   // ETAPA 1 — Validação Obrigatória de Multiempresa
   useEffect(() => {
-    if (!grupoAtual?.id || (contexto !== 'grupo' && !empresaAtual?.id)) {
+    const empresaDefinida = empresaAtual?.id || (conversaoOrcamento ? pedido?.empresa_id : null);
+    if (!grupoAtual?.id || (contexto !== 'grupo' && !empresaDefinida)) {
       toast.error('Erro: Contexto de grupo/empresa não definido. Operação bloqueada.');
       onCancel?.();
     }
-  }, [grupoAtual, empresaAtual, contexto]);
+  }, [grupoAtual, empresaAtual, contexto, conversaoOrcamento, pedido?.empresa_id]);
   
   const defaultValues = { ...getDefaultPedidoValues(pedido), ...(pedido || {}) };
 

@@ -15,13 +15,13 @@ export function montarPedidoConversao(registro, user, destino, formulario = null
   const itens = registro.itens || [];
   if (!itens.length) throw new Error('Orçamento sem itens para converter.');
   const grupos = { itens_revenda: [], itens_armado_padrao: [], itens_corte_dobra: [] };
-  let total = 0, bruto = 0;
+  let total = 0;
   for (const item of itens) {
     const q = Number(item.quantidade), p = Number(item.valor_unitario);
     const d = Number(item.desconto_percentual ?? (q * p > 0 && item.valor_total != null ? (1 - Number(item.valor_total) / (q * p)) * 100 : 0));
     if (![q, p, d].every(Number.isFinite) || q <= 0 || p <= 0 || d < 0 || d > 100) throw new Error('Revalide quantidades, preços e descontos na negociação.');
     const valor = dinheiro(q * p * (1 - d / 100));
-    bruto += q * p; total += valor;
+    total += valor;
     const grupo = item.tipo === 'fabricacao' ? 'itens_armado_padrao' : 'itens_revenda';
     grupos[grupo].push({
       produto_id: item.produto_id || undefined, descricao: texto(item.descricao), produto_descricao: texto(item.descricao),
@@ -30,7 +30,6 @@ export function montarPedidoConversao(registro, user, destino, formulario = null
       valor_total: valor, valor_item: valor, preco_venda_total: valor,
     });
   }
-  if (destino !== 'producao' && grupos.itens_armado_padrao.length) throw new Error('Orçamento com fabricação deve passar por Produção antes da entrega ou retirada.');
   if (formulario) {
     if (formulario.group_id !== registro.group_id || formulario.empresa_id !== registro.empresa_id || formulario.cliente_id !== registro.cliente_id) throw new Error('Cliente, grupo e empresa devem ser os mesmos do orçamento aprovado.');
     const esperado = itens.map((i) => assinatura(i, i.tipo === 'fabricacao' ? 'fabricacao' : 'revenda')).sort();
@@ -63,7 +62,7 @@ export function montarPedidoConversao(registro, user, destino, formulario = null
     tipo_pedido: grupos.itens_armado_padrao.length ? (grupos.itens_revenda.length ? 'Misto' : 'Produção Sob Medida') : 'Revenda',
     ...grupos, valor_produtos: dinheiro(total), valor_total: dinheiro(total), valor_pendente_faturamento: dinheiro(total), valor_faturado: 0,
     desconto_geral_pedido_valor: 0, desconto_geral_pedido_percentual: 0, valor_frete: 0,
-    forma_pagamento: condicaoPedido(registro.condicoes_pagamento), tipo_frete: destino === 'retira' ? 'Retirada' : 'CIF',
+    forma_pagamento: condicaoPedido(registro.condicoes_pagamento), tipo_frete: destino === 'retira' ? 'Retirada' : destino === 'producao' && ['CIF', 'FOB', 'Retirada'].includes(form.tipo_frete) ? form.tipo_frete : 'CIF',
     prioridade: ['Baixa', 'Normal', 'Alta', 'Urgente'].includes(form.prioridade) ? form.prioridade : 'Normal',
     ...(data ? { data_prevista_entrega: data } : {}), endereco_entrega_principal: endereco,
     obra_destino_id: texto(form.obra_destino_id, 100), obra_destino_nome: texto(form.obra_destino_nome, 200),

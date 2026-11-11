@@ -1,5 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
-import { avaliarAlcada, aplicarContraproposta } from './alcadas.ts';
+import {
+  avaliarAlcada, aplicarContraproposta, carregarPoliticas, exigenciaDaPolitica,
+  nivelMaisExigente, categoriaDaSolicitacao, nivelDoAprovador,
+} from './alcadas.ts';
 
 // Self-contained guards (no local imports per platform rules)
 async function hasPermission(base44, user, moduleName, section, action) {
@@ -89,6 +92,19 @@ Deno.serve(async (req) => {
       const ctxErr = assertContextPresence({ empresa_id, group_id }, true);
       if (ctxErr) return ctxErr;
 
+      // §18 — categoria e alçada resolvidas no servidor: a política da empresa/grupo só pode
+      // elevar o nível exigido, nunca ser rebaixada pelo payload de quem solicita.
+      const categoria = categoria_alcada || categoriaDaSolicitacao({ tipo_solicitacao });
+      const politicas = await carregarPoliticas(base44, { group_id, empresa_id });
+      const exigencia = exigenciaDaPolitica({
+        politicas,
+        entidadeAlvo: entidade_alvo,
+        categoria,
+        valor: valor_solicitado || dados_propostos?.valor || 0,
+      });
+      const nivelExigido = nivelMaisExigente(nivel_alcada, exigencia?.nivel || null);
+      const limiteExigido = Math.max(Number(valor_limite_alcada || 0), Number(exigencia?.valor_limite || 0));
+
       const record = await base44.entities.SolicitacaoAprovacao.create({
         group_id: group_id || null,
         empresa_id: empresa_id || null,
@@ -102,9 +118,9 @@ Deno.serve(async (req) => {
         aprovador_id: aprovador_id || null,
         perfil_aprovador_necessario: perfil_aprovador_necessario || null,
         valor_solicitado: valor_solicitado || 0,
-        categoria_alcada: categoria_alcada || null,
-        nivel_alcada: nivel_alcada || null,
-        valor_limite_alcada: valor_limite_alcada || 0,
+        categoria_alcada: categoria,
+        nivel_alcada: nivelExigido || null,
+        valor_limite_alcada: limiteExigido || 0,
         concessao_temporaria: concessao_temporaria || false,
         data_expiracao_concessao: data_expiracao_concessao || null,
         status: 'pendente',
@@ -286,14 +302,8 @@ Deno.serve(async (req) => {
       } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
       if (valorBase == null) valorBase = 0;
 
-      // Carrega políticas (empresa > grupo)
-      let politicas = null;
-      try {
-        const byEmpresa = empresa_id ? await base44.entities.ConfiguracaoSistema.filter({ chave: 'aprovacao_politicas', empresa_id }, undefined, 1) : [];
-        const byGrupo = (!byEmpresa?.length && group_id) ? await base44.entities.ConfiguracaoSistema.filter({ chave: 'aprovacao_politicas', group_id }, undefined, 1) : [];
-        const cfg = (byEmpresa?.[0] || byGrupo?.[0]) || null;
-        politicas = cfg?.valor_json || cfg?.politicas || null; // aceita tanto valor_json quanto politicas
-      } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
+      // Carrega políticas (empresa > grupo) pelo mesmo leitor usado na criação de solicitações
+      const politicas = await carregarPoliticas(base44, { group_id, empresa_id });
       const ranges = (politicas && politicas[entity_name]) || [];
 
       // Encontra a faixa
@@ -302,6 +312,15 @@ Deno.serve(async (req) => {
         const max = (r?.max == null) ? Infinity : Number(r.max);
         return valorBase >= min && valorBase <= max;
       }) : null;
+
+      // §18 — categoria da área; a alçada exigida vem da política, não do chamador.
+      const categoriaAvaliacao = categoriaDaSolicitacao({
+        categoria_alcada: moduleName === 'Estoque' || moduleName === 'Producao' ? 'Operacional' : moduleName,
+        tipo_solicitacao: 'outro',
+      });
+      const exigencia = exigenciaDaPolitica({
+        politicas, entidadeAlvo: entity_name, categoria: categoriaAvaliacao, valor: valorBase,
+      });
 
       // Verifica se o usuário já pode aprovar (perfil com ação 'aprovar')
       const canApprove = await hasPermission(base44, user, moduleName, entity_name, 'aprovar');
@@ -324,6 +343,9 @@ Deno.serve(async (req) => {
           status: 'pendente',
           data_solicitacao: new Date().toISOString(),
           perfil_aprovador_necessario: 'aprovar',
+          categoria_alcada: categoriaAvaliacao,
+          nivel_alcada: exigencia?.nivel || null,
+          valor_limite_alcada: exigencia?.valor_limite || 0,
         });
         try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: empresa_id || null, group_id: group_id || null, acao: 'Criação', modulo: moduleName, entidade: 'SolicitacaoAprovacao', registro_id: rec.id, descricao: `Avaliação de aprovação criada (${entity_name} ${entity_id || ''})`, dados_novos: rec, data_hora: new Date().toISOString() }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
         // Notifica solicitante
@@ -361,6 +383,9 @@ Deno.serve(async (req) => {
           status: 'pendente',
           data_solicitacao: new Date().toISOString(),
           perfil_aprovador_necessario: 'aprovar',
+          categoria_alcada: categoriaAvaliacao,
+          nivel_alcada: exigencia?.nivel || null,
+          valor_limite_alcada: exigencia?.valor_limite || 0,
         });
         try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: empresa_id || null, group_id: group_id || null, acao: 'Criação', modulo: moduleName, entidade: 'SolicitacaoAprovacao', registro_id: rec.id, descricao: `Solicitação por valor (${valorBase}) para ${entity_name} ${entity_id || ''} • Nível ${nivel_index + 1}/${niveis.length || 1}` , dados_novos: rec, data_hora: new Date().toISOString() }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
         // Notifica solicitante (melhor esforço)

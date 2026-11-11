@@ -7,7 +7,7 @@ import { useUser } from '@/components/lib/UserContext';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import useAcoesComerciais from './useAcoesComerciais';
 import { proximoNumeroOrcamento } from './useNovaNegociacao';
-import { totalizarItens } from './negociacaoUtils';
+import { totalizarItens, pedidoParaNegociacao } from './negociacaoUtils';
 
 const somarDias = (dias) => {
   const data = new Date();
@@ -186,11 +186,7 @@ export default function useAcoesOrcamento({ negociacao, onAtualizar }) {
       toast.error('Sem permissão para alterar os itens desta negociação.');
       return null;
     }
-    const originais = [
-      ...(pedido?.itens_revenda || []),
-      ...(pedido?.itens_armado_padrao || []),
-      ...(pedido?.itens_corte_dobra || []),
-    ];
+    const originais = pedidoParaNegociacao(pedido || {}).itens;
     if (!originais.length) {
       toast.error('O pedido selecionado não possui itens para importar.');
       return null;
@@ -214,7 +210,8 @@ export default function useAcoesOrcamento({ negociacao, onAtualizar }) {
         const produto = porId.get(item.produto_id);
         const precoAtual = Number(produto?.preco_venda || 0);
         const quantidade = Number(item.quantidade) || 0;
-        const valorUnitario = precoAtual > 0 ? precoAtual : Number(item.valor_unitario ?? item.preco_unitario) || 0;
+        // Sem preço oficial atual não reaproveita preço histórico silenciosamente.
+        const valorUnitario = precoAtual > 0 ? precoAtual : 0;
         return {
           id: `imp-${Date.now()}-${indice}`,
           produto_id: item.produto_id || null,
@@ -224,7 +221,7 @@ export default function useAcoesOrcamento({ negociacao, onAtualizar }) {
           valor_unitario: valorUnitario,
           desconto_percentual: 0,
           valor_total: Number((quantidade * valorUnitario).toFixed(2)),
-          tipo: item.tipo === 'servico' ? 'servico' : 'revenda',
+          tipo: item.tipo || 'revenda',
           preco_recalculado: precoAtual > 0,
         };
       });

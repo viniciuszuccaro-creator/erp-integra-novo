@@ -1,6 +1,7 @@
 // Painel lateral da Central 360 — Cliente 360 (dados do cadastro canônico)
 import React from 'react';
 import { brl } from '../negociacaoUtils';
+import usePermissions from '@/components/lib/usePermissions';
 
 const CAMPOS = [
   ['nome_fantasia', 'Nome fantasia'],
@@ -17,11 +18,13 @@ const CAMPOS = [
 ];
 
 export default function PainelCliente({ cliente }) {
+  const { hasPermission, isLoading } = usePermissions();
+  const podeFinanceiro = !isLoading && hasPermission('Financeiro', 'Contas a Receber', 'visualizar');
   if (!cliente) {
     return <p className="text-sm text-slate-500">Cliente não localizado no cadastro para esta negociação.</p>;
   }
 
-  const preenchidos = CAMPOS.filter(([chave]) => cliente[chave] !== null && cliente[chave] !== undefined && cliente[chave] !== '');
+  const preenchidos = CAMPOS.filter(([chave, , tipo]) => (tipo !== 'moeda' || podeFinanceiro) && cliente[chave] !== null && cliente[chave] !== undefined && cliente[chave] !== '');
 
   return (
     <div className="space-y-3">

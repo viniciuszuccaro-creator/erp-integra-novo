@@ -5,11 +5,13 @@ import { useWindow } from "@/components/lib/useWindow";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
 import { useUser } from "@/components/lib/UserContext";
 import PedidoFormCompleto from "@/components/comercial/PedidoFormCompleto";
+import useAcoesComerciais from '@/components/comercial/central-vendas-360/useAcoesComerciais';
 
 export default function useComercialPedidoWindows({ clientes, refetchPedidos }) {
   const { openWindow, closeWindow } = useWindow();
   const { createInContext, updateInContext } = useContextoVisual();
   const { user } = useUser();
+  const acoes = useAcoesComerciais();
 
   const handleCreateNewPedido = (cliente = null) => {
     let pedidoCriado = false;
@@ -47,6 +49,11 @@ export default function useComercialPedidoWindows({ clientes, refetchPedidos }) 
   };
 
   const handleEditPedido = (pedido) => {
+    if (acoes.carregando || !acoes.podeEditar) return toast.error('Sem permissão para editar pedidos.');
+    if (!['Rascunho', 'Aguardando Aprovação', 'Aprovado'].includes(pedido?.status)) {
+      toast.info('Os ajustes deste pedido pertencem à tela operacional de Produção, Entrega ou Retira.');
+      return;
+    }
     let atualizacaoEmAndamento = false;
     let windowIdRef = openWindow(
       PedidoFormCompleto,

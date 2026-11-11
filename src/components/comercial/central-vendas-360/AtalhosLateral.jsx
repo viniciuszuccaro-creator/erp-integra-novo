@@ -1,11 +1,14 @@
 // Atalhos laterais — abrem painéis sem sair da negociação
 import React from 'react';
-import { ATALHOS_360 } from './paineis/paineisConfig';
+import { ATALHOS_360, PERMISSOES_PAINEL } from './paineis/paineisConfig';
+import usePermissions from '@/components/lib/usePermissions';
 
 export default function AtalhosLateral({ ativo, onSelect }) {
+  const { hasPermission, isLoading } = usePermissions();
+  const permitidos = ATALHOS_360.filter((atalho) => !isLoading && hasPermission(...PERMISSOES_PAINEL[atalho.id], 'visualizar'));
   return (
     <div className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible rounded-lg border border-slate-200 bg-white p-1.5 lg:w-[86px] shrink-0">
-      {ATALHOS_360.map((atalho) => {
+      {permitidos.map((atalho) => {
         const Icon = atalho.icon;
         const selecionado = ativo === atalho.id;
         return (

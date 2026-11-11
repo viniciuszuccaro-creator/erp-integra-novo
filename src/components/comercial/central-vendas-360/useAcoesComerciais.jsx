@@ -16,5 +16,6 @@ export default function useAcoesComerciais() {
       || hasPermission('Comercial', 'Pedidos', 'aprovar_desconto'),
     podeAprovar: hasPermission('Comercial', 'Pedidos', 'aprovar'),
     podeEmitir: hasPermission('Comercial', 'Pedidos', 'emitir'),
+    podeExportar: hasPermission('Comercial', 'Pedidos', 'exportar'),
   };
 }

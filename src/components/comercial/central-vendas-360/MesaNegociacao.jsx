@@ -6,6 +6,8 @@ import { useWindow } from '@/components/lib/useWindow';
 import { useUser } from '@/components/lib/UserContext';
 import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import PedidoFormCompleto from '@/components/comercial/PedidoFormCompleto';
+import useComercialPedidoWindows from '@/components/comercial/page/useComercialPedidoWindows';
+import useRascunhoNegociacao from '@/components/comercial/central-vendas-360/useRascunhoNegociacao';
 import HeaderNegociacao from './HeaderNegociacao';
 import FaixaAtendimento from './FaixaAtendimento';
 import ItensNegociacaoGrid from './ItensNegociacaoGrid';
@@ -30,12 +32,15 @@ const assinaturaItens = (lista = []) => JSON.stringify(lista.map((item) => ({
   unidade: item.unidade || 'UN',
   valor_unitario: Number(item.valor_unitario || 0),
   desconto_percentual: Number(item.desconto_percentual || 0),
+  tipo: item.tipo || 'revenda',
   valor_total: Number(Number(item.valor_total || 0).toFixed(2)),
 })));
 
 export default function MesaNegociacao({
-  negociacao, clientes = [], empresa, grupo, onVoltar, onAtualizar, concorrentes = [],
+  negociacao: recebida, clientes = [], empresa, grupo, onVoltar, onAtualizar, concorrentes = [],
 }) {
+  const [registroLocal, setRegistroLocal] = useState(null);
+  const negociacao = registroLocal && (!recebida.registro?.updated_date || registroLocal.registro.updated_date >= recebida.registro.updated_date) ? registroLocal : recebida;
   const [itens, setItens] = useState(negociacao.itens);
   const [faixaAberta, setFaixaAberta] = useState(true);
   const [versao, setVersao] = useState(negociacao.registro?.updated_date);
@@ -73,6 +78,13 @@ export default function MesaNegociacao({
   );
 
   const acoes = useAcoesComerciais();
+  const { handleEditPedido } = useComercialPedidoWindows({ clientes, refetchPedidos: onAtualizar || (() => Promise.resolve()) });
+  const rascunho = useRascunhoNegociacao({
+    chave: user?.id && negociacao.registro?.group_id && negociacao.registro?.empresa_id ? `central360:rascunho:${user.id}:${negociacao.registro.group_id}:${negociacao.registro.empresa_id}:${negociacao.registro.id}` : null,
+    habilitado: negociacao.origem === 'orcamento' && negociacao.editavel && acoes.podeEditar,
+    sujo, itens, dados: dadosOrcamento, versao,
+  });
+  const podeEditarItens = negociacao.editavel && acoes.podeEditar && !rascunho.carregando && !rascunho.pendente;
   const acoesOrcamento = useAcoesOrcamento({ negociacao, onAtualizar });
   const salvando = acoesOrcamento.executando;
   const validacao = useValidacaoFechamento({
@@ -142,9 +154,11 @@ export default function MesaNegociacao({
 
   const salvar = async () => {
     if (!negociacao.editavel || !acoes.podeEditar || salvando) return;
-    if (negociacao.origem !== 'orcamento') return PedidoEdicao(negociacao.registro);
+    if (negociacao.origem !== 'orcamento') return handleEditPedido(negociacao.registro);
     const atualizado = await acoesOrcamento.executarFechamento('salvar', itens, versao, dadosOrcamento);
     if (atualizado) {
+      await rascunho.limpar();
+      setRegistroLocal(orcamentoParaNegociacao(atualizado));
       setVersao(atualizado.updated_date);
       setItens(orcamentoParaNegociacao(atualizado).itens);
       setDadosOrcamento({ data_validade: atualizado.data_validade || '', condicoes_pagamento: atualizado.condicoes_pagamento || '', prazo_entrega: atualizado.prazo_entrega || '' });
@@ -155,6 +169,8 @@ export default function MesaNegociacao({
     if (!acoes.podeAprovar || salvando) return;
     const atualizado = await acoesOrcamento.executarFechamento('fechar', itens, versao, dadosOrcamento);
     if (atualizado) {
+      await rascunho.limpar();
+      setRegistroLocal(orcamentoParaNegociacao(atualizado));
       setVersao(atualizado.updated_date);
       setItens(orcamentoParaNegociacao(atualizado).itens);
       setDadosOrcamento({ data_validade: atualizado.data_validade || '', condicoes_pagamento: atualizado.condicoes_pagamento || '', prazo_entrega: atualizado.prazo_entrega || '' });
@@ -184,16 +200,15 @@ export default function MesaNegociacao({
           cliente_id: negociacao.cliente_id,
           cliente_nome: negociacao.cliente_nome,
           observacoes_publicas: `Originado do orçamento ${negociacao.numero} — destino ${destino}`,
-          itens_revenda: itens.map((item) => ({
-            produto_id: item.produto_id || null,
-            produto_descricao: item.descricao,
-            quantidade: Number(item.quantidade || 0),
-            unidade: item.unidade,
-            valor_unitario: Number(item.valor_unitario || 0),
-            preco_unitario: Number(item.valor_unitario || 0),
-            desconto_percentual: Number(item.desconto_percentual || 0),
-            valor_total: Number(item.valor_total || 0),
-          })),
+          ...Object.fromEntries([
+            ['itens_revenda', itens.filter((item) => item.tipo !== 'fabricacao')],
+            ['itens_armado_padrao', itens.filter((item) => item.tipo === 'fabricacao')],
+          ].map(([campo, lista]) => [campo, lista.map((item) => ({
+            produto_id: item.produto_id || null, produto_descricao: item.descricao,
+            descricao: item.descricao, quantidade: Number(item.quantidade || 0), unidade: item.unidade,
+            valor_unitario: Number(item.valor_unitario || 0), preco_unitario: Number(item.valor_unitario || 0),
+            desconto_percentual: Number(item.desconto_percentual || 0), valor_total: Number(item.valor_total || 0),
+          }))])),
         },
         onSubmit: async (formData) => {
           if (criado) return;
@@ -224,69 +239,26 @@ export default function MesaNegociacao({
 
   const avancar = () => {
     if (negociacao.origem === 'orcamento') {
-      if (negociacao.grupo === 'aberto') return aprovarOrcamento();
+      if (negociacao.registro.status === 'Pendente') return aprovarOrcamento();
       if (negociacao.grupo === 'aguardando') return setDestinoAberto(true);
       return undefined;
     }
-    return onEditarPedido(negociacao.registro);
+    return handleEditPedido(negociacao.registro);
   };
 
-  // §5 do dossiê: depois do fechamento, o ajuste do pedido é feito nas telas de Produção, Entrega e Retira
-  const ETAPAS_AJUSTE_MODULO = [
-    'Em Produção', 'Pronto para Faturar', 'Faturamento Parcial', 'Faturado',
-    'Pronto para Retirada', 'Em Expedição', 'Em Trânsito', 'Entregue',
-  ];
-
-  function onEditarPedido(pedido) {
-    if (!acoes.podeEditar) {
-      toast.error('Sem permissão para editar pedidos.');
-      return;
-    }
-    if (ETAPAS_AJUSTE_MODULO.includes(pedido?.status)) {
-      toast.info(`Pedido ${pedido.numero_pedido || ''} em ${pedido.status}: os ajustes desta etapa são feitos nas telas de Produção, Entrega e Retira.`);
-      return;
-    }
-    PedidoEdicao(pedido);
-  }
-
-  function PedidoEdicao(pedido) {
-    let atualizando = false;
-    const janela = openWindow(
-      PedidoFormCompleto,
-      {
-        pedido,
-        clientes,
-        windowMode: true,
-        onSubmit: async (formData) => {
-          if (atualizando) return;
-          atualizando = true;
-          try {
-            await updateInContext('Pedido', formData.id, formData);
-            registrarAuditoria('Edição', `Pedido ${negociacao.numero} atualizado na Central 360`, 'Pedido');
-            toast.success('Pedido atualizado.');
-            await onAtualizar?.();
-            if (janela) closeWindow(janela);
-          } catch (erro) {
-            atualizando = false;
-            toast.error(`Erro ao atualizar: ${erro.message}`);
-          }
-        },
-      },
-      { title: `Editar ${pedido.numero_pedido || 'pedido'}`, width: 1400, height: 800 }
-    );
-  }
+  // Edição reutiliza useComercialPedidoWindows: a mesma trava atende a mesa, lista e duplo clique.
 
   const acaoLabel = negociacao.origem === 'orcamento'
-    ? (negociacao.grupo === 'aberto' ? 'Fechar orçamento' : negociacao.grupo === 'aguardando' ? 'Gerar pedido' : 'Etapa concluída')
+    ? (negociacao.registro.status === 'Pendente' ? 'Fechar orçamento' : negociacao.grupo === 'aguardando' ? 'Gerar pedido' : 'Etapa concluída')
     : 'Abrir pedido';
 
   const acaoDesabilitada =
-    (negociacao.origem === 'orcamento' && !['aberto', 'aguardando'].includes(negociacao.grupo));
+    (negociacao.origem === 'orcamento' && !['Pendente', 'Aprovado'].includes(negociacao.registro.status));
 
   return (
     <div className="w-full h-full flex flex-col gap-2 min-h-0">
       <HeaderNegociacao negociacao={negociacao} empresa={empresa} grupo={grupo} sujo={sujo} salvando={salvando}
-        dados={dadosOrcamento} onAlterar={negociacao.editavel && acoes.podeEditar && !salvando
+        dados={dadosOrcamento} onAlterar={podeEditarItens && !salvando
           ? (campo, valor) => setDadosOrcamento((atual) => ({ ...atual, [campo]: valor })) : undefined} />
       {concorrentes.length > 0 && (
         <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-1.5 text-[11px] text-amber-800">
@@ -295,6 +267,11 @@ export default function MesaNegociacao({
           {' '}— alinhe o atendimento antes de fechar uma nova proposta.
         </div>
       )}
+      {rascunho.pendente && <div className="w-full rounded-md border border-border bg-muted px-3 py-2 text-xs" role="status">
+        <p>Rascunho local disponível, salvo em {new Date(rascunho.pendente.salvo_em).toLocaleString('pt-BR')}. {rascunho.pendente.versao !== versao ? 'A versão no servidor mudou. Revise todos os dados antes de salvar.' : 'Ainda não enviado ao servidor.'}</p>
+        <div className="flex gap-3 mt-1"><button type="button" className="font-semibold text-primary" onClick={() => { setItens(rascunho.pendente.itens); setDadosOrcamento((atual) => ({ ...atual, ...rascunho.pendente.dados })); rascunho.recuperar(); }}>Recuperar rascunho</button><button type="button" className="text-muted-foreground" onClick={rascunho.limpar}>Descartar rascunho local</button></div>
+      </div>}
+      {sujo && rascunho.estado && <p role="status" className="text-xs text-muted-foreground">{rascunho.estado}</p>}
       <FaixaAtendimento negociacao={negociacao} aberta={faixaAberta} onToggle={() => setFaixaAberta((v) => !v)} />
       <PainelValidacaoFechamento validacao={validacao} />
       {acoesOrcamento.erroFechamento && (
@@ -310,7 +287,7 @@ export default function MesaNegociacao({
         <ItensNegociacaoGrid
           itens={itens}
           setItens={setItens}
-          editavel={negociacao.editavel && acoes.podeEditar && !salvando}
+          editavel={podeEditarItens && !salvando}
           permiteDesconto={acoes.podeAprovarDesconto}
         />
       </div>
@@ -326,13 +303,13 @@ export default function MesaNegociacao({
         acaoDescricao={bloqueioFechamento
           ? `Resolva ${validacao.erros.length} bloqueio(s) do fechamento para avançar`
           : 'Avança a negociação para a próxima etapa'}
-        acaoDesabilitada={acaoDesabilitada || bloqueioFechamento || validacao.carregando || salvando || acoes.carregando
-          || (negociacao.origem === 'orcamento' ? negociacao.grupo === 'aberto' ? !acoes.podeAprovar : !acoes.podeCriar : !acoes.podeEditar)}
+        acaoDesabilitada={acaoDesabilitada || bloqueioFechamento || validacao.carregando || salvando || acoes.carregando || rascunho.carregando || Boolean(rascunho.pendente)
+          || (negociacao.origem === 'orcamento' ? negociacao.registro.status === 'Pendente' ? !acoes.podeAprovar : !acoes.podeCriar : !acoes.podeEditar)}
         onSalvar={salvar}
         onVoltar={onVoltar}
         onAvancar={avancar}
         onEnviar={abrirEnvio}
-        onImprimir={imprimir}
+        onImprimir={acoes.podeExportar ? imprimir : undefined}
         enviando={enviando}
         enviarDesabilitado={sujo || !acoes.podeEditar || salvando}
         onDuplicar={negociacao.origem === 'orcamento' && acoes.podeCriar

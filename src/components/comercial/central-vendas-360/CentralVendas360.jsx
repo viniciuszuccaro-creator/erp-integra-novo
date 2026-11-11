@@ -1,5 +1,6 @@
 // Central de Vendas 360° — layout versão 6: tabela de 12 colunas, grade de itens e Cliente 360° lateral
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useWindow } from '@/components/lib/useWindow';
 import { Sparkles } from 'lucide-react';
 import ProtectedSection from '@/components/security/ProtectedSection';
 import PedidosTab from '@/components/comercial/PedidosTab';
@@ -31,7 +32,8 @@ export default function CentralVendas360({
   const [chaveSelecionada, setChaveSelecionada] = useState(null);
   const snapshotSelecionada = useRef(null);
   const [busca, setBusca] = useState('');
-  const [grupo, setGrupo] = useState('todas');
+  const [grupo, setGrupo] = useState('aberto');
+  const { openWindow } = useWindow();
   const [painelAberto, setPainelAberto] = useState(true);
   const [novaNegociacaoAberta, setNovaNegociacaoAberta] = useState(false);
 
@@ -40,6 +42,10 @@ export default function CentralVendas360({
     orcamentos, pedidosBusca, buscando, isLoading, refetch, empresaAtual, grupoAtual,
   } = useCentral360Data({ busca });
   const { criarOrcamento, salvando, dataPadraoValidade } = useNovaNegociacao({ orcamentos });
+  useEffect(() => {
+    setChaveSelecionada(null);
+    snapshotSelecionada.current = null;
+  }, [empresaAtual?.id, grupoAtual?.id]);
 
   // Abertura de negociação: proposta nasce na mesa da Central; pedido direto usa o formulário completo existente
   const abrirNegociacao = async (dados) => {
@@ -108,6 +114,7 @@ export default function CentralVendas360({
 
   const porGrupo = useMemo(() => {
     if (grupo === 'todas') return negociacoes;
+    if (grupo === 'aberto') return negociacoes.filter((negociacao) => negociacao.origem === 'orcamento' && negociacao.grupo === 'aberto');
     if (grupo === 'acompanhamento') {
       return negociacoes.filter((negociacao) => GRUPOS_EXECUCAO.includes(negociacao.grupo));
     }
@@ -188,6 +195,11 @@ export default function CentralVendas360({
       return;
     }
     selecionar(negociacao);
+    openWindow(MesaNegociacao, {
+      negociacao, clientes,
+      empresa: empresas.find((item) => item.id === negociacao.registro.empresa_id) || empresaAtual,
+      grupo: grupoAtual, onAtualizar: atualizar,
+    }, { title: `Orçamento ${negociacao.numero}`, width: 1280, height: 850, uniqueKey: `mesa-${negociacao.chave}` });
   };
 
   return (

@@ -12,7 +12,9 @@ export const GRUPOS_NEGOCIACAO = [
   { id: 'entrega', label: 'Entrega' },
   { id: 'retira', label: 'Retira' },
   { id: 'acompanhamento', label: 'Em execução' },
-  { id: 'fechado', label: 'Fechados' },
+  { id: 'entregue', label: 'Entregues' },
+  { id: 'fechado', label: 'Finalizados / Convertidos' },
+  { id: 'encerrado', label: 'Vencidos / Encerrados' },
   { id: 'cancelado', label: 'Cancelados' },
 ];
 
@@ -25,6 +27,8 @@ export const SITUACAO_ESTILO = {
   retira: 'bg-teal-100 text-teal-800 border-teal-200',
   acompanhamento: 'bg-blue-100 text-blue-800 border-blue-200',
   fechado: 'bg-green-100 text-green-800 border-green-200',
+  entregue: 'bg-green-100 text-green-800 border-green-200',
+  encerrado: 'bg-slate-100 text-slate-700 border-slate-200',
   cancelado: 'bg-red-100 text-red-800 border-red-200',
 };
 
@@ -32,8 +36,8 @@ const GRUPO_ORCAMENTO = {
   Pendente: 'aberto',
   Aprovado: 'aguardando',
   Convertido: 'fechado',
-  Rejeitado: 'cancelado',
-  Expirado: 'cancelado',
+  Rejeitado: 'encerrado',
+  Expirado: 'encerrado',
 };
 
 const GRUPO_PEDIDO = {
@@ -47,7 +51,7 @@ const GRUPO_PEDIDO = {
   'Pronto para Retirada': 'retira',
   'Em Expedição': 'entrega',
   'Em Trânsito': 'entrega',
-  Entregue: 'fechado',
+  Entregue: 'entregue',
   Cancelado: 'cancelado',
 };
 
@@ -84,7 +88,9 @@ const itemNormalizado = (item, tipo, indice) => {
 export function orcamentoParaNegociacao(orcamento) {
   const itens = (orcamento.itens || []).map((item, i) => itemNormalizado(item, 'revenda', i));
   const totais = totalizarItens(itens);
-  const grupo = GRUPO_ORCAMENTO[orcamento.status] || 'aberto';
+  const hoje = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  const vencido = orcamento.status === 'Pendente' && orcamento.data_validade && orcamento.data_validade.slice(0, 10) < hoje;
+  const grupo = vencido ? 'encerrado' : GRUPO_ORCAMENTO[orcamento.status] || 'aberto';
   return {
     chave: `orc-${orcamento.id}`,
     origem: 'orcamento',
@@ -95,7 +101,7 @@ export function orcamentoParaNegociacao(orcamento) {
     vendedor: orcamento.vendedor_responsavel || '—',
     obra: null,
     canal: 'Balcão',
-    situacao: orcamento.status || 'Pendente',
+    situacao: vencido ? 'Vencido' : orcamento.status || 'Pendente',
     grupo,
     data: orcamento.data_criacao || orcamento.created_date,
     validade: orcamento.data_validade,
@@ -103,7 +109,7 @@ export function orcamentoParaNegociacao(orcamento) {
     condicao_pagamento: orcamento.condicoes_pagamento || '—',
     prazo: orcamento.prazo_entrega || '—',
     totais: { ...totais, total: orcamento.valor_total != null ? numero(orcamento.valor_total) : totais.total },
-    editavel: grupo === 'aberto',
+    editavel: orcamento.status === 'Pendente',
   };
 }
 

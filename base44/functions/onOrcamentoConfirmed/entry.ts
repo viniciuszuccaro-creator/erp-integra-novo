@@ -1,6 +1,17 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 // Inlined guard helpers (relative imports break in Deno deploy)
-async function getUserAndPerfil(base44) { const user = await base44.auth.me().catch(() => null); let perfil = null; try { if (user?.perfil_acesso_id) perfil = await base44.asServiceRole.entities.PerfilAcesso.get(user.perfil_acesso_id); } catch (permErr) { console.error('PerfilAcesso fetch falhou (onOrcamentoConfirmed):', permErr); } return { user, perfil }; }
+async function getUserAndPerfil(base44) {
+  const user = await base44.auth.me().catch((e) => e.status === 401 ? null : Promise.reject(e));
+  const perfil = user?.perfil_acesso_id ? await base44.asServiceRole.entities.PerfilAcesso.get(user.perfil_acesso_id).catch((e) => e.status === 404 ? null : Promise.reject(e)) : null;
+  return { user, perfil };
+}
+function possuiContexto(user, groupId, empresaId) {
+  if (user?.bloqueado) return false;
+  if (user?.role === 'admin') return true;
+  const empresa = (user?.empresas_vinculadas || []).some((v) => typeof v === 'string' ? v === empresaId : v?.empresa_id === empresaId && v.ativo !== false);
+  const grupo = (user?.grupos_vinculados || []).some((v) => typeof v === 'string' ? v === groupId : v?.grupo_id === groupId && v.ativo !== false);
+  return empresa || grupo;
+}
 function _normAct(a) { if (!a) return 'visualizar'; const s = String(a).toLowerCase(); const map = { ver:'visualizar',view:'visualizar',read:'visualizar',listar:'visualizar',status:'visualizar',delete:'excluir',remove:'excluir',destroy:'excluir',apagar:'excluir',cancel:'cancelar',cancelar:'cancelar',create:'criar',add:'criar',emitir:'criar',enviar:'criar',update:'editar',edit:'editar',carta:'editar',corrigir:'editar',approve:'aprovar',aprovar:'aprovar',export:'exportar',exportar:'exportar' }; return map[s]||s; }
 function backendHasPermission(perfil,m,sec,act='visualizar',role=null){if(role==='admin')return true;const perms=perfil?.permissoes;if(!perms)return false;const desired=_normAct(act);const modNode=perms[m];if(!modNode)return false;if(!sec)return Object.values(modNode).some(n=>{if(Array.isArray(n))return n.includes(desired)||(desired==='visualizar'&&n.includes('ver'));if(n&&typeof n==='object')return Object.values(n).some(v=>Array.isArray(v)&&(v.includes(desired)||(desired==='visualizar'&&v.includes('ver'))));return false;});const path=Array.isArray(sec)?sec:String(sec).split('.').filter(Boolean);let cursor=modNode;for(let i=0;i<path.length;i++){if(cursor==null)return false;cursor=cursor[path[i]];}if(!cursor)return false;if(Array.isArray(cursor))return cursor.includes(desired)||(desired==='visualizar'&&cursor.includes('ver'));if(typeof cursor==='object'){const stack=[cursor];while(stack.length){const node=stack.pop();if(Array.isArray(node)){if(node.includes(desired)||(desired==='visualizar'&&node.includes('ver')))return true;}else if(node&&typeof node==='object')Object.values(node).forEach(v=>stack.push(v));}}return false;}
 async function assertPermission(base44,{user,perfil},m,sec,act){const allowed=backendHasPermission(perfil,m,sec,act,user?.role||null);if(!allowed){try{await base44.asServiceRole.entities.AuditLog.create({usuario:user?.full_name||user?.email||'Usuário',usuario_id:user?.id,acao:'Bloqueio',modulo:m,entidade:Array.isArray(sec)?sec.join('.'):(sec||'-'),descricao:`Ação negada no backend: ${m}/${sec||'-'} → ${act}`,data_hora:new Date().toISOString()});}catch(auditErr){console.error('AuditLog falhou em assertPermission (onOrcamentoConfirmed):',auditErr);}return Response.json({error:'Forbidden'},{status:403});}return null;}
@@ -43,7 +54,10 @@ async function processarCentral(base44, ctx, body) {
     return Response.json({ error: 'Identificadores de orçamento, grupo ou empresa inválidos.' }, { status: 400 });
   }
   const permissao = acao === 'fechar' ? 'aprovar' : acao === 'salvar' ? 'editar' : 'visualizar';
-  if (ctx.user.bloqueado || !permiteCentral(ctx, permissao)) return Response.json({ error: 'Sem permissão para esta ação comercial.' }, { status: 403 });
+  if (!possuiContexto(ctx.user, group_id, empresa_id) || !permiteCentral(ctx, permissao)) {
+    await auditarCentral(base44, ctx.user, { id: orcamento_id, group_id, empresa_id }, 'Bloqueio', 'Tentativa comercial sem permissão ou vínculo com o contexto.');
+    return Response.json({ error: 'Sem permissão ou vínculo com o grupo/empresa para esta ação comercial.' }, { status: 403 });
+  }
   // Leituras e gravações operacionais mantêm o token do usuário e as regras de acesso existentes.
   const [orcamentos, empresas] = await Promise.all([
     base44.entities.OrcamentoCliente.filter({ id: orcamento_id, group_id, empresa_id }, { limit: 1 }),
@@ -51,6 +65,10 @@ async function processarCentral(base44, ctx, body) {
   ]);
   const registro = pagina(orcamentos)[0];
   if (!registro || !pagina(empresas).length) return Response.json({ error: 'Orçamento ou empresa não disponível neste grupo.' }, { status: 404 });
+  if (ctx.user.role !== 'admin' && ctx.user.restricoes_adicionais?.pode_ver_apenas_proprios_registros && registro.vendedor_responsavel_id !== ctx.user.id && registro.created_by_id !== ctx.user.id) {
+    await auditarCentral(base44, ctx.user, { id: orcamento_id, group_id, empresa_id }, 'Bloqueio', 'Orçamento atribuído a outro responsável.');
+    return Response.json({ error: 'Orçamento atribuído a outro responsável.' }, { status: 403 });
+  }
   const negar = async (error, status, checagens = []) => {
     await auditarCentral(base44, ctx.user, registro, 'Bloqueio', error);
     return Response.json({ error, checagens }, { status });
@@ -108,12 +126,13 @@ async function processarCentral(base44, ctx, body) {
   const adicionar = (chave, titulo, status, detalhe, acaoNecessaria = '') => checagens.push({ chave, titulo, status, detalhe, acao: acaoNecessaria });
   const ids = [...new Set(itens.map((item) => item.produto_id).filter(Boolean))];
   const hoje = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
-  const [clientes, produtos, titulos, solicitacoes] = await Promise.all([
+  const filtroFinanceiro = { cliente_id: registro.cliente_id, group_id, empresa_id, status: { $in: ['Pendente', 'Atrasado', 'Parcial'] } };
+  const [clientes, produtos, financeiro, financeiroVencido, solicitacoes] = await Promise.all([
     registro.cliente_id ? base44.entities.Cliente.filter({ id: registro.cliente_id, group_id }, { limit: 1 }) : Promise.resolve([]),
     ids.length ? base44.entities.Produto.filter({ id: { $in: ids }, group_id }, { limit: ids.length }) : Promise.resolve([]),
-    // Títulos e crédito vêm do módulo Financeiro por referência — o Comercial não copia saldos.
-    registro.cliente_id ? base44.entities.ContaReceber.filter({ cliente_id: registro.cliente_id, group_id, status: { $in: ['Pendente', 'Atrasado', 'Parcial'] } }, { limit: 200 }) : Promise.resolve([]),
-    base44.entities.SolicitacaoAprovacao.filter({ entidade_alvo: 'OrcamentoCliente', entidade_alvo_id: registro.id, group_id }, { limit: 20 }),
+    registro.cliente_id ? base44.entities.ContaReceber.aggregate({ query: filtroFinanceiro, groupBy: 'status', sum: ['valor', 'valor_recebido'] }) : Promise.resolve({ rows: [] }),
+    registro.cliente_id ? base44.entities.ContaReceber.aggregate({ query: { ...filtroFinanceiro, data_vencimento: { $lt: hoje } }, groupBy: 'status', sum: ['valor', 'valor_recebido'] }) : Promise.resolve({ rows: [] }),
+    base44.entities.SolicitacaoAprovacao.filter({ entidade_alvo: 'OrcamentoCliente', entidade_alvo_id: registro.id, group_id, empresa_id }, { limit: 100 }),
   ]);
   const cliente = pagina(clientes)[0];
   const disponivelNaEmpresa = (cadastro) => cadastro && (!cadastro.empresa_id || cadastro.empresa_id === empresa_id || (cadastro.empresas_compartilhadas_ids || []).includes(empresa_id));
@@ -195,25 +214,31 @@ async function processarCentral(base44, ctx, body) {
     abaixoDoCusto.length ? 'Aprovação de preço excedido.' : precoOficialDivergente.length ? 'Confirmar tabela/negociação.' : '');
 
   // 14-18. Crédito, títulos vencidos, aprovações e fiscal
-  const vencidos = pagina(titulos).filter((titulo) => titulo.data_vencimento && String(titulo.data_vencimento).slice(0, 10) < hoje);
-  const valorVencido = vencidos.reduce((soma, titulo) => soma + Math.max(Number(titulo.valor || 0) - Number(titulo.valor_recebido || 0), 0), 0);
+  const somarSaldo = (resultado) => (resultado.rows || []).reduce((soma, linha) => soma + Math.max(Number(linha.sum_valor || 0) - Number(linha.sum_valor_recebido || 0), 0), 0);
+  const quantidadeVencida = (financeiroVencido.rows || []).reduce((soma, linha) => soma + Number(linha.count || 0), 0);
+  const valorVencido = somarSaldo(financeiroVencido);
   const limite = Number(condicao.limite_credito || 0);
-  const utilizado = Number(condicao.limite_credito_utilizado || 0);
+  const utilizado = somarSaldo(financeiro);
+  const aprovacoes = pagina(solicitacoes);
+  // Uma liberação não se transfere a outro cliente, valor ou contexto. Dívida nova exige reanálise.
+  const aprovacaoValida = (s) => s.status === 'aprovado' && s.solicitante_id !== (s.aprovador_id || '')
+    && s.dados_propostos?.cliente_id === registro.cliente_id
+    && Number(s.dados_propostos?.valor_orcamento) === total
+    && (!s.data_expiracao_concessao || Date.parse(s.data_expiracao_concessao) > Date.now());
+  const liberaCredito = aprovacoes.some((s) => aprovacaoValida(s) && s.tipo_solicitacao === 'liberar_credito');
+  const liberaVencido = aprovacoes.some((s) => aprovacaoValida(s) && s.tipo_solicitacao === 'liberacao_vencido' && Number(s.dados_propostos?.valor_vencido || 0) >= valorVencido);
+  const pendentes = aprovacoes.filter((s) => s.status === 'pendente');
   const disponivelCredito = limite > 0 ? limite - utilizado : 0;
   const creditoInsuficiente = limite > 0 && (disponivelCredito < total || condicao.situacao_credito === 'Alerta');
-  adicionar('credito', 'Limite de crédito', limite === 0 ? 'atencao' : creditoInsuficiente ? 'erro' : 'ok',
+  adicionar('credito', 'Limite de crédito', liberaCredito ? 'ok' : limite === 0 ? 'atencao' : creditoInsuficiente ? 'erro' : 'ok',
     limite === 0
       ? 'Cliente sem limite de crédito cadastrado.'
       : `Limite ${limite.toFixed(2)} · utilizado ${utilizado.toFixed(2)} · disponível ${disponivelCredito.toFixed(2)} · pedido ${total.toFixed(2)}.`,
     limite === 0 ? 'Cadastrar limite em Cadastros Gerais.' : creditoInsuficiente ? 'Aprovação financeira de limite.' : '');
-  adicionar('vencidos', 'Títulos vencidos', vencidos.length ? 'erro' : 'ok',
-    vencidos.length ? `${vencidos.length} título(s) vencido(s), total ${valorVencido.toFixed(2)}.` : 'Nenhum título vencido do cliente.',
-    vencidos.length ? 'Liberação do Financeiro.' : '');
+  adicionar('vencidos', 'Títulos vencidos', quantidadeVencida && !liberaVencido ? 'erro' : 'ok',
+    quantidadeVencida ? `${quantidadeVencida} título(s) vencido(s), total ${valorVencido.toFixed(2)}.${liberaVencido ? ' Liberação financeira aprovada para esta proposta.' : ''}` : 'Nenhum título vencido do cliente.',
+    quantidadeVencida && !liberaVencido ? 'Liberação do Financeiro.' : '');
 
-  const aprovacoes = pagina(solicitacoes);
-  const liberaCredito = aprovacoes.some((s) => s.status === 'aprovado' && s.tipo_solicitacao === 'liberar_credito');
-  const liberaVencido = aprovacoes.some((s) => s.status === 'aprovado' && s.tipo_solicitacao === 'liberacao_vencido');
-  const pendentes = aprovacoes.filter((s) => s.status === 'pendente');
   adicionar('aprovacoes', 'Aprovações pendentes', pendentes.length ? 'erro' : 'ok',
     pendentes.length ? `${pendentes.length} solicitação(ões) aguardando decisão.` : 'Nenhuma aprovação pendente para esta proposta.',
     pendentes.length ? 'Aguardar a fila de aprovações.' : '');
@@ -224,11 +249,11 @@ async function processarCentral(base44, ctx, body) {
     fiscalOk ? `Contribuinte: ${fiscal.tipo_contribuinte}.` : 'Configuração fiscal ou inscrição estadual incompleta para emissão.',
     fiscalOk ? '' : 'Completar dados fiscais em Cadastros Gerais.');
 
-  const bloqueadoPorCredito = (creditoInsuficiente && !liberaCredito) || (vencidos.length > 0 && !liberaVencido);
+  const bloqueadoPorCredito = (creditoInsuficiente && !liberaCredito) || (quantidadeVencida > 0 && !liberaVencido);
 
   // §18: fechar bloqueado por crédito/título abre solicitação real na fila já existente, sem duplicá-la.
   if (acao === 'fechar' && bloqueadoPorCredito && !pendentes.length) {
-    const tipo = vencidos.length ? 'liberacao_vencido' : 'liberar_credito';
+    const tipo = quantidadeVencida > 0 && !liberaVencido ? 'liberacao_vencido' : 'liberar_credito';
     try {
       await base44.entities.SolicitacaoAprovacao.create({
         group_id, empresa_id, entidade_alvo: 'OrcamentoCliente', entidade_alvo_id: registro.id,
@@ -276,12 +301,21 @@ export default async function(req) {
     const body = await req.json().catch(() => ({}));
     if (body?.acao) return await processarCentral(base44, ctx, body);
     // Payload from entity automation
-    const { event, data } = body || {};
-    if (!event?.type || !data) return Response.json({ error: 'Invalid payload' }, { status: 400 });
-
-    // Somente quando orçamento for confirmado
-    const confirmado = data?.status === 'Confirmado' || data?.aprovado === true || data?.confirmado === true;
-    if (!confirmado) return Response.json({ ok: true, skipped: true });
+    const { event, data: payload } = body || {};
+    if (!event?.type || !payload) return Response.json({ error: 'Invalid payload' }, { status: 400 });
+    if (![payload.id, payload.group_id, payload.empresa_id].every((id) => typeof id === 'string' && /^[a-f\d]{24}$/i.test(id))) return Response.json({ error: 'Orçamento, grupo e empresa válidos são obrigatórios.' }, { status: 400 });
+    if (!possuiContexto(user, payload.group_id, payload.empresa_id)) return Response.json({ error: 'Contexto não autorizado.' }, { status: 403 });
+    // Evento é somente referência: relê o registro oficial, nunca cria pedido usando dados fornecidos pelo chamador.
+    const [origens, empresas] = await Promise.all([
+      base44.entities.OrcamentoCliente.filter({ id: payload.id, group_id: payload.group_id, empresa_id: payload.empresa_id }, { limit: 1 }),
+      base44.entities.Empresa.filter({ id: payload.empresa_id, group_id: payload.group_id }, { limit: 1 }),
+    ]);
+    const data = pagina(origens)[0];
+    if (!data || !pagina(empresas).length) return Response.json({ error: 'Orçamento não encontrado neste contexto.' }, { status: 404 });
+    if (data.pedido_gerado_id) return Response.json({ ok: true, pedido_id: data.pedido_gerado_id, repetida: true });
+    if (data.status !== 'Aprovado') return Response.json({ ok: true, skipped: true });
+    const validacao = await processarCentral(base44, ctx, { acao: 'validar', orcamento_id: data.id, group_id: data.group_id, empresa_id: data.empresa_id, versao: data.updated_date });
+    if (!validacao.ok) return validacao;
 
     // Permissão para criar Pedido no módulo Comercial
     const perm = await assertPermission(base44, ctx, 'Comercial', 'Pedido', 'criar');
@@ -310,7 +344,8 @@ export default async function(req) {
       }
     });
 
-    const created = await base44.asServiceRole.entities.Pedido.create(pedidoPayload);
+    const created = await base44.entities.Pedido.create(pedidoPayload);
+    await base44.entities.OrcamentoCliente.update(data.id, { status: 'Convertido', pedido_gerado_id: created.id });
 
     await audit(base44, user, {
       acao: 'Criação',
@@ -318,8 +353,9 @@ export default async function(req) {
       entidade: 'Pedido',
       registro_id: created?.id,
       descricao: 'Pedido gerado automaticamente a partir do Orçamento confirmado',
-      dados_novos: pedidoPayload
-    });
+      dados_novos: pedidoPayload,
+      empresa_id: data.empresa_id
+    }, { group_id: data.group_id, orcamento_id: data.id });
 
     return Response.json({ ok: true, pedido_id: created?.id });
   } catch (e) {

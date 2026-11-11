@@ -20,6 +20,14 @@ export const ATALHOS_360 = [
   { id: 'pagamento', label: 'Pagamento', icon: CreditCard },
 ];
 
+export const PERMISSOES_PAINEL = {
+  copiloto: ['Comercial', 'Pedidos'], cliente: ['Comercial', 'Pedidos'], vendedor: ['Comercial', 'Pedidos'],
+  atendimento: ['HubAtendimento', null], historico: ['CRM', null], retornos: ['CRM', null],
+  financeiro: ['Financeiro', 'Contas a Receber'], pagamento: ['Financeiro', 'Contas a Receber'],
+  estoque: ['Estoque', 'Produtos'], producao: ['Produção', 'Ordens de Produção'],
+  entregas: ['Expedição', 'Entrega'], mapa: ['Expedição', 'Entrega'], fiscal: ['Fiscal', 'Notas Fiscais'],
+};
+
 export const TITULOS_PAINEL = ATALHOS_360.reduce((acc, atalho) => {
   acc[atalho.id] = atalho.label;
   return acc;

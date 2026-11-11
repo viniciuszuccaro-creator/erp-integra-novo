@@ -95,3 +95,43 @@ Aprovação com alçadas já existe (`CentralAprovacoesManager`, `SolicitacaoApr
 ## 12. Conclusão
 
 A base da Central de Vendas 360° (layout V6, 12 colunas, Cliente 360°, mesa e preferências) já existe e deve ser evoluída — não recriada. As fases seguintes atacam apenas as lacunas acima, reutilizando entidades, funções e componentes existentes.
+
+## 13. Reconciliação obrigatória com a fonte integral, antes de novas alterações
+
+Fonte efetivamente recebida nesta rodada: `b03548fa1_ERP_ZUCCARO_COMERCIAL_360.docx`, revisão 10/11/2026. Foram lidos o texto integral e as três tabelas do XML do DOCX. A extração textual simples omitia justamente o mapa visual e a ordem das colunas. As marcações ✅ anteriores significavam presença no código, NÃO funcionamento homologado; não são certificado de implantação.
+
+### Divergências confirmadas por inspeção direta
+
+| Referência consolidada | Evidência atual | Classificação antes desta rodada |
+|---|---|---|
+| §2/§3, tabela literal | `TabelaNegociacoes`: tinha coluna Itens, não tinha Cod Cliente, ordem diferente | Precisa corrigir |
+| §2, duas grades simultâneas | `MesaNegociacao` renderizava uma única `ItensNegociacaoGrid` | Precisa corrigir |
+| §2, inicial somente orçamentos abertos | `CentralVendas360`: grupo inicial `todas`; rascunhos de Pedido misturados em Abertos | Precisa corrigir |
+| §3, vencidos/encerrados preservados | `negociacaoUtils`: Expirado era classificado Cancelado | Precisa corrigir |
+| §2/§4, duplo clique/janela independente | Orçamento apenas selecionado; pedido abria formulário por outro caminho | Precisa corrigir |
+| §5, ajuste exclusivamente operacional | Bloqueio na mesa não atingia `CentralVendas360.abrirRegistro` nem `useComercialPedidoWindows` | Restrição incompleta |
+| §4/§10.5, abas por RBAC | `AtalhosLateral` mostrava todos os atalhos; `PainelCorpo` não tinha guarda uniforme por domínio | Precisa corrigir |
+| §5, rascunho automático recuperável | `MesaNegociacao` mantinha alterações somente em memória; cache IndexedDB existente não era utilizado | Precisa integrar |
+| §5/§23, fabricação preservada | Importação e conversão na mesa classificavam fabricação como revenda | Pendente, não confundir grade visual com correção operacional |
+| §5/Anexo §18, aprovação financeira | `onOrcamentoConfirmed`: liberação aprovada era lida mas checagens de crédito/vencidos continuavam com erro | Precisa corrigir |
+| §10.4/§10.7, isolamento | `onOrcamentoConfirmed`: validação financeira consultava somente grupo e caminho legado aceitava payload de evento como registro verdadeiro | Precisa corrigir |
+
+### Matriz da especificação completa, sem inferir funcionamento por existência
+
+| Requisito consolidado / Anexo A | Evidência / destino da implementação | Situação |
+|---|---|---|
+| §1; A1–3, A45, A49–50 | Comercial e componentes existentes; sem migração destrutiva | Base existente, preservar |
+| §2–3; A6–8, A14–15, A38 | Central, Tabela, Mesa, useCentral360Data | Divergências acima; paginação/filtros completos ainda pendentes |
+| §4; A9–11, A13, A39 | Cliente360Lateral, PainelCorpo, PainelAtendimento | Parcial; GoTo e múltiplos contatos não homologados |
+| §5; A12, A16–19 | useAcoesOrcamento, onOrcamentoConfirmed, CentralAprovacoesManager | Parcial; liberação, importação, conversão idempotente e alçadas completas pendentes |
+| §5; A20–24 | PedidoEtapa, EntregaItens, SeparacaoConferencia, Pedido e funções oficiais | Entidades existem; saldos/cadeia parcial por item não comprovados |
+| §6; A29–31 | HubAtendimento, PedidoExterno e funções existentes | Integrações reais e autonomia por política não comprovadas |
+| §7; A25–27 | PainelMapaEntregas, ComprovanteDigital, AppEntregasMotorista | Implementação anterior; falta homologação e consolidação do comprovante legado |
+| §7, documentos/peças | ImprimirPedido e fluxos proprietários | Agendamento, alçada/segunda via e preferências completas pendentes |
+| §7, recebimentos | ContaReceber/PSP/conciliação oficiais | Não certificar confirmação por mero comprovante |
+| §8; A36–37, A42–44 | Alertas, painel vendedor, AuditLog, versão no fechamento | Parcial; carteira por obra, política de comissão e concorrência global pendentes |
+| §9; A4–5, A40–41 | Cadastros únicos, useContextoVisual, PerfilAcesso, endpoints | Base existente; auditoria completa de todas as fronteiras não concluída |
+| §10; A32–35 | Infraestrutura IA existente | Autorização/isolamento de todas as consultas e decisões não homologados |
+| §11; A46–48, A51–55 | Este relatório e relatório de implantação existente | Fonte recebida; execução por lotes, sem declaração de 100% |
+
+Nenhum provedor, plano, crédito, publicação, teste real ou integração ativa é presumido. Os §§47/48 exigem Testing Agent e backend real, não testes pulados. Esta rodada implementará primeiro o núcleo V6 e as correções de bloqueio confirmadas, sem mascarar as pendências operacionais como resolvidas.

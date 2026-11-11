@@ -5,18 +5,18 @@ import { SITUACAO_ESTILO, brl, dataCurta } from './negociacaoUtils';
 import { TITULO_ORIGEM_PESO } from './pesoNegociacao';
 
 const COLUNAS = [
-  { id: 'numero', label: 'Nº', largura: 112, min: 88, fixa: true },
-  { id: 'cliente', label: 'Cliente', largura: 200, min: 140, fixa: true },
+  { id: 'numero', label: 'Nº Orçamento', largura: 112, min: 88, fixa: true },
   { id: 'data', label: 'Data', largura: 88, min: 72 },
-  { id: 'prazo', label: 'Prazo', largura: 108, min: 86, titulo: 'Prazo de entrega e validade do orçamento' },
-  { id: 'vendedor', label: 'Vendedor', largura: 126, min: 90 },
+  { id: 'codigo_cliente', label: 'Cod Cliente', largura: 96, min: 76 },
+  { id: 'cliente', label: 'Nome Cliente', largura: 200, min: 140, fixa: true },
   { id: 'origem', label: 'Origem', largura: 100, min: 76 },
-  { id: 'cidade', label: 'Cidade', largura: 116, min: 84 },
-  { id: 'itens', label: 'Itens', largura: 62, min: 54, alinhamento: 'text-center' },
-  { id: 'peso', label: 'Peso (kg)', largura: 88, min: 70, alinhamento: 'text-right' },
+  { id: 'vendedor', label: 'Nome Vendedor', largura: 126, min: 90 },
+  { id: 'peso', label: 'Peso', largura: 88, min: 70, alinhamento: 'text-right', titulo: 'Peso total em kg, calculado com os produtos oficiais' },
   { id: 'valor', label: 'Valor', largura: 112, min: 88, alinhamento: 'text-right' },
-  { id: 'condicao', label: 'Condição', largura: 112, min: 84 },
+  { id: 'cidade', label: 'Cidade', largura: 116, min: 84 },
+  { id: 'condicao', label: 'Condição Pagamento', largura: 144, min: 108 },
   { id: 'situacao', label: 'Situação', largura: 118, min: 96 },
+  { id: 'prazo', label: 'Prazo', largura: 120, min: 96, titulo: 'Prazo de entrega; validade da proposta identificada separadamente' },
 ];
 
 const LARGURAS_PADRAO = COLUNAS.reduce((acc, coluna) => { acc[coluna.id] = coluna.largura; return acc; }, {});
@@ -31,7 +31,7 @@ const valorOrdenacao = (negociacao, campo, clientesPorId, pesos = {}) => {
     case 'vendedor': return negociacao.vendedor || '';
     case 'origem': return negociacao.canal || '';
     case 'cidade': return cliente.cidade || cliente.endereco_cidade || '';
-    case 'itens': return negociacao.itens?.length || 0;
+    case 'codigo_cliente': return cliente.codigo || '';
     case 'peso': return Number(pesos[negociacao.chave]?.kg ?? (negociacao.registro?.peso_total || negociacao.registro?.peso_total_kg || 0));
     case 'valor': return Number(negociacao.totais?.total || 0);
     case 'condicao': return negociacao.condicao_pagamento || '';
@@ -199,68 +199,26 @@ export default function TabelaNegociacoes({
                   onDoubleClick={() => onAbrir?.(negociacao)}
                   className={`group cursor-pointer border-b border-slate-100 ${ativa ? 'bg-blue-50' : ''}`}
                 >
-                  <td
-                    style={{ width: larguraNumero, minWidth: larguraNumero, left: 0 }}
-                    className={`sticky z-10 px-2 py-1.5 font-semibold text-blue-700 whitespace-nowrap ${fundo} ${ativa ? 'border-l-2 border-l-blue-600' : 'border-l-2 border-l-transparent'}`}
-                  >
-                    {negociacao.numero}
-                  </td>
-                  <td
-                    style={{ width: larguraCliente, minWidth: larguraCliente, left: deslocamentoCliente }}
-                    className={`sticky z-10 px-2 py-1.5 ${fundo}`}
-                    title={negociacao.cliente_nome}
-                  >
-                    <span className="block truncate text-slate-800">{negociacao.cliente_nome}</span>
-                  </td>
-                  <td style={{ width: larguraDe('data'), minWidth: larguraDe('data') }} className="px-2 py-1.5 whitespace-nowrap text-slate-600">
-                    {dataCurta(negociacao.data)}
-                  </td>
-                  <td
-                    style={{ width: larguraDe('prazo'), minWidth: larguraDe('prazo') }}
-                    className="px-2 py-1.5 text-slate-600"
-                    title={`Entrega: ${negociacao.prazo || '—'} · Validade do orçamento: ${dataCurta(negociacao.validade)}`}
-                  >
-                    <span className="block truncate text-slate-700">{negociacao.prazo || '—'}</span>
-                    <span className="block truncate text-[10px] text-slate-400">val. {dataCurta(negociacao.validade)}</span>
-                  </td>
-                  <td style={{ width: larguraDe('vendedor'), minWidth: larguraDe('vendedor') }} className="px-2 py-1.5 truncate text-slate-600" title={negociacao.vendedor}>
-                    {negociacao.vendedor || '—'}
-                  </td>
-                  <td style={{ width: larguraDe('origem'), minWidth: larguraDe('origem') }} className="px-2 py-1.5 truncate text-slate-600">
-                    {negociacao.canal || '—'}
-                  </td>
-                  <td
-                    style={{ width: larguraDe('cidade'), minWidth: larguraDe('cidade') }}
-                    className="px-2 py-1.5 truncate text-slate-600"
-                    title={cliente.cidade || cliente.endereco_cidade || ''}
-                  >
-                    {cliente.cidade || cliente.endereco_cidade || '—'}
-                  </td>
-                  <td style={{ width: larguraDe('itens'), minWidth: larguraDe('itens') }} className="px-2 py-1.5 text-center text-slate-600">
-                    {negociacao.itens?.length || 0}
-                  </td>
-                  <td
-                    style={{ width: larguraDe('peso'), minWidth: larguraDe('peso') }}
-                    className="px-2 py-1.5 text-right text-slate-600"
-                    title={pesoInfo ? TITULO_ORIGEM_PESO[pesoInfo.origem] : 'Sem peso no documento nem nos cadastros de Produto'}
-                  >
-                    {peso > 0 ? peso.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) : '—'}
-                  </td>
-                  <td style={{ width: larguraDe('valor'), minWidth: larguraDe('valor') }} className="px-2 py-1.5 text-right font-semibold text-slate-800">
-                    {brl(negociacao.totais?.total || 0)}
-                  </td>
-                  <td
-                    style={{ width: larguraDe('condicao'), minWidth: larguraDe('condicao') }}
-                    className="px-2 py-1.5 truncate text-slate-600"
-                    title={negociacao.condicao_pagamento}
-                  >
-                    {negociacao.condicao_pagamento || '—'}
-                  </td>
-                  <td style={{ width: larguraDe('situacao'), minWidth: larguraDe('situacao') }} className="px-2 py-1.5">
-                    <span className={`inline-block rounded border px-1.5 py-0.5 text-[10px] font-semibold ${SITUACAO_ESTILO[negociacao.grupo]}`}>
-                      {negociacao.situacao}
-                    </span>
-                  </td>
+                  {COLUNAS.map((coluna) => {
+                    const valores = {
+                      numero: negociacao.numero, data: dataCurta(negociacao.data),
+                      codigo_cliente: cliente.codigo || '—', cliente: negociacao.cliente_nome,
+                      origem: negociacao.canal || '—', vendedor: negociacao.vendedor || '—',
+                      peso: peso > 0 ? peso.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) : '—',
+                      valor: brl(negociacao.totais?.total || 0), cidade: cliente.cidade || cliente.endereco_cidade || '—',
+                      condicao: negociacao.condicao_pagamento || '—', situacao: negociacao.situacao,
+                      prazo: negociacao.prazo || '—',
+                    };
+                    const titulo = coluna.id === 'peso' ? (pesoInfo ? TITULO_ORIGEM_PESO[pesoInfo.origem] : 'Sem peso no documento nem no Produto')
+                      : coluna.id === 'prazo' ? `Entrega: ${negociacao.prazo || '—'} · Validade da proposta: ${dataCurta(negociacao.validade)}`
+                        : coluna.id === 'cliente' ? `${negociacao.cliente_nome} · ${negociacao.itens?.length || 0} item(ns)` : String(valores[coluna.id]);
+                    return <td key={coluna.id} title={titulo} style={{ width: larguraDe(coluna.id), minWidth: larguraDe(coluna.id), maxWidth: larguraDe(coluna.id), ...(coluna.fixa ? { left: coluna.id === 'numero' ? 0 : deslocamentoCliente } : {}) }}
+                      className={`px-2 py-1.5 text-slate-600 ${coluna.alinhamento || 'text-left'} ${coluna.fixa ? `sticky z-10 ${fundo}` : ''} ${coluna.id === 'numero' ? 'font-semibold text-blue-700' : ''}`}>
+                      {coluna.id === 'situacao' ? <span className={`inline-block rounded border px-1.5 py-0.5 text-[10px] font-semibold ${SITUACAO_ESTILO[negociacao.grupo]}`}>{negociacao.situacao}</span>
+                        : <span className="block truncate">{valores[coluna.id]}</span>}
+                      {coluna.id === 'prazo' && negociacao.origem === 'orcamento' && <span className="block truncate text-[10px] text-slate-400">Validade: {dataCurta(negociacao.validade)}</span>}
+                    </td>;
+                  })}
                 </tr>
               );
             })}

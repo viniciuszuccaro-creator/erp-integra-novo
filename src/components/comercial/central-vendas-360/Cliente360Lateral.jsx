@@ -10,6 +10,7 @@ const LARGURA_MAXIMA = 560;
 
 export default function Cliente360Lateral({
   negociacao, cliente, recolhido, onToggle, largura = 360, onRedimensionar,
+  alertas = [], validacao, onSelecionarNegociacao,
 }) {
   const [painel, setPainel] = useState('cliente');
   const [larguraLocal, setLarguraLocal] = useState(null);
@@ -101,7 +102,14 @@ export default function Cliente360Lateral({
               {TITULOS_PAINEL[painel] || 'Painel'}
             </div>
             <div className="flex-1 overflow-auto p-2">
-              <PainelCorpo painel={painel} negociacao={negociacao} cliente={cliente} />
+              <PainelCorpo
+                painel={painel}
+                negociacao={negociacao}
+                cliente={cliente}
+                alertas={alertas}
+                validacao={validacao}
+                onSelecionarNegociacao={onSelecionarNegociacao}
+              />
             </div>
           </div>
         </div>

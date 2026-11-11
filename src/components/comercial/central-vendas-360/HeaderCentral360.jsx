@@ -1,6 +1,6 @@
 // Cabeçalho da Central 360° — identidade azul/branca, empresa, busca universal, filtros e ação primária
 import React from 'react';
-import { Building2, Filter, List, Plus, Search, ShoppingCart } from 'lucide-react';
+import { AlertTriangle, Building2, Filter, List, Plus, Search, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProtectedSection from '@/components/security/ProtectedSection';
 import { GRUPOS_NEGOCIACAO } from './negociacaoUtils';
@@ -26,7 +26,7 @@ function FiltroSelect({ label, valor, opcoes = [], onChange }) {
 export default function HeaderCentral360({
   empresa, grupo, busca, setBusca, grupoFiltro, setGrupoFiltro,
   contadores = {}, total = 0, onNovo, modo, setModo,
-  filtros = {}, onFiltro, onLimparFiltros, opcoes = {},
+  filtros = {}, onFiltro, onLimparFiltros, opcoes = {}, alertas = [],
 }) {
   const contexto = empresa?.nome || grupo?.nome || 'Grupo não selecionado';
   const temFiltroAtivo = ['vendedor', 'cidade', 'origem'].some((campo) => filtros[campo] && filtros[campo] !== 'todos');
@@ -77,6 +77,18 @@ export default function HeaderCentral360({
 
       <div className="flex flex-wrap items-center gap-1 px-3 py-1.5 border-b border-slate-100">
         <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 mr-1">{total} registros</span>
+        {alertas.length > 0 && (
+          <span
+            title={alertas.slice(0, 4).map((a) => `${a.numero}: ${a.titulo}`).join('\n')}
+            className={`inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-semibold mr-1 ${
+              alertas.some((a) => a.severidade === 'critico')
+                ? 'border-red-200 bg-red-50 text-red-700'
+                : 'border-amber-200 bg-amber-50 text-amber-700'
+            }`}
+          >
+            <AlertTriangle className="w-3 h-3" /> {alertas.length} alerta(s)
+          </span>
+        )}
         {GRUPOS_NEGOCIACAO.map((opcao) => {
           const ativo = grupoFiltro === opcao.id;
           const quantidade = opcao.id === 'todas' ? total : (contadores[opcao.id] || 0);

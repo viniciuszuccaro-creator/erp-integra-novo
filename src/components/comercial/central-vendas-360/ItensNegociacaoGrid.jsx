@@ -20,7 +20,7 @@ function novoItem() {
   };
 }
 
-export default function ItensNegociacaoGrid({ itens, setItens, editavel }) {
+export default function ItensNegociacaoGrid({ itens, setItens, editavel, permiteDesconto = true }) {
   const alterar = (id, campo, valor) => {
     setItens((atual) => atual.map((item) => {
       if (item.id !== id) return item;
@@ -101,8 +101,16 @@ export default function ItensNegociacaoGrid({ itens, setItens, editavel }) {
                   <input type="number" min="0" step="0.01" className={classeInput} value={item.valor_unitario}
                     onChange={(e) => alterar(item.id, 'valor_unitario', e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') incluir(); }} />
-                  <input type="number" min="0" step="0.01" className={classeInput} value={item.desconto_percentual}
-                    onChange={(e) => alterar(item.id, 'desconto_percentual', e.target.value)} />
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className={`${classeInput} ${permiteDesconto ? '' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}
+                    value={item.desconto_percentual}
+                    disabled={!permiteDesconto}
+                    title={permiteDesconto ? 'Desconto do item' : 'Desconto acima do limite exige permissão de aprovação'}
+                    onChange={(e) => alterar(item.id, 'desconto_percentual', e.target.value)}
+                  />
                 </>
               ) : (
                 <>

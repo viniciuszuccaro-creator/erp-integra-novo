@@ -13,6 +13,9 @@ import ItensNegociacaoGrid from './ItensNegociacaoGrid';
 import RodapeNegociacao from './RodapeNegociacao';
 import EnviarPropostaDialog from './EnviarPropostaDialog';
 import useEnvioProposta from './useEnvioProposta';
+import PainelValidacaoFechamento from './PainelValidacaoFechamento';
+import useValidacaoFechamento from './useValidacaoFechamento';
+import useAcoesComerciais from './useAcoesComerciais';
 import { totalizarItens } from './negociacaoUtils';
 
 export default function MesaNegociacao({ negociacao, clientes = [], empresa, grupo, onVoltar, onAtualizar }) {
@@ -46,6 +49,13 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
     [clientes, negociacao.cliente_id]
   );
 
+  const acoes = useAcoesComerciais();
+  const validacao = useValidacaoFechamento({
+    negociacao: { ...negociacao, itens },
+    cliente: clienteNegociacao,
+  });
+  const bloqueioFechamento = negociacao.origem === 'orcamento' && validacao.erros.length > 0;
+
   const contextoNegociacao = empresa?.nome || grupo?.nome || '';
 
   const abrirEnvio = () => {
@@ -73,6 +83,15 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
 
   const salvar = async () => {
     if (!negociacao.editavel) return;
+    if (validacao.acimaDoLimite && !acoes.podeAprovarDesconto) {
+      registrarAuditoria(
+        'Bloqueio',
+        `Desconto de ${validacao.descontoPercentual.toFixed(1)}% sem permissão de aprovação`,
+        'OrcamentoCliente'
+      );
+      toast.error('Desconto acima do limite exige permissão de aprovação.');
+      return;
+    }
     setSalvando(true);
     try {
       await updateInContext('OrcamentoCliente', negociacao.registro.id, {
@@ -215,9 +234,15 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
     <div className="w-full h-full flex flex-col gap-2 min-h-0">
       <HeaderNegociacao negociacao={negociacao} empresa={empresa} grupo={grupo} sujo={sujo} salvando={salvando} />
       <FaixaAtendimento negociacao={negociacao} aberta={faixaAberta} onToggle={() => setFaixaAberta((v) => !v)} />
+      <PainelValidacaoFechamento validacao={validacao} />
 
       <div className="flex-1 min-h-0 flex">
-        <ItensNegociacaoGrid itens={itens} setItens={setItens} editavel={negociacao.editavel} />
+        <ItensNegociacaoGrid
+          itens={itens}
+          setItens={setItens}
+          editavel={negociacao.editavel}
+          permiteDesconto={!validacao.acimaDoLimite || acoes.podeAprovarDesconto}
+        />
       </div>
 
       <RodapeNegociacao
@@ -228,8 +253,10 @@ export default function MesaNegociacao({ negociacao, clientes = [], empresa, gru
         sujo={sujo}
         salvando={salvando}
         acaoLabel={acaoLabel}
-        acaoDescricao="Avança a negociação para a próxima etapa"
-        acaoDesabilitada={acaoDesabilitada}
+        acaoDescricao={bloqueioFechamento
+          ? `Resolva ${validacao.erros.length} bloqueio(s) do fechamento para avançar`
+          : 'Avança a negociação para a próxima etapa'}
+        acaoDesabilitada={acaoDesabilitada || bloqueioFechamento}
         onSalvar={salvar}
         onVoltar={onVoltar}
         onAvancar={avancar}

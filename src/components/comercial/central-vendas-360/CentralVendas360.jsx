@@ -14,6 +14,8 @@ import usePreferenciasCentral360 from './usePreferenciasCentral360';
 import { orcamentoParaNegociacao, pedidoParaNegociacao } from './negociacaoUtils';
 import usePesosProdutos from './usePesosProdutos';
 import { pesoDaNegociacao } from './pesoNegociacao';
+import useAlertasComerciais from './useAlertasComerciais';
+import useValidacaoFechamento from './useValidacaoFechamento';
 
 const cidadeDoCliente = (cliente) => cliente?.cidade || cliente?.endereco_cidade || '—';
 
@@ -70,6 +72,14 @@ export default function CentralVendas360({
     () => (clientes || []).reduce((acc, cliente) => { acc[cliente.id] = cliente; return acc; }, {}),
     [clientes]
   );
+
+  const { alertas } = useAlertasComerciais({ negociacoes });
+
+  const clienteSelecionado = clientesPorId[selecionada?.cliente_id] || null;
+  const validacaoSelecionada = useValidacaoFechamento({
+    negociacao: selecionada,
+    cliente: clienteSelecionado,
+  });
 
   const porGrupo = useMemo(
     () => (grupo === 'todas' ? negociacoes : negociacoes.filter((negociacao) => negociacao.grupo === grupo)),
@@ -174,6 +184,7 @@ export default function CentralVendas360({
           onFiltro={preferencias.setFiltro}
           onLimparFiltros={preferencias.limparFiltros}
           opcoes={opcoesFiltro}
+          alertas={alertas}
         />
 
         {modo === 'lista' ? (
@@ -230,11 +241,14 @@ export default function CentralVendas360({
 
             <Cliente360Lateral
               negociacao={selecionada}
-              cliente={clientesPorId[selecionada?.cliente_id] || null}
+              cliente={clienteSelecionado}
               recolhido={!painelAberto}
               onToggle={() => setPainelAberto((v) => !v)}
               largura={preferencias.larguraPainel}
               onRedimensionar={preferencias.setLarguraPainel}
+              alertas={alertas}
+              validacao={validacaoSelecionada}
+              onSelecionarNegociacao={setSelecionada}
             />
           </div>
         )}

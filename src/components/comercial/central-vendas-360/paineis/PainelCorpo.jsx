@@ -9,9 +9,13 @@ import PainelHistorico from './PainelHistorico';
 import useTitulosFinanceiros from './usePainelFinanceiro';
 import usePainelEstoque from './usePainelEstoque';
 import PainelRetornos from './PainelRetornos';
+import PainelCopiloto from './PainelCopiloto';
+import PainelMapaEntregas from './PainelMapaEntregas';
 import { brl, dataCurta } from '../negociacaoUtils';
 
-export default function PainelCorpo({ painel, negociacao, cliente }) {
+export default function PainelCorpo({
+  painel, negociacao, cliente, alertas = [], validacao, onSelecionarNegociacao,
+}) {
   const { pedidoId, clienteId } = FILTRO_RELACIONADO(negociacao);
   const registro = negociacao?.registro || {};
   const financeiro = useTitulosFinanceiros({ clienteId, pedidoId, modo: 'cliente', ativo: painel === 'financeiro' });
@@ -19,6 +23,17 @@ export default function PainelCorpo({ painel, negociacao, cliente }) {
   const estoque = usePainelEstoque({ itens: negociacao?.itens, ativo: painel === 'estoque' });
 
   switch (painel) {
+    case 'copiloto':
+      return (
+        <PainelCopiloto
+          negociacao={negociacao}
+          validacao={validacao}
+          alertas={alertas}
+          onSelecionarNegociacao={onSelecionarNegociacao}
+        />
+      );
+    case 'mapa':
+      return <PainelMapaEntregas negociacao={negociacao} />;
     case 'cliente':
       return <PainelCliente cliente={cliente} />;
     case 'historico':

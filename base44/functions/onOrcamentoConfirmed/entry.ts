@@ -221,7 +221,7 @@ async function processarCentral(base44, ctx, body) {
   const utilizado = somarSaldo(financeiro);
   const aprovacoes = pagina(solicitacoes);
   // Uma liberação não se transfere a outro cliente, valor ou contexto. Dívida nova exige reanálise.
-  const aprovacaoValida = (s) => s.status === 'aprovado' && s.solicitante_id !== (s.aprovador_id || '')
+  const aprovacaoValida = (s) => s.status === 'aprovado' && Boolean(s.aprovador_id) && s.solicitante_id !== s.aprovador_id
     && s.dados_propostos?.cliente_id === registro.cliente_id
     && Number(s.dados_propostos?.valor_orcamento) === total
     && (!s.data_expiracao_concessao || Date.parse(s.data_expiracao_concessao) > Date.now());
@@ -234,7 +234,7 @@ async function processarCentral(base44, ctx, body) {
     limite === 0
       ? 'Cliente sem limite de crédito cadastrado.'
       : `Limite ${limite.toFixed(2)} · utilizado ${utilizado.toFixed(2)} · disponível ${disponivelCredito.toFixed(2)} · pedido ${total.toFixed(2)}.`,
-    limite === 0 ? 'Cadastrar limite em Cadastros Gerais.' : creditoInsuficiente ? 'Aprovação financeira de limite.' : '');
+    liberaCredito ? 'Liberação financeira aprovada para esta proposta.' : limite === 0 ? 'Cadastrar limite em Cadastros Gerais.' : creditoInsuficiente ? 'Aprovação financeira de limite.' : '');
   adicionar('vencidos', 'Títulos vencidos', quantidadeVencida && !liberaVencido ? 'erro' : 'ok',
     quantidadeVencida ? `${quantidadeVencida} título(s) vencido(s), total ${valorVencido.toFixed(2)}.${liberaVencido ? ' Liberação financeira aprovada para esta proposta.' : ''}` : 'Nenhum título vencido do cliente.',
     quantidadeVencida && !liberaVencido ? 'Liberação do Financeiro.' : '');
@@ -304,18 +304,22 @@ export default async function(req) {
     const { event, data: payload } = body || {};
     if (!event?.type || !payload) return Response.json({ error: 'Invalid payload' }, { status: 400 });
     if (![payload.id, payload.group_id, payload.empresa_id].every((id) => typeof id === 'string' && /^[a-f\d]{24}$/i.test(id))) return Response.json({ error: 'Orçamento, grupo e empresa válidos são obrigatórios.' }, { status: 400 });
-    if (!possuiContexto(user, payload.group_id, payload.empresa_id)) return Response.json({ error: 'Contexto não autorizado.' }, { status: 403 });
-    // Evento é somente referência: relê o registro oficial, nunca cria pedido usando dados fornecidos pelo chamador.
-    const [origens, empresas] = await Promise.all([
-      base44.entities.OrcamentoCliente.filter({ id: payload.id, group_id: payload.group_id, empresa_id: payload.empresa_id }, { limit: 1 }),
+    if (user.role !== 'admin' || !possuiContexto(user, payload.group_id, payload.empresa_id)) return Response.json({ error: 'Eventos automáticos exigem administrador e contexto autorizado.' }, { status: 403 });
+    // Preserva o contrato legado dos dois workflows: evento identifica, mas não fornece a verdade do registro.
+    const filtroOrigem = { id: payload.id, group_id: payload.group_id, empresa_id: payload.empresa_id };
+    const [origens, origensSite, empresas] = await Promise.all([
+      base44.entities.OrcamentoCliente.filter(filtroOrigem, { limit: 1 }),
+      base44.entities.OrcamentoSite.filter(filtroOrigem, { limit: 1 }),
       base44.entities.Empresa.filter({ id: payload.empresa_id, group_id: payload.group_id }, { limit: 1 }),
     ]);
-    const data = pagina(origens)[0];
+    const fonte = pagina(origens).length ? 'OrcamentoCliente' : 'OrcamentoSite';
+    const data = pagina(origens)[0] || pagina(origensSite)[0];
     if (!data || !pagina(empresas).length) return Response.json({ error: 'Orçamento não encontrado neste contexto.' }, { status: 404 });
-    if (data.pedido_gerado_id) return Response.json({ ok: true, pedido_id: data.pedido_gerado_id, repetida: true });
-    if (data.status !== 'Aprovado') return Response.json({ ok: true, skipped: true });
-    const validacao = await processarCentral(base44, ctx, { acao: 'validar', orcamento_id: data.id, group_id: data.group_id, empresa_id: data.empresa_id, versao: data.updated_date });
-    if (!validacao.ok) return validacao;
+    const pedidoExistente = data.pedido_gerado_id || data.pedido_erp_id;
+    if (pedidoExistente) return Response.json({ ok: true, pedido_id: pedidoExistente, repetida: true });
+    const confirmado = data.status === 'Confirmado' || data.aprovado === true || data.confirmado === true;
+    // Fechar na mesa não dispara uma segunda conversão automática; o direcionamento continua explícito.
+    if (!confirmado) return Response.json({ ok: true, skipped: true });
 
     // Permissão para criar Pedido no módulo Comercial
     const perm = await assertPermission(base44, ctx, 'Comercial', 'Pedido', 'criar');
@@ -325,7 +329,7 @@ export default async function(req) {
     const pedidoPayload = {
       tipo: 'Pedido',
       origem_pedido: data?.origem || 'Manual',
-      cliente_id: data?.cliente_id || null,
+      cliente_id: data?.cliente_id || data?.cliente_erp_id || null,
       cliente_nome: data?.cliente_nome || data?.cliente || null,
       valor_total: data?.valor_total || 0,
       data_pedido: new Date().toISOString().slice(0,10),
@@ -345,7 +349,7 @@ export default async function(req) {
     });
 
     const created = await base44.entities.Pedido.create(pedidoPayload);
-    await base44.entities.OrcamentoCliente.update(data.id, { status: 'Convertido', pedido_gerado_id: created.id });
+    await base44.entities[fonte].update(data.id, fonte === 'OrcamentoCliente' ? { status: 'Convertido', pedido_gerado_id: created.id } : { status: 'Convertido em Pedido', pedido_erp_id: created.id });
 
     await audit(base44, user, {
       acao: 'Criação',

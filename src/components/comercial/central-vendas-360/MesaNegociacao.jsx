@@ -153,7 +153,7 @@ export default function MesaNegociacao({
   };
 
   const salvar = async () => {
-    if (!negociacao.editavel || !acoes.podeEditar || salvando) return;
+    if (!podeEditarItens || salvando) return;
     if (negociacao.origem !== 'orcamento') return handleEditPedido(negociacao.registro);
     const atualizado = await acoesOrcamento.executarFechamento('salvar', itens, versao, dadosOrcamento);
     if (atualizado) {

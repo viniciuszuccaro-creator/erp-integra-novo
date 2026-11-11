@@ -25,7 +25,7 @@ export const PERMISSOES_PAINEL = {
   atendimento: ['HubAtendimento', null], historico: ['CRM', null], retornos: ['CRM', null],
   financeiro: ['Financeiro', 'Contas a Receber'], pagamento: ['Financeiro', 'Contas a Receber'],
   estoque: ['Estoque', 'Produtos'], producao: ['Produção', 'Ordens de Produção'],
-  entregas: ['Expedição', 'Entrega'], mapa: ['Expedição', 'Entrega'], fiscal: ['Fiscal', 'Notas Fiscais'],
+  entregas: ['Expedição', 'Entregas'], mapa: ['Expedição', 'Entregas'], fiscal: ['Fiscal', 'Notas Fiscais'],
 };
 
 export const TITULOS_PAINEL = ATALHOS_360.reduce((acc, atalho) => {

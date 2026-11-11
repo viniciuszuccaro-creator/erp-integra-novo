@@ -335,10 +335,31 @@ function testLayoutResponsiveness() {
   }
 }
 
+// Cenários puros da Central 360°: sem backend e sem simular homologação E2E.
+async function testCentral360() {
+  const source = readFileSync(join(ROOT, 'src/components/comercial/central-vendas-360/negociacaoUtils.jsx'), 'utf-8');
+  const central = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+  const check = (nome, resultado) => log(resultado ? 'pass' : 'fail', `Central 360: ${nome}`);
+  const base = { id: 'exemplo', status: 'Pendente', data_validade: '2999-01-01', itens: [] };
+  check('orçamento pendente válido em Abertos', central.orcamentoParaNegociacao(base).grupo === 'aberto');
+  const vencido = central.orcamentoParaNegociacao({ ...base, data_validade: '2000-01-01' });
+  check('vencido não é cancelado e permite revalidar', vencido.grupo === 'encerrado' && vencido.editavel);
+  check('expirado mantém histórico separado', central.orcamentoParaNegociacao({ ...base, status: 'Expirado' }).grupo === 'encerrado');
+  check('rejeitado não vira cancelamento', central.orcamentoParaNegociacao({ ...base, status: 'Rejeitado' }).grupo === 'encerrado');
+  check('entregue separado de convertido', central.pedidoParaNegociacao({ id: 'p', status: 'Entregue' }).grupo === 'entregue');
+  const misto = central.pedidoParaNegociacao({ id: 'p', itens_revenda: [{ quantidade: 2, valor_unitario: 5 }], itens_armado_padrao: [{ quantidade: 3, valor_unitario: 7 }], itens_corte_dobra: [{ quantidade: 1, valor_unitario: 9 }] });
+  check('pedido misto preserva revenda e fabricação na leitura', misto.itens.map((i) => i.tipo).join(',') === 'revenda,fabricacao,fabricacao');
+  check('normalização não inventa total em item gratuito', central.orcamentoParaNegociacao({ ...base, itens: [{ quantidade: 2, valor_unitario: 10, valor_total: 0 }] }).itens[0].valor_total === 0);
+  check('totalização considera desconto', central.totalizarItens([{ quantidade: 2, valor_unitario: 10, desconto_percentual: 10 }]).total === 18);
+  const tabela = readFileSync(join(ROOT, 'src/components/comercial/central-vendas-360/TabelaNegociacoes.jsx'), 'utf-8');
+  const labels = [...tabela.match(/const COLUNAS = \[([\s\S]*?)\];/)[1].matchAll(/label: '([^']+)'/g)].map((m) => m[1]);
+  check('12 colunas na ordem literal do dossiê', labels.join('|') === 'Nº Orçamento|Data|Cod Cliente|Nome Cliente|Origem|Nome Vendedor|Peso|Valor|Cidade|Condição Pagamento|Situação|Prazo');
+}
+
 // ═══════════════════════════════════════════════════
 // EXECUÇÃO
 // ═══════════════════════════════════════════════════
-function runUnit() {
+async function runUnit() {
   console.log(`\n${COLORS.bold}${COLORS.blue}═══════════════════════════════════════════════════${COLORS.reset}`);
   console.log(`${COLORS.bold}${COLORS.blue}  ERP ZUCCARO — TESTES UNITÁRIOS (LÓGICA PURA)${COLORS.reset}`);
   console.log(`${COLORS.bold}${COLORS.blue}═══════════════════════════════════════════════════${COLORS.reset}`);
@@ -349,6 +370,7 @@ function runUnit() {
   testRBACStructure();
   testRouteRBACMapping();
   testLayoutResponsiveness();
+  await testCentral360();
 
   const total = results.pass + results.fail + results.skip;
   console.log(`\n${COLORS.bold}═══════════════════════════════════════════════════${COLORS.reset}`);

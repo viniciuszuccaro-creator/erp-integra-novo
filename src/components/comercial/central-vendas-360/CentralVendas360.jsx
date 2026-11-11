@@ -175,6 +175,8 @@ export default function CentralVendas360({
       acc[negociacao.grupo] = (acc[negociacao.grupo] || 0) + 1;
       return acc;
     }, {});
+    // Abertos inicia apenas com orçamentos; pedidos rascunho continuam acessíveis em Todas / Lista completa.
+    contagem.aberto = negociacoes.filter((negociacao) => negociacao.origem === 'orcamento' && negociacao.grupo === 'aberto').length;
     // "Em execução" permanece como visão agregada das etapas Produção + Entrega + Retira
     contagem.acompanhamento = (contagem.producao || 0) + (contagem.entrega || 0)
       + (contagem.retira || 0) + (contagem.acompanhamento || 0);

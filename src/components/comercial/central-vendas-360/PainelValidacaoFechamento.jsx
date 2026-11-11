@@ -56,6 +56,9 @@ export default function PainelValidacaoFechamento({ validacao, compacto = false 
                 <div className="min-w-0">
                   <p className="text-[11px] font-semibold text-slate-700">{checagem.titulo}</p>
                   <p className="text-[11px] text-slate-500 break-words">{checagem.detalhe}</p>
+                  {checagem.acao && (
+                    <p className="text-[11px] font-semibold text-slate-700">Ação necessária: {checagem.acao}</p>
+                  )}
                 </div>
               </li>
             );

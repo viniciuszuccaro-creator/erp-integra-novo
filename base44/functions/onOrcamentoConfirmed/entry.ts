@@ -105,34 +105,153 @@ async function processarCentral(base44, ctx, body) {
     return negar('Desconto acima de 15% exige permissão de aprovação de desconto.', 403);
   }
   const checagens = [];
-  const adicionar = (chave, titulo, status, detalhe) => checagens.push({ chave, titulo, status, detalhe });
+  const adicionar = (chave, titulo, status, detalhe, acaoNecessaria = '') => checagens.push({ chave, titulo, status, detalhe, acao: acaoNecessaria });
   const ids = [...new Set(itens.map((item) => item.produto_id).filter(Boolean))];
-  const [clientes, produtos] = await Promise.all([
+  const hoje = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  const [clientes, produtos, titulos, solicitacoes] = await Promise.all([
     registro.cliente_id ? base44.entities.Cliente.filter({ id: registro.cliente_id, group_id }, { limit: 1 }) : Promise.resolve([]),
     ids.length ? base44.entities.Produto.filter({ id: { $in: ids }, group_id }, { limit: ids.length }) : Promise.resolve([]),
+    // Títulos e crédito vêm do módulo Financeiro por referência — o Comercial não copia saldos.
+    registro.cliente_id ? base44.entities.ContaReceber.filter({ cliente_id: registro.cliente_id, group_id, status: { $in: ['Pendente', 'Atrasado', 'Parcial'] } }, { limit: 200 }) : Promise.resolve([]),
+    base44.entities.SolicitacaoAprovacao.filter({ entidade_alvo: 'OrcamentoCliente', entidade_alvo_id: registro.id, group_id }, { limit: 20 }),
   ]);
   const cliente = pagina(clientes)[0];
   const disponivelNaEmpresa = (cadastro) => cadastro && (!cadastro.empresa_id || cadastro.empresa_id === empresa_id || (cadastro.empresas_compartilhadas_ids || []).includes(empresa_id));
-  const clienteValido = disponivelNaEmpresa(cliente) && !['Inativo', 'Bloqueado'].includes(cliente.status);
-  adicionar('cliente', 'Cliente habilitado', clienteValido ? 'ok' : 'erro', clienteValido ? registro.cliente_nome : 'Cliente ausente, bloqueado ou não compartilhado com a empresa.');
-  adicionar('itens', 'Itens e preços', itens.length && itens.every((item) => item.descricao && item.quantidade > 0 && item.valor_unitario > 0) ? 'ok' : 'erro', 'O fechamento exige descrição, quantidade e preço positivos em todos os itens.');
+  const clienteValido = disponivelNaEmpresa(cliente) && !['Inativo', 'Bloqueado'].includes(cliente.status) && cliente.condicao_comercial?.situacao_credito !== 'Bloqueado';
+  adicionar('cliente', 'Cliente ativo e habilitado', clienteValido ? 'ok' : 'erro', clienteValido ? registro.cliente_nome : 'Cliente ausente, inativo, com crédito bloqueado ou não compartilhado com a empresa.', clienteValido ? '' : 'Regularizar o cadastro do cliente.');
+
+  // 1-4. Documento e cadastro obrigatório (validação real de dígitos, não apenas presença)
+  const documento = String(cliente?.cnpj || cliente?.cpf || '').replace(/\D/g, '');
+  const validoCnpj = (d) => {
+    if (d.length !== 14 || /^(\d)\1+$/.test(d)) return false;
+    const calc = (base) => { const pesos = base.length === 12 ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2] : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]; const soma = base.split('').reduce((s, n, i) => s + Number(n) * pesos[i], 0); const resto = soma % 11; return resto < 2 ? 0 : 11 - resto; };
+    return calc(d.slice(0, 12)) === Number(d[12]) && calc(d.slice(0, 13)) === Number(d[13]);
+  };
+  const validoCpf = (d) => {
+    if (d.length !== 11 || /^(\d)\1+$/.test(d)) return false;
+    const calc = (base) => { const soma = base.split('').reduce((s, n, i) => s + Number(n) * (base.length + 1 - i), 0); const resto = (soma * 10) % 11; return resto === 10 ? 0 : resto; };
+    return calc(d.slice(0, 9)) === Number(d[9]) && calc(d.slice(0, 10)) === Number(d[10]);
+  };
+  const documentoOk = documento.length === 14 ? validoCnpj(documento) : documento.length === 11 ? validoCpf(documento) : false;
+  adicionar('documento', 'CNPJ/CPF válido', documentoOk ? 'ok' : 'erro',
+    documentoOk ? documento.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : 'Documento ausente ou inválido no cadastro do cliente.',
+    documentoOk ? '' : 'Corrigir o cadastro em Cadastros Gerais.');
+
+  const endereco = cliente?.endereco_principal || {};
+  const enderecoOk = Boolean(endereco.logradouro && endereco.cidade && endereco.estado && (endereco.cep || endereco.numero));
+  adicionar('endereco', 'Endereço de faturamento/entrega', enderecoOk ? 'ok' : 'erro',
+    enderecoOk ? `${endereco.logradouro}, ${endereco.numero || 's/n'} — ${endereco.cidade}/${endereco.estado}` : 'Endereço incompleto no cadastro do cliente.',
+    enderecoOk ? '' : 'Completar o endereço em Cadastros Gerais.');
+
+  adicionar('itens', 'Produtos e quantidades', itens.length && itens.every((item) => item.descricao && item.quantidade > 0 && item.valor_unitario > 0) ? 'ok' : 'erro', 'O fechamento exige descrição, quantidade e preço positivos em todos os itens.', 'Revisar os itens da negociação.');
   const pagamento = limparTexto(proposta.condicoes_pagamento);
-  adicionar('pagamento', 'Condição de pagamento', pagamento && pagamento !== '—' ? 'ok' : 'erro', pagamento || 'Informe a condição de pagamento.');
-  const hoje = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  adicionar('pagamento', 'Condição de pagamento', pagamento && pagamento !== '—' ? 'ok' : 'erro', pagamento || 'Informe a condição de pagamento.', 'Definir a condição de pagamento.');
   const validade = String(proposta.data_validade || '').slice(0, 10);
-  adicionar('validade', 'Validade da proposta', /^\d{4}-\d{2}-\d{2}$/.test(validade) && validade >= hoje ? 'ok' : 'erro', validade ? `Validade: ${validade}.` : 'Informe uma validade para a proposta.');
+  adicionar('validade', 'Validade da proposta', /^\d{4}-\d{2}-\d{2}$/.test(validade) && validade >= hoje ? 'ok' : 'erro', validade ? `Validade: ${validade}.` : 'Informe uma validade para a proposta.', 'Revalidar a proposta.');
+
+  // 6-13. Produtos oficiais: situação, estoque, produção, tabela, preço e margem
   const produtosPorId = new Map(pagina(produtos).map((produto) => [produto.id, produto]));
   const quantidades = new Map();
   itens.forEach((item) => { if (item.produto_id) quantidades.set(item.produto_id, (quantidades.get(item.produto_id) || 0) + item.quantidade); });
+  let requerProducao = 0;
   for (const [id, quantidade] of quantidades) {
     const produto = produtosPorId.get(id);
-    if (!disponivelNaEmpresa(produto) || produto.status === 'Inativo') adicionar(`produto-${id}`, 'Produto habilitado', 'erro', 'Produto indisponível no contexto da empresa.');
-    else {
-      const saldo = Number(produto.estoque_disponivel ?? (Number(produto.estoque_atual || 0) - Number(produto.estoque_reservado || 0)));
-      if (saldo < quantidade) adicionar(`estoque-${id}`, 'Disponibilidade em estoque', 'atencao', `${produto.descricao}: disponível ${saldo}, solicitado ${quantidade}. Produção ou compra deverá cobrir o saldo.`);
+    if (!disponivelNaEmpresa(produto) || produto.status === 'Inativo') {
+      adicionar(`produto-${id}`, 'Produto habilitado', 'erro', 'Produto indisponível no contexto da empresa.', 'Selecionar produto válido.');
+      continue;
+    }
+    const saldo = Number(produto.estoque_disponivel ?? (Number(produto.estoque_atual || 0) - Number(produto.estoque_reservado || 0)));
+    if (saldo < quantidade) {
+      requerProducao += 1;
+      adicionar(`estoque-${id}`, 'Disponibilidade em estoque', 'atencao', `${produto.descricao}: disponível ${saldo}, solicitado ${quantidade}. Cobertura por produção ou compra.`, 'Programar produção/compra — não reserva saldo fictício.');
     }
   }
-  if (acao !== 'salvar' && checagens.some((checagem) => checagem.status === 'erro')) return negar('Resolva os bloqueios do fechamento.', 422, checagens);
+  const fabricados = itens.filter((item) => item.tipo === 'fabricacao');
+  adicionar('producao', 'Necessidade de produção', fabricados.length || requerProducao ? 'atencao' : 'ok',
+    fabricados.length || requerProducao
+      ? `${fabricados.length} item(ns) de fabricação e ${requerProducao} item(ns) sem saldo seguem para Produção.`
+      : 'Todos os itens são de revenda com saldo disponível.', fabricados.length || requerProducao ? 'Direcionar o pedido para Produção.' : '');
+
+  const condicao = cliente?.condicao_comercial || {};
+  const semTabela = !condicao.tabela_preco_id && !condicao.tabela_preco_nome;
+  adicionar('tabela_preco', 'Tabela de preço do cliente', semTabela ? 'atencao' : 'ok',
+    semTabela ? 'Cliente sem tabela de preço vinculada na condição comercial.' : `Tabela: ${condicao.tabela_preco_nome || condicao.tabela_preco_id}.`,
+    semTabela ? 'Vincular a tabela em Cadastros Gerais.' : '');
+
+  const abaixoDoCusto = itens.filter((item) => {
+    const produto = produtosPorId.get(item.produto_id);
+    const custo = Number(produto?.custo_medio ?? produto?.custo_aquisicao ?? 0);
+    return custo > 0 && item.valor_unitario < custo;
+  });
+  const precoOficialDivergente = itens.filter((item) => {
+    const produto = produtosPorId.get(item.produto_id);
+    const preco = Number(produto?.preco_venda || 0);
+    return preco > 0 && item.valor_unitario !== preco;
+  });
+  adicionar('preco', 'Preço e margem', abaixoDoCusto.length ? 'erro' : precoOficialDivergente.length ? 'atencao' : 'ok',
+    abaixoDoCusto.length
+      ? `${abaixoDoCusto.length} item(ns) com preço abaixo do custo oficial.`
+      : precoOficialDivergente.length ? `${precoOficialDivergente.length} item(ns) fora do preço de venda do cadastro.` : 'Preços alinhados ao cadastro oficial de Produto.',
+    abaixoDoCusto.length ? 'Aprovação de preço excedido.' : precoOficialDivergente.length ? 'Confirmar tabela/negociação.' : '');
+
+  // 14-18. Crédito, títulos vencidos, aprovações e fiscal
+  const vencidos = pagina(titulos).filter((titulo) => titulo.data_vencimento && String(titulo.data_vencimento).slice(0, 10) < hoje);
+  const valorVencido = vencidos.reduce((soma, titulo) => soma + Math.max(Number(titulo.valor || 0) - Number(titulo.valor_recebido || 0), 0), 0);
+  const limite = Number(condicao.limite_credito || 0);
+  const utilizado = Number(condicao.limite_credito_utilizado || 0);
+  const disponivelCredito = limite > 0 ? limite - utilizado : 0;
+  const creditoInsuficiente = limite > 0 && (disponivelCredito < total || condicao.situacao_credito === 'Alerta');
+  adicionar('credito', 'Limite de crédito', limite === 0 ? 'atencao' : creditoInsuficiente ? 'erro' : 'ok',
+    limite === 0
+      ? 'Cliente sem limite de crédito cadastrado.'
+      : `Limite ${limite.toFixed(2)} · utilizado ${utilizado.toFixed(2)} · disponível ${disponivelCredito.toFixed(2)} · pedido ${total.toFixed(2)}.`,
+    limite === 0 ? 'Cadastrar limite em Cadastros Gerais.' : creditoInsuficiente ? 'Aprovação financeira de limite.' : '');
+  adicionar('vencidos', 'Títulos vencidos', vencidos.length ? 'erro' : 'ok',
+    vencidos.length ? `${vencidos.length} título(s) vencido(s), total ${valorVencido.toFixed(2)}.` : 'Nenhum título vencido do cliente.',
+    vencidos.length ? 'Liberação do Financeiro.' : '');
+
+  const aprovacoes = pagina(solicitacoes);
+  const liberaCredito = aprovacoes.some((s) => s.status === 'aprovado' && s.tipo_solicitacao === 'liberar_credito');
+  const liberaVencido = aprovacoes.some((s) => s.status === 'aprovado' && s.tipo_solicitacao === 'liberacao_vencido');
+  const pendentes = aprovacoes.filter((s) => s.status === 'pendente');
+  adicionar('aprovacoes', 'Aprovações pendentes', pendentes.length ? 'erro' : 'ok',
+    pendentes.length ? `${pendentes.length} solicitação(ões) aguardando decisão.` : 'Nenhuma aprovação pendente para esta proposta.',
+    pendentes.length ? 'Aguardar a fila de aprovações.' : '');
+
+  const fiscal = cliente?.configuracao_fiscal || {};
+  const fiscalOk = Boolean(fiscal.tipo_contribuinte) && (fiscal.contribuinte_icms === false || Boolean(cliente?.inscricao_estadual));
+  adicionar('fiscal', 'Dados fiscais', fiscalOk ? 'ok' : 'atencao',
+    fiscalOk ? `Contribuinte: ${fiscal.tipo_contribuinte}.` : 'Configuração fiscal ou inscrição estadual incompleta para emissão.',
+    fiscalOk ? '' : 'Completar dados fiscais em Cadastros Gerais.');
+
+  const bloqueadoPorCredito = (creditoInsuficiente && !liberaCredito) || (vencidos.length > 0 && !liberaVencido);
+
+  // §18: fechar bloqueado por crédito/título abre solicitação real na fila já existente, sem duplicá-la.
+  if (acao === 'fechar' && bloqueadoPorCredito && !pendentes.length) {
+    const tipo = vencidos.length ? 'liberacao_vencido' : 'liberar_credito';
+    try {
+      await base44.entities.SolicitacaoAprovacao.create({
+        group_id, empresa_id, entidade_alvo: 'OrcamentoCliente', entidade_alvo_id: registro.id,
+        tipo_solicitacao: tipo, categoria_alcada: 'Financeiro',
+        solicitante_id: ctx.user.id, solicitante_nome: ctx.user.full_name || ctx.user.email,
+        valor_solicitado: tipo === 'liberar_credito' ? total : valorVencido,
+        justificativa: tipo === 'liberar_credito'
+          ? `Fechamento do orçamento ${registro.numero_orcamento} excede o limite disponível.`
+          : `Fechamento do orçamento ${registro.numero_orcamento} com títulos vencidos.`,
+        dados_propostos: { orcamento_id: registro.id, cliente_id: registro.cliente_id, numero_orcamento: registro.numero_orcamento, cliente_nome: registro.cliente_nome, valor_orcamento: total, valor_vencido: valorVencido, limite, utilizado },
+        status: 'pendente', data_solicitacao: new Date().toISOString(),
+      });
+      await auditarCentral(base44, ctx.user, registro, 'Edição', `Solicitação de ${tipo === 'liberar_credito' ? 'liberação de limite' : 'liberação de título vencido'} aberta para ${registro.numero_orcamento}.`);
+    } catch (erro) {
+      console.error('[onOrcamentoConfirmed] Falha ao abrir solicitação de aprovação:', erro);
+    }
+  }
+  if (acao !== 'salvar' && checagens.some((checagem) => checagem.status === 'erro')) {
+    return negar(
+      bloqueadoPorCredito ? 'Aprovação financeira necessária: limite ou título vencido.' : 'Resolva os bloqueios do fechamento.',
+      422, checagens
+    );
+  }
   if (acao === 'validar') return Response.json({ ok: true, orcamento: registro, checagens });
   const patch = {
     ...dados, itens, valor_total: total,

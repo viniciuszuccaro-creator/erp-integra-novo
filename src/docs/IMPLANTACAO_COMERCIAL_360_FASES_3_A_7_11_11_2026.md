@@ -124,3 +124,44 @@ Implementado sobre a Central existente, sem módulos, telas ou entidades novas:
 5. Telefonia/GoTo com provedor real; bot autônomo com contador de exceções; processamento automático de pedidos externos.
 6. Executar os cenários E2E/RBAC/multiempresa no Testing Agent, incluindo dois usuários editando o mesmo orçamento e falha parcial de conversão.
 7. Confirmar condições atuais de execução e integrações, publicar pelo botão Publish e realizar nova análise de segurança. Nenhuma condição atual de plano, publicação ou achados é presumida por este relatório.
+
+---
+
+## Revisão com o dossiê original anexado (11/11/2026, 09h)
+
+O documento `ERP_ZUCCARO_COMERCIAL_360.docx` foi finalmente lido integralmente e confrontado com o código.
+Cada item abaixo corresponde a uma exigência textual do dossiê, não a uma interpretação dos relatórios anteriores.
+
+### Implementado nesta revisão (somente sobre o existente)
+
+| Exigência | Onde | Situação |
+|---|---|---|
+| §16 — motor de validações no backend (20 verificações) | `onOrcamentoConfirmed` (`acao: validar/salvar/fechar`): cliente ativo, documento com dígito verificador, endereço, empresa, itens/quantidades, produtos oficiais, estoque, produção, tabela de preço, preço/custo, desconto, condição de pagamento, validade, limite de crédito, títulos vencidos, aprovação pendente, dados fiscais e permissão | Implementado |
+| §17 — resultado explicativo com “AÇÃO NECESSÁRIA” | `PainelValidacaoFechamento` exibe `acao` de cada checagem devolvida pelo servidor | Implementado |
+| §18 — fila de limite de crédito | Aba “Limite de Crédito” da Central de Aprovações deixa de ser “em desenvolvimento” e lista `SolicitacaoAprovacao` real, com aprovar/rejeitar | Implementado |
+| §18 — fila de títulos vencidos | Aba “Duplicatas Vencidas” com a mesma fila real + histórico | Implementado |
+| §18 — contraproposta | Aprovador pode propor novo limite no ato da decisão; grava `contraproposta` e aplica `condicao_comercial.limite_credito` no cadastro único do cliente, com auditoria antes/depois | Implementado |
+| §18 — solicitação gerada pelo próprio fechamento | Fechar orçamento bloqueado por limite ou título vencido abre solicitação `liberar_credito`/`liberacao_vencido` para aquele orçamento, sem duplicar pendentes | Implementado |
+| §41/§5 — crédito e financeiro como referência | O Comercial consulta `ContaReceber` e `Cliente.condicao_comercial`; não copia saldos | Implementado |
+| §42 — auditoria | Decisões de aprovação e abertura de solicitação geram `AuditLog` com grupo, empresa, usuário e antes/depois | Implementado |
+| §3 — 12 colunas | `TabelaNegociacoes` tem 12 colunas, Nº e Cliente fixos, redimensionamento e ordenação persistidos | Já existia |
+| §7 — busca universal | Servidor (`entityListSorted`) com fallback por entidade equivalente | Já existia |
+| §10.10 — proibir telas simuladas | As duas abas que exibiam “Funcionalidade em desenvolvimento” foram substituídas por funcionalidade real | Corrigido |
+
+### Verificações executadas
+- `npm run build` concluído após cada bloco de alterações.
+- `npx eslint` nos componentes alterados, sem erros.
+- Contrato do endpoint: 400 para contexto ausente, ação inválida e identificador malformado; 404 para registro inexistente no contexto. Nenhum registro real foi alterado para testar.
+
+### Pendências confirmadas pelo dossiê (não concluídas)
+1. Testes obrigatórios do §47/§48 (ABERTO→FECHADO, bloqueios, aprovação→fechado, produção→entrega/retira, parcial, cancelamento, reabertura, usuário sem permissão, empresa diferente, `empresa_id`/`group_id` maliciosos) — devem rodar no Testing Agent com backend real; não foram executados.
+2. §23 — saldos parciais por item (revenda vs. fabricação) na separação, produção, entrega, faturamento e cobrança.
+3. §5 — “Ajustar Pedido somente nas telas Produção/Entrega/Retira”: a Central ainda abre o formulário completo para edição jurídica do pedido; a restrição por etapa não foi imposta.
+4. §27 — comprovantes digitais completos (foto da mercadoria/local, canhoto, assinatura legível, documento do recebedor) e reflexo imediato do App do Motorista na Central.
+5. §6 — bot de vendas autônomo com contador de exceções e configuração em Cadastros Gerais; §4 — GoTo/telefonia com provedor real.
+6. §25/§26 — contadores de entregas do cliente (hoje, em rota, rejeitadas, reagendadas, ocorrência) e detalhe navegável do mapa.
+7. §37 — dashboard do vendedor (vendas hoje/mês, meta, atingimento, ticket médio, clientes para retornar).
+8. §47 — o motor de validação cobre as regras, mas ainda não há suíte automatizada que comprove cada uma com dados reais.
+9. Publicação e nova análise de segurança continuam fora do editor e não foram executadas.
+
+Portanto: o núcleo de fechamento, aprovação e contraproposta do dossiê está implementado e compila; **não é possível declarar 100% de implantação** enquanto os itens 1 a 9 acima não forem executados e homologados.

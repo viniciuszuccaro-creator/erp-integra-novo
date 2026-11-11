@@ -26,6 +26,56 @@ export default function useCentralAprovacoes(empresaId) {
     if (user) setPermitido(user.role === 'admin' || user.role === 'gerente');
   }, [user]);
 
+  // §18 — fila real de limite de crédito e títulos vencidos (SolicitacaoAprovacao do Financeiro)
+  const { data: solicitacoes = [], isLoading: carregandoSolicitacoes } = useQuery({
+    queryKey: ['solicitacoes-aprovacao-comercial', empresaId],
+    queryFn: () => filterInContext('SolicitacaoAprovacao', {
+      tipo_solicitacao: { $in: ['liberar_credito', 'liberacao_vencido'] },
+      ...(empresaId ? { empresa_id: empresaId } : {}),
+    }, '-data_solicitacao', 200),
+  });
+
+  const decidirSolicitacao = useMutation({
+    mutationFn: async ({ solicitacao, aprovado, comentarios, contraproposta }) => {
+      if (!canApprove('Comercial')) throw new Error('Sem permissão para decidir aprovações comerciais.');
+      if (!solicitacao?.group_id || !solicitacao?.empresa_id) throw new Error('Solicitação sem contexto de grupo/empresa.');
+      if (solicitacao.status !== 'pendente') throw new Error('Esta solicitação já foi decidida.');
+      await updateInContext('SolicitacaoAprovacao', solicitacao.id, {
+        status: aprovado ? 'aprovado' : 'rejeitado',
+        aprovador_id: user?.id || null,
+        comentarios_aprovacao: comentarios || '',
+        data_decisao: new Date().toISOString(),
+        ...(contraproposta ? { contraproposta } : {}),
+      });
+      // Contraproposta de limite: aplica o novo valor no cadastro único do cliente, com histórico.
+      if (aprovado && contraproposta?.limite_credito && solicitacao.dados_propostos?.cliente_id) {
+        const cliente = await base44.entities.Cliente.get(solicitacao.dados_propostos.cliente_id);
+        await updateInContext('Cliente', cliente.id, {
+          condicao_comercial: {
+            ...(cliente.condicao_comercial || {}),
+            limite_credito: Number(contraproposta.limite_credito),
+            limite_aprovado_por: user?.full_name || user?.email || 'Usuário',
+            limite_aprovado_em: new Date().toISOString().slice(0, 10),
+          },
+        });
+      }
+      await base44.entities.AuditLog.create({
+        usuario: user?.full_name || user?.email || 'Usuário', usuario_id: user?.id || null,
+        acao: aprovado ? 'Aprovação' : 'Rejeição', modulo: 'Comercial', tipo_auditoria: 'entidade',
+        entidade: 'SolicitacaoAprovacao', registro_id: solicitacao.id,
+        descricao: `${solicitacao.tipo_solicitacao} ${aprovado ? 'aprovada' : 'rejeitada'} — ${solicitacao.justificativa || ''}${contraproposta ? ' (com contraproposta)' : ''}`,
+        dados_anteriores: solicitacao, dados_novos: { aprovado, comentarios, contraproposta },
+        group_id: solicitacao.group_id, empresa_id: solicitacao.empresa_id, data_hora: new Date().toISOString(),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['solicitacoes-aprovacao-comercial'] });
+      queryClient.invalidateQueries({ queryKey: ['pedidos-aprovacoes'] });
+      toast({ title: 'Decisão registrada na fila de aprovações.' });
+    },
+    onError: (error) => toast({ title: 'Erro ao decidir', description: error.message, variant: 'destructive' }),
+  });
+
   const aprovarPedidoMutation = useMutation({
     mutationFn: async ({ pedidoId, dados, executarFechamento = false }) => {
       // Regra-Mãe 5: RBAC granular na persistência (fail-closed)
@@ -114,6 +164,7 @@ export default function useCentralAprovacoes(empresaId) {
   return {
     activeTab, setActiveTab, permitido,
     pedidosPendentes, pedidosAprovados, pedidosNegados,
+    solicitacoes, decidirSolicitacao, carregandoSolicitacoes,
     aprovarPedidoMutation, negarPedidoMutation,
   };
 }

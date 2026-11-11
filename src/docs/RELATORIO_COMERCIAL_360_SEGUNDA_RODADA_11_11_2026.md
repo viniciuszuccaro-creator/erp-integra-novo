@@ -173,6 +173,20 @@ A Mesa validava a proposta, mas o navegador criava o pedido e depois alterava o 
 - `npm run build` e ESLint dos arquivos alterados sem erros; endpoint real não destrutivo respondeu **404** para solicitação inexistente.
 - **Pendências mantidas**: histórico de contraproposta como registro próprio (hoje fica na solicitação + `AuditLog`), aplicação de limite por categoria orçamentária (o teto hoje é por nível/valor), decisão de desconto de pedido que ainda grava o pedido inteiro, e homologação E2E §47/§48 no Testing Agent. Nada foi publicado nem reanalisado em Security.
 
+## Continuação — §2 do dossiê: Cliente 360° destacável em janela própria
+
+### O que faltava
+O documento pede o Cliente 360° **destacável**: o painel lateral precisa poder sair da coluna da Central e virar janela própria, mantendo atalhos, painéis e ações rápidas. Até aqui ele só existia fixo na lateral (recolhível/redimensionável).
+
+### Entrega
+- `Cliente360Lateral` ganhou a prop `destacado` e o botão **Destacar** (ícone de expandir) no cabeçalho do painel. Em modo destacado o painel ocupa `w-full h-full`, sem alça de redimensionamento e sem botão de recolher — a janela cuida disso.
+- `CentralVendas360` abre **a mesma instância lateral** em janela do gerenciador já existente (`openWindow`, chave única por negociação), com a negociação em foco, atalhos por RBAC, validação de fechamento e as ações rápidas publicadas pela mesa.
+- Nenhum componente novo, nenhum painel duplicado: é o mesmo painel, em outro contêiner, conforme a Regra-Mãe.
+
+### Evidências e limites
+- `npm run build` concluído; `npm run test:unit` mantém **387 aprovados, 0 falhas, 11 ignorados**.
+- A janela recebe a negociação no momento do destaque. Selecionar outra negociação no painel destacado altera a seleção na Central (que permanece atrás), como já ocorre nas janelas existentes.
+
 ## Continuação — §2 do dossiê: Ações Rápidas contextuais sob o Cliente 360°
 
 ### O que estava divergente

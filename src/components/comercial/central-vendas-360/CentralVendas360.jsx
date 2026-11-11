@@ -207,6 +207,27 @@ export default function CentralVendas360({
     }, { title: `Orçamento ${negociacao.numero}`, width: 1280, height: 850, uniqueKey: `mesa-${negociacao.chave}` });
   };
 
+  // §2 — Cliente 360° destacável: a mesma instância lateral aberta em janela própria,
+  // preservando atalhos, painéis e ações rápidas da negociação em foco.
+  const destacarCliente = () => {
+    if (!selecionada) return;
+    openWindow(Cliente360Lateral, {
+      negociacao: selecionada,
+      cliente: clienteSelecionado,
+      recolhido: false,
+      destacado: true,
+      alertas,
+      validacao: validacaoSelecionada,
+      onSelecionarNegociacao: selecionar,
+      acoesRapidas,
+    }, {
+      title: `Cliente 360° — ${selecionada.cliente_nome || selecionada.numero || ''}`,
+      width: 520,
+      height: 820,
+      uniqueKey: `cliente360-${selecionada.chave}`,
+    });
+  };
+
   return (
     <ProtectedSection module="Comercial" section="Pedidos" action="visualizar">
       <div className="w-full h-full flex flex-col gap-2 min-h-0">
@@ -295,6 +316,7 @@ export default function CentralVendas360({
               validacao={validacaoSelecionada}
               onSelecionarNegociacao={selecionar}
               acoesRapidas={selecionada ? acoesRapidas : []}
+              onDestacar={selecionada ? destacarCliente : undefined}
             />
           </div>
         )}

@@ -8,7 +8,65 @@
  * getEntityRecord) e substitui por consultas diretas ao banco via SDK. Nenhuma função
  * de escrita é substituída (entityGuard, nfeActions, whatsappSend etc. continuam falhando alto).
  */
-const SEARCH_FIELDS = [
+// Campos de busca por entidade — espelham exatamente o SEARCH_FIELDS de
+// base44/functions/entityListSorted, para que a busca (Central 360°, tabelas e
+// Cadastros) encontre os mesmos registros quando a leitura cai para o SDK
+// (backend functions indisponíveis no plano). Regra-Mãe 2: melhoria no existente.
+const SEARCH_FIELDS_POR_ENTIDADE = {
+  Pedido: ['numero_pedido', 'cliente_nome', 'vendedor', 'origem_pedido', 'obra_destino_nome', 'forma_pagamento'],
+  OrcamentoCliente: ['numero_orcamento', 'cliente_nome', 'vendedor_responsavel', 'descricao', 'observacoes'],
+  PedidoExterno: ['numero_pedido_externo', 'cliente_nome', 'cliente_cpf_cnpj', 'cliente_email', 'cliente_telefone', 'id_externo'],
+  Produto: ['descricao', 'codigo', 'codigo_barras', 'grupo_produto_nome', 'marca_nome'],
+  Cliente: ['nome', 'razao_social', 'nome_fantasia', 'cpf', 'cnpj'],
+  Fornecedor: ['nome', 'razao_social', 'nome_fantasia', 'cnpj', 'cpf'],
+  Transportadora: ['razao_social', 'nome_fantasia', 'cnpj'],
+  Colaborador: ['nome_completo', 'cpf', 'email', 'cargo'],
+  Banco: ['nome_banco', 'codigo_banco'],
+  FormaPagamento: ['descricao', 'codigo', 'tipo'],
+  Departamento: ['nome_departamento', 'descricao', 'codigo'],
+  Cargo: ['nome_cargo', 'descricao', 'codigo'],
+  Turno: ['nome_turno', 'descricao', 'codigo'],
+  Veiculo: ['placa', 'modelo', 'marca'],
+  Motorista: ['nome_completo', 'cpf', 'cnh_numero'],
+  Servico: ['descricao', 'codigo_servico', 'tipo_servico'],
+  GrupoProduto: ['nome_grupo', 'codigo', 'natureza'],
+  Marca: ['nome_marca', 'codigo', 'cnpj'],
+  Representante: ['nome', 'cpf', 'cnpj', 'email'],
+  SegmentoCliente: ['nome_segmento', 'descricao', 'tipo_segmento'],
+  RegiaoAtendimento: ['nome_regiao', 'descricao', 'tipo_regiao'],
+  PerfilAcesso: ['nome_perfil', 'descricao', 'nivel_perfil'],
+  ConfiguracaoDespesaRecorrente: ['descricao', 'periodicidade', 'fornecedor_nome'],
+  SetorAtividade: ['nome', 'descricao', 'codigo', 'tipo_operacao'],
+  TabelaPreco: ['nome', 'descricao'],
+  UnidadeMedida: ['codigo', 'nome_completo', 'sigla'],
+  CentroCusto: ['codigo', 'descricao', 'tipo'],
+  CentroResultado: ['codigo', 'nome', 'descricao'],
+  PlanoDeContas: ['codigo', 'nome_conta', 'tipo'],
+  TipoDespesa: ['nome', 'codigo', 'categoria'],
+  MoedaIndice: ['codigo', 'nome', 'simbolo'],
+  GrupoEmpresarial: ['nome_do_grupo', 'razao_social_grupo', 'cnpj_grupo'],
+  Empresa: ['razao_social', 'nome_fantasia', 'cnpj'],
+  ContatoB2B: ['nome_completo', 'cargo', 'tipo_vinculo'],
+  KitProduto: ['nome_kit', 'codigo', 'descricao'],
+  CatalogoWeb: ['produto_id', 'categoria_navegacao', 'slug_url', 'titulo_seo'],
+  CondicaoComercial: ['nome_condicao', 'codigo', 'tipo_condicao'],
+  TabelaFiscal: ['nome_regra', 'cenario_operacao', 'cfop', 'ncm'],
+  LocalEstoque: ['nome', 'codigo', 'tipo'],
+  RotaPadrao: ['nome_rota', 'codigo', 'descricao'],
+  ModeloDocumento: ['nome_modelo', 'tipo_documento', 'descricao'],
+  TipoFrete: ['nome', 'codigo', 'tipo'],
+  OperadorCaixa: ['usuario_nome', 'codigo_operador', 'nome_caixa'],
+  GatewayPagamento: ['nome', 'provedor', 'ambiente'],
+  ApiExterna: ['nome_api', 'descricao'],
+  ChatbotCanal: ['nome_canal', 'descricao'],
+  ChatbotIntent: ['nome_intent', 'descricao'],
+  Webhook: ['nome_webhook', 'url', 'descricao'],
+  JobAgendado: ['nome_job', 'descricao'],
+  ConfiguracaoNFe: ['provedor', 'ambiente', 'descricao', 'observacoes'],
+  EventoNotificacao: ['nome_evento', 'descricao', 'tipo_evento'],
+};
+
+const SEARCH_FIELDS_PADRAO = [
   'nome', 'razao_social', 'nome_fantasia', 'nome_completo', 'descricao', 'titulo', 'codigo',
   'nome_cargo', 'nome_departamento', 'nome_turno', 'nome_rota', 'nome_modelo',
   'nome_perfil', 'nome_do_grupo', 'nome_api', 'nome_canal', 'nome_intent',
@@ -16,11 +74,12 @@ const SEARCH_FIELDS = [
   'nome_marca', 'nome_conta', 'sigla', 'placa', 'codigo_banco', 'cpf_cnpj',
 ];
 
-export function buildSearchFilter(filter, search) {
+export function buildSearchFilter(filter, search, entityName) {
   const term = String(search || '').trim();
   if (!term) return filter || {};
+  const campos = SEARCH_FIELDS_POR_ENTIDADE[entityName] || SEARCH_FIELDS_PADRAO;
   const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const or = SEARCH_FIELDS.map(f => ({ [f]: { $regex: escaped, $options: 'i' } }));
+  const or = campos.map(f => ({ [f]: { $regex: escaped, $options: 'i' } }));
   return { $and: [filter || {}, { $or: or }] };
 }
 
@@ -144,7 +203,7 @@ export function installFunctionsFallback(base44) {
         if (!api) throw e;
         const sf = (!sortField || sortField === 'id') ? 'created_date' : sortField;
         const sort = `${sortDirection === 'desc' ? '-' : ''}${sf}`;
-        const finalFilter = buildSearchFilter(filter, search);
+        const finalFilter = buildSearchFilter(filter, search, entityName);
         const lim = Number(limit) || 50;
         const start = Math.max(0, Number(skip) || 0);
         const target = start + lim;

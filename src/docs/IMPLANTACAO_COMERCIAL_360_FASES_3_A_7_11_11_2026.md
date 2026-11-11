@@ -82,6 +82,7 @@ Verificação item a item sobre o código existente (nenhum arquivo novo foi cri
 - O desconto por item passou a ser persistido no orçamento (antes era descartado e o desconto desaparecia ao recarregar).
 - Comparação de "alterações pendentes" ignora ids gerados na tela e diferença texto/número: o botão Salvar desabilita corretamente após salvar.
 - RBAC da mesa centralizado em `useAcoesComerciais` (salvar, aprovar, gerar pedido, enviar proposta, abrir pedido).
+- **Busca idêntica com ou sem backend:** o fallback de leitura (`functionsFallback.js`) passou a usar os mesmos campos de busca por entidade do `entityListSorted` (Pedido, Orçamento, PedidoExterno, Cliente, Produto, entre outros). Antes, com funções de backend bloqueadas pelo plano, a busca da Central só varria campos genéricos e **não encontrava** por número do pedido, cliente, CPF/CNPJ, telefone, vendedor, origem ou cidade; agora encontra.
 - **Fila de pedidos externos visível na Central:** o botão "Pedidos externos" mostra quantos pedidos aguardam validação (`PedidoExterno` com `status_importacao = A Validar`) no contexto de grupo/empresa, com RBAC de Comercial/Pedidos/ver — a fila deixa de ser só um atalho para o módulo e passa a indicar o volume pendente.
 
 ### O que falta para operar 100% (fora do código do Comercial)

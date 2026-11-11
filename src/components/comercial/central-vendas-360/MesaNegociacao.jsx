@@ -231,9 +231,19 @@ export default function MesaNegociacao({
     return onEditarPedido(negociacao.registro);
   };
 
+  // §5 do dossiê: depois do fechamento, o ajuste do pedido é feito nas telas de Produção, Entrega e Retira
+  const ETAPAS_AJUSTE_MODULO = [
+    'Em Produção', 'Pronto para Faturar', 'Faturamento Parcial', 'Faturado',
+    'Pronto para Retirada', 'Em Expedição', 'Em Trânsito', 'Entregue',
+  ];
+
   function onEditarPedido(pedido) {
     if (!acoes.podeEditar) {
       toast.error('Sem permissão para editar pedidos.');
+      return;
+    }
+    if (ETAPAS_AJUSTE_MODULO.includes(pedido?.status)) {
+      toast.info(`Pedido ${pedido.numero_pedido || ''} em ${pedido.status}: os ajustes desta etapa são feitos nas telas de Produção, Entrega e Retira.`);
       return;
     }
     PedidoEdicao(pedido);

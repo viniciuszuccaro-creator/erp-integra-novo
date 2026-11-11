@@ -8,6 +8,7 @@ import PainelAtendimento from './PainelAtendimento';
 import PainelHistorico from './PainelHistorico';
 import useTitulosFinanceiros from './usePainelFinanceiro';
 import usePainelEstoque from './usePainelEstoque';
+import usePainelEntregasCliente from './usePainelEntregasCliente';
 import PainelRetornos from './PainelRetornos';
 import PainelCopiloto from './PainelCopiloto';
 import PainelMapaEntregas from './PainelMapaEntregas';
@@ -21,6 +22,7 @@ export default function PainelCorpo({
   const financeiro = useTitulosFinanceiros({ clienteId, pedidoId, modo: 'cliente', ativo: painel === 'financeiro' });
   const pagamento = useTitulosFinanceiros({ clienteId, pedidoId, modo: 'pedido', ativo: painel === 'pagamento' });
   const estoque = usePainelEstoque({ itens: negociacao?.itens, ativo: painel === 'estoque' });
+  const entregasCliente = usePainelEntregasCliente({ clienteId, ativo: painel === 'entregas' });
 
   switch (painel) {
     case 'copiloto':
@@ -117,15 +119,39 @@ export default function PainelCorpo({
       );
     case 'entregas':
       return (
-        <PainelRegistros
-          entity="Entrega"
-          filter={{ pedido_id: pedidoId }}
-          vazio="Nenhuma entrega programada para este pedido."
-          campos={[
-            { key: 'numero_pedido', destaque: true },
-            { key: 'status', label: 'Situação' },
-            { key: 'data_previsao', label: 'Previsão', tipo: 'data' },
+        <PainelResumo
+          linhas={[
+            { label: 'Entregas hoje', valor: String(entregasCliente.totais.hoje) },
+            { label: 'Em rota', valor: String(entregasCliente.totais.emRota) },
+            { label: 'Prontas para expedir', valor: String(entregasCliente.totais.prontas) },
+            { label: 'Atrasadas', valor: String(entregasCliente.totais.atrasadas) },
+            { label: 'Rejeitadas', valor: String(entregasCliente.totais.rejeitadas) },
+            { label: 'Reagendadas', valor: String(entregasCliente.totais.reagendadas) },
+            { label: 'Com ocorrência', valor: String(entregasCliente.totais.comOcorrencia) },
+            { label: 'Total do cliente', valor: String(entregasCliente.totais.total) },
           ]}
+          bloco={
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-slate-500">
+                {pedidoId ? 'Entregas do pedido' : 'Entregas do cliente'}
+              </p>
+              <PainelRegistros
+                entity="Entrega"
+                filter={{ pedido_id: pedidoId }}
+                registros={pedidoId ? undefined : entregasCliente.entregas}
+                carregando={entregasCliente.isLoading}
+                vazio={entregasCliente.permitido
+                  ? 'Nenhuma entrega programada para este pedido.'
+                  : 'Sem permissão de leitura no módulo Expedição.'}
+                campos={[
+                  { key: 'numero_pedido', destaque: true },
+                  { key: 'status', label: 'Situação' },
+                  { key: 'data_previsao', label: 'Previsão', tipo: 'data' },
+                ]}
+              />
+            </div>
+          }
+          nota="Contadores do cliente e entregas reais no contexto ativo. Separação, roteirização e comprovantes permanecem nas telas de Expedição e Logística."
         />
       );
     case 'fiscal':

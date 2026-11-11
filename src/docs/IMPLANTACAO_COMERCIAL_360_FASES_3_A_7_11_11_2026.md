@@ -165,3 +165,32 @@ Cada item abaixo corresponde a uma exigência textual do dossiê, não a uma int
 9. Publicação e nova análise de segurança continuam fora do editor e não foram executadas.
 
 Portanto: o núcleo de fechamento, aprovação e contraproposta do dossiê está implementado e compila; **não é possível declarar 100% de implantação** enquanto os itens 1 a 9 acima não forem executados e homologados.
+
+---
+
+## Revisão 11/11/2026, 09h35 — itens 3 e 6 concluídos
+
+### §5 — Ajustar Pedido somente nas telas de Produção, Entrega e Retira (concluído)
+`MesaNegociacao` bloqueia a edição jurídica do pedido na Central a partir da etapa `Em Produção`
+(incluindo `Pronto para Faturar`, `Faturamento Parcial`, `Faturado`, `Pronto para Retirada`,
+`Em Expedição`, `Em Trânsito` e `Entregue`) e orienta o usuário a ajustar na tela do módulo responsável.
+Rascunho, Aguardando Aprovação e Aprovado continuam editáveis na Central, preservando o fluxo atual.
+
+### §25/§26 — Contadores de entrega do cliente (concluído)
+O atalho **Entregas** do Cliente 360° passou a exibir, do cadastro real de `Entrega` no contexto ativo:
+entregas de hoje, em rota, prontas para expedir, atrasadas, rejeitadas, reagendadas, com ocorrência e total.
+A listagem existente do pedido foi preservada; em orçamento (sem pedido) a lista passa a mostrar as entregas do cliente.
+Regras em `usePainelEntregasCliente.jsx`; leitura protegida pela permissão do módulo Expedição.
+
+### Verificação
+- `npm run build` concluído; `npx eslint` sem erros nos arquivos alterados.
+- Nenhuma consulta, criação ou alteração fora do contexto de grupo/empresa; tudo somente leitura.
+
+### Ainda pendente (atualizado)
+1. Testes §47/§48 no Testing Agent.
+2. §23 — saldos parciais por item em separação, produção, entrega, faturamento e cobrança.
+3. §27 — comprovantes digitais completos e reflexo do App do Motorista na Central.
+4. §37 — dashboard do vendedor: não existe hoje fonte de meta por vendedor no cadastro (só `RegiaoAtendimento.meta_vendas_mensal`); depende de campo novo em cadastro existente e da tela que o alimenta.
+5. §6 — bot de vendas autônomo; §4 — GoTo/telefonia com provedor real.
+6. §26 — detalhe navegável do mapa a partir do cartão de entrega.
+7. Publicação e nova análise de segurança.

@@ -1,9 +1,12 @@
 // Mapa de entregas da Central 360° — coordenadas reais das Entregas e contadores por janela de entrega
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Clock, MapPin, Truck } from 'lucide-react';
+import { Clock, MapPin, Navigation, Truck } from 'lucide-react';
+import { toast } from 'sonner';
+import { base44 } from '@/api/base44Client';
 import useRLSQuery from '@/components/lib/useRLSQuery';
+import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import { FILTRO_RELACIONADO } from './paineisConfig';
 
 const CENTRO_PADRAO = [-23.5505, -46.6333];
@@ -59,6 +62,46 @@ export default function PainelMapaEntregas({ negociacao }) {
     };
   }, [entregas]);
 
+  // Roteirização: reaproveita a otimização já existente da Expedição (optimizeDeliveryRoute)
+  const { empresaAtual, grupoAtual } = useContextoVisual();
+  const [otimizando, setOtimizando] = useState(false);
+  const [rota, setRota] = useState(null);
+  const [ordem, setOrdem] = useState([]);
+
+  const pontosOrdenados = useMemo(() => {
+    if (!ordem.length) return resumo.pontos;
+    const posicao = new Map(ordem.map((id, indice) => [id, indice]));
+    const peso = (item) => (posicao.has(item.entrega.id) ? posicao.get(item.entrega.id) : Number.MAX_SAFE_INTEGER);
+    return [...resumo.pontos].sort((a, b) => peso(a) - peso(b));
+  }, [resumo.pontos, ordem]);
+
+  const otimizarRota = async () => {
+    if (!empresaAtual?.id) {
+      toast.error('Selecione uma empresa para otimizar a rota.');
+      return;
+    }
+    setOtimizando(true);
+    try {
+      const resposta = await base44.functions.invoke('optimizeDeliveryRoute', {
+        empresa_id: empresaAtual.id,
+        group_id: grupoAtual?.id || null,
+        entrega_ids: (entregas || []).map((entrega) => entrega.id),
+      });
+      const dados = resposta?.data || {};
+      if (dados.error) throw new Error(dados.error);
+      setRota({
+        distancia: Number(dados.total_distance_m) || 0,
+        duracao: Number(dados.total_duration_s) || 0,
+      });
+      setOrdem((dados.ordered || []).map((item) => item.entrega_id || item.id || item).filter(Boolean));
+      toast.success('Rota otimizada para as entregas desta negociação.');
+    } catch (erro) {
+      toast.error(`Otimização indisponível agora: ${erro.message}`);
+    } finally {
+      setOtimizando(false);
+    }
+  };
+
   if (!pedidoId && !clienteId) {
     return <p className="text-[11px] text-slate-500">Selecione uma negociação para ver as entregas.</p>;
   }
@@ -112,6 +155,23 @@ export default function PainelMapaEntregas({ negociacao }) {
         </ul>
       </div>
 
+      <div className="flex items-center gap-2 rounded border border-slate-200 bg-white px-2 py-1">
+        <button
+          type="button"
+          onClick={otimizarRota}
+          disabled={otimizando}
+          className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700 hover:bg-blue-100 disabled:opacity-60"
+          title="Ordenar as entregas pela rota otimizada"
+        >
+          <Navigation className="w-3.5 h-3.5" /> {otimizando ? 'Otimizando…' : 'Otimizar rota'}
+        </button>
+        {rota && (
+          <span className="text-[10px] text-slate-600">
+            {(rota.distancia / 1000).toFixed(1)} km • {Math.round(rota.duracao / 60)} min
+          </span>
+        )}
+      </div>
+
       {resumo.pontos.length > 0 ? (
         <div className="rounded border border-slate-200 overflow-hidden" style={{ height: 200 }}>
           <MapContainer center={centro} zoom={11} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
@@ -119,10 +179,10 @@ export default function PainelMapaEntregas({ negociacao }) {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution="&copy; OpenStreetMap"
             />
-            {resumo.pontos.map(({ entrega, coords }) => (
+            {pontosOrdenados.map(({ entrega, coords }, indice) => (
               <CircleMarker key={entrega.id} center={coords} radius={7} pathOptions={{ color: '#4f46e5', fillColor: '#818cf8', fillOpacity: 0.8 }}>
                 <Popup>
-                  <span className="text-xs font-semibold">{entrega.cliente_nome || entrega.numero_pedido}</span>
+                  <span className="text-xs font-semibold">{indice + 1}. {entrega.cliente_nome || entrega.numero_pedido}</span>
                   <br />
                   <span className="text-xs">{entrega.status}</span>
                   <br />

@@ -41,9 +41,15 @@ e dos componentes do Comercial, conforme a Regra-Mãe.
 - `usePreferenciasCentral360.jsx` persiste larguras, ordenação, filtros e largura do painel em
   `central360_prefs` do usuário (`updateMe`, com debounce); o armazenamento local permanece só como cache.
 
-## Pendências residuais (não bloqueiam o Comercial)
-- Amarração definitiva do canal WhatsApp do Hub de Atendimento ao atendimento comercial.
-- Automação da fila de validação de pedidos externos (`ValidarPedidosExternos`).
-- Roteirização com otimização por IA incorporada à Central (hoje o mapa é informativo; a otimização
-  permanece na Expedição).
+## Fechamento das pendências (mesma rodada)
+- **Amarração com o Hub de Atendimento:** novo atalho "Hub de atendimento" no painel de atendimento da
+  Central abre `/HubAtendimento?busca=<telefone|cliente>`; o Hub passou a iniciar a busca a partir do
+  parâmetro de URL, caindo direto nas conversas (WhatsApp/omnicanal) daquele cliente.
+- **Fila de pedidos externos:** botão "Pedidos externos" no cabeçalho da Central abre o módulo já
+  existente `ValidarPedidosExternos` em janela, com RBAC (Comercial/Pedidos/ver).
+- **Roteirização na Central:** o painel de mapa ganhou "Otimizar rota", que usa a função já existente
+  `optimizeDeliveryRoute` (Expedição) com as entregas da negociação, numera os pontos na ordem otimizada
+  e mostra distância e tempo estimados.
+
+## Pendência residual
 - Testes E2E das interações da Central (requer agente de testes).

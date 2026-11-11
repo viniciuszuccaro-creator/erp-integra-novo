@@ -1,7 +1,7 @@
 // Painel de atendimento do Cliente 360° — atalhos de atendimento, resumo e últimas interações
 import React from 'react';
 import {
-  CalendarClock, Mail, MessageCircle, MessageSquare, Phone, Plus,
+  CalendarClock, Headset, Mail, MessageCircle, MessageSquare, Phone, Plus,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
@@ -157,6 +157,13 @@ export default function PainelAtendimento({ negociacao, cliente }) {
     }, { title: 'Agendar follow-up', width: 780, height: 760 });
   };
 
+  // Amarração com o Hub de Atendimento (WhatsApp/omnicanal): abre as conversas já filtradas pelo cliente
+  const abrirHub = () => {
+    const termo = telefone || cliente?.nome || cliente?.razao_social || negociacao.cliente_nome || '';
+    const query = termo ? `?busca=${encodeURIComponent(termo)}` : '';
+    window.location.href = `/HubAtendimento${query}`;
+  };
+
   const abrirWhatsApp = () => {
     if (!telefoneWhatsApp) {
       toast.error('Cliente sem telefone cadastrado.');
@@ -170,6 +177,7 @@ export default function PainelAtendimento({ negociacao, cliente }) {
       <Atalho icone={Plus} label="Registrar interação" onClick={abrirInteracao} cor="text-blue-700" />
       <Atalho icone={CalendarClock} label="Agendar follow-up" onClick={abrirFollowUp} cor="text-indigo-700" />
       <Atalho icone={MessageCircle} label="WhatsApp" onClick={abrirWhatsApp} cor="text-emerald-700" />
+      <Atalho icone={Headset} label="Hub de atendimento" onClick={abrirHub} cor="text-sky-700" />
       <Atalho icone={Phone} label="Ligar" href={telefone ? `tel:${telefone}` : undefined} onClick={telefone ? undefined : () => toast.error('Cliente sem telefone cadastrado.')} />
       <Atalho icone={Mail} label="E-mail" href={email ? `mailto:${email}` : undefined} onClick={email ? undefined : () => toast.error('Cliente sem e-mail cadastrado.')} />
       <Atalho icone={MessageSquare} label="Próxima ação" onClick={() => toast.info(proximaAcao(negociacao))} cor="text-amber-700" />

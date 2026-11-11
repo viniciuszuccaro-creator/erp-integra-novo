@@ -43,7 +43,14 @@ export default function HubAtendimento() {
   const [filtroStatus, setFiltroStatus] = useState("Em Progresso");
   const [filtroCanal, setFiltroCanal] = useState("Todos");
   const [filtroPrioridade, setFiltroPrioridade] = useState("Todas");
-  const [buscaTexto, setBuscaTexto] = useState("");
+  // Amarração com o Comercial: a Central 360° abre o Hub já filtrado pelo cliente (?busca=)
+  const [buscaTexto, setBuscaTexto] = useState(() => {
+    try {
+      return new URLSearchParams(window.location.search).get("busca") || "";
+    } catch {
+      return "";
+    }
+  });
   const [conversaSelecionada, setConversaSelecionada] = useState(null);
   const [mensagemAtendente, setMensagemAtendente] = useState("");
   const [exibirPainelLateral, setExibirPainelLateral] = useState(true);

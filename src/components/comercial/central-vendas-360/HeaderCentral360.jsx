@@ -1,8 +1,11 @@
 // Cabeçalho da Central 360° — identidade azul/branca, empresa, busca universal, filtros e ação primária
 import React from 'react';
-import { AlertTriangle, Building2, Filter, List, Plus, Search, ShoppingCart } from 'lucide-react';
+import { AlertTriangle, Building2, ExternalLink, Filter, List, Plus, Search, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProtectedSection from '@/components/security/ProtectedSection';
+import { useWindow } from '@/components/lib/useWindow';
+import usePermissions from '@/components/lib/usePermissions';
+import ValidarPedidosExternos from '../ValidarPedidosExternos';
 import { GRUPOS_NEGOCIACAO } from './negociacaoUtils';
 
 function FiltroSelect({ label, valor, opcoes = [], onChange }) {
@@ -28,7 +31,17 @@ export default function HeaderCentral360({
   contadores = {}, total = 0, onNovo, modo, setModo,
   filtros = {}, onFiltro, onLimparFiltros, opcoes = {}, alertas = [],
 }) {
+  const { openWindow } = useWindow();
+  const { hasPermission } = usePermissions();
+  const podeValidarExternos = hasPermission('Comercial', 'Pedidos', 'ver');
   const contexto = empresa?.nome || grupo?.nome || 'Grupo não selecionado';
+
+  // Fila de validação de pedidos externos: usa o módulo já existente, em janela (Regra-Mãe 1 e 2)
+  const abrirPedidosExternos = () => openWindow(
+    ValidarPedidosExternos,
+    { windowMode: true },
+    { title: 'Pedidos externos — fila de validação', width: 1200, height: 700 }
+  );
   const temFiltroAtivo = ['vendedor', 'cidade', 'origem'].some((campo) => filtros[campo] && filtros[campo] !== 'todos');
 
   return (
@@ -67,6 +80,16 @@ export default function HeaderCentral360({
           >
             <List className="w-3.5 h-3.5" /> Lista completa
           </button>
+          {podeValidarExternos && (
+            <button
+              type="button"
+              onClick={abrirPedidosExternos}
+              className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+              title="Fila de validação dos pedidos recebidos dos canais externos"
+            >
+              <ExternalLink className="w-3.5 h-3.5" /> Pedidos externos
+            </button>
+          )}
           <ProtectedSection module="Comercial" section="Pedidos" action="criar">
             <Button onClick={onNovo} size="sm" className="bg-blue-600 hover:bg-blue-700">
               <Plus className="w-4 h-4 mr-1" /> Nova negociação

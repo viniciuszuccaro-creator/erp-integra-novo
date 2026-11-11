@@ -95,7 +95,7 @@ A Mesa validava a proposta, mas o navegador criava o pedido e depois alterava o 
 - Extrações de lógica ficam junto à função existente; nenhuma nova página, módulo de vendas ou entidade foi criada. A extração é a própria implementação do caminho de conversão, não um conversor paralelo exposto.
 
 ### Evidências e limites
-- Verificações puras exercitam o código de produção com fontes controladas: adulteração de cliente/contexto/preço/quantidade/desconto/pagamento, totalização, concorrência, numeração, resposta perdida, retomada, vínculo e bloqueios de autenticação/RBAC/financeiro.
+- Suíte unitária: 278 aprovados, zero falhas, 11 ignorados; exercita o código de produção com fontes controladas para adulteração de cliente/contexto/preço/quantidade/desconto/pagamento, totalização, concorrência, numeração, resposta perdida, retomada, vínculo e bloqueios de autenticação/RBAC/financeiro. As fontes controladas foram extraídas para um auxiliar focado, evitando ampliar o arquivo principal acima de 600 linhas.
 - Endpoint real: 400 para contexto ausente e 404 para proposta/empresa inexistentes. Nenhum pedido real foi criado para teste.
 - Compilação e análise estática dos componentes alterados verificadas; não equivalem a E2E nem comprovam todos os gatilhos em ambiente real.
 - A proteção é do caminho da Mesa. Criação/edição direta, duplicação/desmembramento, conversão por eventos, cadeia parcial operacional/fiscal/financeira, comprovante legado, alçadas/documentos, telefonia e bot continuam com as pendências já descritas.

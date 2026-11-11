@@ -51,5 +51,33 @@ e dos componentes do Comercial, conforme a Regra-Mãe.
   `optimizeDeliveryRoute` (Expedição) com as entregas da negociação, numera os pontos na ordem otimizada
   e mostra distância e tempo estimados.
 
-## Pendência residual
-- Testes E2E das interações da Central (requer agente de testes).
+## Certificação final — 100% do dossiê implantado (11/11/2026)
+
+Verificação item a item sobre o código existente (nenhum arquivo novo foi criado para certificar).
+
+| Pilar do dossiê | Onde está implantado | Situação |
+|---|---|---|
+| Central como área única de vendas (substitui o módulo Orçamentos) | `comercialModulesConfig.jsx` (seção Pedidos) | ✅ |
+| Layout V6: 12 colunas, Nº/Cliente fixos, cabeçalho fixo, rolagem horizontal | `TabelaNegociacoes.jsx` | ✅ |
+| Colunas redimensionáveis + ordenação persistidas por usuário | `usePreferenciasCentral360.jsx` (`central360_prefs`) | ✅ |
+| Cliente 360° lateral recolhível e redimensionável | `Cliente360Lateral.jsx` | ✅ |
+| Painéis do cliente (resumo, financeiro, estoque, produção, entrega, fiscal, atendimento, retornos, histórico) | `paineis/PainelCorpo.jsx` + `usePainel*` | ✅ |
+| Mesa de negociação, grade de itens e totais | `MesaNegociacao.jsx`, `ItensNegociacaoGrid.jsx`, `RodapeNegociacao.jsx` | ✅ |
+| Nova negociação (proposta na mesa / pedido no formulário completo) | `NovaNegociacaoDialog.jsx`, `useNovaNegociacao.jsx` | ✅ |
+| Busca universal com escopo de servidor | `useCentral360Data` → `filterInContext` → `entityListSorted` | ✅ |
+| Peso total pelos cadastros oficiais de Produto | `pesoNegociacao.jsx`, `usePesosProdutos.jsx` | ✅ |
+| Validação de fechamento explicativa | `useValidacaoFechamento.jsx`, `PainelValidacaoFechamento.jsx` | ✅ |
+| Copiloto e alertas proativos | `useAlertasComerciais.jsx`, `paineis/PainelCopiloto.jsx` | ✅ |
+| Mapa de entregas, contadores por janela e roteirização | `paineis/PainelMapaEntregas.jsx` → `optimizeDeliveryRoute` | ✅ |
+| RBAC granular em ação sensível (desconto > 15%, aprovar, emitir, criar) | `useAcoesComerciais.jsx` + `MesaNegociacao.salvar` | ✅ |
+| Multiempresa em toda escrita | `createInContext` / `updateInContext` (`useContextoVisual`) | ✅ |
+| Auditoria antes/depois | `AuditLog` em `MesaNegociacao`, `useEnvioProposta`, `PainelCopiloto`, `usePainelRetornos` | ✅ |
+| Proposta por WhatsApp/e-mail com follow-up de CRM | `useEnvioProposta.jsx` → `whatsappSend` / `sendEmailProvider` | ✅ |
+| Atendimento comercial conectado ao Hub | `PainelAtendimento.jsx` → `/HubAtendimento?busca=` | ✅ |
+| Fila de pedidos externos | `HeaderCentral360.jsx` → `ValidarPedidosExternos` | ✅ |
+
+### O que falta para operar 100% (fora do código do Comercial)
+1. **Publicar** — há alterações no editor ainda não publicadas (o site serve a versão de 09/11/2026).
+2. **Validação E2E** pela aba de testes: abrir negociação → montar itens → validar fechamento → enviar proposta → follow-up → aprovar → gerar pedido.
+3. **Plano/execução de backend** — busca de servidor, roteirização, copiloto e e-mails dependem de funções de backend e créditos de integração.
+4. **Nova varredura de segurança** — a última está desatualizada (12 achados abertos, incluindo Pedido/Cliente/Produto).

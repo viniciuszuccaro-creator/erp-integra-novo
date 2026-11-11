@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { avaliarAlcada, aplicarContraproposta } from './alcadas.ts';
 
 // Self-contained guards (no local imports per platform rules)
 async function hasPermission(base44, user, moduleName, section, action) {
@@ -134,6 +135,17 @@ Deno.serve(async (req) => {
         return Response.json({ error: 'Segregação de funções: outra pessoa deve decidir esta solicitação.' }, { status: 403 });
       }
       if (s.status !== 'pendente') return Response.json({ error: 'Solicitação já decidida. O histórico é imutável.' }, { status: 409 });
+      // §18 — alçada: nível exigido pela solicitação x nível real e limite individual do aprovador.
+      if (action === 'approve') {
+        const perfil = user?.perfil_acesso_id
+          ? await base44.asServiceRole.entities.PerfilAcesso.get(user.perfil_acesso_id).catch((e) => (e?.status === 404 ? null : Promise.reject(e)))
+          : null;
+        const alcada = avaliarAlcada({ solicitacao: s, user, perfil });
+        if (!alcada.permitido) {
+          try { await base44.entities.AuditLog.create({ usuario: user.full_name || user.email, usuario_id: user.id, empresa_id: s.empresa_id || null, group_id: s.group_id || null, acao: 'Bloqueio', modulo: 'Comercial', tipo_auditoria: 'seguranca', entidade: 'SolicitacaoAprovacao', registro_id: s.id, descricao: alcada.motivo, dados_novos: { nivel_aprovador: alcada.nivel, nivel_exigido: s.nivel_alcada || null }, data_hora: new Date().toISOString() }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
+          return Response.json({ error: alcada.motivo }, { status: 403 });
+        }
+      }
       const novoStatus = action === 'approve' ? 'aprovado' : 'rejeitado';
       const updated = await base44.entities.SolicitacaoAprovacao.update(solicitacao_id, { status: novoStatus, aprovador_id: user.id, comentarios_aprovacao: comentarios_aprovacao || null, ...(contraproposta && typeof contraproposta === 'object' ? { contraproposta } : {}), data_decisao: new Date().toISOString() });
 
@@ -166,6 +178,17 @@ Deno.serve(async (req) => {
       try { await base44.asServiceRole.functions.invoke('whatsappSend', { action: 'sendText', empresaId: s.empresa_id || null, groupId: s.group_id || null, intent: novoStatus === 'aprovado' ? 'aprovacao_concedida' : 'aprovacao_recusada', vars: { entidade: s.entidade_alvo, id: s.entidade_alvo_id || 'novo' } }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
       try { await base44.asServiceRole.functions.invoke('sendEmailProvider', { empresaId: s.empresa_id || null, assunto: `Solicitação ${novoStatus}`, destinatario: user.email || 'noreply@local', mensagem: `Sua solicitação ${solicitacao_id} foi ${novoStatus}.` }); } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
 
+      // §18 — contraproposta de limite aplicada no servidor; o navegador não grava o cadastro do cliente.
+      let contrapropostaAplicada = null;
+      if (novoStatus === 'aprovado') {
+        try {
+          contrapropostaAplicada = await aplicarContraproposta({ base44, solicitacao: s, contraproposta, user });
+        } catch (e) {
+          console.error('[solicitacoesAprovacao] falha ao aplicar contraproposta:', e);
+          contrapropostaAplicada = { aplicado: false, motivo: e?.message || String(e) };
+        }
+      }
+
       // Aplicações automáticas simples (ex.: desconto de pedido)
       if (novoStatus === 'aprovado' && s.tipo_solicitacao === 'desconto_pedido' && s.entidade_alvo === 'Pedido') {
         try {
@@ -177,7 +200,7 @@ Deno.serve(async (req) => {
         } catch (e) { console.error('[solicitacoesAprovacao] catch:', e); }
       }
 
-      return Response.json(updated);
+      return Response.json(contrapropostaAplicada ? { ...updated, contraproposta_aplicada: contrapropostaAplicada } : updated);
     }
 
     // PORTAL: aceitar orçamento

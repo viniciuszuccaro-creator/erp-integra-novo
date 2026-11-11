@@ -155,6 +155,24 @@ A Mesa validava a proposta, mas o navegador criava o pedido e depois alterava o 
 - `npm run build` e ESLint dos arquivos alterados sem erros; endpoint real não destrutivo retornou **400** (sem contexto) e **404** (entrega/empresa inexistente), sem efeitos.
 - **Pendências mantidas**: o formulário rápido comercial ainda não exige as três fotos + assinatura do §27 (o formulário completo existe na Expedição); a proteção contra baixa repetida é leitura seguida de escrita, não uma transação; consolidação de frete/estorno idempotentes, faturamento/cobrança parciais, alçadas/documentos, telefonia/bot e homologação E2E continuam abertas. Nada foi publicado nem analisado em Security nesta sessão.
 
+## Continuação — §18: alçada de aprovação e contraproposta no servidor
+
+### O que estava aberto
+- O nível exigido pela solicitação (`nivel_alcada`) e o limite do aprovador (`valor_limite_alcada`, `User.restricoes_adicionais.limite_aprovacao_valor`) não eram verificados na decisão: qualquer usuário com permissão de aprovar decidia qualquer valor.
+- A contraproposta de limite aprovada era aplicada **no navegador**, gravando o cadastro do cliente sem verificação de grupo/empresa.
+- O pendente §18 registrava "alçadas completas por categoria/nível" como não concluído.
+
+### Entrega desta continuação
+- Módulo `solicitacoesAprovacao/alcadas.ts` (extração da própria função, sem entidade, tela ou módulo paralelo) com o nível real do aprovador (papel de administrador prevalece; senão o maior entre `PerfilAcesso.nivel_perfil` e `empresas_vinculadas[].nivel_acesso`), o limite individual e a comparação com o que a solicitação exige.
+- O endpoint recusa (`403`) aprovação com nível insuficiente ou valor acima do limite, registrando `Bloqueio` em `AuditLog` com nível do aprovador e nível exigido; **rejeitar continua sempre permitido**, para não travar a fila.
+- A contraproposta de `liberar_credito` passou a ser aplicada **pelo servidor**, revalidando grupo e empresa do cliente (ou compartilhamento explícito), gravando `condicao_comercial` com antes/depois em `AuditLog` e devolvendo `contraproposta_aplicada` na resposta. O navegador apenas invalida as consultas.
+- Nenhum campo novo: a alçada usa `nivel_perfil`, `nivel_acesso`, `limite_aprovacao_valor`, `nivel_alcada` e `valor_limite_alcada`, que já existiam nos schemas.
+
+### Evidências e limites
+- Suíte unitária: **382 aprovados, zero falhas, 11 ignorados**, incluindo 13 verificações novas que executam `alcadas.ts` e o próprio `entry.ts` com fontes controladas (nível insuficiente, valor acima do limite individual, contraproposta aplicada com antes/depois, cliente de outro grupo recusado, aprovação de desconto sem tocar no cadastro).
+- `npm run build` e ESLint dos arquivos alterados sem erros; endpoint real não destrutivo respondeu **404** para solicitação inexistente.
+- **Pendências mantidas**: histórico de contraproposta como registro próprio (hoje fica na solicitação + `AuditLog`), aplicação de limite por categoria orçamentária (o teto hoje é por nível/valor), decisão de desconto de pedido que ainda grava o pedido inteiro, e homologação E2E §47/§48 no Testing Agent. Nada foi publicado nem reanalisado em Security.
+
 ## Situação
 
 O núcleo visual e de fechamento exigido pelo dossiê está agora alinhado ao texto e às tabelas, compila e passa nas verificações estáticas e nos testes puros. **Não é possível declarar 100% de implantação** enquanto os itens 1 a 9 não forem executados e homologados com backend real. Nenhuma integração, plano ou crédito é presumido.

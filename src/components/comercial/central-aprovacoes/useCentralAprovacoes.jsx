@@ -51,18 +51,13 @@ export default function useCentralAprovacoes(empresaId) {
         ...(contraproposta ? { contraproposta } : {}),
       });
       if (data?.error) throw new Error(data.error);
-      // Contraproposta de limite: aplica o novo valor no cadastro único do cliente, com histórico.
-      if (aprovado && contraproposta?.limite_credito && solicitacao.dados_propostos?.cliente_id) {
-        const cliente = await base44.entities.Cliente.get(solicitacao.dados_propostos.cliente_id);
-        await updateInContext('Cliente', cliente.id, {
-          condicao_comercial: {
-            ...(cliente.condicao_comercial || {}),
-            limite_credito: Number(contraproposta.limite_credito),
-            limite_aprovado_por: user?.full_name || user?.email || 'Usuário',
-            limite_aprovado_em: new Date().toISOString().slice(0, 10),
-          },
-        });
+      // §18 — a contraproposta de limite é aplicada pelo endpoint, no cadastro único do cliente,
+      // com verificação de grupo/empresa e antes/depois. O navegador não grava mais o cadastro.
+      if (data?.contraproposta_aplicada?.aplicado) {
+        queryClient.invalidateQueries({ queryKey: ['clientes'] });
+        queryClient.invalidateQueries({ queryKey: ['cliente'] });
       }
+      return data;
       // A decisão já é auditada pelo endpoint (antes/depois, usuário, grupo e empresa).
     },
     onSuccess: () => {

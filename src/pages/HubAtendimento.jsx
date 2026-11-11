@@ -40,7 +40,14 @@ const SuspenseFallback = () => <div className="h-40 rounded-md bg-slate-100 anim
  */
 export default function HubAtendimento() {
   const [abaAtiva, setAbaAtiva] = useState("atendimento");
-  const [filtroStatus, setFiltroStatus] = useState("Em Progresso");
+  // A Central de Vendas 360° abre o Hub já na fila certa (?status=), por exemplo as exceções do Bot
+  const [filtroStatus, setFiltroStatus] = useState(() => {
+    try {
+      return new URLSearchParams(window.location.search).get("status") || "Em Progresso";
+    } catch {
+      return "Em Progresso";
+    }
+  });
   const [filtroCanal, setFiltroCanal] = useState("Todos");
   const [filtroPrioridade, setFiltroPrioridade] = useState("Todas");
   // Amarração com o Comercial: a Central 360° abre o Hub já filtrado pelo cliente (?busca=)

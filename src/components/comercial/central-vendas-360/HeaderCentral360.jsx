@@ -1,13 +1,11 @@
 // Cabeçalho da Central 360° — identidade azul/branca, empresa, busca universal, filtros e ação primária
 import React from 'react';
-import { AlertTriangle, Building2, ExternalLink, Filter, List, Plus, Search, ShieldCheck, ShoppingCart } from 'lucide-react';
+import { AlertTriangle, Building2, Filter, List, Plus, Search, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProtectedSection from '@/components/security/ProtectedSection';
-import { useWindow } from '@/components/lib/useWindow';
 import usePermissions from '@/components/lib/usePermissions';
 import useRLSQuery from '@/components/lib/useRLSQuery';
-import ValidarPedidosExternos from '../ValidarPedidosExternos';
-import CentralAprovacoesManager from '../CentralAprovacoesManager';
+import FaixaCompacta360 from './FaixaCompacta360';
 import { GRUPOS_NEGOCIACAO } from './negociacaoUtils';
 
 function FiltroSelect({ label, valor, opcoes = [], onChange }) {
@@ -33,7 +31,6 @@ export default function HeaderCentral360({
   contadores = {}, total = 0, onNovo, modo, setModo,
   filtros = {}, onFiltro, onLimparFiltros, opcoes = {}, alertas = [],
 }) {
-  const { openWindow } = useWindow();
   const { hasPermission } = usePermissions();
   const podeValidarExternos = hasPermission('Comercial', 'Pedidos', 'ver');
   const contexto = empresa?.nome || grupo?.nome || 'Grupo não selecionado';
@@ -48,29 +45,6 @@ export default function HeaderCentral360({
   );
   const qtdExternosPendentes = (externosPendentes || []).length;
 
-  // Fila de aprovações comerciais com contador — reutiliza a Central de Aprovações existente
-  const podeAprovar = hasPermission('Comercial', 'Pedidos', 'aprovar')
-    || hasPermission('Comercial', 'Pedidos', 'aprovar_desconto');
-  const { data: aprovacoesPendentes = [] } = useRLSQuery(
-    'Pedido',
-    { status_aprovacao: 'pendente' },
-    '-created_date',
-    100,
-    { enabled: podeAprovar, staleTime: 60000 }
-  );
-  const qtdAprovacoesPendentes = (aprovacoesPendentes || []).length;
-  const abrirAprovacoes = () => openWindow(
-    CentralAprovacoesManager,
-    { windowMode: true },
-    { title: 'Central de Aprovações', width: 1240, height: 780 }
-  );
-
-  // Fila de validação de pedidos externos: usa o módulo já existente, em janela (Regra-Mãe 1 e 2)
-  const abrirPedidosExternos = () => openWindow(
-    ValidarPedidosExternos,
-    { windowMode: true },
-    { title: 'Pedidos externos — fila de validação', width: 1200, height: 700 }
-  );
   const temFiltroAtivo = ['vendedor', 'cidade', 'origem'].some((campo) => filtros[campo] && filtros[campo] !== 'todos');
 
   return (
@@ -109,42 +83,6 @@ export default function HeaderCentral360({
           >
             <List className="w-3.5 h-3.5" /> Lista completa
           </button>
-          {podeAprovar && (
-            <button
-              type="button"
-              onClick={abrirAprovacoes}
-              className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
-              title="Fila de aprovações comerciais (desconto, limite e condição)"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" /> Aprovações
-              {qtdAprovacoesPendentes > 0 && (
-                <span
-                  className="rounded-full bg-purple-100 text-purple-700 px-1.5 text-[10px] font-bold"
-                  title={`${qtdAprovacoesPendentes} pedido(s) aguardando aprovação`}
-                >
-                  {qtdAprovacoesPendentes >= 100 ? '100+' : qtdAprovacoesPendentes}
-                </span>
-              )}
-            </button>
-          )}
-          {podeValidarExternos && (
-            <button
-              type="button"
-              onClick={abrirPedidosExternos}
-              className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
-              title="Fila de validação dos pedidos recebidos dos canais externos"
-            >
-              <ExternalLink className="w-3.5 h-3.5" /> Pedidos externos
-              {qtdExternosPendentes > 0 && (
-                <span
-                  className="rounded-full bg-orange-100 text-orange-700 px-1.5 text-[10px] font-bold"
-                  title={`${qtdExternosPendentes} pedido(s) externo(s) aguardando validação`}
-                >
-                  {qtdExternosPendentes >= 100 ? '100+' : qtdExternosPendentes}
-                </span>
-              )}
-            </button>
-          )}
           <ProtectedSection module="Comercial" section="Pedidos" action="criar">
             <Button onClick={onNovo} size="sm" className="bg-blue-600 hover:bg-blue-700">
               <Plus className="w-4 h-4 mr-1" /> Nova negociação
@@ -152,6 +90,8 @@ export default function HeaderCentral360({
           </ProtectedSection>
         </div>
       </div>
+
+      <FaixaCompacta360 pendentesExternos={qtdExternosPendentes} />
 
       <div className="flex flex-wrap items-center gap-1 px-3 py-1.5 border-b border-slate-100">
         <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 mr-1">{total} registros</span>

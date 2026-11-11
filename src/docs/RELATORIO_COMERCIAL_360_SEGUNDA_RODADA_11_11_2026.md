@@ -173,6 +173,21 @@ A Mesa validava a proposta, mas o navegador criava o pedido e depois alterava o 
 - `npm run build` e ESLint dos arquivos alterados sem erros; endpoint real não destrutivo respondeu **404** para solicitação inexistente.
 - **Pendências mantidas**: histórico de contraproposta como registro próprio (hoje fica na solicitação + `AuditLog`), aplicação de limite por categoria orçamentária (o teto hoje é por nível/valor), decisão de desconto de pedido que ainda grava o pedido inteiro, e homologação E2E §47/§48 no Testing Agent. Nada foi publicado nem reanalisado em Security.
 
+## Continuação — §2 do dossiê: faixa compacta com contadores e janelas próprias
+
+### O que estava divergente do documento
+O §2 exige, entre cabeçalho e seletor de situação, uma **faixa compacta** com Atendimento Unificado, Bot de Vendas (exceções/intervenção humana), Entregas do Dia e Aprovações pendentes, cada um com contador e abrindo **janela própria**. Existiam apenas dois desses acessos (Aprovações e Pedidos externos) como botões soltos na linha do título, sem Atendimento, Bot nem Entregas do Dia, e sem contadores vindos do servidor.
+
+### Entrega
+- `useContadores360`: contadores consultados no servidor (`count`) sempre com o contexto ativo — grupo consolida por `group_id`, empresa por `empresa_id`: conversas `Em Progresso`, exceções de Bot (`tipo_atendimento` Bot/Híbrido em `Aguardando`/`Não Atribuída`), entregas com `data_previsao` de hoje ainda abertas e pedidos com `status_aprovacao = pendente`. Cache de 1 min, sem consulta sem contexto.
+- `FaixaCompacta360`: faixa de uma linha entre o cabeçalho e o seletor de situação, com ícone, rótulo e contador em cada acesso, respeitando RBAC (Hub/CRM, Expedição, Comercial aprovar, Comercial ver). Atendimento, Bot e Entregas do Dia abrem o **módulo existente em janela própria** (funciona no segundo monitor); Aprovações e Pedidos externos continuam abrindo as janelas já existentes da Central de Aprovações e da fila de validação — nenhum componente duplicado.
+- `HubAtendimento`: passou a respeitar `?status=` na abertura, então o atalho do Bot cai direto na fila de intervenção humana.
+- Cabeçalho limpo: os dois botões que estavam soltos foram **movidos** para a faixa (nada foi removido do produto), e a ação primária “Nova negociação”, busca, filtros e seletor de situação permanecem iguais.
+
+### Evidências e limites
+- `npm run build` concluído e `npm run test:unit` com **387 aprovados, 0 falhas, 11 ignorados**.
+- Pendências do §2 ainda abertas: **Ações Rápidas contextuais sob o Cliente 360°** (Imprimir/Enviar e Fechar no Aberto; Ajustar Pedido somente Produção/Entrega/Retira) — hoje essas ações estão no rodapé da mesa, precisam subir para a lateral — e o Cliente 360° **destacável** em janela, além da homologação E2E (§47/§48).
+
 ## Continuação — §18: alçada por categoria, multiempresa e histórico imutável
 
 ### O que estava aberto

@@ -24,11 +24,17 @@ export default function useComprovanteDigital({ entrega, readOnly, onSuccess, on
     if (!readOnly || !permitido) return undefined;
     return base44.entities.Entrega.subscribe((evento) => { if (evento.id === entrega.id) consulta.refetch(); });
   }, [readOnly, permitido, entrega?.id]);
-  const salvar = async ({ dados, arquivos, assinatura, revisado }) => {
+  const salvar = async ({ dados, arquivos, assinatura, revisado, itens }) => {
     setErro('');
     if (!permitido || !user?.id) { setErro('Sem permissão ou contexto de grupo/empresa inválido.'); return; }
     setEnviando(true);
     try {
+      // §23 — o que foi entregue é registrado antes do comprovante, limitado pelo saldo oficial no servidor.
+      if (Array.isArray(itens) && itens.length) {
+        if (!navigator.onLine) throw new Error('Sem conexão: os itens entregues precisam ser registrados antes do comprovante.');
+        await base44.functions.invoke('onEntregaUpdated', { acao: 'registrar_itens_entrega', entrega_id: entrega.id, group_id: entrega.group_id, empresa_id: entrega.empresa_id, itens });
+        await client.invalidateQueries({ predicate: (q) => ['saldos-itens-pedido', 'itens-entrega'].some((k) => q.queryKey.includes(k)) });
+      }
       const chave = chaveComprovante(user.id, entrega);
       const anterior = await idbGet(chave);
       const operacao = anterior?.body?.versao === entrega.updated_date ? anterior.body.operacao_id : crypto.randomUUID();

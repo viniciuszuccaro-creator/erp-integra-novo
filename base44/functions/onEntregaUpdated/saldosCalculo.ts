@@ -39,9 +39,39 @@ export function itensCanonicos(pedido) {
   return origens.flatMap(([campo, prefixo]) => (pedido[campo] || []).map((item, i) => ({
     chave: `${prefixo}-${i}`, id_original: item.id || null, origem: prefixo,
     produto_id: item.produto_id || null, unidade: item.unidade || 'UN',
+    descricao: item.descricao || item.produto_descricao || item.nome || null,
     quantidade: qtd(item.quantidade), faturada: Object.hasOwn(item, 'quantidade_faturada') ? qtd(item.quantidade_faturada) : null,
     valor_unitario: dinheiro(item.valor_unitario),
   })));
+}
+
+// §23 — o que foi realmente entregue é limitado pelo saldo oficial a atender de cada item.
+// Nenhuma quantidade é presumida: item sem vínculo verificável não pode ser registrado.
+export function selecionarItensEntrega(pedido, saldos = [], selecao = []) {
+  const itens = new Map(itensCanonicos(pedido).map((i) => [i.chave, i]));
+  const oficiais = new Map((saldos || []).map((s) => [s.chave, s]));
+  if (!Array.isArray(selecao) || !selecao.length) return { ok: false, erro: 'Informe as quantidades efetivamente entregues por item.' };
+  const vistos = new Set();
+  const linhas = [];
+  for (const escolha of selecao) {
+    const referencia = typeof escolha?.chave === 'string' ? escolha.chave : null;
+    const item = referencia ? itens.get(referencia) : null;
+    const saldo = referencia ? oficiais.get(referencia) : null;
+    const quantidade = qtd(escolha?.quantidade);
+    if (!item || !saldo) return { ok: false, erro: `Item ${referencia || 'selecionado'} não pertence a este pedido.` };
+    if (vistos.has(referencia)) return { ok: false, erro: `Item ${item.descricao || referencia} informado mais de uma vez.` };
+    if (quantidade === null || !(quantidade > 0)) return { ok: false, erro: `Quantidade entregue de ${item.descricao || referencia} deve ser maior que zero.` };
+    if (saldo.saldo_atender === null) return { ok: false, erro: `${item.descricao || referencia} está sem vínculo verificável de saldo a atender.` };
+    if (quantidade > saldo.saldo_atender + 0.000001) return { ok: false, erro: `Quantidade entregue de ${item.descricao || referencia} (${quantidade}) excede o saldo a atender (${saldo.saldo_atender} ${item.unidade}).` };
+    vistos.add(referencia);
+    linhas.push({
+      chave: referencia, pedido_item_id: item.id_original || referencia, produto_id: item.produto_id,
+      tipo_item: item.origem === 'revenda' ? 'revenda' : 'producao',
+      descricao_produto: item.descricao || referencia, quantidade_pedida_original: item.quantidade,
+      unidade: item.unidade, quantidade,
+    });
+  }
+  return { ok: true, linhas };
 }
 
 // §23 — cobrança por item: rateio do título oficial do pedido pela quantidade realmente faturada.

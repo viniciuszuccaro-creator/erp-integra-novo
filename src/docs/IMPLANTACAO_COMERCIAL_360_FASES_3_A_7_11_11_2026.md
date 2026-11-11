@@ -306,10 +306,35 @@ Não há entidade, tela, rota ou consulta nova no frontend: apenas três campos 
 - `npm run test:unit`: **392 pass · 0 fail** (11 skip), incluindo cinco novas checagens: rateio correto, soma exata do
   saldo do pedido, título cancelado ignorado, ausência de título mantendo `null` e bloqueio por RBAC.
 
+## Revisão 11/11/2026, 14h10 — §23: itens efetivamente entregues com bloqueio de excesso no servidor
+
+### O que foi entregue
+Até aqui a cadeia por item só **lia** saldos: nada gravava o que a entrega realmente levou. O elo foi fechado reaproveitando
+o endpoint existente `onEntregaUpdated`, sem função, tela ou módulo novo:
+
+- **`consultar_itens_entrega`**: devolve os itens do pedido com o saldo oficial a atender daquela entrega (a própria entrega
+  é excluída do cálculo, então reenviar não soma duas vezes). Exige `Expedição / Entrega → ver`.
+- **`registrar_itens_entrega`**: único caminho de gravação de `EntregaItens`. Exige `Expedição / Entrega → editar`, vínculo
+  ativo com grupo/empresa e revalida cada quantidade contra o saldo oficial apurado pelas fontes proprietárias.
+  Rejeita item de outro pedido, item repetido, quantidade zero, item sem vínculo verificável de saldo e quantidade acima
+  do saldo. Reenvio do mesmo item é ignorado (idempotente), nunca duplicado.
+- **Formulário de comprovante existente** (`ComprovanteDigital`, usado na Expedição, no motorista e na Central 360°): passou
+  a listar os itens com saldo a atender, com a quantidade sugerida igual ao saldo. Os itens são registrados **antes** do
+  comprovante; se o servidor recusar o excesso, o comprovante não é gravado e a mensagem explica o motivo.
+- `permissoes.ts` extraído do comprovante (refatoração Regra-Mãe 3) para que comprovante, saldos e itens compartilhem a mesma
+  guarda de RBAC e vínculo de grupo/empresa, sem duplicação e sem ciclo de importação.
+- Auditoria em `AuditLog` a cada registro e a cada bloqueio (usuário, grupo, empresa, itens e motivo).
+
+### Verificação executada
+- `npm run build` concluído.
+- `npm run test:unit`: **399 pass · 0 fail** (11 skip), com 7 novas checagens da seleção de itens (aceite no saldo,
+  excesso, item sem vínculo, item de outro pedido, quantidade zero, item repetido e seleção vazia).
+
 ### Pendências que seguem abertas (§23 e demais)
-1. **Reflexo nas mutações**: separação, produção, entrega e faturamento ainda não são limitados pelo saldo oficial ao
-   gravar — a consulta mostra o saldo, mas não impede tecnicamente o excesso no momento da gravação (a divergência
-   aparece sinalizada depois). É o próximo passo natural da cadeia.
+1. **Reflexo nas mutações (parcialmente fechado)**: a entrega por item já é bloqueada pelo saldo oficial no servidor.
+   Separação e produção continuam sem caminho de gravação por item na interface (o `SeparacaoConferenciaIA` ainda é um
+   protótipo que não persiste), e o `ComprovanteEntregaDigital` legado da Logística continua sem itens — ambos precisam
+   convergir para o endpoint oficial antes de receberem o mesmo bloqueio. Faturamento já validava o saldo pendente.
 2. §4/§6 — telefonia/GoTo e bot de vendas com provedor real (exigem credencial de terceiro, sem simulação).
 3. §47/§48 — homologação dos fluxos e bloqueios no Testing Agent com backend real.
 4. Publicação e nova análise de segurança.

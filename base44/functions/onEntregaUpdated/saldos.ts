@@ -1,5 +1,5 @@
 import { calcularSaldosPedido } from './saldosCalculo.ts';
-import { temPermissaoLeitura, usuarioVinculado } from './comprovante.ts';
+import { temPermissaoLeitura, usuarioVinculado } from './permissoes.ts';
 
 const itens = (pagina) => Array.isArray(pagina) ? pagina : pagina?.items || [];
 // Só os registros deste pedido, em páginas; nunca consulta o banco inteiro nem trunca silenciosamente.

@@ -365,9 +365,13 @@ async function testSaldosPedido() {
   const carregar = (path) => readFileSync(join(ROOT, path), 'utf-8');
   const url = (source) => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
   const calculoUrl = url(carregar('base44/functions/onEntregaUpdated/saldosCalculo.ts'));
-  const comprovanteUrl = url(carregar('base44/functions/onEntregaUpdated/comprovante.ts'));
+  const permissoesUrl = url(carregar('base44/functions/onEntregaUpdated/permissoes.ts'));
+  const comprovanteUrl = url(carregar('base44/functions/onEntregaUpdated/comprovante.ts').replaceAll("'./permissoes.ts'", JSON.stringify(permissoesUrl)));
   const calc = await import(calculoUrl);
-  const handlerSource = carregar('base44/functions/onEntregaUpdated/saldos.ts').replace("'./saldosCalculo.ts'", JSON.stringify(calculoUrl)).replace("'./comprovante.ts'", JSON.stringify(comprovanteUrl));
+  const handlerSource = carregar('base44/functions/onEntregaUpdated/saldos.ts')
+    .replace("'./saldosCalculo.ts'", JSON.stringify(calculoUrl))
+    .replace("'./comprovante.ts'", JSON.stringify(comprovanteUrl))
+    .replace("'./permissoes.ts'", JSON.stringify(permissoesUrl));
   const { consultarSaldosPedido } = await import(url(handlerSource));
   const check = (nome, ok) => log(ok ? 'pass' : 'fail', `Saldos por item: ${nome}`);
   const pedido = { id: '111111111111111111111111', group_id: '222222222222222222222222', empresa_id: '333333333333333333333333', updated_date: 'v1', itens_revenda: [{ produto_id: 'p', quantidade: 10, quantidade_faturada: 3, unidade: 'UN' }], itens_armado_padrao: [{ produto_id: 'fab', quantidade: 8, unidade: 'PC' }] };
@@ -408,6 +412,16 @@ async function testSaldosPedido() {
   check('RBAC oculta cobrança sem permissão financeira', semFinanceiro.every((i) => i.cobrado === null && i.valor_faturado === null));
   const oculto = calc.calcularSaldosPedido(pedido, fontes, {});
   check('RBAC oculta todos os dados de domínios não autorizados', oculto.every((i) => ['separada', 'conferida', 'produzida', 'entregue', 'retirada', 'faturada', 'saldo_atender', 'saldo_faturar'].every((k) => i[k] === null)));
+  // §23 entrega por item: a gravação é limitada pelo saldo oficial a atender
+  const saldosItem = [{ chave: 'revenda-0', unidade: 'UN', saldo_atender: 4 }, { chave: 'armado-0', unidade: 'PC', saldo_atender: null }];
+  const entregaOk = calc.selecionarItensEntrega(pedido, saldosItem, [{ chave: 'revenda-0', quantidade: 4 }]);
+  check('itens entregues dentro do saldo são aceitos', entregaOk.ok && entregaOk.linhas[0].quantidade === 4 && entregaOk.linhas[0].pedido_item_id === 'revenda-0');
+  check('item sem vínculo de saldo não é registrado', !calc.selecionarItensEntrega(pedido, saldosItem, [{ chave: 'armado-0', quantidade: 1 }]).ok);
+  check('entrega acima do saldo é bloqueada', !calc.selecionarItensEntrega(pedido, saldosItem, [{ chave: 'revenda-0', quantidade: 4.5 }]).ok);
+  check('item de outro pedido é bloqueado', !calc.selecionarItensEntrega(pedido, saldosItem, [{ chave: 'revenda-9', quantidade: 1 }]).ok);
+  check('quantidade zero é recusada', !calc.selecionarItensEntrega(pedido, saldosItem, [{ chave: 'revenda-0', quantidade: 0 }]).ok);
+  check('item repetido é recusado', !calc.selecionarItensEntrega(pedido, saldosItem, [{ chave: 'revenda-0', quantidade: 1 }, { chave: 'revenda-0', quantidade: 1 }]).ok);
+  check('seleção vazia é recusada', !calc.selecionarItensEntrega(pedido, saldosItem, []).ok);
   const chamadas = [];
   const entidade = (nome, pagina) => ({ filter: async (filtro, opcoes) => { chamadas.push({ nome, filtro, opcoes }); return pagina(filtro, opcoes); } });
   const entidades = {

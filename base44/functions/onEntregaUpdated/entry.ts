@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { processarComprovante, usuarioVinculado } from './comprovante.ts';
 import { consultarSaldosPedido, lerVinculados } from './saldos.ts';
+import { consultarItensEntrega, registrarItensEntrega } from './itensEntrega.ts';
 import { avaliarConclusaoOP } from './saldosCalculo.ts';
 const pagina = (v) => Array.isArray(v) ? v : v?.items || [];
 // Inlined guard helpers (relative imports break in Deno deploy)
@@ -31,6 +32,9 @@ export default async function(req) {
 
     const body = await req.json().catch(() => ({}));
     if (body?.acao === 'consultar_saldos_pedido') return await consultarSaldosPedido(base44, ctx, body);
+    // §23 — itens efetivamente entregues (saldo oficial bloqueia excesso na gravação).
+    if (body?.acao === 'consultar_itens_entrega') return await consultarItensEntrega(base44, ctx, body);
+    if (body?.acao === 'registrar_itens_entrega') return await registrarItensEntrega(base44, ctx, body);
     if (body?.acao) return await processarComprovante(base44, ctx, body);
     const { event, data: payload, old_data } = body || {};
     if (!event || event.type !== 'update' || !payload) return Response.json({ ok: true, skipped: true });

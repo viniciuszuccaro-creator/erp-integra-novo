@@ -1,38 +1,11 @@
-const normalizar = (v) => String(v || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+import { permitido, temPermissaoLeitura, usuarioVinculado } from './permissoes.ts';
+
 const pagina = (v) => Array.isArray(v) ? v : v?.items || [];
 const camposArquivo = ['foto_comprovante', 'foto_mercadoria', 'foto_local', 'assinatura_digital'];
 const texto = (v, max) => String(v || '').replace(/<[^>]*>/g, '').replace(/javascript\s*:/gi, '').trim().slice(0, max);
 
-function permitido(ctx, leitura) {
-  if (ctx.user.bloqueado) return false;
-  if (ctx.user.role === 'admin') return true;
-  if (!ctx.perfil || ctx.perfil.ativo === false) return false;
-  const modulo = Object.entries(ctx.perfil.permissoes || {}).find(([k]) => normalizar(k) === 'expedicao')?.[1];
-  const secao = Object.entries(modulo || {}).find(([k]) => ['entrega', 'entregas'].includes(normalizar(k)))?.[1];
-  const aliases = leitura ? ['ver', 'visualizar', 'consultar', 'read', 'view', 'listar'] : ['editar', 'update', 'edit', 'corrigir', 'gerenciar', 'atualizar'];
-  const contem = (v) => Array.isArray(v) ? v.some((a) => aliases.includes(normalizar(a))) : v && typeof v === 'object' && Object.values(v).some(contem);
-  return Boolean(contem(secao));
-}
-
-export function temPermissaoLeitura(ctx, modulo, secoes) {
-  if (ctx.user?.bloqueado) return false;
-  if (ctx.user?.role === 'admin') return true;
-  if (!ctx.perfil || ctx.perfil.ativo === false) return false;
-  const chave = (v) => normalizar(v).replace(/[^a-z0-9]/g, '');
-  const permissoes = Object.entries(ctx.perfil.permissoes || {}).find(([k]) => chave(k) === chave(modulo))?.[1];
-  const aliases = secoes.map(chave);
-  const leitura = new Set(['ver', 'visualizar', 'consultar', 'read', 'view', 'listar']);
-  const contem = (v) => Array.isArray(v) ? v.some((a) => leitura.has(normalizar(a))) : v && typeof v === 'object' && Object.values(v).some(contem);
-  return Object.entries(permissoes || {}).some(([k, v]) => aliases.includes(chave(k)) && contem(v));
-}
-
-export function usuarioVinculado(ctx, groupId, empresaId) {
-  if (ctx.user?.bloqueado) return false;
-  if (ctx.user?.role === 'admin') return true;
-  const empresa = (ctx.user.empresas_vinculadas || []).some((v) => typeof v === 'string' ? v === empresaId : v.empresa_id === empresaId && v.ativo !== false);
-  const grupo = (ctx.user.grupos_vinculados || []).some((v) => typeof v === 'string' ? v === groupId : v.grupo_id === groupId && v.ativo !== false);
-  return empresa || grupo;
-}
+// Reexportado para os módulos vizinhos que já dependiam destas guardas.
+export { temPermissaoLeitura, usuarioVinculado };
 
 async function auditar(base44, user, registro, acao, descricao, depois = null) {
   return base44.asServiceRole.entities.AuditLog.create({

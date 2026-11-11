@@ -5,11 +5,19 @@ import { join } from 'path';
 export default async function testConclusaoEntrega(log, root) {
   const ler = (p) => readFileSync(join(root, 'base44/functions/onEntregaUpdated', p), 'utf-8');
   const url = (s) => `data:text/javascript;base64,${Buffer.from(s).toString('base64')}`;
-  const calcUrl = url(ler('saldosCalculo.ts')), comprovanteUrl = url(ler('comprovante.ts'));
-  const saldosUrl = url(ler('saldos.ts').replace("'./saldosCalculo.ts'", JSON.stringify(calcUrl)).replace("'./comprovante.ts'", JSON.stringify(comprovanteUrl)));
+  const permissoesUrl = url(ler('permissoes.ts'));
+  const calcUrl = url(ler('saldosCalculo.ts'));
+  const comprovanteUrl = url(ler('comprovante.ts').replaceAll("'./permissoes.ts'", JSON.stringify(permissoesUrl)));
+  const saldosUrl = url(ler('saldos.ts')
+    .replace("'./saldosCalculo.ts'", JSON.stringify(calcUrl))
+    .replace("'./comprovante.ts'", JSON.stringify(comprovanteUrl))
+    .replaceAll("'./permissoes.ts'", JSON.stringify(permissoesUrl)));
+  const itensUrl = url(ler('itensEntrega.ts')
+    .replace("'./saldosCalculo.ts'", JSON.stringify(calcUrl)).replace("'./saldos.ts'", JSON.stringify(saldosUrl)).replace("'./permissoes.ts'", JSON.stringify(permissoesUrl)));
   const endpoint = (await import(url(ler('entry.ts')
     .replace("import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';", 'const createClientFromRequest = () => globalThis.__entregaCliente;')
-    .replace("'./saldosCalculo.ts'", JSON.stringify(calcUrl)).replace("'./saldos.ts'", JSON.stringify(saldosUrl)).replace("'./comprovante.ts'", JSON.stringify(comprovanteUrl))))).default;
+    .replace("'./saldosCalculo.ts'", JSON.stringify(calcUrl)).replace("'./saldos.ts'", JSON.stringify(saldosUrl))
+    .replace("'./comprovante.ts'", JSON.stringify(comprovanteUrl)).replace("'./itensEntrega.ts'", JSON.stringify(itensUrl))))).default;
   const { avaliarConclusaoOP } = await import(calcUrl);
   const clone = (v) => JSON.parse(JSON.stringify(v));
   const check = (nome, ok) => log(ok ? 'pass' : 'fail', `Entrega/Produção 360: ${nome}`);

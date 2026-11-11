@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,8 +18,26 @@ export default function ComprovanteDigital({ entrega, isOpen, onClose, onSuccess
   const [dados, setDados] = useState({ nome_recebedor: '', documento_recebedor: '', cargo_recebedor: '', observacoes_recebimento: '' });
   const [arquivos, setArquivos] = useState({}); const [previews, setPreviews] = useState({});
   const [revisado, setRevisado] = useState(false); const [erroArquivo, setErroArquivo] = useState('');
+  const [itensPendentes, setItensPendentes] = useState([]); const [quantidades, setQuantidades] = useState({});
   const assinatura = useAssinaturaCanvas();
   const hook = useComprovanteDigital({ entrega, readOnly, onOffline, onSuccess: onSuccess || onClose });
+  // §23 — itens com saldo a atender nesta entrega, sempre apurados no servidor.
+  useEffect(() => {
+    if (readOnly || !hook.permitido || !entrega?.id) return;
+    let ativo = true;
+    base44.functions.invoke('onEntregaUpdated', { acao: 'consultar_itens_entrega', entrega_id: entrega.id, group_id: entrega.group_id, empresa_id: entrega.empresa_id })
+      .then(({ data }) => {
+        if (!ativo) return;
+        const lista = (data?.itens || []).filter((i) => i.saldo_atender === null || i.saldo_atender > 0);
+        setItensPendentes(lista);
+        setQuantidades(Object.fromEntries(lista.map((i) => [i.chave, i.saldo_atender === null ? '' : String(i.saldo_atender)])));
+      })
+      .catch(() => { if (ativo) setErroArquivo('Não foi possível consultar o saldo por item desta entrega.'); });
+    return () => { ativo = false; };
+  }, [readOnly, hook.permitido, entrega?.id]);
+  const itensSelecionados = () => itensPendentes
+    .map((i) => ({ chave: i.chave, quantidade: Number(String(quantidades[i.chave] ?? '').replace(',', '.')) }))
+    .filter((i) => Number.isFinite(i.quantidade) && i.quantidade > 0);
   useEffect(() => {
     if (!readOnly) assinatura.inicializarCanvas();
   }, [readOnly, hook.permitido]);
@@ -35,7 +54,9 @@ export default function ComprovanteDigital({ entrega, isOpen, onClose, onSuccess
   const enviar = async (e) => {
     e.preventDefault();
     if (assinatura.assinaturaVazia || !revisado || ARQUIVOS_COMPROVANTE.some(({ campo }) => !arquivos[campo])) { setErroArquivo('Inclua as três fotos, uma assinatura legível e confirme a conferência.'); return; }
-    await hook.salvar({ dados, arquivos, assinatura: assinatura.canvasRef.current, revisado });
+    const itens = itensSelecionados();
+    if (itensPendentes.length && !itens.length) { setErroArquivo('Informe a quantidade entregue de ao menos um item.'); return; }
+    await hook.salvar({ dados, arquivos, assinatura: assinatura.canvasRef.current, revisado, itens });
   };
   const comprovante = hook.consulta.data?.comprovante || {};
   const conteudo = (
@@ -59,6 +80,23 @@ export default function ComprovanteDigital({ entrega, isOpen, onClose, onSuccess
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3"><Label>Nome completo de quem recebeu *<Input required minLength={3} maxLength={160} value={dados.nome_recebedor} onChange={(e) => alterar('nome_recebedor', e.target.value)} /></Label><Label>CPF/RG do recebedor *<Input required minLength={5} maxLength={40} value={dados.documento_recebedor} onChange={(e) => alterar('documento_recebedor', e.target.value)} /></Label></div>
             <Label className="block">Cargo/função<Input maxLength={100} value={dados.cargo_recebedor} onChange={(e) => alterar('cargo_recebedor', e.target.value)} /></Label>
             <Label className="block">Observações do recebimento<Textarea maxLength={2000} value={dados.observacoes_recebimento} onChange={(e) => alterar('observacoes_recebimento', e.target.value)} /></Label>
+            {itensPendentes.length > 0 && (
+              <div className="space-y-2 rounded border p-3">
+                <p className="text-sm font-medium">Itens entregues</p>
+                <p className="text-xs text-muted-foreground">Quantidade limitada ao saldo oficial a atender de cada item.</p>
+                <div className="space-y-2">
+                  {itensPendentes.map((item) => (
+                    <div key={item.chave} className="flex flex-wrap items-center justify-between gap-2 border-b pb-2 last:border-0 last:pb-0">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm">{item.descricao || item.chave}</p>
+                        <p className="text-xs text-muted-foreground">Pedido: {item.pedida ?? '—'} {item.unidade} · A atender: {item.saldo_atender === null ? 'sem vínculo verificável' : `${item.saldo_atender} ${item.unidade}`}{item.ja_registrado != null ? ` · Já registrado: ${item.ja_registrado}` : ''}</p>
+                      </div>
+                      <Input className="w-28" inputMode="decimal" aria-label={`Quantidade entregue de ${item.descricao || item.chave}`} value={quantidades[item.chave] ?? ''} onChange={(e) => { setRevisado(false); setQuantidades((anterior) => ({ ...anterior, [item.chave]: e.target.value })); }} disabled={item.saldo_atender === null} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <AssinaturaCanvas canvasRef={assinatura.canvasRef} assinaturaVazia={assinatura.assinaturaVazia} onIniciarDesenho={(e) => { setRevisado(false); assinatura.iniciarDesenho(e); }} onDesenhar={assinatura.desenhar} onPararDesenho={assinatura.pararDesenho} onLimpar={() => { setRevisado(false); assinatura.limparAssinatura(); }} />
             <label className="flex items-start gap-2 text-sm"><Checkbox checked={revisado} onCheckedChange={(v) => setRevisado(v === true)} /><span>Conferi mercadoria, local, canhoto, documento e legibilidade da assinatura.</span></label>
           </fieldset>

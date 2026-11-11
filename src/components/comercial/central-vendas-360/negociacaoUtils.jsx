@@ -72,15 +72,18 @@ const itemNormalizado = (item, tipo, indice) => {
     quantidade,
     unidade: item.unidade || 'UN',
     valor_unitario: valorUnitario,
-    desconto_percentual: numero(item.desconto_percentual),
-    valor_total: numero(item.valor_total) || quantidade * valorUnitario,
-    tipo: item.tipo === 'servico' ? 'servico' : tipo,
+    desconto_percentual: item.desconto_percentual != null ? numero(item.desconto_percentual)
+      : quantidade * valorUnitario > 0 && item.valor_total != null
+        ? Math.max(0, (1 - numero(item.valor_total) / (quantidade * valorUnitario)) * 100) : 0,
+    valor_total: item.valor_total != null ? numero(item.valor_total)
+      : quantidade * valorUnitario * (1 - numero(item.desconto_percentual) / 100),
+    tipo: ['servico', 'fabricacao'].includes(item.tipo) ? item.tipo : tipo,
   };
 };
 
 export function orcamentoParaNegociacao(orcamento) {
   const itens = (orcamento.itens || []).map((item, i) => itemNormalizado(item, 'revenda', i));
-  const totalItens = itens.reduce((soma, item) => soma + item.valor_total, 0);
+  const totais = totalizarItens(itens);
   const grupo = GRUPO_ORCAMENTO[orcamento.status] || 'aberto';
   return {
     chave: `orc-${orcamento.id}`,
@@ -99,7 +102,7 @@ export function orcamentoParaNegociacao(orcamento) {
     itens,
     condicao_pagamento: orcamento.condicoes_pagamento || '—',
     prazo: orcamento.prazo_entrega || '—',
-    totais: { produtos: totalItens, desconto: 0, frete: 0, total: numero(orcamento.valor_total) || totalItens },
+    totais: { ...totais, total: orcamento.valor_total != null ? numero(orcamento.valor_total) : totais.total },
     editavel: grupo === 'aberto',
   };
 }

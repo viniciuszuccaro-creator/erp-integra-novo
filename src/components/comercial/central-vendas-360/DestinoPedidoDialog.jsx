@@ -32,7 +32,7 @@ export default function DestinoPedidoDialog({ aberto, onOpenChange, onConfirmar,
           <DialogTitle>Direcionar o pedido {numero}</DialogTitle>
           <DialogDescription>
             Escolha o destino operacional do pedido fechado. A etapa escolhida fica registrada no pedido
-            e o módulo responsável (Produção, Expedição ou Retira) assume o acompanhamento.
+            e será executada pelo módulo responsável após aprovação, separação e conferência. O pedido não nasce com etapas operacionais concluídas.
           </DialogDescription>
         </DialogHeader>
 

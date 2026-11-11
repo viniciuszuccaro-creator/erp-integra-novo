@@ -59,16 +59,16 @@ const emDias = (dias) => {
 
 export default function useEnvioProposta({ negociacao, empresa, grupo, onAtualizar }) {
   const [enviando, setEnviando] = useState(false);
-  const { createInContext, updateInContext } = useContextoVisual();
+  const { createInContext } = useContextoVisual();
   const { user } = useUser();
 
   const registrarAuditoria = (acao, descricao) => {
     void base44.entities.AuditLog.create({
       usuario: user?.full_name || user?.email || 'Usuário',
       usuario_id: user?.id || null,
-      acao,
+      acao: acao === 'Envio' ? 'Edição' : acao,
       modulo: 'Comercial',
-      tipo_auditoria: 'venda',
+      tipo_auditoria: 'entidade',
       entidade: negociacao.origem === 'orcamento' ? 'OrcamentoCliente' : 'Pedido',
       registro_id: negociacao.registro?.id || null,
       descricao,
@@ -131,10 +131,8 @@ export default function useEnvioProposta({ negociacao, empresa, grupo, onAtualiz
         });
       }
 
-      // Proposta enviada conclui a etapa de montagem: orçamento passa a aguardar o cliente
-      if (negociacao.origem === 'orcamento' && negociacao.grupo === 'aberto') {
-        await updateInContext('OrcamentoCliente', negociacao.registro.id, { status: 'Aprovado' });
-      }
+      // Envio e aprovação são ações distintas. Somente o fechamento validado no servidor
+      // muda a etapa; enviar uma mensagem não concede aprovação comercial.
 
       registrarAuditoria('Envio', `Proposta ${negociacao.numero} enviada por ${canal === 'whatsapp' ? 'WhatsApp' : 'e-mail'} para ${destinatario}`);
       toast.success(

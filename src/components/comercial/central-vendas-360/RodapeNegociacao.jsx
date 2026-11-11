@@ -44,7 +44,7 @@ export default function RodapeNegociacao({
             size="sm"
             className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
             onClick={onEnviar}
-            disabled={enviando || enviarDesabilitado}
+            disabled={enviando || enviarDesabilitado || salvando}
             title={enviarDesabilitado ? 'Salve as alterações antes de enviar a proposta' : 'Enviar a proposta ao cliente'}
           >
             <Send className="w-3.5 h-3.5 mr-1" /> {enviando ? 'Enviando…' : 'Enviar proposta'}
@@ -52,7 +52,7 @@ export default function RodapeNegociacao({
           {temMaisAcoes && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button type="button" variant="outline" size="sm" title="Duplicar, desmembrar e importar itens">
+                <Button type="button" variant="outline" size="sm" disabled={salvando} title="Duplicar, desmembrar e importar itens">
                   <MoreHorizontal className="w-3.5 h-3.5 mr-1" /> Mais ações
                 </Button>
               </DropdownMenuTrigger>
@@ -88,7 +88,7 @@ export default function RodapeNegociacao({
             size="sm"
             className="bg-indigo-600 hover:bg-indigo-700"
             onClick={onAvancar}
-            disabled={acaoDesabilitada}
+            disabled={acaoDesabilitada || salvando}
             title={acaoDescricao}
           >
             {acaoLabel}

@@ -22,28 +22,62 @@ const itemParaOrcamento = (item) => ({
   unidade: item.unidade || 'UN',
   valor_unitario: Number(item.valor_unitario || 0),
   desconto_percentual: Number(item.desconto_percentual || 0),
+  tipo: item.tipo || 'revenda',
   valor_total: Number(item.valor_total || 0),
 });
 
 export default function useAcoesOrcamento({ negociacao, onAtualizar }) {
   const [executando, setExecutando] = useState(false);
   const [importando, setImportando] = useState(false);
+  const [erroFechamento, setErroFechamento] = useState('');
+  const [checagensServidor, setChecagensServidor] = useState([]);
   const { user } = useUser();
   const { createInContext, updateInContext, filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
   const acoes = useAcoesComerciais();
+
+  const executarFechamento = async (acao, itens, versao, dadosOrcamento = {}) => {
+    if (executando) return null;
+    setExecutando(true);
+    setErroFechamento('');
+    setChecagensServidor([]);
+    try {
+      const { data } = await base44.functions.invoke('onOrcamentoConfirmed', {
+        acao, orcamento_id: negociacao.registro.id,
+        group_id: grupoAtual?.id || negociacao.registro.group_id,
+        empresa_id: empresaAtual?.id || negociacao.registro.empresa_id,
+        versao: versao || negociacao.registro.updated_date,
+        ...(acao !== 'validar' ? { itens: itens.map(itemParaOrcamento), dados_orcamento: dadosOrcamento } : {}),
+      });
+      if (!data?.ok) throw new Error(data?.error || 'Fechamento não confirmado pelo servidor.');
+      setChecagensServidor(data.checagens || []);
+      if (acao !== 'validar') {
+        toast.success(acao === 'fechar' ? 'Orçamento fechado e validado no servidor.' : 'Orçamento salvo.');
+        await onAtualizar?.();
+      }
+      return data.orcamento;
+    } catch (erro) {
+      const retorno = erro?.response?.data || erro?.data;
+      const mensagem = retorno?.error || erro.message || 'Não foi possível validar o fechamento.';
+      setChecagensServidor(retorno?.checagens || []);
+      setErroFechamento(mensagem);
+      return null;
+    } finally {
+      setExecutando(false);
+    }
+  };
 
   const registrarAuditoria = (acao, descricao, registroId) => {
     void base44.entities.AuditLog.create({
       usuario: user?.full_name || user?.email || 'Usuário',
       usuario_id: user?.id || null,
-      acao,
+      acao: acao === 'Duplicação' || acao === 'Desmembramento' ? 'Criação' : acao,
       modulo: 'Comercial',
-      tipo_auditoria: 'venda',
+      tipo_auditoria: 'entidade',
       entidade: 'OrcamentoCliente',
       registro_id: registroId || negociacao.registro?.id || null,
       descricao,
-      empresa_id: empresaAtual?.id || null,
-      group_id: grupoAtual?.id || empresaAtual?.group_id || empresaAtual?.grupo_id || null,
+      empresa_id: empresaAtual?.id || negociacao.registro?.empresa_id || null,
+      group_id: grupoAtual?.id || negociacao.registro?.group_id || null,
       data_hora: new Date().toISOString(),
     }).catch((erro) => { console.error('AuditLog falhou (ações do orçamento):', erro); });
   };
@@ -57,6 +91,8 @@ export default function useAcoesOrcamento({ negociacao, onAtualizar }) {
     const numero = await proximoNumero();
     const totais = totalizarItens(itens);
     return createInContext('OrcamentoCliente', {
+      group_id: negociacao.registro.group_id,
+      empresa_id: negociacao.registro.empresa_id,
       numero_orcamento: numero,
       cliente_id: negociacao.cliente_id,
       cliente_nome: negociacao.cliente_nome,
@@ -162,10 +198,18 @@ export default function useAcoesOrcamento({ negociacao, onAtualizar }) {
     setImportando(true);
     try {
       const ids = Array.from(new Set(originais.map((item) => item.produto_id).filter(Boolean)));
+      if (!negociacao.registro?.group_id || !negociacao.registro?.empresa_id) throw new Error('Orçamento sem grupo e empresa definidos.');
       const produtos = ids.length
-        ? await base44.entities.Produto.filter({ id: { $in: ids } })
+        ? await base44.entities.Produto.filter({
+          id: { $in: ids }, group_id: negociacao.registro.group_id,
+          $or: [
+            { empresa_id: negociacao.registro.empresa_id },
+            { empresas_compartilhadas_ids: negociacao.registro.empresa_id },
+          ],
+        }, { limit: ids.length })
         : [];
-      const porId = new Map((Array.isArray(produtos) ? produtos : []).map((produto) => [produto.id, produto]));
+      const registros = Array.isArray(produtos) ? produtos : produtos.items || [];
+      const porId = new Map(registros.map((produto) => [produto.id, produto]));
       return originais.map((item, indice) => {
         const produto = porId.get(item.produto_id);
         const precoAtual = Number(produto?.preco_venda || 0);
@@ -192,5 +236,5 @@ export default function useAcoesOrcamento({ negociacao, onAtualizar }) {
     }
   };
 
-  return { duplicar, desmembrar, importarItens, executando, importando };
+  return { duplicar, desmembrar, importarItens, executarFechamento, executando, importando, erroFechamento, checagensServidor };
 }

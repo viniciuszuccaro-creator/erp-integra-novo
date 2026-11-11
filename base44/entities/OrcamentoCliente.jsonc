@@ -57,6 +57,25 @@
           "valor_unitario": {
             "type": "number"
           },
+          "desconto_percentual": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Desconto individual persistido, entre 0 e 100%. Ausente em registros legados: inferir pelo total."
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "revenda",
+              "fabricacao",
+              "servico"
+            ],
+            "enumColors": [
+              "blue",
+              "purple",
+              "yellow"
+            ]
+          },
           "valor_total": {
             "type": "number"
           }

@@ -104,12 +104,12 @@ export default function ItensNegociacaoGrid({ itens, setItens, editavel, permite
                   <input
                     type="number"
                     min="0"
+                    max={permiteDesconto ? 100 : 15}
                     step="0.01"
-                    className={`${classeInput} ${permiteDesconto ? '' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}
+                    className={classeInput}
                     value={item.desconto_percentual}
-                    disabled={!permiteDesconto}
-                    title={permiteDesconto ? 'Desconto do item' : 'Desconto acima do limite exige permissão de aprovação'}
-                    onChange={(e) => alterar(item.id, 'desconto_percentual', e.target.value)}
+                    title={permiteDesconto ? 'Desconto do item' : 'Limite de 15%. É permitido reduzir um desconto anterior.'}
+                    onChange={(e) => alterar(item.id, 'desconto_percentual', Math.max(0, Math.min(permiteDesconto ? 100 : 15, Number(e.target.value))))}
                   />
                 </>
               ) : (

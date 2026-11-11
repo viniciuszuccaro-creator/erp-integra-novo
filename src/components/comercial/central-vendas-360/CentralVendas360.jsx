@@ -244,6 +244,7 @@ export default function CentralVendas360({
               <div className="flex-1 min-h-0 flex">
                 {selecionada ? (
                   <MesaNegociacao
+                    key={selecionada.chave}
                     negociacao={selecionada}
                     clientes={clientes}
                     empresa={empresaAtual}

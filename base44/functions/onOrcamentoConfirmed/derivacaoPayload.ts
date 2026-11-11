@@ -1,5 +1,5 @@
 const texto = (v, max = 2000) => String(v || '').replace(/<[^>]*>/g, '').replace(/javascript\s*:/gi, '').trim().slice(0, max);
-export const assinaturaOrigem = (r) => JSON.stringify([r.status, r.cliente_id, r.cliente_nome, r.itens, r.condicoes_pagamento, r.prazo_entrega, r.data_validade, r.pedido_gerado_id]);
+export const assinaturaOrigem = (r) => JSON.stringify([r.numero_orcamento, r.status, r.cliente_id, r.cliente_nome, r.itens, r.valor_total, r.condicoes_pagamento, r.prazo_entrega, r.data_validade, r.pedido_gerado_id]);
 export const totalItens = (itens) => Math.round(itens.reduce((s, i) => s + i.valor_total, 0) * 100) / 100;
 
 // Só usa os itens persistidos, nunca preços, quantidades ou contexto enviados pelo navegador.
@@ -13,7 +13,7 @@ export function montarDerivacao(registro, user, acao, indices) {
   const itens = originais.map((item) => {
     const quantidade = Number(item.quantidade), valor = Number(item.valor_unitario), bruto = quantidade * valor;
     const desconto = Number(item.desconto_percentual ?? (bruto > 0 && item.valor_total != null ? (1 - Number(item.valor_total) / bruto) * 100 : 0));
-    if (![quantidade, valor, desconto].every(Number.isFinite) || quantidade <= 0 || valor < 0 || desconto < -0.000001 || desconto > 100.000001) throw new Error('Há quantidades, preços ou descontos inválidos. Corrija o orçamento antes de continuar.');
+    if (![quantidade, valor, desconto, bruto].every(Number.isFinite) || quantidade <= 0 || valor < 0 || desconto < -0.000001 || desconto > 100.000001) throw new Error('Há quantidades, preços ou descontos inválidos. Corrija o orçamento antes de continuar.');
     const percentual = Math.max(0, Math.min(100, desconto));
     if (item.tipo && !['revenda', 'fabricacao', 'servico'].includes(item.tipo)) throw new Error('Tipo de item inválido no orçamento de origem.');
     return { ...(item.produto_id ? { produto_id: String(item.produto_id) } : {}), descricao: texto(item.descricao, 500), unidade: texto(item.unidade || 'UN', 30), tipo: item.tipo || 'revenda', quantidade, valor_unitario: valor, desconto_percentual: percentual, valor_total: Math.round(bruto * (1 - percentual / 100) * 100) / 100 };

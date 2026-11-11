@@ -37,7 +37,7 @@ Nenhum módulo, tela ou entidade nova foi criada. As alterações ocorreram em a
 1. **§47/§48 — homologação E2E/RBAC/multiempresa** no Testing Agent, com backend real: ABERTO→FECHADO, bloqueio financeiro, aprovação→fechado, produção→entrega/retira, entrega→entregue/rejeitada, pedido misto, faturamento e entrega parciais, cancelamento, reabertura, usuário sem permissão, empresa diferente, `empresa_id`/`group_id` maliciosos, desconto e preço não autorizados. Nada disso foi executado aqui.
 2. **§23 — execução parcial por item**: a consulta de saldos oficiais foi integrada às duas grades nesta continuação (evidências abaixo). A cadeia de mutações separação → produção → entrega/retirada → faturamento → cobrança por item ainda não está integralmente implementada/homologada; esta consulta não a substitui.
 3. **§6 — bot de vendas autônomo** com contador de exceções, autonomia por política e aprendizado supervisionado; **§4 — GoTo/telefonia** com provedor real. Ambos seguem sem provedor conectado.
-4. **§5/§18 — autoridade de servidor nos demais caminhos**: duplicar, desmembrar e criar/editar pedido fora da conversão da Mesa ainda usam escrita do navegador com as regras de acesso existentes. A conversão da Mesa passou pelo servidor na continuação abaixo. Isso não é bloqueio global de todas as APIs, nem consolida automaticamente o conversor legado de eventos.
+4. **§5/§18 — autoridade de servidor nos demais caminhos**: duplicar e desmembrar passaram pelo servidor no lote registrado abaixo. Criar/editar pedido diretamente e abrir proposta pela criação legada ainda usam escrita do navegador com as regras existentes. A proteção desses caminhos não equivale a bloqueio global das APIs nem consolida automaticamente o conversor legado de eventos.
 5. **§18 — alçadas completas** por categoria/nível e histórico imutável de contraproposta como registro próprio; a contraproposta é gravada na solicitação, mas a aplicação de limite continua no cadastro do cliente.
 6. **§7 — comprovantes**: a consolidação com o caminho comercial legado (`ComprovanteEntregaDigital`, que também mexe em estoque/pedido) segue pendente e não foi substituída para não duplicar efeitos.
 7. **§7 — documentos**: agendamento de envio, reimpressão de peças com alçada/segunda via e preferências por cliente ainda não estão implementados.
@@ -100,6 +100,24 @@ A Mesa validava a proposta, mas o navegador criava o pedido e depois alterava o 
 - Compilação e análise estática dos componentes alterados verificadas; não equivalem a E2E nem comprovam todos os gatilhos em ambiente real.
 - A proteção é do caminho da Mesa. Criação/edição direta, duplicação/desmembramento, conversão por eventos, cadeia parcial operacional/fiscal/financeira, comprovante legado, alçadas/documentos, telefonia e bot continuam com as pendências já descritas.
 - O DOCX original não está acessível no repositório desta sessão; a conferência final de cobertura exige sua disponibilização novamente. Os relatórios anteriores servem como histórico de pendências, não substituem a fonte.
+
+## Continuação — duplicação e desmembramento com autoridade de servidor
+
+### Escopo entregue
+- Reutilizados `onOrcamentoConfirmed`, `useAcoesOrcamento`, `MesaNegociacao` e `DesmembrarDialog`. O mesmo diálogo confirma as duas ações, com conferência explícita e erro dentro da janela. Não há nova página, módulo, entidade ou provedor.
+- O navegador envia somente ação, identificação/contexto, versão, seleção de posições e chave de operação. Itens, valores, cliente, condições e totais são relidos/recalculados no servidor; campos comerciais enviados à força são ignorados.
+- Duplicar exige leitura e criação; desmembrar também exige edição. O endpoint verifica usuário bloqueado, perfil ativo, vínculos protegidos, empresa no grupo e carteira antes de elevar a escrita dos controles protegidos.
+- Ambas criam proposta **Pendente**, preservando fabricação/revenda/serviço e descontos (inclusive legados), sem copiar aprovação, assinatura ou vínculo com pedido. Preços copiados continuam sujeitos à validação do fechamento.
+- Desmembrar só atua em origem pendente e sem conversão. O destino é criado antes da remoção das linhas; os totais das duas propostas são recalculados. A origem só é liberada quando os vínculos terminam de ser conciliados.
+- Controle durável no próprio orçamento: `preparando → criando → vinculada → concluida`, com `preparada` para retomada anterior ao POST e `revisao` para resultado incerto. A reserva e a transferência usam versão/token condicionais. Reenvio local, após recarregar ou após resposta perdida procura o destino existente; não há segundo POST quando uma criação pode já ter ocorrido.
+- Alteração concorrente na origem ou no destino impede remoção/conciliação automática. Uma preparação interrompida antes do POST pode ser retomada após três minutos. Resultado incerto sem destino verificável permanece bloqueado para revisão operacional, sem repetição automática nem exclusão compensatória.
+- A numeração reutiliza o reservador da empresa existente, agora parametrizado para pedidos/orçamentos, com contador protegido e checagem de número ocupado. A numeração da criação direta legada ainda não usa esse contador; portanto não há garantia global contra corrida com aquele caminho.
+- Os novos controles de `OrcamentoCliente` e o sequencial de `Empresa` têm escrita protegida; as regras de acesso anteriores das outras propriedades foram preservadas. Auditorias incluem usuário, contexto e antes/depois; os vínculos condicionais possuem auditoria explícita porque operações em lote não disparam efeitos por registro.
+
+### Evidências e limites
+- Testes de produção com fontes controladas cobrem duplicação/desmembramento, conservação das linhas, tipos, desconto legado, sanitização, seleção maliciosa, contexto/empresa/carteira/RBAC, concorrência, numeração, resposta perdida, falha anterior ao POST e retomada após transferência. Não são E2E nem prova de isolamento de todas as APIs.
+- Compilação e ESLint dos componentes alterados concluídos. Endpoint real retornou **400** para contexto ausente e **404** para registros inexistentes; nenhum orçamento/pedido real foi criado ou alterado para testes.
+- Ainda pendentes: criação direta/edição de pedido, conversor legado por eventos, cadeia operacional/fiscal/financeira parcial, comprovante legado, alçadas/documentos, telefonia/bot e homologação E2E. O DOCX original continua necessário para conferir cobertura integral. Não foi feita publicação nem conectada integração.
 
 ## Situação
 

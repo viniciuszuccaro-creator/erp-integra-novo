@@ -39,6 +39,7 @@ export default function DesmembrarDialog({ aberto, onOpenChange, itens = [], onC
           </DialogDescription>
         </DialogHeader>
 
+        {controle?.fase === 'vinculada' && <p className="text-xs text-muted-foreground">Os itens já foram transferidos. A confirmação abaixo apenas conclui os vínculos, sem mover novamente.</p>}
         <div className="max-h-72 overflow-auto rounded-md border border-slate-200 divide-y divide-slate-100">
           {itens.map((item) => (
             <label key={item.id} className="flex items-center gap-2 px-2.5 py-2 text-xs cursor-pointer hover:bg-slate-50">
@@ -67,7 +68,7 @@ export default function DesmembrarDialog({ aberto, onOpenChange, itens = [], onC
             type="button"
             size="sm"
             className="bg-indigo-600 hover:bg-indigo-700"
-            disabled={executando || marcados.length === 0 || !revisado || !acaoCorreta}
+            disabled={executando || (!retomando && marcados.length === 0) || !revisado || !acaoCorreta}
             onClick={() => onConfirmar(marcados, revisado)}
           >
             {executando ? 'Processando…' : retomando ? 'Retomar operação' : duplicar ? 'Duplicar' : 'Desmembrar'}

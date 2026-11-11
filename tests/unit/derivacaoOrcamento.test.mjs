@@ -60,7 +60,15 @@ export default async function testDerivacaoOrcamento(log, root) {
   const transferencia = nova({ falharConfirmacao: true });
   await chamar(transferencia, separar);
   check('falha na confirmação final mantém a origem reservada após mover itens', transferencia.estado.orcamentos[0].derivacao_orcamento.fase === 'vinculada' && transferencia.estado.orcamentos[0].valor_total === 18);
+  const filhoPendente = transferencia.estado.orcamentos[1];
+  check('destino não avança enquanto a origem não conclui a conciliação', (await chamar(transferencia, { ...entrada, acao: 'fechar', orcamento_id: filhoPendente.id, versao: filhoPendente.updated_date, itens: filhoPendente.itens })).status === 409);
   check('retomada final não remove itens duas vezes', (await chamar(transferencia, separar)).status === 200 && transferencia.estado.posts === 1 && transferencia.estado.orcamentos[0].valor_total === 18);
+  const tudo = nova({ falharConfirmacao: true });
+  const moverTudo = { ...separar, indices: [0, 1] }; await chamar(tudo, moverTudo);
+  check('origem vazia após mover todas as linhas permite conciliar sem nova criação', tudo.estado.orcamentos[0].itens.length === 0 && (await chamar(tudo, moverTudo)).status === 200 && tudo.estado.posts === 1);
+  const segunda = { ...entrada, versao: copia.estado.orcamentos[0].updated_date, operacao_id: '22222222-2222-4222-8222-222222222222' };
+  check('nova duplicação intencional usa outra operação e outro número', (await chamar(copia, segunda)).status === 200 && copia.estado.posts === 2 && copia.estado.orcamentos[2].numero_orcamento === 'ORC-0002');
+  check('reenvio de operação histórica continua idempotente', (await (await chamar(copia)).json()).repetida && copia.estado.posts === 2);
   const alterada = nova({ alterarOrigem: true });
   check('alteração concorrente preserva destino e não remove linhas da origem', (await chamar(alterada, separar)).status === 409 && alterada.estado.posts === 1 && alterada.estado.orcamentos[0].itens.length === 2);
   const paralelo = nova();

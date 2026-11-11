@@ -1,57 +1,57 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { sanitizeFlow } from "@/components/lib/contexto/contextoCrud";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Camera, Upload, CheckCircle2, AlertCircle, User, FileText, MapPin } from "lucide-react";
+import { Camera, CheckCircle2, AlertCircle, User, FileText, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { useContextoVisual } from "@/components/lib/useContextoVisual";
+import usePermissions from "@/components/lib/usePermissions";
 
 /**
- * 📸 COMPROVANTE DIGITAL DE ENTREGA V21.5
- * Upload de foto, assinatura digital e geolocalização
+ * 📸 COMPROVANTE DIGITAL DE ENTREGA (consolidado com o fluxo proprietário)
+ * Este formulário não baixa mais estoque no navegador: a baixa oficial por produto
+ * pertence a applyOrderStockMovements. A foto é guardada em armazenamento privado.
  */
 export default function ComprovanteEntregaDigital({ pedido, entrega, onSuccess, windowMode = false }) {
   const { filterInContext, createInContext, updateInContext } = useContextoVisual();
+  const { hasPermission } = usePermissions();
   const [nomeRecebedor, setNomeRecebedor] = useState("");
   const [documentoRecebedor, setDocumentoRecebedor] = useState("");
   const [cargoRecebedor, setCargoRecebedor] = useState("");
   const [observacoes, setObservacoes] = useState("");
   const [fotoComprovante, setFotoComprovante] = useState(null);
+  const [previewFoto, setPreviewFoto] = useState(null);
   const [uploadando, setUploadando] = useState(false);
+  const [confirmando, setConfirmando] = useState(false);
   const [geolocalizacao, setGeolocalizacao] = useState(null);
-
   const queryClient = useQueryClient();
 
+  const podeConfirmarEntrega = hasPermission("Comercial", "Pedido", "editar");
+
   const capturarGeolocalizacao = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setGeolocalizacao({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          });
-          toast.success("📍 Localização capturada!");
-        },
-        () => {
-          toast.error("❌ Erro ao capturar localização");
-        }
-      );
-    }
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setGeolocalizacao({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+        toast.success("📍 Localização capturada!");
+      },
+      () => toast.error("❌ Erro ao capturar localização")
+    );
   };
 
   const handleFotoUpload = async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
-
     setUploadando(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setFotoComprovante(file_url);
+      const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
+      setFotoComprovante(file_uri);
+      setPreviewFoto(URL.createObjectURL(file));
       toast.success("✅ Foto enviada!");
     } catch (error) {
       toast.error("Erro ao enviar foto: " + error.message);
@@ -60,50 +60,13 @@ export default function ComprovanteEntregaDigital({ pedido, entrega, onSuccess, 
     }
   };
 
-  const confirmarEntregaMutation = useMutation({
-    mutationFn: async () => {
-      // Baixar estoque automaticamente
-      if (pedido.itens_revenda?.length > 0) {
-        for (const item of pedido.itens_revenda) {
-          if (item.produto_id) {
-            const produtos = await filterInContext('Produto', { 
-              id: item.produto_id,
-              empresa_id: pedido.empresa_id 
-            });
-            
-            const produto = produtos[0];
-            if (produto && (produto.estoque_atual || 0) >= (item.quantidade || 0)) {
-              const novoEstoque = (produto.estoque_atual || 0) - (item.quantidade || 0);
-              
-              await createInContext('MovimentacaoEstoque', {
-                empresa_id: pedido.empresa_id,
-                group_id: pedido.group_id,
-                tipo_movimento: "saida",
-                origem_movimento: "pedido",
-                origem_documento_id: pedido.id,
-                produto_id: item.produto_id,
-                produto_descricao: item.descricao || item.produto_descricao,
-                quantidade: item.quantidade,
-                unidade_medida: item.unidade,
-                estoque_anterior: produto.estoque_atual || 0,
-                estoque_atual: novoEstoque,
-                data_movimentacao: new Date().toISOString(),
-                documento: pedido.numero_pedido,
-                motivo: `Entrega confirmada - ${nomeRecebedor}`,
-                responsavel: nomeRecebedor,
-                aprovado: true
-              });
-              
-              await updateInContext('Produto', item.produto_id, {
-                estoque_atual: novoEstoque
-              });
-            }
-          }
-        }
-      }
-
-      // Atualizar ou criar entrega
-      const comprovanteData = {
+  // Efeitos operacionais delegados ao fluxo existente: contexto, RBAC e auditoria próprios.
+  const confirmarEntrega = async () => {
+    if (!podeConfirmarEntrega) { toast.error("Sem permissão para confirmar entrega."); return; }
+    if (!pedido?.id || !pedido?.empresa_id) { toast.error("Pedido sem contexto de grupo/empresa."); return; }
+    setConfirmando(true);
+    try {
+      const comprovanteData = sanitizeFlow({
         foto_comprovante: fotoComprovante,
         nome_recebedor: nomeRecebedor,
         documento_recebedor: documentoRecebedor,
@@ -111,17 +74,13 @@ export default function ComprovanteEntregaDigital({ pedido, entrega, onSuccess, 
         data_hora_recebimento: new Date().toISOString(),
         latitude_entrega: geolocalizacao?.latitude,
         longitude_entrega: geolocalizacao?.longitude,
-        observacoes_recebimento: observacoes
-      };
+        observacoes_recebimento: observacoes,
+      });
 
-      if (entrega) {
-        await base44.entities.Entrega.update(entrega.id, sanitizeFlow({
-          status: 'Entregue',
-          data_entrega: new Date().toISOString(),
-          comprovante_entrega: comprovanteData
-        }));
+      if (entrega?.id) {
+        await updateInContext("Entrega", entrega.id, { status: "Entregue", data_entrega: new Date().toISOString(), comprovante_entrega: comprovanteData });
       } else {
-        await base44.entities.Entrega.create(sanitizeFlow({
+        await createInContext("Entrega", {
           pedido_id: pedido.id,
           numero_pedido: pedido.numero_pedido,
           cliente_id: pedido.cliente_id,
@@ -129,39 +88,44 @@ export default function ComprovanteEntregaDigital({ pedido, entrega, onSuccess, 
           empresa_id: pedido.empresa_id,
           group_id: pedido.group_id,
           endereco_entrega_completo: pedido.endereco_entrega_principal,
-          status: 'Entregue',
+          status: "Entregue",
           data_entrega: new Date().toISOString(),
-          comprovante_entrega: comprovanteData
-        }));
+          comprovante_entrega: comprovanteData,
+        });
       }
 
-      // Atualizar pedido
-      await base44.entities.Pedido.update(pedido.id, sanitizeFlow({
-        status: 'Entregue'
-      }));
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pedidos'] });
-      queryClient.invalidateQueries({ queryKey: ['entregas'] });
-      queryClient.invalidateQueries({ queryKey: ['produtos'] });
-      toast.success("✅ Entrega confirmada e estoque baixado!");
-      if (onSuccess) onSuccess();
-    }
-  });
+      // Baixa oficial por produto é idempotente por pedido: não repete o que a aprovação já baixou.
+      const jaBaixado = await filterInContext("MovimentacaoEstoque", { origem_documento_id: pedido.id, origem_movimento: "pedido" }, "-created_date", 1);
+      if (!(jaBaixado || []).length && (pedido.itens_revenda || []).length) {
+        await base44.functions.invoke("applyOrderStockMovements", { pedido });
+      }
 
-  const podeConfirmar = nomeRecebedor.trim() && fotoComprovante;
+      await updateInContext("Pedido", pedido.id, { status: "Entregue" });
+
+      queryClient.invalidateQueries({ queryKey: ["pedidos"] });
+      queryClient.invalidateQueries({ queryKey: ["entregas"] });
+      queryClient.invalidateQueries({ queryKey: ["produtos"] });
+      toast.success("✅ Entrega confirmada.");
+      onSuccess?.();
+    } catch (error) {
+      toast.error(error?.response?.data?.error || error.message || "Não foi possível confirmar a entrega.");
+    } finally {
+      setConfirmando(false);
+    }
+  };
+
+  const podeConfirmar = Boolean(nomeRecebedor.trim() && fotoComprovante);
 
   return (
-    <Card className="border-0 shadow-xl">
+    <Card className={windowMode ? "border-0 shadow-none" : "border-0 shadow-xl"}>
       <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white">
         <CardTitle className="flex items-center gap-2">
           <Camera className="w-5 h-5" />
           📸 Comprovante Digital de Entrega
         </CardTitle>
-        <p className="text-sm opacity-90">Pedido #{pedido.numero_pedido}</p>
+        <p className="text-sm opacity-90">Pedido #{pedido?.numero_pedido}</p>
       </CardHeader>
       <CardContent className="p-6 space-y-4">
-        {/* Upload de Foto */}
         <Card className="bg-blue-50 border-blue-300">
           <CardContent className="p-4">
             <Label className="text-sm font-semibold mb-2 block">📷 Foto do Comprovante *</Label>
@@ -169,20 +133,12 @@ export default function ComprovanteEntregaDigital({ pedido, entrega, onSuccess, 
               <Button
                 variant="outline"
                 className="flex-1"
-                onClick={() => document.getElementById('foto-input').click()}
+                onClick={() => document.getElementById('foto-input')?.click()}
                 disabled={uploadando}
               >
                 <Camera className="w-4 h-4 mr-2" />
                 {uploadando ? 'Enviando...' : fotoComprovante ? '✅ Foto Enviada' : 'Tirar/Enviar Foto'}
               </Button>
-              {fotoComprovante && (
-                <Button
-                  variant="outline"
-                  onClick={() => window.open(fotoComprovante, '_blank')}
-                >
-                  Ver Foto
-                </Button>
-              )}
             </div>
             <input
               id="foto-input"
@@ -192,21 +148,18 @@ export default function ComprovanteEntregaDigital({ pedido, entrega, onSuccess, 
               onChange={handleFotoUpload}
               className="hidden"
             />
+            {previewFoto && <img src={previewFoto} alt="Prévia do comprovante" className="mt-3 w-full max-h-48 object-contain rounded border bg-card" />}
+            <p className="mt-2 text-xs text-muted-foreground">A foto é guardada em armazenamento privado. Para o comprovante completo, use o formulário da Expedição.</p>
           </CardContent>
         </Card>
 
-        {/* Dados do Recebedor */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label className="flex items-center gap-2">
               <User className="w-4 h-4" />
               Nome de Quem Recebeu *
             </Label>
-            <Input
-              value={nomeRecebedor}
-              onChange={(e) => setNomeRecebedor(e.target.value)}
-              placeholder="Nome completo"
-            />
+            <Input value={nomeRecebedor} onChange={(e) => setNomeRecebedor(e.target.value)} placeholder="Nome completo" />
           </div>
 
           <div>
@@ -214,63 +167,39 @@ export default function ComprovanteEntregaDigital({ pedido, entrega, onSuccess, 
               <FileText className="w-4 h-4" />
               CPF/RG do Recebedor
             </Label>
-            <Input
-              value={documentoRecebedor}
-              onChange={(e) => setDocumentoRecebedor(e.target.value)}
-              placeholder="000.000.000-00"
-            />
+            <Input value={documentoRecebedor} onChange={(e) => setDocumentoRecebedor(e.target.value)} placeholder="000.000.000-00" />
           </div>
         </div>
 
         <div>
           <Label>Cargo/Função do Recebedor</Label>
-          <Input
-            value={cargoRecebedor}
-            onChange={(e) => setCargoRecebedor(e.target.value)}
-            placeholder="Ex: Gerente, Almoxarife, Proprietário..."
-          />
+          <Input value={cargoRecebedor} onChange={(e) => setCargoRecebedor(e.target.value)} placeholder="Ex: Gerente, Almoxarife, Proprietário..." />
         </div>
 
         <div>
           <Label>Observações da Entrega</Label>
-          <Textarea
-            value={observacoes}
-            onChange={(e) => setObservacoes(e.target.value)}
-            placeholder="Ex: Entregue em perfeito estado, sem avarias..."
-            rows={3}
-          />
+          <Textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} placeholder="Ex: Entregue em perfeito estado, sem avarias..." rows={3} />
         </div>
 
-        {/* Geolocalização */}
         <Card className={geolocalizacao ? "bg-green-50 border-green-300" : "bg-slate-50"}>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <MapPin className={`w-5 h-5 ${geolocalizacao ? 'text-green-600' : 'text-slate-400'}`} />
                 <div>
-                  <p className="text-sm font-semibold">
-                    {geolocalizacao ? '✅ Localização Capturada' : '📍 Capturar Localização'}
-                  </p>
+                  <p className="text-sm font-semibold">{geolocalizacao ? '✅ Localização Capturada' : '📍 Capturar Localização'}</p>
                   {geolocalizacao && (
-                    <p className="text-xs text-slate-600">
-                      Lat: {geolocalizacao.latitude.toFixed(6)}, Lng: {geolocalizacao.longitude.toFixed(6)}
-                    </p>
+                    <p className="text-xs text-slate-600">Lat: {geolocalizacao.latitude.toFixed(6)}, Lng: {geolocalizacao.longitude.toFixed(6)}</p>
                   )}
                 </div>
               </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={capturarGeolocalizacao}
-                className={geolocalizacao ? "border-green-300" : ""}
-              >
+              <Button size="sm" variant="outline" onClick={capturarGeolocalizacao} className={geolocalizacao ? "border-green-300" : ""}>
                 {geolocalizacao ? 'Recapturar' : 'Capturar GPS'}
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Alertas de Validação */}
         {!podeConfirmar && (
           <Card className="bg-orange-50 border-orange-300">
             <CardContent className="p-4">
@@ -288,19 +217,18 @@ export default function ComprovanteEntregaDigital({ pedido, entrega, onSuccess, 
           </Card>
         )}
 
-        {/* Botão de Confirmação */}
         <Button
-          onClick={() => confirmarEntregaMutation.mutate()}
-          disabled={!podeConfirmar || confirmarEntregaMutation.isPending}
+          onClick={confirmarEntrega}
+          disabled={!podeConfirmar || confirmando || uploadando || !podeConfirmarEntrega}
           className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
           size="lg"
         >
           <CheckCircle2 className="w-5 h-5 mr-2" />
-          {confirmarEntregaMutation.isPending ? '⏳ Confirmando...' : '✅ Confirmar Entrega e Baixar Estoque'}
+          {confirmando ? '⏳ Confirmando...' : '✅ Confirmar Entrega'}
         </Button>
 
-        <p className="text-xs text-center text-slate-500">
-          ⚠️ Ao confirmar, o estoque será baixado automaticamente e não poderá ser desfeito
+        <p className="text-xs text-center text-muted-foreground">
+          ⚠️ A baixa de estoque segue a movimentação oficial do pedido e não é repetida quando já registrada.
         </p>
       </CardContent>
     </Card>

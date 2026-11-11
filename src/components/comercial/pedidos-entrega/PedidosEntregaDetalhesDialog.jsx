@@ -11,7 +11,6 @@ import { CheckCircle2, Package, Truck, Camera, AlertTriangle, MessageCircle, Ima
 import { toast } from "sonner";
 import TimelineEntregaVisual from "@/components/logistica/TimelineEntregaVisual";
 import IAPrevisaoEntrega from "@/components/logistica/IAPrevisaoEntrega";
-import ComprovanteEntregaDigital from "@/components/logistica/ComprovanteEntregaDigital";
 import ComprovanteDigital from '@/components/expedicao/ComprovanteDigital';
 import NotificadorAutomaticoEntrega from "@/components/logistica/NotificadorAutomaticoEntrega";
 import RegistroOcorrenciaLogistica from "@/components/logistica/RegistroOcorrenciaLogistica";

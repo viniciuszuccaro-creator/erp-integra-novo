@@ -46,7 +46,7 @@ export default async function testConclusaoEntrega(log, root) {
   check('produto repetido exige identidade de item', !avaliar({ pedido: repetido, linhas: [{ ...linha, pedido_item_id: null, produto_id: 'fabricado' }, { ...restante, pedido_item_id: null, produto_id: 'fabricado' }] }).pode_concluir);
 
   const matches = (r, q) => Object.entries(q).every(([k, v]) => k === '$or' ? v.some((f) => matches(r, f)) : v && typeof v === 'object' && '$in' in v ? v.$in.includes(r[k]) : r[k] === v);
-  const nova = (completa = false) => {
+  const nova = (completa = false, opcoes = {}) => {
     const estado = { usuario: { id: '999999999999999999999999', role: 'admin', full_name: 'Operador de teste' }, logs: [], consultas: [], alteracoes: [], paginasOp: 0, concorrente: false };
     const registros = {
       Empresa: [{ id: contexto.empresa_id, group_id: contexto.group_id }], Pedido: [clone(pedido)],
@@ -71,7 +71,8 @@ export default async function testConclusaoEntrega(log, root) {
       },
     };
     api.AuditLog = { create: async (dados) => { estado.logs.push(clone(dados)); return dados; } };
-    api.PerfilAcesso = { get: async () => null };
+    api.PerfilAcesso = { get: async () => opcoes.perfil || null };
+    if (opcoes.usuario) estado.usuario = clone(opcoes.usuario);
     const client = { auth: { me: async () => estado.usuario }, entities: api, asServiceRole: { entities: api } };
     return { client, estado, registros };
   };
@@ -110,6 +111,16 @@ export default async function testConclusaoEntrega(log, root) {
   const adulterado = nova(true);
   await chamar(adulterado, { ...entrada, data: { ...entrada.data, pedido_id: 'aaaaaaaaaaaaaaaaaaaaaaaa', valor_frete: 999999, op_id: 'aaaaaaaaaaaaaaaaaaaaaaaa' } });
   check('pedido, OP e frete do payload não substituem os dados oficiais', adulterado.estado.alteracoes.length === 1 && adulterado.estado.alteracoes[0].id === op.id);
+  const vinculadoSemPermissao = nova(true, { usuario: { id: 'bbbbbbbbbbbbbbbbbbbbbbbb', role: 'user', full_name: 'Entregador', empresas_vinculadas: [contexto.empresa_id] } });
+  const respostaSemPermissao = await chamar(vinculadoSemPermissao);
+  const dadosSemPermissao = await respostaSemPermissao.json();
+  check('usuário vinculado sem permissão não recebe 403 nem efeitos indevidos', respostaSemPermissao.status === 200 && vinculadoSemPermissao.estado.alteracoes.length === 0 && dadosSemPermissao.ops_concluidas.length === 0);
+  const comProducao = nova(true, {
+    usuario: { id: 'cccccccccccccccccccccccc', role: 'user', full_name: 'Apontador', empresa_id: contexto.empresa_id, perfil_acesso_id: 'dddddddddddddddddddddddd', empresas_vinculadas: [contexto.empresa_id] },
+    perfil: { ativo: true, permissoes: { 'Produção': { OrdemProducao: ['editar'] } } },
+  });
+  const respostaProducao = await chamar(comProducao); const dadosProducao = await respostaProducao.json();
+  check('permissão de produção conclui a OP sem liberar estoque ou financeiro', respostaProducao.status === 200 && dadosProducao.ops_concluidas[0] === op.id && comProducao.estado.alteracoes.length === 1);
   const semMudanca = nova(true);
   const repetidoEvento = await (await chamar(semMudanca, { ...entrada, old_data: { status: 'Entregue' } })).json();
   check('evento sem mudança de situação não executa efeitos', repetidoEvento.skipped && semMudanca.estado.alteracoes.length === 0);

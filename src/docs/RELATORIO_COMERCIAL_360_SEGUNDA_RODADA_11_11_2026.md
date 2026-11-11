@@ -137,6 +137,24 @@ A Mesa validava a proposta, mas o navegador criava o pedido e depois alterava o 
 - Este lote corrige a autorização/contexto do evento e o critério de conclusão das OPs. Não implementa a cadeia inteira de mutações parciais: baixas oficiais por produto, reconciliação do comprovante legado, frete/reversão idempotentes, faturamento/cobrança proporcionais e reabertura continuam pendentes. O movimento genérico legado de estoque não foi substituído silenciosamente nem tratado como atendimento oficial por item.
 - Homologação E2E, execução real dos gatilhos, dispositivos e concorrência entre usuários continuam pendentes. O documento original não está disponível nesta sessão; a continuação segue as lacunas registradas, sem certificar cobertura integral.
 
+## Continuação — §7/§23: consolidação do comprovante comercial com a baixa oficial
+
+### O que estava duplicado
+- `ComprovanteEntregaDigital` (aba Pedidos para Entrega) baixava estoque **no navegador**, produto a produto, sem RBAC, sem a regra de estoque negativo e sem a função oficial `applyOrderStockMovements` — que já baixa na aprovação do pedido. O mesmo pedido podia ter baixa dupla.
+- A foto do comprovante era enviada com `UploadFile` (pública), enquanto o próprio schema de `Entrega.comprovante_entrega` define URI privada.
+- A `Entrega` era atualizada por SDK direto, sem carimbo de grupo/empresa e sem auditoria do contexto; o `Pedido` era atualizado sem verificação de permissão.
+
+### Entrega desta continuação
+- A baixa local foi **removida** e substituída pela função oficial existente `applyOrderStockMovements`, chamada apenas quando o pedido ainda não possui movimentação de saída registrada — a aprovação já baixa, e a entrega não repete. Nenhuma função, módulo, tela ou entidade nova.
+- `Entrega` e `Pedido` passam a ser gravados por `updateInContext`/`createInContext`, com `group_id`/`empresa_id` carimbados e auditoria existente. A confirmação exige permissão `Comercial/Pedido.editar` no frontend; a baixa oficial revalida a mesma permissão no servidor.
+- A foto usa `UploadPrivateFile` (armazenamento privado) e a interface mostra prévia local; o link público direto deixou de existir. O comprovante completo continua no formulário da Expedição, que grava as três fotos e a assinatura e é lido pela Central 360° em modo somente leitura.
+- O evento de entrega deixou de exigir administrador: aceita usuário ativo **com vínculo** ao grupo/empresa (ou administrador), sempre após reler a entrega oficial. Cada efeito (frete, estoque, produção, estorno de títulos) verifica a permissão do próprio domínio e, sem ela, é ignorado com auditoria de bloqueio — antes, os retornos de permissão eram descartados e os efeitos seguiam sem autorização. Um domínio sem permissão não interrompe os demais.
+
+### Evidências e limites
+- Suíte unitária: **369 aprovados, zero falhas, 11 ignorados**, incluindo usuário vinculado sem permissão (200, sem efeitos) e perfil com apenas `Produção/OrdemProducao.editar` (conclui a OP e não libera estoque nem financeiro).
+- `npm run build` e ESLint dos arquivos alterados sem erros; endpoint real não destrutivo retornou **400** (sem contexto) e **404** (entrega/empresa inexistente), sem efeitos.
+- **Pendências mantidas**: o formulário rápido comercial ainda não exige as três fotos + assinatura do §27 (o formulário completo existe na Expedição); a proteção contra baixa repetida é leitura seguida de escrita, não uma transação; consolidação de frete/estorno idempotentes, faturamento/cobrança parciais, alçadas/documentos, telefonia/bot e homologação E2E continuam abertas. Nada foi publicado nem analisado em Security nesta sessão.
+
 ## Situação
 
 O núcleo visual e de fechamento exigido pelo dossiê está agora alinhado ao texto e às tabelas, compila e passa nas verificações estáticas e nos testes puros. **Não é possível declarar 100% de implantação** enquanto os itens 1 a 9 não forem executados e homologados com backend real. Nenhuma integração, plano ou crédito é presumido.

@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
-import { processarComprovante } from './comprovante.ts';
+import { processarComprovante, usuarioVinculado } from './comprovante.ts';
 import { consultarSaldosPedido, lerVinculados } from './saldos.ts';
 import { avaliarConclusaoOP } from './saldosCalculo.ts';
 const pagina = (v) => Array.isArray(v) ? v : v?.items || [];
@@ -36,9 +36,9 @@ export default async function(req) {
     if (!event || event.type !== 'update' || !payload) return Response.json({ ok: true, skipped: true });
     if (![payload.id, payload.group_id, payload.empresa_id].every((id) => typeof id === 'string' && /^[a-f\d]{24}$/i.test(id))) return Response.json({ error: 'Entrega, grupo e empresa válidos são obrigatórios.' }, { status: 400 });
     const contexto = { group_id: payload.group_id, empresa_id: payload.empresa_id };
-    if (user.role !== 'admin' || user.bloqueado) {
-      await audit(base44, user, { ...contexto, acao: 'Bloqueio', registro_id: payload.id, descricao: 'Eventos automáticos de entrega exigem administrador ativo.' });
-      return Response.json({ error: 'Eventos automáticos exigem administrador ativo. Use as ações autorizadas de comprovante para confirmar a entrega.' }, { status: 403 });
+    if (user.bloqueado || (user.role !== 'admin' && !usuarioVinculado(ctx, contexto.group_id, contexto.empresa_id))) {
+      await audit(base44, user, { ...contexto, acao: 'Bloqueio', registro_id: payload.id, descricao: 'Evento de entrega recusado: usuário bloqueado ou sem vínculo com o grupo/empresa.' });
+      return Response.json({ error: 'Evento de entrega exige usuário ativo com vínculo ao grupo/empresa.' }, { status: 403 });
     }
     // O evento identifica a entrega. Situação, valores, pedido e OP são sempre relidos.
     const [entregas, empresas] = await Promise.all([
@@ -68,9 +68,10 @@ export default async function(req) {
       const transportadoraId = data?.transportadora_id || null;
 
       // Conta de frete a pagar (service role; RBAC verificado via guard)
-      if (frete > 0 && (transportadoraId || transportadoraNome)) {
-        const permissaoFrete = await assertPermission(base44, ctx, 'Financeiro', 'ContaPagar', 'criar');
-        if (permissaoFrete) return permissaoFrete;
+      // Cada efeito respeita a permissão do próprio domínio; um domínio sem permissão não bloqueia os demais.
+      const podeFrete = frete > 0 && (transportadoraId || transportadoraNome)
+        && !(await assertPermission(base44, ctx, 'Financeiro', 'ContaPagar', 'criar'));
+      if (podeFrete) {
         // tenta localizar CC e Plano de Contas padrão para logística
         let centroId = null; let planoId = null;
         try {
@@ -111,15 +112,14 @@ export default async function(req) {
 
       // Baixa final de estoque (saída genérica quando aplicável)
       try {
-        const permissaoEstoque = await assertPermission(base44, ctx, 'Estoque', 'MovimentacaoEstoque', 'criar');
-        if (permissaoEstoque) return permissaoEstoque;
+        const podeEstoque = !(await assertPermission(base44, ctx, 'Estoque', 'MovimentacaoEstoque', 'criar'));
         // evita duplicidade: se já houver movimento para esta entrega, não recriar
         let jaExiste = false;
         try {
           const existentes = await base44.asServiceRole.entities.MovimentacaoEstoque.filter({ origem_documento_id: data.id, ...contexto }, { limit: 1 });
           jaExiste = pagina(existentes).length > 0;
         } catch (e) { console.error('[onEntregaUpdated] catch:', e); }
-        if (!jaExiste) {
+        if (podeEstoque && !jaExiste) {
           const qtyKg = Number(data?.peso_total_kg || 0);
           const mov = await base44.asServiceRole.entities.MovimentacaoEstoque.create({
             origem_movimento: 'pedido',
@@ -143,9 +143,8 @@ export default async function(req) {
       }
 
       // §23: entrega parcial não conclui todas as OPs do pedido.
-      if (pedido) {
-        const perm = await assertPermission(base44, ctx, 'Produção', 'OrdemProducao', 'editar');
-        if (perm) return perm;
+      const podeProducao = Boolean(pedido) && !(await assertPermission(base44, ctx, 'Produção', 'OrdemProducao', 'editar'));
+      if (podeProducao) {
         const filtro = { ...contexto, pedido_id: pedido.id };
         const api = base44.asServiceRole.entities;
         const ops = await lerVinculados(api.OrdemProducao, { ...filtro, status: 'Pronto para Expedição' });
@@ -191,9 +190,8 @@ export default async function(req) {
     if (data.status === 'Devolvido' || data?.logistica_reversa?.ativada) {
       // Estoque: entrada por devolução
       try {
-        const permissaoEstoque = await assertPermission(base44, ctx, 'Estoque', 'MovimentacaoEstoque', 'criar');
-        if (permissaoEstoque) return permissaoEstoque;
-        const qty = Number(data?.logistica_reversa?.quantidade_devolvida || 0);
+        const podeEstoque = !(await assertPermission(base44, ctx, 'Estoque', 'MovimentacaoEstoque', 'criar'));
+        const qty = podeEstoque ? Number(data?.logistica_reversa?.quantidade_devolvida || 0) : 0;
         const val = Number(data?.logistica_reversa?.valor_devolvido || 0);
         if (qty > 0) {
           const mov = await base44.asServiceRole.entities.MovimentacaoEstoque.create({
@@ -220,9 +218,8 @@ export default async function(req) {
 
       // Financeiro: cancelar cobranças pendentes do pedido (se houver)
       try {
-        const permissaoFinanceiro = await assertPermission(base44, ctx, 'Financeiro', 'ContaReceber', 'editar');
-        if (permissaoFinanceiro) return permissaoFinanceiro;
-        if (data?.pedido_id) {
+        const podeCancelar = !(await assertPermission(base44, ctx, 'Financeiro', 'ContaReceber', 'editar'));
+        if (podeCancelar && data?.pedido_id) {
           const titulos = await lerVinculados(base44.asServiceRole.entities.ContaReceber, { ...contexto, pedido_id: data.pedido_id, status: 'Pendente' });
           for (const t of (titulos || [])) {
             await base44.asServiceRole.entities.ContaReceber.update(t.id, {

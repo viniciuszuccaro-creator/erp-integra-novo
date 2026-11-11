@@ -1,5 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
-// Inlined guard helpers (relative imports break in Deno deploy)
+import { converterPedido } from './conversaoPedido.ts';
+import { montarPedidoConversao } from './pedidoConversaoPayload.ts';
+// Guardas existentes preservadas; as ações novas reutilizam o mesmo contexto e validação.
 async function getUserAndPerfil(base44) {
   const user = await base44.auth.me().catch((e) => e.status === 401 ? null : Promise.reject(e));
   const perfil = user?.perfil_acesso_id ? await base44.asServiceRole.entities.PerfilAcesso.get(user.perfil_acesso_id).catch((e) => e.status === 404 ? null : Promise.reject(e)) : null;
@@ -22,12 +24,13 @@ const limparTexto = (valor) => String(valor || '').replace(/<[^>]*>/g, '').repla
 const pagina = (resultado) => Array.isArray(resultado) ? resultado : resultado?.items || [];
 
 function permiteCentral(ctx, acao) {
+  if (ctx.user?.bloqueado) return false;
   if (ctx.user?.role === 'admin') return true;
   if (ctx.perfil?.ativo === false) return false;
   const permissoes = ctx.perfil?.permissoes || {};
   const modulo = Object.entries(permissoes).find(([chave]) => normalizar(chave) === 'comercial')?.[1];
   const secao = Object.entries(modulo || {}).find(([chave]) => ['pedido', 'pedidos'].includes(normalizar(chave)))?.[1];
-  const aliases = { visualizar: ['visualizar', 'ver', 'view', 'read', 'listar', 'consultar'], editar: ['editar', 'update', 'edit', 'corrigir', 'gerenciar', 'atualizar'], aprovar: ['aprovar', 'approve', 'validar'], desconto: ['desconto', 'aprovar_desconto'] };
+  const aliases = { criar: ['criar', 'create', 'add', 'adicionar', 'novo', 'incluir'], visualizar: ['visualizar', 'ver', 'view', 'read', 'listar', 'consultar'], editar: ['editar', 'update', 'edit', 'corrigir', 'gerenciar', 'atualizar'], aprovar: ['aprovar', 'approve', 'validar'], desconto: ['desconto', 'aprovar_desconto'] };
   const contem = (no) => Array.isArray(no) ? no.some((valor) => (aliases[acao] || [acao]).includes(normalizar(valor))) : no && typeof no === 'object' && Object.values(no).some(contem);
   return Boolean(contem(secao));
 }
@@ -46,14 +49,14 @@ async function auditarCentral(base44, user, registro, acao, descricao, depois = 
 // O mesmo endpoint existente recebe as ações da mesa; nunca confia em totais ou aprovação do navegador.
 async function processarCentral(base44, ctx, body) {
   const { acao, orcamento_id, group_id, empresa_id, versao } = body;
-  if (!['salvar', 'fechar', 'validar'].includes(acao)) return Response.json({ error: 'Ação comercial inválida.' }, { status: 400 });
+  if (!['salvar', 'fechar', 'validar', 'converter'].includes(acao)) return Response.json({ error: 'Ação comercial inválida.' }, { status: 400 });
   if (![orcamento_id, group_id, empresa_id, versao].every((valor) => typeof valor === 'string' && valor.trim())) {
     return Response.json({ error: 'Orçamento, grupo, empresa e versão são obrigatórios.' }, { status: 400 });
   }
   if (![orcamento_id, group_id, empresa_id].every((valor) => /^[a-f0-9]{24}$/i.test(valor))) {
     return Response.json({ error: 'Identificadores de orçamento, grupo ou empresa inválidos.' }, { status: 400 });
   }
-  const permissao = acao === 'fechar' ? 'aprovar' : acao === 'salvar' ? 'editar' : 'visualizar';
+  const permissao = acao === 'converter' || body.preparar_pedido === true ? 'criar' : acao === 'fechar' ? 'aprovar' : acao === 'salvar' ? 'editar' : 'visualizar';
   if (!possuiContexto(ctx.user, group_id, empresa_id) || !permiteCentral(ctx, permissao)) {
     await auditarCentral(base44, ctx.user, { id: orcamento_id, group_id, empresa_id }, 'Bloqueio', 'Tentativa comercial sem permissão ou vínculo com o contexto.');
     return Response.json({ error: 'Sem permissão ou vínculo com o grupo/empresa para esta ação comercial.' }, { status: 403 });
@@ -73,6 +76,13 @@ async function processarCentral(base44, ctx, body) {
     await auditarCentral(base44, ctx.user, registro, 'Bloqueio', error);
     return Response.json({ error, checagens }, { status });
   };
+  if (acao === 'converter') return converterPedido(base44, ctx, body, registro, (entrada) => processarCentral(base44, ctx, entrada), auditarCentral);
+  if (body.preparar_pedido === true && (acao !== 'validar' || registro.status !== 'Aprovado')) return negar('Aprove a proposta antes de preparar a conversão.', 409);
+  if (body.preparar_pedido === true && registro.conversao_pedido) {
+    const destino = registro.conversao_pedido.destino;
+    try { return Response.json({ ok: true, orcamento: registro, pedido_base: montarPedidoConversao(registro, ctx.user, destino), destino }); }
+    catch (e) { return negar(e.message, 422); }
+  }
   if (registro.updated_date !== versao) return negar('O orçamento foi alterado. Recarregue e revise antes de continuar.', 409);
   if ((acao !== 'validar' && registro.status !== 'Pendente') || (acao === 'validar' && !['Pendente', 'Aprovado'].includes(registro.status))) {
     return negar('A situação atual do orçamento não permite esta ação.', 409);
@@ -277,7 +287,14 @@ async function processarCentral(base44, ctx, body) {
       422, checagens
     );
   }
-  if (acao === 'validar') return Response.json({ ok: true, orcamento: registro, checagens });
+  if (acao === 'validar') {
+    let pedidoBase;
+    if (body.preparar_pedido === true) {
+      try { pedidoBase = montarPedidoConversao(registro, ctx.user, body.destino); }
+      catch (e) { return negar(e.message, 422); }
+    }
+    return Response.json({ ok: true, orcamento: registro, checagens, ...(pedidoBase ? { pedido_base: pedidoBase, destino: body.destino } : {}) });
+  }
   const patch = {
     ...dados, itens, valor_total: total,
     ...(acao === 'fechar' ? { status: 'Aprovado', aprovado_por: ctx.user.full_name || ctx.user.email, data_aprovacao: new Date().toISOString() } : {}),

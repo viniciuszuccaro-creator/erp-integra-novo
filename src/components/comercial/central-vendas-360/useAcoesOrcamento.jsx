@@ -1,6 +1,6 @@
 // Ações do orçamento na Central 360° — duplicar, desmembrar e importar itens de pedido anterior.
 // Multiempresa: createInContext/updateInContext carimbam group_id/empresa_id e auditam.
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { useUser } from '@/components/lib/UserContext';
@@ -34,6 +34,41 @@ export default function useAcoesOrcamento({ negociacao, onAtualizar }) {
   const { user } = useUser();
   const { createInContext, updateInContext, filterInContext, empresaAtual, grupoAtual } = useContextoVisual();
   const acoes = useAcoesComerciais();
+  const conversaoEmCurso = useRef(false);
+
+  const solicitarConversao = async (dados) => {
+    if (!acoes.podeCriar) throw new Error('Sem permissão para criar pedidos.');
+    if (conversaoEmCurso.current) throw new Error('Aguarde a confirmação em andamento.');
+    conversaoEmCurso.current = true;
+    setExecutando(true);
+    setErroFechamento('');
+    try {
+      const { data } = await base44.functions.invoke('onOrcamentoConfirmed', {
+        orcamento_id: negociacao.registro.id,
+        group_id: negociacao.registro.group_id,
+        empresa_id: negociacao.registro.empresa_id,
+        ...dados,
+      });
+      if (!data?.ok) throw new Error(data?.error || 'Conversão não confirmada.');
+      return data;
+    } catch (erro) {
+      const retorno = erro?.response?.data || erro?.data;
+      const mensagem = retorno?.error || erro.message || 'Não foi possível converter a proposta.';
+      setErroFechamento(mensagem);
+      setChecagensServidor(retorno?.checagens || []);
+      throw new Error(mensagem);
+    } finally {
+      conversaoEmCurso.current = false;
+      setExecutando(false);
+    }
+  };
+  const prepararConversao = (destino, versao) => solicitarConversao({ acao: 'validar', preparar_pedido: true, destino, versao });
+  const converterPedido = (formulario, preparo, operacaoId) => solicitarConversao({
+    acao: 'converter', formulario, destino: preparo.destino,
+    versao: preparo.orcamento.conversao_pedido?.versao_origem || preparo.orcamento.updated_date,
+    operacao_id: preparo.orcamento.conversao_pedido?.operacao_id || operacaoId,
+    revisado: formulario.__conversao_revisada === true,
+  });
 
   const executarFechamento = async (acao, itens, versao, dadosOrcamento = {}) => {
     if (executando) return null;
@@ -233,5 +268,5 @@ export default function useAcoesOrcamento({ negociacao, onAtualizar }) {
     }
   };
 
-  return { duplicar, desmembrar, importarItens, executarFechamento, executando, importando, erroFechamento, checagensServidor };
+  return { duplicar, desmembrar, importarItens, executarFechamento, prepararConversao, converterPedido, executando, importando, erroFechamento, checagensServidor };
 }

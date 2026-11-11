@@ -57,9 +57,10 @@ import PedidoTabsContainer from './pedido/PedidoTabsContainer';
  * 
  * REGRA-MÃE: NUNCA APAGAR - APENAS ACRESCENTAR
  */
-function PedidoFormCompleto({ pedido, clientes = [], onSubmit, onCancel, windowMode = false, contexto = 'erp', criacaoManual = true }) {
+function PedidoFormCompleto({ pedido, clientes = [], onSubmit, onCancel, windowMode = false, contexto = 'erp', criacaoManual = true, conversaoOrcamento = false }) {
   const [activeTab, setActiveTab] = useState('identificacao');
   const [salvando, setSalvando] = useState(false); // V21.5: Anti-duplicação
+  const [erroConversao, setErroConversao] = useState('');
   
   // V21.6 FINAL: Hook de detecção AUTOMÁTICA OBRIGATÓRIA
   const { origemPedido, bloquearEdicao } = useOrigemPedido();
@@ -153,10 +154,20 @@ function PedidoFormCompleto({ pedido, clientes = [], onSubmit, onCancel, windowM
       return;
     }
     const empresaId = parsed.data.empresa_id || formData.empresa_id;
+    if (conversaoOrcamento && formData.__conversao_revisada !== true) {
+      setErroConversao('Confira os dados e marque a confirmação da proposta aprovada.');
+      return;
+    }
 
     setSalvando(true);
 
     try {
+      if (conversaoOrcamento) {
+        setErroConversao('');
+        try { await onSubmit({ ...formData, group_id: pedido.group_id, empresa_id: pedido.empresa_id }); }
+        catch (erro) { setErroConversao(erro.message || 'A conversão não foi confirmada.'); }
+        return;
+      }
       // V21.5: BAIXAR ESTOQUE SE STATUS FOR APROVADO (migrado para função backend)
       if (formData.status === 'Aprovado' && formData.itens_revenda?.length > 0) {
         await base44.functions.invoke('applyOrderStockMovements', {
@@ -291,6 +302,11 @@ function PedidoFormCompleto({ pedido, clientes = [], onSubmit, onCancel, windowM
       <div className="w-full h-full flex flex-col bg-white">
       {/* Header - FIXO */}
       <PedidoHeader formData={formData} pedido={pedido} />
+      {conversaoOrcamento && <Alert className="w-full shrink-0"><AlertDescription>
+        A proposta aprovada é a fonte dos itens, preços e pagamento. Revise a logística; o número será reservado no servidor e o pedido ficará aguardando aprovação, sem baixar estoque nem faturar.
+        <label className="mt-2 flex items-center gap-2"><input type="checkbox" checked={formData.__conversao_revisada === true} disabled={salvando} onChange={(e) => setFormData((atual) => ({ ...atual, __conversao_revisada: e.target.checked }))} />Conferi os dados e confirmo a conversão desta proposta.</label>
+      </AlertDescription></Alert>}
+      {erroConversao && <Alert variant="destructive" className="w-full shrink-0" role="alert"><AlertDescription>{erroConversao}</AlertDescription></Alert>}
 
       {/* Tabs - FIXO (extraído para componente) */}
       <PedidoTabsContainer
@@ -311,12 +327,12 @@ function PedidoFormCompleto({ pedido, clientes = [], onSubmit, onCancel, windowM
           pesoTotalKg={formData?.peso_total_kg || 0}
           etapasCount={formData?.etapas_entrega?.length || 0}
           salvando={salvando}
-          canSalvarRascunho={!isLockedFooter && (validacoes.identificacao && validacoes.itens)}
-          canFecharCompleto={!isLockedFooter && (validacoes.identificacao && validacoes.itens)}
-          canFecharEnviarEntrega={!isLockedFooter && (validacoes.identificacao && validacoes.itens)}
-          canSalvarAlteracoes={!isLockedFooter && (validacoes.identificacao && validacoes.itens)}
-          canCriarPedido={!isLockedFooter && (validacoes.identificacao && validacoes.itens)}
-          canSolicitarAprovacao={!isLockedFooter && canSolicitarAprovacao}
+          canSalvarRascunho={!conversaoOrcamento && !isLockedFooter && (validacoes.identificacao && validacoes.itens)}
+          canFecharCompleto={!conversaoOrcamento && !isLockedFooter && (validacoes.identificacao && validacoes.itens)}
+          canFecharEnviarEntrega={!conversaoOrcamento && !isLockedFooter && (validacoes.identificacao && validacoes.itens)}
+          canSalvarAlteracoes={!conversaoOrcamento && !isLockedFooter && (validacoes.identificacao && validacoes.itens)}
+          canCriarPedido={!isLockedFooter && (validacoes.identificacao && validacoes.itens) && (!conversaoOrcamento || formData.__conversao_revisada === true)}
+          canSolicitarAprovacao={!conversaoOrcamento && !isLockedFooter && canSolicitarAprovacao}
           onSolicitarAprovacao={solicitarAprovacao}
           onCancelar={onCancel}
           onSalvarRascunho={async () => {

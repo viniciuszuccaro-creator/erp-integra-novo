@@ -430,6 +430,149 @@ async function testSaldosPedido() {
 // ═══════════════════════════════════════════════════
 // EXECUÇÃO
 // ═══════════════════════════════════════════════════
+// Conversão executa o código de produção com fontes controladas; não é homologação E2E.
+async function testConversaoPedido() {
+  const ler = (p) => readFileSync(join(ROOT, p), 'utf-8');
+  const url = (s) => `data:text/javascript;base64,${Buffer.from(s).toString('base64')}`;
+  const payloadUrl = url(ler('base44/functions/onOrcamentoConfirmed/pedidoConversaoPayload.ts'));
+  const numeroUrl = url(ler('base44/functions/onOrcamentoConfirmed/numeracaoPedido.ts'));
+  const conversaoUrl = url(ler('base44/functions/onOrcamentoConfirmed/conversaoPedido.ts').replace("'./pedidoConversaoPayload.ts'", JSON.stringify(payloadUrl)).replace("'./numeracaoPedido.ts'", JSON.stringify(numeroUrl)));
+  const { montarPedidoConversao } = await import(payloadUrl);
+  const { converterPedido } = await import(conversaoUrl);
+  const { reservarNumeroPedido } = await import(numeroUrl);
+  const check = (nome, ok) => log(ok ? 'pass' : 'fail', `Conversão 360: ${nome}`);
+  const clone = (v) => JSON.parse(JSON.stringify(v));
+  const base = { id: '111111111111111111111111', group_id: '222222222222222222222222', empresa_id: '333333333333333333333333', cliente_id: '444444444444444444444444', cliente_nome: 'Cliente de teste', numero_orcamento: 'ORC-0001', status: 'Aprovado', updated_date: 'v1', condicoes_pagamento: 'À Vista', data_validade: '2999-01-01', prazo_entrega: '7 dias úteis', valor_total: 78, itens: [{ produto_id: '555555555555555555555555', descricao: 'Revenda', tipo: 'revenda', quantidade: 2, valor_unitario: 10, desconto_percentual: 10, valor_total: 18 }, { produto_id: '666666666666666666666666', descricao: 'Fabricação', tipo: 'fabricacao', quantidade: 3, valor_unitario: 20, valor_total: 60 }] };
+  const user = { id: '777777777777777777777777', role: 'admin', full_name: 'Operador de teste' };
+  const ctx = { user };
+  const op = '11111111-1111-4111-8111-111111111111';
+  const form = montarPedidoConversao(base, user, 'producao');
+  const entrada = { acao: 'converter', orcamento_id: base.id, group_id: base.group_id, empresa_id: base.empresa_id, versao: 'v1', operacao_id: op, revisado: true, destino: 'producao', formulario: form };
+  const path = (r, k) => k.split('.').reduce((v, f) => v?.[f], r);
+  const matches = (r, q) => Object.entries(q).every(([k, v]) => {
+    if (k === '$or') return v.some((n) => matches(r, n));
+    const atual = path(r, k);
+    if (v && typeof v === 'object' && !Array.isArray(v)) {
+      if ('$exists' in v) return (atual !== undefined) === v.$exists;
+      if ('$in' in v) return v.$in.includes(atual);
+    }
+    return v === null ? atual == null : JSON.stringify(atual) === JSON.stringify(v);
+  });
+  function criarFonte(opcoes = {}) {
+    const estado = { orcamento: clone(base), empresa: { id: base.empresa_id, group_id: base.group_id }, pedidos: [], logs: [], versao: 1, posts: 0, validacoes: 0 };
+    const fonte = (nome) => nome === 'OrcamentoCliente' ? [estado.orcamento] : nome === 'Empresa' ? [estado.empresa] : nome === 'Pedido' ? estado.pedidos : [];
+    const api = {};
+    for (const nome of ['OrcamentoCliente', 'Empresa', 'Pedido']) {
+      api[nome] = {
+        filter: async (q) => ({ items: clone(fonte(nome).filter((r) => matches(r, q))) }),
+        count: async (q) => fonte(nome).filter((r) => matches(r, q)).length,
+        updateMany: async (q, patch) => {
+          if (nome === 'Empresa' && opcoes.falharNumero) { opcoes.falharNumero = false; throw new Error('Indisponível antes do POST'); }
+          const r = fonte(nome).find((i) => matches(i, q));
+          if (!r) return { updated: 0 };
+          Object.assign(r, clone(patch.$set), { updated_date: `v${++estado.versao}` });
+          return { updated: 1 };
+        },
+      };
+    }
+    api.Pedido.create = async (dados) => {
+      estado.posts++;
+      if (opcoes.falharSemCriar) throw new Error('Resposta perdida sem confirmação');
+      const pedido = { ...clone(dados), id: '888888888888888888888888' };
+      estado.pedidos.push(pedido);
+      if (opcoes.alterarOrigem) estado.orcamento.itens[0].quantidade = 100;
+      if (opcoes.perderResposta) throw new Error('Resposta perdida depois de criar');
+      return clone(pedido);
+    };
+    api.AuditLog = { create: async (v) => { estado.logs.push(clone(v)); return v; } };
+    api.Cliente = { filter: async () => ({ items: [{ id: base.cliente_id, group_id: base.group_id, empresa_id: base.empresa_id, status: 'Ativo', cpf: '52998224725', endereco_principal: { logradouro: 'Rua', cidade: 'Cidade', estado: 'SP', numero: '1' }, condicao_comercial: { tabela_preco_nome: 'Padrão' }, configuracao_fiscal: { tipo_contribuinte: 'Não Contribuinte', contribuinte_icms: false } }] }) };
+    api.Produto = { filter: async () => ({ items: base.itens.map((i) => ({ id: i.produto_id, group_id: base.group_id, empresa_id: base.empresa_id, descricao: i.descricao, preco_venda: i.valor_unitario, estoque_disponivel: 100, custo_medio: 1 })) }) };
+    api.ContaReceber = { aggregate: async () => ({ rows: opcoes.vencidos ? [{ status: 'Atrasado', count: 1, sum_valor: 100, sum_valor_recebido: 0 }] : [] }) };
+    api.SolicitacaoAprovacao = { filter: async () => ({ items: [] }) };
+    const client = { entities: api, asServiceRole: { entities: api }, auth: { me: async () => estado.usuario === null ? null : estado.usuario || user } };
+    const validar = async () => { estado.validacoes++; return Response.json({ ok: true }); };
+    const auditar = async (_b, _u, r, acao, descricao, depois) => api.AuditLog.create({ group_id: r.group_id, empresa_id: r.empresa_id, acao, descricao, dados_anteriores: r, dados_novos: depois });
+    const executar = (body = entrada, registro = estado.orcamento) => converterPedido(client, ctx, clone(body), clone(registro), validar, auditar);
+    return { client, estado, executar };
+  }
+  check('itens de revenda e fabricação preservados e faturados em zero', form.itens_revenda.length === 1 && form.itens_armado_padrao.length === 1 && form.itens_revenda[0].quantidade_faturada === 0);
+  check('total recalculado e desconto individual não é aplicado duas vezes', form.valor_total === 78 && form.itens_revenda[0].valor_total === 18 && form.desconto_geral_pedido_valor === 0);
+  const totaisFonte = await import(url(ler('src/components/comercial/pedido/utils/computePedidoTotais.jsx')));
+  check('formulário apresenta o mesmo total que o servidor', totaisFonte.computePedidoTotais(form).valor_total === 78);
+  for (const [nome, alterar] of [
+    ['cliente malicioso', (f) => { f.cliente_id = 'outro'; }], ['empresa maliciosa', (f) => { f.empresa_id = 'outra'; }],
+    ['grupo malicioso', (f) => { f.group_id = 'outro'; }], ['preço alterado', (f) => { f.itens_revenda[0].valor_unitario = 1; }],
+    ['quantidade alterada', (f) => { f.itens_revenda[0].quantidade = 1; }], ['desconto alterado', (f) => { f.itens_revenda[0].desconto_percentual = 0; }],
+    ['frete que altera crédito aprovado', (f) => { f.valor_frete = 100; }], ['pagamento alterado', (f) => { f.forma_pagamento = 'Boleto'; }],
+    ['tipo de fabricação convertido em revenda', (f) => { f.itens_revenda.push(...f.itens_armado_padrao); f.itens_armado_padrao = []; }],
+  ]) {
+    let bloqueou = false;
+    try { const f = clone(form); alterar(f); montarPedidoConversao(base, user, 'producao', f); } catch { bloqueou = true; }
+    check(`bloqueia ${nome}`, bloqueou);
+  }
+  let bloqueouDestino = false;
+  try { montarPedidoConversao(base, user, 'retira'); } catch { bloqueouDestino = true; }
+  check('fabricação não salta produção', bloqueouDestino);
+  const fHtml = { ...clone(form), observacoes_internas: '<b>Observação</b> javascript:teste' };
+  check('texto não confiável é sanitizado', montarPedidoConversao(base, user, 'producao', fHtml).observacoes_internas === 'Observação teste');
+  const caso = criarFonte();
+  const resposta = await caso.executar();
+  const sucesso = await resposta.json();
+  check('converte no servidor e vincula as duas pontas', resposta.status === 200 && caso.estado.pedidos.length === 1 && caso.estado.orcamento.pedido_gerado_id === sucesso.pedido.id && caso.estado.orcamento.status === 'Convertido');
+  check('pedido aguarda aprovação sem faturamento nem estoque artificial', sucesso.pedido.status === 'Aguardando Aprovação' && sucesso.pedido.valor_faturado === 0);
+  check('número reservado no servidor e estado durável concluído', sucesso.pedido.numero_pedido === 'PED-000001' && caso.estado.orcamento.conversao_pedido.fase === 'concluida');
+  check('validação de fechamento executada antes de criar', caso.estado.validacoes === 1);
+  check('auditoria inclui antes/depois e ambos os contextos', caso.estado.logs.length >= 3 && caso.estado.logs.every((l) => l.group_id === base.group_id && l.empresa_id === base.empresa_id));
+  const repetida = await (await caso.executar()).json();
+  check('reenvio devolve pedido existente sem segunda criação', repetida.repetida === true && caso.estado.posts === 1);
+  const concorrente = criarFonte();
+  const versaoOriginal = clone(concorrente.estado.orcamento);
+  const respostas = await Promise.all([concorrente.executar(entrada, versaoOriginal), concorrente.executar(entrada, versaoOriginal)]);
+  check('duas confirmações concorrentes criam no máximo um pedido', concorrente.estado.posts === 1 && respostas.some((r) => r.status === 409));
+  const perdido = criarFonte({ perderResposta: true });
+  check('resposta perdida marca revisão sem declarar sucesso', (await perdido.executar()).status === 409 && perdido.estado.orcamento.conversao_pedido.fase === 'revisao');
+  const recuperado = await (await perdido.executar()).json();
+  check('pedido criado antes da falha é conciliado sem outro POST', recuperado.ok && perdido.estado.posts === 1 && perdido.estado.orcamento.status === 'Convertido');
+  const incerto = criarFonte({ falharSemCriar: true });
+  await incerto.executar(); await incerto.executar();
+  check('resultado incerto sem vínculo não dispara criação automática', incerto.estado.posts === 1 && incerto.estado.pedidos.length === 0);
+  const anteriorPost = criarFonte({ falharNumero: true });
+  await anteriorPost.executar();
+  check('falha anterior ao POST permite retomada segura', anteriorPost.estado.posts === 0 && anteriorPost.estado.orcamento.conversao_pedido.fase === 'preparada' && (await anteriorPost.executar()).status === 200);
+  const versaoErrada = criarFonte();
+  check('versão desatualizada não cria pedido', (await versaoErrada.executar({ ...entrada, versao: 'antiga' })).status === 409 && versaoErrada.estado.posts === 0);
+  const alterado = criarFonte({ alterarOrigem: true });
+  check('mudança de origem preserva pedido sem concluir vínculo incorreto', (await alterado.executar()).status === 409 && alterado.estado.posts === 1 && !alterado.estado.orcamento.pedido_gerado_id);
+  const numeracao = criarFonte();
+  const numeros = await Promise.all([reservarNumeroPedido(numeracao.client, base.group_id, base.empresa_id), reservarNumeroPedido(numeracao.client, base.group_id, base.empresa_id)]);
+  check('reserva concorrente de número não repete sequência', new Set(numeros).size === 2);
+  const legado = criarFonte(); legado.estado.pedidos.push({ group_id: base.group_id, empresa_id: base.empresa_id, numero_pedido: 'PED-000001' });
+  check('número legado ocupado não é reutilizado', await reservarNumeroPedido(legado.client, base.group_id, base.empresa_id) === 'PED-000002');
+  const codigoEndpoint = ler('base44/functions/onOrcamentoConfirmed/entry.ts')
+    .replace("import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';", 'const createClientFromRequest = () => globalThis.__central360Cliente;')
+    .replace("'./conversaoPedido.ts'", JSON.stringify(conversaoUrl)).replace("'./pedidoConversaoPayload.ts'", JSON.stringify(payloadUrl));
+  const { default: endpoint } = await import(url(codigoEndpoint));
+  const chamar = (fonte, body) => { globalThis.__central360Cliente = fonte.client; return endpoint(new Request('https://teste.local', { method: 'POST', body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } })); };
+  const anonimo = criarFonte(); anonimo.estado.usuario = null;
+  check('endpoint recusa chamada anônima', (await chamar(anonimo, entrada)).status === 401);
+  const bloqueado = criarFonte(); bloqueado.estado.usuario = { ...user, bloqueado: true };
+  check('endpoint recusa administrador bloqueado', (await chamar(bloqueado, entrada)).status === 403);
+  const semPermissao = criarFonte(); semPermissao.estado.usuario = { ...user, role: 'user', grupos_vinculados: [base.group_id] };
+  check('endpoint exige permissão granular para criar', (await chamar(semPermissao, entrada)).status === 403);
+  const outraEmpresa = criarFonte();
+  check('endpoint não lê proposta de outra empresa', (await chamar(outraEmpresa, { ...entrada, empresa_id: '999999999999999999999999' })).status === 404);
+  const fin = criarFonte({ vencidos: true });
+  check('endpoint revalida bloqueio financeiro antes de converter', (await chamar(fin, entrada)).status === 422 && fin.estado.posts === 0);
+  const preparado = criarFonte();
+  const respPreparo = await chamar(preparado, { ...entrada, acao: 'validar', preparar_pedido: true });
+  const valorPreparo = await respPreparo.json();
+  check('preparação não cria nem reserva número antecipadamente', respPreparo.status === 200 && valorPreparo.pedido_base.valor_total === 78 && preparado.estado.posts === 0 && !preparado.estado.empresa.sequencial_pedido_360);
+  delete globalThis.__central360Cliente;
+  for (const [entidade, campo] of [['Empresa', 'sequencial_pedido_360'], ['OrcamentoCliente', 'conversao_pedido']]) {
+    check(`${campo} tem escrita protegida`, Boolean(readJson(join(ROOT, 'base44/entities', `${entidade}.jsonc`)).properties[campo].rls?.update?.user_condition));
+  }
+}
+
 async function runUnit() {
   console.log(`\n${COLORS.bold}${COLORS.blue}═══════════════════════════════════════════════════${COLORS.reset}`);
   console.log(`${COLORS.bold}${COLORS.blue}  ERP ZUCCARO — TESTES UNITÁRIOS (LÓGICA PURA)${COLORS.reset}`);

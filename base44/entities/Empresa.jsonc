@@ -254,6 +254,18 @@
     },
     "observacoes": {
       "type": "string"
+    },
+    "sequencial_pedido_360": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Contador sequencial de pedidos convertidos pela Central 360. Reserva at\u00f4mica no servidor por empresa, sem reutilizar n\u00fameros.",
+      "rls": {
+        "update": {
+          "user_condition": {
+            "collaborator_role": "editor"
+          }
+        }
+      }
     }
   },
   "required": [

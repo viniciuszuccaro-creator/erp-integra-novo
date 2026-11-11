@@ -134,6 +134,74 @@
     "pedido_gerado_id": {
       "type": "string",
       "description": "ID do pedido gerado ap\u00f3s aprova\u00e7\u00e3o"
+    },
+    "conversao_pedido": {
+      "type": "object",
+      "description": "Controle dur\u00e1vel da convers\u00e3o, alterado somente pelo servidor ap\u00f3s autoriza\u00e7\u00e3o. N\u00e3o \u00e9 uma transa\u00e7\u00e3o entre entidades.",
+      "rls": {
+        "update": {
+          "user_condition": {
+            "collaborator_role": "editor"
+          }
+        }
+      },
+      "properties": {
+        "operacao_id": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        },
+        "versao_origem": {
+          "type": "string"
+        },
+        "usuario_id": {
+          "type": "string"
+        },
+        "fase": {
+          "type": "string",
+          "enum": [
+            "preparando",
+            "preparada",
+            "criando",
+            "revisao",
+            "concluida"
+          ],
+          "enumColors": [
+            "yellow",
+            "yellow",
+            "blue",
+            "red",
+            "green"
+          ]
+        },
+        "destino": {
+          "type": "string",
+          "enum": [
+            "producao",
+            "entrega",
+            "retira"
+          ],
+          "enumColors": [
+            "purple",
+            "blue",
+            "green"
+          ]
+        },
+        "numero_pedido": {
+          "type": "string"
+        },
+        "pedido_id": {
+          "type": "string"
+        },
+        "iniciada_em": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "payload_hash": {
+          "type": "string"
+        }
+      }
     }
   },
   "required": [

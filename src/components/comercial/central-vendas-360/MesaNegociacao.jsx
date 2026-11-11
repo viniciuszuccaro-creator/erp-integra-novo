@@ -4,7 +4,6 @@ import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { useWindow } from '@/components/lib/useWindow';
 import { useUser } from '@/components/lib/UserContext';
-import { useContextoVisual } from '@/components/lib/useContextoVisual';
 import PedidoFormCompleto from '@/components/comercial/PedidoFormCompleto';
 import useComercialPedidoWindows from '@/components/comercial/page/useComercialPedidoWindows';
 import useRascunhoNegociacao from '@/components/comercial/central-vendas-360/useRascunhoNegociacao';
@@ -52,7 +51,6 @@ export default function MesaNegociacao({
 
   const { openWindow, closeWindow } = useWindow();
   const { user } = useUser();
-  const { createInContext, updateInContext } = useContextoVisual();
 
   useEffect(() => {
     setItens(negociacao.itens);
@@ -178,64 +176,25 @@ export default function MesaNegociacao({
   };
 
   const gerarPedido = async (destino = 'entrega') => {
-    if (!acoes.podeCriar) {
-      toast.error('Sem permissão para criar pedidos.');
-      return;
-    }
-    if (salvando) return;
-    const validado = await acoesOrcamento.executarFechamento('validar', undefined, versao);
-    if (!validado) return;
+    if (!acoes.podeCriar || salvando) return;
+    let preparo;
+    try { preparo = await acoesOrcamento.prepararConversao(destino, versao); }
+    catch { return; }
     setDestinoAberto(false);
-    let criado = false;
-    const janela = openWindow(
-      PedidoFormCompleto,
-      {
-        clientes,
-        windowMode: true,
-        onCancel: () => closeWindow(janela),
-        pedido: {
-          status: 'Aguardando Aprovação',
-          group_id: negociacao.registro.group_id,
-          empresa_id: negociacao.registro.empresa_id,
-          tipo_frete: destino === 'retira' ? 'Retirada' : 'CIF',
-          cliente_id: negociacao.cliente_id,
-          cliente_nome: negociacao.cliente_nome,
-          observacoes_publicas: `Originado do orçamento ${negociacao.numero} — destino ${destino}`,
-          ...Object.fromEntries([
-            ['itens_revenda', itens.filter((item) => item.tipo !== 'fabricacao')],
-            ['itens_armado_padrao', itens.filter((item) => item.tipo === 'fabricacao')],
-          ].map(([campo, lista]) => [campo, lista.map((item) => ({
-            produto_id: item.produto_id || null, produto_descricao: item.descricao,
-            descricao: item.descricao, quantidade: Number(item.quantidade || 0), unidade: item.unidade,
-            valor_unitario: Number(item.valor_unitario || 0), preco_unitario: Number(item.valor_unitario || 0),
-            desconto_percentual: Number(item.desconto_percentual || 0), valor_total: Number(item.valor_total || 0),
-          }))])),
-        },
-        onSubmit: async (formData) => {
-          if (criado) return;
-          criado = true;
-          try {
-            const pedidoCriado = await createInContext('Pedido', {
-              ...formData,
-              status: 'Aguardando Aprovação',
-              group_id: negociacao.registro.group_id,
-              empresa_id: negociacao.registro.empresa_id,
-              vendedor: formData.vendedor || user?.full_name,
-              vendedor_id: formData.vendedor_id || user?.id,
-            });
-            await updateInContext('OrcamentoCliente', negociacao.registro.id, { status: 'Convertido', pedido_gerado_id: pedidoCriado.id });
-            registrarAuditoria('Conversão', `Orçamento ${negociacao.numero} convertido em pedido`, 'Pedido');
-            toast.success('Pedido gerado a partir do orçamento.');
-            await onAtualizar?.();
-            if (janela) closeWindow(janela);
-          } catch (erro) {
-            criado = false;
-            toast.error(`Erro ao gerar pedido: ${erro.message}`);
-          }
-        },
+    const operacaoId = crypto.randomUUID();
+    const janela = openWindow(PedidoFormCompleto, {
+      clientes, windowMode: true, conversaoOrcamento: true,
+      pedido: preparo.pedido_base,
+      onCancel: () => closeWindow(janela),
+      onSubmit: async (formData) => {
+        const resultado = await acoesOrcamento.converterPedido(formData, preparo, operacaoId);
+        setRegistroLocal(orcamentoParaNegociacao(resultado.orcamento));
+        toast.success(resultado.repetida ? 'Pedido existente conciliado, sem duplicação.' : `Pedido ${resultado.pedido.numero_pedido} criado e aguardando aprovação.`);
+        if (janela) closeWindow(janela);
+        await onAtualizar?.();
+        return resultado.pedido;
       },
-      { title: `Pedido do orçamento ${negociacao.numero}`, width: 1400, height: 800 }
-    );
+    }, { title: `Pedido do orçamento ${negociacao.numero}`, width: 1400, height: 800 });
   };
 
   const avancar = () => {
